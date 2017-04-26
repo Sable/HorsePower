@@ -25,41 +25,25 @@ members, Hanfeng and Hongji, with the generous support from Laurie.
 We plan to build the system in the first three months (12 weeks). Later, we
 could have another month to improve the system and draft a paper.
 
-- [Schedule](#schedule)
-  + [Hongji](#hongji)
-  + [Hanfeng](#hanfeng)
+- Schedule
+  + [Hongji](docs/plans/hongji.md)
+  + [Hanfeng](docs/plans/hanfeng.md)
 
-## Schedule
+## Project settings
 
-Project settings
+- Languages      : C/C++ 
+- Parallelism    : OpenMP/Pthread
+- Conventions    : [docs/conventions](docs/conventions)
+- GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues) 
 
-   - Programming languages: C/C++ 
-   - Parallelism          : OpenMP/Pthread
+## Resources
 
-Conventions: we will maintain reasonable amount of `conventions` to keep track of code styles.
+- MonetDB : [home](https://www.monetdb.org/Home) | [reference](https://www.monetdb.org/Documentation/SQLreference)
+- Q/KDB+  : [kx](kx.com) | [reference](code.kx.com)
 
-### Hongji
+## Chat room
 
-Hongji is willing to assisting Hanfeng to in multiple ways.  He is assigned
-with the following tasks.
+[Enter here](https://gitter.im/Sable/HorsePower?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 
-1st week
-
-    - Attend a lesson from Hanfeng about code style conventions
-    - Learn IR designs from hanfeng
-    - Start to build interpreters to parse IRs in different levels
-
-2nd week
-
-    - 
-
-### Hanfeng
-
-1st week
-
-    - Advise Hongji to get started
-    - Build the overall structure of the project, including documentations
-    - Make decisions on the IR design, including the choices of primitives
-    - Report to Laurie about the project progress
 
 
