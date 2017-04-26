@@ -20,7 +20,8 @@ In HorsePower, we focus on the following parts.
 ## Summer 2017
 
 In the summer 2017, we will start this project from scratch. We have great team
-members, Hanfeng and Hongji, with the generous support from my advisor Laurie.
+members, Hanfeng and Hongji, with the generous support from Laurie.
+
 We plan to build the system in the first three months (12 weeks). Later, we
 could have another month to improve the system and draft a paper.
 
