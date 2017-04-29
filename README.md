@@ -45,13 +45,14 @@ time.  That means it may be faster than compiled code.
 <p align="center"><img src="docs/figures/horse-flow.png" /></p>
 <p align="center">Figure 1. The workflow of the Horse framework.</p>
 
-Figure 2 introduces the design of three IRs.  The work flow dependence of IRs
-consists of an acyclic graph:
+Figure 2 introduces the design of three levels of IRs.  The workflow dependence
+of IRs consists of an acyclic graph.  The workflow can be described as follows.
 
 1. Source code is converted to medium-level IR (MIR, 3-address code);
 2. MIR has two options, either to Low-level IR (LIR) or to High-level IR (HIR);
 3. HIR is designed for optimizations with high-level perspectives;
-4. LIR is close to target code which often is relatively low level.
+4. LIR is close to target code which usually is relatively low-level;
+5. In each level, IR code is optimized with different optimizations.
 
 <p align="center"><img src="docs/figures/horse-ir.png" /></p>
 <p align="center">Figure 2. The design of 3 IRs.</p>
