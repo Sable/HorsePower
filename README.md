@@ -19,8 +19,8 @@ In HorsePower, we focus on the following parts.
 
 ## Summer 2017
 
-In the summer 2017, we will start this project from scratch. We have great team
-members, Hanfeng and Hongji, with the generous support from Laurie.
+In the summer 2017, we will start this project from scratch.  We have a great team
+, Hanfeng and Hongji, with the strong support from Laurie.
 
 We plan to build the system in the first three months (12 weeks). Later, we
 could have another month to improve the system and draft a paper.
@@ -29,21 +29,34 @@ could have another month to improve the system and draft a paper.
   + [Hongji](docs/plans/hongji.md)
   + [Hanfeng](docs/plans/hanfeng.md)
 
-## Project settings
+### About project
 
+![](docs/figures/horse-flow.png)
+
+Figure 1. The workflow of Horse framework.
+
+![](docs/figures/horse-ir.png)
+
+Figure 2. The design of 3 IRs.
+
+
+### Settings
+
+- Platform       : Cross-platform
 - Languages      : C/C++ 
 - Parallelism    : OpenMP/Pthread
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues) 
 
-## Resources
+### Resources
 
 - MonetDB : [home](https://www.monetdb.org/Home) | [reference](https://www.monetdb.org/Documentation/SQLreference)
 - Q/KDB+  : [kx](kx.com) | [reference](code.kx.com)
 
-## Chat room
 
-[Enter here](https://gitter.im/Sable/HorsePower?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+### Chat room
 
+[Enter here](https://gitter.im/Sable/HorsePower)
 
+Let's rock the summer 2017!
 

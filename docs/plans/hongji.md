@@ -1,7 +1,6 @@
 ### Hongji
 
-Hongji is willing to assisting Hanfeng to in multiple ways.  He is assigned
-with the following tasks.
+He is assigned with the following tasks.
 
 1st week
 
