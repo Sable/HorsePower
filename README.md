@@ -31,15 +31,10 @@ could have another month to improve the system and draft a paper.
 
 ### About project
 
-<center>
-<img src="docs/figures/horse-flow.png" />
-</center>
+<p align="center"><img src="docs/figures/horse-flow.png" /></p>
 <p align="center">Figure 1. The workflow of Horse framework.</p>
 
-<center>
-<img src="docs/figures/horse-ir.png" />
-</center>
-
+<p align="center"><img src="docs/figures/horse-ir.png" /></p>
 <p align="center">Figure 2. The design of 3 IRs.</p>
 
 
