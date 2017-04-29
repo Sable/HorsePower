@@ -46,7 +46,7 @@ time.  That means it may be faster than compiled code.
 <p align="center">Figure 1. The workflow of the Horse framework.</p>
 
 Figure 2 introduces the design of three levels of IRs.  The workflow dependence
-of IRs consists of an acyclic graph.  The workflow can be described as follows.
+of IRs consists of an acyclic graph.  The workflow is described as follows.
 
 1. Source code is converted to medium-level IR (MIR, 3-address code);
 2. MIR has two options, either to Low-level IR (LIR) or to High-level IR (HIR);
@@ -57,6 +57,17 @@ of IRs consists of an acyclic graph.  The workflow can be described as follows.
 <p align="center"><img src="docs/figures/horse-ir.png" /></p>
 <p align="center">Figure 2. The design of 3 IRs.</p>
 
+### External links
+
+About Horse
+
+- [HorseIR design](http://www.sable.mcgill.ca/~hanfeng.c/f17/horse_spec/) | Horse: An array programming language with Database components
+- [Horse program](http://www.sable.mcgill.ca/~hanfeng.c/f17/horseir/) | Design of Horse program
+
+Related work
+
+- [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) | A query compiler for database
+- [Query compiler](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/) | A paper
 
 ### Settings
 
