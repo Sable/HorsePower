@@ -31,22 +31,25 @@ could have another month to improve the system and draft a paper.
 
 ### About project
 
+<center>
 ![](docs/figures/horse-flow.png)
+</center>
+<p align="center">Figure 1. The workflow of Horse framework.</p>
 
-Figure 1. The workflow of Horse framework.
-
+<center>
 ![](docs/figures/horse-ir.png)
+</center>
 
-Figure 2. The design of 3 IRs.
+<p align="center">Figure 2. The design of 3 IRs.</p>
 
 
 ### Settings
 
 - Platform       : Cross-platform
-- Languages      : C/C++ 
+- Languages      : C/C++
 - Parallelism    : OpenMP/Pthread
 - Conventions    : [docs/conventions](docs/conventions)
-- GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues) 
+- GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
 ### Resources
 
@@ -59,4 +62,3 @@ Figure 2. The design of 3 IRs.
 [Enter here](https://gitter.im/Sable/HorsePower)
 
 Let's rock the summer 2017!
-
