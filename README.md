@@ -57,18 +57,6 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 <p align="center"><img src="docs/figures/horse-ir.png" /></p>
 <p align="center">Figure 2. The design of 3 IRs.</p>
 
-### External links
-
-About Horse
-
-- [HorseIR design](http://www.sable.mcgill.ca/~hanfeng.c/f17/horse_spec/) | Horse: An array programming language with Database components
-- [Horse program](http://www.sable.mcgill.ca/~hanfeng.c/f17/horseir/) | Design of Horse program
-
-Related work
-
-- [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) | A query compiler for database
-- [Query compiler](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/) | A paper
-
 ### Settings
 
 - Platform       : Cross-platform
@@ -77,11 +65,27 @@ Related work
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
-### Resources
+### External links
+
+Software
 
 - MonetDB : [home](https://www.monetdb.org/Home) | [reference](https://www.monetdb.org/Documentation/SQLreference)
 - Q/KDB+  : [kx](kx.com) | [reference](code.kx.com)
 
+About Horse
+
+- [HorseIR design](http://www.sable.mcgill.ca/~hanfeng.c/f17/horse_spec/) | Horse: An array programming language with Database components
+- [Horse program](http://www.sable.mcgill.ca/~hanfeng.c/f17/horseir/) | Design of Horse program
+
+Related work
+
+- [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) | A query compiler for IMDB
+- LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014 [Presentation by HF](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/)
+- Aquery   : Cambronero and Shasha, AQuery, a query language for order in data analytics: Language, Optimization, and Experiments, to appear
+
+SQL grammar
+
+- [H2 database](http://www.h2database.com/html/grammar.html) | H2: an in-memory db written in Java
 
 ### Chat room
 
