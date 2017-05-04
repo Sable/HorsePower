@@ -79,8 +79,8 @@ About Horse
 
 Related work
 
-- [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) | A query compiler for IMDB
-- LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014 [Presentation by HF](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/)
+- [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) : A query compiler for IMDB
+- LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014 [Presentation](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/)
 - Aquery   : Cambronero and Shasha, AQuery, a query language for order in data analytics: Language, Optimization, and Experiments, to appear
 
 SQL grammar
