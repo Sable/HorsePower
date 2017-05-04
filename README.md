@@ -61,7 +61,7 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 
 - Platform       : Cross-platform
 - Languages      : C/C++
-- Parallelism    : OpenMP/Pthread
+- Parallelism    : OpenMP/Pthread/CUDA/OpenCL
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
@@ -80,7 +80,8 @@ About Horse
 Related work
 
 - [Introduction](http://www.sable.mcgill.ca/~hanfeng.c/f17/talk2/slide.html) : A query compiler for IMDB
-- LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014 [Presentation](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/)
+- [Query compiler](http://www.sable.mcgill.ca/~hanfeng.c/f17/qcompiler/) : Shaikhha et al., How to Architect a Query Compiler, SIGMOD 2016
+- LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014
 - Aquery   : Cambronero and Shasha, AQuery, a query language for order in data analytics: Language, Optimization, and Experiments, to appear
 
 SQL grammar
