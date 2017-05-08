@@ -66,22 +66,29 @@ index_cell        ::= empty
 Types
 
 ```
-bool  bool        1 bit
-char  char        1 byte
-i16   short      16 bytes
-i32   int        32 bytes
-i64   long       64 bytes
-f32   float      32 bytes
-f64   double     64 bytes
-clex  complex   128 bytes  //2 double
-sym   symbol     32 bytes  //1 int
+b bool    0n  bool           1 bit
+c char    0n  char           1 byte
+h i16     0nh short         16 bytes
+i i32     0ni int           32 bytes
+u i64     0nu long          64 bytes
+f f32     0nf float         32 bytes
+e f64     0ne double        64 bytes
+  clex    0nx complex      128 bytes //2 f64
+  sym     0ns symbol        32 bytes //1 i32
 
-list    list         -
-varchar varchar(n)   -
-enum    enumertion   -
-dict    dictionary   -
-table   normal table -
-ktable  keyed table  -
+m m       0nm month         32 bytes //1 i32
+d d       0nd date          32 bytes //1 i32
+z z       0nz date time     64 bytes //1 i64 
+u u       0nu minute        32 bytes //1 i32
+v v       0nv second        32 bytes //1 i32
+t t       0nt time          32 bytes //1 i32
+
+  list        list          -
+  string  ''  varchar(n)    -
+  enum        enumertion    -
+  dict        dictionary    -
+  table       normal table  -
+  ktable      keyed table   -
 ```
 
 Primitives
@@ -104,6 +111,7 @@ Primitives
 pi        3.1415...                  pi(n)
 circle    sin/cos/tan/atan           circle(n, val)
 rand      return a random number     rand(n) / rand(n, k)
+seed      set random seed            seed(n)
 power     power                      power(n, k)
 sqrt      power(n, 0.5)              sqrt(n)
 each      apply to lists             each(f,x) / each(f,x,y)
@@ -135,6 +143,8 @@ ne        not equal                  ne(x,y)
 print     print                      print(x)
 flip      transform to table         flip(x)
 reverse   reverse                    reverse(x)
+like      match                      like(x,y)
+where     find true                  where(x)
 
 // Special
 list      create a list
@@ -142,4 +152,6 @@ enum      create an enum
 dict      create a dict
 goto      goto a branch
 ```
+
+
 
