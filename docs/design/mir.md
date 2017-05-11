@@ -91,8 +91,8 @@ neg       negate                    neg(x)
 signum    -1,0,1                    signum(x)
 recip     reciprocal                recip(x)
 unique    unique                    unique(x)
-gradeup   index: grade up           gradeup(x)
-gradedw   index: grade down         gradedw(x)
+asc       index: grade up           asc(x)
+desc      index: grade down         desc(x)
 len       rho (length)              len(x)
 range     iota                      range(x)
 not       logiclal not              not(x)
@@ -144,6 +144,8 @@ each      apply to lists            each(f,x) / each(f,x,y)
 compress  boolean selection         compress(x,y)
 reduct    reduction                 reduct(fn, x)
 scan      scan                      scan(fn, x)
+inner     inner product             inner(fn,gn,x,y)
+outer     outer product             outer(fn,x,y)
 nor       nor                       nor(x) / nor(x,y)
 nand      nand                      nand(x) / nand(x,y)
 print     print                     print(x)
@@ -151,14 +153,24 @@ list      create a list
 enum      create an enum
 dict      create a dict
 goto      goto a branch
+key       return keys
+value     return value
+meta      return meta info
 ```
 
 ## Example
 
 Two tables
 
-- Table `employee`   has two columns: `LastName` and `DepartmentID`;
-- Table `department` has two columns: `DepartmentName` and `DepartmentID`;
+```
+employee
+- LastName       : str
+- DepartmentID   : sym
+
+department
+- DepartmentName : str
+- DepartmentID   : sym
+```
 
 SQL query - Equi-join
 
@@ -170,35 +182,36 @@ WHERE employee.DepartmentID = department.DepartmentID;
 HorseIR - MIR
 
 ```
-s0:list<sym> = meta(employee:table);
-s1:list<sym> = meta(department:table);
-s2:sym  = s0[0:i32];
-s3:sym  = s0[1:i32];
-s4:sym  = s1[0:i32];
-s5:sym  = s1[1:i32];
+module _default {
+    c0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
+    c1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
+    t0:list<sym> = value(c0);
+    t1:list<sym> = value(c1);
+    t2:i32  = len(t0);
+    t3:i32  = len(t1);
+    t4:i32  = index(t0, t1);    // begin
+    t5:bool = lt(t4, t3);
+    t6:list = range(t3);
+    t7:i32  = compress(t5, t6); // index for t1
+    t8:i32  = compress(t5, t1);
+    t9:i32  = unique(t8);
+    t10:i32 = asc(t9);      // index for t0
 
-t0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
-t1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
-t2:i32  = len(t0);
-t3:i32  = len(t1);
-t4:i32  = index(t0, t1)     // begin
-t5:bool = lt(t4, t3);
-t6:list = range(t3);
-t7:i32  = compress(t5, t6); // index for t1
-t8:i32  = compress(t5, t1);
-t9:i32  = unique(t8);
-t10:i32 = gradeup(t9);      // index for t0
+    t11:dict<sym,str> = column(employee:table, `LastName);
+    t12:dict<sym,str> = column(department:table, `DepartmentName);
 
-t11:dict<sym,str> = column(employee:table, `LastName);
-t12:dict<sym,str> = column(department:table, `DepartmentName);
+    M0:dict<sym,str> = index(t11,t10);
+    M1:dict<sym,sym> = index(t0 ,t10);
+    M2:dict<sym,sym> = index(t1 ,t7);
+    M3:dict<sym,str> = index(t12,t7);
 
-M0:dict<sym,str> = index(t11,t10);
-M1:dict<sym,sym> = index(t0 ,t10);
-M2:dict<sym,sym> = index(t1 ,t7);
-M3:dict<sym,str> = index(t12,t7);
-
-z0:list<sym> = list(s2,s3,s4,s5);
-z1:list<?>   = list(M0,M1,M2,M3);
-z:table = createTable(z0, z1);
+    z0:list<?> = list(M0,M1,M2,M3);
+    z:table    = createTable(z0);
+}
 ```
+
+## More examples
+
+- [GROUP BY and ORDER](mir-example1.md)
+
 
