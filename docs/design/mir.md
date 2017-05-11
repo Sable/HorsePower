@@ -170,7 +170,7 @@ WHERE employee.DepartmentID = department.DepartmentID;
 HorseIR - MIR
 
 ```
-s0:list = meta(employee:table);
+s0:list<sym> = meta(employee:table);
 s1:list = meta(department:table);
 s2:sym  = s0[0:i32];
 s3:sym  = s0[1:i32];
