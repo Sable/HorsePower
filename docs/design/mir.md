@@ -91,8 +91,9 @@ neg       negate                    neg(x)
 signum    -1,0,1                    signum(x)
 recip     reciprocal                recip(x)
 unique    unique                    unique(x)
-asc       index: grade up           asc(x)
-desc      index: grade down         desc(x)
+asc       order(1:bool)             asc(x)
+desc      order(0:bool)             desc(x)
+order     asc:true, desc:false      order(x,y)
 len       rho (length)              len(x)
 range     iota                      range(x)
 not       logiclal not              not(x)
@@ -156,6 +157,7 @@ goto      goto a branch
 key       return keys
 value     return value
 meta      return meta info
+order     order
 ```
 
 ## Example
