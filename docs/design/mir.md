@@ -171,14 +171,14 @@ HorseIR - MIR
 
 ```
 s0:list<sym> = meta(employee:table);
-s1:list = meta(department:table);
+s1:list<sym> = meta(department:table);
 s2:sym  = s0[0:i32];
 s3:sym  = s0[1:i32];
 s4:sym  = s1[0:i32];
 s5:sym  = s1[1:i32];
 
-t0:dict = employee.DepartmentID;
-t1:dict = department.DepartmentID;
+t0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
+t1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
 t2:i32  = len(t0);
 t3:i32  = len(t1);
 t4:i32  = index(t0, t1)     // begin
@@ -189,13 +189,16 @@ t8:i32  = compress(t5, t1);
 t9:i32  = unique(t8);
 t10:i32 = gradeup(t9);      // index for t0
 
-M0:dict = employee.LastName[t10];
-M1:dict = employee.DepartmentID[t10];
-M2:dict = department.DepartmentID[t7];
-M3:dict = department.DepartmentName[t7];
+t11:dict<sym,str> = column(employee:table, `LastName);
+t12:dict<sym,str> = column(department:table, `DepartmentName);
 
-z0:list = list(s2,s3,s4,s5);
-z1:list = list(M0,M1,M2,M3);
+M0:dict<sym,str> = index(t11,t10);
+M1:dict<sym,sym> = index(t0 ,t10);
+M2:dict<sym,sym> = index(t1 ,t7);
+M3:dict<sym,str> = index(t12,t7);
+
+z0:list<sym> = list(s2,s3,s4,s5);
+z1:list<?>   = list(M0,M1,M2,M3);
 z:table = createTable(z0, z1);
 ```
 
