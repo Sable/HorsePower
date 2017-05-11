@@ -148,7 +148,7 @@ modeul _default{
     c6:dict<sym,f64> = dict(`SmallestPrice:sym, t1);
 
     z0:list<dict<sym,f64>> = list(c6)
-    z:table = createTable(c6); 
+    z:table = createTable(z0); 
 }
 ```
 
