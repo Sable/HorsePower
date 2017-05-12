@@ -136,12 +136,12 @@ HorseIR
 
 ```
 modeul _default{
-    c0:dict<sym,i32> = column(Products:table, `ProductID:i32);
-    c1:dict<sym,str> = column(Products:table, `ProductName:str);
-    c2:dict<sym,str> = column(Products:table, `SupplierID:i32);
-    c3:dict<sym,str> = column(Products:table, `CategoryID:i32);
-    c4:dict<sym,str> = column(Products:table, `Unit:str);
-    c5:dict<sym,str> = column(Products:table, `Price:f64);
+    c0:dict<sym,i32> = column(Products:table, `ProductID:sym);
+    c1:dict<sym,str> = column(Products:table, `ProductName:sym);
+    c2:dict<sym,str> = column(Products:table, `SupplierID:sym);
+    c3:dict<sym,str> = column(Products:table, `CategoryID:sym);
+    c4:dict<sym,str> = column(Products:table, `Unit:sym);
+    c5:dict<sym,str> = column(Products:table, `Price:sym);
 
     t0:list<f64> = value(c5);
     t1:list<f64> = min(t0);

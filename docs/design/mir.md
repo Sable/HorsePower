@@ -28,56 +28,69 @@ statement         ::= empty
                     | expression
 
 statement_flow    ::= "return" | label
-label             ::= id ":"
+label             ::= id ":" ";"
 goto_lable        ::= "goto" label
 assign            ::= "="
 
-expression        ::= [statement_flow] core_expression
+type_rules        ::= "cast" | "check"
+
+expression        ::= [ (statement_flow | type_rules) ] core_expression
                     | goto_label
 core_expression   ::= variable       [ assign sub_expression ]
                     | variable_index [ assign variable ]
 sub_expression    ::= function_call
-                    | primitive_call
                     | variable_index
                     | operand
                     | literal
 
-function_call     ::= module_name "." id "(" argument_list ")"
-primitive_call    ::= [operand] primitive operand
+function_call     ::= [module_name "."] function_name "(" argument_list ")"
+function_name     ::= id
 operand           ::= id
 variable          ::= id { "." id } ":" type
-type              ::= id
+literal           ::= literal_basic ":" type
+type              ::= id [sub_type]
+                    | "?"
+sub_type          ::= "<" type "," {type}  ">"
 variable_index    ::= variable { "[" index_cell  "]" }
 index_cell        ::= ":"
                     | operand
+
+literal_basic     ::= literal_bool
+                    | literal_char
+                    | literal_int
+                    | literal_float
+                    | literal_complex
+                    | literal_symbol
+                    | literal_time
 ```
 
 Types
 
 ```
-b   bool    0n      bool           1 bit
-c   char    0n      char           1 byte
-h   i16     0nh     short         16 bytes
-i   i32     0ni     int           32 bytes
-u   i64     0nu     long          64 bytes
-f   f32     0nf     float         32 bytes
-e   f64     0ne     double        64 bytes
-    clex    0nx     complex      128 bytes //2 f64
-    sym     0ns     symbol        32 bytes //1 i32
+b   bool      0n      bool           1 bit
+c   char      0n      char           1 byte
+h   i16       0nh     short         16 bytes
+i   i32       0ni     int           32 bytes
+u   i64       0nu     long          64 bytes
+f   f32       0nf     float         32 bytes
+e   f64       0ne     double        64 bytes
+x   complex   0nx     complex      128 bytes //2 f64
+    sym       0ns     symbol        32 bytes //1 i32
 
-m   m       0nm     month         32 bytes //1 i32
-d           0nd     date          32 bytes //1 i32
-z           0nz     date time     64 bytes //1 i64 
-u           0nu     minute        32 bytes //1 i32
-v           0nv     second        32 bytes //1 i32
-t           0nt     time          32 bytes //1 i32
+m   m         0nm     month         32 bytes //1 i32
+d   d         0nd     date          32 bytes //1 i32
+z   z         0nz     date time     64 bytes //1 i64 
+u   u         0nu     minute        32 bytes //1 i32
+v   v         0nv     second        32 bytes //1 i32
+t   t         0nt     time          32 bytes //1 i32
 
-    list    ()      list          -
-    string  ''      varchar(n)    -
-    enum            enumertion    -
-    dict            dictionary    -
-    table           normal table  -
-    ktable          keyed table   -
+    list      ()      list          -
+    string    ''      varchar(n)    -
+    func              function      -
+    enum              enumertion    -
+    dict              dictionary    -
+    table             normal table  -
+    ktable            keyed table   -
 ```
 
 Primitives
@@ -107,10 +120,12 @@ str       format                    str(s)
 floor     floor                     floor(n)
 ceil      ceiling                   ceil(n)
 round     round                     round(n)
-raze      raze                      raze(x)
 flip      transform to table        flip(x)
 reverse   reverse                   reverse(x)
 where     find true                 where(x)
+raze      raze                      raze(x)
+enlist    scalar to list            enlist(x)
+scalar    list to scalar            scalar(x)
 
 // Dyadic
 plus      elementwise: x+y          plus(x,y)
@@ -139,7 +154,6 @@ ge        greater equal than        ge(x,y)
 ne        not equal                 ne(x,y)
 like      match                     like(x,y)
 
-
 // Special
 each      apply to lists            each(f,x) / each(f,x,y)
 compress  boolean selection         compress(x,y)
@@ -158,6 +172,13 @@ key       return keys
 value     return value
 meta      return meta info
 order     order
+```
+
+Directives
+
+```
+CAST      type casting
+CHECK     type checking
 ```
 
 ## Example
@@ -215,5 +236,19 @@ module _default {
 ## More examples
 
 - [GROUP BY and ORDER](mir-example1.md)
+- [Examples of types](mir-example2.md)
+
+
+## Discussion
+
+- No implicit type rules
+- CAST: <required>
+  + i32 = i8
+  + list<i32> = list<i8> //memory transform from i8 to i32
+- CHECK: <optimal in some way>
+  + i32 = ?
+  + list<i32> = list<?>  // check if ? is i32
+  + left type should be specified (not ?)
+
 
 
