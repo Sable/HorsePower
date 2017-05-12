@@ -3,58 +3,33 @@
 See [an example](#example).
 
 ```java
-/*
- * literal includes:
- *   int, float, double, list ...
- * empty means:
- *   <empty string>
- */
-
-mir_program      ::= mir_module
-                   | mir_expression
-mir_module       ::= "module" module_name "{" module_body  "}"
-module_name      ::= id
-module_body      ::= module_methods
-                   | module_expression
-module_methods   ::= "def" method_name parameter_list method_body
-method_name      ::= id
-parameter_list   ::= "(" parameter_name { "," parameter_name } ")"
-parameter_name   ::= id
+mir_program      ::= { module | method }
+module           ::= "module" name "{" module_body "}"
+module_body      ::= method
+method           ::= "def" name parameter_list method_body
 method_body      ::= "{" statement_list "}"
+parameter_list   ::= "(" name type { "," name type } ")"
 
 /* main */
-statement_list    ::= { statement }
-statement         ::= empty
-                    | expression
-
-statement_flow    ::= "return" | label
-label             ::= id ":" ";"
-goto_lable        ::= "goto" label
-assign            ::= "="
-
-type_rules        ::= "cast" | "check"
-
-expression        ::= [ (statement_flow | type_rules) ] core_expression
-                    | goto_label
-core_expression   ::= variable       [ assign sub_expression ]
-                    | variable_index [ assign variable ]
-sub_expression    ::= function_call
-                    | variable_index
-                    | operand
+statement_list    ::= { statement ";" }
+statement         ::= variable [ assign expression ]
+                    | "return" expression
+                    | "goto" label
+                    | label ":"
+expression        ::= [ type_cast ] sub_expression
+type_cast         ::= "(" type ")"
+sub_expression    ::= method_call
+                    | variable
                     | literal
 
-function_call     ::= [module_name "."] function_name "(" argument_list ")"
-function_name     ::= id
-operand           ::= id
-variable          ::= id { "." id } ":" type
-literal           ::= literal_basic ":" type
-type              ::= id [sub_type]
-                    | "?"
-sub_type          ::= "<" type "," {type}  ">"
-variable_index    ::= variable { "[" index_cell  "]" }
+method_call       ::= compound_name argument_list
+argument_list     ::= "(" name { "," name } ")"
+variable          ::= compound_name { index }
+index             ::= "[" index_cell "]"
 index_cell        ::= ":"
-                    | operand
+                    | expression
 
+literal           ::= literal_basic type
 literal_basic     ::= literal_bool
                     | literal_char
                     | literal_int
@@ -62,6 +37,17 @@ literal_basic     ::= literal_bool
                     | literal_complex
                     | literal_symbol
                     | literal_time
+
+type              ::= ":" (known_type | unknown_type)
+known_type        ::= type_name [sub_type]
+unknown_type      ::= "?"
+sub_type          ::= "<" known_type "," {known_type}  ">"
+
+name              ::= id
+compound_name     ::= name {"." name}
+type_name         ::= name
+label             ::= id
+assign            ::= "="
 ```
 
 Types (See [examples](#mir-example2.md))
@@ -192,7 +178,7 @@ employee
 
 department
 - DepartmentName : str
-- DepartmentID   : sym
+- DepartmentID   : sym (primary key)
 ```
 
 SQL query - Equi-join
@@ -205,31 +191,33 @@ WHERE employee.DepartmentID = department.DepartmentID;
 HorseIR - MIR
 
 ```
-module _default {
-    c0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
-    c1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
-    t0:list<sym> = value(c0);
-    t1:list<sym> = value(c1);
-    t2:i32  = len(t0);
-    t3:i32  = len(t1);
-    t4:i32  = index(t0, t1);    // begin
-    t5:bool = lt(t4, t3);
-    t6:list = range(t3);
-    t7:i32  = compress(t5, t6); // index for t1
-    t8:i32  = compress(t5, t1);
-    t9:i32  = unique(t8);
-    t10:i32 = asc(t9);      // index for t0
+module system {
+    def main(){
+        c0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
+        c1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
+        t0:list<sym> = value(c0);
+        t1:list<sym> = value(c1);
+        t2:i32  = len(t0);
+        t3:i32  = len(t1);
+        t4:i32  = index(t0, t1);    // begin
+        t5:bool = lt(t4, t3);
+        t6:list = range(t3);
+        t7:i32  = compress(t5, t6); // index for t1
+        t8:i32  = compress(t5, t1);
+        t9:i32  = unique(t8);
+        t10:i32 = asc(t9);          // index for t0
 
-    t11:dict<sym,str> = column(employee:table, `LastName);
-    t12:dict<sym,str> = column(department:table, `DepartmentName);
+        t11:dict<sym,str> = column(employee:table, `LastName);
+        t12:dict<sym,str> = column(department:table, `DepartmentName);
 
-    M0:dict<sym,str> = index(t11,t10);
-    M1:dict<sym,sym> = index(t0 ,t10);
-    M2:dict<sym,sym> = index(t1 ,t7);
-    M3:dict<sym,str> = index(t12,t7);
+        M0:dict<sym,str> = index(t11,t10);
+        M1:dict<sym,sym> = index(t0 ,t10);
+        M2:dict<sym,sym> = index(t1 ,t7);
+        M3:dict<sym,str> = index(t12,t7);
 
-    z0:list<?> = list(M0,M1,M2,M3);
-    z:table    = createTable(z0);
+        z0:?    = list(M0,M1,M2,M3);
+        z:table = createTable(z0);
+    }
 }
 ```
 
