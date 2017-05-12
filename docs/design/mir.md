@@ -64,7 +64,7 @@ literal_basic     ::= literal_bool
                     | literal_time
 ```
 
-Types
+Types (See [examples](#mir-example2.md))
 
 ```
 b   bool      0n      bool           1 bit

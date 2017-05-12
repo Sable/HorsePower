@@ -18,7 +18,7 @@ char/string
 short/int/long/float/double/complex
 
 ```
-12:h                    //short 12
+12:i16                  //short 12
 12:i32                  //int 12
 12:i64                  //long 12
 3.14:f32                //float 3.14
