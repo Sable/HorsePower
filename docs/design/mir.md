@@ -1,6 +1,73 @@
 # Horse IR  - MIR
 
-See [an example](#example).
+## Introduction - An example
+
+Two tables
+
+```
+employee
+- LastName       : str
+- DepartmentID   : sym
+
+department
+- DepartmentName : str
+- DepartmentID   : sym (primary key)
+```
+
+SQL query - Equi-join
+
+```sql
+SELECT * FROM employee, department
+WHERE employee.DepartmentID = department.DepartmentID;
+```
+
+HorseIR - MIR
+
+```
+module sys {
+    def main() {
+        c0:dict<sym,sym> = column(employee:table, `DepartmentID, `sym);
+        c1:dict<sym,sym> = column(department:table, `DepartmentID, `sym);
+        t0:list<sym> = value(c0);
+        t1:list<sym> = value(c1);
+        t2:i32  = len(t0);
+        t3:i32  = len(t1);
+        t4:i32  = index(t0, t1);    // begin
+        t5:bool = lt(t4, t3);
+        t6:list = range(t3);
+        t7:i32  = compress(t5, t6); // index for t1
+        t8:i32  = compress(t5, t1);
+        t9:i32  = unique(t8);
+        t10:i32 = asc(t9);          // index for t0
+
+        t11:dict<sym,str> = column(employee:table, `LastName);
+        t12:dict<sym,str> = column(department:table, `DepartmentName);
+
+        M0:dict<sym,str> = index(t11,t10);
+        M1:dict<sym,sym> = index(t0 ,t10);
+        M2:dict<sym,sym> = index(t1 ,t7);
+        M3:dict<sym,str> = index(t12,t7);
+
+        z0:?    = list(M0,M1,M2,M3);
+        z:table = createTable(z0);
+        print(z);
+    }
+}
+```
+
+### Conventions
+
+`module`
+
+    default module: sys
+
+`method`
+
+    entry method: main
+
+
+
+## Grammar
 
 ```java
 mir_program      ::= { module | method }
@@ -167,59 +234,6 @@ CAST      type casting
 CHECK     type checking
 ```
 
-## Example
-
-Two tables
-
-```
-employee
-- LastName       : str
-- DepartmentID   : sym
-
-department
-- DepartmentName : str
-- DepartmentID   : sym (primary key)
-```
-
-SQL query - Equi-join
-
-```sql
-SELECT * FROM employee, department
-WHERE employee.DepartmentID = department.DepartmentID;
-```
-
-HorseIR - MIR
-
-```
-module system {
-    def main(){
-        c0:dict<sym,sym> = column(employee:table, `DepartmentID:sym);
-        c1:dict<sym,sym> = column(department:table, `DepartmentID:sym);
-        t0:list<sym> = value(c0);
-        t1:list<sym> = value(c1);
-        t2:i32  = len(t0);
-        t3:i32  = len(t1);
-        t4:i32  = index(t0, t1);    // begin
-        t5:bool = lt(t4, t3);
-        t6:list = range(t3);
-        t7:i32  = compress(t5, t6); // index for t1
-        t8:i32  = compress(t5, t1);
-        t9:i32  = unique(t8);
-        t10:i32 = asc(t9);          // index for t0
-
-        t11:dict<sym,str> = column(employee:table, `LastName);
-        t12:dict<sym,str> = column(department:table, `DepartmentName);
-
-        M0:dict<sym,str> = index(t11,t10);
-        M1:dict<sym,sym> = index(t0 ,t10);
-        M2:dict<sym,sym> = index(t1 ,t7);
-        M3:dict<sym,str> = index(t12,t7);
-
-        z0:?    = list(M0,M1,M2,M3);
-        z:table = createTable(z0);
-    }
-}
-```
 
 ## More examples
 
