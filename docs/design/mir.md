@@ -117,7 +117,7 @@ label             ::= id
 assign            ::= "="
 ```
 
-Types (See [examples](#mir-example2.md))
+Types (See [examples](mir-example2.md))
 
 ```
 b   bool      0n      bool           1 bit
@@ -132,7 +132,7 @@ x   complex   0nx     complex      128 bytes //2 f64
 
 m   m         0nm     month         32 bytes //1 i32
 d   d         0nd     date          32 bytes //1 i32
-z   z         0nz     date time     64 bytes //1 i64 
+z   z         0nz     date time     64 bytes //1 i64
 u   u         0nu     minute        32 bytes //1 i32
 v   v         0nv     second        32 bytes //1 i32
 t   t         0nt     time          32 bytes //1 i32
@@ -146,13 +146,13 @@ t   t         0nt     time          32 bytes //1 i32
     ktable            keyed table   -
 ```
 
-Primitives
+Primitives (See [primitives](primitive.md))
 
 ```
 // Built-in (starting with 'sys.', e.g. 'sys.pi')
 
 // Monadic
-conj      conjjugate                conj(x)
+conj      conjugate                 conj(x)
 neg       negate                    neg(x)
 signum    -1,0,1                    signum(x)
 recip     reciprocal                recip(x)
@@ -251,6 +251,3 @@ CHECK     type checking
   + i32 = ?
   + list<i32> = list<?>  // check if ? is i32
   + left type should be specified (not ?)
-
-
-
