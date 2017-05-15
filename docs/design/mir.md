@@ -32,7 +32,7 @@ module sys {
         t1:list<sym> = value(c1);
         t2:i32  = len(t0);
         t3:i32  = len(t1);
-        t4:i32  = index(t0, t1);    // begin
+        t4:i32  = indexof(t0, t1);  // begin
         t5:bool = lt(t4, t3);
         t6:list = range(t3);
         t7:i32  = compress(t5, t6); // index for t1
@@ -71,44 +71,47 @@ module sys {
 
 ```java
 mir_program      ::= { module | method }
-module           ::= "module" name "{" module_body "}"
-module_body      ::= method
-method           ::= "def" name parameter_list method_body
+module           ::= "module" name "{" method "}"
+method           ::= "def" name parameter_list type method_body
 method_body      ::= "{" statement_list "}"
 parameter_list   ::= "(" name type { "," name type } ")"
 
 /* main */
 statement_list    ::= { statement ";" }
-statement         ::= variable [ assign expression ]
+statement         ::= name type assign expression
                     | "return" expression
                     | "goto" label
                     | label ":"
 expression        ::= [ type_cast ] sub_expression
 type_cast         ::= "(" type ")"
 sub_expression    ::= method_call
-                    | variable
+                    | operand
+operand           ::= name
                     | literal
 
 method_call       ::= compound_name argument_list
-argument_list     ::= "(" name { "," name } ")"
-variable          ::= compound_name { index }
-index             ::= "[" index_cell "]"
-index_cell        ::= ":"
-                    | expression
+argument_list     ::= "(" operand { "," operand } ")"
 
-literal           ::= literal_basic type
-literal_basic     ::= literal_bool
-                    | literal_char
-                    | literal_int
-                    | literal_float
-                    | literal_complex
-                    | literal_symbol
-                    | literal_time
+literal           ::= literal_basic
+                    | literal_list    [type]
+                    | literal_dict    [type]
+literal_basic     ::= literal_bool     type
+                    | literal_char     type
+                    | literal_int      type
+                    | literal_float    type
+                    | literal_complex [type]
+                    | literal_symbol  [type]
+                    | literal_time     type
 
-type              ::= ":" (known_type | unknown_type)
-known_type        ::= type_name [sub_type]
+type              ::= ":" (scalar_type | compound_type | unknown_type)
+scalar_type       ::= "bool" | "char"    | "i16"   | "i32" | "i64" | "f32"
+                    | "f64"  | "complex" | "sym"
+                    | "m"    | "d"       | "z"     | "u"   | "v"   | "t"
+                    | "str"  | "func"    | "table" | "ktable"
+compound_type     ::= "list" "<" type ">"
+                    | "dict" "<" type, type ">"
+                    | "enum" "<" type ">"
 unknown_type      ::= "?"
-sub_type          ::= "<" known_type "," {known_type}  ">"
 
 name              ::= id
 compound_name     ::= name {"." name}
@@ -194,7 +197,7 @@ randk     k times rand(x)           rand(x,k)
 power     power                     power(x, k)
 log       b:base                    log(b,x)
 mod       mod                       mod(x,y)
-index     index of                  index(x,y)
+indexof   index of                  indexof(x,y)
 and       logical and               and(x,y)
 or        logical or                or(x,y)
 take      take n elements           take(n,x)
