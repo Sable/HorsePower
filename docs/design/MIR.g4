@@ -2,15 +2,16 @@ grammar MIR;
 
 program : (module | method)* ;
 module : 'module' name '{' method* '}' ;
-method : 'def' name  '(' method_decal_arg_list ')' '->' type '{' statement* '}';
+method : 'def' name  '(' method_decal_arg_list ')' ':' type '{' statement* '}';
 method_decal_arg_list :
                       | name ':' type (',' name ':' type)* ;
 
-statement : name ':' type '=' expression ';'
-          | 'return' expression ';'
-          | 'goto' name (expression)? ';'
-          | name ':'
-          ;
+statement : ('[' name ']')? statement_core ';' ;
+statement_core : name ':' type '=' expression
+               | 'nop'
+               | 'return' expression
+               | 'goto' name (name)?
+               ;
 
 name : (ID | 'i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't' | 'list' | 'enum' | 'dict' );
 operand : (literal | name) ;
@@ -71,10 +72,11 @@ literal_primitive : literal_bool
                   | literal_string
                   ;
 
-literal_complex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER) ':' 'complex'
-                | opIm  =('+' | '-')?   im=(LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j') (':' 'complex')?
+literal_complex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)  ':' 'complex'
+                | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)  ('i' | 'j') (':' 'complex')?
                 | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
-                  opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j') (':' 'complex')?
+                  opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j') (':' 'complex')?
+                | opIM  =('+' | '-')? ('i' | 'j') ':' 'complex'
                 ;
 literal_bool    : op=('+' | '-')? value=LITERAL_INTEGER ':' 'bool' ;
 literal_char    : value=LITERAL_CHAR (':' 'char')? ;
@@ -91,7 +93,7 @@ literal_time    : value=LITERAL_T_GROUP_2 ':' 'm'
 literal_function: value=LITERAL_FUNCTION (':' 'func')? ;
 literal_table   : value=ID ':' 'table' ;
 literal_ktable  : value=ID ':' 'ktable' ;
-literal_string  : value=LITERAL_STRING (':' 'string')? ;
+literal_string  : value=LITERAL_STRING (':' 'str')? ;
 
 
 fragment OCT_CHARACTER     : [0-7] ;
