@@ -71,9 +71,8 @@ module sys {
 
 ```java
 mir_program      ::= { module | method }
-module           ::= "module" name "{" method "}"
-method           ::= "def" name parameter_list type method_body
-method_body      ::= "{" statement_list "}"
+module           ::= "module" name "{" { method } "}"
+method           ::= "def" name parameter_list type "{" statement_list "}"
 parameter_list   ::= "(" name type { "," name type } ")"
 
 /* main */
