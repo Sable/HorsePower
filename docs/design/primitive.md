@@ -23,6 +23,7 @@
 | [neg](builtin/m/neg.md)         | negate                  |
 | [recip](builtin/m/neg.md)       | reciprocal              |
 | [signum](builtin/m/signum.md)   | signum (-1,0,1)         |
+| [pi](builtin/m/pi.md)           | pi                      |
 
 
 <p id="general1">General</p>
@@ -33,6 +34,8 @@
 | [desc](builtin/m/desc.md)       | descending order        |
 | [unique](builtin/m/unique.md)   | unique values           |
 | [str](builtin/m/str.md)         | format                  |
+| [len](builtin/m/len.md)         | length                  |
+| [range](builtin/m/range.md)     | range(0,n-1)            |
 
 ### Dyadic
 
