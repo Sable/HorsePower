@@ -67,7 +67,7 @@ module sys {
 
 
 
-## Grammar
+## Grammar (See [details](MIR.g4))
 
 ```java
 mir_program      ::= { module | method }
@@ -77,10 +77,11 @@ parameter_list   ::= "(" name type { "," name type } ")"
 
 /* main */
 statement_list    ::= { statement ";" }
-statement         ::= name type assign expression
+statement         ::= [label] statement_core
+statement_core    ::= name type assign expression
                     | "return" expression
-                    | "goto" label
-                    | label ":"
+                    | "goto" label [name]
+                    | "nop"
 expression        ::= [ type_cast ] sub_expression
 type_cast         ::= "(" type ")"
 sub_expression    ::= method_call
@@ -91,31 +92,50 @@ operand           ::= name
 method_call       ::= compound_name argument_list
 argument_list     ::= "(" operand { "," operand } ")"
 
-literal           ::= literal_basic
-                    | literal_list    [type]
-                    | literal_dict    [type]
-literal_basic     ::= literal_bool     type
-                    | literal_char     type
-                    | literal_int      type
-                    | literal_float    type
-                    | literal_complex [type]
-                    | literal_symbol  [type]
-                    | literal_time     type
+literal           ::= literal_bool     type_bool
+                    | literal_char     type_char
+                    | literal_int      type_int
+                    | literal_float    type_float
+                    | literal_complex [type_complex]
+                    | literal_symbol  [type_symbol]
+                    | literal_time     type_time
+                    | literal_list    [type_list]
+                    | literal_dict    [type_dict]
+                    | literal_table   [type_table]
+                    | literal_ktable  [type_ktable]
 
 type              ::= ":" (scalar_type | compound_type | unknown_type)
-scalar_type       ::= "bool" | "char"    | "i16"   | "i32" | "i64" | "f32"
-                    | "f64"  | "complex" | "sym"
-                    | "m"    | "d"       | "z"     | "u"   | "v"   | "t"
-                    | "str"  | "func"    | "table" | "ktable"
-compound_type     ::= "list" "<" type ">"
-                    | "dict" "<" type, type ">"
-                    | "enum" "<" type ">"
+scalar_type       ::= type_bool
+                    | type_char
+                    | type_int
+                    | type_float
+                    | type_complex
+                    | type_sym
+                    | type_time
+compound_type     ::= type_list
+                    | type_dict
+                    | type_enum
+                    | type_table
+                    | type_ktable
 unknown_type      ::= "?"
+
+type_bool         ::= "bool"
+type_char         ::= "char"
+type_int          ::= "i8" | "i16" | "i32" | "i64"
+type_float        ::= "f32" | "f64"
+type_complex      ::= "complex"
+type_sym          ::= "sym"
+type_time         ::= "m" | "d" | "z" | "u" | "v" | "t"
+type_list         ::= "list" "<" type ">"
+type_dict         ::= "dict" "<" type, type ">"
+type_enum         ::= "enum" "<" type ">"
+type_table        ::= "table"
+type_ktable       ::= "ktable"
 
 name              ::= id
 compound_name     ::= name {"." name}
 type_name         ::= name
-label             ::= id
+label             ::= name
 assign            ::= "="
 ```
 
