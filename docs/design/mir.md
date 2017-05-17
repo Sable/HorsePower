@@ -43,17 +43,17 @@ module default {
         t11:list<str> = @column_value(employee:table,   `LastName);
         t12:list<str> = @column_value(department:table, `DepartmentName);
 
-        t13:list<str> = index(t11,t10);
-        t14:list<sym> = index(t0 ,t10);
-        t15:list<sym> = index(t1 ,t7);
-        t16:list<str> = index(t12,t7);
+        t13:list<str> = @index(t11,t10);
+        t14:list<sym> = @index(t0 ,t10);
+        t15:list<sym> = @index(t1 ,t7);
+        t16:list<str> = @index(t12,t7);
 
         z0:dict<sym,str> = dict(`LastName,       t13);
         z1:dict<sym,sym> = dict(`DepartmentID,   t14);
         z2:dict<sym,sym> = dict(`DepartmentID,   t15);
         z3:dict<sym,str> = dict(`DepartmentName, t16);
         z4:?             = list(z0,z1,z2,z3);
-        z:table = createTable(z4);
+        z:table          = @createTable(z4);
         print(z);
     }
 }
