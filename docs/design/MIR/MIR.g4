@@ -130,7 +130,7 @@ fragment ESCAPE_SEQUENCE   : '\\' (ESCAPE_CHARACTERS              |
                                    OCT_GROUP_3                    |
                                    'x' HEX_GROUP_2                |
                                    'U' HEX_GROUP_8                |
-                                   'u' HEX_GROUP_2                )
+                                   'u' HEX_GROUP_4                )
                            ;
 fragment FRAGMENT_ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
