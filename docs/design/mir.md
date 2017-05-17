@@ -30,15 +30,15 @@ module default {
     def main() {
         t0:list<sym>  = @column_value(employee:table,   `DepartmentID);
         t1:list<sym>  = @column_value(department:table, `DepartmentID);
-        t2:i32        = @len(t0);
-        t3:i32        = @len(t1);
-        t4:list<i32>  = @index_of(t0, t1);  // begin
+        t2:i64        = @len(t0);
+        t3:i64        = @len(t1);
+        t4:list<i64>  = @index_of(t0, t1);  // begin
         t5:list<bool> = @lt(t4, t3);
-        t6:list<int>  = @range(t3);
-        t7:list<i32>  = @compress(t5, t6); // index for t1
-        t8:list<i32>  = @compress(t5, t1);
-        t9:list<i32>  = @unique(t8);
-        t10:list<i32> = @asc(t9);          // index for t0
+        t6:list<i64>  = @range(t3);
+        t7:list<i64>  = @compress(t5, t6); // index for t1
+        t8:list<i64>  = @compress(t5, t1);
+        t9:list<i64>  = @unique(t8);
+        t10:list<i64> = @asc(t9);          // index for t0
 
         t11:list<str> = @column_value(employee:table,   `LastName);
         t12:list<str> = @column_value(department:table, `DepartmentName);
@@ -63,7 +63,7 @@ module default {
 
 `module`
 
-    default module: sys
+    default module: default
 
 `method`
 
