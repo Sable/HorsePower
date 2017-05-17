@@ -24,32 +24,36 @@ WHERE employee.DepartmentID = department.DepartmentID;
 HorseIR - MIR
 
 ```
-module sys {
+import Builtin
+
+module default {
     def main() {
-        c0:dict<sym,sym> = column(employee:table, `DepartmentID, `sym);
-        c1:dict<sym,sym> = column(department:table, `DepartmentID, `sym);
-        t0:list<sym> = value(c0);
-        t1:list<sym> = value(c1);
-        t2:i32  = len(t0);
-        t3:i32  = len(t1);
-        t4:i32  = indexof(t0, t1);  // begin
-        t5:bool = lt(t4, t3);
-        t6:list = range(t3);
-        t7:i32  = compress(t5, t6); // index for t1
-        t8:i32  = compress(t5, t1);
-        t9:i32  = unique(t8);
-        t10:i32 = asc(t9);          // index for t0
+        t0:list<sym>  = @column_value(employee:table,   `DepartmentID);
+        t1:list<sym>  = @column_value(department:table, `DepartmentID);
+        t2:i32        = @len(t0);
+        t3:i32        = @len(t1);
+        t4:list<i32>  = @index_of(t0, t1);  // begin
+        t5:list<bool> = @lt(t4, t3);
+        t6:list<int>  = @range(t3);
+        t7:list<i32>  = @compress(t5, t6); // index for t1
+        t8:list<i32>  = @compress(t5, t1);
+        t9:list<i32>  = @unique(t8);
+        t10:list<i32> = @asc(t9);          // index for t0
 
-        t11:dict<sym,str> = column(employee:table, `LastName);
-        t12:dict<sym,str> = column(department:table, `DepartmentName);
+        t11:list<str> = @column_value(employee:table,   `LastName);
+        t12:list<str> = @column_value(department:table, `DepartmentName);
 
-        M0:dict<sym,str> = index(t11,t10);
-        M1:dict<sym,sym> = index(t0 ,t10);
-        M2:dict<sym,sym> = index(t1 ,t7);
-        M3:dict<sym,str> = index(t12,t7);
+        t13:list<str> = index(t11,t10);
+        t14:list<sym> = index(t0 ,t10);
+        t15:list<sym> = index(t1 ,t7);
+        t16:list<str> = index(t12,t7);
 
-        z0:?    = list(M0,M1,M2,M3);
-        z:table = createTable(z0);
+        z0:dict<sym,str> = dict(`LastName,       t13);
+        z1:dict<sym,sym> = dict(`DepartmentID,   t14);
+        z2:dict<sym,sym> = dict(`DepartmentID,   t15);
+        z3:dict<sym,str> = dict(`DepartmentName, t16);
+        z4:?             = list(z0,z1,z2,z3);
+        z:table = createTable(z4);
         print(z);
     }
 }
@@ -92,7 +96,8 @@ operand           ::= name
 method_call       ::= compound_name argument_list
 argument_list     ::= "(" operand { "," operand } ")"
 
-literal           ::= literal_bool     type_bool
+literal           ::= literal_nil      type
+                    | literal_bool     type_bool
                     | literal_char     type_char
                     | literal_int      type_int
                     | literal_float    type_float
@@ -137,6 +142,7 @@ compound_name     ::= name {"." name}
 type_name         ::= name
 label             ::= name
 assign            ::= "="
+literal_nil       ::= "nil"
 ```
 
 Types (See [examples](mir-example2.md))
