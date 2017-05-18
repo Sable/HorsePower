@@ -19,9 +19,9 @@ statement_core    ::= name type assign expression
                     | "return" (name | compound_name | literal)
                     | "goto" label [(name | compound_name | literal_bool)]
 expression        ::= [ type_cast ] sub_expression
-                    | "checktype" "(" sub_expression "," type_word ")"
-                    | "checkcast" "(" sub_expression "," type_word ")"
-type_cast         ::= "(" type_word ")"
+                    | "checktype" "(" sub_expression "," type_literal ")"
+                    | "checkcast" "(" sub_expression "," type_literal ")"
+type_cast         ::= "(" type_literal ")"
 sub_expression    ::= method_call
                     | operand
 operand           ::= compound_name
@@ -44,8 +44,8 @@ literal           ::= literal_nil      type
                     | literal_table   [type_table]
                     | literal_ktable  [type_ktable]
 
-type              ::= ":" type_word
-type_word         ::= scalar_type
+type              ::= ":" type_literal
+type_literal      ::= scalar_type
                     | compound_type
                     | unknown_type
 scalar_type       ::= type_bool
@@ -69,9 +69,9 @@ type_float        ::= "f32" | "f64"
 type_complex      ::= "complex"
 type_sym          ::= "sym"
 type_time         ::= "m" | "d" | "z" | "u" | "v" | "t"
-type_list         ::= "list" "<" type ">"
-type_dict         ::= "dict" "<" type, type ">"
-type_enum         ::= "enum" "<" type ">"
+type_list         ::= "list" "<" type_literal ">"
+type_dict         ::= "dict" "<" type_literal, type_literal ">"
+type_enum         ::= "enum" "<" type_literal ">"
 type_table        ::= "table"
 type_ktable       ::= "ktable"
 
