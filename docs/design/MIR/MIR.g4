@@ -52,6 +52,7 @@ literal : literal_bool
         | literal_string
         | literal_list
         | literal_dict
+        | literal_nil 
         ;
 
 literal_list : '[' literal_list_internal ']' (':' listType=type_list)? ;
@@ -63,6 +64,7 @@ literal_dict_internal :
                       | literal_dict_pair ((',' | ';')? literal_dict_pair)* ;
 literal_dict_pair : key=literal '->' value=literal ;
 
+literal_nil     : 'nil' ':' type ;
 literal_complex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                   ':' 'complex'
                 | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)

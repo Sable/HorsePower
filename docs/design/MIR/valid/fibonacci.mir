@@ -1,0 +1,24 @@
+module Fibonacci {
+    def calculate(x:i32) :i32 {
+        equal_0 :bool = @builtin.equal(x, 0:i32) ;
+        equal_1 :bool = @builtin.equal(x, 1:i32) ;
+        equal_2 :bool = @builtin.equal(x, 2:i32) ;
+
+        goto [L_EQ1] equal_1 ;
+        goto [L_EQ2] equal_2 ;
+
+        prev :i32  = @builtin.subtract(x, 1:i32) ;
+        prev2 :i32 = @builtin.subtract(x, 2:i32) ;
+
+        t0 :i32 = @fib(prev);
+        t1 :i32 = @fib(prev2);
+
+        ret :i32 = @buitlin.add(t0, t1);
+        return ret ;
+
+        [L_EQ1] nop;
+        [L_EQ2] nop;
+        ret :i32 = 1:i32 ;
+        return ret ;
+    }
+}
