@@ -1,16 +1,15 @@
 grammar MIR ;
 
-// Export Grammar
-program : (module | module_body)* ;
+program : (module | content)* ;
+module  : 'module' name '{' content* '}' ;
+content : method
+        | global_var
+        ;
+method  : 'def' name  '(' parameter_list ')' ':' type '{' statement* '}' ;
+parameter_list :
+               | name ':' type (',' name ':' type)* ;
 
-module : 'module' name '{' module_body* '}' ;
-module_body : method
-            | global_var
-            ;
-method : 'def' name  '(' method_decal_arg_list ')' ':' type '{' statement* '}' ;
-method_decal_arg_list :
-                      | name ':' type (',' name ':' type)* ;
-global_var : 'def' name ':' type (';')? ;
+global_var : 'def' name ':' type ';' ;
 
 statement : ('[' name ']')? statement_core ';' ;
 statement_core : name ':' type '=' expression
@@ -27,12 +26,12 @@ operand : compound_name
         | literal
         ;
 
-method_call : compound_name '(' method_call_arg_list ')'
-            | name '(' method_call_arg_list ')'
-            | literal_function '(' method_call_arg_list ')'
+method_call : compound_name '(' argument_list ')'
+            | name '(' argument_list ')'
+            | literal_function '(' argument_list ')'
             ;
-method_call_arg_list :
-                     | operand (',' operand)* ;
+argument_list :
+              | operand (',' operand)* ;
 
 expression : (method_call | operand)
            | '(' type ')' (method_call | operand)
