@@ -1,0 +1,3 @@
+-I./antlr4-cpp-runtime/runtime/src
+-L./antlr4-cpp-runtime/dist
+-lantlr4-runtime

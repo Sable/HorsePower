@@ -1,0 +1,13 @@
+module GlobalVariable {
+    def global_var : list<?>
+    def foo(a:i32, b:i32) : bool {
+               i:bool = @builtin.equal(a, b) ;
+               goto [ret2] sys.gotoflag ;
+        [ret1]
+               ret:bool = 0:bool;
+               return ret ;
+        [ret2]
+               ret:bool = 1:bool;
+               return ret ;
+    }
+}

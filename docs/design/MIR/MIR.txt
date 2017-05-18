@@ -36,7 +36,7 @@ literal           ::= literal_nil      type
                     | literal_char     type_char
                     | literal_int      type_int
                     | literal_float    type_float
-                    | literal_complex [type_complex]
+                    | literal_complex  type_complex 
                     | literal_symbol  [type_symbol]
                     | literal_time     type_time
                     | literal_list    [type_list]
