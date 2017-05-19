@@ -28,6 +28,10 @@ public:
     void testGlobalVariable (void) {
         TS_ASSERT( testParse( "./valid/globalVariable.mir" ) ) ;
     }
+
+    void testSQL1 (void) {
+        TS_ASSERT( testParse( "./valid/sql1.mir" ) ) ;
+    }
 protected:
     bool errorFlag ;
     std::string errorMessage ;

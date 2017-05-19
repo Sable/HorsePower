@@ -5,12 +5,16 @@ program_content : (module | content) ;
 module  : 'module' name '{' content* '}' ;
 content : method
         | global_var
+        | import_module
         ;
 method  : 'def' name  '(' parameter_list ')' ':' type '{' statement* '}' ;
 parameter_list :
                | name ':' type (',' name ':' type)* ;
 
 global_var : 'def' name ':' type ';' ;
+import_module : 'import' IMPORT_COMPOUND_ID ';' 
+              | 'import' COMPOUND_ID ';'
+              ;
 
 statement : ('[' name ']')? statement_core ';' ;
 statement_core : name ':' type '=' expression
@@ -36,8 +40,8 @@ argument_list :
 
 expression : (method_call | operand)
            | '(' type ')' (method_call | operand)
-           | 'checktype' '(' (method_call | operand) ',' type ')'
-           | 'checkcast' '(' (method_call | operand) ',' type ')'
+           | 'check_type' '(' (method_call | operand) ',' type ')'
+           | 'check_cast' '(' (method_call | operand) ',' type ')'
            ;
 
 literal : literal_bool
@@ -53,7 +57,7 @@ literal : literal_bool
         | literal_string
         | literal_list
         | literal_dict
-        | literal_nil 
+        | literal_nil
         ;
 
 literal_list : '[' literal_list_internal ']' (':' listType=typeList)? ;
@@ -82,10 +86,10 @@ literal_integer : op=('+' | '-')? value=LITERAL_INTEGER ':'
 literal_float   : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
                   valueType=('f32' | 'f64') ;
 literal_symbol  : value=LITERAL_SYMBOL (':' 'sym')? ;
-literal_time    : value=LITERAL_T_GROUP_2  ':' 'm'
+literal_time    : value=LITERAL_FLOAT  ':' 'm'
                 | value=LITERAL_T_GROUP_3  ':' 'd'
                 | value=LITERAL_T_GROUP_7 (':' 'z')?
-                | value=LITERAL_T_GROUP_2  ':' 'u'
+                | value=LITERAL_FLOAT  ':' 'u'
                 | value=LITERAL_T_GROUP_3  ':' 'v'
                 | value=LITERAL_T_GROUP_4 (':' 't')?
                 ;
@@ -102,22 +106,23 @@ type : tokenValue=( 'bool'    |
                     'sym'     |
                     'm' | 'd' | 'z' | 'u' | 'v' | 't' |
                     'str'     |
-                    'table'   | 'ktbale'                          ) #typeCaseScalar
-     | tokenValue='?'                                               #typeCaseWildcard
-     | typeList                                                     #typeCaseList
-     | typeDict                                                     #typeCaseDict
-     | typeEnum                                                     #typeCaseEnum
-     | typeFunc                                                     #typeCaseFunc
+                    'table'   | 'ktbale'                          )
+                                                               #typeCaseScalar
+     | tokenValue='?'                                          #typeCaseWildcard
+     | typeList                                                #typeCaseList
+     | typeDict                                                #typeCaseDict
+     | typeEnum                                                #typeCaseEnum
+     | typeFunc                                                #typeCaseFunc
      ;
 
 typeList : 'list' '<' element=type '>' ;
 typeDict : 'dict' '<' key=type ',' value=type '>'
          ;
 typeEnum : 'enum' '<' element=type '>' ;
-typeFunc : 'func' '<' ':' type '>'                                 #typeFuncCase0     
-         | 'func' '<' '...' ':' type '>'                           #typeFuncCase1
-         | 'func' '<' type (',' type)* ':' type '>'                #typeFuncCase2
-         | 'func' '<' type (',' type)* ',' '...' ':' type '>'      #typeFuncCase3
+typeFunc : 'func' '<' ':' type '>'                                #typeFuncCase0
+         | 'func' '<' '...' ':' type '>'                          #typeFuncCase1
+         | 'func' '<' type (',' type)* ':' type '>'               #typeFuncCase2
+         | 'func' '<' type (',' type)* ',' '...' ':' type '>'     #typeFuncCase3
          ;
 
 fragment OCT_CHARACTER     : [0-7] ;
@@ -137,9 +142,8 @@ fragment ESCAPE_SEQUENCE   : '\\' (ESCAPE_CHARACTERS              |
 fragment FRAGMENT_ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 fragment FRAGMENT_INTEGER  : ('0' | [1-9][0-9]*) ;
-fragment FRAGMENT_FLOAT    : (FRAGMENT_INTEGER)? '.' [0-9]+ ;
+fragment FRAGMENT_FLOAT    : FRAGMENT_INTEGER '.' [0-9]+ ;
 
-LITERAL_T_GROUP_2    : [0-9]+ '.' [0-9]+ ;
 LITERAL_T_GROUP_3    : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 LITERAL_T_GROUP_4    : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 LITERAL_T_GROUP_7    : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
@@ -152,8 +156,10 @@ LITERAL_CHAR    : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE) '\'' ;
 LITERAL_SYMBOL  : '`' FRAGMENT_ID ;
 LITERAL_FUNCTION: '@' FRAGMENT_ID ('.' FRAGMENT_ID)* ;
 
+IMPORT_COMPOUND_ID : FRAGMENT_ID ('.' FRAGMENT_ID)* '.' '*' ;
 COMPOUND_ID : FRAGMENT_ID ('.' FRAGMENT_ID)+ ;
 ID          : FRAGMENT_ID ;
 
 WHITE_SPACE : [ \t\n\r]+      -> channel(HIDDEN) ;
 COMMENT     : '//' (~[\n\r])* -> channel(HIDDEN) ;
+BLOCK_COMMET: '/*' .*? '*/'   -> channel(HIDDEN) ;

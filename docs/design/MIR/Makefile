@@ -32,7 +32,8 @@ testsuits: cxxtest.cc
 	cxxtestgen --error-printer -o cxxtestRunner.cc cxxtest.cc
 	@echo "Building cxxtestRunner.cc ... "
 	@cc -g -std=c++11 -c -I$(ANTLR4_INCLUDE_DIR) cxxtestRunner.cc -Wno-attributes
-	cc -g -std=c++11 -c -I$(ANTLR4_INCLUDE_DIR) prettyPrinter.cc -Wno-attributes
+	@echo "Building prettyPrinter.cc ... "
+	@cc -g -std=c++11 -c -I$(ANTLR4_INCLUDE_DIR) prettyPrinter.cc -Wno-attributes
 	@echo "Linking ... (flag: ${LINK_LIBS})"
 	@cc -g -std=c++11 *.o  ${LINK_LIBS} -o cxxtestRunner
 

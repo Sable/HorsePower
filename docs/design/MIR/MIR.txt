@@ -3,16 +3,18 @@
 * Keep this file updated with MIR.g4.
 */
 
-mir_program      ::= { module | content }
-module           ::= "module" name "{" { method } "}"
+mir_program      ::= { module | content }*
+module           ::= "module" name "{" { method }* "}"
 content          ::= method
                    | global_var
+                   | import_module
 method           ::= "def" name parameter_list type "{" statement_list "}"
-parameter_list   ::= "(" [ name type { "," name type } ] ")"
+parameter_list   ::= "(" [ name type { "," name type }* ] ")"
 global_var       ::= "def" name type ";"
-
+import_module    ::= "import" compound_name ";"
+                   | "import" import_compound_name ";"
 /* main */
-statement_list    ::= { statement ";" }
+statement_list    ::= { statement ";" }*
 statement         ::= [label] statement_core
 statement_core    ::= name type assign expression
                     | "nop"
@@ -29,7 +31,7 @@ operand           ::= compound_name
                     | literal
 
 method_call       ::= compound_name argument_list
-argument_list     ::= "(" [operand { "," operand }] ")"
+argument_list     ::= "(" [operand { "," operand }*] ")"
 
 literal           ::= literal_nil      type
                     | literal_bool     type_bool
@@ -75,11 +77,12 @@ type_enum         ::= "enum" "<" type_literal ">"
 type_table        ::= "table"
 type_ktable       ::= "ktable"
 
-name              ::= id
-compound_name     ::= name {"." name}
-type_name         ::= name
-label             ::= name
-assign            ::= "="
-literal_nil       ::= "nil"
+name                 ::= id
+import_compound_name ::= name {"." name}* "." "*"
+compound_name        ::= name {"." name}+
+type_name            ::= name
+label                ::= name
+assign               ::= "="
+literal_nil          ::= "nil"
 
 

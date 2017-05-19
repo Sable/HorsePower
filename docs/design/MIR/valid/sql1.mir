@@ -1,0 +1,47 @@
+/* 
+ *  select
+ *    sum(l_extendedprice * l_discount) as revenue
+ *  from
+ *    lineitem
+ *  where
+ *    l_shipdate >= date '1994-01-01'
+ *    and l_shipdate < date '1994-01-01' + interval '1' year
+ *    and l_discount between .06 - 0.01 and .06 + 0.01
+ *    and l_quantity < 24;
+ */
+ 
+// l_extendedprice DECIMAL(15,2) f64
+// l_discount      DECIMAL(15,2) f64
+// l_shipdate      DATE          d
+// l_quantity      DECIMAL(15,2) f64
+
+module default{
+    import Builtin.* ;
+    def main() : table {
+        t0:list<f64>      = check_cast(@column_value(`lineitem, `l_extendedprice), list<f64>);
+        t1:list<f64>      = check_cast(@column_value(`lineitem, `l_discount     ), list<f64>);
+        t2:list<d>        = check_cast(@column_value(`lineitem, `l_shipdate     ), list<d>);
+        t3:list<f64>      = check_cast(@column_value(`lineitem, `l_quantity     ), list<f64>);
+
+        t4:d              = 1994.01.01:d;
+        t5:list<bool>     = @ge(t3, t4);
+        t6:d              = 1994.01.01:d;
+        t7:d              = @add_date(t6, 1:i64, 0:i64);
+        t8:list<bool>     = @lt(t3, t7);
+        t9:f64            = @minus(0.06 :f64, 0.01 :f64);
+        t10:f64           = @plus(0.06 :f64, 0.01 :f64);
+        t11:list<bool>    = @between(t1, t9, t10);
+        t12:list<bool>    = @lt(t3, 24:i64);
+
+        t13:list<bool>    = @and(t5,t8);
+        t14:list<bool>    = @and(t13,t11);
+        t15:list<bool>    = @and(t14,t12);
+
+        t16:list<f64>     = @index(t0, t15);
+        t17:list<f64>     = @index(t1, t15);
+        t18:list<f64>     = @sum(t16, t17);
+        t19:dict<sym,f64> = @dict(`revenue, t18);
+        t20:table         = @table(t19);
+        return t20;
+    }
+}

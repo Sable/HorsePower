@@ -1,3 +1,2 @@
--I./antlr4-cpp-runtime/runtime/src
--L./antlr4-cpp-runtime/dist
+-I/usr/local/include/antlr4-runtime
 -lantlr4-runtime
