@@ -65,7 +65,7 @@ i32  //int
 i64  //long
 f32  //float
 f64  //double
-``
+```
 
 Also, a fixed-size type can be a meaningful name.
 

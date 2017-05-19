@@ -4,11 +4,10 @@ An online document for the design and implementation of HorseIR.
 
 ## IR design
 
-### [Grammar](grammar.md)
+### [Grammar](../MIR/MIR.txt)
 
 - [Names](names.md)
 - [Types](types.md)
-
 
 ### Primitives
 
