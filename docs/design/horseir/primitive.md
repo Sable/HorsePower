@@ -8,7 +8,8 @@
   + [Logic](#logic2)
   + [Relation](#relation2)
   + [Trigonometric](#trig2)
-- [Niladic](#niladic) : `z <- foo()`
+- [Others](#others)
+  + [Datetime](#datetime)
 
 ### Monadic
 
@@ -75,4 +76,15 @@
 | :------------------------------ | :---------------------- |
 | [trig](builtin/d/trig.md)       | trigonometric functions |
 
+### Others
 
+<p id="datetime">Datetime</p>
+
+| Function                        | Description             |
+| :------------------------------ | :---------------------- |
+| date                            | Date extraction         |
+| date_diff                       | Date difference         |
+| date_add                        | Date plus               |
+| date_sub                        | Date minus              |
+
+[Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
