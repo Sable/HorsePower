@@ -1,6 +1,7 @@
 grammar MIR ;
 
-program : (module | content)* ;
+program : program_content* ;
+program_content : (module | content) ;
 module  : 'module' name '{' content* '}' ;
 content : method
         | global_var
@@ -55,11 +56,11 @@ literal : literal_bool
         | literal_nil 
         ;
 
-literal_list : '[' literal_list_internal ']' (':' listType=type_list)? ;
+literal_list : '[' literal_list_internal ']' (':' listType=typeList)? ;
 literal_list_internal :
                       | literal ((',' | ';')? literal)* ;
 
-literal_dict : '{' literal_dict_internal '}' (':' dictType=type_dict)? ;
+literal_dict : '{' literal_dict_internal '}' (':' dictType=typeDict)? ;
 literal_dict_internal :
                       | literal_dict_pair ((',' | ';')? literal_dict_pair)* ;
 literal_dict_pair : key=literal '->' value=literal ;
@@ -88,12 +89,12 @@ literal_time    : value=LITERAL_T_GROUP_2  ':' 'm'
                 | value=LITERAL_T_GROUP_3  ':' 'v'
                 | value=LITERAL_T_GROUP_4 (':' 't')?
                 ;
-literal_function: value=LITERAL_FUNCTION (':' type_func)? ;
+literal_function: value=LITERAL_FUNCTION (':' typeFunc)? ;
 literal_table   : value=ID ':' 'table' ;
 literal_ktable  : value=ID ':' 'ktable' ;
 literal_string  : value=LITERAL_STRING (':' 'str')? ;
 
-type : scalarType=( 'bool'    |
+type : tokenValue=( 'bool'    |
                     'char'    |
                     'i8'      | 'i16'     | 'i32'     | 'i64'     |
                     'f32'     | 'f64'     |
@@ -101,23 +102,23 @@ type : scalarType=( 'bool'    |
                     'sym'     |
                     'm' | 'd' | 'z' | 'u' | 'v' | 't' |
                     'str'     |
-                    'table'   | 'ktbale'                                       )
-     | wildcardType='?'
-     | listType=type_list
-     | dictType=type_dict
-     | enumType=type_enum
-     | funcType=type_func
+                    'table'   | 'ktbale'                          ) #typeCaseScalar
+     | tokenValue='?'                                               #typeCaseWildcard
+     | typeList                                                     #typeCaseList
+     | typeDict                                                     #typeCaseDict
+     | typeEnum                                                     #typeCaseEnum
+     | typeFunc                                                     #typeCaseFunc
      ;
 
-type_list : 'list' '<' interal=type '>' ;
-type_dict : 'dict' '<' key=type ',' value=type '>'
-          ;
-type_enum : 'enum' '<' interal=type '>' ;
-type_func : 'func' '<' ':' type '>'
-          | 'func' '<' '...' ':' type '>'
-          | 'func' '<' type (',' type)* ':' type '>'
-          | 'func' '<' type (',' type)* ',' '...' ':' type '>'
-          ;
+typeList : 'list' '<' element=type '>' ;
+typeDict : 'dict' '<' key=type ',' value=type '>'
+         ;
+typeEnum : 'enum' '<' element=type '>' ;
+typeFunc : 'func' '<' ':' type '>'                                 #typeFuncCase0     
+         | 'func' '<' '...' ':' type '>'                           #typeFuncCase1
+         | 'func' '<' type (',' type)* ':' type '>'                #typeFuncCase2
+         | 'func' '<' type (',' type)* ',' '...' ':' type '>'      #typeFuncCase3
+         ;
 
 fragment OCT_CHARACTER     : [0-7] ;
 fragment OCT_GROUP_3       : OCT_CHARACTER OCT_CHARACTER OCT_CHARACTER ;
