@@ -174,7 +174,7 @@ t   t         0nt     time           4 bytes //1 i32
     ktable            keyed table   -
 ```
 
-Primitives (See [primitives](horseir/primitive.md))
+Primitives (See [primitives](horseir/primitives.md))
 
 ```
 // Built-in (starting with 'sys.', e.g. 'sys.pi')

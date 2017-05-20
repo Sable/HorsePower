@@ -11,10 +11,11 @@ An online document for the design and implementation of HorseIR.
 
 ### Primitives
 
-- [Builtins](builtins.md)
+- [Builtins](primitives.md)
 
 ### Database operations
 
-- [Operations](operation.md)
+- [Operations](db_ops.md)
+- [References](db_ref.md)
 
 
