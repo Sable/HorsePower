@@ -145,25 +145,25 @@ assign            ::= "="
 literal_nil       ::= "nil"
 ```
 
-Types (See [examples](mir-example2.md))
+Types (See [examples](horseir/type_examples.md))
 
 ```
 b   bool      0n      bool           1 bit
 c   char      0n      char           1 byte
-h   i16       0nh     short         16 bytes
-i   i32       0ni     int           32 bytes
-u   i64       0nu     long          64 bytes
-f   f32       0nf     float         32 bytes
-e   f64       0ne     double        64 bytes
-x   complex   0nx     complex      128 bytes //2 f64
-    sym       0ns     symbol        32 bytes //1 i32
+h   i16       0nh     short          2 bytes
+i   i32       0ni     int            4 bytes
+u   i64       0nu     long           8 bytes
+f   f32       0nf     float          4 bytes
+e   f64       0ne     double         8 bytes
+x   complex   0nx     complex       16 bytes //2 f64
+    sym       0ns     symbol         8 bytes //1 i64
 
-m   m         0nm     month         32 bytes //1 i32
-d   d         0nd     date          32 bytes //1 i32
-z   z         0nz     date time     64 bytes //1 i64
-u   u         0nu     minute        32 bytes //1 i32
-v   v         0nv     second        32 bytes //1 i32
-t   t         0nt     time          32 bytes //1 i32
+m   m         0nm     month          4 bytes //1 i32
+d   d         0nd     date           4 bytes //1 i32
+z   z         0nz     date time      8 bytes //1 i64
+u   u         0nu     minute         4 bytes //1 i32
+v   v         0nv     second         4 bytes //1 i32
+t   t         0nt     time           4 bytes //1 i32
 
     list      ()      list          -
     string    ''      varchar(n)    -

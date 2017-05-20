@@ -8,11 +8,10 @@ bool
 0100001:b               //list of T/F
 ```
 
-char/string
+string
 
 ```
-'a':c                   //char 'a'
-'abc':s                 //string 'abc'
+'abc':str               //string 'abc'
 ```
 
 short/int/long/float/double/complex
@@ -23,7 +22,7 @@ short/int/long/float/double/complex
 12:i64                  //long 12
 3.14:f32                //float 3.14
 3.14:f64                //double 3.14
-2.3j4.5:complex         //complex
+2.3+4.5i:complex        //complex
 ```
 
 symbol
@@ -36,8 +35,8 @@ symbol
 function
 
 ```
-`plus:func             //built-in operation
-`minus:func            //'-'
+@add                    //function literal
+@substract:func         //'-'
 ```
 
 month/date/datetime/minute/second/time
@@ -54,7 +53,7 @@ month/date/datetime/minute/second/time
 list
 
 ```
-list(1 2 3; 4 5 6)        //list<i32>
+list(1 2 3; 4 5 6)        //list<i64>
 list(1 2 3; 'abc')        //list<?>
 ```
 
