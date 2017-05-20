@@ -31,20 +31,22 @@ operand           ::= compound_name
                     | literal
 
 method_call       ::= compound_name argument_list
+                    | literal_function argument_list
 argument_list     ::= "(" [operand { "," operand }*] ")"
 
-literal           ::= literal_nil      type
-                    | literal_bool     type_bool
-                    | literal_char     type_char
-                    | literal_int      type_int
-                    | literal_float    type_float
-                    | literal_complex  type_complex 
-                    | literal_symbol  [type_symbol]
-                    | literal_time     type_time
-                    | literal_list    [type_list]
-                    | literal_dict    [type_dict]
-                    | literal_table   [type_table]
-                    | literal_ktable  [type_ktable]
+literal           ::= literal_nil        type
+                    | literal_bool       type_bool
+                    | literal_char       type_char
+                    | literal_int        type_int
+                    | literal_float      type_float
+                    | literal_complex    type_complex 
+                    | literal_symbol    [type_symbol]
+                    | literal_time       type_time
+                    | literal_function  [type_func]
+                    | literal_list      [type_list]
+                    | literal_dict      [type_dict]
+                    | literal_table     [type_table]
+                    | literal_ktable    [type_ktable]
 
 type              ::= ":" type_literal
 type_literal      ::= scalar_type
