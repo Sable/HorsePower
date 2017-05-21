@@ -45,9 +45,21 @@
 | Function                        | Description             |
 | :------------------------------ | :---------------------- |
 | date                            | Date extraction         |
+| date_year                       | Date.year               |
+| date_month                      | Date.month              |
+| date_day                        | Date.day                |
+| time                            | Time extraction         |
+| time_hour                       | Time.hour               |
+| time_minute                     | Time.minute             |
+| time_second                     | Time.second             |
+| time_mill                       | Time.mill               |
+| | |
 | date_diff                       | Date difference         |
 | date_add                        | Date plus               |
 | date_sub                        | Date minus              |
+| time_diff                       | Time difference         |
+| time_add                        | Time plus               |
+| time_sub                        | Time sub                |
 
 [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
 
