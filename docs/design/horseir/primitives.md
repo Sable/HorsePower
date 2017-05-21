@@ -5,31 +5,25 @@
 - [Datetime](#datetime)
 - [Trigonometric](#trig)
 - [General](#general)
+- [Database related](#database)
 
 ### <p id="arithmetic">Arithmetic</p>
 
-| Function                        | Description             |
-| :------------------------------ | :---------------------- |
-| [abs](builtin/abs.md)           | absolute                |
-| [ceil](builtin/ceil.md)         | ceiling                 |
-| [conj](builtin/conj.md)         | conjugate               |
-| [floor](builtin/floor.md)       | floor                   |
-| [neg](builtin/neg.md)           | negate                  |
-| [recip](builtin/recip.md)       | reciprocal              |
-| [signum](builtin/signum.md)     | signum (-1,0,1)         |
-| [pi](builtin/pi.md)             | pi                      |
-| | |
-| [lt](builtin/lt.md)             | less than               |
-| [leq](builtin/leq.md)           | less equal than         |
-| [gt](builtin/gt.md)             | greater than            |
-| [geq](builtin/geq.md)           | greater equal than      |
-| [eq](builtin/eq.md)             | equal                   |
-| [neq](builtin/neq.md)           | not equal               |
-| [plus](builtin/plus.md)         | plus                    |
-| [minus](builtin/minus.md)       | minus                   |
-| [mul](builtin/mul.md)           | multiple                |
-| [div](builtin/div.md)           | division                |
-
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| [abs](builtin/abs.md)           | absolute                | [lt](builtin/lt.md)             | less than               |
+| [ceil](builtin/ceil.md)         | ceiling                 | [leq](builtin/leq.md)           | less equal than         |
+| [floor](builtin/floor.md)       | floor                   | [gt](builtin/gt.md)             | greater than            |
+| [round*](builtin/round.md)      | round                   | [geq](builtin/geq.md)           | greater equal than      |
+| [conj](builtin/conj.md)         | conjugate               | [eq](builtin/eq.md)             | equal                   |
+| [neg](builtin/neg.md)           | negate                  | [neq](builtin/neq.md)           | not equal               |
+| [recip](builtin/recip.md)       | reciprocal              | [plus](builtin/plus.md)         | plus                    |
+| [signum](builtin/signum.md)     | signum (-1,0,1)         | [minus](builtin/minus.md)       | minus                   |
+| [pi](builtin/pi.md)             | pi                      | [mul](builtin/mul.md)           | multiple                |
+|                                 |                         | [div](builtin/div.md)           | division                |
+|                                 |                         | [power](builtin/power.md)       | power(x,k)              |
+|                                 |                         | [log](builtin/log.md)           | log(b,x)                |
+|                                 |                         | [mod](builtin/mod.md)           | mod(x,y)                |
 
 ### <p id="logic">Logic</p>
 
@@ -37,6 +31,7 @@
 | :------------------------------ | :---------------------- |
 | [and](builtin/and.md)           | and                     |
 | [or](builtin/or.md)             | or                      |
+| [not*](builtin/not.md)          | not                     |
 | [nand](builtin/nand.md)         | not and                 |
 | [nor](builtin/nor.md)           | not or                  |
 
@@ -63,12 +58,25 @@
 
 ### <p id="general">General</p>
 
-| Function                        | Description             |
-| :------------------------------ | :---------------------- |
-| [asc](builtin/asc.md)           | ascending order         |
-| [desc](builtin/desc.md)         | descending order        |
-| [unique](builtin/unique.md)     | unique values           |
-| [str](builtin/str.md)           | format                  |
-| [len](builtin/len.md)           | length                  |
-| [range](builtin/range.md)       | range(0,n-1)            |
-| [at](builtin/at.md)             | member                  |
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| [asc](builtin/asc.md)           | ascending order         | [rand*](builtin/rand.md)        | random number generator |
+| [desc](builtin/desc.md)         | descending order        | [randk*](builtin/randk.md)      | repeat rand             |
+| [unique](builtin/unique.md)     | unique values           | [seed*](builtin/seed.md)        | random seed             |
+| [str](builtin/str.md)           | format                  | [flip*](builtin/flip.md)        | flip to a table         |
+| [len](builtin/len.md)           | length                  | [reverse*](builtin/reverse.md)  | reverse                 |
+| [range](builtin/range.md)       | range(0,n-1)            | [where*](builtin/where.md)      | find all trues          |
+| [fact](builtin/fact.md)         | factorial*              | [raze*](builtin/raze.md)        | raze                    |
+| [at](builtin/at.md)             | member                  | [enlist*](builtin/enlist.md)    | return a list           |
+| [max*](builtin/max.md)          | maximum                 | [scalar*](builtin/scalar.md)    | return a scalar         | 
+| [min*](builtin/min.md)          | min                     | [indexof*](builtin/indexof.md)  | index of                | 
+| [append*](builtin/append.md)    | append                  | [take*](builtin/take.md)        | take elements           | 
+| [like*](builtin/like.md)        | match                   | [drop*](builtin/drop.md)        | drop elements           |  
+
+### <p id="database">Database related</p>
+
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| list                            |                         | key                             |                         |
+| enum                            |                         | value                           |                         |
+| dict                            |                         | meta                            |                         |
