@@ -32,6 +32,10 @@ public:
     void testSQL1 (void) {
         TS_ASSERT( testParse( "./valid/sql1.mir" ) ) ;
     }
+
+    void testPhi (void) {
+        TS_ASSERT( testParse( "./valid/phi.mir" ) ) ;
+    }
 protected:
     bool errorFlag ;
     std::string errorMessage ;

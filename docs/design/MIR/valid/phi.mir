@@ -1,0 +1,11 @@
+module PhiInstruction {
+       def foo(flag :bool) :i32 {
+                       goto [label.br2] flag ;
+           [label.br1] i :i32 = 1 :i32 ;
+                       goto [label.br3] ;
+           [label.br2] i :i32 = 1 :i32 ;
+                       goto [label.br3] ;
+           [label.br3] i :i32 = phi([label.br1] i, [label.br2] i) ;
+                       return i ;
+       }
+}

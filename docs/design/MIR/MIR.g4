@@ -16,12 +16,15 @@ import_module : 'import' IMPORT_COMPOUND_ID ';'
               | 'import' COMPOUND_ID ';'
               ;
 
-statement : ('[' name ']')? statement_core ';' ;
+label : '[' name ']'
+      | '[' COMPOUND_ID ']'
+      ;
+statement : (label)? statement_core ';' ;
 statement_core : name ':' type '=' expression
                | compound_name ':' type '=' expression
                | 'nop'
-               | 'return' (name | compound_name | literal)
-               | 'goto' '[' name ']' (name | compound_name | literal_bool)?
+               | 'return' name
+               | 'goto' label (name)?
                ;
 
 name : (ID | 'i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't');
@@ -42,6 +45,7 @@ expression : (method_call | operand)
            | '(' type ')' (method_call | operand)
            | 'check_type' '(' (method_call | operand) ',' type ')'
            | 'check_cast' '(' (method_call | operand) ',' type ')'
+           | 'phi' '(' label name (',' label name)* ')'
            ;
 
 literal : literal_bool
