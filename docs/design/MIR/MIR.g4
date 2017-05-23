@@ -1,106 +1,106 @@
 grammar MIR ;
 
-program : program_content* ;
-program_content : (module | content) ;
+program : programContent* ;
+programContent : (module | content) ;
 module  : 'module' name '{' content* '}' ;
 content : method
-        | global_var
-        | import_module
+        | globalVar
+        | importModule
         ;
-method  : 'def' name  '(' parameter_list ')' ':' type '{' statement* '}' ;
-parameter_list :
-               | name ':' type (',' name ':' type)* ;
+method  : 'def' name  '(' parameterList ')' ':' type '{' statement* '}' ;
+parameterList :
+              | name ':' type (',' name ':' type)* ;
 
-global_var : 'def' name ':' type ';' ;
-import_module : 'import' IMPORT_COMPOUND_ID ';' 
-              | 'import' COMPOUND_ID ';'
-              ;
+globalVar : 'def' name ':' type ';' ;
+importModule : 'import' IMPORT_COMPOUND_ID ';' 
+             | 'import' COMPOUND_ID ';'
+             ;
 
 label : '[' name ']'
       | '[' COMPOUND_ID ']'
       ;
-statement : (label)? statement_core ';' ;
-statement_core : name ':' type '=' expression
-               | compound_name ':' type '=' expression
-               | 'nop'
-               | 'return' name
-               | 'goto' label (name)?
-               ;
+statement : (label)? statementCore ';' ;
+statementCore : name ':' type '=' expression
+              | compoundName ':' type '=' expression
+              | 'nop'
+              | 'return' name
+              | 'goto' label (name)?
+              ;
 
 name : (ID | 'i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't');
-compound_name : COMPOUND_ID ;
-operand : compound_name
+compoundName : COMPOUND_ID ;
+operand : compoundName
         | name
         | literal
         ;
 
-method_call : compound_name '(' argument_list ')'
-            | name '(' argument_list ')'
-            | literal_function '(' argument_list ')'
+methodCall : compoundName '(' argumentList ')'
+            | name '(' argumentList ')'
+            | literalFunction '(' argumentList ')'
             ;
-argument_list :
-              | operand (',' operand)* ;
+argumentList :
+             | operand (',' operand)* ;
 
-expression : (method_call | operand)
-           | '(' type ')' (method_call | operand)
-           | 'check_type' '(' (method_call | operand) ',' type ')'
-           | 'check_cast' '(' (method_call | operand) ',' type ')'
+expression : (methodCall | operand)
+           | '(' type ')' (methodCall | operand)
+           | 'check_type' '(' (methodCall | operand) ',' type ')'
+           | 'check_cast' '(' (methodCall | operand) ',' type ')'
            | 'phi' '(' label name (',' label name)* ')'
            ;
 
-literal : literal_bool
-        | literal_char
-        | literal_integer
-        | literal_float
-        | literal_complex
-        | literal_symbol
-        | literal_time
-        | literal_function
-        | literal_table
-        | literal_ktable
-        | literal_string
-        | literal_list
-        | literal_dict
-        | literal_nil
+literal : literalBool
+        | literalChar
+        | literalInteger
+        | literalFloat
+        | literalComplex
+        | literalSymbol
+        | literalTime
+        | literalFunction
+        | literalTable
+        | literalKtable
+        | literalString
+        | literalList
+        | literalDict
+        | literalNil
         ;
 
-literal_list : '[' literal_list_internal ']' (':' listType=typeList)? ;
-literal_list_internal :
-                      | literal ((',' | ';')? literal)* ;
+literalList : '[' literalListInternal ']' (':' listType=typeList)? ;
+literalListInternal :
+                    | literal ((',' | ';')? literal)* ;
 
-literal_dict : '{' literal_dict_internal '}' (':' dictType=typeDict)? ;
-literal_dict_internal :
-                      | literal_dict_pair ((',' | ';')? literal_dict_pair)* ;
-literal_dict_pair : key=literal '->' value=literal ;
+literalDict : '{' literalDictInternal '}' (':' dictType=typeDict)? ;
+literalDictInternal :
+                    | literalDictPair ((',' | ';')? literalDictPair)* ;
+literalDictPair : key=literal '->' value=literal ;
 
-literal_nil     : 'nil' ':' type ;
-literal_complex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
-                  ':' 'complex'
-                | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)
-                  ('i' | 'j') ':' 'complex'
-                | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
-                  opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)?
-                  ('i' | 'j') ':' 'complex'
-                | opIM  =('+' | '-')? ('i' | 'j') ':' 'complex'
-                ;
-literal_bool    : op=('+' | '-')? value=LITERAL_INTEGER ':' 'bool' ;
-literal_char    : value=LITERAL_CHAR (':' 'char')? ;
-literal_integer : op=('+' | '-')? value=LITERAL_INTEGER ':'
-                  valueType=('i8'  | 'i16' | 'i32' | 'i64') ;
-literal_float   : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
-                  valueType=('f32' | 'f64') ;
-literal_symbol  : value=LITERAL_SYMBOL (':' 'sym')? ;
-literal_time    : value=LITERAL_FLOAT  ':' 'm'
-                | value=LITERAL_T_GROUP_3  ':' 'd'
-                | value=LITERAL_T_GROUP_7 (':' 'z')?
-                | value=LITERAL_FLOAT  ':' 'u'
-                | value=LITERAL_T_GROUP_3  ':' 'v'
-                | value=LITERAL_T_GROUP_4 (':' 't')?
-                ;
-literal_function: value=LITERAL_FUNCTION (':' typeFunc)? ;
-literal_table   : value=ID ':' 'table' ;
-literal_ktable  : value=ID ':' 'ktable' ;
-literal_string  : value=LITERAL_STRING (':' 'str')? ;
+literalNil     : 'nil' ':' type ;
+literalComplex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
+                 ':' 'complex'
+               | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)
+                 ('i' | 'j') ':' 'complex'
+               | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
+                 opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)?
+                 ('i' | 'j') ':' 'complex'
+               | opIM  =('+' | '-')? ('i' | 'j') ':' 'complex'
+               ;
+literalBool    : op=('+' | '-')? value=LITERAL_INTEGER ':' 'bool' ;
+literalChar    : value=LITERAL_CHAR (':' 'char')? ;
+literalInteger : op=('+' | '-')? value=LITERAL_INTEGER ':'
+                 valueType=('i8'  | 'i16' | 'i32' | 'i64') ;
+literalFloat   : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
+                 valueType=('f32' | 'f64') ;
+literalSymbol  : value=LITERAL_SYMBOL (':' 'sym')? ;
+literalTime    : value=LITERAL_FLOAT  ':' 'm'
+               | value=LITERAL_T_GROUP_3  ':' 'd'
+               | value=LITERAL_T_GROUP_7 (':' 'z')?
+               | value=LITERAL_FLOAT  ':' 'u'
+               | value=LITERAL_T_GROUP_3  ':' 'v'
+               | value=LITERAL_T_GROUP_4 (':' 't')?
+               ;
+literalFunction: value=LITERAL_FUNCTION (':' typeFunc)? ;
+literalTable   : value=ID ':' 'table' ;
+literalKtable  : value=ID ':' 'ktable' ;
+literalString  : value=LITERAL_STRING (':' 'str')? ;
 
 type : tokenValue=( 'bool'    |
                     'char'    |
