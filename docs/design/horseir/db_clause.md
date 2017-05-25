@@ -66,7 +66,8 @@ For example, `LIMIT 10` takes the first 10 elements.
 t1:list<type> = take(t0, 10:i32);
 ```
 
-Another similar function, `limit_range`, can select items within a range `(m,n)`.
+Another similar function, `limit_range` for range queries, can select items
+within a range `(m,n)`.
 
 ```
 // t0 is a partial or full set of the column

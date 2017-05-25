@@ -1,9 +1,13 @@
 ## Implementing database operations using array operations
 
-Reference:
+References:
 
 - **Zhou**, Jingren and Kenneth A. Ross. “Implementing database operations
   using SIMD instructions.” SIGMOD Conference (2002).
+- **Govindaraju**, Naga K., Brandon Lloyd, Wei Wang, Ming C. Lin and Dinesh
+  Manocha. “Fast computation of database operations using graphics processors.”
+  SIGGRAPH Courses (2004).
+
 
 ### Scan-like operators
 
@@ -63,6 +67,23 @@ We see
 
 ### Aggregation
 
+Basic operations for aggregation
 
+- count
+- min and max
+- sum and avg
 
+We provide a general function `reduct` to aggregate a list `T` by an
+aggregation function `f`.  Its syntax is `reduct(@f, T)`.
+
+For example,
+
+```
+   t0 <- (1 1 1;2 2);
+   t1 <- reduct(@count, t0);
+> (3;2)
+```
+
+Aggregation is a perfect candidate for data parallelism despite it may take
+different aggregation functions.
 
