@@ -27,13 +27,11 @@
 
 ### <p id="logic">Logic</p>
 
-| Function                        | Description             |
-| :------------------------------ | :---------------------- |
-| [and](builtin/and.md)           | and                     |
-| [or](builtin/or.md)             | or                      |
-| [not*](builtin/not.md)          | not                     |
-| [nand](builtin/nand.md)         | not and                 |
-| [nor](builtin/nor.md)           | not or                  |
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| [and](builtin/and.md)           | and                     | [nand](builtin/nand.md)         | not and                 |
+| [or](builtin/or.md)             | or                      | [nor](builtin/nor.md)           | not or                  |
+| [not*](builtin/not.md)          | not                     |                                 |                         |   
 
 ### <p id="datetime">Datetime</p>
 

@@ -4,9 +4,9 @@ MySQL functions
 
 | MySQL functions      | HorseIR builtins |  Description                                               |
 | :--------------------| :----------------| :----------------------------------------------------------|
-| date_add             | @date_add        | Returns the new date after given an interval               |
-| date_sub             | @date_sub        | Returns the difference in days between two date values     |
-| NOW                  |                  | `2014-11-22 12:45:34`                                      |
+| date_add             | date_add         | Returns the new date after given an interval               |
+| date_sub             | date_sub         | Returns the difference in days between two date values     |
+| NOW                  | time_stamp       | `2014-11-22 12:45:34`                                      |
 | CURDATE              |                  | `2014-11-22`                                               |
 | CURTIME              |                  | `12:45:34`                                                 |
 
