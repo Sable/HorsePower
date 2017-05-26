@@ -5,7 +5,7 @@ A couple of important database operations are listed as follows.
 
 - [Join](#join)
 - [Order](#order)
-- [Group by](#group_by)
+- [Group by](#group-by)
 - [Limit](#limit)
 
 ### Join
