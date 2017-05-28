@@ -37,14 +37,14 @@
 
 | Function                        | Description             | Function                        | Description             |
 | :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| date                            | Date extraction         | time                            | Time extraction         |
+| [date](date.md#date)            | Date extraction         | time                            | Time extraction         |
 | date_year                       | Date.year               | time_hour                       | Time.hour               |
 | date_month                      | Date.month              | time_minute                     | Time.minute             |
 | date_day                        | Date.day                | time_second                     | Time.second             |
 |                                 |                         | time_mill                       | Time.mill               |
-| date_diff                       | Date difference         | time_diff                       | Time difference         |
-| date_add                        | Date plus               | time_add                        | Time plus               |
-| date_sub                        | Date minus              | time_sub                        | Time sub                |
+| datetime_diff                   | Date time difference    |                                 |                         |
+| datetime_add                    | Date time plus          |                                 |                         |
+| datetime_sub                    | Date time minus         |                                 |                         |
 
 [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
 

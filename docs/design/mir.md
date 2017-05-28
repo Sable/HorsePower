@@ -71,7 +71,7 @@ module default {
 
 
 
-## Grammar (See [details](MIR.g4))
+## Grammar (See [details](MIR/MIR.g4))
 
 ```java
 mir_program      ::= { module | method }
