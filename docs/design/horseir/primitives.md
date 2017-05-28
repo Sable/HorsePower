@@ -35,6 +35,8 @@
 
 ### <p id="datetime">Datetime</p>
 
+Basic functions
+
 | Function                        | Description             | Function                           | Description             |
 | :------------------------------ | :---------------------- | :--------------------------------- | :---------------------- |
 | [date](date.md#date)            | Date extraction         | [time](date.md#time)               | Time extraction         |
@@ -42,9 +44,14 @@
 | [date_month](date.md#date-month)| Date.month              | [time_minute](date.md#time-minute) | Time.minute             |
 | [date_day](date.md#date-day)    | Date.day                | [time_second](date.md#time-second) | Time.second             |
 |                                 |                         | [time_mill](date.md#time-mill)     | Time.mill               |
-| [datetime_diff](date.md#datetime-diff)                    | Date time difference    |          |                         |
-| [datetime_add](date.md#datetime-add)                      | Date time plus          |          |                         |
-| [datetime_sub](date.md#datetime-sub)                      | Date time minus         |          |                         |
+
+Common functions
+
+| Function                                                  | Description             |
+| :---------------------------------------------------------| ------------------------|
+| [datetime_diff](date.md#datetime-diff)                    | Date time difference    |
+| [datetime_add](date.md#datetime-add)                      | Date time plus          |
+| [datetime_sub](date.md#datetime-sub)                      | Date time minus         |
 
 [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
 
