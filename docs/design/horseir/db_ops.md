@@ -73,14 +73,14 @@ Basic operations for aggregation
 - min and max
 - sum and avg
 
-We provide a general function `reduct` to aggregate a list `T` by an
-aggregation function `f`.  Its syntax is `reduct(@f, T)`.
+We provide a general function `reduce` to aggregate a list `T` by an
+aggregation function `f`.  Its syntax is `reduce(@f, T)`.
 
 For example,
 
 ```
    t0 <- (1 1 1;2 2);
-   t1 <- reduct(@count, t0);
+   t1 <- reduce(@count, t0);
 > (3;2)
 ```
 

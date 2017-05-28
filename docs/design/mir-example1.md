@@ -40,8 +40,8 @@ modeul _default{
     t0:list<i32> = value(c6);
     t1:list<i32> = unique(t0);
     t2:list<list<i32>,list<i32>> = outer(`equal:fun, t1, t0);
-    t3:list<i32> = reduct(`plus:fun, t2);
-    t4:list<i32> = reduct(`plus:fun, t2);
+    t3:list<i32> = reduce(`plus:fun, t2);
+    t4:list<i32> = reduce(`plus:fun, t2);
     t5:list<i32> = desc(t4);
 
     c7:dict<sym,i32> = dict(`count_customerid:sym;, t3); //group by

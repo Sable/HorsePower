@@ -238,7 +238,7 @@ like      match                     like(x,y)
 // Special
 each      apply to lists            each(f,x) / each(f,x,y)
 compress  boolean selection         compress(x,y)
-reduct    reduction                 reduct(fn, x)
+reduce    reduction                 reduce(fn, x)
 scan      scan                      scan(fn, x)
 inner     inner product             inner(fn,gn,x,y)
 outer     outer product             outer(fn,x,y)
