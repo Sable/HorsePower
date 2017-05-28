@@ -38,8 +38,8 @@
 | Function                        | Description             | Function                           | Description             |
 | :------------------------------ | :---------------------- | :--------------------------------- | :---------------------- |
 | [date](date.md#date)            | Date extraction         | [time](date.md#time)               | Time extraction         |
-| [date_year](date.md#date-year   | Date.year               | [time_hour](date.md#time-hour      | Time.hour               |
-| [date_month](date.md#date-month | Date.month              | [time_minute](date.md#time-minute) | Time.minute             |
+| [date_year](date.md#date-year)  | Date.year               | [time_hour](date.md#time-hour)     | Time.hour               |
+| [date_month](date.md#date-month)| Date.month              | [time_minute](date.md#time-minute) | Time.minute             |
 | [date_day](date.md#date-day)    | Date.day                | [time_second](date.md#time-second) | Time.second             |
 |                                 |                         | [time_mill](date.md#time-mill)     | Time.mill               |
 | [datetime_diff](date.md#datetime-diff)                    | Date time difference    |          |                         |
