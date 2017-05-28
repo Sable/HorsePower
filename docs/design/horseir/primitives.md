@@ -35,16 +35,16 @@
 
 ### <p id="datetime">Datetime</p>
 
-| Function                        | Description             | Function                        | Description             |
-| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| [date](date.md#date)            | Date extraction         | time                            | Time extraction         |
-| date_year                       | Date.year               | time_hour                       | Time.hour               |
-| date_month                      | Date.month              | time_minute                     | Time.minute             |
-| date_day                        | Date.day                | time_second                     | Time.second             |
-|                                 |                         | time_mill                       | Time.mill               |
-| datetime_diff                   | Date time difference    |                                 |                         |
-| datetime_add                    | Date time plus          |                                 |                         |
-| datetime_sub                    | Date time minus         |                                 |                         |
+| Function                        | Description             | Function                           | Description             |
+| :------------------------------ | :---------------------- | :--------------------------------- | :---------------------- |
+| [date](date.md#date)            | Date extraction         | [time](date.md#time)               | Time extraction         |
+| [date_year](date.md#date-year   | Date.year               | [time_hour](date.md#time-hour      | Time.hour               |
+| [date_month](date.md#date-month | Date.month              | [time_minute](date.md#time-minute) | Time.minute             |
+| [date_day](date.md#date-day)    | Date.day                | [time_second](date.md#time-second) | Time.second             |
+|                                 |                         | [time_mill](date.md#time-mill)     | Time.mill               |
+| [datetime_diff](date.md#datetime-diff)                    | Date time difference    |          |                         |
+| [datetime_add](date.md#datetime-add)                      | Date time plus          |          |                         |
+| [datetime_sub](date.md#datetime-sub)                      | Date time minus         |          |                         |
 
 [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
 
