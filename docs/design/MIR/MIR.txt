@@ -84,6 +84,7 @@ import_compound_name ::= name {"." name}* "." "*"
 compound_name        ::= name {"." name}+
 type_name            ::= name
 label                ::= name
+                       | compound_name
 assign               ::= "="
 literal_nil          ::= "nil"
 
