@@ -18,8 +18,8 @@ In HorsePower, we focus on the following parts.
 
 ## Project
 
-In the summer 2017, we started this project from scratch.  We plan to build the
-framework in the first three months (12 weeks). Then, we could have another
+In the summer 2017, we started this project from scratch.  We planned to build
+the framework in the first three months (12 weeks). Thus, we could have another
 month to improve it and draft several technical reports.
 
 Figure 1 describes the workflow of the Horse framework.  A candidate for the
