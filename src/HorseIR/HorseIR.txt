@@ -1,7 +1,7 @@
 /*
 * Please provide your grammar with EBNF notations.
 * Keep this file updated with MIR.g4.
-*/
+ x*/
 
 mir_program      ::= { module | content }*
 module           ::= "module" name "{" { method }* "}"
@@ -15,9 +15,9 @@ import_module    ::= "import" compound_name ";"
                    | "import" import_compound_name ";"
 /* main */
 statement_list    ::= { statement ";" }*
-statement         ::= [label] statement_core
+statement         ::= statement_core
+                    | "[" label "]"
 statement_core    ::= name type assign expression
-                    | "nop"
                     | "return" (name | compound_name | literal)
                     | "goto" label [(name | compound_name | literal_bool)]
 expression        ::= [ type_cast ] sub_expression
@@ -84,7 +84,6 @@ import_compound_name ::= name {"." name}* "." "*"
 compound_name        ::= name {"." name}+
 type_name            ::= name
 label                ::= name
-                       | compound_name
 assign               ::= "="
 literal_nil          ::= "nil"
 

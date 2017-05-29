@@ -4,12 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "antlr4-runtime.h"
-#include "MIRLexer.h"
-#include "MIRParser.h"
-
-#include "PrettyPrinter.h"
+#include "HorseIRLexer.h"
+#include "HorseIRParser.h"
 
 using antlr4::tree::ParseTree ;
+
+#define TEST_VALID_FILE(x) ("./tests/valid/" x ".hir")
 
 class LexerParserSuite : public CxxTest::TestSuite {
 public:
@@ -22,19 +22,19 @@ public:
     }
     
     void testFibonacci (void) {
-        TS_ASSERT( testParse( "./valid/fibonacci.mir" ) ) ;
+        TS_ASSERT(testParse(TEST_VALID_FILE("fibonacci"))) ;
     }
 
     void testGlobalVariable (void) {
-        TS_ASSERT( testParse( "./valid/globalVariable.mir" ) ) ;
+        TS_ASSERT(testParse(TEST_VALID_FILE("globalVariable"))) ;
     }
 
     void testSQL1 (void) {
-        TS_ASSERT( testParse( "./valid/sql1.mir" ) ) ;
+        TS_ASSERT(testParse(TEST_VALID_FILE("sql1"))) ;
     }
 
     void testPhi (void) {
-        TS_ASSERT( testParse( "./valid/phi.mir" ) ) ;
+        TS_ASSERT(testParse(TEST_VALID_FILE("phi"))) ;
     }
 protected:
     bool errorFlag ;
@@ -70,9 +70,9 @@ protected:
     
     bool testParse(const std::string& path) noexcept {
         antlr4::ANTLRFileStream fileStream( path ) ;
-        MIRLexer lexer( &fileStream ) ;
+        HorseIRLexer lexer( &fileStream ) ;
         antlr4::CommonTokenStream tokenStream( &lexer ) ;
-        MIRParser parser( &tokenStream ) ;
+        HorseIRParser parser( &tokenStream ) ;
 
         LexerParserErrorHandler errorHandler( path, std::cout );
         lexer.removeErrorListeners() ;

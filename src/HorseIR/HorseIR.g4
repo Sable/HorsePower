@@ -1,4 +1,4 @@
-grammar MIR ;
+grammar HorseIR ;
 
 program : programContent* ;
 programContent : (module | content) ;
@@ -16,13 +16,12 @@ importModule : 'import' IMPORT_COMPOUND_ID ';'
              | 'import' COMPOUND_ID ';'
              ;
 
-label : '[' name ']'
-      | '[' COMPOUND_ID ']'
-      ;
-statement : (label)? statementCore ';' ;
+label : '[' name ']' ;
+statement : statementCore ';' 
+          | label
+          ;
 statementCore : name ':' type '=' expression
               | compoundName ':' type '=' expression
-              | 'nop'
               | 'return' name
               | 'goto' label (name)?
               ;
@@ -73,34 +72,34 @@ literalDictInternal :
                     | literalDictPair ((',' | ';')? literalDictPair)* ;
 literalDictPair : key=literal '->' value=literal ;
 
-literalNil     : 'nil' ':' type ;
+literalNil     : value='nil' ':' valueType=type ;
 literalComplex : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
-                 ':' 'complex'
+                 ':' valueType='complex'
                | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)
-                 ('i' | 'j') ':' 'complex'
+                 ('i' | 'j') ':' valueType='complex'
                | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                  opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)?
-                 ('i' | 'j') ':' 'complex'
-               | opIM  =('+' | '-')? ('i' | 'j') ':' 'complex'
+                 ('i' | 'j') ':' valueType='complex'
+               | opIM  =('+' | '-')? ('i' | 'j') ':' valueType='complex'
                ;
-literalBool    : op=('+' | '-')? value=LITERAL_INTEGER ':' 'bool' ;
-literalChar    : value=LITERAL_CHAR (':' 'char')? ;
+literalBool    : op=('+' | '-')? value=LITERAL_INTEGER ':' valueType='bool' ;
+literalChar    : value=LITERAL_CHAR (':' valueType='char')? ;
 literalInteger : op=('+' | '-')? value=LITERAL_INTEGER ':'
                  valueType=('i8'  | 'i16' | 'i32' | 'i64') ;
 literalFloat   : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
                  valueType=('f32' | 'f64') ;
-literalSymbol  : value=LITERAL_SYMBOL (':' 'sym')? ;
-literalTime    : value=LITERAL_FLOAT  ':' 'm'
-               | value=LITERAL_T_GROUP_3  ':' 'd'
-               | value=LITERAL_T_GROUP_7 (':' 'z')?
-               | value=LITERAL_FLOAT  ':' 'u'
-               | value=LITERAL_T_GROUP_3  ':' 'v'
-               | value=LITERAL_T_GROUP_4 (':' 't')?
+literalSymbol  : value=LITERAL_SYMBOL (':' valueType='sym')? ;
+literalTime    : value=LITERAL_FLOAT  ':' valueType='m'         #literalTimeMonth
+               | value=LITERAL_T_GROUP_3  ':' valueType='d'     #literalTimeDate
+               | value=LITERAL_T_GROUP_7 (':' valueType='z')?   #literalTimeDateTime
+               | value=LITERAL_FLOAT  ':' valueType='u'         #literalTimeMinute
+               | value=LITERAL_T_GROUP_3  ':' valueType='v'     #literalTimeSecond
+               | value=LITERAL_T_GROUP_4 (':' valueType='t')?   #literalTimeTime
                ;
-literalFunction: value=LITERAL_FUNCTION (':' typeFunc)? ;
-literalTable   : value=ID ':' 'table' ;
-literalKtable  : value=ID ':' 'ktable' ;
-literalString  : value=LITERAL_STRING (':' 'str')? ;
+literalFunction: value=LITERAL_FUNCTION (':' valueType=typeFunc)? ;
+literalTable   : value=ID ':' valueType='table' ;
+literalKtable  : value=ID ':' valueType='ktable' ;
+literalString  : value=LITERAL_STRING (':' valueType='str')? ;
 
 type : tokenValue=( 'bool'    |
                     'char'    |
