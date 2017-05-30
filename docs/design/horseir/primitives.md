@@ -74,9 +74,15 @@ Common functions
 | [fact](builtin/fact.md)         | factorial*              | [raze*](builtin/raze.md)        | raze                    |
 | [at](builtin/at.md)             | member                  | [enlist*](builtin/enlist.md)    | return a list           |
 | [max*](builtin/max.md)          | maximum                 | [scalar*](builtin/scalar.md)    | return a scalar         | 
-| [min*](builtin/min.md)          | min                     | [indexof*](builtin/indexof.md)  | index of                | 
+| [min*](builtin/min.md)          | min                     | [index_of*](builtin/indexof.md) | index of                | 
 | [append*](builtin/append.md)    | append                  | [take*](builtin/take.md)        | take elements           | 
 | [like*](builtin/like.md)        | match                   | [drop*](builtin/drop.md)        | drop elements           |  
+
+Indexing
+
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| [index*](builtin/index.md)      | list indexing           | [index_a*](builtin/index.md)    | list indexing assignment|
 
 ### <p id="database">Database related</p>
 
@@ -85,3 +91,5 @@ Common functions
 | list                            |                         | key                             |                         |
 | enum                            |                         | value                           |                         |
 | dict                            |                         | meta                            |                         |
+| table                           | create a new table      | ktable                          | create a new keyed table|
+
