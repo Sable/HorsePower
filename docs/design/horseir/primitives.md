@@ -74,15 +74,22 @@ Common functions
 | [fact](builtin/fact.md)         | factorial*              | [raze*](builtin/raze.md)        | raze                    |
 | [at](builtin/at.md)             | member                  | [enlist*](builtin/enlist.md)    | return a list           |
 | [max*](builtin/max.md)          | maximum                 | [scalar*](builtin/scalar.md)    | return a scalar         | 
-| [min*](builtin/min.md)          | min                     | [index_of*](builtin/indexof.md) | index of                | 
+| [min*](builtin/min.md)          | min                     | [index_of*](builtin/indexof.md) | index of (mysql: FIELD) | 
 | [append*](builtin/append.md)    | append                  | [take*](builtin/take.md)        | take elements           | 
 | [like*](builtin/like.md)        | match                   | [drop*](builtin/drop.md)        | drop elements           |  
+| [concat*]()                     | concatenation           | [alphabet*]()                   | alphabet                |
 
 Indexing
 
 | Function                        | Description             | Function                        | Description             |
 | :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
 | [index*](builtin/index.md)      | list indexing           | [index_a*](builtin/index.md)    | list indexing assignment|
+
+Printing
+
+| Function                        | Description             | Function                        | Description             |
+| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
+| [print*]()                      | print                   |                                 |                         |
 
 ### <p id="database">Database related</p>
 
@@ -92,4 +99,5 @@ Indexing
 | enum                            |                         | value                           |                         |
 | dict                            |                         | meta                            |                         |
 | table                           | create a new table      | ktable                          | create a new keyed table|
+
 

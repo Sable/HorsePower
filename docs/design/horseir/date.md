@@ -99,6 +99,12 @@ Description: return a millisecond from a time
 
 General operations for all datetime types.
 
+#### Keys
+
+```
+`year   `month   `day   `hour   `minute   `second   `mill
+```
+
 ### datetime diff
 
 Description: return the difference between two times
@@ -121,12 +127,12 @@ Description: add an interval to a time
 ```
   d <- 2011.03.15d
   x <- 1:i64
-  datetime_add(d,x)
-> 2011.03.16d
+  datetime_add(d,x,`year:sym)
+> 2012.03.15d
   t <- 15.12.57.001t
   x <- 1:i64
-  datetime_add(t,x)
-> 15.12.57.002t
+  datetime_add(t,x,`second)
+> 15.12.58.001t
 ```
 
 ### datetime sub
@@ -136,11 +142,11 @@ Description: substract an interval to a time
 ```
   d <- 2011.03.15d
   x <- 1:i64
-  datetime_sub(d,x)
-> 2011.03.16d
+  datetime_sub(d,x,`year)
+> 2010.03.15d
   t <- 15.12.57.001t
   x <- 2:i64
-  datetime_sub(t,x)
-> 15.12.56.999t
+  datetime_sub(t,x,`second)
+> 15.12.56.001t
 ```
 
