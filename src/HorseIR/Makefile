@@ -1,4 +1,4 @@
-all: testsuits
+all: testsuites
 
 ANTLR4_INCLUDE_DIR="/usr/local/include/antlr4-runtime"
 
@@ -28,7 +28,7 @@ parser: HorseIR.g4
 
 LINK_LIBS=-L. -lstdc++ -lantlr4-runtime -lMIRParser
 
-testsuits: cxxtest.cc
+testsuites: cxxtest.cc
 	cxxtestgen --error-printer -o cxxtestRunner.cc cxxtest.cc
 	@echo "Building cxxtestRunner.cc ... "
 	@cc -g -std=c++11 -c -I$(ANTLR4_INCLUDE_DIR) cxxtestRunner.cc -Wno-attributes

@@ -112,12 +112,12 @@ literalFloat    : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
 
 literalSymbol   : value=LITERAL_SYMBOL (':' valueType='sym')? ;
 
-literalTime     : value=LITERAL_FLOAT       ':' valueType='m'     #TimeMonth
-                | value=LITERAL_T_GROUP_3   ':' valueType='d'     #TimeDate
-                | value=LITERAL_T_GROUP_7  (':' valueType='z')?   #TimeDateTime
-                | value=LITERAL_FLOAT       ':' valueType='u'     #TimeMinute
-                | value=LITERAL_T_GROUP_3   ':' valueType='v'     #TimeSecond
-                | value=LITERAL_T_GROUP_4  (':' valueType='t')?   #TimeTime
+literalTime     : value=LITERAL_FLOAT    ':' valueType='m'   #literalTimeMonth
+                | value=LITERAL_GROUP_3  ':' valueType='d'   #literalTimeDate
+                | value=LITERAL_GROUP_7 (':' valueType='z')? #literalTimeDateTime
+                | value=LITERAL_FLOAT    ':' valueType='u'   #literalTimeMinute
+                | value=LITERAL_GROUP_3  ':' valueType='v'   #literalTimeSecond
+                | value=LITERAL_GROUP_4 (':' valueType='t')? #literalTimeTime
                 ;
 
 literalFunction : value=LITERAL_FUNCTION (':' valueType=typeFunc)? ;
@@ -151,21 +151,18 @@ typeDict        : 'dict' '<' key=type ',' value=type '>' ;
 
 typeEnum        : 'enum' '<' element=type '>' ;
 
-typeFunc        : 'func' '<' ':' type '>'                               #Case0
-                | 'func' '<' '...' ':' type '>'                         #Case1
-                | 'func' '<' type (',' type)* ':' type '>'              #Case2
-                | 'func' '<' type (',' type)* ',' '...' ':' type '>'    #Case3
+typeFunc        : 'func' '<' ':' type '>'                            #typeFunc0
+                | 'func' '<' '...' ':' type '>'                      #typeFunc1
+                | 'func' '<' type (',' type)* ':' type '>'           #typeFunc2
+                | 'func' '<' type (',' type)* ',' '...' ':' type '>' #typeFunc3
                 ;
 
 
-LITERAL_T_GROUP_3 
-                : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+LITERAL_GROUP_3 : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 
-LITERAL_T_GROUP_4
-                : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+LITERAL_GROUP_4 : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 
-LITERAL_T_GROUP_7 
-                : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
+LITERAL_GROUP_7 : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
                   [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 
 LITERAL_INTEGER : FRAGMENT_INTEGER ;
