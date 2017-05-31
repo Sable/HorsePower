@@ -11,7 +11,7 @@ content         : method
                 | importModule
                 ;
 
-method          : 'def' name  '(' parameterList ')' ':' type '{' statement* '}' ;
+method          : 'def' name  '(' parameterList ')' ':' type '{' statement* '}';
 
 parameterList   :
                 | name ':' type (',' name ':' type)* ;
@@ -112,12 +112,12 @@ literalFloat    : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
 
 literalSymbol   : value=LITERAL_SYMBOL (':' valueType='sym')? ;
 
-literalTime     : value=LITERAL_FLOAT       ':' valueType='m'     #literalTimeMonth
-                | value=LITERAL_T_GROUP_3   ':' valueType='d'     #literalTimeDate
-                | value=LITERAL_T_GROUP_7  (':' valueType='z')?   #literalTimeDateTime
-                | value=LITERAL_FLOAT       ':' valueType='u'     #literalTimeMinute
-                | value=LITERAL_T_GROUP_3   ':' valueType='v'     #literalTimeSecond
-                | value=LITERAL_T_GROUP_4  (':' valueType='t')?   #literalTimeTime
+literalTime     : value=LITERAL_FLOAT       ':' valueType='m'     #TimeMonth
+                | value=LITERAL_T_GROUP_3   ':' valueType='d'     #TimeDate
+                | value=LITERAL_T_GROUP_7  (':' valueType='z')?   #TimeDateTime
+                | value=LITERAL_FLOAT       ':' valueType='u'     #TimeMinute
+                | value=LITERAL_T_GROUP_3   ':' valueType='v'     #TimeSecond
+                | value=LITERAL_T_GROUP_4  (':' valueType='t')?   #TimeTime
                 ;
 
 literalFunction : value=LITERAL_FUNCTION (':' valueType=typeFunc)? ;
@@ -128,21 +128,21 @@ literalKtable   : value=ID ':' valueType='ktable' ;
 
 literalString   : value=LITERAL_STRING (':' valueType='str')? ;
 
-type            : tokenValue=( 'bool'     |
+type            : tokenValue=( 'bool' |
                     'char'    |
-                    'i8'      | 'i16'     | 'i32'     | 'i64'     |
-                    'f32'     | 'f64'     |
+                    'i8'      | 'i16' | 'i32' | 'i64' |
+                    'f32'     | 'f64' |
                     'complex' |
                     'sym'     |
                     'm' | 'd' | 'z' | 'u' | 'v' | 't' |
                     'str'     |
-                    'table'   | 'ktbale'                          )
-                                                                       #typeCaseScalar
-                | tokenValue='?'                                       #typeCaseWildcard
-                | typeList                                             #typeCaseList
-                | typeDict                                             #typeCaseDict
-                | typeEnum                                             #typeCaseEnum
-                | typeFunc                                             #typeCaseFunc
+                    'table'   | 'ktbale'              )
+                                                      #typeCaseScalar
+                | tokenValue='?'                      #typeCaseWildcard
+                | typeList                            #typeCaseList
+                | typeDict                            #typeCaseDict
+                | typeEnum                            #typeCaseEnum
+                | typeFunc                            #typeCaseFunc
                 ;
 
 typeList        : 'list' '<' element=type '>' ;
@@ -151,11 +151,41 @@ typeDict        : 'dict' '<' key=type ',' value=type '>' ;
 
 typeEnum        : 'enum' '<' element=type '>' ;
 
-typeFunc        : 'func' '<' ':' type '>'                               #typeFuncCase0
-                | 'func' '<' '...' ':' type '>'                         #typeFuncCase1
-                | 'func' '<' type (',' type)* ':' type '>'              #typeFuncCase2
-                | 'func' '<' type (',' type)* ',' '...' ':' type '>'    #typeFuncCase3
+typeFunc        : 'func' '<' ':' type '>'                               #Case0
+                | 'func' '<' '...' ':' type '>'                         #Case1
+                | 'func' '<' type (',' type)* ':' type '>'              #Case2
+                | 'func' '<' type (',' type)* ',' '...' ':' type '>'    #Case3
                 ;
+
+
+LITERAL_T_GROUP_3 
+                : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+
+LITERAL_T_GROUP_4
+                : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+
+LITERAL_T_GROUP_7 
+                : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
+                  [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+
+LITERAL_INTEGER : FRAGMENT_INTEGER ;
+
+LITERAL_FLOAT   : FRAGMENT_FLOAT ;
+
+LITERAL_STRING  : '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"' ;
+
+LITERAL_CHAR    : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE) '\'' ;
+
+LITERAL_SYMBOL  : '`' FRAGMENT_ID ;
+
+LITERAL_FUNCTION: '@' FRAGMENT_ID ('.' FRAGMENT_ID)* ;
+
+IMPORT_COMPOUND_ID
+                : FRAGMENT_ID ('.' FRAGMENT_ID)* '.' '*' ;
+
+COMPOUND_ID     : FRAGMENT_ID ('.' FRAGMENT_ID)+ ;
+
+ID              : FRAGMENT_ID ;
 
 fragment OCT_CHARACTER     : [0-7] ;
 fragment OCT_GROUP_3       : OCT_CHARACTER OCT_CHARACTER OCT_CHARACTER ;
@@ -172,25 +202,8 @@ fragment ESCAPE_SEQUENCE   : '\\' (ESCAPE_CHARACTERS              |
                                    'u' HEX_GROUP_4                )
                            ;
 fragment FRAGMENT_ID       : [a-zA-Z_][a-zA-Z0-9_]* ;
-
 fragment FRAGMENT_INTEGER  : ('0' | [1-9][0-9]*) ;
 fragment FRAGMENT_FLOAT    : FRAGMENT_INTEGER '.' [0-9]+ ;
-
-LITERAL_T_GROUP_3          : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
-LITERAL_T_GROUP_4          : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
-LITERAL_T_GROUP_7          : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
-                             [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
-
-LITERAL_INTEGER            : FRAGMENT_INTEGER ;
-LITERAL_FLOAT              : FRAGMENT_FLOAT ;
-LITERAL_STRING             : '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"' ;
-LITERAL_CHAR               : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE) '\'' ;
-LITERAL_SYMBOL             : '`' FRAGMENT_ID ;
-LITERAL_FUNCTION           : '@' FRAGMENT_ID ('.' FRAGMENT_ID)* ;
-
-IMPORT_COMPOUND_ID         : FRAGMENT_ID ('.' FRAGMENT_ID)* '.' '*' ;
-COMPOUND_ID                : FRAGMENT_ID ('.' FRAGMENT_ID)+ ;
-ID                         : FRAGMENT_ID ;
 
 WHITE_SPACE                : [ \t\n\r]+      -> channel(HIDDEN) ;
 COMMENT                    : '//' (~[\n\r])* -> channel(HIDDEN) ;
