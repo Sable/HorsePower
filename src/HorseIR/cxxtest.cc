@@ -30,7 +30,7 @@ public:
     }
 
     void testSQL1 (void) {
-        TS_ASSERT(testParse(TEST_VALID_FILE("sql1"))) ;
+        TS_ASSERT(testParse(TEST_VALID_FILE("tpch-q6"))) ;
     }
 
     void testPhi (void) {

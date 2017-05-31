@@ -112,12 +112,12 @@ literalFloat    : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
 
 literalSymbol   : value=LITERAL_SYMBOL (':' valueType='sym')? ;
 
-literalTime     : value=LITERAL_FLOAT  ':' valueType='m'         #literalTimeMonth
-                | value=LITERAL_T_GROUP_3  ':' valueType='d'     #literalTimeDate
-                | value=LITERAL_T_GROUP_7 (':' valueType='z')?   #literalTimeDateTime
-                | value=LITERAL_FLOAT  ':' valueType='u'         #literalTimeMinute
-                | value=LITERAL_T_GROUP_3  ':' valueType='v'     #literalTimeSecond
-                | value=LITERAL_T_GROUP_4 (':' valueType='t')?   #literalTimeTime
+literalTime     : value=LITERAL_FLOAT       ':' valueType='m'     #literalTimeMonth
+                | value=LITERAL_T_GROUP_3   ':' valueType='d'     #literalTimeDate
+                | value=LITERAL_T_GROUP_7  (':' valueType='z')?   #literalTimeDateTime
+                | value=LITERAL_FLOAT       ':' valueType='u'     #literalTimeMinute
+                | value=LITERAL_T_GROUP_3   ':' valueType='v'     #literalTimeSecond
+                | value=LITERAL_T_GROUP_4  (':' valueType='t')?   #literalTimeTime
                 ;
 
 literalFunction : value=LITERAL_FUNCTION (':' valueType=typeFunc)? ;

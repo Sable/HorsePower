@@ -163,7 +163,6 @@ generic types associated with a list, such as `list<i64>`.
 x0:i64 = 0:i64;
 x1:i64 = 1:i64;
 x2:list<i64> = list(x0,x1); // a list of integers
-
 ```
 
 #### Dictionary
