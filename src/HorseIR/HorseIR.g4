@@ -11,7 +11,7 @@ content         : method
                 | importModule
                 ;
 
-method          : 'def' name  '(' parameterList ')' ':' type '{' statement* '}' ;
+method          : 'def' name '(' parameterList ')' ':' type '{' statement* '}' ;
 
 parameterList   :
                 | name ':' type (',' name ':' type)* ;
@@ -112,12 +112,12 @@ literalFloat    : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER) ':'
 
 literalSymbol   : value=LITERAL_SYMBOL (':' valueType='sym')? ;
 
-literalTime     : value=LITERAL_FLOAT       ':' valueType='m'     #literalTimeMonth
-                | value=LITERAL_T_GROUP_3   ':' valueType='d'     #literalTimeDate
-                | value=LITERAL_T_GROUP_7  (':' valueType='z')?   #literalTimeDateTime
-                | value=LITERAL_FLOAT       ':' valueType='u'     #literalTimeMinute
-                | value=LITERAL_T_GROUP_3   ':' valueType='v'     #literalTimeSecond
-                | value=LITERAL_T_GROUP_4  (':' valueType='t')?   #literalTimeTime
+literalTime     : value=LITERAL_FLOAT      ':' valueType='m'   #literalTMonth
+                | value=LITERAL_T_GROUP_3  ':' valueType='d'   #literalTDate
+                | value=LITERAL_T_GROUP_7 (':' valueType='z')? #literalTDateTime
+                | value=LITERAL_FLOAT      ':' valueType='u'   #literalTMinute
+                | value=LITERAL_T_GROUP_3  ':' valueType='v'   #literalTSecond
+                | value=LITERAL_T_GROUP_4 (':' valueType='t')? #literalTTime
                 ;
 
 literalFunction : value=LITERAL_FUNCTION (':' valueType=typeFunc)? ;
@@ -137,12 +137,12 @@ type            : tokenValue=( 'bool'     |
                     'm' | 'd' | 'z' | 'u' | 'v' | 't' |
                     'str'     |
                     'table'   | 'ktbale'                          )
-                                                                       #typeCaseScalar
-                | tokenValue='?'                                       #typeCaseWildcard
-                | typeList                                             #typeCaseList
-                | typeDict                                             #typeCaseDict
-                | typeEnum                                             #typeCaseEnum
-                | typeFunc                                             #typeCaseFunc
+                                                               #typeCaseScalar
+                | tokenValue='?'                               #typeCaseWildcard
+                | typeList                                     #typeCaseList
+                | typeDict                                     #typeCaseDict
+                | typeEnum                                     #typeCaseEnum
+                | typeFunc                                     #typeCaseFunc
                 ;
 
 typeList        : 'list' '<' element=type '>' ;
@@ -151,10 +151,10 @@ typeDict        : 'dict' '<' key=type ',' value=type '>' ;
 
 typeEnum        : 'enum' '<' element=type '>' ;
 
-typeFunc        : 'func' '<' ':' type '>'                               #typeFuncCase0
-                | 'func' '<' '...' ':' type '>'                         #typeFuncCase1
-                | 'func' '<' type (',' type)* ':' type '>'              #typeFuncCase2
-                | 'func' '<' type (',' type)* ',' '...' ':' type '>'    #typeFuncCase3
+typeFunc        : 'func' '<' ':' type '>'                            #typeFunc0
+                | 'func' '<' '...' ':' type '>'                      #typeFunc1
+                | 'func' '<' type (',' type)* ':' type '>'           #typeFunc2
+                | 'func' '<' type (',' type)* ',' '...' ':' type '>' #typeFunc3
                 ;
 
 fragment OCT_CHARACTER     : [0-7] ;
@@ -183,8 +183,14 @@ LITERAL_T_GROUP_7          : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
 
 LITERAL_INTEGER            : FRAGMENT_INTEGER ;
 LITERAL_FLOAT              : FRAGMENT_FLOAT ;
-LITERAL_STRING             : '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"' ;
-LITERAL_CHAR               : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE) '\'' ;
+LITERAL_STRING             : '"'
+                             (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )*
+                             '"'
+                           ;
+LITERAL_CHAR               : '\''
+                             (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE)
+                             '\''
+                           ;
 LITERAL_SYMBOL             : '`' FRAGMENT_ID ;
 LITERAL_FUNCTION           : '@' FRAGMENT_ID ('.' FRAGMENT_ID)* ;
 

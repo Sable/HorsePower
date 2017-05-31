@@ -3,6 +3,9 @@
 #include <sstream>
 #include <cxxtest/TestSuite.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "antlr4-runtime.h"
 #include "HorseIRLexer.h"
 #include "HorseIRParser.h"
@@ -29,7 +32,7 @@ public:
         TS_ASSERT(testParse(TEST_VALID_FILE("globalVariable"))) ;
     }
 
-    void testSQL1 (void) {
+    void testTPCH_Q6 (void) {
         TS_ASSERT(testParse(TEST_VALID_FILE("tpch-q6"))) ;
     }
 
@@ -69,6 +72,13 @@ protected:
     };
     
     bool testParse(const std::string& path) noexcept {
+        struct stat buffer ;
+        if (stat(path.c_str(), &buffer) != 0) {
+            errorFlag = true ;
+            errorMessage = "Test suit resource not found" ;
+            return false ;
+        }
+        
         antlr4::ANTLRFileStream fileStream( path ) ;
         HorseIRLexer lexer( &fileStream ) ;
         antlr4::CommonTokenStream tokenStream( &lexer ) ;
