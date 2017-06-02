@@ -2,14 +2,29 @@
 
 using CSTPrettyPrinter = horseIR::util::CSTPrettyPrinter ;
 
-antlrcpp::Any
-visitTypeFuncTemplate(HorseIRParser::TypeContext* 
+//antlrcpp::Any
+//visitTypeFuncTemplate(HorseIRParser::TypeContext* 
 
 std::ostream&
 CSTPrettyPrinter::prettyPrint(antlr4::tree::ParseTree *parseTree)
 {
     parseTree->accept(this) ;
     return strm ;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitModule(HorseIRParser::ModuleContext *ctx) {
+    strm << "module";
+    const auto namePtr = static_cast<HorseIRParser::NameContext*>(ctx->name()) ;
+    (void) prettyPrint(namePtr);
+    std::vector<HorseIRParser::ContentContext*>::iterator it;
+    std::vector<HorseIRParser::ContentContext*> contentList = ctx->content();
+    strm << "{";
+    for(it=contentList.begin(); it<contentList.end(); it++){
+        (void) prettyPrint(*it);
+    }
+    strm << "}";
+    return NULL;
 }
 
 antlrcpp::Any

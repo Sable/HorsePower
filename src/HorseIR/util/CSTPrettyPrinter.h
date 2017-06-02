@@ -5,20 +5,22 @@
 #include <utility>
 
 #include "antlr4-runtime.h"
-#include "../HorseIRBaseVisitor.h"
-#include "../HorseIRParser.h"
+#include "../grammar/HorseIRBaseVisitor.h"
+#include "../grammar/HorseIRParser.h"
 
 namespace horseIR {
     namespace util {
-        class CSTPrettyPrinter : protected HorseIRBaseVisitor {
+        class CSTPrettyPrinter : HorseIRBaseVisitor {
         public:
-            CSTPrettyPrinter() = delete ;
+            //CSTPrettyPrinter() = delete ;
             CSTPrettyPrinter(std::ostream& outputStream)
                 : strm(outputStream)
             {}
 
             std::ostream& prettyPrint(antlr4::tree::ParseTree* parseTree) ;
-        protected:
+        //protected:
+        public:
+            virtual antlrcpp::Any visitModule(HorseIRParser::ModuleContext *ctx) override ;
             virtual antlrcpp::Any visitTypeFunc0(HorseIRParser::TypeFunc0Context* ctx) override ;
             virtual antlrcpp::Any visitTypeFunc1(HorseIRParser::TypeFunc1Context* ctx) override ;
             virtual antlrcpp::Any visitTypeFunc2(HorseIRParser::TypeFunc2Context* ctx) override ;
