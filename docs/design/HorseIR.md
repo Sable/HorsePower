@@ -1,4 +1,4 @@
-# Horse IR  - MIR
+# Horse IR
 
 ## Introduction - An example
 
@@ -21,7 +21,7 @@ SELECT * FROM employee, department
 WHERE employee.DepartmentID = department.DepartmentID;
 ```
 
-HorseIR - MIR
+HorseIR
 
 ```
 import Builtin
@@ -71,7 +71,7 @@ module default {
 
 
 
-## Grammar (See [details](MIR/MIR.g4))
+## Grammar (See [details](../../src/HorseIR/grammar/HorseIR.g4))
 
 ```java
 mir_program      ::= { module | method }
@@ -265,9 +265,8 @@ CHECK     type checking
 
 ## More examples
 
-- [GROUP BY and ORDER](mir-example1.md)
-- [Examples of types](mir-example2.md)
-
+- [GROUP BY and ORDER](horseir/db_examples.md)
+- [Examples of types](horseir/type_examples.md)
 
 ## Discussion
 
