@@ -15,7 +15,7 @@ namespace horseIR {
             //CSTPrettyPrinter() = delete ;
             CSTPrettyPrinter(std::ostream& outputStream)
                 : strm(outputStream)
-            {}
+            { depth = -1; }
 
             std::ostream& prettyPrint(antlr4::tree::ParseTree* parseTree) ;
         //protected:
@@ -27,7 +27,6 @@ namespace horseIR {
             virtual antlrcpp::Any visitStmtCore(HorseIRParser::StmtCoreContext   *ctx) override;
             virtual antlrcpp::Any visitStmtLabel(HorseIRParser::StmtLabelContext *ctx) override;
             virtual antlrcpp::Any visitStmtNameExpr(HorseIRParser::StmtNameExprContext *ctx) override;
-            virtual antlrcpp::Any visitStmtCNameExpr(HorseIRParser::StmtCNameExprContext *ctx) override;
             virtual antlrcpp::Any visitStmtReturn(HorseIRParser::StmtReturnContext *ctx) override;
             virtual antlrcpp::Any visitStmtGoto(HorseIRParser::StmtGotoContext *ctx) override;
 
@@ -37,7 +36,6 @@ namespace horseIR {
             virtual antlrcpp::Any visitExprCheckType(HorseIRParser::ExprCheckTypeContext *ctx) override;
             virtual antlrcpp::Any visitExprCheckCast(HorseIRParser::ExprCheckCastContext *ctx) override;
             virtual antlrcpp::Any visitExprPhi(HorseIRParser::ExprPhiContext *ctx) override;
-
 
             virtual antlrcpp::Any visitTypeCaseScalar(HorseIRParser::TypeCaseScalarContext     *ctx) override;
             virtual antlrcpp::Any visitTypeCaseWildcard(HorseIRParser::TypeCaseWildcardContext *ctx) override;
@@ -50,9 +48,25 @@ namespace horseIR {
             virtual antlrcpp::Any visitTypeFunc2(HorseIRParser::TypeFunc2Context* ctx) override ;
             virtual antlrcpp::Any visitTypeFunc3(HorseIRParser::TypeFunc3Context* ctx) override ;
 
+            virtual antlrcpp::Any visitMethodInv(HorseIRParser::MethodInvContext *ctx) override;
+            virtual antlrcpp::Any visitMethodFun(HorseIRParser::MethodFunContext *ctx) override;
+            virtual antlrcpp::Any visitArgumentList(HorseIRParser::ArgumentListContext *ctx) override;
+            virtual antlrcpp::Any visitCompoundName(HorseIRParser::CompoundNameContext *ctx) override;
+
+            virtual antlrcpp::Any visitLiteralInteger(HorseIRParser::LiteralIntegerContext *ctx) override;
+            virtual antlrcpp::Any visitLiteralFloat(HorseIRParser::LiteralFloatContext *ctx) override;
+            virtual antlrcpp::Any visitLiteralSymbol(HorseIRParser::LiteralSymbolContext *ctx) override;
+            virtual antlrcpp::Any visitLiteralTimeMonth(HorseIRParser::LiteralTimeMonthContext *ctx) override;
+            virtual antlrcpp::Any visitLiteralFunction(HorseIRParser::LiteralFunctionContext *ctx) override;
+
             virtual antlrcpp::Any visitNameId(HorseIRParser::NameIdContext *ctx) override;
+        public:
+            void printToken(antlr4::tree::TerminalNode *tokNode);
+            void printToken(antlr4::Token *tok);
+            void indent();
         private:
             std::ostream& strm ;
+            int depth;
         } ;
     }
 }

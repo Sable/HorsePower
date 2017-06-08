@@ -24,14 +24,17 @@ importModule    : 'import' IMPORT_COMPOUND_ID ';'
 
 label           : '[' name ']' ;
 
-statement       : statementCore ';'   #stmtCore
-                | label               #stmtLabel
+statement       : statementCore ';'                      #stmtCore
+                | label                                  #stmtLabel
                 ;
 
-statementCore   : name ':' type '=' expression          #stmtNameExpr
-                | compoundName ':' type '=' expression  #stmtCNameExpr
-                | 'return' name                         #stmtReturn
-                | 'goto' label (name)?                  #stmtGoto
+statementCore   : generalName ':' type '=' expression    #stmtNameExpr
+                | 'return' name                          #stmtReturn
+                | 'goto' label (name)?                   #stmtGoto
+                ;
+
+generalName     : name
+                | compoundName
                 ;
 
 name            : ID                                                     # nameId
@@ -40,14 +43,12 @@ name            : ID                                                     # nameI
 
 compoundName    : COMPOUND_ID ;
 
-operand         : compoundName
-                | name
+operand         : generalName
                 | literal
                 ;
 
-methodCall      : compoundName '(' argumentList ')'
-                | name '(' argumentList ')'
-                | literalFunction '(' argumentList ')'
+methodCall      : generalName '(' argumentList ')'            #methodInv
+                | literalFunction '(' argumentList ')'        #methodFun
                 ;
 
 argumentList    :
