@@ -247,26 +247,60 @@ rvalue, agree.
 The `check_cast` checks whether a designated type casting is allowed.
 
 
-## 3. References
+## 3. Database operations
 
-### 3.1 Grammar
+### Table
+
+#### Create an empty table
+
+A normal table
+
+```
+my_meta:list<sym> = {`employee `department; `str`sym}
+my_table:table    = create_table(my_meta);
+```
+
+A keyed table
+
+```
+my_meta_key:list<sym> = {`id; `i64}
+my_meta_val:list<sym> = {`employee `department; `str`sym}
+my_table_key:table    = create_table(my_meta_key);
+my_table_val:table    = create_table(my_meta_val);
+    my_table:table    = create_ktable(my_table_key, my_table_val);
+```
+
+#### Load data to a table
+
+The data to be loaded can be stored in a regular file format. A built-in
+function (e.g. load_csv) loads the data with given file specifications.
+
+```
+r:i64 = @load_csv(table_name, file_name, file_format);
+ ...    @load_txt  ...
+```
+
+
+## Appendix
+
+Grammar
 
 - [EBNF](../../../src/HorseIR/HorseIR.txt)
 
-### 3.2 Basics
+Basics
 
 - [Names](names.md)
 - [Types](types.md)
 - [Date time](date.md)
 - [Builtins](primitives.md)
 
-### 3.3 Database operations
+Database operations
 
 - [Clauses](db_clause.md)
 - [Operations](db_ops.md)
 - [References](db_ref.md)
 
-### 3.4 Additional features
+Additional features
 
 - Data streaming
 - Server and client modes

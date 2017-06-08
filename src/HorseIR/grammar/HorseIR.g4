@@ -24,17 +24,19 @@ importModule    : 'import' IMPORT_COMPOUND_ID ';'
 
 label           : '[' name ']' ;
 
-statement       : statementCore ';' 
-                | label
+statement       : statementCore ';'   #stmtCore
+                | label               #stmtLabel
                 ;
 
-statementCore   : name ':' type '=' expression
-                | compoundName ':' type '=' expression
-                | 'return' name
-                | 'goto' label (name)?
+statementCore   : name ':' type '=' expression          #stmtNameExpr
+                | compoundName ':' type '=' expression  #stmtCNameExpr
+                | 'return' name                         #stmtReturn
+                | 'goto' label (name)?                  #stmtGoto
                 ;
 
-name            : (ID | 'i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't');
+name            : ID                                                     # nameId
+                | idKey=('i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't')  # nameKey
+                ;
 
 compoundName    : COMPOUND_ID ;
 
@@ -51,11 +53,11 @@ methodCall      : compoundName '(' argumentList ')'
 argumentList    :
                 | operand (',' operand)* ;
 
-expression      : (methodCall | operand)
-                | '(' type ')' (methodCall | operand)
-                | 'check_type' '(' (methodCall | operand) ',' type ')'
-                | 'check_cast' '(' (methodCall | operand) ',' type ')'
-                | 'phi' '(' label name (',' label name)* ')'
+expression      : (methodCall | operand)                                #exprBasic
+                | '(' type ')' (methodCall | operand)                   #exprBasicType
+                | 'check_type' '(' (methodCall | operand) ',' type ')'  #exprCheckType
+                | 'check_cast' '(' (methodCall | operand) ',' type ')'  #exprCheckCast
+                | 'phi' '(' label name (',' label name)* ')'            #exprPhi
                 ;
 
 literal         : literalBool
