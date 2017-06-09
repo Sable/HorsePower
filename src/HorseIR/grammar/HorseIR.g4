@@ -18,8 +18,8 @@ parameterList   :
 
 globalVar       : 'def' name ':' type ';' ;
 
-importModule    : 'import' IMPORT_COMPOUND_ID ';' 
-                | 'import' COMPOUND_ID ';'
+importModule    : 'import' IMPORT_COMPOUND_ID ';'        #importCID
+                | 'import' COMPOUND_ID ';'               #importID
                 ;
 
 label           : '[' name ']' ;
@@ -96,11 +96,11 @@ literalNil      : value='nil' ':' valueType=type ;
 literalComplex  : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                   ':' valueType='complex'
                 | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)
-                  ('i' | 'j') ':' valueType='complex'
+                  unit=('i' | 'j') ':' valueType='complex'
                 | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                   opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)?
-                  ('i' | 'j') ':' valueType='complex'
-                | opIM  =('+' | '-')? ('i' | 'j') ':' valueType='complex'
+                  unit=('i' | 'j') ':' valueType='complex'
+                | opIm  =('+' | '-')? unit=('i' | 'j') ':' valueType='complex'
                 ;
 
 literalBool     : op=('+' | '-')? value=LITERAL_INTEGER ':' valueType='bool' ;

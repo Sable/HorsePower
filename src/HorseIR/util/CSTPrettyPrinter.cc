@@ -11,24 +11,23 @@ CSTPrettyPrinter::prettyPrint(antlr4::tree::ParseTree *parseTree)
 
 antlrcpp::Any
 CSTPrettyPrinter::visitModule(HorseIRParser::ModuleContext *ctx) {
-    depth++;
     strm << "module ";
     prettyPrint(ctx->name());
     strm << " ";
     std::vector<HorseIRParser::ContentContext *> contentList = ctx->content();
     strm << "{" << std::endl;
+    depth++;
     for(auto it=contentList.begin(); it<contentList.end(); it++){
         indent();
         (void) prettyPrint(*it);
     }
-    strm << "}" << std::endl;
     depth--;
+    strm << "}" << std::endl;
     return NULL;
 }
 antlrcpp::Any
 CSTPrettyPrinter::visitMethod(HorseIRParser::MethodContext *ctx) {
-    depth++;
-    indent(); strm << "def ";
+    strm << "def ";
     prettyPrint(ctx->name());
     strm << "(";
     (void) prettyPrint(ctx->parameterList());
@@ -43,7 +42,6 @@ CSTPrettyPrinter::visitMethod(HorseIRParser::MethodContext *ctx) {
     }
     depth--;
     indent(); strm << "}" << std::endl;
-    depth--;
     return NULL;
 }
 
@@ -58,6 +56,32 @@ CSTPrettyPrinter::visitParameterList(HorseIRParser::ParameterListContext *ctx) {
         strm << ":";
         prettyPrint(types[i]);
     }
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitGlobalVar(HorseIRParser::GlobalVarContext *ctx) {
+    strm << "def ";
+    prettyPrint(ctx->name());
+    strm << ":";
+    prettyPrint(ctx->type());
+    strm << ";" << std::endl;
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitImportCID(HorseIRParser::ImportCIDContext *ctx) {
+    strm << "import";
+    printToken(ctx->IMPORT_COMPOUND_ID());
+    strm << ";" << std::endl;
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitImportID(HorseIRParser::ImportIDContext *ctx) {
+    strm << "import";
+    printToken(ctx->COMPOUND_ID());
+    strm << ";" << std::endl;
     return NULL;
 }
 
@@ -105,6 +129,7 @@ CSTPrettyPrinter::visitStmtGoto(HorseIRParser::StmtGotoContext *ctx) {
     strm << "goto ";
     prettyPrint(ctx->label());
     if(ctx->name()){
+        strm << " ";
         prettyPrint(ctx->name());
     }
     return NULL;
@@ -120,9 +145,9 @@ CSTPrettyPrinter::visitNameKey(HorseIRParser::NameKeyContext *ctx) {
 
 antlrcpp::Any
 CSTPrettyPrinter::visitExprBasicType(HorseIRParser::ExprBasicTypeContext *ctx) {
-    strm << "( ";
+    strm << "(";
     prettyPrint(ctx->type());
-    strm << " )";
+    strm << ")";
     return NULL;
 }
 
@@ -130,7 +155,7 @@ antlrcpp::Any
 CSTPrettyPrinter::visitExprCheckType(HorseIRParser::ExprCheckTypeContext *ctx) {
     strm << "check_type" << "(";
     prettyPrint(ctx->methodCall());
-    strm << ",";
+    strm << ", ";
     prettyPrint(ctx->type());
     strm << ")";
     return NULL;
@@ -138,6 +163,11 @@ CSTPrettyPrinter::visitExprCheckType(HorseIRParser::ExprCheckTypeContext *ctx) {
 
 antlrcpp::Any
 CSTPrettyPrinter::visitExprCheckCast(HorseIRParser::ExprCheckCastContext *ctx) {
+    strm << "check_cast" << "(";
+    prettyPrint(ctx->methodCall());
+    strm << ", ";
+    prettyPrint(ctx->type());
+    strm << ")";
     return NULL;
 }
 
@@ -148,7 +178,7 @@ CSTPrettyPrinter::visitExprPhi(HorseIRParser::ExprPhiContext *ctx) {
     std::vector<HorseIRParser::NameContext *>  names  = ctx->name();
     int len = labels.size();
     for(int i=0; i<len; ++i){
-        if(i!=0) strm << ",";
+        if(i!=0) strm << ", ";
         prettyPrint(labels[i]);
         strm << " ";
         prettyPrint(names[i]);
@@ -261,18 +291,18 @@ CSTPrettyPrinter::visitTypeFunc3(HorseIRParser::TypeFunc3Context *ctx)
 antlrcpp::Any
 CSTPrettyPrinter::visitMethodInv(HorseIRParser::MethodInvContext *ctx) {
     prettyPrint(ctx->generalName());
-    strm << "( ";
+    strm << "(";
     prettyPrint(ctx->argumentList());
-    strm << " )";
+    strm << ")";
     return NULL;
 }
 
 antlrcpp::Any
 CSTPrettyPrinter::visitMethodFun(HorseIRParser::MethodFunContext *ctx) {
     prettyPrint(ctx->literalFunction());
-    strm << "( ";
+    strm << "(";
     prettyPrint(ctx->argumentList());
-    strm << " )";
+    strm << ")";
     return NULL;
 }
 
@@ -281,7 +311,7 @@ CSTPrettyPrinter::visitArgumentList(HorseIRParser::ArgumentListContext *ctx) {
     std::vector<HorseIRParser::OperandContext *> content = ctx->operand();
     int i = 0;
     for(auto it = content.begin(); it != content.end(); ++it, ++i){
-        if(i>0) strm << ",";
+        if(i>0) strm << ", ";
         prettyPrint(*it);
     }
     return NULL;
@@ -294,6 +324,62 @@ CSTPrettyPrinter::visitCompoundName(HorseIRParser::CompoundNameContext *ctx) {
 }
 
 /* literals */
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralNil(HorseIRParser::LiteralNilContext *ctx) {
+    printToken(ctx->value);
+    strm << ":";
+    prettyPrint(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralComplex(HorseIRParser::LiteralComplexContext *ctx) {
+    if(ctx->opReal){
+        if(ctx->opIm == nullptr){ // 2:complex
+            if(ctx->opReal) printToken(ctx->opReal);
+            printToken(ctx->real);
+        }
+        else {
+            if(ctx->opReal) printToken(ctx->opReal);
+            printToken(ctx->real);
+            printToken(ctx->opIm);
+            if(ctx->im) printToken(ctx->im);
+            printToken(ctx->unit);
+        }
+    }
+    else {
+        if(ctx->opIm) printToken(ctx->opIm);
+        if(ctx->im){
+            printToken(ctx->im);
+        }
+        printToken(ctx->unit);
+    }
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralBool(HorseIRParser::LiteralBoolContext *ctx) {
+    if(ctx->op){
+        printToken(ctx->op);
+    }
+    printToken(ctx->value);
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralChar(HorseIRParser::LiteralCharContext *ctx) {
+    printToken(ctx->value);
+    if(ctx->valueType){
+        strm << ":";
+        printToken(ctx->valueType);
+    }
+    return NULL;
+}
+
 antlrcpp::Any
 CSTPrettyPrinter::visitLiteralInteger(HorseIRParser::LiteralIntegerContext *ctx) {
     if(ctx->op != nullptr) printToken(ctx->op);
@@ -323,6 +409,53 @@ CSTPrettyPrinter::visitLiteralSymbol(HorseIRParser::LiteralSymbolContext *ctx) {
 
 antlrcpp::Any
 CSTPrettyPrinter::visitLiteralTimeMonth(HorseIRParser::LiteralTimeMonthContext *ctx) {
+    printToken(ctx->value);
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralTimeDate(HorseIRParser::LiteralTimeDateContext *ctx) {
+    printToken(ctx->value);
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralTimeDateTime(HorseIRParser::LiteralTimeDateTimeContext *ctx) {
+    printToken(ctx->value);
+    if(ctx->valueType){
+        strm << ":";
+        printToken(ctx->valueType);
+    }
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralTimeMinute(HorseIRParser::LiteralTimeMinuteContext *ctx) {
+    printToken(ctx->value);
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralTimeSecond(HorseIRParser::LiteralTimeSecondContext *ctx) {
+    printToken(ctx->value);
+    strm << ":";
+    printToken(ctx->valueType);
+    return NULL;
+}
+
+antlrcpp::Any
+CSTPrettyPrinter::visitLiteralTimeTime(HorseIRParser::LiteralTimeTimeContext *ctx) {
+    printToken(ctx->value);
+    if(ctx->valueType){
+        strm << ":";
+        printToken(ctx->valueType);
+    }
     return NULL;
 }
 
