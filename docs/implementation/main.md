@@ -25,6 +25,7 @@ Goals
 
 Special cases
 
+- No GC
 - A table requires addtional memory for adding new records
   + Two possible solutions: 2^n or a variant of fibonacci number
 

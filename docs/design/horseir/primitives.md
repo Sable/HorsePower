@@ -29,9 +29,9 @@
 
 | Function                        | Description             | Function                        | Description             |
 | :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| [and](builtin/and.md)           | and                     | [nand](builtin/nand.md)         | not and                 |
-| [or](builtin/or.md)             | or                      | [nor](builtin/nor.md)           | not or                  |
-| [not*](builtin/not.md)          | not                     |                                 |                         |   
+| [and](builtin/logic.md#and)     | and                     | [nand](builtin/logic.md#nand)   | not and                 |
+| [or](builtin/logic.md#or)       | or                      | [nor](builtin/logic.md#nor)     | not or                  |
+| [not](builtin/logic.md#not)     | not                     | [xor](builtin/logic.md#xor)     | xor                     |   
 
 ### <p id="datetime">Datetime</p>
 
