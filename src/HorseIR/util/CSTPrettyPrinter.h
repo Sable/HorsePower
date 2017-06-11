@@ -80,9 +80,9 @@ namespace horseIR {
 
             virtual antlrcpp::Any visitNameId(HorseIRParser::NameIdContext *ctx) override;
         public:
-            void printToken(antlr4::tree::TerminalNode *tokNode);
-            void printToken(antlr4::Token *tok);
-            void indent();
+            inline void printToken(antlr4::tree::TerminalNode *tokNode) noexcept;
+            inline void printToken(antlr4::Token *tok) noexcept;
+            inline void indent() noexcept;
         private:
             std::ostream& strm ;
             int depth;

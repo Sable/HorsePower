@@ -475,18 +475,18 @@ CSTPrettyPrinter::visitNameId(HorseIRParser::NameIdContext *ctx) {
 }
 
 /* helper functions */
-void
-CSTPrettyPrinter::printToken(antlr4::tree::TerminalNode *tokNode) {
+inline void
+CSTPrettyPrinter::printToken(antlr4::tree::TerminalNode *tokNode) noexcept {
     strm << tokNode->getSymbol()->getText();
 }
 
-void
-CSTPrettyPrinter::printToken(antlr4::Token *tok) {
+inline void
+CSTPrettyPrinter::printToken(antlr4::Token *tok) noexcept {
     strm << tok->getText();
 }
 
-void
-CSTPrettyPrinter::indent(){
+inline void
+CSTPrettyPrinter::indent() noexcept {
     int n = 4;
     for(int i=0, i2=depth*n; i<i2; ++i){
         strm << " ";
