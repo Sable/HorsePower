@@ -48,7 +48,7 @@ HorseIR has a rich set of literals for each type.
 
 - nil
 - bool
-- char
+- char / string
 - integer
 - real
 - complex
@@ -57,16 +57,15 @@ HorseIR has a rich set of literals for each type.
 - function
 - list
 - dictionary
-- table & keyed table
+- table
+- keyed table
 
 ### 1.6 Identifier
 
 HorseIR only uses the ASCII charset.
 
 ```
-id     ::= letter { { "_" } (letter | digit) }
-letter ::= [a-zA-Z]
-digit  ::= [0-9]
+id ::= [a-zA-Z_][a-zA-Z0-9_]*
 ```
 
 ### 1.7 Semicolons
@@ -85,7 +84,7 @@ A valid HorseIR program has the following parts.
 ### 2.2 Module
 
 A module is used to organize methods and variables in a specific namespace.  It
-is flexible to declare two methods with the same name in different namespace.
+is allowed to declare two methods with the same name in different namespace.
 
 <u>Conventions</u>
 
@@ -132,6 +131,23 @@ type.  A pair of parenthesis defines the method body.
 def foo(x:i64, y:i64) : i64{
 	v:i64 = ...;
 	return v;
+}
+```
+
+#### Method overloading
+
+Two methods may share a same method name, but with different number of arguments or different types.  An unknown type `?` covers all possible types, so that it is not allowed to declare a same method with a specific type.
+
+For example,
+
+```
+def foo(x:?){
+}
+
+def foo(x:i64){ // not allowed
+}
+
+def foo(x:i64, y:f32){ // allowed
 }
 ```
 
