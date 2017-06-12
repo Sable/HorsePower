@@ -71,7 +71,7 @@ CSTPrettyPrinter::visitGlobalVar(HorseIRParser::GlobalVarContext *ctx) {
 
 antlrcpp::Any
 CSTPrettyPrinter::visitImportCID(HorseIRParser::ImportCIDContext *ctx) {
-    strm << "import";
+    strm << "import ";
     printToken(ctx->IMPORT_COMPOUND_ID());
     strm << ";" << std::endl;
     return NULL;
@@ -79,7 +79,7 @@ CSTPrettyPrinter::visitImportCID(HorseIRParser::ImportCIDContext *ctx) {
 
 antlrcpp::Any
 CSTPrettyPrinter::visitImportID(HorseIRParser::ImportIDContext *ctx) {
-    strm << "import";
+    strm << "import ";
     printToken(ctx->COMPOUND_ID());
     strm << ";" << std::endl;
     return NULL;
