@@ -16,6 +16,13 @@ In HorsePower, we focus on the following parts.
     - Query optimizations with heuristics
     - Query optimizations with data-flow analysis
 
+## Quick entries
+
+| [Design](docs/design/horseir) | [Implementation](docs/implementation)
+| [Front end](src/HorseIR)      | [Valid examples](src/HorseIR/tests/valid)
+| [TPC-H](docs/tpch)            | [Paper related](docs/study)
+|
+
 ## Project
 
 In the summer 2017, we started this project from scratch.  We planned to build
