@@ -13,7 +13,6 @@ public:
     std::size_t getNumChildren() ;
     std::vector<ASTNode*>::const_iterator childConstBegin() ;
     std::vector<ASTNode*>::const_iterator childConstEnd() ;
-    void appendChild(ASTNode*) ;
     ASTNode* getChildAt(std::size_t pos) ;
 
     antlr4::tree::ParseTree* getCST() ;
@@ -147,6 +146,37 @@ std::string
 ScalarType::toString()
 {
     switch (scalarClass) {
-        case Sca
+    case ScalarType::ScalarClass::Bool:      return std::string("bool") ;
+    case ScalarType::ScalarClass::Char:      return std::string("char") ;
+    case ScalarType::ScalarClass::Integer8:  return std::string("i8") ;
+    case ScalarType::ScalarClass::Integer16: return std::string("i16") ;
+    case ScalarType::ScalarClass::Integer32: return std::string("i32") ;
+    case ScalarType::ScalarClass::Integer64: return std::string("i64") ;
+    case ScalarType::ScalarClass::FP32:      return std::string("f32") ;
+    case ScalarType::ScalarClass::FP64:      return std::string("f64") ;
+    case ScalarType::ScalarClass::Complex:   return std::string("complex") ;
+    case ScalarType::ScalarClass::Symbol:    return std::string("sym") ;
+    case ScalarType::ScalarClass::Month:     return std::string("m") ;
+    case ScalarType::ScalarClass::Date:      return std::string("d") ;
+    case ScalarType::ScalarClass::DateTime:  return std::string("z") ;
+    case ScalarType::ScalarClass::Minute:    return std::string("u") ;
+    case ScalarType::ScalarClass::Second:    return std::string("v") ;
+    case ScalarType::ScalarClass::Time:      return std::string("t") ;
+    case ScalarType::ScalarClass::String:    return std::string("str") ;
+    case ScalarType::ScalarClass::Table:     return std::string("table") ;
+    case ScalarType::ScalarClass::KeyTable:  return std::string("ktable") ;
     }
+}
+
+std::string
+ScalarType::toTreeString()
+{
+    return "(ScalarType " + toString() + ")" ;
+}
+
+
+ScalarType::ScalarClass
+ScalarType::getScalarClass()
+{
+    return scalarClass ;
 }
