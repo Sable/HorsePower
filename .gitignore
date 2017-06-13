@@ -1,7 +1,6 @@
 
 .DS_Store
 src/HorseIR/ast/.clang_complete
-src/HorseIR/ast/ASTNode.h
 src/HorseIR/grammar/HorseIRBaseVisitor.h
 src/HorseIR/grammar/HorseIRBaseListener.h
 src/HorseIR/grammar/HorseIRLexer.h

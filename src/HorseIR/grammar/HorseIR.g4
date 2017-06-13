@@ -131,6 +131,10 @@ literalKtable   : value=ID ':' valueType='ktable' ;
 
 literalString   : value=LITERAL_STRING (':' valueType='str')? ;
 
+/*
+  ScalarMonth = 'm'  ScalarDate = 'd'  ScalarDateTime = 'z'  ScalarMinute = 'u'
+  ScalarSecond = 'v' ScalarTime = 't'
+*/
 type            : tokenValue=( 'bool' |
                     'char'    |
                     'i8'      | 'i16' | 'i32' | 'i64' |
