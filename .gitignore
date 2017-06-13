@@ -1,2 +1,11 @@
 
 .DS_Store
+src/HorseIR/ast/.clang_complete
+src/HorseIR/ast/ASTNode.h
+src/HorseIR/grammar/HorseIRBaseVisitor.h
+src/HorseIR/grammar/HorseIRBaseListener.h
+src/HorseIR/grammar/HorseIRLexer.h
+src/HorseIR/grammar/HorseIRListener.h
+src/HorseIR/grammar/HorseIRParser.h
+src/HorseIR/grammar/HorseIRVisitor.h
+src/HorseIR/grammar/libMIRParser.a
