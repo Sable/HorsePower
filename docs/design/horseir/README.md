@@ -78,8 +78,9 @@ A semicolon must be found at the end of a statement.
 
 A valid HorseIR program has the following parts.
 
-1. a list of import statements
-2. a module declarations
+1. Modules and methods
+2. Import statements
+3. Local and global variables
 
 ### 2.2 Module
 
@@ -91,8 +92,8 @@ is allowed to declare two methods with the same name in different namespace.
 - A **module** has zero or more methods and global variables
 - A **method** has zero or more parameters and local variables
 - A **gloabl variable** declaration must be placed inside a module
+- An **entry method** `main` defines the entry of a program
 - If there is no module declaration top of a method, this method is included into a default module (i.e. `default`)
-- An entry method (i.e. `main`) should be provided.
 
 <u>Sample</u>
 
@@ -100,10 +101,24 @@ is allowed to declare two methods with the same name in different namespace.
 import Builtin;
 
 def default{      // a module 'default'
-    def main(){   // entry method
+    def main(){   // an entry method
     }
 }
 ```
+
+<u>Name issues</u>
+
+- Distinct name
+  + A module name
+  + A method name in a module
+  + A global variable in a module
+  + A local variable in a method
+  + Method name with global name
+- Same name
+  + Module name with method / global / local variable name
+  + Method name with local variable name
+  + Global variable name with local variable name
+
 
 #### Variable declaration
 
@@ -112,9 +127,9 @@ declared inside a method is considered as a **local variable**.  If a variable
 is declared outside a method explicitly, it is a **global variables**.
 
 ```
-import Builtin;
 
-def default{                // a module 'default'
+module default{             // a module 'default'
+    import Builtin;
     def global_var:i64;     // a global variable
     def main(){             // entry method
        local_var:i64 = ...; // a local variable
@@ -136,7 +151,9 @@ def foo(x:i64, y:i64) : i64{
 
 #### Method overloading
 
-Two methods may share a same method name, but with different number of arguments or different types.  An unknown type `?` covers all possible types, so that it is not allowed to declare a same method with a specific type.
+Two methods may share a same method name, but with different number of
+arguments or different types.  An unknown type `?` covers all possible types,
+so that it is not allowed to declare a same method with a specific type.
 
 For example,
 
@@ -148,6 +165,17 @@ def foo(x:i64){ // not allowed
 }
 
 def foo(x:i64, y:f32){ // allowed
+}
+```
+
+#### Unknown number of parameters (Optional)
+
+A method may not decide the number of parameters at compile time.  [In
+C](https://stackoverflow.com/questions/10071186/function-with-unknown-number-of-parameters-in-c),
+a type `va\_list` is used to handle unknown number of parameters.
+
+```
+def foo(x:i64, ...){
 }
 ```
 

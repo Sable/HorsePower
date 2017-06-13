@@ -1,6 +1,6 @@
 ## How to add a built-in function?
 
-Supposedly, we have the following four basic function.
+Supposedly, we have the following four basic built-in functions.
 
 ```
   plus  /  minus  /  mul   /  div

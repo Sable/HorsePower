@@ -35,21 +35,26 @@ total                       21
 Overview
 
 ```
+typedef long long h_size;
+enum h_types = {
+    t_bool, t_char, t_short, t_int, ...
+};
+
 typedef struct _Value{
-    int n;              // length
-    int t;              // type
-    union {
-        bool      b;
-        char      c;
-        short     i16;
-        int       i32;
-        long long i64;
-        float     f32;
-        double    f64;
-        complex   clx;
-        int       sym;
-        char      g[0]; // memory pointer
-    };
+     h_size  n;          // length
+enum h_types t;          // type
+     union {
+         bool      b;
+         char      c;
+         short int i16;
+         int       i32;
+         long long i64;
+         float     f32;
+         double    f64;
+         complex   clx;
+         int       sym;
+         char      g[0]; // memory pointer
+     };
 } V0, *V;
 ```
 
@@ -73,24 +78,24 @@ Overview
 
 **List**
 
-(1 2 3; 4 5 6)    //case 1
-(1 2 3; 'abc')    //case 2
-(1 2 3; ('a';5))  //case 3
+- (1 2 3; 4 5 6)    //case 1
+- (1 2 3; 'abc')    //case 2
+- (1 2 3; ('a';5))  //case 3
 
 ** Dictionary**
 
-`age:(20 18 21)
+- \`age:(20 18 21)
 
 **Enumeration**
 
-??
+- ??
 
 **Table**
 
-Comprise of multiple dictionaries
+- Comprise of multiple dictionaries
 
 **Keyed table**
 
-Two normal tables
+- Two normal tables
 
 
