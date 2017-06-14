@@ -2,18 +2,24 @@
 
 #include "Type.h"
 
-Type* Type::makeTypeASTNode(Type::ParseTreeType *cst, ASTNodeMemory& mem)
+using Type = horseIR::ast::Type ;
+Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, ASTNodeMemory& mem)
 {
     assert(cst != nullptr) ;
-    ScalarType::ParseTreeType* scalar ;
-    ListType::ParseTreeType* list ;
-
+    HorseIRParser::TypeCaseScalarContext* scalar ;
+    HorseIRParser::TypeCaseListContext* list ;
+    HorseIRParser::TypeCaseDictContext* dictionary ;
+    
     if ((scalar = dynamic_cast<decltype(scalar)>(cst)) != nullptr) {
         ScalarType* ret = new ScalarType(scalar, mem) ;
         mem.manage(ret) ;
         return ret ;
     } else if ((list = dynamic_cast<decltype(list)>(cst)) != nullptr) {
         ListType* ret = new ListType(list, mem) ;
+        mem.manage(ret) ;
+        return ret ;
+    } else if ((dictionary = dynamic_cast<decltype(dictionary)>(cst)) != nullptr) {
+        DictionaryType* ret = new DictionaryType(dictionary, mem) ;
         mem.manage(ret) ;
         return ret ;
     } else {
@@ -23,14 +29,13 @@ Type* Type::makeTypeASTNode(Type::ParseTreeType *cst, ASTNodeMemory& mem)
 }
 
 
-
-ScalarType::ScalarType(ScalarType::ParseTreeType* cst, ASTNodeMemory& mem)
+using ScalarType = horseIR::ast::ScalarType ;
+using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
+ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNodeMemory& mem)
 {
     (void) mem ;
     assert(cst != nullptr) ;
-
-    this->cst = dynamic_cast<antlr4::tree::ParseTree*>(cst) ;
-    assert(this->cst != nullptr) ;
+    this->cst = static_cast<decltype(this->cst)>(cst) ;
     
     const std::string tokenContent = cst->tokenValue->getText() ;
     if (tokenContent == "bool") {
@@ -125,22 +130,21 @@ constexpr ScalarType::ScalarClass ScalarType::getScalarClass() const
 }
 
 
-
-ListType::ListType(ListType::ParseTreeType* cst, ASTNodeMemory& mem)
+using ListType = horseIR::ast::ListType ;
+using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
+ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNodeMemory& mem)
 {
     assert(cst != nullptr) ;
-    Type::ParseTreeType* listCTX ;
-    listCTX = dynamic_cast<decltype(listCTX)>(cst->typeList()) ;
-    assert(listCTX != nullptr) ;
-
-    Type* internalType = Type::makeTypeASTNode(listCTX, mem) ;
+    this->cst = static_cast<decltype(this->cst)>(cst) ;
+    auto listCST = static_cast<HorseIRParser::TypeListContext*>(cst->typeList()) ;
+    
+    elementType = Type::makeTypeASTNode(listCST->element, mem) ;
 }
 
 constexpr Type::TypeClass ListType::getTypeClass() const
 {
     return Type::TypeClass::List ;
 }
-
 
 bool ListType::isGeneralizationOf(Type *type) const
 {
@@ -160,7 +164,88 @@ constexpr std::string ListType::toTreeString() const
     return "(ListType " + elementType->toTreeString() + " )" ;
 }
 
-constexpr Type* ListType::getInternalType() const
+constexpr Type* ListType::getElementType() const
 {
     return elementType ;
+}
+
+
+using DictionaryType = horseIR::ast::DictionaryType ;
+using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
+DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNodeMemory& mem)
+{
+    assert(cst != nullptr) ;
+    this->cst = static_cast<decltype(this->cst)>(cst) ;
+    auto dictCST = static_cast<HorseIRParser::TypeDictContext*>(cst->typeDict()) ;
+    
+    keyType = Type::makeTypeASTNode(dictCST->key, mem) ;
+    valueType = Type::makeTypeASTNode(dictCST->value, mem) ;
+}
+
+constexpr Type::TypeClass DictionaryType::getTypeClass() const
+{
+    return Type::TypeClass::Dictionary ;
+}
+
+bool DictionaryType::isGeneralizationOf(Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Dictionary) return false ;
+    DictionaryType* dictType = static_cast<DictionaryType*>(type) ;
+
+    bool keyIsGeneralization = keyType->isGeneralizationOf(dictType->keyType) ;
+    bool valueIsGeneralization = valueType->isGeneralizationOf(dictType->valueType) ;
+
+    return keyIsGeneralization && valueIsGeneralization ;
+}
+
+constexpr std::string DictionaryType::toString() const
+{
+    return "dict<" + keyType->toString() + ", " + valueType->toString() + ">" ;
+}
+
+constexpr std::string DictionaryType::toTreeString() const
+{
+    return "(DictType " + keyType->toTreeString() + " " +
+        valueType->toTreeString() + ")" ;
+}
+
+constexpr Type* DictionaryType::getKeyType() const
+{
+    return keyType ;
+}
+
+constexpr Type* DictionaryType::getValueType() const
+{
+    return valueType ;
+}
+
+
+using EnumerationType = horseIR::ast::EnumerationType ;
+using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
+EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNodeMemory& mem)
+{
+    assert(cst != nullptr) ;
+    this->cst = static_cast<decltype(this->cst)>(cst) ;
+    auto enumCST = static_cast<HorseIRParser::TypeEnumContext*>(cst->typeEnum()) ;
+
+    elementType = Type::makeTypeASTNode(enumCST->element, mem) ;
+}
+
+constexpr Type::TypeClass EnumerationType::getTypeClass() const
+{
+    return Type::TypeClass::Enumeration ;
+}
+
+bool EnumerationType::isGeneralizationOf(Type *type) const {
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Enumeration) return false ;
+    EnumerationType* enumType = static_cast<EnumerationType*>(type) ;
+
+    return elementType->isGeneralizationOf(enumType->elementType) ;
+}
+
+constexpr std::string EnumerationType::toString() const
+{
+    
 }
