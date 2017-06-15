@@ -9,8 +9,6 @@
 #include "antlr4-runtime.h"
 #include "../grammar/HorseIRParser.h"
 
-//#include "ASTVisitor.h"
-
 namespace horseIR {
     namespace ast {
         class ASTNode {
@@ -23,11 +21,10 @@ namespace horseIR {
             ASTNode* getChildAt(std::size_t pos) ;
 
             antlr4::tree::ParseTree* getCST() ;
-            std::size_t getNumNodes() ;
+            std::size_t getNumNodesRecursively() ;
 
             virtual std::string toString() const = 0 ;
             virtual std::string toTreeString() const = 0 ;
-            //virtual antlrcpp::Any accept(ASTVisitor& visitor) = 0 ;
         protected:
             antlr4::tree::ParseTree* cst ;
             std::vector<ASTNode*> children ;
@@ -37,7 +34,7 @@ namespace horseIR {
         ASTNode::const_iterator ASTNode::childConstBegin() { return children.cbegin() ; }
         ASTNode::const_iterator ASTNode::childConstEnd() { return children.cend() ; }
         antlr4::tree::ParseTree* ASTNode::getCST() { return cst ; }
-        std::size_t ASTNode::getNumNodes()
+        std::size_t ASTNode::getNumNodesRecursively()
         {
             std::size_t cum = 1 ;
             for (auto ptr = children.cbegin(); ptr != children.cend(); ++ptr) {
