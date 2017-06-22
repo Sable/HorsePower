@@ -4,10 +4,9 @@
 #include "Type.h"
 
 using EnumerationType = horseIR::ast::EnumerationType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, MemoryManager<ASTNode>& mem)
+EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Enumeration)
 {
     assert(cst != nullptr) ;
@@ -17,7 +16,7 @@ EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, Memory
     this->children.push_back(elementType) ;
 }
 
-EnumerationType::EnumerationType(MemoryManager<ASTNode>& mem)
+EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Enumeration),
       elementType(nullptr)
 {}

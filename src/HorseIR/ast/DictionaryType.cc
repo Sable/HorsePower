@@ -4,10 +4,9 @@
 #include "Type.h"
 
 using DictionaryType = horseIR::ast::DictionaryType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, MemoryManager<ASTNode>& mem)
+DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Dictionary)
 {
     assert(cst != nullptr) ;
@@ -19,7 +18,7 @@ DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, MemoryMa
     this->children.push_back(valueType) ;
 }
 
-DictionaryType::DictionaryType(MemoryManager<ASTNode>& mem)
+DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Dictionary),
       keyType(nullptr),
       valueType(nullptr)

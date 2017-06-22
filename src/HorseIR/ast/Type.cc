@@ -3,28 +3,28 @@
 #include "Type.h"
 
 using Type = horseIR::ast::Type ;
-Type::Type(antlr4::tree::ParseTree* cst, MemoryManager<ASTNode>& mem, Type::TypeClass p_typeClass)
+Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass)
     : typeClass(p_typeClass),
       ASTNode(cst, mem)
 {}
 
-Type::Type(MemoryManager<ASTNode>& mem, Type::TypeClass p_typeClass)
+Type::Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass)
     : typeClass(p_typeClass),
       ASTNode(mem)
 {}
 
-constexpr Type::TypeClass Type::getTypeClass() const
+Type::TypeClass Type::getTypeClass() const
 {
     return typeClass ;
 }
 
-Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, MemoryManager<ASTNode>& mem)
+Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, ASTNode::MemManagerType& mem)
 {
     assert(cst != nullptr) ;
-    HorseIRParser::TypeCaseScalarContext* scalar = nullptr;
+    HorseIRParser::TypeCaseScalarContext* scalar = nullptr ;
     HorseIRParser::TypeCaseWildcardContext* wildcard = nullptr ;
-    HorseIRParser::TypeCaseListContext* list = nullptr;
-    HorseIRParser::TypeCaseDictContext* dictionary = nullptr;
+    HorseIRParser::TypeCaseListContext* list = nullptr ;
+    HorseIRParser::TypeCaseDictContext* dictionary = nullptr ;
     HorseIRParser::TypeCaseEnumContext* enumeration = nullptr ;
     HorseIRParser::TypeCaseFuncContext* function = nullptr ;
     

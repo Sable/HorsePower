@@ -4,10 +4,9 @@
 #include "Type.h"
 
 using ScalarType = horseIR::ast::ScalarType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, MemoryManager<ASTNode>& mem)
+ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Scalar)
 {
     (void) mem ;
@@ -56,12 +55,12 @@ ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, MemoryManager<
     }
 }
 
-ScalarType::ScalarType(ScalarType::ScalarClass type, MemoryManager<ASTNode>& mem)
+ScalarType::ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem)
     : scalarClass(type),
       Type(mem, Type::TypeClass::Scalar)
 {}
 
-ScalarType::ScalarType(MemoryManager<ASTNode>& mem)
+ScalarType::ScalarType(ASTNode::MemManagerType& mem)
     : scalarClass(ScalarType::ScalarClass::Integer8),
       Type(mem, Type::TypeClass::Scalar)
 {}

@@ -4,10 +4,9 @@
 #include "Type.h"
 
 using ListType = horseIR::ast::ListType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-ListType::ListType(HorseIRParser::TypeCaseListContext* cst, MemoryManager<ASTNode>& mem)
+ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::List)
 {
     assert(cst != nullptr) ;
@@ -17,7 +16,7 @@ ListType::ListType(HorseIRParser::TypeCaseListContext* cst, MemoryManager<ASTNod
     this->children.push_back(elementType) ;
 }
 
-ListType::ListType(MemoryManager<ASTNode>& mem)
+ListType::ListType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::List),
       elementType(nullptr)
 {}

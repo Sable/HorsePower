@@ -8,3 +8,5 @@ src/HorseIR/grammar/HorseIRListener.h
 src/HorseIR/grammar/HorseIRParser.h
 src/HorseIR/grammar/HorseIRVisitor.h
 src/HorseIR/grammar/libMIRParser.a
+src/HorseIR/ast/debug.cc
+src/HorseIR/ast/demo

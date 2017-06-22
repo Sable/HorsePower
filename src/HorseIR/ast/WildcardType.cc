@@ -4,14 +4,13 @@
 #include "Type.h"
 
 using WildcardType = horseIR::ast::WildcardType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, MemoryManager<ASTNode>& mem)
+WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Wildcard)
 {}
 
-WildcardType::WildcardType(MemoryManager<ASTNode>& mem)
+WildcardType::WildcardType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Wildcard)
 {}
 

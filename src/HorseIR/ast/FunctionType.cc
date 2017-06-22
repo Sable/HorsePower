@@ -5,10 +5,9 @@
 #include "Type.h"
 
 using FunctionType = horseIR::ast::FunctionType ;
-using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, MemoryManager<ASTNode>& mem)
+FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Function) 
 {
     assert(cst != nullptr) ;
@@ -57,7 +56,7 @@ FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, MemoryManage
     this->children.push_back(returnType) ;
 }
 
-FunctionType::FunctionType(MemoryManager<ASTNode>& mem)
+FunctionType::FunctionType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Function),
       flexible(false),
       returnType(nullptr)
