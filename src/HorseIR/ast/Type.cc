@@ -3,7 +3,22 @@
 #include "Type.h"
 
 using Type = horseIR::ast::Type ;
-Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, ASTNodeMemory& mem)
+Type::Type(antlr4::tree::ParseTree* cst, MemoryManager<ASTNode>& mem, Type::TypeClass p_typeClass)
+    : typeClass(p_typeClass),
+      ASTNode(cst, mem)
+{}
+
+Type::Type(MemoryManager<ASTNode>& mem, Type::TypeClass p_typeClass)
+    : typeClass(p_typeClass),
+      ASTNode(mem)
+{}
+
+constexpr Type::TypeClass Type::getTypeClass() const
+{
+    return typeClass ;
+}
+
+Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, MemoryManager<ASTNode>& mem)
 {
     assert(cst != nullptr) ;
     HorseIRParser::TypeCaseScalarContext* scalar = nullptr;

@@ -7,19 +7,15 @@ using WildcardType = horseIR::ast::WildcardType ;
 using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNodeMemory& mem)
-{
-    (void) mem;
-    assert(cst != nullptr) ;
-    this->cst = static_cast<decltype(this->cst)>(cst) ;
-}
+WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, MemoryManager<ASTNode>& mem)
+    : Type(cst, mem, Type::TypeClass::Wildcard)
+{}
 
-Type::TypeClass WildcardType::getTypeClass() const
-{
-    return Type::TypeClass::Wildcard ;
-}
+WildcardType::WildcardType(MemoryManager<ASTNode>& mem)
+    : Type(mem, Type::TypeClass::Wildcard)
+{}
 
-bool WildcardType::isGeneralizationOf(horseIR::ast::Type *type) const
+bool WildcardType::isGeneralizationOf(const horseIR::ast::Type *type) const
 {
     assert(type != nullptr) ;
     return true ;

@@ -7,11 +7,10 @@ using ScalarType = horseIR::ast::ScalarType ;
 using ASTNodeMemory = horseIR::ast::ASTNodeMemory ;
 using Type = horseIR::ast::Type ;
 
-ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNodeMemory& mem)
+ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, MemoryManager<ASTNode>& mem)
+    : Type(cst, mem, Type::TypeClass::Scalar)
 {
     (void) mem ;
-    assert(cst != nullptr) ;
-    this->cst = static_cast<decltype(this->cst)>(cst) ;
     
     const std::string tokenContent = cst->tokenValue->getText() ;
     if (tokenContent == "bool") {
@@ -57,16 +56,21 @@ ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNodeMemory&
     }
 }
 
-Type::TypeClass ScalarType::getTypeClass() const
-{
-    return Type::TypeClass::Scalar ;
-}
+ScalarType::ScalarType(ScalarType::ScalarClass type, MemoryManager<ASTNode>& mem)
+    : scalarClass(type),
+      Type(mem, Type::TypeClass::Scalar)
+{}
 
-bool ScalarType::isGeneralizationOf(Type *type) const 
+ScalarType::ScalarType(MemoryManager<ASTNode>& mem)
+    : scalarClass(ScalarType::ScalarClass::Integer8),
+      Type(mem, Type::TypeClass::Scalar)
+{}
+                  
+bool ScalarType::isGeneralizationOf(const Type *type) const 
 {
     assert(type != nullptr) ;
     if (type->getTypeClass() != Type::TypeClass::Scalar) return false ;
-    ScalarType* scalarType = static_cast<ScalarType*>(type) ;
+    auto scalarType = static_cast<const ScalarType*>(type) ;
     return this->scalarClass == scalarType->scalarClass ;
 }
 
@@ -103,4 +107,10 @@ std::string ScalarType::toTreeString() const
 constexpr ScalarType::ScalarClass ScalarType::getScalarClass() const
 {
     return scalarClass ;
+}
+
+ScalarType& ScalarType::setScalarClass(const ScalarType::ScalarClass type)
+{
+    scalarClass = type ;
+    return *this ;
 }
