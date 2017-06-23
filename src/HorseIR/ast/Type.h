@@ -42,7 +42,9 @@ namespace horseIR {
             ScalarType(ASTNode::MemManagerType& mem) ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
-            
+
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
@@ -60,6 +62,8 @@ namespace horseIR {
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
         } ;
@@ -71,7 +75,9 @@ namespace horseIR {
             ListType(ASTNode::MemManagerType& mem) ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
-            
+
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
@@ -88,7 +94,9 @@ namespace horseIR {
             DictionaryType(ASTNode::MemManagerType& mem) ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
-            
+
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
@@ -108,7 +116,9 @@ namespace horseIR {
             EnumerationType(ASTNode::MemManagerType& mem) ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
-            
+
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
@@ -126,6 +136,8 @@ namespace horseIR {
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
 

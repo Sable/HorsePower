@@ -2,23 +2,19 @@
 
 using ASTNode = horseIR::ast::ASTNode ;
 
-ASTNode::ASTNode(ASTNode::MemManagerType& mem) : ASTNode(nullptr, mem) {} 
+ASTNode::ASTNode(ASTNode::MemManagerType& mem)
+    : ASTNode(nullptr, mem)
+{}
+
 ASTNode::ASTNode(const antlr4::tree::ParseTree* pTree, ASTNode::MemManagerType& mem)
-    : cst{pTree} {
+    : cst{pTree}
+{
     mem.manage(this) ;
 }
-std::size_t ASTNode::getNumChildren() { return children.size() ; }
-ASTNode::const_iterator ASTNode::childConstBegin() { return children.cbegin() ; }
-ASTNode::const_iterator ASTNode::childConstEnd() { return children.cend() ; }
-const antlr4::tree::ParseTree* ASTNode::getCST() { return cst ; }
-std::size_t ASTNode::getNumNodesRecursively()
+
+const antlr4::tree::ParseTree* ASTNode::getCST()
 {
-    std::size_t cum = 1 ;
-    for (auto ptr = children.cbegin(); ptr != children.cend(); ++ptr) {
-        ASTNode* node = *ptr ;
-        cum = cum + node->getNumChildren() ;
-    }
-    return cum ;
+    return cst ;
 }
 
 ASTNode::MemManagerType& ASTNode::MemManagerType::manage(ASTNode* ptr)

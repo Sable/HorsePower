@@ -3,6 +3,7 @@
 
 #include "Type.h"
 
+using ASTNode = horseIR::ast::ASTNode ;
 using DictionaryType = horseIR::ast::DictionaryType ;
 using Type = horseIR::ast::Type ;
 
@@ -13,9 +14,7 @@ DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode:
 
     auto dictCST = static_cast<HorseIRParser::TypeDictContext*>(cst->typeDict()) ;    
     keyType = Type::makeTypeASTNode(dictCST->key, mem) ;
-    this->children.push_back(keyType) ;
     valueType = Type::makeTypeASTNode(dictCST->value, mem) ;
-    this->children.push_back(valueType) ;
 }
 
 DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)
@@ -34,6 +33,19 @@ bool DictionaryType::isGeneralizationOf(const Type *type) const
     bool valueIsGeneralization = valueType->isGeneralizationOf(dictType->valueType) ;
 
     return keyIsGeneralization && valueIsGeneralization ;
+}
+
+std::size_t DictionaryType::getNumNodesRecursively() const
+{
+    std::size_t count = 1 ;
+    count += (keyType == nullptr)? 0: keyType->getNumNodesRecursively() ;
+    count += (valueType == nullptr) ? 0: valueType->getNumNodesRecursively() ;
+    return count ;
+}
+
+std::vector<ASTNode*> DictionaryType::getChildren() const
+{
+    return std::vector<ASTNode*>{keyType, valueType} ;
 }
 
 std::string DictionaryType::toString() const
@@ -55,12 +67,7 @@ constexpr Type* DictionaryType::getKeyType() const
 DictionaryType& DictionaryType::setKeyType(const Type* type)
 {
     assert(type != nullptr) ;
-    
-    this->children.clear() ;
-    
     keyType = const_cast<Type*>(type) ;
-    this->children.push_back(keyType) ;
-    if (valueType != nullptr) this->children.push_back(valueType) ;
     return *this ;
 }
 
@@ -72,10 +79,6 @@ constexpr Type* DictionaryType::getValueType() const
 DictionaryType& DictionaryType::setValueType(const Type* type)
 {
     assert(type != nullptr) ;
-    
-    this->children.clear() ;
-    if (keyType != nullptr) this->children.push_back(keyType) ;
     valueType = const_cast<Type*>(type) ;
-    this->children.push_back(valueType) ;
     return *this ;
 }

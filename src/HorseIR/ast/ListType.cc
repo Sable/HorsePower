@@ -3,6 +3,7 @@
 
 #include "Type.h"
 
+using ASTNode = horseIR::ast::ASTNode ;
 using ListType = horseIR::ast::ListType ;
 using Type = horseIR::ast::Type ;
 
@@ -13,7 +14,6 @@ ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerT
 
     auto listCST = static_cast<HorseIRParser::TypeListContext*>(cst->typeList()) ;
     elementType = Type::makeTypeASTNode(listCST->element, mem) ;
-    this->children.push_back(elementType) ;
 }
 
 ListType::ListType(ASTNode::MemManagerType& mem)
@@ -27,6 +27,20 @@ bool ListType::isGeneralizationOf(const Type *type) const
     if (type->getTypeClass() != Type::TypeClass::List) return false ;
     auto listType = static_cast<const ListType*>(type) ;
     return elementType->isGeneralizationOf(listType->elementType) ;
+}
+
+std::size_t ListType::getNumNodesRecursively() const
+{
+    if (elementType == nullptr) {
+        return 1 ;
+    } else {
+        return elementType->getNumNodesRecursively() + 1 ;
+    }
+}
+
+std::vector<ASTNode*> ListType::getChildren() const
+{
+    return std::vector<ASTNode*>{elementType} ;
 }
 
 std::string ListType::toString() const
@@ -47,11 +61,6 @@ constexpr Type* ListType::getElementType() const
 ListType& ListType::setElementType(const Type *type)
 {
     assert(type != nullptr) ;
-    
-    if (elementType != nullptr) {
-        this->children.clear() ;
-    }
     elementType = const_cast<Type*>(type) ;
-    this->children.push_back(elementType) ;
     return *this ;
 }

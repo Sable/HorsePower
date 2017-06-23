@@ -4,6 +4,7 @@
 
 #include "Type.h"
 
+using ASTNode = horseIR::ast::ASTNode ;
 using FunctionType = horseIR::ast::FunctionType ;
 using Type = horseIR::ast::Type ;
 
@@ -49,11 +50,6 @@ FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::Mem
     } else {
         assert(false) ;
     }
-
-    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
-        this->children.push_back(*ptr) ;
-    }
-    this->children.push_back(returnType) ;
 }
 
 FunctionType::FunctionType(ASTNode::MemManagerType& mem)
@@ -87,6 +83,32 @@ bool FunctionType::isGeneralizationOf(const Type *type) const
     }
 
     return returnType->isGeneralizationOf(functionType->returnType) ;
+}
+
+std::size_t FunctionType::getNumNodesRecursively() const
+{
+    std::size_t count = 1 ;
+    count += (returnType == nullptr)? 0: returnType->getNumNodesRecursively() ;
+    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
+        if (*ptr != nullptr) {
+            count += (*ptr)->getNumNodesRecursively() ;
+        }
+    }
+    return count ;
+}
+
+std::vector<ASTNode*> FunctionType::getChildren() const
+{
+    std::vector<ASTNode*> retVector ;
+    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
+        if (*ptr != nullptr) {
+            retVector.push_back(*ptr) ;
+        }
+    }
+    if (returnType != nullptr) {
+        retVector.push_back(returnType) ;
+    }
+    return retVector ;
 }
 
 std::string FunctionType::toString() const
@@ -143,7 +165,7 @@ FunctionType& FunctionType::addParameterType(horseIR::ast::Type *type)
     assert(type != nullptr) ;
     
     parameterTypes.push_back(type) ;
-    this->children.push_back(type) ;
+
     return *this ;
 }
 
@@ -153,12 +175,6 @@ FunctionType& FunctionType::setParameterTypeAt(std::size_t pos, horseIR::ast::Ty
     assert(pos < parameterTypes.size()) ;
 
     parameterTypes[pos] = type ;
-    
-    this->children.clear();
-    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
-        this->children.push_back(*ptr) ;
-    }
-    this->children.push_back(returnType) ;
 
     return *this ;
 }
@@ -174,11 +190,6 @@ FunctionType& FunctionType::setReturnType(horseIR::ast::Type *type)
     assert(type != nullptr) ;
 
     returnType = type ;
-    this->children.clear() ;
-    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
-        this->children.push_back(*ptr) ;
-    }
-    this->children.push_back(returnType) ;
 
     return *this ;
 }
@@ -192,12 +203,6 @@ FunctionType& FunctionType::truncateNumParameter(std::size_t num)
     for (std::size_t ptr = 0; ptr < num; ++ptr) {
         parameterTypes.push_back(org_parameterTypes[ptr]) ;
     }
-
-    this->children.clear() ;
-    for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
-        this->children.push_back(*ptr) ;
-    }
-    this->children.push_back(returnType) ;
 
     return *this ;
 }

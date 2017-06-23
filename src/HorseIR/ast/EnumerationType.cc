@@ -3,6 +3,7 @@
 
 #include "Type.h"
 
+using ASTNode = horseIR::ast::ASTNode ;
 using EnumerationType = horseIR::ast::EnumerationType ;
 using Type = horseIR::ast::Type ;
 
@@ -13,7 +14,6 @@ EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNod
     
     auto enumCST = static_cast<HorseIRParser::TypeEnumContext*>(cst->typeEnum()) ;
     elementType = Type::makeTypeASTNode(enumCST->element, mem) ;
-    this->children.push_back(elementType) ;
 }
 
 EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)
@@ -27,6 +27,20 @@ bool EnumerationType::isGeneralizationOf(const Type *type) const {
     auto enumType = static_cast<const EnumerationType*>(type) ;
 
     return elementType->isGeneralizationOf(enumType->elementType) ;
+}
+
+std::size_t EnumerationType::getNumNodesRecursively() const
+{
+    if (elementType == nullptr) {
+        return 1 ;
+    } else {
+        return elementType->getNumNodesRecursively() + 1 ;
+    }
+}
+
+std::vector<ASTNode*> EnumerationType::getChildren() const
+{
+    return std::vector<ASTNode*>{elementType} ;
 }
 
 std::string EnumerationType::toString() const
@@ -46,13 +60,7 @@ constexpr Type* EnumerationType::getElementType() const
 
 EnumerationType& EnumerationType::setElementType(const Type *type)
 {
-    if (elementType != nullptr) {
-        this->children.erase(std::remove_if(this->children.begin(), this->children.end(),
-                                            [=] (ASTNode* p_search) -> bool {
-                                                return p_search == elementType ;
-                                            })) ;
-    }
+    assert(type != nullptr) ;
     elementType = const_cast<Type*>(type) ;
-    this->children.push_back(elementType) ;
     return *this ;
 }

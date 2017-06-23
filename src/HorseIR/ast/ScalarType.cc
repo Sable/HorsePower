@@ -3,6 +3,7 @@
 
 #include "Type.h"
 
+using ASTNode = horseIR::ast::ASTNode ;
 using ScalarType = horseIR::ast::ScalarType ;
 using Type = horseIR::ast::Type ;
 
@@ -71,6 +72,16 @@ bool ScalarType::isGeneralizationOf(const Type *type) const
     if (type->getTypeClass() != Type::TypeClass::Scalar) return false ;
     auto scalarType = static_cast<const ScalarType*>(type) ;
     return this->scalarClass == scalarType->scalarClass ;
+}
+
+std::size_t ScalarType::getNumNodesRecursively() const
+{
+    return 1 ;
+}
+
+std::vector<ASTNode*> ScalarType::getChildren() const
+{
+    return std::vector<ASTNode*>() ;
 }
 
 std::string ScalarType::toString() const
