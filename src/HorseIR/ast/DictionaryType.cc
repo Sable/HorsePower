@@ -8,7 +8,7 @@ using DictionaryType = horseIR::ast::DictionaryType ;
 using Type = horseIR::ast::Type ;
 
 DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Dictionary)
+    : Type(cst, mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeType::DictionaryType)
 {
     assert(cst != nullptr) ;
 
@@ -18,7 +18,7 @@ DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode:
 }
 
 DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)
-    : Type(mem, Type::TypeClass::Dictionary),
+    : Type(mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeType::DictionaryType),
       keyType(nullptr),
       valueType(nullptr)
 {}

@@ -8,7 +8,7 @@ using ScalarType = horseIR::ast::ScalarType ;
 using Type = horseIR::ast::Type ;
 
 ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Scalar)
+    : Type(cst, mem, Type::TypeClass::Scalar, ASTNode::ASTNodeType::ScalarType)
 {
     (void) mem ;
     
@@ -58,12 +58,12 @@ ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemMa
 
 ScalarType::ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem)
     : scalarClass(type),
-      Type(mem, Type::TypeClass::Scalar)
+      Type(mem, Type::TypeClass::Scalar, ASTNode::ASTNodeType::ScalarType)
 {}
 
 ScalarType::ScalarType(ASTNode::MemManagerType& mem)
     : scalarClass(ScalarType::ScalarClass::Integer8),
-      Type(mem, Type::TypeClass::Scalar)
+      Type(mem, Type::TypeClass::Scalar, ASTNode::ASTNodeType::ScalarType)
 {}
                   
 bool ScalarType::isGeneralizationOf(const Type *type) const 

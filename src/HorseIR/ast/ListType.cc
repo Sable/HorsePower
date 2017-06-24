@@ -8,7 +8,7 @@ using ListType = horseIR::ast::ListType ;
 using Type = horseIR::ast::Type ;
 
 ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::List)
+    : Type(cst, mem, Type::TypeClass::List, ASTNode::ASTNodeType::ListType)
 {
     assert(cst != nullptr) ;
 
@@ -17,7 +17,7 @@ ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerT
 }
 
 ListType::ListType(ASTNode::MemManagerType& mem)
-    : Type(mem, Type::TypeClass::List),
+    : Type(mem, Type::TypeClass::List, ASTNode::ASTNodeType::ListType),
       elementType(nullptr)
 {}
       

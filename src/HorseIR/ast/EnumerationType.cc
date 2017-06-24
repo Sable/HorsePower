@@ -8,7 +8,7 @@ using EnumerationType = horseIR::ast::EnumerationType ;
 using Type = horseIR::ast::Type ;
 
 EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Enumeration)
+    : Type(cst, mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeType::EnumerationType)
 {
     assert(cst != nullptr) ;
     
@@ -17,7 +17,7 @@ EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNod
 }
 
 EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)
-    : Type(mem, Type::TypeClass::Enumeration),
+    : Type(mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeType::EnumerationType),
       elementType(nullptr)
 {}
 

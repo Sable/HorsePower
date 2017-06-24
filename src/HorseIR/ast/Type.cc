@@ -2,15 +2,17 @@
 
 #include "Type.h"
 
+using ASTMode = horseIR::ast::ASTNode ;
 using Type = horseIR::ast::Type ;
-Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass)
+
+Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type)
     : typeClass(p_typeClass),
-      ASTNode(cst, mem)
+      ASTNode(cst, mem, type)
 {}
 
-Type::Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass)
+Type::Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type)
     : typeClass(p_typeClass),
-      ASTNode(mem)
+      ASTNode(mem, type)
 {}
 
 Type::TypeClass Type::getTypeClass() const
@@ -30,27 +32,21 @@ Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, ASTNode::MemManager
     
     if ((scalar = dynamic_cast<decltype(scalar)>(cst)) != nullptr) {
         ScalarType* ret = new ScalarType(scalar, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else if ((wildcard = dynamic_cast<decltype(wildcard)>(cst)) != nullptr) {
         WildcardType* ret = new WildcardType(wildcard, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else if ((list = dynamic_cast<decltype(list)>(cst)) != nullptr) {
         ListType* ret = new ListType(list, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else if ((dictionary = dynamic_cast<decltype(dictionary)>(cst)) != nullptr) {
         DictionaryType* ret = new DictionaryType(dictionary, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else if ((enumeration = dynamic_cast<decltype(enumeration)>(cst)) != nullptr) {
         EnumerationType* ret = new EnumerationType(enumeration, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else if ((function = dynamic_cast<decltype(function)>(cst)) != nullptr) {
         FunctionType* ret = new FunctionType(function, mem) ;
-        mem.manage(ret) ;
         return ret ;
     } else {
         assert(false) ;
