@@ -42,6 +42,8 @@ Both block comments and line comments are supported.
  */
 ```
 
+NB. Unicode is allowed.
+
 ### 1.5 Literals
 
 HorseIR has a rich set of literals for each type.
@@ -196,6 +198,12 @@ boolean, byte, short, int, long, float, double and complex numbers.
 ```
 string and symbol
 ```
+
+About Unicode
+
+- Unicode is not supported currently, but we will add it later.
+- See [escape sequences in C](https://en.wikipedia.org/wiki/Escape_sequences_in_C)
+- Discussions about [wchar vs. icu](https://stackoverflow.com/questions/4507222/inconsistency-in-unicode-with-wchar-t-vs-icu-in-c)
 
 #### List
 
