@@ -95,12 +95,16 @@ literalNil      : value='nil' ':' valueType=type ;
 
 literalComplex  : opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                   ':' valueType='complex'
+                                                            #literalComplexCase0
                 | opIm  =('+' | '-')? im  =(LITERAL_FLOAT | LITERAL_INTEGER)
                   unit=('i' | 'j') ':' valueType='complex'
+                                                            #literalComplexCase1
                 | opReal=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)
                   opIm  =('+' | '-')  im  =(LITERAL_FLOAT | LITERAL_INTEGER)?
                   unit=('i' | 'j') ':' valueType='complex'
+                                                            #literalComplexCase2
                 | opIm  =('+' | '-')? unit=('i' | 'j') ':' valueType='complex'
+                                                            #literalComplexCase3
                 ;
 
 literalBool     : op=('+' | '-')? value=LITERAL_INTEGER ':' valueType='bool' ;

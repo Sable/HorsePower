@@ -4,6 +4,7 @@
 
 #include "ASTNode.h"
 #include "Type.h"
+#include "Literal.h"
 
 namespace horseIR {
     namespace ast {
@@ -11,6 +12,9 @@ namespace horseIR {
         public:
             virtual antlrcpp::Any visit(ASTNode* node) ;
         protected:
+            virtual antlrcpp::Any visitNilLiteral(NilLiteral* nilLiteral) = 0 ;
+            virtual antlrcpp::Any visitComplexLiteral(ComplexLiteral* complexLiteral) = 0 ;
+            
             virtual antlrcpp::Any visitScalarType(ScalarType* scalarType) = 0 ;
             virtual antlrcpp::Any visitWildcardType(WildcardType* wildcardType) = 0 ;
             virtual antlrcpp::Any visitListType(ListType* listType) = 0 ;

@@ -20,7 +20,6 @@ const antlr4::tree::ParseTree* ASTNode::getCST()
 
 ASTNode::MemManagerType& ASTNode::MemManagerType::manage(ASTNode* ptr)
 {
-    std::cout << "allocated a new node " << std::endl ;
     auto p = std::find_if(pool.begin(), pool.end(),
                           [&] (std::unique_ptr<ASTNode>& p_search) -> bool {
                               return p_search.get() == ptr ;
