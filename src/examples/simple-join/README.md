@@ -23,33 +23,11 @@ select * from Employee,Department
 where Employee.DepartmentID = Department.DepartmentID;
 ```
 
-## Data sample
-
-Employee
-
-```
-Rafferty       | 31 |
-Jones          | 33 |
-Heisenberg     | 33 |
-Robinson       | 34 |
-Smith          | 34 |
-Williams       | 35 |
-```
-
-Department
-
-```
-31 | Sales       |
-33 | Engineering |
-34 | Clerical    |
-35 | Marketing   |
-```
-
 ## HorseIR
 
 ```
 /*
- * varchar(99) -> symbol
+ * varchar(99) -> sym
  * int         -> i64
  */
 module default {
@@ -78,6 +56,41 @@ module default {
     }
     
 }
+```
+
+## Data sample
+
+Employee
+
+```
+Rafferty       | 31 |
+Jones          | 33 |
+Heisenberg     | 33 |
+Robinson       | 34 |
+Smith          | 34 |
+Williams       | 35 |
+```
+
+Department
+
+```
+31 | Sales       |
+33 | Engineering |
+34 | Clerical    |
+35 | Marketing   |
+```
+
+**Expected output**
+
+```
+LastName       | ID | DepartmentName |
+-------------------------------------
+Rafferty       | 31 | Sables         |
+Jones          | 33 | Engineering    |
+Heisenberg     | 33 | Engineering    |
+Robinson       | 34 | Clerical       |
+Smith          | 34 | Clerical       |
+Williams       | 35 | Marketing      |
 ```
 
 
