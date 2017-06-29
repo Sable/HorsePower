@@ -33,6 +33,11 @@ typedef struct node_value{
 	};
 }V0,*V;
 
+typedef struct list_value_node{
+	V value;
+	struct list_value_node *next;
+}ListV0,*ListV;
+
 /* type enum */
 
 enum H_T {
@@ -65,5 +70,6 @@ extern G H_heap;
 #include <stdlib.h>
 #include "h_memory.h"
 #include "h_symbol.h"
+#include "h_libs.h"
 #include "h_primitive.h"
 #include "h_io.h"
