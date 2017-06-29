@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #include "antlr4-runtime.h"
-#include "../grammar/HorseIRParser.h"
+#include "../HorsePower/src/HorseIR/grammar/HorseIRParser.h"
 
 namespace horseIR {
     namespace ast {

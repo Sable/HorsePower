@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "Type.h"
+#include "../Type.h"
 
 using ASTMode = horseIR::ast::ASTNode ;
 using Type = horseIR::ast::Type ;

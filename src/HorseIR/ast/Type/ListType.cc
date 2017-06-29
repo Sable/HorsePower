@@ -1,7 +1,7 @@
 #include <string>
 #include <cassert>
 
-#include "Type.h"
+#include "../Type.h"
 
 using ASTNode = horseIR::ast::ASTNode ;
 using ListType = horseIR::ast::ListType ;

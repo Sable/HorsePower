@@ -2,7 +2,7 @@
 #include <cassert>
 #include <string>
 
-#include "Type.h"
+#include "../Type.h"
 
 using ASTNode = horseIR::ast::ASTNode ;
 using FunctionType = horseIR::ast::FunctionType ;
