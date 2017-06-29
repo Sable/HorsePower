@@ -12,7 +12,7 @@ typedef double     E;
 typedef struct { E real,imag; } X;
 
 typedef struct node_value{
-	L t,n;
+	L typ,len;
 	union{
 		B b;   //bool
 		C c;   //char
@@ -52,6 +52,9 @@ enum H_T {
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;}
 
+/* constant code */
+#define ERROR_CODE 99
+
 /* extern */
 
 extern G H_heap;
@@ -63,3 +66,4 @@ extern G H_heap;
 #include "h_memory.h"
 #include "h_symbol.h"
 #include "h_primitive.h"
+#include "h_io.h"
