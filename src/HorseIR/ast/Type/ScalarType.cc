@@ -3,9 +3,7 @@
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using ScalarType = horseIR::ast::ScalarType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Scalar, ASTNode::ASTNodeType::ScalarType)
@@ -114,7 +112,7 @@ std::string ScalarType::toTreeString() const
     return "(ScalarType " + toString() + ")" ;
 }
 
-constexpr ScalarType::ScalarClass ScalarType::getScalarClass() const
+ScalarType::ScalarClass ScalarType::getScalarClass() const
 {
     return scalarClass ;
 }

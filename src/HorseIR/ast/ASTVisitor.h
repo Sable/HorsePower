@@ -10,7 +10,7 @@ namespace horseIR {
     namespace ast {
         class ASTVisitor {
         public:
-            virtual antlrcpp::Any visit(ASTNode* node) ;
+            virtual antlrcpp::Any visit(ASTNode* node) = 0;
         protected:
             virtual antlrcpp::Any visitNilLiteral(NilLiteral* nilLiteral) = 0 ;
             virtual antlrcpp::Any visitComplexLiteral(ComplexLiteral* complexLiteral) = 0 ;

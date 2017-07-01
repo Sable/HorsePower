@@ -3,9 +3,7 @@
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using EnumerationType = horseIR::ast::EnumerationType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeType::EnumerationType)
@@ -53,7 +51,7 @@ std::string EnumerationType::toTreeString() const
     return "(EnumerationType " + elementType->toTreeString() + ")" ;
 }
 
-constexpr Type* EnumerationType::getElementType() const
+Type* EnumerationType::getElementType() const
 {
     return elementType ;
 }

@@ -48,7 +48,7 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
-            constexpr ScalarType::ScalarClass getScalarClass() const ;
+            ScalarType::ScalarClass getScalarClass() const ;
             ScalarType& setScalarClass(const ScalarType::ScalarClass type) ;
         protected:
             ScalarType::ScalarClass scalarClass ; 
@@ -81,7 +81,7 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
-            constexpr Type* getElementType() const ;
+            Type* getElementType() const ;
             ListType& setElementType(const Type* type) ;
         protected:
             Type* elementType ;
@@ -100,8 +100,8 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
-            constexpr Type* getKeyType() const ;
-            constexpr Type* getValueType() const ;
+            Type* getKeyType() const ;
+            Type* getValueType() const ;
             DictionaryType& setKeyType(const Type* type) ;
             DictionaryType& setValueType(const Type* type) ;
         protected:
@@ -122,7 +122,7 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
             
-            constexpr Type* getElementType() const ;
+            Type* getElementType() const ;
             EnumerationType& setElementType(const Type* type) ;
         protected:
             Type* elementType ;
@@ -141,11 +141,11 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
 
-            constexpr std::size_t getMinNumParameters() const ;
-            constexpr bool isFlexible() const ;
-            constexpr Type* getReturnType() const ;
-            constexpr std::vector<Type*> getParameterTypes() const ;
-            constexpr Type* getParameterTypeAt(std::size_t pos) const ;
+            std::size_t getMinNumParameters() const ;
+            bool isFlexible() const ;
+            Type* getReturnType() const ;
+            std::vector<Type*> getParameterTypes() const ;
+            Type* getParameterTypeAt(std::size_t pos) const ;
 
             FunctionType& addParameterType(Type* type) ;
             FunctionType& setParameterTypeAt(std::size_t pos, Type* type) ;

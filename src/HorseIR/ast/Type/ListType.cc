@@ -3,9 +3,7 @@
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using ListType = horseIR::ast::ListType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::List, ASTNode::ASTNodeType::ListType)
@@ -53,7 +51,7 @@ std::string ListType::toTreeString() const
     return "(ListType " + elementType->toTreeString() + ")" ;
 }
 
-constexpr Type* ListType::getElementType() const
+Type* ListType::getElementType() const
 {
     return elementType ;
 }

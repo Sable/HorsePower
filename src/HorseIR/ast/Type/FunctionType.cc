@@ -1,12 +1,11 @@
 #include <cstddef>
 #include <cassert>
 #include <string>
+#include <vector>
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using FunctionType = horseIR::ast::FunctionType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeType::FunctionType) 
@@ -102,11 +101,13 @@ std::vector<ASTNode*> FunctionType::getChildren() const
     std::vector<ASTNode*> retVector ;
     for (auto ptr = parameterTypes.cbegin(); ptr != parameterTypes.cend(); ++ptr) {
         if (*ptr != nullptr) {
-            retVector.push_back(*ptr) ;
+            ASTNode* node_ptr = *ptr ;
+            retVector.push_back(node_ptr) ;
         }
     }
     if (returnType != nullptr) {
-        retVector.push_back(returnType) ;
+        ASTNode* ret_ptr = returnType ;
+        retVector.push_back(ret_ptr) ;
     }
     return retVector ;
 }
@@ -145,17 +146,27 @@ std::string FunctionType::toTreeString() const
     return ostream.str() ;
 }
 
-constexpr std::size_t FunctionType::getMinNumParameters() const
+std::size_t FunctionType::getMinNumParameters() const
 {
     return parameterTypes.size() ;
 }
 
-constexpr bool FunctionType::isFlexible() const
+bool FunctionType::isFlexible() const
 {
     return flexible ;
 }
 
-constexpr Type* FunctionType::getParameterTypeAt(std::size_t pos) const
+Type* FunctionType::getReturnType() const
+{
+    return returnType ;
+}
+
+std::vector<Type*> FunctionType::getParameterTypes() const
+{
+    return parameterTypes ;
+}
+
+Type* FunctionType::getParameterTypeAt(std::size_t pos) const
 {
     return parameterTypes.at(pos) ;
 }

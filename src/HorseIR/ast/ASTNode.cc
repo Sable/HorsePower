@@ -1,6 +1,6 @@
 #include "ASTNode.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
+using namespace horseIR::ast ;
 
 ASTNode::ASTNode(ASTNode::MemManagerType& mem, ASTNode::ASTNodeType type)
     : ASTNode(nullptr, mem, type)
@@ -13,9 +13,14 @@ ASTNode::ASTNode(const antlr4::tree::ParseTree* pTree, ASTNode::MemManagerType& 
     mem.manage(this) ;
 }
 
-const antlr4::tree::ParseTree* ASTNode::getCST()
+const antlr4::tree::ParseTree* ASTNode::getCST() const
 {
     return cst ;
+}
+
+ASTNode::ASTNodeType ASTNode::getNodeType() const
+{
+    return nodeType ;
 }
 
 ASTNode::MemManagerType& ASTNode::MemManagerType::manage(ASTNode* ptr)

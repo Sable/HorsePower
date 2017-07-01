@@ -3,9 +3,7 @@
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using WildcardType = horseIR::ast::WildcardType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeType::WildcardType)

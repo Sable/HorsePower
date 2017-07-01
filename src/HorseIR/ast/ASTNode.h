@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #include "antlr4-runtime.h"
-#include "../HorsePower/src/HorseIR/grammar/HorseIRParser.h"
+#include "../grammar/HorseIRParser.h"
 
 namespace horseIR {
     namespace ast {
@@ -23,6 +23,12 @@ namespace horseIR {
             } ;
 
             enum class ASTNodeType {
+                NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
+                Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
+                FP64Literal, SymbolLiteral, TimeMonthLiteral, TimeDateLiteral, TimeDateTimeLiteral,
+                TimeMinuteLiteral, TimeSecondLiteral, TimeTimeLiteral, FunctionLiteral, TableLiteral,
+                KeyTableLiteral, StringLiteral,
+
                 ScalarType, WildcardType, ListType, DictionaryType,
                 EnumerationType, FunctionType
             } ;
@@ -34,8 +40,8 @@ namespace horseIR {
             virtual std::size_t getNumNodesRecursively() const = 0;
             virtual std::vector<ASTNode*> getChildren() const = 0 ;
 
-            const antlr4::tree::ParseTree* getCST() ;
-            const ASTNode::ASTNodeType getNodeType() ;
+            const antlr4::tree::ParseTree* getCST() const ;
+            ASTNode::ASTNodeType getNodeType() const ;
 
             virtual std::string toString() const = 0 ;
             virtual std::string toTreeString() const = 0 ;

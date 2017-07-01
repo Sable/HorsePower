@@ -2,8 +2,7 @@
 
 #include "../Type.h"
 
-using ASTMode = horseIR::ast::ASTNode ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type)
     : typeClass(p_typeClass),

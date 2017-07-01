@@ -3,9 +3,7 @@
 
 #include "../Type.h"
 
-using ASTNode = horseIR::ast::ASTNode ;
-using DictionaryType = horseIR::ast::DictionaryType ;
-using Type = horseIR::ast::Type ;
+using namespace horseIR::ast ;
 
 DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
     : Type(cst, mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeType::DictionaryType)
@@ -59,7 +57,7 @@ std::string DictionaryType::toTreeString() const
         valueType->toTreeString() + ")" ;
 }
 
-constexpr Type* DictionaryType::getKeyType() const
+Type* DictionaryType::getKeyType() const
 {
     return keyType ;
 }
@@ -71,7 +69,7 @@ DictionaryType& DictionaryType::setKeyType(const Type* type)
     return *this ;
 }
 
-constexpr Type* DictionaryType::getValueType() const
+Type* DictionaryType::getValueType() const
 {
     return valueType ;
 }
