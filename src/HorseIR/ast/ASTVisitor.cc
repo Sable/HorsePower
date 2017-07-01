@@ -55,84 +55,184 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::ComplexLiteral: {
-            (void) visit(static_cast<ComplexLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<ComplexLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::BoolLiteral: {
-            (void) visit(static_cast<BoolLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<BoolLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::CharLiteral: {
-            (void) visit(static_cast<CharLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<CharLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::Integer8Literal: {
-            (void) visit(static_cast<Integer8Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<Integer8Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::Integer16Literal: {
-            (void) visit(static_cast<Integer16Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<Integer16Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::Integer32Literal: {
-            (void) visit(static_cast<Integer32Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<Integer32Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::Integer64Literal: {
-            (void) visit(static_cast<Integer64Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<Integer64Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::FP32Literal: {
-            (void) visit(static_cast<FP32Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<FP32Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::FP64Literal: {
-            (void) visit(static_cast<FP64Literal*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<FP64Literal*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::SymbolLiteral: {
-            (void) visit(static_cast<SymbolLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<SymbolLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeMonthLiteral: {
-            (void) visit(static_cast<TimeMonthLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeMonthLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeDateLiteral: {
-            (void) visit(static_cast<TimeDateLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeDateLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeDateTimeLiteral: {
-            (void) visit(static_cast<TimeDateTimeLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeDateTimeLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeMinuteLiteral: {
-            (void) visit(static_cast<TimeMinuteLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeMinuteLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeSecondLiteral: {
-            (void) visit(static_cast<TimeSecondLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeSecondLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TimeTimeLiteral: {
-            (void) visit(static_cast<TimeTimeLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TimeTimeLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::FunctionLiteral: {
-            (void) visit(static_cast<FunctionLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<FunctionLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::TableLiteral: {
-            (void) visit(static_cast<TableLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<TableLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::KeyTableLiteral: {
-            (void) visit(static_cast<KeyTableLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<KeyTableLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::StringLiteral: {
-            (void) visit(static_cast<StringLiteral*>(node)->getLiteralType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* typeASTNode = static_cast<StringLiteral*>(node)->getLiteralType() ;
+            std::size_t visitCounter {0};
+            if (typeASTNode != nullptr) {
+                (void) visit(typeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
 
         case ASTNodeType::ScalarType: {
@@ -142,27 +242,54 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             return antlrcpp::Any(0) ;
         }
         case ASTNodeType::ListType: {
-            (void) visit(static_cast<ListType*>(node)->getElementType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* elementTypeASTNode = static_cast<ListType*>(node)->getElementType() ;
+            std::size_t visitCounter {0};
+            if (elementTypeASTNode != nullptr) {
+                (void) visit(elementTypeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::DictionaryType: {
-            const auto ptr = static_cast<DictionaryType*>(node) ;
-            (void) visit(ptr->getKeyType()) ;
-            (void) visit(ptr->getValueType()) ;
-            return antlrcpp::Any(2) ;
+            ASTNode* keyTypeASTNode = static_cast<DictionaryType*>(node)->getKeyType() ;
+            ASTNode* valueTypeASTNode = static_cast<DictionaryType*>(node)->getValueType() ;
+            std::size_t visitCounter {0};
+            if (keyTypeASTNode != nullptr) {
+                (void) visit(keyTypeASTNode) ;
+                ++visitCounter ;
+            }
+            if (valueTypeASTNode != nullptr) {
+                (void) visit(valueTypeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::EnumerationType: {
-            (void) visit(static_cast<EnumerationType*>(node)->getElementType()) ;
-            return antlrcpp::Any(1) ;
+            ASTNode* elementTypeASTNode = static_cast<EnumerationType*>(node)->getElementType() ;
+            std::size_t visitCounter {0};
+            if (elementTypeASTNode != nullptr) {
+                (void) visit(elementTypeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
         case ASTNodeType::FunctionType: {
             const auto ptr = static_cast<FunctionType*>(node) ;
+            std::size_t visitCounter {0};
             std::vector<Type*> parameters(ptr->getParameterTypes()) ;
             for (auto iter = parameters.cbegin(); iter != parameters.cend(); ++iter) {
-                (void) visit(*iter) ;
+                ASTNode* astNodePtr = *iter ;
+                if (astNodePtr != nullptr) {
+                    (void) visit(*iter);
+                    ++visitCounter ;
+                }
             }
-            (void) visit(ptr->getReturnType()) ;
-            return antlrcpp::Any(parameters.size() + 1) ;
+            ASTNode* retTypeASTNode = ptr->getReturnType() ;
+            if (retTypeASTNode != nullptr) {
+                (void) visit(retTypeASTNode) ;
+                ++visitCounter ;
+            }
+            return antlrcpp::Any(visitCounter) ;
         }
     }
 }
