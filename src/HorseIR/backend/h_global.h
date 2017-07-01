@@ -57,6 +57,8 @@ enum H_T {
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;}
 
+#define EMPTY_STRING(s) ((s)[0]!=0)
+
 /* constant code */
 #define ERROR_CODE 99
 

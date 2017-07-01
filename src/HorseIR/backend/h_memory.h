@@ -2,8 +2,9 @@
 
 /* macros */
 
-#define AL(typ,n) h_malloc(typ, n)
+#define AL(typ,n) hMalloc(typ, n)
 
 /* methods */
 
-G h_malloc(H_T typ, L n);
+G hMalloc(H_T typ, L n);
+L getTypeSize(H_T typ);

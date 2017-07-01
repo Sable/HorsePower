@@ -5,6 +5,7 @@ const C LINE_SEP      = '|';
 
 /*
  * 1: csv
+ * 2: txt (optional)
  */
 L readFile(S fileName, L op){
 	FILE *fp = openFile(fileName);
@@ -18,6 +19,7 @@ L readFile(S fileName, L op){
 
 L readCSV(FILE* fp){
 	C line[LINE_MAX_CHAR];
+	L tot = 0;
 	while(fgets(line, LINE_MAX_CHAR, fp)){
 		getField(line, LINE_SEP);
 	}
