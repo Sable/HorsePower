@@ -1,14 +1,14 @@
-## Bult-in functions
+# Bult-in functions
 
-Type alias
+## <p id="alias">1. Type alias</p>
 
 - A = B, H, I, L, F, E
 - K = B, C, H, I, L, F, E, S, M, D, Z, U, W, T
   
 
-### <p id="basic">Basics</p>
+## <p id="basic">2. Basics</p>
 
-**Unary**
+### 2.1 Unary
 
 No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
 :--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
@@ -33,7 +33,7 @@ No.| Function             | Description                 | Type of Argument(s)\* 
 19 | time_mill(x)         | Time: millisecond           | T,Z                              | L                             | [link](date.md#time-mill)    |19 |
 
 
-**Binary**
+### 2.2 Binary
 
 No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
 :--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
@@ -61,71 +61,66 @@ No.| Function             | Description                 | Type of Argument(s)\* 
 
 \* [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp)
 
-### <p id="Algebraic">Algebraic related</p>
+## <p id="Algebraic">3. Algebraic related</p>
 
-**Binary**
+### 3.1 Unary
 
 No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
 :--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
 1  | asc(x)               | Ascending order (index)     | Pending                          | L                             | [link](builtin/asc.md)       |1  |
+2  | desc(x)              | Descending order (index)    | Pending                          | L                             | [link](builtin/desc.md)      |2  |
+3  | unique(x)            | Unique values               | Pending                          | Same as argument              | [link](builtin/unique.md)    |3  |
+4  | str(x)               | Format                      | Pending                          | S                             | [link](builtin/str.md)       |4  |
+5  | len(x)               | Length                      | Pending                          | L                             | [link](builtin/len.md)       |5  |
+6  | range(x)             | Iota                        | B,H,I,L                          | List                          | [link](builtin/range.md)     |6  |
+7  | fact(x)              | Factorial                   | B,H,I,L                          | E                             | [link](builtin/fact.md)      |7  |
+8  | at(x)                | Member                      | Pending                          | B                             | [link](builtin/at.md)        |8  |
+9  | max(x)               | Maximum                     | Pending                          | Same as argument              | link                         |9  |
+10 | min(x)               | Minimum                     | Pending                          | Same as argument              | link                         |10 |
+11 | rand(x)              | Random number generator     | B,H,I,L                          | Same as argument              | link                         |11 |
+12 | seed(x)              | Random seed                 | B,H,I,L                          | L                             | link                         |12 |
+13 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table       | Table or Dict                 | link                         |13 |
+14 | reverse(x)           | Reverse                     | Pending                          | Pending                       | link                         |14 |
+15 | where(x)             | Find all trues              | B                                | L                             | link                         |15 |
+16 | raze(x)              | Raze a nested list          | Pending                          | Pending                       | link                         |16 |
+17 | enlist(x)            | Return a list               | Pending                          | Pending                       | link                         |17 |
+18 | scalar(x)            | Return a scalar             | Pending                          | Pending                       | link                         |18 |
 
-### <p id="others">Others</p>
+### 3.2 Binary
 
-Trigonometric
+No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
+:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
+1  | append(x,y)          | Append to a list            | Pending                          | Pending                       | link                         |1  |
+2  | like(x,y)            | Patten x matches y          | Pending                          | B                             | link                         |2  |
+3  | concat(x,y)          | Concatenate x and y         | Pending                          | Pending                       | link                         |3  |
+4  | concat(x,y)          | Concatenate x and y         | Pending                          | Pending                       | link                         |4  |
+5  | randk(x,k)           | rand(x) in k times          | Pending                          | Pending                       | link                         |5  |
+6  | index_of(x,y)        | index of y in x             | Pending                          | Pending                       | link                         |6  |
+7  | take(k,x)            | Take first/last k elem. of y| Pending                          | Pending                       | link                         |7  |
+8  | drop(k,x)            | Drop first/last k elem. of y| Pending                          | Pending                       | link                         |8  |
 
-| Function                        | Description             |
-| :------------------------------ | :---------------------- |
-| [trig](builtin/trig.md)         | trigonometric functions |
+## <p id="database">4. Database related</p>
 
-### <p id="general">General</p>
+No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
+:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
+1  | list                 |                             | Pending                          | Pending                       | link                         |1  |
+2  | enum                 |                             | Pending                          | Pending                       | link                         |2  |
+3  | dict                 |                             | Pending                          | Pending                       | link                         |3  |
+4  | table                |                             | Pending                          | Pending                       | link                         |4  |
+5  | key                  |                             | Pending                          | Pending                       | link                         |5  |
+6  | value                |                             | Pending                          | Pending                       | link                         |6  |
+7  | meta                 |                             | Pending                          | Pending                       | link                         |7  |
+8  | ktable               |                             | Pending                          | Pending                       | link                         |8  |
+9  | column_value         |                             | Pending                          | Pending                       | link                         |9  |
 
-| Function                        | Description             | Function                        | Description             |
-| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| [asc](builtin/asc.md)           | ascending order         | [rand*](builtin/rand.md)        | random number generator |
-| [desc](builtin/desc.md)         | descending order        | [randk*](builtin/randk.md)      | repeat rand             |
-| [unique](builtin/unique.md)     | unique values           | [seed*](builtin/seed.md)        | random seed             |
-| [str](builtin/str.md)           | format                  | [flip*](builtin/flip.md)        | flip to a table         |
-| [len](builtin/len.md)           | length                  | [reverse*](builtin/reverse.md)  | reverse                 |
-| [range](builtin/range.md)       | range(0,n-1)            | [where*](builtin/where.md)      | find all trues          |
-| [fact](builtin/fact.md)         | factorial*              | [raze*](builtin/raze.md)        | raze                    |
-| [at](builtin/at.md)             | member                  | [enlist*](builtin/enlist.md)    | return a list           |
-| [max*](builtin/max.md)          | maximum                 | [scalar*](builtin/scalar.md)    | return a scalar         | 
-| [min*](builtin/min.md)          | min                     | [index_of*](builtin/indexof.md) | index of (mysql: FIELD) | 
-| [append*](builtin/append.md)    | append                  | [take*](builtin/take.md)        | take elements           | 
-| [like*](builtin/like.md)        | match                   | [drop*](builtin/drop.md)        | drop elements           |  
-| [concat*]()                     | concatenation           | [alphabet*]()                   | alphabet                |
+## <p id="others">5. Others</p>
 
-Indexing
-
-| Function                        | Description             | Function                        | Description             |
-| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| [index*](builtin/index.md)      | list indexing           | [index_a*](builtin/index.md)    | list indexing assignment|
-
-Printing
-
-| Function                        | Description             | Function                        | Description             |
-| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| [print*]()                      | print                   |                                 |                         |
-
-### <p id="database">Database related</p>
-
-| Function                        | Description             | Function                        | Description             |
-| :------------------------------ | :---------------------- | :------------------------------ | :---------------------- |
-| list                            |                         | [column_value](builtin/column_value.md) |                 |
-| enum                            |                         |                                 |                         |
-| dict                            |                         |                                 |                         |
-| table                           | create a new table      |                                 |                         |
-| key                             |                         |                                 |                         | 
-| value                           |                         |                                 |                         | 
-| meta                            |                         |                                 |                         | 
-| ktable                          | create a new keyed table|                                 |                         | 
-
-### <p id="system">System related</p>
-
-I/O
-
-| Function                        | Description             |
-| :------------------------------ | :---------------------- |
-| load_csv                        | load a csv file         |
-
+No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
+:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
+1  | trig(k,x)            | Trigonometric functions     | Pending                          | Pending                       | [link](builtin/trig.md)      |1  |
+2  | alphabet()           | All alphabet set            | Pending                          | S                             | link                         |2  |
+3  | index(x,y)           | List indexing (x[y])        | Pending                          | S                             | link                         |3  |
+4  | index_a              | List indexing assignment    | Pending                          | S                             | link                         |4  |
+5  | print                | Output                      | Pending                          | S                             | link                         |5  |
+6  | load_csv             | Load a csv file             | Pending                          | S                             | link                         |6  |
 
