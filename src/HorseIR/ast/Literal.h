@@ -15,7 +15,7 @@ namespace horseIR {
         class Literal : public ASTNode {
         public:
             enum class LiteralClass {
-                NilLiteral, ComplexLiteral, BoolLiteral
+                NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, IntegerLiteral
             } ;
             Literal() = delete ;
             Literal(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Literal::LiteralClass p_literalClass, ASTNode::ASTNodeType type) ;
@@ -106,6 +106,10 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
+
+        protected:
+            Type* type ;
+            InternalType value ;
         } ;
 
         class IntegerLiteral : public Literal {
@@ -131,7 +135,7 @@ namespace horseIR {
 
             static IntegerLiteral* makeIntegerLiteralASTNode(HorseIRParser::LiteralCaseIntegerContext* cst, ASTNode::MemManagerType& mem) ;
         protected:
-            IntegerLiteral::IntegerLiteralClass integerLiteralClass ;
+            const IntegerLiteral::IntegerLiteralClass integerLiteralClass ;
         } ;
 
         class Integer8Literal : public IntegerLiteral {
@@ -210,6 +214,7 @@ namespace horseIR {
         } ;
 
         class Integer64Literal : public IntegerLiteral {
+        public:
             typedef std::int_fast64_t InternalType ;
 
             Integer64Literal() = delete ;
