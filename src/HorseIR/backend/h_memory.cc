@@ -6,7 +6,7 @@ G H_heap = NULL;
 
 /* methods */
 
-G hMalloc(H_T typ, L n){
+G hMalloc(H_Type typ, L n){
 	G r = (G)malloc(getTypeSize(typ) * n);
 	if(!r) {
 		P("error\n");
@@ -15,7 +15,7 @@ G hMalloc(H_T typ, L n){
 	return r;
 }
 
-L getTypeSize(H_T typ){
+L getTypeSize(H_Type typ){
 	L r = -1;
 	switch(typ){
 		case H_bool    : r = sizeof(B);     break;

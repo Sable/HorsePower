@@ -4,9 +4,10 @@
 extern "C" {
 #endif
 
+/* methods */
+
+L loadFile();
 
 #ifdef	__cplusplus
 }
 #endif
-
-

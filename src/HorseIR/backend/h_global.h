@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+#include <stdbool.h>
+
 /* all types */
 
 typedef bool       B;
@@ -40,13 +46,13 @@ typedef struct list_value_node{
 
 /* type enum */
 
-enum H_T {
+typedef enum h_type {
 	H_bool, H_char, H_short, H_int, H_long,
 	H_float, H_double,
 	H_complex, H_symbol,
 	H_month, H_date, H_datetime,
 	H_minute, H_second, H_time
-};
+}H_Type;
 
 /* macros */
 
@@ -57,7 +63,8 @@ enum H_T {
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;}
 
-#define EMPTY_STRING(s) ((s)[0]!=0)
+#define STRING_EMPTY(s) ((s)[0]!=0)
+#define STRING_NONEMPTY(s) ((s)[0]!=0)
 
 /* constant code */
 #define ERROR_CODE 99
@@ -66,12 +73,18 @@ enum H_T {
 
 extern G H_heap;
 
+#ifdef	__cplusplus
+}
+#endif
+
 /* include .h files */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "h_memory.h"
 #include "h_symbol.h"
 #include "h_libs.h"
 #include "h_primitive.h"
 #include "h_io.h"
+#include "test.h"
