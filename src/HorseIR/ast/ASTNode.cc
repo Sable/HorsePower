@@ -33,6 +33,9 @@ ASTNode::MemManagerType& ASTNode::MemManagerType::manage(ASTNode* ptr)
         /* duplicate ignore */
     } else {
         pool.emplace_back(ptr) ;
+        std::cout << "node successfully allocated with address: 0x"
+                  << std::hex
+                  << (std::intptr_t) ptr << std::endl ;
     }
     return *this ;
 }

@@ -61,20 +61,20 @@ expression      : (methodCall | operand)                                #exprBas
                 | 'phi' '(' label name (',' label name)* ')'            #exprPhi
                 ;
 
-literal         : literalBool
-                | literalChar
-                | literalInteger
-                | literalFloat
-                | literalComplex
-                | literalSymbol
-                | literalTime
-                | literalFunction
-                | literalTable
-                | literalKtable
-                | literalString
-                | literalList
-                | literalDict
-                | literalNil
+literal         : literalBool       #LiteralCaseBool
+                | literalChar       #LiteralCaseChar
+                | literalInteger    #LiteralCaseInteger
+                | literalFloat      #LiteralCaseFloat
+                | literalComplex    #LiteralCaseComplex
+                | literalSymbol     #LiteralCaseSymbol
+                | literalTime       #LiteralCaseTime
+                | literalFunction   #LiteralCaseFunction
+                | literalTable      #LiteralCaseTable
+                | literalKtable     #LiteralCaseKtable
+                | literalString     #LiteralCaseString
+                | literalList       #LiteralCaseList
+                | literalDict       #LiteralCaseDict
+                | literalNil        #LiteralCaseNil
                 ;
 
 literalList     : '[' literalListInternal ']' (':' listType=typeList)? ;
