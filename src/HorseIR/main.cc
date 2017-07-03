@@ -15,12 +15,15 @@
 using antlr4::tree::ParseTree;
 using antlr4::tree::ParseTreeWalker;
 
+#include "backend/h_global.h"
+
 /*
  * https://github.com/antlr/antlr4/blob/master/doc/cpp-target.md
  */
 
 bool flagVersion = false;
 bool flagUsage   = false;
+bool flagTest    = false;
 char *inputPath  = NULL;
 
 void usage();
@@ -37,6 +40,10 @@ int main(int argc, char *argv[]){
     }
     else if(flagVersion){
         printf("HorseIR version: 0.1\n");
+    }
+    else if(flagTest){
+        printf("...Testing...\n");
+        testInputFile(inputPath);
     }
     else if(inputPath!=NULL){
         antlr4::ANTLRFileStream fileStream(inputPath);
@@ -67,11 +74,12 @@ int main(int argc, char *argv[]){
 
 int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvp:")) != -1){
+    while((c = getopt(argc, argv, "hvp:t")) != -1){
         switch(c){
             case 'h': flagUsage   = true; break;
             case 'v': flagVersion = true; break;
             case 'p': inputPath = optarg; break;
+            case 't': flagTest    = true; break;
             default : return 1;
         }
     }
@@ -83,5 +91,6 @@ void usage(){
     std::cout << "  -h           Print this information" << std::endl;
     std::cout << "  -p <path>    Set an input file"      << std::endl;
     std::cout << "  -v           Print HorseIR version"  << std::endl;
+    std::cout << "  -t           For test only"          << std::endl;
 }
 

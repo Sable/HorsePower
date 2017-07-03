@@ -4,11 +4,11 @@ ANTLR4_INCLUDE_DIR="/usr/local/include/antlr4-runtime"
 LINK_LIBS=-L./grammar -lstdc++ -lantlr4-runtime -lMIRParser
 all: ${EXE}
 
-${EXE}: *.cc util util/*.o
+${EXE}: *.cc util util/*.o backend
 	cc ${CXXFLAGS} -c -I${ANTLR4_INCLUDE_DIR} main.cc
-	cc *.o util/*.o ${CXXFLAGS} ${LINK_LIBS} -o $@
+	cc *.o util/*.o backend/*.o ${CXXFLAGS} ${LINK_LIBS} -o $@
 
-.PHONY: grammar tests clean util
+.PHONY: grammar tests clean util backend
 grammar:
 	make -C grammar
 
@@ -20,4 +20,7 @@ clean:
 
 util:
 	make -C util/
+
+backend:
+	make -C backend/
 
