@@ -61,7 +61,6 @@ FILE* openFile(S s){
 	R fp;
 }
 
-
 /* helper functions */
 
 #define SKIP(x,a) ((x)==(a))
@@ -89,3 +88,36 @@ void errorMsg(S msg){
 	fprintf(stderr, "%s\n", msg);
 	exit(ERROR_CODE);
 }
+
+
+/* output */
+
+void printItem(V x, S strBuff){
+	switch(xp){
+		caseB SP(strBuff, "%d"  , xb); break;
+		caseI SP(strBuff, "%d"  , xi); break;
+		caseL SP(strBuff, "%lld", xl); break;
+		caseE SP(strBuff, "%lf" , xe); break;
+		caseS SP(strBuff, "%lld", xs); break;
+	}
+}
+
+void printListItem(V x, L k, S strBuff){
+	switch(xp){
+		caseB SP(strBuff, "%d"  , xB(k)); break;
+		caseI SP(strBuff, "%d"  , xI(k)); break;
+		caseL SP(strBuff, "%lld", xL(k)); break;
+		caseE SP(strBuff, "%lf" , xF(k)); break;
+		caseS SP(strBuff, "%lld", xS(k)); break;
+		caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
+	}
+	P("%s ", strBuff);
+}
+
+void printList(V x){
+	C buff[128];
+	P("{");
+	DOI(xn, printListItem(x,i,buff));
+	P("}\n");
+}
+
