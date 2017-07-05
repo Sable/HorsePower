@@ -20,10 +20,15 @@ L testInputFile(S filePath){
 
 L testMain(){
 	hInit(); 
+	loadCSV();
 	// if(loadCSV(CSV_EMP) && loadCSV(CSV_DEP)){
 	// 	P("Two csv files have been loaded successfully");
 	// }
 	getchar();
 	R 0;
+}
+
+L loadCSV(){
+	R readFile((S)CSV_EMP, 1);
 }
 

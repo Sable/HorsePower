@@ -47,16 +47,6 @@ typedef struct list_value_node{
 
 #include "h_global_type.h"
 
-/* type enum */
-
-typedef enum h_type {
-	H_bool, H_char, H_short, H_int, H_long,
-	H_float, H_double,
-	H_complex, H_symbol,
-	H_month, H_date, H_datetime,
-	H_minute, H_second, H_time
-}H_Type;
-
 /* macros */
 
 #define P printf
