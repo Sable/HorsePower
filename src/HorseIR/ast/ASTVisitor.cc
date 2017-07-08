@@ -6,7 +6,7 @@ using namespace horseIR::ast ;
 
 antlrcpp::Any ASTBaseVisitor::visit(ASTNode *node)
 {
-    using ASTNodeType = ASTNode::ASTNodeType ;
+    using ASTNodeType = ASTNode::ASTNodeClass ;
     const ASTNodeType nodeType = node->getNodeType() ;
     switch (nodeType) {
         case ASTNodeType::NilLiteral: return visitNilLiteral(static_cast<NilLiteral*>(node)) ;
@@ -17,19 +17,21 @@ antlrcpp::Any ASTBaseVisitor::visit(ASTNode *node)
         case ASTNodeType::Integer16Literal: return visitInteger16Literal(static_cast<Integer16Literal*>(node)) ;
         case ASTNodeType::Integer32Literal: return visitInteger32Literal(static_cast<Integer32Literal*>(node)) ;
         case ASTNodeType::Integer64Literal: return visitInteger64Literal(static_cast<Integer64Literal*>(node)) ;
-        case ASTNodeType::FP32Literal: return visitFP32Literal(static_cast<FP32Literal*>(node)) ;
-        case ASTNodeType::FP64Literal: return visitFP64Literal(static_cast<FP64Literal*>(node)) ;
+        //case ASTNodeClass::FP32Literal: return visitFP32Literal(static_cast<FP32Literal*>(node)) ;
+        //case ASTNodeClass::FP64Literal: return visitFP64Literal(static_cast<FP64Literal*>(node)) ;
         case ASTNodeType::SymbolLiteral: return visitSymbolLiteral(static_cast<SymbolLiteral*>(node)) ;
-        case ASTNodeType::TimeMonthLiteral: return visitTimeMonthLiteral(static_cast<TimeMonthLiteral*>(node)) ;
-        case ASTNodeType::TimeDateLiteral: return visitTimeDateLiteral(static_cast<TimeDateLiteral*>(node)) ;
-        case ASTNodeType::TimeDateTimeLiteral: return visitTimeDateTimeLiteral(static_cast<TimeDateTimeLiteral*>(node));
-        case ASTNodeType::TimeMinuteLiteral: return visitTimeMinuteLiteral(static_cast<TimeMinuteLiteral*>(node)) ;
-        case ASTNodeType::TimeSecondLiteral: return visitTimeSecondLiteral(static_cast<TimeSecondLiteral*>(node)) ;
-        case ASTNodeType::TimeTimeLiteral: return visitTimeTimeLiteral(static_cast<TimeTimeLiteral*>(node)) ;
+        /*
+        case ASTNodeClass::TimeMonthLiteral: return visitTimeMonthLiteral(static_cast<TimeMonthLiteral*>(node)) ;
+        case ASTNodeClass::TimeDateLiteral: return visitTimeDateLiteral(static_cast<TimeDateLiteral*>(node)) ;
+        case ASTNodeClass::TimeDateTimeLiteral: return visitTimeDateTimeLiteral(static_cast<TimeDateTimeLiteral*>(node));
+        case ASTNodeClass::TimeMinuteLiteral: return visitTimeMinuteLiteral(static_cast<TimeMinuteLiteral*>(node)) ;
+        case ASTNodeClass::TimeSecondLiteral: return visitTimeSecondLiteral(static_cast<TimeSecondLiteral*>(node)) ;
+        case ASTNodeClass::TimeTimeLiteral: return visitTimeTimeLiteral(static_cast<TimeTimeLiteral*>(node)) ;
+         */
         case ASTNodeType::FunctionLiteral: return visitFunctionLiteral(static_cast<FunctionLiteral*>(node)) ;
         case ASTNodeType::TableLiteral: return visitTableLiteral(static_cast<TableLiteral*>(node)) ;
-        case ASTNodeType::KeyTableLiteral: return visitKeyTableLiteral(static_cast<KeyTableLiteral*>(node)) ;
-        case ASTNodeType::StringLiteral: return visitStringLiteral(static_cast<StringLiteral*>(node)) ;
+        //case ASTNodeClass::KeyTableLiteral: return visitKeyTableLiteral(static_cast<KeyTableLiteral*>(node)) ;
+        //case ASTNodeClass::StringLiteral: return visitStringLiteral(static_cast<StringLiteral*>(node)) ;
 
         case ASTNodeType::ScalarType: return visitScalarType(static_cast<ScalarType*>(node)) ;
         case ASTNodeType::WildcardType: return visitWildcardType(static_cast<WildcardType*>(node)) ;
@@ -42,7 +44,7 @@ antlrcpp::Any ASTBaseVisitor::visit(ASTNode *node)
 
 antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
 {
-    using ASTNodeType = ASTNode::ASTNodeType ;
+    using ASTNodeType = ASTNode::ASTNodeClass ;
     const ASTNodeType nodeType = node->getNodeType() ;
     switch (nodeType) {
         case ASTNodeType::NilLiteral: {
@@ -117,7 +119,8 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::FP32Literal: {
+        /*
+        case ASTNodeClass::FP32Literal: {
             ASTNode* typeASTNode = static_cast<FP32Literal*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -126,7 +129,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::FP64Literal: {
+        case ASTNodeClass::FP64Literal: {
             ASTNode* typeASTNode = static_cast<FP64Literal*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -135,6 +138,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
+         */
         case ASTNodeType::SymbolLiteral: {
             ASTNode* typeASTNode = static_cast<SymbolLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
@@ -144,7 +148,8 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeMonthLiteral: {
+        /*
+        case ASTNodeClass::TimeMonthLiteral: {
             ASTNode* typeASTNode = static_cast<TimeMonthLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -153,7 +158,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeDateLiteral: {
+        case ASTNodeClass::TimeDateLiteral: {
             ASTNode* typeASTNode = static_cast<TimeDateLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -162,7 +167,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeDateTimeLiteral: {
+        case ASTNodeClass::TimeDateTimeLiteral: {
             ASTNode* typeASTNode = static_cast<TimeDateTimeLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -171,7 +176,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeMinuteLiteral: {
+        case ASTNodeClass::TimeMinuteLiteral: {
             ASTNode* typeASTNode = static_cast<TimeMinuteLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -180,7 +185,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeSecondLiteral: {
+        case ASTNodeClass::TimeSecondLiteral: {
             ASTNode* typeASTNode = static_cast<TimeSecondLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -189,7 +194,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::TimeTimeLiteral: {
+        case ASTNodeClass::TimeTimeLiteral: {
             ASTNode* typeASTNode = static_cast<TimeTimeLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -198,6 +203,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
+         */
         case ASTNodeType::FunctionLiteral: {
             ASTNode* typeASTNode = static_cast<FunctionLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
@@ -216,7 +222,8 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::KeyTableLiteral: {
+        /*
+        case ASTNodeClass::KeyTableLiteral: {
             ASTNode* typeASTNode = static_cast<KeyTableLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -225,7 +232,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
-        case ASTNodeType::StringLiteral: {
+        case ASTNodeClass::StringLiteral: {
             ASTNode* typeASTNode = static_cast<StringLiteral*>(node)->getLiteralType() ;
             std::size_t visitCounter {0};
             if (typeASTNode != nullptr) {
@@ -234,6 +241,7 @@ antlrcpp::Any ASTBaseVisitor::visitChildren(ASTNode *node)
             }
             return antlrcpp::Any(visitCounter) ;
         }
+        */
 
         case ASTNodeType::ScalarType: {
             return antlrcpp::Any(0) ;
@@ -333,7 +341,7 @@ antlrcpp::Any ASTBaseVisitor::visitInteger64Literal(Integer64Literal *integer64L
 {
     return visitChildren(integer64Literal) ;
 }
-
+/*
 antlrcpp::Any ASTBaseVisitor::visitFP32Literal(FP32Literal *fp32Literal)
 {
     return visitChildren(fp32Literal) ;
@@ -343,12 +351,12 @@ antlrcpp::Any ASTBaseVisitor::visitFP64Literal(FP64Literal *fp64Literal)
 {
     return visitChildren(fp64Literal) ;
 }
-
+*/
 antlrcpp::Any ASTBaseVisitor::visitSymbolLiteral(SymbolLiteral *symbolLiteral)
 {
     return visitChildren(symbolLiteral) ;
 }
-
+/*
 antlrcpp::Any ASTBaseVisitor::visitTimeMonthLiteral(TimeMonthLiteral *timeMonthLiteral)
 {
     return visitChildren(timeMonthLiteral) ;
@@ -378,7 +386,7 @@ antlrcpp::Any ASTBaseVisitor::visitTimeTimeLiteral(TimeTimeLiteral *timeTimeLite
 {
     return visitChildren(timeTimeLiteral) ;
 }
-
+*/
 antlrcpp::Any ASTBaseVisitor::visitFunctionLiteral(FunctionLiteral *functionLiteral)
 {
     return visitChildren(functionLiteral) ;
@@ -388,7 +396,7 @@ antlrcpp::Any ASTBaseVisitor::visitTableLiteral(TableLiteral *tableLiteral)
 {
     return visitChildren(tableLiteral) ;
 }
-
+/*
 antlrcpp::Any ASTBaseVisitor::visitKeyTableLiteral(KeyTableLiteral *keyTableLiteral)
 {
     return visitChildren(keyTableLiteral) ;
@@ -398,7 +406,7 @@ antlrcpp::Any ASTBaseVisitor::visitStringLiteral(StringLiteral *stringLiteral)
 {
     return visitChildren(stringLiteral) ;
 }
-
+*/
 antlrcpp::Any ASTBaseVisitor::visitScalarType(ScalarType *type)
 {
     return visitChildren(type) ;

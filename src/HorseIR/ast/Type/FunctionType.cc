@@ -8,7 +8,7 @@
 using namespace horseIR::ast ;
 
 FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeType::FunctionType) 
+    : Type(cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType)
 {
     assert(cst != nullptr) ;
     
@@ -52,7 +52,7 @@ FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::Mem
 }
 
 FunctionType::FunctionType(ASTNode::MemManagerType& mem)
-    : Type(mem, Type::TypeClass::Function, ASTNode::ASTNodeType::FunctionType),
+    : Type(mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType),
       flexible(false),
       returnType(nullptr)
 {}

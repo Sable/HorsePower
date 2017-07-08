@@ -7,13 +7,13 @@
 using namespace horseIR::ast ;
 
 CharLiteral::CharLiteral(HorseIRParser::LiteralCaseCharContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::CharLiteral, ASTNode::ASTNodeType::CharLiteral)
+    : Literal(cst, mem, Literal::LiteralClass::CharLiteral, ASTNode::ASTNodeClass::CharLiteral)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 CharLiteral::CharLiteral(ASTNode::MemManagerType &mem)
-    : Literal(mem, Literal::LiteralClass::CharLiteral, ASTNode::ASTNodeType::CharLiteral)
+    : Literal(mem, Literal::LiteralClass::CharLiteral, ASTNode::ASTNodeClass::CharLiteral)
 {}
 
 horseIR::ast::Type* CharLiteral::getLiteralType() const

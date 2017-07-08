@@ -5,12 +5,12 @@
 using namespace horseIR::ast ;
 
 IntegerLiteral::IntegerLiteral(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem,
-                               ASTNode::ASTNodeType type, IntegerLiteral::IntegerLiteralClass p_integerLiteralClass)
+                               ASTNode::ASTNodeClass type, IntegerLiteral::IntegerLiteralClass p_integerLiteralClass)
     : Literal(cst, mem, Literal::LiteralClass::IntegerLiteral, type),
       integerLiteralClass(p_integerLiteralClass)
 {}
 
-IntegerLiteral::IntegerLiteral(ASTNode::MemManagerType &mem, ASTNode::ASTNodeType type,
+IntegerLiteral::IntegerLiteral(ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type,
                                IntegerLiteral::IntegerLiteralClass p_integerLiteralClass)
     : Literal(mem, Literal::LiteralClass::IntegerLiteral, type),
       integerLiteralClass(p_integerLiteralClass)

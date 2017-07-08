@@ -6,11 +6,11 @@
 using namespace horseIR::ast ;
 
 WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeType::WildcardType)
+    : Type(cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
 {}
 
 WildcardType::WildcardType(ASTNode::MemManagerType& mem)
-    : Type(mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeType::WildcardType)
+    : Type(mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
 {}
 
 bool WildcardType::isGeneralizationOf(const horseIR::ast::Type *type) const

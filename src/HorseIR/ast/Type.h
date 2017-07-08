@@ -17,8 +17,8 @@ namespace horseIR {
                 Wildcard, Scalar, List, Dictionary, Enumeration, Function
             } ;
             Type() = delete ;
-            Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type) ;
-            Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type) ;
+            Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type) ;
+            Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type) ;
             
             Type::TypeClass getTypeClass() const ;
             virtual bool isGeneralizationOf(const Type*) const = 0 ;

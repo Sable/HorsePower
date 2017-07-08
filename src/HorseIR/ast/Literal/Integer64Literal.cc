@@ -8,52 +8,53 @@
 
 using namespace horseIR::ast ;
 
-Integer32Literal::Integer32Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
-    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer32Literal, IntegerLiteralClass::Integer32Literal)
+Integer64Literal::Integer64Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
+    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer64Literal, IntegerLiteralClass::Integer64Literal)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
-Integer32Literal::Integer32Literal(ASTNode::MemManagerType &mem)
-    : IntegerLiteral(mem, ASTNode::ASTNodeClass::Integer32Literal, IntegerLiteralClass::Integer32Literal),
-      value(0)
+Integer64Literal::Integer64Literal(ASTNode::MemManagerType &mem)
+    : IntegerLiteral(mem, ASTNode::ASTNodeClass::Integer64Literal, IntegerLiteralClass::Integer64Literal)
 {}
 
-horseIR::ast::Type* Integer32Literal::getLiteralType() const
+horseIR::ast::Type* Integer64Literal::getLiteralType() const
 {
     return type ;
 }
 
-std::int8_t Integer32Literal::getInt8Value() const
+std::int8_t Integer64Literal::getInt8Value() const
 {
     if (value > std::numeric_limits<std::int8_t>::max()) throw std::overflow_error("literal casting overflow") ;
     if (value < std::numeric_limits<std::int8_t>::min()) throw std::underflow_error("literal casting underflow") ;
     return static_cast<std::int8_t>(value) ;
 }
 
-std::int16_t Integer32Literal::getInt16Value() const
+std::int16_t Integer64Literal::getInt16Value() const
 {
     if (value > std::numeric_limits<std::int16_t>::max()) throw std::overflow_error("literal casting overflow") ;
     if (value < std::numeric_limits<std::int16_t>::min()) throw std::underflow_error("literal casting underflow") ;
     return static_cast<std::int16_t>(value) ;
 }
 
-std::int32_t Integer32Literal::getInt32Value() const
+std::int32_t Integer64Literal::getInt32Value() const
 {
+    if (value > std::numeric_limits<std::int32_t>::max()) throw std::overflow_error("literal casting overflow") ;
+    if (value < std::numeric_limits<std::int32_t>::min()) throw std::underflow_error("literal casting underflow") ;
     return static_cast<std::int32_t>(value) ;
 }
 
-std::int64_t Integer32Literal::getInt64Value() const
+std::int64_t Integer64Literal::getInt64Value() const
 {
-    return static_cast<std::int64_t>(value) ;
+    return static_cast<std::int64_t>(value);
 }
 
-Integer32Literal::InternalType Integer32Literal::getValue() const
+Integer64Literal::InternalType Integer64Literal::getValue() const
 {
     return value ;
 }
 
-std::size_t Integer32Literal::getNumNodesRecursively() const
+std::size_t Integer64Literal::getNumNodesRecursively() const
 {
     if (type != nullptr) {
         return type->getNumNodesRecursively() + 1 ;
@@ -62,7 +63,7 @@ std::size_t Integer32Literal::getNumNodesRecursively() const
     }
 }
 
-std::vector<ASTNode*> Integer32Literal::getChildren() const
+std::vector<ASTNode*> Integer64Literal::getChildren() const
 {
     if (type != nullptr) {
         return std::vector<ASTNode*> {type} ;
@@ -71,7 +72,7 @@ std::vector<ASTNode*> Integer32Literal::getChildren() const
     }
 }
 
-std::string Integer32Literal::toString() const
+std::string Integer64Literal::toString() const
 {
     std::ostringstream stream ;
     stream << value ;
@@ -83,7 +84,7 @@ std::string Integer32Literal::toString() const
     return stream.str() ;
 }
 
-std::string Integer32Literal::toTreeString() const
+std::string Integer64Literal::toTreeString() const
 {
-    return "(Integer32Literal " + ((type != nullptr)? type->toTreeString(): "nullptr") + ")" ;
+    return "(Integer64Literal " + ((type != nullptr)? type->toTreeString(): "nullptr") + ")" ;
 }

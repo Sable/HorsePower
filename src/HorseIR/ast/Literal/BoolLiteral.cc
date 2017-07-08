@@ -7,13 +7,13 @@
 using namespace horseIR::ast ;
 
 BoolLiteral::BoolLiteral(HorseIRParser::LiteralCaseBoolContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::BoolLiteral, ASTNode::ASTNodeType::BoolLiteral)
+    : Literal(cst, mem, Literal::LiteralClass::BoolLiteral, ASTNode::ASTNodeClass::BoolLiteral)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 BoolLiteral::BoolLiteral(ASTNode::MemManagerType &mem)
-    : Literal(mem, Literal::LiteralClass::BoolLiteral, ASTNode::ASTNodeType::BoolLiteral),
+    : Literal(mem, Literal::LiteralClass::BoolLiteral, ASTNode::ASTNodeClass::BoolLiteral),
       type(nullptr)
 {}
 

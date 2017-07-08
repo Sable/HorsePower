@@ -7,13 +7,13 @@
 using namespace horseIR::ast ;
 
 Integer8Literal::Integer8Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
-    : IntegerLiteral(cst, mem, ASTNode::ASTNodeType::Integer8Literal, IntegerLiteralClass::Integer8Literal)
+    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer8Literal, IntegerLiteralClass::Integer8Literal)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 Integer8Literal::Integer8Literal(ASTNode::MemManagerType &mem)
-    : IntegerLiteral(mem, ASTNode::ASTNodeType::Integer8Literal, IntegerLiteralClass::Integer8Literal)
+    : IntegerLiteral(mem, ASTNode::ASTNodeClass::Integer8Literal, IntegerLiteralClass::Integer8Literal)
 {}
 
 horseIR::ast::Type* Integer8Literal::getLiteralType() const

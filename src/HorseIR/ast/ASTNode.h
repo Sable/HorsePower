@@ -22,7 +22,7 @@ namespace horseIR {
                 std::vector<std::unique_ptr<ASTNode>> pool ;
             } ;
 
-            enum class ASTNodeType {
+            enum class ASTNodeClass {
                 NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
                 Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
                 FP64Literal, SymbolLiteral, TimeMonthLiteral, TimeDateLiteral, TimeDateTimeLiteral,
@@ -30,24 +30,30 @@ namespace horseIR {
                 KeyTableLiteral, StringLiteral,
 
                 ScalarType, WildcardType, ListType, DictionaryType,
-                EnumerationType, FunctionType
+                EnumerationType, FunctionType,
+
+                CompilationUnit, Module, Method, LabelStatement, BranchStatement, PhiStatement
             } ;
             
             ASTNode () = delete ;
-            ASTNode (MemManagerType& mem, const ASTNode::ASTNodeType type) ;
-            ASTNode (const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeType type) ;
+            ASTNode (MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
+            ASTNode (const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
 
             virtual std::size_t getNumNodesRecursively() const = 0;
             virtual std::vector<ASTNode*> getChildren() const = 0 ;
 
             const antlr4::tree::ParseTree* getCST() const ;
-            ASTNode::ASTNodeType getNodeType() const ;
+            ASTNode::ASTNodeClass getNodeType() const ;
 
             virtual std::string toString() const = 0 ;
             virtual std::string toTreeString() const = 0 ;
+
         protected:
+            static const std::string INDENT ;
             const antlr4::tree::ParseTree* cst ;
-            const ASTNode::ASTNodeType nodeType ;
+            const ASTNode::ASTNodeClass nodeType ;
+
+            static std::string CSTNameToString(HorseIRParser::NameContext* nameContext) ;
         } ;
     }
 }

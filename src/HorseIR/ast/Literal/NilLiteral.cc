@@ -6,13 +6,13 @@
 using namespace horseIR::ast ;
 
 NilLiteral::NilLiteral(HorseIRParser::LiteralCaseNilContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::NilLiteral, ASTNode::ASTNodeType::NilLiteral)
+    : Literal(cst, mem, Literal::LiteralClass::NilLiteral, ASTNode::ASTNodeClass::NilLiteral)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 NilLiteral::NilLiteral(ASTNode::MemManagerType &mem)
-    : Literal(mem, Literal::LiteralClass::NilLiteral, ASTNode::ASTNodeType::NilLiteral),
+    : Literal(mem, Literal::LiteralClass::NilLiteral, ASTNode::ASTNodeClass::NilLiteral),
       type(nullptr)
 {}
 

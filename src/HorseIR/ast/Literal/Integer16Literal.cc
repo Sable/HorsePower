@@ -9,13 +9,13 @@
 using namespace horseIR::ast ;
 
 Integer16Literal::Integer16Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
-    : IntegerLiteral(cst, mem, ASTNode::ASTNodeType::Integer16Literal, IntegerLiteralClass::Integer16Literal)
+    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer16Literal, IntegerLiteralClass::Integer16Literal)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 Integer16Literal::Integer16Literal(ASTNode::MemManagerType &mem)
-    : IntegerLiteral(mem, ASTNode::ASTNodeType::Integer16Literal, IntegerLiteralClass::Integer16Literal),
+    : IntegerLiteral(mem, ASTNode::ASTNodeClass::Integer16Literal, IntegerLiteralClass::Integer16Literal),
       value(0)
 {}
 

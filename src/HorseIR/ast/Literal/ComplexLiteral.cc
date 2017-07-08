@@ -7,13 +7,13 @@
 using namespace horseIR::ast ;
 
 ComplexLiteral::ComplexLiteral(HorseIRParser::LiteralCaseComplexContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::ComplexLiteral, ASTNode::ASTNodeType::ComplexLiteral)
+    : Literal(cst, mem, Literal::LiteralClass::ComplexLiteral, ASTNode::ASTNodeClass::ComplexLiteral)
 {
     throw std::runtime_error("not yet implement") ;
 }
 
 ComplexLiteral::ComplexLiteral(ASTNode::MemManagerType &mem)
-    : Literal(mem, Literal::LiteralClass::ComplexLiteral, ASTNode::ASTNodeType::ComplexLiteral),
+    : Literal(mem, Literal::LiteralClass::ComplexLiteral, ASTNode::ASTNodeClass::ComplexLiteral),
       type(nullptr)
 {}
 

@@ -4,12 +4,12 @@
 
 using namespace horseIR::ast ;
 
-Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type)
+Type::Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type)
     : typeClass(p_typeClass),
       ASTNode(cst, mem, type)
 {}
 
-Type::Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeType type)
+Type::Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type)
     : typeClass(p_typeClass),
       ASTNode(mem, type)
 {}
