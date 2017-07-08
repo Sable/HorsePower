@@ -29,11 +29,13 @@ namespace horseIR {
                 TimeMinuteLiteral, TimeSecondLiteral, TimeTimeLiteral, FunctionLiteral, TableLiteral,
                 KeyTableLiteral, StringLiteral,
 
+                Identifier,
+
                 ScalarType, WildcardType, ListType, DictionaryType,
                 EnumerationType, FunctionType,
 
                 CompilationUnit, Module, Method, LabelStatement, BranchStatement, PhiStatement,
-                AssignStatement
+                AssignStatement, ReturnStatement
             } ;
             
             ASTNode () = delete ;

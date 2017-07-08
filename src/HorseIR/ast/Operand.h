@@ -18,11 +18,8 @@ namespace horseIR {
                 Identifier, Literal
             };
             Operand() = delete ;
-            Operand(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
-            Operand(HorseIRParser::LiteralContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
-            Operand(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_OperandClass) ;
-
-            OperandClass getOperandClass() const ;
+            Operand(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
+            Operand(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
 
         protected:
             OperandClass operandClass ;
@@ -34,8 +31,12 @@ namespace horseIR {
             Identifier(HorseIRParser::NameContext* cst, ASTNode::MemManagerType& mem) ;
             Identifier(ASTNode::MemManagerType& mem) ;
 
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
+            virtual std::string toString() const override ;
+            virtual std::string toTreeString() const override ;
         protected:
-            std::string IDName ;
+            std::string idName ;
         };
 
         class Literal : public Operand {
@@ -554,6 +555,7 @@ namespace horseIR {
 
             FunctionLiteral() = delete ;
             FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext* cst, ASTNode::MemManagerType& mem) ;
+            FunctionLiteral(HorseIRParser::LiteralFunctionContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionLiteral(ASTNode::MemManagerType& mem) ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;

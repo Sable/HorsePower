@@ -18,6 +18,15 @@ FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext *cst,
     value = lex.substr(1, lex.length()) ;
 }
 
+FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralFunctionContext *cst, ASTNode::MemManagerType &mem)
+    : Literal(mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
+      type(nullptr)
+{
+    assert(cst != nullptr) ;
+    const std::string lex = cst->value->getText() ;
+    value = lex.substr(1, lex.length()) ;
+}
+
 FunctionLiteral::FunctionLiteral(ASTNode::MemManagerType &mem)
     : Literal(mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
       type(nullptr)

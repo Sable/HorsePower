@@ -38,6 +38,7 @@ CompilationUnit::CompilationUnit(ASTNode::MemManagerType &mem)
 CompilationUnit&& CompilationUnit::merge(CompilationUnit &&obj)
 {
     // TODO
+    return std::move(*this) ;
 }
 
 std::size_t CompilationUnit::getNumNodesRecursively() const

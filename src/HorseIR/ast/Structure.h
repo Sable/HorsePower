@@ -44,27 +44,24 @@ namespace horseIR {
             Statement(HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
             Statement(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
 
-            StatementClass getStatementClass() const ;
             static Statement* makeStatementASTNode(HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem) ;
         protected:
-            StatementClass StatementClass ;
+            StatementClass statementClass ;
             std::pair<Statement*, Statement*> flow ;
         };
 
         class ReturnStatement : public Statement {
         public:
             ReturnStatement() = delete ;
-            ReturnStatement(HorseIRParser::StmtReturnContext* cst, ASTNode::MemManagerType& mem) ;
+            ReturnStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
             ReturnStatement(ASTNode::MemManagerType& mem) ;
-
-            std::string getReturnIDName() ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
         protected:
-            std::string id ;
+            Identifier* id ;
         };
 
         class AssignStatement : public Statement {
@@ -73,8 +70,8 @@ namespace horseIR {
                 Direct, Cast, CheckCast, CheckType
             };
             AssignStatement() = delete ;
-            AssignStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type) ;
-            AssignStatement(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type) ;
+            AssignStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
+            AssignStatement(ASTNode::MemManagerType& mem) ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;

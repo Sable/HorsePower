@@ -9,8 +9,7 @@
 
 using namespace horseIR::ast ;
 
-AssignStatement::AssignStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem,
-                                 ASTNode::ASTNodeClass type)
+AssignStatement::AssignStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
     : Statement(cst, mem, ASTNode::ASTNodeClass::AssignStatement, StatementClass::Assign)
 {
     assert(cst != nullptr) ;
@@ -93,7 +92,7 @@ inline void AssignStatement::parseMethodInvoke(HorseIRParser::MethodCallContext 
             }
         }
     } else if ((methodFunContext = dynamic_cast<decltype(methodFunContext)>(methodCallContext)) != nullptr) {
-        Operand* invokeTarget = Literal::makeLiteralASTNode(static_cast<HorseIRParser::LiteralContext*>(methodFunContext->literalFunction()), mem) ;
+        Operand* invokeTarget = new FunctionLiteral(methodFunContext->literalFunction(), mem) ;
         isInvoke = std::make_pair(true, invokeTarget) ;
         HorseIRParser::ArgumentListContext* argumentListContext = methodFunContext->argumentList() ;
         const auto argumentOperands (argumentListContext->operand()) ;
@@ -128,7 +127,7 @@ inline void AssignStatement::parseOperand(HorseIRParser::OperandContext *operand
     }
 }
 
-AssignStatement::AssignStatement(ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type)
+AssignStatement::AssignStatement(ASTNode::MemManagerType &mem)
     : Statement(mem, ASTNode::ASTNodeClass::AssignStatement, StatementClass::Assign),
       isInvoke{std::make_pair(false, nullptr)},
       retTypeValidation{std::make_pair(AssignStatementClass::Direct, nullptr)},
@@ -140,7 +139,7 @@ std::size_t AssignStatement::getNumNodesRecursively() const
 {
     std::size_t count = 1 ;
     count += (isInvoke.first)? isInvoke.second->getNumNodesRecursively() : 0 ;
-    count += (retTypeValidation == AssignStatementClass::Direct)? 0 : retTypeValidation.second->getNumNodesRecursively() ;
+    count += (retTypeValidation.first == AssignStatementClass::Direct)? 0 : retTypeValidation.second->getNumNodesRecursively() ;
     for (auto iter = parameters.cbegin(); iter != parameters.cend(); ++iter) {
         count = count + (*iter)->getNumNodesRecursively() ;
     }

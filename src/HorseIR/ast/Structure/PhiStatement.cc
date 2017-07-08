@@ -29,7 +29,7 @@ PhiStatement::PhiStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemMana
     const std::size_t numFlow = labels.size() ;
     for (std::size_t iter = 0; iter < numFlow; ++iter) {
         auto label = labels[iter] ;
-        auto name = name[iter] ;
+        auto name = names[iter] ;
         std::string targetLabelName = ASTNode::CSTNameToString(label->name()) ;
         Identifier* conditionID = new Identifier(name, mem) ;
         inFlowMap.insert(std::make_pair(std::move(targetLabelName), conditionID)) ;
@@ -68,9 +68,10 @@ std::string PhiStatement::toString() const
 {
     std::ostringstream stream ;
     stream << lhsID->toString() << " :" << lhsType->toString() << " = phi(" ;
-    std::vector<std::pair<std::string*, Identifier*>> buffer ;
+    std::vector<std::pair<const std::string*, Identifier*>> buffer ;
     for (auto iter = inFlowMap.cbegin(); iter != inFlowMap.cend(); ++iter) {
-        buffer.push_back(std::make_pair(&iter->first, iter->second)) ;
+        std::pair<const std::string*, Identifier*> pair = std::make_pair(&(iter->first), iter->second) ;
+        buffer.push_back(std::move(pair)) ;
     }
     for (auto iter = buffer.cbegin(); iter != buffer.cend(); ++iter) {
         if (iter + 1 != buffer.cend()) {

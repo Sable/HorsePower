@@ -80,6 +80,9 @@ std::string Method::toString() const
         }
     }
     stream << ") :" << returnType->toString() << " {" << std::endl ;
+    for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
+        stream << ASTNode::INDENT << (*iter)->toString() << std::endl ;
+    }
     stream << "}" ;
     return stream.str() ;
 }
