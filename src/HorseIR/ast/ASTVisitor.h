@@ -4,7 +4,7 @@
 
 #include "ASTNode.h"
 #include "Type.h"
-#include "Literal.h"
+#include "Operand.h"
 
 namespace horseIR {
     namespace ast {

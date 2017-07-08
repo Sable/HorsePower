@@ -5,38 +5,12 @@
 #include <map>
 #include <string>
 
-#include "Type.h"
-#include "Literal.h"
 #include "ASTNode.h"
+#include "Type.h"
+#include "Operand.h"
 
 namespace horseIR {
     namespace ast {
-        class Operand : public ASTNode {
-        public:
-            enum class OperandClass {
-                Identifier, Literal
-            };
-            Operand() = delete ;
-            Operand(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
-            Operand(HorseIRParser::LiteralContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
-            Operand(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_OperandClass) ;
-
-            OperandClass getOperandClass() const ;
-
-        protected:
-            OperandClass operandClass ;
-        };
-
-        class Identifier : public Operand {
-        public:
-            Identifier(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem) ;
-            Identifier(HorseIRParser::NameContext* cst, ASTNode::MemManagerType& mem) ;
-            Identifier(ASTNode::MemManagerType& mem) ;
-
-        protected:
-            std::string IDName ;
-        };
-
         class Statement ;
 
         class StatementIterator {
@@ -101,12 +75,25 @@ namespace horseIR {
             AssignStatement() = delete ;
             AssignStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type) ;
             AssignStatement(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type) ;
+
+            virtual std::size_t getNumNodesRecursively() const override ;
+            virtual std::vector<ASTNode*> getChildren() const override ;
+            virtual std::string toString() const override ;
+            virtual std::string toTreeString() const override ;
+
         protected:
             std::pair<bool, Operand*> isInvoke ;
-            std::pair<bool, Type*> retTypeValidation ;
+            std::pair<AssignStatementClass, Type*> retTypeValidation ;
             std::vector<Operand*> parameters ;
-            Operand* lhsName ;
+            Identifier* lhsName ;
             Type* lhsType ;
+        private:
+            inline void parseMethodInvoke(HorseIRParser::MethodCallContext* methodCallContext, ASTNode::MemManagerType& mem) ;
+            inline void parseOperand(HorseIRParser::OperandContext* operandContext, ASTNode::MemManagerType& mem) ;
+            inline std::string caseDirectToString() const ;
+            inline std::string caseCastToString() const ;
+            inline std::string caseCheckTypeToString() const ;
+            inline std::string caseCheckCastToString() const ;
         };
 
         class PhiStatement : public Statement {

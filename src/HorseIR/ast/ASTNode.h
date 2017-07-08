@@ -32,7 +32,8 @@ namespace horseIR {
                 ScalarType, WildcardType, ListType, DictionaryType,
                 EnumerationType, FunctionType,
 
-                CompilationUnit, Module, Method, LabelStatement, BranchStatement, PhiStatement
+                CompilationUnit, Module, Method, LabelStatement, BranchStatement, PhiStatement,
+                AssignStatement
             } ;
             
             ASTNode () = delete ;

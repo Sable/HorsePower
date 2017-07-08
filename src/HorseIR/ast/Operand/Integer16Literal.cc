@@ -4,7 +4,7 @@
 #include <limits>
 #include "../grammar/HorseIRParser.h"
 
-#include "../Literal.h"
+#include "../Operand.h"
 
 using namespace horseIR::ast ;
 

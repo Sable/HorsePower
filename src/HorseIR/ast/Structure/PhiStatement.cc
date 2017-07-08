@@ -41,3 +41,49 @@ PhiStatement::PhiStatement(ASTNode::MemManagerType &mem)
       lhsID{nullptr},
       lhsType{nullptr}
 {}
+
+std::size_t PhiStatement::getNumNodesRecursively() const
+{
+    std::size_t count = 1 ;
+    for (auto iter = inFlowMap.cbegin(); iter != inFlowMap.cend(); ++iter) {
+        count = count + iter->second->getNumNodesRecursively() ;
+    }
+    count += (lhsID == nullptr)? 0 : lhsID->getNumNodesRecursively() ;
+    count += (lhsType == nullptr)? 0 : lhsType->getNumNodesRecursively() ;
+    return count ;
+}
+
+std::vector<ASTNode*> PhiStatement::getChildren() const
+{
+    std::vector<ASTNode*> retVector ;
+    if (lhsID != nullptr) retVector.push_back(static_cast<ASTNode*>(lhsID)) ;
+    if (lhsType != nullptr) retVector.push_back(static_cast<ASTNode*>(lhsType)) ;
+    for (auto iter = inFlowMap.cbegin(); iter != inFlowMap.cend(); ++iter) {
+        retVector.push_back(static_cast<ASTNode*>(iter->second)) ;
+    }
+    return retVector ;
+}
+
+std::string PhiStatement::toString() const
+{
+    std::ostringstream stream ;
+    stream << lhsID->toString() << " :" << lhsType->toString() << " = phi(" ;
+    std::vector<std::pair<std::string*, Identifier*>> buffer ;
+    for (auto iter = inFlowMap.cbegin(); iter != inFlowMap.cend(); ++iter) {
+        buffer.push_back(std::make_pair(&iter->first, iter->second)) ;
+    }
+    for (auto iter = buffer.cbegin(); iter != buffer.cend(); ++iter) {
+        if (iter + 1 != buffer.cend()) {
+            stream << '[' << *(iter->first) << "] " << iter->second->toString() << ", " ;
+        } else {
+            stream << '[' << *(iter->first) << "] " << iter->second->toString() ;
+        }
+    }
+    stream << ')' ;
+    return stream.str() ;
+}
+
+std::string PhiStatement::toTreeString() const
+{
+    return "(PhiStatement)" ;
+}

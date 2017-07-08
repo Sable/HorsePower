@@ -12,7 +12,31 @@
 
 namespace horseIR {
     namespace ast {
-        class Operand ;
+        class Operand : public ASTNode {
+        public:
+            enum class OperandClass {
+                Identifier, Literal
+            };
+            Operand() = delete ;
+            Operand(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
+            Operand(HorseIRParser::LiteralContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
+            Operand(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_OperandClass) ;
+
+            OperandClass getOperandClass() const ;
+
+        protected:
+            OperandClass operandClass ;
+        };
+
+        class Identifier : public Operand {
+        public:
+            Identifier(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem) ;
+            Identifier(HorseIRParser::NameContext* cst, ASTNode::MemManagerType& mem) ;
+            Identifier(ASTNode::MemManagerType& mem) ;
+
+        protected:
+            std::string IDName ;
+        };
 
         class Literal : public Operand {
         public:

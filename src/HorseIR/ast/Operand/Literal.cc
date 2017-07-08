@@ -1,7 +1,7 @@
 #include <cassert>
 #include <Structure.h>
 
-#include "../Literal.h"
+#include "../Operand.h"
 
 using namespace horseIR::ast ;
 

@@ -3,7 +3,7 @@
 #include <cassert>
 #include "../grammar/HorseIRParser.h"
 
-#include "../Literal.h"
+#include "../Operand.h"
 
 using namespace horseIR::ast ;
 
