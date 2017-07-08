@@ -11,15 +11,15 @@ extern "C" {
 typedef struct h_symbol{
 	L len;
 	C str[128];
-}hsym;
+}SB0,*SB;
 
-#define Elemtype hsym
+#define Elemtype SB0
 #define LH +1
 #define EH  0
 #define RH -1
-#define EQ(a,b) hsymEqual(a,b)
-#define LT(a,b) hsymLess(a,b)
-#define LQ(a,b) hsymLessEqual(a,b)
+#define EQ(a,b) symEqual(a,b)
+#define LT(a,b) symLess(a,b)
+#define LQ(a,b) symLessEqual(a,b)
 
 
 typedef struct BST_node{
@@ -36,14 +36,14 @@ void rightBalance(BSTree *T);
 bool InsertAVL   (BSTree *T, Elemtype e, bool *taller, L *index, L *id);
 void initSym     ();
 
-L getSymbol      (char* name);
-void insertSym   (hsym h1);
+L getSymbol      (S name);
+L insertSym      (Elemtype h1);
 void cleanSym    ();
 void deleteT     (BSTree T);
 
-B hsymEqual      (hsym h1, hsym h2);
-B hsymLess       (hsym h1, hsym h2);
-B hsymLessEqual  (hsym h1, hsym h2);
+B symEqual      (Elemtype h1, Elemtype h2);
+B symLess       (Elemtype h1, Elemtype h2);
+B symLessEqual  (Elemtype h1, Elemtype h2);
 
 #ifdef	__cplusplus
 }

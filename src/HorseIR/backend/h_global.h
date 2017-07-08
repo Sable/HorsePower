@@ -21,12 +21,13 @@ typedef struct node_value{
 	L typ,len;
 	union{
 		B b;   //bool
-		C c;   //char
 		H h;   //short
 		I i32; //int
 		L i64; //long
 		F f32; //float
 		E f64; //double
+		C c;   //char
+		L s;   //symbol
 		Y y;   //year
 		M m;   //month
 		D d;   //date
@@ -35,7 +36,7 @@ typedef struct node_value{
 		W w;   //second
 		T t;   //time
 		X x;   //complex
-		G g[0];
+		G g;
 	};
 }V0,*V;
 
@@ -44,20 +45,14 @@ typedef struct list_value_node{
 	struct list_value_node *next;
 }ListV0,*ListV;
 
-/* type enum */
-
-typedef enum h_type {
-	H_bool, H_char, H_short, H_int, H_long,
-	H_float, H_double,
-	H_complex, H_symbol,
-	H_month, H_date, H_datetime,
-	H_minute, H_second, H_time
-}H_Type;
+#include "h_global_type.h"
 
 /* macros */
 
 #define P printf
 #define R return
+#define FP fprintf
+#define SP sprintf
 
 #define DOI(n, x) {for(L i=0,i2=n;i<i2;i++)x;}
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}

@@ -6,12 +6,20 @@ extern "C" {
 
 /* macros */
 
-#define AL(typ,n) hMalloc(typ, n)
-
 /* methods */
 
-G hMalloc(H_Type typ, L n);
-L getTypeSize(H_Type typ);
+void hInit();
+
+L getTypeSize(L typ);
+G getCacheMem(L typ, L len);
+G getHeapMem(L typ, L len);
+G allocMem(G heap, L cur, L top, L typ, L len);
+
+V allocV(L typ, L len);
+V allocDict();
+V allocList(L numItems);
+V allocTable(L numCols);
+V allocKTable();
 
 #ifdef	__cplusplus
 }

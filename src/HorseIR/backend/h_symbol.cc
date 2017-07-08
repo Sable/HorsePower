@@ -1,9 +1,12 @@
 #include "h_global.h"
 
-BSTree T;
-// BSTree psym[MAXPSYM];
-BSTree *psym;
-L sindex,sybmax;
+BSTree rootT;
+BSTree *symTable;
+L sindex, symSize; // symSize(init. 5000)
+
+#define symCopySym(x, y) { strcpy(x.str, y.str); x.len=y.len; }
+#define symCopyStr(x, s) { strcpy(x.str, s); x.len=strlen(s); }
+#define safeDelete(x)    { if(x!=NULL) free(x); x=NULL; }
 
 void R_Rotate(BSTree *p) {
     BSTree lc;
@@ -84,12 +87,12 @@ bool insertAVL(BSTree *T, Elemtype e, bool *taller, L *index, L *id)
     if (!(*T)) {
         BSTree Tx = (BSTree) malloc(sizeof (BSTnode));
 		*T = Tx;
-        estring_assign_e(&Tx->data,&e); //T->data = e;
+        symCopySym(Tx->data,e); //T->data = e;
         Tx->lchild = Tx->rchild = NULL;
         Tx->index = ++(*index); //insert successfully
         Tx->bf = 0; //should be initialized zero
         *id = *index;
-        psym[*id] = Tx; //BTtree psym[10005];psym[id]->data 
+        symTable[*id] = Tx; //BTtree psym[10005];psym[id]->data 
         *taller = true;
     } else {
         if (EQ(e, (*T)->data)) { //insert fail
@@ -142,39 +145,38 @@ bool insertAVL(BSTree *T, Elemtype e, bool *taller, L *index, L *id)
 
 void initSym()
 {
-	T=NULL;
+	rootT=NULL;
+    symTable=(BSTree*)malloc(sizeof(BSTree) * symSize); //initial size
 }
 
 void incSym()
 {
-	BSTree *t = AL(BSTree,sybmax*2); //(BSTree*)malloc(sizeof(BSTree)*sybmax*2);
+	BSTree *t = (BSTree*)malloc(sizeof(BSTree) * symSize * 2);
 	// DOI(sybmax, t[i]=psym[i]); DOI(sybmax, t[i+sybmax]=NULL); 
-	memcpy(t,psym,sybmax*sizeof(BSTree)); memset(t+sybmax,0,sybmax*sizeof(BSTree));
-	sybmax *= 2; free(psym); psym=t;
+	memcpy(t,symTable,symSize*sizeof(BSTree));
+    memset(t+symSize,0,symSize*sizeof(BSTree));
+	symSize *= 2; free(symTable); symTable=t;
 }
 
-L getSymbol(char* name) {
-    estring e;
-    bool taller;
-    L id;
-	estring_assign_str(&e,name); // e = name;
-    taller = false;
-    id = -1;
-	if(sindex >= sybmax-1) incSym();
-    insertAVL(&T, e, &taller, &sindex, &id);
+L getSymbol(S name) {
+    Elemtype e;
+    B taller = false;
+    L id = -1;
+    symCopyStr(e, name); // e = name;
+	if(sindex >= symSize-1) incSym();
+    insertAVL(&rootT, e, &taller, &sindex, &id);
     return id;
 }
 
-void insertSym(hsym h1) {
-    getSymbol(h1.str);
-    return;
+L insertSym(Elemtype h1) {
+    R getSymbol(h1.str);
 }
 
 void cleanSym() {
     L c;
-    deleteT(T); T = NULL;
+    deleteT(rootT); rootT = NULL;
     for (c = 0; c <= sindex; c++) {
-        psym[c] = NULL;
+        symTable[c] = NULL;
     }
 }
 
@@ -184,20 +186,19 @@ void deleteT(BSTree T)
     if (T) {
         if (T->lchild) deleteT(T->lchild);
         if (T->rchild) deleteT(T->rchild);
-        DeleteQ(T);
+        safeDelete(T);
     }
 }
 
-B hsymEqual(hsym h1, hsym h2) {
-	return strcmp(h1->str, h2->str)==0;
+B symEqual(Elemtype h1, Elemtype h2) {
+	return strcmp(h1.str, h2.str)==0;
 }
 
-B hsymLess(hsym h1, hsym h2) {
-	return strcmp(h1->str, h2->str) <0;
+B symLess(Elemtype h1, Elemtype h2) {
+	return strcmp(h1.str, h2.str) <0;
 }
 
-B hsymLessEqual(hsym h1, Elemtype h2) {
-	return strcmp(h1->str, h2->str)<=0;
+B symLessEqual(Elemtype h1, Elemtype h2) {
+	return strcmp(h1.str, h2.str)<=0;
 }
-
 

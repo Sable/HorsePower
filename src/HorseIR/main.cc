@@ -43,7 +43,8 @@ int main(int argc, char *argv[]){
     }
     else if(flagTest){
         printf("...Testing...\n");
-        testInputFile(inputPath);
+        // testInputFile(inputPath);
+        testMain();
     }
     else if(inputPath!=NULL){
         antlr4::ANTLRFileStream fileStream(inputPath);
