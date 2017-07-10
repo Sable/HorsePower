@@ -30,17 +30,19 @@
 #define caseS case H_S:
 #define caseA case H_A:
 #define caseN case H_N:
+#define caseV case H_V:
 
-#define xp x->typ
-#define xn x->len
-#define xb x->b
-#define xh x->h
-#define xi x->i32
-#define xl x->i64
-#define xf x->f32
-#define xe x->f64
-#define xs x->s
-#define xg x->g
+#define xp  x->typ
+#define xn  x->len
+#define xb  x->b
+#define xh  x->h
+#define xc  x->c
+#define xi  x->i32
+#define xl  x->i64
+#define xf  x->f32
+#define xe  x->f64
+#define xs  x->s
+#define xg  x->g
 
 #define xB(k) ((B*)(xg))[k]
 #define xI(k) ((I*)(xg))[k]

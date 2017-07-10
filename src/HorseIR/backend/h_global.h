@@ -36,7 +36,8 @@ typedef struct node_value{
 		W w;   //second
 		T t;   //time
 		X x;   //complex
-		G g;
+		S g;
+		C g1[1]; //base
 	};
 }V0,*V;
 

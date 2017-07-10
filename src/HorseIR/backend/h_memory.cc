@@ -15,7 +15,7 @@ void initMain(){
 	gHeap = (G)malloc(INIT_HEAP_SIZE);
 	gCache= (G)malloc(INIT_CACHE_SIZE);
 	gHeapCur = gCacheCur = 0;
-	P("Successfully initialized\n");
+	P("-> [Info heap] Successfully initialized\n");
 }
 
 G getHeapMem(L typ, L len){
@@ -26,18 +26,25 @@ G getCacheMem(L typ, L len){
 	return allocMem(gCache, &gCacheCur, INIT_CACHE_SIZE, typ, len);
 }
 
+void printHeapInfo(){
+	P("-> [Info heap] Init. %lld, used %lld (%lf%%)\n", \
+		INIT_HEAP_SIZE, \
+		gHeapCur, \
+		gHeapCur*100.0/INIT_HEAP_SIZE);
+}
+
 G allocMem(G heap, L *cur, L top, L typ, L len){
 	L size = getTypeSize(typ) * len;
 	G g = NULL;
 	if((*cur)+size < top){
-		*cur = (*cur) + size;
+		P("-> [Info heap] Allocated %lld for info (", size); printType(typ); P(", %2lld)\n",len);
 		g = heap + (*cur);
+		*cur = (*cur) + size;
 	}
 	else {
 		P("Heap full!!\n");
 		exit(99);
 	}
-	P("cur = %lld\n", *cur);
 	R g;
 }
 
@@ -79,25 +86,25 @@ V allocV(L typ, L len){
 
 V allocDict(){
 	V x = allocV(H_N, 2);
-	P("-> dict: %lld\n",x);
+	P("-> dict: %lld\n",L(x));
 	R x;
 }
 
 V allocList(L numItems){
 	V x = allocV(H_G, numItems);
-	P("-> list: %lld\n",x);
+	P("-> list: %lld\n",L(x));
 	R x;
 }
 
 V allocTable(L numCols){
 	V x = allocV(H_A, numCols);
-	P("-> table: %lld\n",x);
+	P("-> table: %lld\n",L(x));
 	R x;
 }
 
 V allocKTable(){
 	V x = allocV(H_K, 2);
-	P("-> ktable: %lld\n",x);
+	P("-> ktable: %lld\n",L(x));
 	R x;
 }
 
@@ -135,11 +142,12 @@ void printType(L x){
 
 void printTypeStr(L x, S buff){
 	switch(x){
-		caseB SP(buff, "t::bool");   break;
-		caseL SP(buff, "t::long");   break;
-		caseS SP(buff, "t::symbol"); break;
-		caseA SP(buff, "t::table");  break;
-		caseN SP(buff, "t::dict");   break;
+		caseB SP(buff, "t::bool");    break;
+		caseL SP(buff, "t::long");    break;
+		caseS SP(buff, "t::symbol");  break;
+		caseA SP(buff, "t::table");   break;
+		caseN SP(buff, "t::dict");    break;
+		caseV SP(buff, "value_item"); break;
 		default: SP(buff, "<unknown::%lld>",x); break;
 	}
 }
