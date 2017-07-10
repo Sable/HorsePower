@@ -2,7 +2,7 @@
 
 BSTree rootT;
 BSTree *symTable;
-L sindex, symSize; // symSize(init. 5000)
+L symCur, symSize; // symSize(init. 5000)
 
 #define symCopySym(x, y) { strcpy(x.str, y.str); x.len=y.len; }
 #define symCopyStr(x, s) { strcpy(x.str, s); x.len=strlen(s); }
@@ -146,6 +146,8 @@ bool insertAVL(BSTree *T, Elemtype e, bool *taller, L *index, L *id)
 void initSym()
 {
 	rootT=NULL;
+    symCur = -1;
+    symSize = 5000;
     symTable=(BSTree*)malloc(sizeof(BSTree) * symSize); //initial size
 }
 
@@ -163,8 +165,8 @@ L getSymbol(S name) {
     B taller = false;
     L id = -1;
     symCopyStr(e, name); // e = name;
-	if(sindex >= symSize-1) incSym();
-    insertAVL(&rootT, e, &taller, &sindex, &id);
+	if(symCur >= symSize-1) incSym();
+    insertAVL(&rootT, e, &taller, &symCur, &id);
     return id;
 }
 
@@ -175,7 +177,7 @@ L insertSym(Elemtype h1) {
 void cleanSym() {
     L c;
     deleteT(rootT); rootT = NULL;
-    for (c = 0; c <= sindex; c++) {
+    for (c = 0; c <= symCur; c++) {
         symTable[c] = NULL;
     }
 }
@@ -200,5 +202,17 @@ B symLess(Elemtype h1, Elemtype h2) {
 
 B symLessEqual(Elemtype h1, Elemtype h2) {
 	return strcmp(h1.str, h2.str)<=0;
+}
+
+Elemtype createSymbol(S s){
+    Elemtype x;
+    strcpy(x.str, s);
+    x.len = strlen(s);
+    R x;
+}
+
+void printAllSymol(){
+    P("total size = %lld\n", symCur+1);
+    DOI(symCur+1, P("[%2lld] %s\n",i,symTable[i]->data.str));
 }
 

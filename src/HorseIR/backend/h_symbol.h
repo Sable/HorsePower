@@ -11,9 +11,9 @@ extern "C" {
 typedef struct h_symbol{
 	L len;
 	C str[128];
-}SB0,*SB;
+}SB;
 
-#define Elemtype SB0
+#define Elemtype SB
 #define LH +1
 #define EH  0
 #define RH -1
@@ -44,6 +44,9 @@ void deleteT     (BSTree T);
 B symEqual      (Elemtype h1, Elemtype h2);
 B symLess       (Elemtype h1, Elemtype h2);
 B symLessEqual  (Elemtype h1, Elemtype h2);
+
+Elemtype createSymbol(S s);
+void printAllSymol();
 
 #ifdef	__cplusplus
 }

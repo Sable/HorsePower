@@ -11,7 +11,7 @@ G gCache= NULL; L gCacheCur; //global cache and cursor
 
 /* methods */
 
-void hInit(){
+void initMain(){
 	gHeap = (G)malloc(INIT_HEAP_SIZE);
 	gCache= (G)malloc(INIT_CACHE_SIZE);
 	gHeapCur = gCacheCur = 0;
@@ -19,24 +19,25 @@ void hInit(){
 }
 
 G getHeapMem(L typ, L len){
-	return allocMem(gHeap, gHeapCur, INIT_HEAP_SIZE, typ, len);
+	return allocMem(gHeap, &gHeapCur, INIT_HEAP_SIZE, typ, len);
 }
 
 G getCacheMem(L typ, L len){
-	return allocMem(gCache, gCacheCur, INIT_CACHE_SIZE, typ, len);
+	return allocMem(gCache, &gCacheCur, INIT_CACHE_SIZE, typ, len);
 }
 
-G allocMem(G heap, L cur, L top, L typ, L len){
+G allocMem(G heap, L *cur, L top, L typ, L len){
 	L size = getTypeSize(typ) * len;
 	G g = NULL;
-	if(cur+size < top){
-		cur += size;
-		g = heap + cur;
+	if((*cur)+size < top){
+		*cur = (*cur) + size;
+		g = heap + (*cur);
 	}
 	else {
 		P("Heap full!!\n");
 		exit(99);
 	}
+	P("cur = %lld\n", *cur);
 	R g;
 }
 
@@ -58,10 +59,11 @@ L getTypeSize(L typ){
 		case H_U  : r = sizeof(U);     break;
 		case H_W  : r = sizeof(W);     break;
 		case H_T  : r = sizeof(T);     break;
-		case H_G  : r = sizeof(V);     break;
-		case H_N  : r = sizeof(V);     break;
-		case H_A  : r = sizeof(V);     break;
-		case H_K  : r = sizeof(V);     break;
+		case H_G  : r = sizeof(V0);    break;
+		case H_N  : r = sizeof(V0);    break;
+		case H_A  : r = sizeof(V0);    break;
+		case H_K  : r = sizeof(V0);    break;
+		case H_V  : r = sizeof(V0);    break;
 	}
 	return r;
 }
@@ -70,32 +72,83 @@ L getTypeSize(L typ){
 /* allocate */
 
 V allocV(L typ, L len){
-	V x = (V)malloc(sizeof(V0));
-	x->typ = typ;
-	x->len = len;
-	x->g   = (len>1)?getHeapMem(typ, len):NULL;
+	V x = (V)getHeapMem(H_V, 1); //malloc(sizeof(V0));
+	initV(x, typ, len);
 	R x;
 }
 
 V allocDict(){
-	R allocV(H_N, 2);
+	V x = allocV(H_N, 2);
+	P("-> dict: %lld\n",x);
+	R x;
 }
 
 V allocList(L numItems){
-	R allocV(H_G, numItems);
+	V x = allocV(H_G, numItems);
+	P("-> list: %lld\n",x);
+	R x;
 }
 
 V allocTable(L numCols){
-	R allocV(H_A, numCols);
+	V x = allocV(H_A, numCols);
+	P("-> table: %lld\n",x);
+	R x;
 }
 
 V allocKTable(){
-	R allocV(H_K, 2);
+	V x = allocV(H_K, 2);
+	P("-> ktable: %lld\n",x);
+	R x;
+}
+
+/* initialization */
+
+void initV(V x, L typ, L len){
+	xp = typ;
+	xn = len;
+	xg = (len>1)?getHeapMem(typ, len):NULL;
+}
+
+void initDict(V x){
+	initV(x, H_N, 2);
+}
+
+void initSymbol(V x, L val){
+	initV(x, H_S, 1);
+	xs = val;
+}
+
+void initList(V x, L numItems){
+	initV(x, H_G, numItems);
+}
+
+void initValue(V x, L typ, L len){
+	initV(x,typ,len);
 }
 
 
+void printType(L x){
+	C buff[128];
+	printTypeStr(x, buff);
+	P("%s",buff);
+}
 
+void printTypeStr(L x, S buff){
+	switch(x){
+		caseB SP(buff, "t::bool");   break;
+		caseL SP(buff, "t::long");   break;
+		caseS SP(buff, "t::symbol"); break;
+		caseA SP(buff, "t::table");  break;
+		caseN SP(buff, "t::dict");   break;
+		default: SP(buff, "<unknown::%lld>",x); break;
+	}
+}
 
+/* helper functions */
+
+V getDictKey(V x) { R xV(0); }
+V getDictVal(V x) { R xV(1); }
+V getTableDict(V x, L k) { R xV(k); }
 
 
 

@@ -1,11 +1,13 @@
 #include "h_global.h"
 
-const C CSV_EMP[] = "data/simple-join/employee.csv";
-const C CSV_DEP[] = "data/simple-join/department.csv";
-const C* COLS_EMP[] = {"LastName", "DepartmentID"};
-const C* COLS_DEP[] = {"DepartmentID", "DepartmentName"};
-// const L[] TYPE_EMP  = {H_S, H_L};
-// const L[] TYPE_DEP  = {H_L, H_S};
+C CSV_EMP[] = "data/simple-join/employee.csv";
+C CSV_DEP[] = "data/simple-join/department.csv";
+L TYPE_EMP[]  = {H_S, H_L};
+L TYPE_DEP[]  = {H_L, H_S};
+const L NUM_COL_EMP = 2;
+const L NUM_COL_DEP = 2;
+L SYM_LIST_EMP[2];
+L SYM_LIST_DEP[2];
 
 L testInputFile(S filePath){
 	if(!filePath){
@@ -13,22 +15,43 @@ L testInputFile(S filePath){
 		exit(99);
 	}
 	P("path = %s\n", filePath);
-	readFile(filePath, 1);
+	// readFile(filePath, 1);
 	R 0;
 }
 
+void initTable(){
+	const C* PRE_DEFINED[] = {
+		"LastName", "DepartmentID",
+		"DepartmentID", "DepartmentName"
+	};
+	DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
+	printAllSymol();
+	SYM_LIST_EMP[0] = getSymbol("LastName");
+	SYM_LIST_EMP[1] = getSymbol("DepartmentID");
+	SYM_LIST_DEP[0] = getSymbol("DepartmentID");
+	SYM_LIST_DEP[1] = getSymbol("DepartmentName");
+}
+
+/* return -1, if too large */
+L getNiceNumber(L n){
+	L k = 1, c = 62;
+	while(c>0 && k<n){c--;k<<=1;}
+	R (k<n?-1:k);
+}
 
 L testMain(){
-	hInit(); 
-	loadCSV();
-	// if(loadCSV(CSV_EMP) && loadCSV(CSV_DEP)){
-	// 	P("Two csv files have been loaded successfully");
-	// }
+	initMain();  // memory
+	initSym();   // symbol
+	initTable(); // table
+	P("Reading table employee\n");
+	V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
+	P("Reading table department\n");
+	V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
 	getchar();
 	R 0;
 }
 
-L loadCSV(){
-	R readFile((S)CSV_EMP, 1);
-}
+// L loadCSV(S filePath, L types, L size){
+// 	R readFile((S)CSV_EMP, 1);
+// }
 

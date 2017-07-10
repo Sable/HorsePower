@@ -19,6 +19,7 @@
 #define H_N 17 //dict
 #define H_A 18 //table
 #define H_K 19 //ktable
+#define H_V 20 //value item
 
 #define caseB case H_B:
 #define caseH case H_H:
@@ -28,7 +29,7 @@
 #define caseE case H_E:
 #define caseS case H_S:
 #define caseA case H_A:
-
+#define caseN case H_N:
 
 #define xp x->typ
 #define xn x->len
@@ -48,3 +49,18 @@
 #define xE(k) ((E*)(xg))[k]
 #define xS(k) xL(k)
 #define xG(k) ((V)(xg)+k)
+#define xV(k) ((V)(xg)+k)
+#define xN(k) xV(k)
+
+/* save pointer to a slot */
+#define setXV(k, val) {V t=((V)xg)+(k); P("t = %lld\n",t); t=val; P("after: xg = %lld, t = %lld\n",xg,t);}
+
+#define isB() (H_B==xp)
+#define isH() (H_H==xp)
+#define isA() (H_A==xp)
+#define isN() (H_N==xp)
+
+#define VDexl(x, k) (((V)((x)->g))+(k))
+
+
+

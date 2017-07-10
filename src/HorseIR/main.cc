@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
         printf("successfully done.\n");
     }
     else {
-        std::cout<<"Error: check ./horse -h" <<std::endl;
+        usage();
         exit(1);
     }
     return 0;

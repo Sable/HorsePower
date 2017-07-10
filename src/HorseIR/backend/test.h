@@ -6,7 +6,7 @@ extern "C" {
 
 L testInputFile(S path);
 L testMain();
-L loadCSV();
+// L loadCSV();
 
 #ifdef	__cplusplus
 }
