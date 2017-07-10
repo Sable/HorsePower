@@ -20,6 +20,7 @@ namespace horseIR {
             Operand() = delete ;
             Operand(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
             Operand(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, OperandClass p_operandClass) ;
+            virtual ~Operand() override = default ;
 
         protected:
             OperandClass operandClass ;
@@ -30,6 +31,7 @@ namespace horseIR {
             Identifier(HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem) ;
             Identifier(HorseIRParser::NameContext* cst, ASTNode::MemManagerType& mem) ;
             Identifier(ASTNode::MemManagerType& mem) ;
+            ~Identifier() override = default ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
@@ -48,6 +50,7 @@ namespace horseIR {
             Literal() = delete ;
             Literal(HorseIRParser::LiteralContext* cst, ASTNode::MemManagerType& mem, Literal::LiteralClass p_literalClass, ASTNode::ASTNodeClass type) ;
             Literal(ASTNode::MemManagerType& mem, Literal::LiteralClass p_literalClass, ASTNode::ASTNodeClass type) ;
+            virtual ~Literal() override = default ;
 
             Literal::LiteralClass getLiteralClass() const ;
             virtual horseIR::ast::Type* getLiteralType() const = 0;
@@ -64,6 +67,7 @@ namespace horseIR {
             NilLiteral() = delete ;
             NilLiteral(HorseIRParser::LiteralCaseNilContext* cst, ASTNode::MemManagerType& mem) ;
             NilLiteral(ASTNode::MemManagerType& mem) ;
+            ~NilLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -83,6 +87,7 @@ namespace horseIR {
             ComplexLiteral() = delete ;
             ComplexLiteral(HorseIRParser::LiteralCaseComplexContext* cst, ASTNode::MemManagerType& mem) ;
             ComplexLiteral(ASTNode::MemManagerType& mem) ;
+            ~ComplexLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -104,6 +109,7 @@ namespace horseIR {
             BoolLiteral() = delete ;
             BoolLiteral(HorseIRParser::LiteralCaseBoolContext* cst, ASTNode::MemManagerType& mem) ;
             BoolLiteral(ASTNode::MemManagerType& mem) ;
+            ~BoolLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -126,6 +132,7 @@ namespace horseIR {
             CharLiteral() = delete ;
             CharLiteral(HorseIRParser::LiteralCaseCharContext* cst, ASTNode::MemManagerType& mem) ;
             CharLiteral(ASTNode::MemManagerType& mem) ;
+            ~CharLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -154,7 +161,8 @@ namespace horseIR {
             IntegerLiteral(ASTNode::MemManagerType& mem,
                            ASTNode::ASTNodeClass type,
                            IntegerLiteral::IntegerLiteralClass p_integerLiteralClass) ;
-            
+            ~IntegerLiteral() override = default ;
+
             virtual std::int8_t  getInt8Value()  const = 0 ;
             virtual std::int16_t getInt16Value() const = 0 ;
             virtual std::int32_t getInt32Value() const = 0 ;
@@ -173,6 +181,7 @@ namespace horseIR {
             Integer8Literal() = delete ;
             Integer8Literal(HorseIRParser::LiteralCaseIntegerContext* cst, ASTNode::MemManagerType& mem) ;
             Integer8Literal(ASTNode::MemManagerType& mem) ;
+            ~Integer8Literal() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             virtual std::int8_t  getInt8Value()  const override ;
@@ -198,6 +207,7 @@ namespace horseIR {
             Integer16Literal() = delete ;
             Integer16Literal(HorseIRParser::LiteralCaseIntegerContext* cst, ASTNode::MemManagerType& mem) ;
             Integer16Literal(ASTNode::MemManagerType& mem) ;
+            ~Integer16Literal() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             virtual std::int8_t  getInt8Value()  const override ;
@@ -223,6 +233,7 @@ namespace horseIR {
             Integer32Literal() = delete ;
             Integer32Literal(HorseIRParser::LiteralCaseIntegerContext* cst, ASTNode::MemManagerType& mem) ;
             Integer32Literal(ASTNode::MemManagerType& mem) ;
+            ~Integer32Literal() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             virtual std::int8_t  getInt8Value()  const override ;
@@ -248,6 +259,7 @@ namespace horseIR {
             Integer64Literal() = delete ;
             Integer64Literal(HorseIRParser::LiteralCaseIntegerContext* cst, ASTNode::MemManagerType& mem) ;
             Integer64Literal(ASTNode::MemManagerType& mem) ;
+            ~Integer64Literal() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             virtual std::int8_t  getInt8Value()  const override ;
@@ -343,6 +355,7 @@ namespace horseIR {
             SymbolLiteral() = delete ;
             SymbolLiteral(HorseIRParser::LiteralCaseSymbolContext* cst, ASTNode::MemManagerType& mem) ;
             SymbolLiteral(ASTNode::MemManagerType& mem) ;
+            ~SymbolLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -557,6 +570,7 @@ namespace horseIR {
             FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionLiteral(HorseIRParser::LiteralFunctionContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionLiteral(ASTNode::MemManagerType& mem) ;
+            ~FunctionLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;
@@ -578,6 +592,7 @@ namespace horseIR {
             TableLiteral() = delete ;
             TableLiteral(HorseIRParser::LiteralCaseTableContext* cst, ASTNode::MemManagerType& mem) ;
             TableLiteral(ASTNode::MemManagerType& mem) ;
+            ~TableLiteral() override = default ;
 
             virtual horseIR::ast::Type* getLiteralType() const override ;
             InternalType getValue() const ;

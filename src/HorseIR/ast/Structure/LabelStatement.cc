@@ -19,6 +19,11 @@ LabelStatement::LabelStatement(ASTNode::MemManagerType &mem)
     : Statement(mem, ASTNode::ASTNodeClass::LabelStatement, StatementClass::Label)
 {}
 
+std::string LabelStatement::getLabelName() const
+{
+    return labelName ;
+}
+
 std::size_t LabelStatement::getNumNodesRecursively() const
 {
     return 1 ;

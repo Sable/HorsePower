@@ -65,11 +65,11 @@ bool FunctionType::isGeneralizationOf(const Type *type) const
     
     bool paramGeneralization = true ;
     if (flexible) {
-        if (!(parameterTypes.size() <= functionType->parameterTypes.size())) {
+        if (parameterTypes.size() > functionType->parameterTypes.size()) {
             paramGeneralization = false ;
         }
     } else {
-        if (!(parameterTypes.size() == functionType->parameterTypes.size())) {
+        if (parameterTypes.size() != functionType->parameterTypes.size()) {
             paramGeneralization = false ;
         }
     }
@@ -121,7 +121,8 @@ std::string FunctionType::toString() const
         ostream << paramType->toString()
                 << ((ptr + 1 == parameterTypes.cend())? "" : ", ") ;
     }
-    ostream << (flexible? ", ..." : "")
+    if (parameterTypes.size() != 0) ostream << ", " ;
+    ostream << (flexible? "..." : "")
             << " :"
             << returnType->toString()
             << ">" ;

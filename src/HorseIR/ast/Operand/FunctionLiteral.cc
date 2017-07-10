@@ -9,18 +9,20 @@ using namespace horseIR::ast ;
 
 FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext *cst, ASTNode::MemManagerType &mem)
     : Literal(cst, mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
-      type(nullptr)
+      type{nullptr}
 {
     assert(cst != nullptr) ;
 
     HorseIRParser::LiteralFunctionContext* context = cst->literalFunction() ;
     const std::string lex = context->value->getText() ;
     value = lex.substr(1, lex.length()) ;
+    FunctionType* functionType = new FunctionType(mem) ;
+
 }
 
 FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralFunctionContext *cst, ASTNode::MemManagerType &mem)
     : Literal(mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
-      type(nullptr)
+      type{nullptr}
 {
     assert(cst != nullptr) ;
     const std::string lex = cst->value->getText() ;

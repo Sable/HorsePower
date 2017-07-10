@@ -2,6 +2,7 @@
 #include <cassert>
 #include <string>
 #include <utility>
+#include <algorithm>
 #include "../grammar/HorseIRParser.h"
 
 #include "../Structure.h"
@@ -12,13 +13,13 @@ Statement::Statement(HorseIRParser::StatementContext *cst, ASTNode::MemManagerTy
                      StatementClass p_StatementClass)
     : ASTNode(cst, mem, type),
       statementClass{p_StatementClass},
-      flow{std::make_pair(nullptr, nullptr)}
+      outwardFlow{std::make_pair(nullptr, nullptr)}
 {}
 
 Statement::Statement(ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass)
     : ASTNode(mem, type),
       statementClass{p_StatementClass},
-      flow{std::make_pair(nullptr, nullptr)}
+      outwardFlow{std::make_pair(nullptr, nullptr)}
 {}
 
 Statement* Statement::makeStatementASTNode(HorseIRParser::StatementContext *cst, ASTNode::MemManagerType &mem)
@@ -40,6 +41,7 @@ Statement* Statement::makeStatementASTNode(HorseIRParser::StatementContext *cst,
             return returnStatement ;
         } else if ((gotoContext = dynamic_cast<decltype(gotoContext)>(coreContext)) != nullptr) {
             BranchStatement* branchStatement = new BranchStatement(stmtCoreContext, mem) ;
+            return branchStatement ;
         } else {
             assert(false) ;
             return nullptr ;
@@ -51,4 +53,44 @@ Statement* Statement::makeStatementASTNode(HorseIRParser::StatementContext *cst,
         assert(false) ;
         return nullptr ;
     }
+}
+
+Statement::StatementClass Statement::getStatementClass() const
+{
+    return statementClass ;
+}
+
+std::pair<Statement*, Statement*> Statement::getOutwardFlow() const
+{
+    return outwardFlow ;
+}
+
+std::vector<Statement*> Statement::getInwardFlow() const
+{
+    return inwardFlow ;
+}
+
+Statement& Statement::setOutwardFlow(const std::pair<Statement *, Statement *> &flow)
+{
+    outwardFlow = std::move(flow) ;
+    return *this ;
+}
+
+Statement& Statement::setOutwardFlow(Statement *trueFlow, Statement *falseFlow)
+{
+    outwardFlow = std::make_pair(trueFlow, falseFlow) ;
+    return *this ;
+}
+
+Statement& Statement::appendInwardFlow(Statement *flow)
+{
+    assert(flow != nullptr) ;
+    if (std::find(inwardFlow.begin(), inwardFlow.end(), flow) != inwardFlow.end()) return *this ;
+    inwardFlow.push_back(flow) ;
+    return *this ;
+}
+
+StatementIterator Statement::getIterator()
+{
+    return StatementIterator(this) ;
 }
