@@ -3,6 +3,7 @@
 #include <sstream>
 #include <utility>
 #include <string>
+#include <map>
 #include "../grammar/HorseIRParser.h"
 
 #include "../Structure.h"
@@ -30,11 +31,13 @@ Method::Method(HorseIRParser::MethodContext *cst, ASTNode::MemManagerType &mem)
 
     returnType = Type::makeTypeASTNode(cst->type(), mem) ;
 
-    const auto statements = cst->statement() ;
-    for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
+    const auto cstStatement = cst->statement() ;
+    for (auto iter = cstStatement.cbegin(); iter != cstStatement.cend(); ++iter) {
         Statement* stmt = Statement::makeStatementASTNode(*iter, mem) ;
-        this->statements.push_back(stmt) ;
+        statements.push_back(stmt) ;
     }
+
+    linkStatementFlow() ;
 }
 
 Method::Method(ASTNode::MemManagerType &mem)
@@ -82,6 +85,9 @@ std::string Method::toString() const
     stream << ") :" << returnType->toString() << " {" << std::endl ;
     for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
         stream << ASTNode::INDENT << (*iter)->toString() << std::endl ;
+        StatementIterator iterator = (*iter)->getIterator() ;
+        stream << "        OnTrue:  " << (((*iterator.nextOnTrue()) == nullptr)? "nullptr" : (*iterator.nextOnTrue())->toString()) << std::endl ;
+        stream << "        OnFalse: " << (((*iterator.nextOnFalse()) == nullptr)? "nullptr" : (*iterator.nextOnFalse())->toString()) << std::endl ;
     }
     stream << "}" ;
     return stream.str() ;
@@ -100,4 +106,61 @@ std::string Method::toTreeString() const
     }
     stream << ')' ;
     return stream.str() ;
+}
+
+void Method::linkStatementFlow() {
+    std::map<const std::string, Statement*> labelMap ;
+    for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
+        if ((*iter)->getStatementClass() == Statement::StatementClass::Label) {
+            LabelStatement* labelStatement = static_cast<LabelStatement*>(*iter) ;
+            const std::string labelName = labelStatement->getLabelName() ;
+            assert(labelMap.find(labelName) == labelMap.end()) ;
+            labelMap.insert(std::make_pair(std::move(labelName), std::move(labelStatement))) ;
+        }
+    }
+    for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
+        switch ((*iter)->getStatementClass()) {
+            case Statement::StatementClass::Return : {
+                ReturnStatement* const statement = static_cast<ReturnStatement*>(*iter) ;
+                (void) statement->setOutwardFlow(nullptr, nullptr) ;
+                break ;
+            }
+            case Statement::StatementClass::Label : {
+                assert(iter + 1 != statements.cend()) ;
+                LabelStatement* const statement = static_cast<LabelStatement*>(*iter) ;
+                Statement* const nextStatement = *(iter + 1) ;
+                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+                (void) nextStatement->appendInwardFlow(statement) ;
+                break ;
+            }
+            case Statement::StatementClass::Assign : {
+                assert(iter + 1 != statements.cend()) ;
+                AssignStatement* const statement = static_cast<AssignStatement*>(*iter) ;
+                Statement* const nextStatement = *(iter + 1) ;
+                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+                (void) nextStatement->appendInwardFlow(statement) ;
+                break ;
+            }
+            case Statement::StatementClass::Phi: {
+                assert(iter + 1 != statements.cend()) ;
+                PhiStatement* const statement = static_cast<PhiStatement*>(*iter) ;
+                Statement* const nextStatement = *(iter + 1) ;
+                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+                (void) nextStatement->appendInwardFlow(statement) ;
+                break ;
+            }
+            case Statement::StatementClass::Branch : {
+                assert(iter + 1 != statements.cend()) ;
+                BranchStatement* const statement = static_cast<BranchStatement*>(*iter) ;
+                const std::string targetLabelName = statement->getTargetLabelName() ;
+                assert(labelMap.find(targetLabelName) != labelMap.end()) ;
+                Statement* const trueStatement = labelMap[targetLabelName] ;
+                Statement* const falseStatement = *(iter + 1) ;
+                (void) statement->setOutwardFlow(trueStatement, falseStatement) ;
+                (void) trueStatement->appendInwardFlow(statement) ;
+                (void) falseStatement->appendInwardFlow(statement) ;
+                break ;
+            }
+        }
+    }
 }

@@ -41,6 +41,7 @@ namespace horseIR {
             ASTNode () = delete ;
             ASTNode (MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
             ASTNode (const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
+            virtual ~ASTNode() = default ;
 
             virtual std::size_t getNumNodesRecursively() const = 0;
             virtual std::vector<ASTNode*> getChildren() const = 0 ;

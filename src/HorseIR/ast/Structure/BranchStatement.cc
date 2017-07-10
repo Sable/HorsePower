@@ -17,7 +17,8 @@ BranchStatement::BranchStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::M
     auto gotoContext = dynamic_cast<HorseIRParser::StmtGotoContext*>(cst->statementCore()) ;
     assert(gotoContext != nullptr) ;
 
-    targetLabelName = gotoContext->label()->getText() ;
+    HorseIRParser::LabelContext* labelContext = gotoContext->label() ;
+    targetLabelName = ASTNode::CSTNameToString(labelContext->name()) ;
     if (gotoContext->name() != nullptr) {
         Identifier* identifier = new Identifier(gotoContext->name(), mem) ;
         checkCondition = std::make_pair(true, identifier) ;
@@ -31,6 +32,11 @@ BranchStatement::BranchStatement(ASTNode::MemManagerType &mem)
       targetLabelName{""},
       checkCondition{std::make_pair(false, nullptr)}
 {}
+
+std::string BranchStatement::getTargetLabelName() const
+{
+    return targetLabelName ;
+}
 
 std::size_t BranchStatement::getNumNodesRecursively() const
 {

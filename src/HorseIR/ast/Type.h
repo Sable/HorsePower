@@ -19,7 +19,8 @@ namespace horseIR {
             Type() = delete ;
             Type(antlr4::tree::ParseTree* cst, ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type) ;
             Type(ASTNode::MemManagerType& mem, Type::TypeClass p_typeClass, ASTNode::ASTNodeClass type) ;
-            
+            virtual ~Type() override = default ;
+
             Type::TypeClass getTypeClass() const ;
             virtual bool isGeneralizationOf(const Type*) const = 0 ;
             
@@ -40,6 +41,7 @@ namespace horseIR {
             ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem) ;
             ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem) ;
             ScalarType(ASTNode::MemManagerType& mem) ;
+            ~ScalarType() override = default ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
@@ -59,6 +61,7 @@ namespace horseIR {
             WildcardType() = delete ;
             WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem) ;
             WildcardType(ASTNode::MemManagerType& mem) ;
+            ~WildcardType() override = default ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
@@ -73,7 +76,8 @@ namespace horseIR {
             ListType() = delete ;
             ListType(ASTNode::MemManagerType& mem) ;
             ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem) ;
-            
+            ~ListType() override = default ;
+
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
@@ -92,6 +96,7 @@ namespace horseIR {
             DictionaryType() = delete ;
             DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem) ;
             DictionaryType(ASTNode::MemManagerType& mem) ;
+            ~DictionaryType() override = default ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
@@ -114,6 +119,7 @@ namespace horseIR {
             EnumerationType() = delete ;
             EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem) ;
             EnumerationType(ASTNode::MemManagerType& mem) ;
+            ~EnumerationType() override = default ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
@@ -133,6 +139,7 @@ namespace horseIR {
             FunctionType() = delete ;
             FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionType(ASTNode::MemManagerType& mem) ;
+            ~FunctionType() override = default ;
             
             virtual bool isGeneralizationOf(const Type* type) const override ;
 
