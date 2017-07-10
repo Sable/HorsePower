@@ -27,21 +27,41 @@
 #define caseL case H_L:
 #define caseF case H_F:
 #define caseE case H_E:
+#define caseC case H_C:
 #define caseS case H_S:
-#define caseA case H_A:
+#define caseY case H_Y:
+#define caseM case H_M:
+#define caseD case H_D:
+#define caseZ case H_Z:
+#define caseU case H_U:
+#define caseW case H_W:
+#define caseT case H_T:
+#define caseX case H_X:
+#define caseG case H_G:
 #define caseN case H_N:
+#define caseA case H_A:
+#define caseK case H_K:
 #define caseV case H_V:
 
 #define xp  x->typ
 #define xn  x->len
+
 #define xb  x->b
 #define xh  x->h
-#define xc  x->c
 #define xi  x->i32
 #define xl  x->i64
 #define xf  x->f32
 #define xe  x->f64
+#define xc  x->c
 #define xs  x->s
+#define xy  x->y
+#define xm  x->m
+#define xd  x->d
+#define xz  x->z
+#define xu  x->u
+#define xw  x->w
+#define xt  x->t
+#define xx  x->x
 #define xg  x->g
 
 #define xB(k) ((B*)(xg))[k]
