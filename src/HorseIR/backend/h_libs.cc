@@ -12,6 +12,11 @@ typedef struct hash_node {
  * e.g. libIndexOf_I
  */
 
+L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
+	R 0;
+}
+
+
 L libIndexOf_I(L *targ, I *src, L src_len, I *val, L val_len){
 	HN hashT = createHashTable(src, src_len);
 	targ = (L*)malloc(sizeof(L)*val_len);
