@@ -27,9 +27,9 @@ V readCSV(S fileName, L numCols, L *types, L *symList){
 		initValue (VDexl(newDict, 1), types[i], numRow);});
 
 	P("** Done with initialization **\n");
-	printTable(x); P("\n");
 	rewind(fp);
 	loadCSV(fp, true, x, numCols, types);
+	printTable(x); P("\n");
 	fclose(fp);
 	R x;
 }
@@ -59,15 +59,14 @@ L loadCSV(FILE *fp, B isLoading, V table, L numCols, L *types){
 L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
 	C tmp[LINE_MAX_CHAR];
 	S lineT = trim(line);
-	L num = 0, numCols = 0, strLen = strlen(lineT);
-	P("line[%lld] = %s", rowID,lineT); printType(xp); P("\n");
+	L cnt = 0, numCols = 0, strLen = strlen(lineT);
+	// P("line[%lld] = %s", rowID,lineT); printType(xp); P("\n");
 	DOI(strLen, {\
 		if(sp==lineT[i]){\
-			tmp[num]=0;P("%s [col %lld]\n",tmp, numCols);\
-			P(" entering\n");\
+			tmp[cnt]=0; trimSelf(tmp); \
 			loadItem(getDictVal(getTableDict(x,numCols)),rowID,types[numCols],tmp);\
-			num=0;numCols++;}\
-		else{tmp[num++]=lineT[i];}})
+			cnt=0;numCols++;}\
+		else{tmp[cnt++]=lineT[i];}})
 	R numCols;
 }
 
@@ -82,19 +81,12 @@ FILE* openFile(S s){
 
 /* x[k] = (typ) s */
 void loadItem(V x, L k, L typ, S s){
-	P("loadItem, ");
-	printType(xp);
-	P(" typ = %lld, k = %lld, xg = 0\n",typ,k);
-	// switch(typ){
-	// 	caseB xB(k) = atoi(s); break;
-	// 	caseI xI(k) = atoi(s); break;
-	// 	caseL xL(k) = atol(s); break;
-	// 	caseS xS(k) = insertSym(createSymbol(s)); break;
-	// }
-	P("xS(%lld) = %lld\n",k,xS(k));
-	getchar();
-	getchar();
-	getchar();
+	switch(typ){
+		caseB xB(k) = atoi(s); break;
+		caseI xI(k) = atoi(s); break;
+		caseL xL(k) = atol(s); break;
+		caseS xS(k) = insertSym(createSymbol(s)); break;
+	}
 }
 
 /* helper functions */
@@ -120,6 +112,14 @@ S trimRight(S s){
 	R s;
 }
 
+S trimSelf(S s){
+	S t = trim(s);
+	if(s != t) {
+		strcpy(s, t);
+	}
+	R s;
+}
+
 void errorMsg(S msg){
 	fprintf(stderr, "%s\n", msg);
 	exit(ERROR_CODE);
@@ -133,20 +133,25 @@ void printItem(V x, S strBuff){
 		caseI SP(strBuff, "%d"  , xi); break;
 		caseL SP(strBuff, "%lld", xl); break;
 		caseE SP(strBuff, "%lf" , xe); break;
-		caseS SP(strBuff, "%lld", xs); break;
+		caseS printSymbol(xs, strBuff);break;
 	}
 }
 
 void printListItem(V x, L k, S strBuff){
-	switch(xp){
-		caseB SP(strBuff, "%d"  , xB(k)); break;
-		caseI SP(strBuff, "%d"  , xI(k)); break;
-		caseL SP(strBuff, "%lld", xL(k)); break;
-		caseE SP(strBuff, "%lf" , xF(k)); break;
-		caseS SP(strBuff, "%lld", xS(k)); break;
-		caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
+	if(xn == 1){
+		printItem(x, strBuff);
 	}
-	P("%s ", strBuff);
+	else {
+		switch(xp){
+			caseB SP(strBuff, "%d"  , xB(k)); break;
+			caseI SP(strBuff, "%d"  , xI(k)); break;
+			caseL SP(strBuff, "%lld", xL(k)); break;
+			caseE SP(strBuff, "%lf" , xF(k)); break;
+			caseS printSymbol(xS(k), strBuff);break;
+			caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
+		}
+	}
+	P(" %s", strBuff);
 }
 
 void printHead(V x){
@@ -156,7 +161,7 @@ void printHead(V x){
 void printList(V x){
 	C buff[128];
 	printHead(x);
-	// DOI(xn, printListItem(x,i,buff));
+	DOI(xn, printListItem(x,i,buff));
 	P("}");
 }
 

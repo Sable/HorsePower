@@ -211,8 +211,17 @@ Elemtype createSymbol(S s){
     R x;
 }
 
+void printSymbol(L x, S strBuff){
+    SP(strBuff, "`%s", symTable[x]->data.str);
+}
+
 void printAllSymol(){
     P("total size = %lld\n", symCur+1);
     DOI(symCur+1, P("[%2lld] %s\n",i,symTable[i]->data.str));
+}
+
+void printSymInfo(){
+    P("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
+        symSize, symCur+1, (symCur+1)*100.0/symSize);
 }
 

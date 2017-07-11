@@ -29,6 +29,7 @@ void initValue(V x, L typ, L len);
 
 void printType(L x);
 void printTypeStr(L x, S buff);
+void printHeapInfo();
 
 V getDictKey(V x);
 V getDictVal(V x);

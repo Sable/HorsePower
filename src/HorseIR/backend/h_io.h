@@ -15,6 +15,7 @@ void loadItem(V x, L k, L typ, S s);
 S trim(S s);
 S trimLeft(S s);
 S trimRight(S s);
+S trimSelf(S s);
 void errorMsg(S msg);
 
 /* output */

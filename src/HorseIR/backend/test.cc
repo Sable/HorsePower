@@ -26,10 +26,10 @@ void initTable(){
 	};
 	DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
 	printAllSymol();
-	SYM_LIST_EMP[0] = getSymbol("LastName");
-	SYM_LIST_EMP[1] = getSymbol("DepartmentID");
-	SYM_LIST_DEP[0] = getSymbol("DepartmentID");
-	SYM_LIST_DEP[1] = getSymbol("DepartmentName");
+	SYM_LIST_EMP[0] = getSymbol((S)"LastName");
+	SYM_LIST_EMP[1] = getSymbol((S)"DepartmentID");
+	SYM_LIST_DEP[0] = getSymbol((S)"DepartmentID");
+	SYM_LIST_DEP[1] = getSymbol((S)"DepartmentName");
 }
 
 /* return -1, if too large */
@@ -47,6 +47,8 @@ L testMain(){
 	V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
 	P("Reading table department\n");
 	V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
+	printSymInfo();
+	printHeapInfo();
 	getchar();
 	R 0;
 }
