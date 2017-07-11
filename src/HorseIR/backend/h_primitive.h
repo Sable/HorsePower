@@ -25,12 +25,19 @@ extern "C" {
 #define vx(x)  x->x
 #define vg(x)  x->g
 
-#define vB(x) (B*)(vg(x))
-#define vL(x) (L*)(vg(x))
-#define vS(x) (S*)(vg(x))
+#define vB(x) ((B*)(vg(x)))
+#define vL(x) ((L*)(vg(x)))
+#define vS(x) ((S*)(vg(x)))
 
 #define isSymbol(x) (vp(x) == H_S)
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
+#define isInteger(x) (vp(x) == H_L)
+
+L pfnColumnValue(V z, V x, V y);
+L pfnIndexOf    (V z, V x, V y);
+L pfnFindLeft   (V z, V x, V y);
+L pfnFindRight  (V z, V x, V y, V m);
+L pfnIndex      (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

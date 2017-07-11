@@ -1,5 +1,10 @@
 #include "h_global.h"
 
+/* temp */
+L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
+	R 0;
+}
+
 /*
  * primitive function -> pfn
  * input  parameters  -> x, y, m ...
@@ -23,10 +28,11 @@ L pfnColumnValue(V z, V x, V y){
 
 L pfnIndexOf(V z, V x, V y){
 	if(vp(x) == vp(y)){
-		setarg(z, H_L, vn(y));
+		initV(z, H_L, vn(y));
 		switch(vp(y)){
 			caseL lib_index_of_i32(vL(z),vL(x),vn(x),vL(y),vn(y)); break;
 		}
+		R 0;
 	}
 	else R E_DOMAIN;
 }
@@ -41,8 +47,9 @@ L pfnFindLeft(V z, V x, V y){
 		L lenz = 0, typz = H_B;
 		L leny = vn(y), lenx = vn(x), cnt = 0;
 		DOI(leny, lenz+=vL(y)[i]<lenx)
-		setarg(z, typz, lenz);
+		initV(z, typz, lenz);
 		DOI(leny, {L t=vL(y)[i]; if(t>=0 && t<lenx)vL(z)[cnt++]=vL(x)[t];})
+		R 0;
 	}
 	else R E_DOMAIN;
 }
@@ -50,13 +57,14 @@ L pfnFindLeft(V z, V x, V y){
 /*
  * find_right: x[(y<#m)/!#y]
  */
-L pfnFindRight(V x, V y, V m){
+L pfnFindRight(V z, V x, V y, V m){
 	if(vp(x) == vp(y) && vp(x) == vp(m) && vn(x) == vn(y) && isInteger(x)){
 		L lenz = 0, typz = H_B;
 		L lenm = vn(m), leny = vn(y), cnt = 0;
-		DOI(leny, lenz+=vL(y)<lenm)
-		setarg(z, typz, lenz);
+		DOI(leny, lenz+=vL(y)[i]<lenm)
+		initV(z, typz, lenz);
 		DOI(leny, {L t=vL(y)[i]; if(t<lenm)vL(z)[cnt++]=vL(x)[i];})
+		R 0;
 	}
 	else R E_DOMAIN;
 }
@@ -69,22 +77,26 @@ L pfnIndex(V z, V x, V y){
 		L typz = vp(x), lenz = vn(y), lenx = vn(x);
 		if(isSymbol(x)){
 			DOI(lenz, if(lenx <= vL(y)[i])R E_INDEX)
-			setarg(z, typz, lenz);
+			initV(z, typz, lenz);
 			DOI(lenz, vS(z)[i] = vS(x)[vL(y)[i]])
 			R 0;
 		}
+		else R E_DOMAIN;
 	}
-	R E_DOMAIN;
+	else R E_DOMAIN;
 }
 
 /* list, dict, table */
 
 L pfnList(ListV x){
+	R 0;
 }
 
 L pfnDict(V x){
+	R 0;
 }
 
 L pfnTable(V x){
+	R 0;
 }
 

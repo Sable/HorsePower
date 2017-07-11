@@ -45,6 +45,11 @@ typedef struct list_value_node{
 	struct list_value_node *next;
 }ListV0,*ListV;
 
+typedef struct list_table{
+	L sid;
+	V table;
+}ListT0, *ListT;
+
 #include "h_global_type.h"
 
 /* macros */
@@ -80,6 +85,7 @@ extern G H_heap;
 #include "h_memory.h"
 #include "h_symbol.h"
 #include "h_libs.h"
-#include "h_primitive.h"
 #include "h_io.h"
+#include "h_system.h"
+#include "h_primitive.h"
 #include "test.h"

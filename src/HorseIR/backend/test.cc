@@ -42,11 +42,14 @@ L getNiceNumber(L n){
 L testMain(){
 	initMain();  // memory
 	initSym();   // symbol
+	initSys();
 	initTable(); // table
 	P("Reading table employee\n");
 	V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
+	registerTable((S)"employee", tableEmp);
 	P("Reading table department\n");
 	V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
+	registerTable((S)"department", tableDep);
 	printSymInfo();
 	printHeapInfo();
 	getchar();
