@@ -2,21 +2,21 @@
 #include <cassert>
 #include <sstream>
 #include <string>
-#include "../grammar/HorseIRParser.h"
+#include <algorithm>
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
 CompilationUnit::CompilationUnit(HorseIRParser::ProgramContext *cst, ASTNode::MemManagerType &mem)
-    : ASTNode(cst, mem, ASTNode::ASTNodeClass::CompilationUnit)
+    : ASTNode(nullptr, cst, mem, ASTNode::ASTNodeClass::CompilationUnit)
 {
     assert(cst != nullptr) ;
     std::vector<HorseIRParser::ProgramContentContext*> contents = cst->programContent() ;
     for (auto iter = contents.cbegin(); iter != contents.cend(); ++iter) {
         if ((*iter)->module() != nullptr) {
             HorseIRParser::ModuleContext* moduleContext = (*iter)->module() ;
-            Module* module = new Module(moduleContext, mem) ;
+            Module* module = new Module(this, moduleContext, mem) ;
             modules.push_back(module) ;
             continue ;
         } else if ((*iter)->content() != nullptr) {
@@ -39,6 +39,24 @@ CompilationUnit&& CompilationUnit::merge(CompilationUnit &&obj)
 {
     // TODO
     return std::move(*this) ;
+}
+
+std::vector<Module*> CompilationUnit::getModules() const
+{
+    return modules ;
+}
+
+Module* CompilationUnit::getModule(std::size_t index) const
+{
+    return (index < modules.size())? modules[index] : nullptr ;
+}
+
+Module* CompilationUnit::getModule(const std::string &moduleName) const
+{
+    auto ptr = std::find_if(modules.begin(), modules.end(), [&](Module* module) {
+            return module->getModuleName() == moduleName ;
+        }) ;
+    return (ptr == modules.end())? nullptr : *ptr ;
 }
 
 std::size_t CompilationUnit::getNumNodesRecursively() const

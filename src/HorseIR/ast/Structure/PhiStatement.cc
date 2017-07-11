@@ -3,22 +3,21 @@
 #include <string>
 #include <utility>
 #include <sstream>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-PhiStatement::PhiStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
-    : Statement(cst, mem, ASTNode::ASTNodeClass::PhiStatement, StatementClass::Phi)
+PhiStatement::PhiStatement(ASTNode* parent, HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
+    : Statement(parent, cst, mem, ASTNode::ASTNodeClass::PhiStatement, StatementClass::Phi)
 {
     assert(cst != nullptr) ;
     assert(cst->statementCore() != nullptr) ;
     auto stmtNameExprContext = dynamic_cast<HorseIRParser::StmtNameExprContext*>(cst->statementCore()) ;
     assert(stmtNameExprContext != nullptr) ;
 
-    lhsID = new Identifier(stmtNameExprContext->generalName(), mem) ;
-    lhsType = Type::makeTypeASTNode(stmtNameExprContext->type(), mem) ;
+    lhsID = new Identifier(this, stmtNameExprContext->generalName(), mem) ;
+    lhsType = Type::makeTypeASTNode(this, stmtNameExprContext->type(), mem) ;
 
     HorseIRParser::ExpressionContext* expressionContext = stmtNameExprContext->expression() ;
     HorseIRParser::ExprPhiContext* exprPhiContext = dynamic_cast<decltype(exprPhiContext)>(expressionContext) ;
@@ -31,7 +30,7 @@ PhiStatement::PhiStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemMana
         auto label = labels[iter] ;
         auto name = names[iter] ;
         std::string targetLabelName = ASTNode::CSTNameToString(label->name()) ;
-        Identifier* conditionID = new Identifier(name, mem) ;
+        Identifier* conditionID = new Identifier(this, name, mem) ;
         inFlowMap.insert(std::make_pair(std::move(targetLabelName), conditionID)) ;
     }
 }
@@ -87,4 +86,45 @@ std::string PhiStatement::toString() const
 std::string PhiStatement::toTreeString() const
 {
     return "(PhiStatement)" ;
+}
+
+PhiStatement* PhiStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    PhiStatement* replica = new PhiStatement(mem) ;
+    replica->inFlowMap = inFlowMap ;
+    replica->lhsID = lhsID ;
+    replica->lhsType = lhsType ;
+    return replica ;
+}
+
+PhiStatement* PhiStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    PhiStatement* replica = new PhiStatement(mem) ;
+
+    std::map<std::string, Identifier*> duplicateInFlowMap ;
+    for (auto iter = inFlowMap.cbegin(); iter != inFlowMap.cend(); ++iter) {
+        std::string const labelName = iter->first ;
+        Identifier* const id = iter->second ;
+        assert(id != nullptr) ;
+        Identifier* const duplicateID = static_cast<Identifier*>(id->duplicateDeep(mem)) ;
+        (void) duplicateID->setParentASTNode(replica) ;
+        duplicateInFlowMap.insert(std::make_pair(std::move(labelName), std::move(duplicateID))) ;
+    }
+    replica->inFlowMap = std::move(duplicateInFlowMap) ;
+
+    Identifier* duplicateLHSID = nullptr ;
+    if (lhsID != nullptr) {
+        duplicateLHSID = static_cast<Identifier*>(lhsID->duplicateDeep(mem)) ;
+        (void) duplicateLHSID->setParentASTNode(replica) ;
+    }
+    replica->lhsID = duplicateLHSID ;
+
+    Type* duplicateLHSType = nullptr ;
+    if (lhsType != nullptr) {
+        duplicateLHSType = static_cast<Type*>(lhsType->duplicateDeep(mem)) ;
+        (void) duplicateLHSType->setParentASTNode(replica) ;
+    }
+    replica->lhsType = duplicateLHSType ;
+
+    return replica ;
 }

@@ -1,13 +1,14 @@
 #include <string>
 #include <cassert>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)
+ScalarType::ScalarType(ASTNode* parent, HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)
 {
+    assert(cst != nullptr) ;
     (void) mem ;
     
     const std::string tokenContent = cst->tokenValue->getText() ;

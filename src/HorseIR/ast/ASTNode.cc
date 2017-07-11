@@ -5,14 +5,26 @@ using namespace horseIR::ast ;
 const std::string ASTNode::INDENT = "    " ;
 
 ASTNode::ASTNode(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type)
-    : ASTNode(nullptr, mem, type)
+    : ASTNode(nullptr, nullptr, mem, type)
 {}
 
-ASTNode::ASTNode(const antlr4::tree::ParseTree* pTree, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type)
-    : cst(pTree),
-      nodeType(type) 
+ASTNode::ASTNode(ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* pTree, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type)
+    : cst{pTree},
+      nodeType{type} ,
+      parentASTNode{p_parentASTNode}
 {
     mem.manage(this) ;
+}
+
+ASTNode* ASTNode::getParentASTNode() const
+{
+    return parentASTNode ;
+}
+
+ASTNode& ASTNode::setParentASTNode(ASTNode *p_parentASTNode)
+{
+    parentASTNode = p_parentASTNode ;
+    return *this ;
 }
 
 const antlr4::tree::ParseTree* ASTNode::getCST() const
@@ -23,6 +35,33 @@ const antlr4::tree::ParseTree* ASTNode::getCST() const
 ASTNode::ASTNodeClass ASTNode::getNodeType() const
 {
     return nodeType ;
+}
+
+std::string ASTNode::CSTNameToString(HorseIRParser::NameContext *nameContext)
+{
+    assert(nameContext != nullptr) ;
+    HorseIRParser::NameIdContext* nameIdContext = nullptr ;
+    HorseIRParser::NameKeyContext* nameKeyContext = nullptr ;
+    if ((nameIdContext = dynamic_cast<decltype(nameIdContext)>(nameContext)) != nullptr) {
+        return nameIdContext->ID()->getText() ;
+    } else if ((nameKeyContext = dynamic_cast<decltype(nameKeyContext)>(nameContext)) != nullptr) {
+        return nameKeyContext->idKey->getText() ;
+    } else {
+        assert(false);
+        return std::string() ;
+    }
+}
+
+/* TODO */
+ASTNode* ASTNode::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    return nullptr ;
+}
+
+/* TODO */
+ASTNode* ASTNode::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    return nullptr ;
 }
 
 ASTNode::MemManagerType& ASTNode::MemManagerType::manage(ASTNode* ptr)
@@ -50,19 +89,4 @@ ASTNode::MemManagerType& ASTNode::MemManagerType::release(ASTNode* ptr)
                                   return p_search.get() == ptr ;
                               }));
     return *this ;
-}
-
-std::string ASTNode::CSTNameToString(HorseIRParser::NameContext *nameContext)
-{
-    assert(nameContext != nullptr) ;
-    HorseIRParser::NameIdContext* nameIdContext = nullptr ;
-    HorseIRParser::NameKeyContext* nameKeyContext = nullptr ;
-    if ((nameIdContext = dynamic_cast<decltype(nameIdContext)>(nameContext)) != nullptr) {
-        return nameIdContext->ID()->getText() ;
-    } else if ((nameKeyContext = dynamic_cast<decltype(nameKeyContext)>(nameContext)) != nullptr) {
-        return nameKeyContext->idKey->getText() ;
-    } else {
-        assert(false);
-        return std::string() ;
-    }
 }

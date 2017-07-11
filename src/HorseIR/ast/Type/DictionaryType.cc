@@ -1,18 +1,18 @@
 #include <string>
 #include <cassert>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeClass::DictionaryType)
+DictionaryType::DictionaryType(ASTNode* parent, HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeClass::DictionaryType)
 {
     assert(cst != nullptr) ;
 
-    auto dictCST = static_cast<HorseIRParser::TypeDictContext*>(cst->typeDict()) ;    
-    keyType = Type::makeTypeASTNode(dictCST->key, mem) ;
-    valueType = Type::makeTypeASTNode(dictCST->value, mem) ;
+    auto dictCST = cst->typeDict() ;
+    keyType = Type::makeTypeASTNode(this, dictCST->key, mem) ;
+    valueType = Type::makeTypeASTNode(this, dictCST->value, mem) ;
 }
 
 DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)

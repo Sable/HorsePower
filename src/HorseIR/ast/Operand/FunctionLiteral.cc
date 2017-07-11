@@ -1,14 +1,13 @@
 #include <vector>
 #include <sstream>
 #include <cassert>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
+FunctionLiteral::FunctionLiteral(ASTNode* parent, HorseIRParser::LiteralCaseFunctionContext *cst, ASTNode::MemManagerType &mem)
+    : Literal(parent, cst, mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
       type{nullptr}
 {
     assert(cst != nullptr) ;
@@ -20,8 +19,8 @@ FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralCaseFunctionContext *cst,
 
 }
 
-FunctionLiteral::FunctionLiteral(HorseIRParser::LiteralFunctionContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
+FunctionLiteral::FunctionLiteral(ASTNode* parent, HorseIRParser::LiteralFunctionContext *cst, ASTNode::MemManagerType &mem)
+    : Literal(parent, cst, mem, Literal::LiteralClass::FunctionLiteral, ASTNode::ASTNodeClass::FunctionLiteral),
       type{nullptr}
 {
     assert(cst != nullptr) ;

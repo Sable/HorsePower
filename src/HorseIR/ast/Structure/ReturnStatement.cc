@@ -1,21 +1,20 @@
 #include <vector>
 #include <cassert>
 #include <string>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-ReturnStatement::ReturnStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
-    : Statement(cst, mem, ASTNode::ASTNodeClass::ReturnStatement, StatementClass::Return)
+ReturnStatement::ReturnStatement(ASTNode* parent, HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
+    : Statement(parent, cst, mem, ASTNode::ASTNodeClass::ReturnStatement, StatementClass::Return)
 {
     assert(cst != nullptr) ;
     assert(cst->statementCore() != nullptr) ;
     auto returnContext = dynamic_cast<HorseIRParser::StmtReturnContext*>(cst->statementCore()) ;
     assert(returnContext != nullptr) ;
 
-    id = new Identifier(returnContext->name(), mem) ;
+    id = new Identifier(this, returnContext->name(), mem) ;
 }
 
 ReturnStatement::ReturnStatement(ASTNode::MemManagerType &mem)
@@ -41,4 +40,23 @@ std::string ReturnStatement::toString() const
 std::string ReturnStatement::toTreeString() const
 {
     return "(ReturnStatement)" ;
+}
+
+ReturnStatement* ReturnStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    ReturnStatement* replica = new ReturnStatement(mem) ;
+    replica->id = id ;
+    return replica ;
+}
+
+ReturnStatement* ReturnStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    ReturnStatement* replica = new ReturnStatement(mem) ;
+    Identifier* duplicateIdentifier = nullptr ;
+    if (id != nullptr) {
+        duplicateIdentifier = static_cast<Identifier*>(id->duplicateDeep(mem)) ;
+        (void) duplicateIdentifier->setParentASTNode(replica) ;
+    }
+    replica->id = duplicateIdentifier ;
+    return replica ;
 }

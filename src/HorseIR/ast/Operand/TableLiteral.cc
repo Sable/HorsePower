@@ -1,14 +1,13 @@
 #include <vector>
 #include <sstream>
 #include <cassert>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-TableLiteral::TableLiteral(HorseIRParser::LiteralCaseTableContext *cst, ASTNode::MemManagerType &mem)
-    : Literal(cst, mem, Literal::LiteralClass::TableLiteral, ASTNode::ASTNodeClass::TableLiteral),
+TableLiteral::TableLiteral(ASTNode* parent, HorseIRParser::LiteralCaseTableContext *cst, ASTNode::MemManagerType &mem)
+    : Literal(parent, cst, mem, Literal::LiteralClass::TableLiteral, ASTNode::ASTNodeClass::TableLiteral),
       type(new ScalarType(ScalarType::ScalarClass::Table, mem))
 
 {

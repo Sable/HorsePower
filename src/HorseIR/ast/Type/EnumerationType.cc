@@ -1,17 +1,17 @@
 #include <string>
 #include <cassert>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeClass::EnumerationType)
+EnumerationType::EnumerationType(ASTNode* parent, HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeClass::EnumerationType)
 {
     assert(cst != nullptr) ;
     
-    auto enumCST = static_cast<HorseIRParser::TypeEnumContext*>(cst->typeEnum()) ;
-    elementType = Type::makeTypeASTNode(enumCST->element, mem) ;
+    auto enumCST = cst->typeEnum() ;
+    elementType = Type::makeTypeASTNode(this, enumCST->element, mem) ;
 }
 
 EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)

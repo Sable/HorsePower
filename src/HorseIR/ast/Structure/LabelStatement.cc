@@ -1,14 +1,13 @@
 #include <vector>
 #include <cassert>
 #include <string>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-LabelStatement::LabelStatement(HorseIRParser::StmtLabelContext *cst, ASTNode::MemManagerType &mem)
-    : Statement(cst, mem, ASTNode::ASTNodeClass::LabelStatement, StatementClass::Label)
+LabelStatement::LabelStatement(ASTNode* parent, HorseIRParser::StmtLabelContext *cst, ASTNode::MemManagerType &mem)
+    : Statement(parent, cst, mem, ASTNode::ASTNodeClass::LabelStatement, StatementClass::Label)
 {
     assert(cst != nullptr) ;
     HorseIRParser::LabelContext* labelContext = cst->label() ;

@@ -1,12 +1,12 @@
-#include "../grammar/HorseIRParser.h"
+#include <cassert>
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-IntegerLiteral::IntegerLiteral(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem,
+IntegerLiteral::IntegerLiteral(ASTNode* parent, const antlr4::tree::ParseTree *cst, ASTNode::MemManagerType &mem,
                                ASTNode::ASTNodeClass type, IntegerLiteral::IntegerLiteralClass p_integerLiteralClass)
-    : Literal(cst, mem, Literal::LiteralClass::IntegerLiteral, type),
+    : Literal(parent, cst, mem, Literal::LiteralClass::IntegerLiteral, type),
       integerLiteralClass(p_integerLiteralClass)
 {}
 
@@ -21,7 +21,7 @@ IntegerLiteral::IntegerLiteralClass IntegerLiteral::getIntegerLiteralClass() con
     return integerLiteralClass ;
 }
 
-IntegerLiteral* IntegerLiteral::makeIntegerLiteralASTNode(HorseIRParser::LiteralCaseIntegerContext *cst,
+IntegerLiteral* IntegerLiteral::makeIntegerLiteralASTNode(ASTNode* parent, HorseIRParser::LiteralCaseIntegerContext *cst,
                                                           ASTNode::MemManagerType &mem)
 {
     assert(cst != nullptr) ;
@@ -29,16 +29,16 @@ IntegerLiteral* IntegerLiteral::makeIntegerLiteralASTNode(HorseIRParser::Literal
     auto literalPtr = cst->literalInteger() ;
     auto literalTypeLex = literalPtr->valueType->getText() ;
     if (literalTypeLex == "i8") {
-        Integer8Literal* literal = new Integer8Literal(cst, mem) ;
+        Integer8Literal* literal = new Integer8Literal(parent, cst, mem) ;
         return literal ;
     } else if (literalTypeLex == "i16") {
-        Integer16Literal* literal = new Integer16Literal(cst, mem) ;
+        Integer16Literal* literal = new Integer16Literal(parent, cst, mem) ;
         return literal ;
     } else if (literalTypeLex == "i32") {
-        Integer32Literal* literal = new Integer32Literal(cst, mem) ;
+        Integer32Literal* literal = new Integer32Literal(parent, cst, mem) ;
         return literal ;
     } else if (literalTypeLex == "i64") {
-        Integer64Literal* literal = new Integer64Literal(cst, mem) ;
+        Integer64Literal* literal = new Integer64Literal(parent, cst, mem) ;
         return literal ;
     } else {
         assert(false) ;

@@ -12,6 +12,8 @@
 
 namespace horseIR {
     namespace ast {
+        class ASTVisitor ;
+
         class ASTNode {
         public:
             class MemManagerType {
@@ -40,11 +42,15 @@ namespace horseIR {
             
             ASTNode () = delete ;
             ASTNode (MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
-            ASTNode (const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
+            ASTNode (ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
             virtual ~ASTNode() = default ;
 
             virtual std::size_t getNumNodesRecursively() const = 0;
             virtual std::vector<ASTNode*> getChildren() const = 0 ;
+            virtual ASTNode* duplicateShallow(ASTNode::MemManagerType& mem) const ; /* TODO */
+            virtual ASTNode* duplicateDeep(ASTNode::MemManagerType& mem) const ;    /* TODO */
+            ASTNode* getParentASTNode() const ;
+            ASTNode& setParentASTNode(ASTNode* p_parentASTNode) ;
 
             const antlr4::tree::ParseTree* getCST() const ;
             ASTNode::ASTNodeClass getNodeType() const ;
@@ -56,6 +62,7 @@ namespace horseIR {
             static const std::string INDENT ;
             const antlr4::tree::ParseTree* cst ;
             const ASTNode::ASTNodeClass nodeType ;
+            ASTNode* parentASTNode ;
 
             static std::string CSTNameToString(HorseIRParser::NameContext* nameContext) ;
         } ;

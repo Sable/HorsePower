@@ -3,14 +3,13 @@
 #include <string>
 #include <utility>
 #include <sstream>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-BranchStatement::BranchStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
-    : Statement(cst, mem, ASTNode::ASTNodeClass::BranchStatement, StatementClass::Branch)
+BranchStatement::BranchStatement(ASTNode* parent, HorseIRParser::StmtCoreContext *cst, ASTNode::MemManagerType &mem)
+    : Statement(parent, cst, mem, ASTNode::ASTNodeClass::BranchStatement, StatementClass::Branch)
 {
     assert(cst != nullptr) ;
     assert(cst->statementCore() != nullptr) ;
@@ -20,7 +19,7 @@ BranchStatement::BranchStatement(HorseIRParser::StmtCoreContext *cst, ASTNode::M
     HorseIRParser::LabelContext* labelContext = gotoContext->label() ;
     targetLabelName = ASTNode::CSTNameToString(labelContext->name()) ;
     if (gotoContext->name() != nullptr) {
-        Identifier* identifier = new Identifier(gotoContext->name(), mem) ;
+        Identifier* identifier = new Identifier(this, gotoContext->name(), mem) ;
         checkCondition = std::make_pair(true, identifier) ;
     } else {
         checkCondition = std::make_pair(false, nullptr) ;
@@ -62,4 +61,14 @@ std::string BranchStatement::toString() const
 std::string BranchStatement::toTreeString() const
 {
     return "(BranchStatement)" ;
+}
+
+BranchStatement* BranchStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+
+}
+
+BranchStatement* BranchStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+
 }

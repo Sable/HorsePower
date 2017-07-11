@@ -3,15 +3,14 @@
 #include <string>
 #include <utility>
 #include <algorithm>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Statement::Statement(HorseIRParser::StatementContext *cst, ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type,
+Statement::Statement(ASTNode* parent, HorseIRParser::StatementContext *cst, ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type,
                      StatementClass p_StatementClass)
-    : ASTNode(cst, mem, type),
+    : ASTNode(parent, cst, mem, type),
       statementClass{p_StatementClass},
       outwardFlow{std::make_pair(nullptr, nullptr)}
 {}
@@ -22,7 +21,7 @@ Statement::Statement(ASTNode::MemManagerType &mem, ASTNode::ASTNodeClass type, S
       outwardFlow{std::make_pair(nullptr, nullptr)}
 {}
 
-Statement* Statement::makeStatementASTNode(HorseIRParser::StatementContext *cst, ASTNode::MemManagerType &mem)
+Statement* Statement::makeStatementASTNode(ASTNode* parent, HorseIRParser::StatementContext *cst, ASTNode::MemManagerType &mem)
 {
     assert(cst != nullptr) ;
     HorseIRParser::StmtCoreContext* stmtCoreContext = nullptr ;
@@ -34,20 +33,20 @@ Statement* Statement::makeStatementASTNode(HorseIRParser::StatementContext *cst,
         HorseIRParser::StmtReturnContext* returnContext = nullptr ;
         HorseIRParser::StmtGotoContext* gotoContext = nullptr ;
         if ((nameExprContext = dynamic_cast<decltype(nameExprContext)>(coreContext)) != nullptr) {
-            AssignStatement* assignStatement = new AssignStatement(stmtCoreContext, mem) ;
+            AssignStatement* assignStatement = new AssignStatement(parent, stmtCoreContext, mem) ;
             return assignStatement ;
         } else if ((returnContext = dynamic_cast<decltype(returnContext)>(coreContext)) != nullptr) {
-            ReturnStatement* returnStatement = new ReturnStatement(stmtCoreContext, mem) ;
+            ReturnStatement* returnStatement = new ReturnStatement(parent, stmtCoreContext, mem) ;
             return returnStatement ;
         } else if ((gotoContext = dynamic_cast<decltype(gotoContext)>(coreContext)) != nullptr) {
-            BranchStatement* branchStatement = new BranchStatement(stmtCoreContext, mem) ;
+            BranchStatement* branchStatement = new BranchStatement(parent, stmtCoreContext, mem) ;
             return branchStatement ;
         } else {
             assert(false) ;
             return nullptr ;
         }
     } else if ((stmtLabelContext = dynamic_cast<decltype(stmtLabelContext)>(cst)) != nullptr) {
-        LabelStatement* labelStatement = new LabelStatement(stmtLabelContext, mem) ;
+        LabelStatement* labelStatement = new LabelStatement(parent, stmtLabelContext, mem) ;
         return labelStatement ;
     } else {
         assert(false) ;

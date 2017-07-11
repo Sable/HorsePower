@@ -1,13 +1,12 @@
 #include <vector>
 #include <sstream>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Integer8Literal::Integer8Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
-    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer8Literal, IntegerLiteralClass::Integer8Literal)
+Integer8Literal::Integer8Literal(ASTNode* parent, HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
+    : IntegerLiteral(parent, cst, mem, ASTNode::ASTNodeClass::Integer8Literal, IntegerLiteralClass::Integer8Literal)
 {
     throw std::runtime_error("not yet implement") ;
 }

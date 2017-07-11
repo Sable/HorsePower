@@ -2,14 +2,14 @@
 #include <cassert>
 #include <sstream>
 #include <string>
-#include "../grammar/HorseIRParser.h"
+#include <algorithm>
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Module::Module(HorseIRParser::ModuleContext *cst, ASTNode::MemManagerType &mem)
-    : ASTNode(cst, mem, ASTNode::ASTNodeClass::Module)
+Module::Module(ASTNode* parent, HorseIRParser::ModuleContext *cst, ASTNode::MemManagerType &mem)
+    : ASTNode(parent, cst, mem, ASTNode::ASTNodeClass::Module)
 {
     assert(cst != nullptr) ;
     moduleName = ASTNode::CSTNameToString(cst->name()) ;
@@ -17,15 +17,16 @@ Module::Module(HorseIRParser::ModuleContext *cst, ASTNode::MemManagerType &mem)
     for (auto iter = contents.cbegin(); iter != contents.cend(); ++iter) {
         if ((*iter)->method() != nullptr) {
             HorseIRParser::MethodContext* methodContext = (*iter)->method() ;
-            Method* method = new Method(methodContext, mem) ;
+            Method* method = new Method(this, methodContext, mem) ;
             methods.push_back(method) ;
             continue ;
         } else if ((*iter)->globalVar() != nullptr) {
             HorseIRParser::GlobalVarContext* globalVarContext = (*iter)->globalVar() ;
-            std::string varName = globalVarContext->name()->getText() ;
+            Identifier* variable = new Identifier(this, globalVarContext->name(), mem) ;
+            (void) variable->setPackageName(moduleName) ;
             HorseIRParser::TypeContext* varTypeContext = globalVarContext->type() ;
-            Type* varType = Type::makeTypeASTNode(varTypeContext, mem) ;
-            globalVariables.emplace_back(varName, varType) ;
+            Type* varType = Type::makeTypeASTNode(this, varTypeContext, mem) ;
+            globalVariables.emplace_back(variable, varType) ;
             continue ;
         } else if ((*iter)->importModule() != nullptr) {
             HorseIRParser::ImportModuleContext* importModuleContext = (*iter)->importModule() ;
@@ -50,8 +51,34 @@ Module::Module(HorseIRParser::ModuleContext *cst, ASTNode::MemManagerType &mem)
 
 Module::Module(ASTNode::MemManagerType &mem)
     : ASTNode(mem, ASTNode::ASTNodeClass::Module)
-{
+{}
 
+std::string Module::getModuleName() const
+{
+    return moduleName ;
+}
+
+std::vector<std::pair<Identifier*, Type*>> Module::getGlobalVariables() const
+{
+    return globalVariables ;
+}
+
+std::vector<Method*> Module::getMethods() const
+{
+    return methods ;
+}
+
+Method* Module::getMethod(std::size_t index) const
+{
+    return (index >= methods.size())? nullptr : methods[index] ;
+}
+
+Method* Module::getMethod(const std::string &methodName) const
+{
+    auto ptr = std::find_if(methods.begin(), methods.end(), [&](Method* method) -> bool {
+            return method->getMethodName() == methodName ;
+        }) ;
+    return (ptr == methods.end())? nullptr : *ptr ;
 }
 
 std::size_t Module::getNumNodesRecursively() const
@@ -87,7 +114,7 @@ std::string Module::toString() const
     }
     for (auto iter = globalVariables.cbegin(); iter != globalVariables.cend(); ++iter) {
         stream << ASTNode::INDENT << "def "
-               << iter->first << " :"
+               << iter->first->getIDName() << " :"
                << iter->second->toString() << " ;" << std::endl ;
     }
     for (auto iter = methods.cbegin(); iter != methods.cend(); ++iter) {

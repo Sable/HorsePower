@@ -2,14 +2,13 @@
 #include <sstream>
 #include <stdexcept>
 #include <limits>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Integer16Literal::Integer16Literal(HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
-    : IntegerLiteral(cst, mem, ASTNode::ASTNodeClass::Integer16Literal, IntegerLiteralClass::Integer16Literal)
+Integer16Literal::Integer16Literal(ASTNode* parent, HorseIRParser::LiteralCaseIntegerContext *cst, ASTNode::MemManagerType &mem)
+    : IntegerLiteral(parent, cst, mem, ASTNode::ASTNodeClass::Integer16Literal, IntegerLiteralClass::Integer16Literal)
 {
     throw std::runtime_error("not yet implement") ;
 }

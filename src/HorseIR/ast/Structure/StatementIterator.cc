@@ -1,7 +1,7 @@
 #include <cassert>
 #include <utility>
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
@@ -13,7 +13,7 @@ StatementIterator::StatementIterator(Statement *statement)
     : ptr{statement}
 {}
 
-StatementIterator::StatementIterator(StatementIterator &iterator)
+StatementIterator::StatementIterator(const StatementIterator &iterator)
     : ptr{iterator.ptr}
 {}
 
@@ -21,20 +21,25 @@ StatementIterator::StatementIterator(StatementIterator &&iterator)
     : ptr{iterator.ptr}
 {}
 
-StatementIterator StatementIterator::nextOnTrue() const {
-    return StatementIterator(ptr->getOutwardFlow().first) ;
-}
-
-StatementIterator StatementIterator::nextOnFalse() const
+StatementIterator::value_type StatementIterator::nextOnTrue()
 {
-    return StatementIterator(ptr->getOutwardFlow().second) ;
+    StatementIterator::value_type current = ptr ;
+    ptr = ptr->getOutwardFlow().first ;
+    return current ;
 }
 
-Statement* StatementIterator::operator *() {
+StatementIterator::value_type StatementIterator::nextOnFalse()
+{
+    StatementIterator::value_type current = ptr ;
+    ptr = ptr->getOutwardFlow().second ;
+    return current ;
+}
+
+StatementIterator::value_type StatementIterator::operator *() {
     return ptr ;
 }
 
-StatementIterator& StatementIterator::operator=(StatementIterator &iterator)
+StatementIterator& StatementIterator::operator=(const StatementIterator &iterator)
 {
     ptr = iterator.ptr ;
     return *this ;
@@ -44,4 +49,14 @@ StatementIterator& StatementIterator::operator=(StatementIterator &&iterator)
 {
     ptr = iterator.ptr ;
     return *this ;
+}
+
+bool StatementIterator::operator==(const horseIR::ast::StatementIterator &iterator)
+{
+    return ptr == iterator.ptr ;
+}
+
+bool StatementIterator::operator!=(const horseIR::ast::StatementIterator &iterator)
+{
+    return ptr != iterator.ptr ;
 }

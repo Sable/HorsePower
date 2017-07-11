@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType)
+FunctionType::FunctionType(ASTNode* parent, HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType)
 {
     assert(cst != nullptr) ;
     
@@ -17,18 +17,18 @@ FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::Mem
     HorseIRParser::TypeFunc2Context* type2 = nullptr ;
     HorseIRParser::TypeFunc3Context* type3 = nullptr ;
 
-    auto funcCST = static_cast<HorseIRParser::TypeFuncContext*>(cst->typeFunc()) ;
+    auto funcCST = cst->typeFunc() ;
     if ((type0 = dynamic_cast<decltype(type0)>(funcCST)) != nullptr) {
         flexible = false ;
-        returnType = Type::makeTypeASTNode(type0->type(), mem) ;
+        returnType = Type::makeTypeASTNode(this, type0->type(), mem) ;
     } else if ((type1 = dynamic_cast<decltype(type1)>(funcCST)) != nullptr) {
         flexible = true ;
-        returnType = Type::makeTypeASTNode(type1->type(), mem) ;
+        returnType = Type::makeTypeASTNode(this, type1->type(), mem) ;
     } else if ((type2 = dynamic_cast<decltype(type2)>(funcCST)) != nullptr) {
         flexible = false ;
         std::vector<HorseIRParser::TypeContext*> types(std::move(type2->type())) ;
         for (auto ptr = types.cbegin(); ptr != types.cend(); ++ptr) {
-            auto param = Type::makeTypeASTNode(*ptr, mem) ;
+            auto param = Type::makeTypeASTNode(this, *ptr, mem) ;
             if (ptr + 1 != types.cend()) {
                 parameterTypes.push_back(param) ;
             } else {
@@ -39,7 +39,7 @@ FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::Mem
         flexible = true ;
         std::vector<HorseIRParser::TypeContext*> types(std::move(type3->type())) ;
         for (auto ptr = types.cbegin(); ptr != types.cend(); ++ptr) {
-            auto param = Type::makeTypeASTNode(*ptr, mem) ;
+            auto param = Type::makeTypeASTNode(this, *ptr, mem) ;
             if (ptr + 1 != types.cend()) {
                 parameterTypes.push_back(param) ;
             } else {
@@ -124,7 +124,7 @@ std::string FunctionType::toString() const
     if (parameterTypes.size() != 0) ostream << ", " ;
     ostream << (flexible? "..." : "")
             << " :"
-            << returnType->toString()
+            << ((returnType!= nullptr)? returnType->toString() : "nullptr")
             << ">" ;
     return ostream.str() ;
 }
@@ -208,7 +208,7 @@ FunctionType& FunctionType::setReturnType(horseIR::ast::Type *type)
 
 FunctionType& FunctionType::truncateNumParameter(std::size_t num)
 {
-    if (!(num < parameterTypes.size())) return *this ; /* NO-OP */
+    if (num >= parameterTypes.size()) return *this ; /* NO-OP */
 
     std::vector<Type*> org_parameterTypes = parameterTypes ;
     parameterTypes.clear() ;

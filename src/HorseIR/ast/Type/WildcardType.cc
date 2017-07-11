@@ -1,12 +1,12 @@
 #include <string>
 #include <cassert>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
+WildcardType::WildcardType(ASTNode* parent, HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
 {}
 
 WildcardType::WildcardType(ASTNode::MemManagerType& mem)

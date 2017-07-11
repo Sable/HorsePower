@@ -1,14 +1,13 @@
 #include <cassert>
-#include <Structure.h>
 
-#include "../Operand.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Literal::Literal(HorseIRParser::LiteralContext *cst, ASTNode::MemManagerType &mem, Literal::LiteralClass p_literalClass,
+Literal::Literal(ASTNode* parent, const antlr4::tree::ParseTree *cst, ASTNode::MemManagerType &mem, Literal::LiteralClass p_literalClass,
                  ASTNode::ASTNodeClass type)
     : literalClass(p_literalClass),
-      Operand(cst, mem, type, Operand::OperandClass::Literal)
+      Operand(parent, cst, mem, type, Operand::OperandClass::Literal)
 {}
 
 Literal::Literal(ASTNode::MemManagerType &mem, Literal::LiteralClass p_literalClass, ASTNode::ASTNodeClass type)
@@ -21,7 +20,7 @@ Literal::LiteralClass Literal::getLiteralClass() const
     return literalClass ;
 }
 
-Literal* Literal::makeLiteralASTNode(HorseIRParser::LiteralContext *cst, ASTNode::MemManagerType &mem)
+Literal* Literal::makeLiteralASTNode(ASTNode* parent, HorseIRParser::LiteralContext *cst, ASTNode::MemManagerType &mem)
 {
     assert(cst != nullptr) ;
     HorseIRParser::LiteralCaseBoolContext* boolContext = nullptr ;
@@ -40,13 +39,13 @@ Literal* Literal::makeLiteralASTNode(HorseIRParser::LiteralContext *cst, ASTNode
     HorseIRParser::LiteralCaseNilContext* nilContext = nullptr ;
 
     if ((boolContext = dynamic_cast<decltype(boolContext)>(cst)) != nullptr) {
-        BoolLiteral* boolLiteral = new BoolLiteral(boolContext, mem) ;
+        BoolLiteral* boolLiteral = new BoolLiteral(parent, boolContext, mem) ;
         return boolLiteral ;
     } else if ((charContext = dynamic_cast<decltype(charContext)>(cst)) != nullptr) {
-        CharLiteral* charLiteral = new CharLiteral(charContext, mem) ;
+        CharLiteral* charLiteral = new CharLiteral(parent, charContext, mem) ;
         return charLiteral ;
     } else if ((integerContext = dynamic_cast<decltype(integerContext)>(cst)) != nullptr) {
-        IntegerLiteral* integerLiteral = IntegerLiteral::makeIntegerLiteralASTNode(integerContext, mem) ;
+        IntegerLiteral* integerLiteral = IntegerLiteral::makeIntegerLiteralASTNode(parent, integerContext, mem) ;
         return integerLiteral ;
         /*
     } else if ((floatContext = dynamic_cast<decltype(floatContext)>(cst)) != nullptr) {
@@ -54,10 +53,10 @@ Literal* Literal::makeLiteralASTNode(HorseIRParser::LiteralContext *cst, ASTNode
         return fpLiteral ;
          */
     } else if ((complexContext = dynamic_cast<decltype(complexContext)>(cst)) != nullptr) {
-        ComplexLiteral* complexLiteral = new ComplexLiteral(complexContext, mem) ;
+        ComplexLiteral* complexLiteral = new ComplexLiteral(parent, complexContext, mem) ;
         return complexLiteral ;
     } else if ((symbolContext = dynamic_cast<decltype(symbolContext)>(cst)) != nullptr) {
-        SymbolLiteral* symbolLiteral = new SymbolLiteral(symbolContext, mem) ;
+        SymbolLiteral* symbolLiteral = new SymbolLiteral(parent, symbolContext, mem) ;
         return symbolLiteral ;
         /*
     } else if ((timeContext = dynamic_cast<decltype(timeContext)>(cst)) != nullptr) {
@@ -65,10 +64,10 @@ Literal* Literal::makeLiteralASTNode(HorseIRParser::LiteralContext *cst, ASTNode
         return timeLiteral ;
          */
     } else if ((functionContext = dynamic_cast<decltype(functionContext)>(cst)) != nullptr) {
-        FunctionLiteral* functionLiteral = new FunctionLiteral(functionContext, mem) ;
+        FunctionLiteral* functionLiteral = new FunctionLiteral(parent, functionContext, mem) ;
         return functionLiteral ;
     } else if ((tableContext = dynamic_cast<decltype(tableContext)>(cst)) != nullptr) {
-        TableLiteral* tableLiteral = new TableLiteral(tableContext, mem) ;
+        TableLiteral* tableLiteral = new TableLiteral(parent, tableContext, mem) ;
         return tableLiteral ;
         /*
     } else if ((ktableContext = dynamic_cast<decltype(ktableContext)>(cst)) != nullptr) {
@@ -83,7 +82,7 @@ Literal* Literal::makeLiteralASTNode(HorseIRParser::LiteralContext *cst, ASTNode
     } else if ((dictContext = dynamic_cast<decltype(dictContext)>(cst)) != nullptr) {
         throw std::runtime_error("not yet implement") ;
     } else if ((nilContext = dynamic_cast<decltype(nilContext)>(cst)) != nullptr) {
-        NilLiteral* nilLiteral = new NilLiteral(nilContext, mem) ;
+        NilLiteral* nilLiteral = new NilLiteral(parent, nilContext, mem) ;
         return nilLiteral ;
     } else {
         assert(false) ;

@@ -1,17 +1,17 @@
 #include <string>
 #include <cassert>
 
-#include "../Type.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
-    : Type(cst, mem, Type::TypeClass::List, ASTNode::ASTNodeClass::ListType)
+ListType::ListType(ASTNode* parent, HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
+    : Type(parent, cst, mem, Type::TypeClass::List, ASTNode::ASTNodeClass::ListType)
 {
     assert(cst != nullptr) ;
 
-    auto listCST = static_cast<HorseIRParser::TypeListContext*>(cst->typeList()) ;
-    elementType = Type::makeTypeASTNode(listCST->element, mem) ;
+    auto listCST = cst->typeList() ;
+    elementType = Type::makeTypeASTNode(this, listCST->element, mem) ;
 }
 
 ListType::ListType(ASTNode::MemManagerType& mem)

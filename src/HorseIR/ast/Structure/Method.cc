@@ -4,36 +4,35 @@
 #include <utility>
 #include <string>
 #include <map>
-#include "../grammar/HorseIRParser.h"
 
-#include "../Structure.h"
+#include "../AST.h"
 
 using namespace horseIR::ast ;
 
-Method::Method(HorseIRParser::MethodContext *cst, ASTNode::MemManagerType &mem)
-    : ASTNode(cst, mem, ASTNode::ASTNodeClass::Method)
+Method::Method(ASTNode* parent, HorseIRParser::MethodContext *cst, ASTNode::MemManagerType &mem)
+    : ASTNode(parent, cst, mem, ASTNode::ASTNodeClass::Method)
 {
     assert(cst != nullptr) ;
     methodName = cst->name()->getText() ;
 
     HorseIRParser::ParameterListContext* parameterListContext = cst->parameterList() ;
-    const auto parameterNames = parameterListContext->name() ;
-    const auto parameterTypes = parameterListContext->type() ;
+    auto const parameterNames = parameterListContext->name() ;
+    auto const parameterTypes = parameterListContext->type() ;
     assert(parameterNames.size() == parameterTypes.size()) ;
-    const std::size_t numParameter = parameterNames.size() ;
+    std::size_t const numParameter = parameterNames.size() ;
     for (std::size_t i = 0; i < numParameter; ++i) {
         HorseIRParser::NameContext* nameContext = parameterNames[i] ;
         HorseIRParser::TypeContext* typeContext = parameterTypes[i] ;
         std::string parameterName = ASTNode::CSTNameToString(nameContext) ;
-        Type* parameterType = Type::makeTypeASTNode(typeContext, mem) ;
+        Type* parameterType = Type::makeTypeASTNode(this, typeContext, mem) ;
         parameters.push_back(std::make_pair(std::move(parameterName), parameterType)) ;
     }
 
-    returnType = Type::makeTypeASTNode(cst->type(), mem) ;
+    returnType = Type::makeTypeASTNode(this, cst->type(), mem) ;
 
-    const auto cstStatement = cst->statement() ;
+    auto const cstStatement = cst->statement() ;
     for (auto iter = cstStatement.cbegin(); iter != cstStatement.cend(); ++iter) {
-        Statement* stmt = Statement::makeStatementASTNode(*iter, mem) ;
+        Statement* stmt = Statement::makeStatementASTNode(this, *iter, mem) ;
         statements.push_back(stmt) ;
     }
 
@@ -44,6 +43,21 @@ Method::Method(ASTNode::MemManagerType &mem)
     : ASTNode(mem, ASTNode::ASTNodeClass::Method),
       returnType{nullptr}
 {}
+
+StatementIterator Method::begin() const
+{
+    return (statements.size() == 0)? StatementIterator(nullptr) : StatementIterator(statements[0]) ;
+}
+
+StatementIterator Method::end() const
+{
+    return StatementIterator(nullptr) ;
+}
+
+std::string Method::getMethodName() const
+{
+    return methodName ;
+}
 
 std::size_t Method::getNumNodesRecursively() const
 {
@@ -85,9 +99,6 @@ std::string Method::toString() const
     stream << ") :" << returnType->toString() << " {" << std::endl ;
     for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
         stream << ASTNode::INDENT << (*iter)->toString() << std::endl ;
-        StatementIterator iterator = (*iter)->getIterator() ;
-        stream << "        OnTrue:  " << (((*iterator.nextOnTrue()) == nullptr)? "nullptr" : (*iterator.nextOnTrue())->toString()) << std::endl ;
-        stream << "        OnFalse: " << (((*iterator.nextOnFalse()) == nullptr)? "nullptr" : (*iterator.nextOnFalse())->toString()) << std::endl ;
     }
     stream << "}" ;
     return stream.str() ;
@@ -120,47 +131,50 @@ void Method::linkStatementFlow() {
     }
     for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
         switch ((*iter)->getStatementClass()) {
-            case Statement::StatementClass::Return : {
-                ReturnStatement* const statement = static_cast<ReturnStatement*>(*iter) ;
-                (void) statement->setOutwardFlow(nullptr, nullptr) ;
-                break ;
-            }
-            case Statement::StatementClass::Label : {
-                assert(iter + 1 != statements.cend()) ;
-                LabelStatement* const statement = static_cast<LabelStatement*>(*iter) ;
-                Statement* const nextStatement = *(iter + 1) ;
-                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
-                (void) nextStatement->appendInwardFlow(statement) ;
-                break ;
-            }
-            case Statement::StatementClass::Assign : {
-                assert(iter + 1 != statements.cend()) ;
-                AssignStatement* const statement = static_cast<AssignStatement*>(*iter) ;
-                Statement* const nextStatement = *(iter + 1) ;
-                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
-                (void) nextStatement->appendInwardFlow(statement) ;
-                break ;
-            }
-            case Statement::StatementClass::Phi: {
-                assert(iter + 1 != statements.cend()) ;
-                PhiStatement* const statement = static_cast<PhiStatement*>(*iter) ;
-                Statement* const nextStatement = *(iter + 1) ;
-                (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
-                (void) nextStatement->appendInwardFlow(statement) ;
-                break ;
-            }
-            case Statement::StatementClass::Branch : {
-                assert(iter + 1 != statements.cend()) ;
-                BranchStatement* const statement = static_cast<BranchStatement*>(*iter) ;
-                const std::string targetLabelName = statement->getTargetLabelName() ;
-                assert(labelMap.find(targetLabelName) != labelMap.end()) ;
-                Statement* const trueStatement = labelMap[targetLabelName] ;
-                Statement* const falseStatement = *(iter + 1) ;
-                (void) statement->setOutwardFlow(trueStatement, falseStatement) ;
-                (void) trueStatement->appendInwardFlow(statement) ;
-                (void) falseStatement->appendInwardFlow(statement) ;
-                break ;
-            }
+        case Statement::StatementClass::Return : {
+            ReturnStatement* const statement = static_cast<ReturnStatement*>(*iter) ;
+            (void) statement->setOutwardFlow(nullptr, nullptr) ;
+            break ;
+        }
+        case Statement::StatementClass::Label : {
+            assert(iter + 1 != statements.cend()) ;
+            LabelStatement* const statement = static_cast<LabelStatement*>(*iter) ;
+            Statement* const nextStatement = *(iter + 1) ;
+            (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+            (void) nextStatement->appendInwardFlow(statement) ;
+            break ;
+        }
+        case Statement::StatementClass::Assign : {
+            assert(iter + 1 != statements.cend()) ;
+            AssignStatement* const statement = static_cast<AssignStatement*>(*iter) ;
+            Statement* const nextStatement = *(iter + 1) ;
+            (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+            (void) nextStatement->appendInwardFlow(statement) ;
+            break ;
+        }
+        case Statement::StatementClass::Phi: {
+            assert(iter + 1 != statements.cend()) ;
+            PhiStatement* const statement = static_cast<PhiStatement*>(*iter) ;
+            Statement* const nextStatement = *(iter + 1) ;
+            (void) statement->setOutwardFlow(nextStatement, nextStatement) ;
+            (void) nextStatement->appendInwardFlow(statement) ;
+            break ;
+        }
+        case Statement::StatementClass::Branch : {
+            assert(iter + 1 != statements.cend()) ;
+            BranchStatement* const statement = static_cast<BranchStatement*>(*iter) ;
+            const std::string targetLabelName = statement->getTargetLabelName() ;
+            assert(labelMap.find(targetLabelName) != labelMap.end()) ;
+            Statement* const trueStatement = labelMap[targetLabelName] ;
+            Statement* const falseStatement = *(iter + 1) ;
+            (void) statement->setOutwardFlow(trueStatement, falseStatement) ;
+            (void) trueStatement->appendInwardFlow(statement) ;
+            (void) falseStatement->appendInwardFlow(statement) ;
+            break ;
+        }
         }
     }
 }
+
+void Method::inferStatementParameterSignature()
+{}

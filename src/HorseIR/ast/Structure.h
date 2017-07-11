@@ -16,18 +16,21 @@ namespace horseIR {
 
         class StatementIterator {
         public:
+            typedef Statement* value_type ;
             StatementIterator() ;
             StatementIterator(Statement* statement) ;
-            StatementIterator(StatementIterator& iterator) ;
+            StatementIterator(const StatementIterator& iterator) ;
             StatementIterator(StatementIterator&& iterator) ;
 
-            StatementIterator nextOnTrue() const ;
-            StatementIterator nextOnFalse() const ;
+            value_type nextOnTrue() ;
+            value_type nextOnFalse() ;
 
-            Statement* operator *() ;
-            StatementIterator& operator =(StatementIterator& iterator) ;
+            StatementIterator::value_type operator *() ;
+            StatementIterator& operator =(const StatementIterator& iterator) ;
             StatementIterator& operator =(StatementIterator&& iterator) ;
 
+            bool operator ==(const StatementIterator& iterator) ;
+            bool operator !=(const StatementIterator& iterator) ;
         protected:
             Statement* ptr ;
         } ;
@@ -39,7 +42,7 @@ namespace horseIR {
             };
 
             Statement() = delete ;
-            Statement(HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
+            Statement(ASTNode* parent, HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
             Statement(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
             virtual ~Statement() override = default ;
 
@@ -51,7 +54,7 @@ namespace horseIR {
             Statement& appendInwardFlow(Statement* flow) ;
             StatementIterator getIterator() ;
 
-            static Statement* makeStatementASTNode(HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem) ;
+            static Statement* makeStatementASTNode(ASTNode* parent, HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem) ;
 
         protected:
             StatementClass statementClass ;
@@ -62,14 +65,17 @@ namespace horseIR {
         class ReturnStatement : public Statement {
         public:
             ReturnStatement() = delete ;
-            ReturnStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
+            ReturnStatement(ASTNode* parent, HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
             ReturnStatement(ASTNode::MemManagerType& mem) ;
+            ReturnStatement(const ReturnStatement&) = delete ;
             ~ReturnStatement() override = default ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
+            virtual ReturnStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
+            virtual ReturnStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             Identifier* id ;
@@ -81,14 +87,23 @@ namespace horseIR {
                 Direct, Cast, CheckCast, CheckType
             };
             AssignStatement() = delete ;
-            AssignStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
+            AssignStatement(ASTNode* parent, HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
             AssignStatement(ASTNode::MemManagerType& mem) ;
+            AssignStatement(const ReturnStatement&) = delete ;
             ~AssignStatement() override = default ;
+
+            Identifier* getLHSName() const ;
+            Type* getLHSType() const ;
+            bool isInvocation() const ;
+            Operand* getInvokeTarget() const ;
+            std::vector<Operand*> getParameters() const ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
+            virtual AssignStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
+            virtual AssignStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::pair<bool, Operand*> isInvoke ;
@@ -109,14 +124,17 @@ namespace horseIR {
         class PhiStatement : public Statement {
         public:
             PhiStatement() = delete ;
-            PhiStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
+            PhiStatement(ASTNode* parent, HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
             PhiStatement(ASTNode::MemManagerType& mem) ;
+            PhiStatement(const PhiStatement&) = delete ;
             ~PhiStatement() override = default ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
+            virtual PhiStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
+            virtual PhiStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::map<std::string, Identifier*> inFlowMap ;
@@ -127,8 +145,9 @@ namespace horseIR {
         class BranchStatement : public Statement {
         public:
             BranchStatement() = delete ;
-            BranchStatement(HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
+            BranchStatement(ASTNode* parent, HorseIRParser::StmtCoreContext* cst, ASTNode::MemManagerType& mem) ;
             BranchStatement(ASTNode::MemManagerType& mem) ;
+            BranchStatement(const BranchStatement&) = delete ;
             ~BranchStatement() override = default ;
 
             std::string getTargetLabelName() const ;
@@ -137,6 +156,8 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
+            virtual BranchStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
+            virtual BranchStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::string targetLabelName ;
@@ -146,7 +167,7 @@ namespace horseIR {
         class LabelStatement : public Statement {
         public:
             LabelStatement() = delete ;
-            LabelStatement(HorseIRParser::StmtLabelContext* cst, ASTNode::MemManagerType& mem) ;
+            LabelStatement(ASTNode* parent, HorseIRParser::StmtLabelContext* cst, ASTNode::MemManagerType& mem) ;
             LabelStatement(ASTNode::MemManagerType& mem) ;
             ~LabelStatement() override = default ;
 
@@ -164,10 +185,15 @@ namespace horseIR {
         class Method : public ASTNode {
         public:
             Method() = delete ;
-            Method(HorseIRParser::MethodContext* cst, ASTNode::MemManagerType& mem) ;
+            Method(ASTNode* parent, HorseIRParser::MethodContext* cst, ASTNode::MemManagerType& mem) ;
             Method(ASTNode::MemManagerType& mem) ;
             ~Method() override = default ;
 
+            StatementIterator begin() const ;
+            StatementIterator end() const ;
+
+            std::string getMethodName() const ;
+            
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
@@ -187,10 +213,16 @@ namespace horseIR {
         class Module : public ASTNode {
         public:
             Module() = delete ;
-            Module(HorseIRParser::ModuleContext* cst, ASTNode::MemManagerType& mem) ;
+            Module(ASTNode* parent, HorseIRParser::ModuleContext* cst, ASTNode::MemManagerType& mem) ;
             Module(ASTNode::MemManagerType& mem) ;
             ~Module() override = default ;
 
+            std::string getModuleName() const ;
+            std::vector<std::pair<Identifier*, Type*>> getGlobalVariables() const ;
+            std::vector<Method*> getMethods() const ;
+            Method* getMethod(std::size_t index) const ;
+            Method* getMethod(const std::string& methodName) const ;
+            
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
@@ -199,7 +231,7 @@ namespace horseIR {
         protected:
             std::string moduleName ;
             std::vector<std::string> importedModules ;
-            std::vector<std::pair<std::string, Type*>> globalVariables ;
+            std::vector<std::pair<Identifier*, Type*>> globalVariables ;
             std::vector<Method*> methods ;
         } ;
 
@@ -211,6 +243,10 @@ namespace horseIR {
             ~CompilationUnit() override = default ;
 
             CompilationUnit&& merge(CompilationUnit&& obj) ;
+
+            std::vector<Module*> getModules() const ;
+            Module* getModule(std::size_t index) const ;
+            Module* getModule(const std::string& moduleName) const ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
