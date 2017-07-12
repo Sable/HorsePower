@@ -79,9 +79,13 @@ L getTypeSize(L typ){
 /* allocate */
 
 V allocV(L typ, L len){
-	V x = (V)getHeapMem(H_V, 1); //malloc(sizeof(V0));
+	V x = allocNode();
 	initV(x, typ, len);
 	R x;
+}
+
+V allocNode(){
+	R (V)getHeapMem(H_V, 1); //malloc(sizeof(V0));
 }
 
 V allocDict(){
@@ -110,27 +114,33 @@ V allocKTable(){
 
 /* initialization */
 
-void initV(V x, L typ, L len){
+V initV(V x, L typ, L len){
 	xp = typ;
 	xn = len;
 	xg = (len>1)?getHeapMem(typ, len):NULL;
+	R x;
 }
 
-void initDict(V x){
-	initV(x, H_N, 2);
+V initDict(V x){
+	R initV(x, H_N, 2);
 }
 
-void initSymbol(V x, L val){
+V initSymbol(V x, L val){
 	initV(x, H_S, 1);
 	xs = val;
+	R x;
 }
 
-void initList(V x, L numItems){
-	initV(x, H_G, numItems);
+V initList(V x, L numItems){
+	R initV(x, H_G, numItems);
 }
 
-void initValue(V x, L typ, L len){
-	initV(x,typ,len);
+V initValue(V x, L typ, L len){
+	R initV(x,typ,len);
+}
+
+V initTable(V x, L numCols){
+	R initV(x, H_A, numCols);
 }
 
 
@@ -157,6 +167,5 @@ void printTypeStr(L x, S buff){
 V getDictKey(V x) { R xV(0); }
 V getDictVal(V x) { R xV(1); }
 V getTableDict(V x, L k) { R xV(k); }
-
 
 

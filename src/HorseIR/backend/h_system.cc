@@ -30,10 +30,16 @@ V findTableByName(L sid){
 	R NULL;
 }
 
-/* copy y to x */
-L copyTable(V x, V y){
-	*x = *y; // alias
+/* copy x to z */
+L copyV(V z, V x){
+	*z = *x; // alias
 	R 0;
+}
+
+
+L findColFromTable(V x, L cId){
+	DOI(vn(x), if(cId == vs(getDictKey(getTableDict(x,i))))R i)
+	R -1;
 }
 
 /* Error messages */
@@ -43,9 +49,10 @@ L copyTable(V x, V y){
 void printErrMsg(L eid){
 	P("Error: ");
 	switch(eid){
-		errCaseCell(E_GENERAL,         "General error"  );
-		errCaseCell(E_INDEX,           "Index error"    );
-		errCaseCell(E_TABLE_NOT_FOUND, "Table not found");
+		errCaseCell(E_GENERAL,         "General error"   );
+		errCaseCell(E_INDEX,           "Index error"     );
+		errCaseCell(E_TABLE_NOT_FOUND, "Table not found" );
+		errCaseCell(E_COL_NOT_FOUND,   "Column not found");
 	}
 	P(".\n");
 }

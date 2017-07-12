@@ -10,7 +10,7 @@
 #include "grammar/HorseIRParser.h"
 #include "grammar/HorseIRBaseVisitor.h" 
 
-#include "util/CSTPrettyPrinter.h"
+// #include "util/CSTPrettyPrinter.h"
 
 using antlr4::tree::ParseTree;
 using antlr4::tree::ParseTreeWalker;
@@ -56,9 +56,9 @@ int main(int argc, char *argv[]){
             printf("entering\n");
             antlr4::tree::ParseTree* tree =  parser.program();
             std::ostream outStream(std::cout.rdbuf());
-            horseIR::util::CSTPrettyPrinter printer(outStream);
-            printer.prettyPrint(tree);
-            //printer.visit(tree);
+            // horseIR::util::CSTPrettyPrinter printer(outStream);
+            // printer.prettyPrint(tree);
+            // printer.visit(tree);
         }
         catch (antlr4::ParseCancellationException &exception){
             std::cerr<<"Exception captured"<<std::endl;

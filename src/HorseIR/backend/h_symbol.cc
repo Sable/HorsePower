@@ -212,7 +212,7 @@ Elemtype createSymbol(S s){
 }
 
 void printSymbol(L x, S strBuff){
-    SP(strBuff, "`%s", symTable[x]->data.str);
+    SP(strBuff, "%s", symTable[x]->data.str);
 }
 
 void printAllSymol(){
@@ -223,5 +223,9 @@ void printAllSymol(){
 void printSymInfo(){
     P("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
         symSize, symCur+1, (symCur+1)*100.0/symSize);
+}
+
+L getSymbolSize(L x){
+    R symTable[x]->data.len;
 }
 

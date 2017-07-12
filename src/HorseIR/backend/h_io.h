@@ -26,6 +26,12 @@ void printList(V x);
 void printDict(V x);
 void printTable(V x);
 
+void printTablePretty(V x);
+L getColWidth(V x);
+L getListInfo(V x, L k, S strBuff);
+void prettyItem(S str, L maxSize);
+L getTableRowNumber(V x);
+
 #ifdef	__cplusplus
 }
 #endif

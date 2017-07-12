@@ -160,7 +160,7 @@ void printHead(V x){
 
 void printList(V x){
 	C buff[128];
-	printHead(x);
+	printHead(x); P("*%lld*",xn);
 	DOI(xn, printListItem(x,i,buff));
 	P("}");
 }
@@ -185,7 +185,77 @@ void printTable(V x){
 		P("}");
 	}
 	else {
-		P("<Not a table>");
+		P("<Not a table>\n");
 	}
 }
+
+/* pretty print */
+
+void printTablePretty(V x){
+	if(isA()){
+		L *colWidth = (L*)malloc(sizeof(L) * vn(x));
+		L totSize = 0;  C buff[99];
+		DOI(vn(x), colWidth[i]=getColWidth(getTableDict(x,i)))
+		DOI(vn(x), totSize+=colWidth[i]); totSize += vn(x);
+		// DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
+		/* print head */
+		DOI(vn(x), {V d=getTableDict(x,i); V key = getDictKey(d); \
+			printSymbol(vs(key),buff); prettyItem(buff,colWidth[i]); P("%s|",buff); })
+		P("\n");
+		DOI(totSize, P("-"));
+		P("\n");
+		/* print body */
+		DOI(getTableRowNumber(x),
+			{DOJ(vn(x), {V d=getTableDict(x,j); V val = getDictVal(d); \
+				getListInfo(val,i,buff); prettyItem(buff,colWidth[j]); P("%s|",buff);})
+			P("\n");})
+		P("\n");
+		free(colWidth);
+	}
+	else{
+		P("<Not a tbale> - From printTablePretty\n");
+	}
+}
+
+L getColWidth(V x){
+	V key = getDictKey(x);
+	V val = getDictVal(x);
+	C buff[99];
+	L maxSize = getSymbolSize(vs(key));
+	DOI(vn(val), {L t=getListInfo(val,i,buff); if(t>maxSize)maxSize=t;})
+	R maxSize;
+}
+
+L getListInfo(V x, L k, S strBuff){
+	if(xn == 1){
+		printItem(x, strBuff);
+	}
+	else {
+		switch(xp){
+			caseB SP(strBuff, "%d"  , xB(k)); break;
+			caseI SP(strBuff, "%d"  , xI(k)); break;
+			caseL SP(strBuff, "%lld", xL(k)); break;
+			caseE SP(strBuff, "%lf" , xF(k)); break;
+			caseS printSymbol(xS(k), strBuff);break;
+			default: P("Error in getListInfo: type %lld\n",xp); exit(99);
+		}
+	}
+	R strlen(strBuff);
+}
+
+
+void prettyItem(S str, L maxSize){
+	L len = strlen(str);
+	while(len < maxSize) {
+		str[len++] = ' ';
+	}
+	if(len == maxSize) {
+		str[len] = 0;
+	}
+}
+
+L getTableRowNumber(V x){
+	R (vn(x)>0?vn(getDictVal(getTableDict(x,0))):0);
+}
+
 

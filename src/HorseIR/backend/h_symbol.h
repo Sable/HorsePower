@@ -50,6 +50,8 @@ void printSymbol(L x, S strBuff);
 void printAllSymol();
 void printSymInfo();
 
+L getSymbolSize(L x);
+
 #ifdef	__cplusplus
 }
 #endif

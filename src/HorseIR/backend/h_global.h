@@ -82,9 +82,9 @@ extern G H_heap;
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdarg.h>
 #include "h_memory.h"
 #include "h_symbol.h"
-#include "h_libs.h"
 #include "h_io.h"
 #include "h_system.h"
 #include "h_primitive.h"

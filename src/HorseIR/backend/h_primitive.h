@@ -28,6 +28,7 @@ extern "C" {
 #define vB(x) ((B*)(vg(x)))
 #define vL(x) ((L*)(vg(x)))
 #define vS(x) ((S*)(vg(x)))
+#define vV(x) ((V )(vg(x)))
 
 #define isSymbol(x) (vp(x) == H_S)
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
@@ -35,9 +36,11 @@ extern "C" {
 
 L pfnColumnValue(V z, V x, V y);
 L pfnIndexOf    (V z, V x, V y);
-L pfnFindLeft   (V z, V x, V y);
-L pfnFindRight  (V z, V x, V y, V m);
+L pfnFindValid  (V z, V x, V y);
 L pfnIndex      (V z, V x, V y);
+L pfnList       (V z, L n, ...);
+L pfnDict       (V z, V x, V y);
+L pfnTable      (V z, V x);
 
 #ifdef	__cplusplus
 }

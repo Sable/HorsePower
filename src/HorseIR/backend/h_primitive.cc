@@ -2,6 +2,9 @@
 
 /* temp */
 L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
+	DOI(tlen, {B f=1;\
+		DOJ(slen, if(targ[i]==src[j]){indx[i]=j;f=0;break;})\
+		if(f)indx[i]=slen;})
 	R 0;
 }
 
@@ -15,18 +18,26 @@ L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
  *    in-lining + CSE
  */
 
+/* x.y */
 L pfnColumnValue(V z, V x, V y){
+	P("-> Entering column_value\n");
 	if(isOneSymbol(x) && isOneSymbol(y)){
 		V t = findTableByName(vs(x));
 		if(!t) R E_TABLE_NOT_FOUND;
 		else {
-			R copyTable(z, t);
+			L colId = vs(y);
+			L colIndex = findColFromTable(t,colId);
+			if(colIndex < 0) R E_COL_NOT_FOUND;
+			else {
+				R copyColumnValue(z, getDictVal(getTableDict(t,colIndex)));
+			}
 		}
 	}
 	else R E_DOMAIN;
 }
 
 L pfnIndexOf(V z, V x, V y){
+	P("-> Entering index_of\n");
 	if(vp(x) == vp(y)){
 		initV(z, H_L, vn(y));
 		switch(vp(y)){
@@ -40,30 +51,16 @@ L pfnIndexOf(V z, V x, V y){
 // example: (21 45 7 9), (45 36 9)
 
 /*
- * find_left: x[(y<#x)/y]
+ * find_left: (y<#x)/!#y
  */
-L pfnFindLeft(V z, V x, V y){
+L pfnFindValid(V z, V x, V y){
+	P("-> Entering find_left\n");
 	if(vp(x) == vp(y) && isInteger(x)){
-		L lenz = 0, typz = H_B;
+		L lenz = 0, typz = H_L;
 		L leny = vn(y), lenx = vn(x), cnt = 0;
-		DOI(leny, lenz+=vL(y)[i]<lenx)
+		DOI(leny, {L t=vL(y)[i]; lenz+=(t>=0&&t<lenx);})
 		initV(z, typz, lenz);
-		DOI(leny, {L t=vL(y)[i]; if(t>=0 && t<lenx)vL(z)[cnt++]=vL(x)[t];})
-		R 0;
-	}
-	else R E_DOMAIN;
-}
-
-/*
- * find_right: x[(y<#m)/!#y]
- */
-L pfnFindRight(V z, V x, V y, V m){
-	if(vp(x) == vp(y) && vp(x) == vp(m) && vn(x) == vn(y) && isInteger(x)){
-		L lenz = 0, typz = H_B;
-		L lenm = vn(m), leny = vn(y), cnt = 0;
-		DOI(leny, lenz+=vL(y)[i]<lenm)
-		initV(z, typz, lenz);
-		DOI(leny, {L t=vL(y)[i]; if(t<lenm)vL(z)[cnt++]=vL(x)[i];})
+		DOI(leny, {L t=vL(y)[i]; if(t>=0 && t<lenx)vL(z)[cnt++]=i;})
 		R 0;
 	}
 	else R E_DOMAIN;
@@ -73,12 +70,16 @@ L pfnFindRight(V z, V x, V y, V m){
  * indexing: x[y]
  */
 L pfnIndex(V z, V x, V y){
+	P("-> Entering index\n");
 	if(isInteger(y)){
 		L typz = vp(x), lenz = vn(y), lenx = vn(x);
-		if(isSymbol(x)){
+		if(isSymbol(x) || isInteger(x)){ // basic types, non-list
 			DOI(lenz, if(lenx <= vL(y)[i])R E_INDEX)
 			initV(z, typz, lenz);
-			DOI(lenz, vS(z)[i] = vS(x)[vL(y)[i]])
+			switch(typz){
+				caseS DOI(lenz, vS(z)[i] = vS(x)[vL(y)[i]]) break;
+				caseL DOI(lenz, vL(z)[i] = vL(x)[vL(y)[i]]) break;
+			}
 			R 0;
 		}
 		else R E_DOMAIN;
@@ -88,15 +89,36 @@ L pfnIndex(V z, V x, V y){
 
 /* list, dict, table */
 
-L pfnList(ListV x){
+/* copy alias */
+L pfnList(V z, L n, ...){
+	va_list args;
+	initList(z, n);
+	va_start(args, n);
+	DOI(n, {V x=va_arg(args,V);*(vV(z)+i)=*x;})
+	va_end  (args);
 	R 0;
 }
 
-L pfnDict(V x){
+/* copy alias */
+L pfnDict(V z, V x, V y){
+	initDict(z);
+	V key = getDictKey(z);
+	V val = getDictVal(z);
+	*key = *x;
+	*val = *y;
 	R 0;
 }
 
-L pfnTable(V x){
+/* copy alias */
+L pfnTable(V z, V x){
+	initTable(z, vn(x));
+	/* need to check dict */
+	DOI(vn(x), *(vV(z)+i)=*(vV(x)+i))
 	R 0;
 }
+
+
+
+
+
 
