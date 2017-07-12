@@ -38,13 +38,12 @@ module default {
         s2:list<i64> = check_cast(@column_value(`Department, `DepartmentID)  , list<i64>);
         s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);
 
-        t0:list<i64> = @index_of (s1,s2);
-        t1:list<i64> = @find_left(s1,t0);
-        t2:list<i64> = @find_right(s2,t0);
+        t0:list<i64> = @index_of  (s2,s1);
+        t1:list<i64> = @find_valid(s1,t0);
 
         r0:list<sym> = @index(s0,t1);
         r1:list<i64> = @index(s1,t1);
-        r2:list<sym> = @index(s3,t2);
+        r2:list<sym> = @index(s3,t0);
 
         d0:dict<sym,sym> = @dict(`LastName      , r0);
         d1:dict<sym,i64> = @dict(`DepartmentID  , r1);
@@ -84,7 +83,7 @@ Department
 
 ```
 LastName       | ID | DepartmentName |
--------------------------------------
+--------------------------------------
 Rafferty       | 31 | Sables         |
 Jones          | 33 | Engineering    |
 Heisenberg     | 33 | Engineering    |
