@@ -39,8 +39,8 @@ module default {
         s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);
 
         t0:list<i64> = @index_of        (s2,s1);
-        t1:list<i64> = @find_valid_index(s1,t0);
-        t2:list<i64> = @find_valid_item (s1,t0);
+        t1:list<i64> = @find_valid_index(s2,t0);
+        t2:list<i64> = @find_valid_item (s2,t0);
 
         r0:list<sym> = @index(s0,t1);
         r1:list<i64> = @index(s1,t1);
