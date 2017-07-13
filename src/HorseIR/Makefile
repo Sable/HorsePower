@@ -1,7 +1,7 @@
 EXE=horse
 CXXFLAGS=-std=c++11 -g
 ANTLR4_INCLUDE_DIR="/usr/local/include/antlr4-runtime"
-LINK_LIBS=-L./grammar -lstdc++ -lantlr4-runtime -lMIRParser
+LINK_LIBS=-L./grammar -lstdc++ -lantlr4-runtime -lMIRParser -L./ast/build -lAST
 all: ${EXE}
 
 ${EXE}: *.cc backend

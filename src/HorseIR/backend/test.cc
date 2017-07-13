@@ -1,4 +1,42 @@
+#include <iostream>
+#include "../ast/AST.h"
+#include "antlr4-runtime.h"
+
 #include "h_global.h"
+
+
+const char* program = ""
+    "/*.  \n"
+    " * varchar(99) -> sym  \n"
+    " * int         -> i64 \n"
+    " */  \n"
+    "module default {  \n"
+    "    import Builtin.*;  \n"
+    "    def main() : table {  \n"
+    "        s0:list<sym> = check_cast(@column_value(`Employee,   `LastName)      , list<sym>);  \n"
+    "        s1:list<i64> = check_cast(@column_value(`Employee,   `DepartmentID)  , list<i64>);  \n"
+    "        s2:list<i64> = check_cast(@column_value(`Department, `DepartmentID)  , list<i64>);  \n"
+    "        s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);  \n"
+    "  \n"
+    "        t0:list<i64> = @index_of        (s2,s1);  \n"
+    "        t1:list<i64> = @find_valid_index(s1,t0);  \n"
+    "        t2:list<i64> = @find_valid_item (s1,t0);  \n"
+    "  \n"
+    "        r0:list<sym> = @index(s0,t1);  \n"
+    "        r1:list<i64> = @index(s1,t1);  \n"
+    "        r2:list<sym> = @index(s3,t2);  \n"
+    "  \n"
+    "        d0:dict<sym,sym> = @dict(`LastName      , r0);  \n"
+    "        d1:dict<sym,i64> = @dict(`DepartmentID  , r1);  \n"
+    "        d2:dict<sym,sym> = @dict(`DepartmentName, r2);  \n"
+    "  \n"
+    "        z0:?    = @list(d0,d1,d2);  \n"
+    "        z:table = @table(z0);  \n"
+    "        return z;  \n"
+    "    }  \n"
+    "  \n"
+    "}  \n"
+    ;
 
 C CSV_EMP[] = "data/simple-join/employee.csv";
 C CSV_DEP[] = "data/simple-join/department.csv";
@@ -41,7 +79,34 @@ L getNiceNumber(L n){
 
 #define CHECK(e, x) { if(e!=0) { P("Error at line %d, (err=%lld)\n",x,e); exit(99); } P("Pass line %d\n",x); }
 
+V handleLiteral(horseIR::ast::Literal* literal)
+{
+    using Literal = horseIR::ast::Literal ;
+    using SymbolLiteral = horseIR::ast::SymbolLiteral ;
+    switch (literal->getLiteralClass()) {
+    case Literal::LiteralClass::SymbolLiteral :
+        R initSymbol(allocNode(), getSymbol((S) static_cast<SymbolLiteral*>(literal)->getValue().c_str())) ;
+    default:
+        assert(false) ;
+        return nullptr ;
+    }
+}
+
+V handleParameter(horseIR::ast::Operand* operand, std::map<std::string, V>& env)
+{
+    using Literal = horseIR::ast::Literal ;
+    using Identifier = horseIR::ast::Identifier ;
+    switch (operand->getOperandClass()) {
+    case horseIR::ast::Operand::OperandClass::Identifier:
+        return env[static_cast<Identifier*>(operand)->getFullName()] ;
+    case horseIR::ast::Operand::OperandClass::Literal:
+        return handleLiteral(static_cast<Literal*>(operand)) ;
+    }
+}
+        
+
 L simulateSimple(){
+    /*
 	L e;
 	V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V d0 = allocNode();
 	V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V d1 = allocNode();
@@ -82,6 +147,87 @@ L simulateSimple(){
 	P("\n");
 	printTablePretty(z);
 	R 0;
+    */
+    antlr4::ANTLRInputStream inStream(program) ;
+    HorseIRLexer lexer(&inStream) ;
+    antlr4::CommonTokenStream tokenStream(&lexer) ;
+    HorseIRParser parser(&tokenStream) ;
+    HorseIRParser::ProgramContext* program = parser.program() ;
+
+    horseIR::ast::ASTNode::MemManagerType mem ;
+    auto* compilationUnit = new horseIR::ast::CompilationUnit(program, mem) ;
+    auto* module = compilationUnit->getModule("default") ;
+    auto* method = module->getMethod("main") ;
+
+    std::map<std::string, V> variableStack ;
+    
+    for (horseIR::ast::StatementIterator iterator = method->begin(); iterator != method->end(); ) {
+        auto* statement = *iterator ;
+        switch (statement->getStatementClass()) {
+        case horseIR::ast::Statement::StatementClass::Assign: {
+            auto* invokeStmt = static_cast<horseIR::ast::AssignStatement*>(statement) ;
+            assert(invokeStmt->isInvocation()) ;
+            auto* invokeTargetOperand = invokeStmt->getInvokeTarget() ;
+            assert(invokeTargetOperand->getOperandClass() == horseIR::ast::Operand::OperandClass::Literal) ;
+            auto* literal = static_cast<horseIR::ast::Literal*>(invokeTargetOperand) ;
+            assert(literal->getLiteralClass() == horseIR::ast::Literal::LiteralClass::FunctionLiteral) ;
+            auto* function = static_cast<horseIR::ast::FunctionLiteral*>(literal) ;
+            std::string builtinFunc = function->getValue() ;
+            V lhsValue = allocNode() ;
+            const std::vector<horseIR::ast::Operand*> parameters = invokeStmt->getParameters() ;
+            if (builtinFunc == "column_value") {
+                pfnColumnValue(lhsValue,
+                               handleParameter(parameters[0], variableStack),
+                               handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "index_of") {
+                pfnIndexOf(lhsValue,
+                           handleParameter(parameters[0], variableStack),
+                           handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "find_valid_index") {
+                pfnFindValidIndex(lhsValue,
+                                  handleParameter(parameters[0], variableStack),
+                                  handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "find_valid_item") {
+                pfnFindValidItem(lhsValue,
+                                 handleParameter(parameters[0], variableStack),
+                                 handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "index") {
+                pfnIndex(lhsValue,
+                         handleParameter(parameters[0], variableStack),
+                         handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "dict") {
+                pfnDict(lhsValue,
+                        handleParameter(parameters[0], variableStack),
+                        handleParameter(parameters[1], variableStack)) ;
+            } else if (builtinFunc == "list") {
+                pfnList(lhsValue, 3,
+                        handleParameter(parameters[0], variableStack),
+                        handleParameter(parameters[1], variableStack),
+                        handleParameter(parameters[2], variableStack)) ;
+            } else if (builtinFunc == "table") {
+                pfnTable(lhsValue,
+                         handleParameter(parameters[0], variableStack)) ;
+            } else {
+                assert(false) ;
+                break;
+            }
+            variableStack[invokeStmt->getLHSName()->getFullName()] = lhsValue ;
+            break ;
+        }
+        case horseIR::ast::Statement::StatementClass::Return : {
+            break ;
+        }
+        default: {
+            assert(false) ;
+            break ;
+        }
+        }
+        (void) iterator.nextOnTrue() ;
+    }
+
+    P("\n");
+    printTablePretty(variableStack["<local>.z"]);
+    R 0;
 }
 
 L testMain(){
