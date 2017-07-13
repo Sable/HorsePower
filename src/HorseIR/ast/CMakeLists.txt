@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(HorseIRAST)
+project(AST)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -7,7 +7,6 @@ set(SOURCE_FILES
         ./Operand.h
         ./Type.h
         ./ASTNode.cc
-        ./debug.cc
         ./Type/DictionaryType.cc
         ./Type/EnumerationType.cc
         ./Type/FunctionType.cc
@@ -48,8 +47,4 @@ include_directories(
         /usr/local/include/antlr4-runtime
 )
 
-link_directories(../grammar)
-link_libraries(antlr4-runtime)
-link_libraries(MIRParser)
-
-add_executable(HorseIRAST ${SOURCE_FILES})
+add_library(AST ${SOURCE_FILES})

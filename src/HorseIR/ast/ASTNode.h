@@ -61,10 +61,13 @@ namespace horseIR {
         protected:
             static const std::string INDENT ;
             const antlr4::tree::ParseTree* cst ;
-            const ASTNode::ASTNodeClass nodeType ;
+            ASTNode::ASTNodeClass nodeType ;
             ASTNode* parentASTNode ;
 
             static std::string CSTNameToString(HorseIRParser::NameContext* nameContext) ;
+
+            void __duplicateShallow(const ASTNode* astNode) ;
+            void __duplicateDeep(const ASTNode* astNode, ASTNode::MemManagerType& mem) ;
         } ;
     }
 }

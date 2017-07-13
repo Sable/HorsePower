@@ -93,3 +93,22 @@ StatementIterator Statement::getIterator()
 {
     return StatementIterator(this) ;
 }
+
+void Statement::__duplicateShallow(const Statement* statement)
+{
+    assert(statement != nullptr) ;
+    ASTNode::__duplicateShallow(statement) ;
+    statementClass = statement->statementClass ;
+    outwardFlow = std::make_pair(nullptr, nullptr) ;
+    inwardFlow = std::vector<Statement*> {} ;
+    return ;
+}
+void Statement::__duplicateDeep(const Statement *statement, ASTNode::MemManagerType &mem)
+{
+    assert(statement != nullptr) ;
+    ASTNode::__duplicateDeep(statement, mem) ;
+    statementClass = statement->statementClass ;
+    outwardFlow = std::make_pair(nullptr, nullptr) ;
+    inwardFlow = std::vector<Statement*> {} ;
+    return ;
+}

@@ -44,6 +44,7 @@ namespace horseIR {
             Statement() = delete ;
             Statement(ASTNode* parent, HorseIRParser::StatementContext* cst, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
             Statement(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type, StatementClass p_StatementClass) ;
+            Statement(const Statement&) = delete ;
             virtual ~Statement() override = default ;
 
             StatementClass getStatementClass() const ;
@@ -60,6 +61,9 @@ namespace horseIR {
             StatementClass statementClass ;
             std::pair<Statement*, Statement*> outwardFlow ;
             std::vector<Statement*> inwardFlow ;
+
+            void __duplicateShallow(const Statement* statement) ;
+            void __duplicateDeep(const Statement* statement, ASTNode::MemManagerType& mem) ;
         } ;
 
         class ReturnStatement : public Statement {
@@ -74,11 +78,12 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
-            virtual ReturnStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
-            virtual ReturnStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             Identifier* id ;
+
+            void __duplicateShallow(const ReturnStatement* returnStmt) ;
+            void __duplicateDeep(const ReturnStatement* returnStmt, ASTNode::MemManagerType& mem) ;
         } ;
 
         class AssignStatement : public Statement {
@@ -102,8 +107,6 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
-            virtual AssignStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
-            virtual AssignStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::pair<bool, Operand*> isInvoke ;
@@ -115,10 +118,13 @@ namespace horseIR {
         private:
             inline void parseMethodInvoke(HorseIRParser::MethodCallContext* methodCallContext, ASTNode::MemManagerType& mem) ;
             inline void parseOperand(HorseIRParser::OperandContext* operandContext, ASTNode::MemManagerType& mem) ;
-            inline std::string caseDirectToString() const ;
-            inline std::string caseCastToString() const ;
-            inline std::string caseCheckTypeToString() const ;
-            inline std::string caseCheckCastToString() const ;
+            inline std::string toStringCaseDirect() const ;
+            inline std::string toStringCaseCast() const ;
+            inline std::string toStringCaseCheckType() const ;
+            inline std::string toStringCaseCheckCast() const ;
+
+            void __duplicateShallow(const AssignStatement* assignStmt) ;
+            void __duplicateDeep(const AssignStatement* assignStmt, ASTNode::MemManagerType& mem) ;
         } ;
 
         class PhiStatement : public Statement {
@@ -133,8 +139,6 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
-            virtual PhiStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
-            virtual PhiStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::map<std::string, Identifier*> inFlowMap ;
@@ -156,8 +160,6 @@ namespace horseIR {
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
-            virtual BranchStatement* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
-            virtual BranchStatement* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
         protected:
             std::string targetLabelName ;

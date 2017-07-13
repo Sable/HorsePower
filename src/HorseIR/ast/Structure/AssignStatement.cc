@@ -213,7 +213,7 @@ std::vector<ASTNode*> AssignStatement::getChildren() const
     return retVector ;
 }
 
-inline std::string AssignStatement::caseDirectToString() const
+inline std::string AssignStatement::toStringCaseDirect() const
 {
     assert(retTypeValidation.first == AssignStatementClass::Direct) ;
     std::ostringstream stream ;
@@ -235,7 +235,7 @@ inline std::string AssignStatement::caseDirectToString() const
     return stream.str() ;
 }
 
-inline std::string AssignStatement::caseCastToString() const
+inline std::string AssignStatement::toStringCaseCast() const
 {
     assert(retTypeValidation.first == AssignStatementClass::Cast) ;
     std::ostringstream stream ;
@@ -258,7 +258,7 @@ inline std::string AssignStatement::caseCastToString() const
     return stream.str() ;
 }
 
-inline std::string AssignStatement::caseCheckTypeToString() const
+inline std::string AssignStatement::toStringCaseCheckType() const
 {
     assert(retTypeValidation.first == AssignStatementClass::CheckType) ;
     std::ostringstream stream ;
@@ -281,7 +281,7 @@ inline std::string AssignStatement::caseCheckTypeToString() const
     return stream.str() ;
 }
 
-inline std::string AssignStatement::caseCheckCastToString() const
+inline std::string AssignStatement::toStringCaseCheckCast() const
 {
     assert(retTypeValidation.first == AssignStatementClass::CheckCast) ;
     std::ostringstream stream ;
@@ -307,10 +307,10 @@ inline std::string AssignStatement::caseCheckCastToString() const
 std::string AssignStatement::toString() const
 {
     switch (retTypeValidation.first) {
-    case AssignStatementClass::Direct : return caseDirectToString() ;
-    case AssignStatementClass::Cast: return caseCastToString() ;
-    case AssignStatementClass::CheckType: return caseCheckTypeToString() ;
-    case AssignStatementClass::CheckCast: return caseCheckCastToString() ;
+    case AssignStatementClass::Direct : return toStringCaseDirect() ;
+    case AssignStatementClass::Cast: return toStringCaseCast() ;
+    case AssignStatementClass::CheckType: return toStringCaseCheckType() ;
+    case AssignStatementClass::CheckCast: return toStringCaseCheckCast() ;
     }
 }
 
@@ -319,57 +319,52 @@ std::string AssignStatement::toTreeString() const
     return "(AssignStatement)" ;
 }
 
-AssignStatement* AssignStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
+void AssignStatement::__duplicateShallow(const AssignStatement *assignStmt)
 {
-    AssignStatement* replica = new AssignStatement(mem) ;
-    replica->isInvoke = isInvoke ;
-    replica->retTypeValidation = retTypeValidation ;
-    replica->parameters = parameters ;
-    replica->lhsName = lhsName ;
-    replica->lhsType = lhsType ;
-    return replica ;
+    assert(assignStmt != nullptr) ;
+    Statement::__duplicateShallow(assignStmt) ;
+    isInvoke = std::make_pair(assignStmt->isInvoke.first, assignStmt->isInvoke.second) ;
+    retTypeValidation = std::make_pair(assignStmt->retTypeValidation.first, assignStmt->retTypeValidation.second) ;
+    parameters = assignStmt->parameters ;
+    lhsName = assignStmt->lhsName ;
+    lhsType = assignStmt->lhsType ;
+    return ;
 }
 
-AssignStatement* AssignStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
-{
-    AssignStatement* replica = new AssignStatement(mem) ;
-    
-    Operand* duplicateInvokeOperand = nullptr ;
-    if (isInvoke.second != nullptr) {
-        duplicateInvokeOperand = static_cast<Operand*>(isInvoke.second->duplicateDeep(mem));
-        (void) duplicateInvokeOperand->setParentASTNode(replica) ;
+void AssignStatement::__duplicateDeep(const AssignStatement *assignStmt, ASTNode::MemManagerType &mem) {
+    assert(assignStmt != nullptr);
+    Statement::__duplicateDeep(assignStmt, mem);
+    Operand *duplicateInvokeOperand = nullptr;
+    if (assignStmt->isInvoke.second != nullptr) {
+        duplicateInvokeOperand = static_cast<Operand *>(assignStmt->isInvoke.second->duplicateDeep(mem));
+        (void) duplicateInvokeOperand->setParentASTNode(this);
     }
-    replica->isInvoke = std::make_pair(isInvoke.first, duplicateInvokeOperand) ;
-
-    Type* duplicateRetType = nullptr ;
-    if (retTypeValidation.second != nullptr) {
-        duplicateRetType = static_cast<Type*>(retTypeValidation.second->duplicateDeep(mem)) ;
-        (void) duplicateRetType->setParentASTNode(replica) ;
+    isInvoke = std::make_pair(assignStmt->isInvoke.first, duplicateInvokeOperand);
+    Type *duplicateRetTypeVal = nullptr;
+    if (assignStmt->retTypeValidation.second != nullptr) {
+        duplicateRetTypeVal = static_cast<Type *>(assignStmt->retTypeValidation.second->duplicateDeep(mem));
+        (void) duplicateRetTypeVal->setParentASTNode(this);
     }
-    replica->retTypeValidation = std::make_pair(retTypeValidation.first, duplicateRetType) ;
-
-    std::vector<Operand*> duplicateParameter ;
-    for (auto iter = parameters.cbegin(); iter != parameters.cend(); ++iter) {
+    retTypeValidation = std::make_pair(assignStmt->retTypeValidation.first, duplicateRetTypeVal) ;
+    std::vector<Operand*> duplicateParameters {} ;
+    for (auto iter = assignStmt->parameters.cbegin(); iter != assignStmt->parameters.cend(); ++iter) {
         assert(*iter != nullptr) ;
         Operand* duplicateParam = static_cast<Operand*>((*iter)->duplicateDeep(mem)) ;
-        (void) duplicateParam->setParentASTNode(replica) ;
-        duplicateParameter.push_back(duplicateParam) ;
+        (void) duplicateParam->setParentASTNode(this) ;
+        duplicateParameters.push_back(duplicateParam) ;
     }
-    replica->parameters = std::move(duplicateParameter) ;
-
+    parameters = std::move(duplicateParameters) ;
     Identifier* duplicateLHSName = nullptr ;
-    if (lhsName != nullptr) {
-        duplicateLHSName = static_cast<Identifier*>(lhsName->duplicateDeep(mem)) ;
-        (void) duplicateLHSName->setParentASTNode(replica) ;
+    if (assignStmt->lhsName != nullptr) {
+        duplicateLHSName = static_cast<Identifier*>(assignStmt->lhsName->duplicateDeep(mem)) ;
+        (void) duplicateLHSName->setParentASTNode(this) ;
     }
-    replica->lhsName = duplicateLHSName ;
-
+    lhsName = duplicateLHSName ;
     Type* duplicateLHSType = nullptr ;
-    if (lhsType != nullptr) {
-        duplicateLHSType = static_cast<Type*>(lhsType->duplicateDeep(mem)) ;
-        (void) duplicateLHSType->setParentASTNode(replica) ;
+    if (assignStmt->lhsType != nullptr) {
+        duplicateLHSType = static_cast<Type*>(assignStmt->lhsType->duplicateDeep(mem)) ;
+        (void) duplicateLHSType->setParentASTNode(this) ;
     }
-    replica->lhsType = duplicateLHSType ;
-
-    return replica ;
+    lhsType = duplicateLHSType ;
+    return ;
 }

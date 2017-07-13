@@ -42,21 +42,23 @@ std::string ReturnStatement::toTreeString() const
     return "(ReturnStatement)" ;
 }
 
-ReturnStatement* ReturnStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
+void ReturnStatement::__duplicateShallow(const ReturnStatement *returnStmt)
 {
-    ReturnStatement* replica = new ReturnStatement(mem) ;
-    replica->id = id ;
-    return replica ;
+    assert(returnStmt != nullptr) ;
+    Statement::__duplicateShallow(returnStmt) ;
+    id = returnStmt->id ;
+    return ;
 }
 
-ReturnStatement* ReturnStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
+void ReturnStatement::__duplicateDeep(const ReturnStatement *returnStmt, ASTNode::MemManagerType &mem)
 {
-    ReturnStatement* replica = new ReturnStatement(mem) ;
-    Identifier* duplicateIdentifier = nullptr ;
-    if (id != nullptr) {
-        duplicateIdentifier = static_cast<Identifier*>(id->duplicateDeep(mem)) ;
-        (void) duplicateIdentifier->setParentASTNode(replica) ;
+    assert(returnStmt != nullptr) ;
+    Statement::__duplicateDeep(returnStmt, mem) ;
+    Identifier* duplicateID = nullptr ;
+    if (returnStmt->id != nullptr) {
+        duplicateID = static_cast<Identifier*>(returnStmt->id->duplicateDeep(mem)) ;
+        (void) duplicateID->setParentASTNode(this) ;
     }
-    replica->id = duplicateIdentifier ;
-    return replica ;
+    id = duplicateID ;
+    return ;
 }

@@ -62,13 +62,3 @@ std::string BranchStatement::toTreeString() const
 {
     return "(BranchStatement)" ;
 }
-
-BranchStatement* BranchStatement::duplicateShallow(ASTNode::MemManagerType &mem) const
-{
-
-}
-
-BranchStatement* BranchStatement::duplicateDeep(ASTNode::MemManagerType &mem) const
-{
-
-}

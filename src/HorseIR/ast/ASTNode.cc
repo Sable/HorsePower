@@ -90,3 +90,22 @@ ASTNode::MemManagerType& ASTNode::MemManagerType::release(ASTNode* ptr)
                               }));
     return *this ;
 }
+
+void ASTNode::__duplicateShallow(const ASTNode *astNode)
+{
+    assert(astNode != nullptr) ;
+    cst = astNode->cst ;
+    nodeType = astNode->nodeType ;
+    parentASTNode = nullptr ;
+    return ;
+}
+
+void ASTNode::__duplicateDeep(const ASTNode *astNode, ASTNode::MemManagerType& mem)
+{
+    assert(astNode != nullptr) ;
+    (void) mem ;
+    cst = astNode->cst ;
+    nodeType = astNode->nodeType ;
+    parentASTNode = nullptr ;
+    return ;
+}
