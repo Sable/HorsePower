@@ -51,16 +51,32 @@ L pfnIndexOf(V z, V x, V y){
 // example: (21 45 7 9), (45 36 9)
 
 /*
- * find_left: (y<#x)/!#y
+ * find_valid_index: (y<#x)/!#y
  */
-L pfnFindValid(V z, V x, V y){
-	P("-> Entering find_left\n");
+L pfnFindValidIndex(V z, V x, V y){
+	P("-> Entering find_valid_index\n");
 	if(vp(x) == vp(y) && isInteger(x)){
 		L lenz = 0, typz = H_L;
 		L leny = vn(y), lenx = vn(x), cnt = 0;
 		DOI(leny, {L t=vL(y)[i]; lenz+=(t>=0&&t<lenx);})
 		initV(z, typz, lenz);
 		DOI(leny, {L t=vL(y)[i]; if(t>=0 && t<lenx)vL(z)[cnt++]=i;})
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+/*
+ * find_valid_item: (y<#x)/y
+ */
+L pfnFindValidItem(V z, V x, V y){
+	P("-> Entering find_valid_item\n");
+	if(vp(x) == vp(y) && isInteger(x)){
+		L lenz = 0, typz = H_L;
+		L leny = vn(y), lenx = vn(x), cnt = 0;
+		DOI(leny, {L t=vL(y)[i]; lenz+=(t>=0&&t<lenx);})
+		initV(z, typz, lenz);
+		DOI(leny, {L t=vL(y)[i]; if(t>=0 && t<lenx)vL(z)[cnt++]=t;})
 		R 0;
 	}
 	else R E_DOMAIN;

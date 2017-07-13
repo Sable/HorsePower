@@ -34,13 +34,14 @@ extern "C" {
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
 #define isInteger(x) (vp(x) == H_L)
 
-L pfnColumnValue(V z, V x, V y);
-L pfnIndexOf    (V z, V x, V y);
-L pfnFindValid  (V z, V x, V y);
-L pfnIndex      (V z, V x, V y);
-L pfnList       (V z, L n, ...);
-L pfnDict       (V z, V x, V y);
-L pfnTable      (V z, V x);
+L pfnColumnValue   (V z, V x, V y);
+L pfnIndexOf       (V z, V x, V y);
+L pfnFindValidIndex(V z, V x, V y);
+L pfnFindValidItem (V z, V x, V y);
+L pfnIndex         (V z, V x, V y);
+L pfnList          (V z, L n, ...);
+L pfnDict          (V z, V x, V y);
+L pfnTable         (V z, V x);
 
 #ifdef	__cplusplus
 }

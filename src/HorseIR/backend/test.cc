@@ -45,7 +45,7 @@ L simulateSimple(){
 	L e;
 	V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V d0 = allocNode();
 	V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V d1 = allocNode();
-	V s2 = allocNode();                       V r2 = allocNode();  V d2 = allocNode();
+	V s2 = allocNode();  V t2 = allocNode();  V r2 = allocNode();  V d2 = allocNode();
 	V s3 = allocNode();
 	V z0 = allocNode();  V z = allocNode();
 	P("** Starting simulation\n");
@@ -62,12 +62,13 @@ L simulateSimple(){
 		  initSymbol(allocNode(),getSymbol((S)"Department")), \
 		  initSymbol(allocNode(),getSymbol((S)"DepartmentName"))); CHECK(e,4);
 
-	e = pfnIndexOf  (t0, s2, s1);     CHECK(e,5);
-	e = pfnFindValid(t1, s2, t0);     CHECK(e,6);
+	e = pfnIndexOf       (t0, s2, s1);     CHECK(e,5);
+	e = pfnFindValidIndex(t1, s2, t0);     CHECK(e,6);
+	e = pfnFindValidItem (t2, s2, t0);     CHECK(e,6);
 
 	e = pfnIndex    (r0, s0, t1);     CHECK(e,7);
 	e = pfnIndex    (r1, s1, t1);     CHECK(e,8);
-	e = pfnIndex    (r2, s3, t0);     CHECK(e,9);
+	e = pfnIndex    (r2, s3, t2);     CHECK(e,9);
 
 	e = pfnDict     (d0, \
 		  initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,10);
