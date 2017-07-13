@@ -19,8 +19,8 @@ const char* program = ""
     "        s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);  \n"
     "  \n"
     "        t0:list<i64> = @index_of        (s2,s1);  \n"
-    "        t1:list<i64> = @find_valid_index(s1,t0);  \n"
-    "        t2:list<i64> = @find_valid_item (s1,t0);  \n"
+    "        t1:list<i64> = @find_valid_index(s2,t0);  \n"
+    "        t2:list<i64> = @find_valid_item (s2,t0);  \n"
     "  \n"
     "        r0:list<sym> = @index(s0,t1);  \n"
     "        r1:list<i64> = @index(s1,t1);  \n"
@@ -129,18 +129,18 @@ L simulateSimple(){
 
 	e = pfnIndexOf       (t0, s2, s1);     CHECK(e,5);
 	e = pfnFindValidIndex(t1, s2, t0);     CHECK(e,6);
-	e = pfnFindValidItem (t2, s2, t0);     CHECK(e,6);
+	e = pfnFindValidItem (t2, s2, t0);     CHECK(e,7);
 
-	e = pfnIndex    (r0, s0, t1);     CHECK(e,7);
-	e = pfnIndex    (r1, s1, t1);     CHECK(e,8);
-	e = pfnIndex    (r2, s3, t2);     CHECK(e,9);
+	e = pfnIndex    (r0, s0, t1);     CHECK(e,8);
+	e = pfnIndex    (r1, s1, t1);     CHECK(e,9);
+	e = pfnIndex    (r2, s3, t2);     CHECK(e,10);
 
 	e = pfnDict     (d0, \
-		  initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,10);
+		  initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,11);
 	e = pfnDict     (d1, \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentID")),  r1);  CHECK(e,11);
+		  initSymbol(allocNode(),getSymbol((S)"DepartmentID")),  r1);  CHECK(e,12);
 	e = pfnDict     (d2, \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentName")),r2);  CHECK(e,12);
+		  initSymbol(allocNode(),getSymbol((S)"DepartmentName")),r2);  CHECK(e,13);
 
 	e = pfnList     (z0, 3, d0, d1, d2); CHECK(e,14);
 	e = pfnTable    (z, z0);             CHECK(e,15);
