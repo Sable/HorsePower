@@ -15,3 +15,4 @@ src/HorseIR/backend/*.o
 src/HorseIR/backend/h_primitive.o
 src/HorseIR/*.o
 src/HorseIR/horse
+src/HorseIR/ast/compile_commands.json
