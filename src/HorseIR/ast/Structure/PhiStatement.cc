@@ -87,3 +87,42 @@ std::string PhiStatement::toTreeString() const
 {
     return "(PhiStatement)" ;
 }
+
+void PhiStatement::__duplicateShallow(const PhiStatement* phiStmt)
+{
+    assert(phiStmt != nullptr) ;
+    Statement::__duplicateShallow(phiStmt) ;
+    inFlowMap = phiStmt->inFlowMap ;
+    lhsID = phiStmt->lhsID ;
+    lhsType = phiStmt->lhsType ;
+    return ;
+}
+
+void PhiStatement::__duplicateDeep(const PhiStatement* phiStmt, ASTNode::MemManagerType& mem)
+{
+    assert(phiStmt != nullptr) ;
+    Statement::__duplicateDeep(phiStmt, mem) ;
+    std::map<std::string, Identifier*> duplicateInFlowMap ;
+    for (auto iter = phiStmt->inFlowMap.cbegin(); iter != phiStmt->inFlowMap.cend(); ++iter) {
+        assert(iter->second != nullptr) ;
+        std::string duplicateLabelName = iter->first ;
+        Identifier* duplicateID = static_cast<Identifier*>(iter->second->duplicateDeep(mem)) ;
+        (void) duplicateID->setParentASTNode(this) ;
+        std::pair<std::string, Identifier*> insertPair = std::make_pair(std::move(duplicateLabelName), std::move(duplicateID)) ;
+        duplicateInFlowMap.insert(std::move(insertPair)) ;
+    }
+    inFlowMap = std::move(duplicateInFlowMap) ;
+    Identifier* duplicateLHSID = nullptr ;
+    if (phiStmt->lhsID != nullptr) {
+        duplicateLHSID = static_cast<Identifier*>(phiStmt->lhsID->duplicateDeep(mem)) ;
+        (void) duplicateLHSID->setParentASTNode(this) ;
+    }
+    lhsID = duplicateLHSID ;
+    Type* duplicateLHSType = nullptr ;
+    if (phiStmt->lhsType != nullptr) {
+        duplicateLHSType = static_cast<Type*>(phiStmt->lhsType->duplicateDeep(mem)) ;
+        (void) duplicateLHSType->setParentASTNode(this) ;
+    }
+    lhsType = duplicateLHSType ;
+    return ;
+}

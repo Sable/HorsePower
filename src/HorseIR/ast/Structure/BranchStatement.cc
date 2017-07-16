@@ -62,3 +62,28 @@ std::string BranchStatement::toTreeString() const
 {
     return "(BranchStatement)" ;
 }
+
+void BranchStatement::__duplicateShallow(const BranchStatement* branchStmt)
+{
+    assert(branchStmt != nullptr) ;
+    Statement::__duplicateShallow(branchStmt) ;
+    targetLabelName = branchStmt->targetLabelName ;
+    checkCondition = std::make_pair(branchStmt->checkCondition.first, branchStmt->checkCondition.second) ;
+    return ;
+}
+
+void BranchStatement::__duplicateDeep(const BranchStatement* branchStmt, ASTNode::MemManagerType& mem)
+{
+    assert(branchStmt != nullptr) ;
+    Statement::__duplicateDeep(branchStmt, mem) ;
+    std::string duplicateTargetLabelName = branchStmt->targetLabelName ;
+    targetLabelName = std::move(duplicateTargetLabelName) ;
+    Identifier* duplicateID = nullptr ;
+    if (branchStmt->checkCondition.second != nullptr) {
+        duplicateID = static_cast<Identifier*>(branchStmt->checkCondition.second->duplicateDeep(mem)) ;
+        (void) duplicateID->setParentASTNode(this) ;
+    }
+    checkCondition = std::make_pair(branchStmt->checkCondition.first, duplicateID) ;
+    return ;
+}
+

@@ -144,6 +144,9 @@ namespace horseIR {
             std::map<std::string, Identifier*> inFlowMap ;
             Identifier* lhsID ;
             Type* lhsType ;
+
+            void __duplicateShallow(const PhiStatement* phiStmt) ;
+            void __duplicateDeep(const PhiStatement* phiStmt, ASTNode::MemManagerType& mem) ;
         } ;
 
         class BranchStatement : public Statement {
@@ -164,6 +167,9 @@ namespace horseIR {
         protected:
             std::string targetLabelName ;
             std::pair<bool, Identifier*> checkCondition ;
+
+            void __duplicateShallow(const BranchStatement* branchStmt) ;
+            void __duplicateDeep(const BranchStatement* branchStmt, ASTNode::MemManagerType& mem) ;
         } ;
 
         class LabelStatement : public Statement {
