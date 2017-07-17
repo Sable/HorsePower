@@ -19,16 +19,16 @@ In HorsePower, we focus on the following parts.
 ## Quick entries
 
 - Design:
-    | [Grammar](src/HorseIR/grammar/HorseIR.g4)
+    [Grammar](src/HorseIR/grammar/HorseIR.g4)
     | [IR Design](docs/design/horseir)
     | [Valid examples](src/HorseIR/tests/valid)
     | [TPC-H](docs/tpch)
     |
 - Implementation: 
-    | [Details](docs/implementation)
+    [Details](docs/implementation)
     |
 - Paper:
-    | [Paper related](docs/study)
+    [Related](docs/study)
     |
 
 
@@ -94,9 +94,10 @@ Related work
 - LegoBase : Klonatos et al., [Building Efficient Query Engines in a High-Level Language](http://dl.acm.org/citation.cfm?id=2732959), VLDB 2014
 - Aquery   : Cambronero and Shasha, AQuery, a query language for order in data analytics: Language, Optimization, and Experiments, to appear
 
-SQL grammar
+SQL front-end
 
 - [H2 database](http://www.h2database.com/html/grammar.html) | H2: an in-memory db written in Java
+- [hyrise/sql-parser](https://github.com/hyrise/sql-parser)
 
 ### Chat room
 
