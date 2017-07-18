@@ -42,3 +42,19 @@ std::string LabelStatement::toTreeString() const
 {
     return "(LabelStatement)" ;
 }
+
+void LabelStatement::__duplicateShallow(const LabelStatement* labelStmt)
+{
+    assert(labelStmt != nullptr) ;
+    Statement::__duplicateShallow(labelStmt) ;
+    labelName = labelStmt->labelName ;
+    return ;
+}
+
+void LabelStatement::__duplicateDeep(const LabelStatement* labelStmt, ASTNode::MemManagerType& mem)
+{
+    assert(labelStmt != nullptr) ;
+    Statement::__duplicateDeep(labelStmt, mem) ;
+    labelName = labelStmt->labelName ;
+    return ;
+}

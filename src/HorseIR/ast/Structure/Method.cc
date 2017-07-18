@@ -119,7 +119,50 @@ std::string Method::toTreeString() const
     return stream.str() ;
 }
 
-void Method::linkStatementFlow() {
+void Method::__duplicateShallow(const Method* method)
+{
+    assert(method != nullptr) ;
+    ASTNode::__duplicateShallow(method) ;
+    methodName = method->methodName ;
+    parameters = method->parameters ;
+    returnType = method->returnType ;
+    statements = method->statements ;
+    return ;
+}
+
+void Method::__duplicateDeep(const Method* method, ASTNode::MemManagerType& mem)
+{
+    assert(method != nullptr) ;
+    ASTNode::__duplicateDeep(method, mem) ;
+    methodName = method->methodName ;
+    decltype(parameters) duplicateParameters {} ;
+    for (auto iter = method->parameters.cbegin(); iter != method->parameters.cend(); ++iter) {
+        std::string duplicateParameterName = iter->first ;
+        assert(iter->second != nullptr) ;
+        Type* duplicateParameterType = static_cast<Type*>(iter->second->duplicateDeep(mem)) ;
+        (void) duplicateParameterType->setParentASTNode(this) ;
+        duplicateParameters.emplace_back(std::move(duplicateParameterName),
+                                         std::move(duplicateParameterType)) ;
+    }
+    parameters = std::move(duplicateParameters) ;
+    Type* duplicateReturnType = nullptr ;
+    if (method->returnType != nullptr) {
+        duplicateReturnType = static_cast<Type*>(method->returnType->duplicateDeep(mem)) ;
+        (void) duplicateReturnType->setParentASTNode(this) ;
+    }
+    returnType = duplicateReturnType ;
+    decltype(statements) duplicateStatements {} ;
+    for (auto iter = method->statements.cbegin(); iter != method->statements.cend(); ++iter) {
+        assert(*iter != nullptr) ;
+        Statement* duplicateStatement = static_cast<Statement*>((*iter)->duplicateDeep(mem)) ;
+        (void) duplicateStatement->setParentASTNode(this) ;
+    }
+    statements = std::move(duplicateStatements) ;
+    return ;
+}
+
+void Method::linkStatementFlow()
+{
     std::map<const std::string, Statement*> labelMap ;
     for (auto iter = statements.cbegin(); iter != statements.cend(); ++iter) {
         if ((*iter)->getStatementClass() == Statement::StatementClass::Label) {
@@ -175,6 +218,3 @@ void Method::linkStatementFlow() {
         }
     }
 }
-
-void Method::inferStatementParameterSignature()
-{}

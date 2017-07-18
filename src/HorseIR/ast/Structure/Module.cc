@@ -142,3 +142,46 @@ std::string Module::toTreeString() const
     stream << ')' ;
     return stream.str() ;
 }
+
+void Module::__duplicateShallow(const Module* module)
+{
+    assert(module) ;
+    ASTNode::__duplicateShallow(module) ;
+    moduleName = module->moduleName ;
+    importedModules = module->importedModules ;
+    globalVariables = module->globalVariables ;
+    methods = module->methods ;
+    return ;
+}
+
+void Module::__duplicateDeep(const Module* module, ASTNode::MemManagerType& mem)
+{
+    assert(module) ;
+    ASTNode::__duplicateDeep(module, mem) ;
+    moduleName = module->moduleName ;
+    decltype(importedModules) duplicateImportedModules {} ;
+    for (auto iter = module->importedModules.cbegin(); iter != module->importedModules.cend(); ++iter) {
+        duplicateImportedModules.push_back(*iter) ;
+    }
+    importedModules = std::move(duplicateImportedModules) ;
+    decltype(globalVariables) duplicateGlobalVariables {} ;
+    for (auto iter = module->globalVariables.cbegin(); iter != module->globalVariables.cend(); ++iter) {
+        assert(iter->first != nullptr) ;
+        Identifier* duplicateGVarName = static_cast<Identifier*>(iter->first->duplicateDeep(mem)) ;
+        (void) duplicateGVarName->setParentASTNode(this) ;
+        assert(iter->second != nullptr) ;
+        Type* duplicateGVarType = static_cast<Type*>(iter->second->duplicateDeep(mem)) ;
+        (void) duplicateGVarType->setParentASTNode(this) ;
+        duplicateGlobalVariables.emplace_back(std::move(duplicateGVarName), std::move(duplicateGVarType)) ;
+    }
+    globalVariables = std::move(duplicateGlobalVariables) ;
+    decltype(methods) duplicateMethods {} ;
+    for (auto iter = module->methods.cbegin(); iter != module->methods.cend(); ++iter) {
+        assert(*iter != nullptr) ;
+        Method* duplicateMethod = static_cast<Method*>((*iter)->duplicateDeep(mem)) ;
+        (void) duplicateMethod->setParentASTNode(this) ;
+        duplicateMethods.push_back(duplicateMethod) ;
+    }
+    methods = std::move(duplicateMethods) ;
+    return ;
+}

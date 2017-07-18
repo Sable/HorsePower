@@ -177,6 +177,7 @@ namespace horseIR {
             LabelStatement() = delete ;
             LabelStatement(ASTNode* parent, HorseIRParser::StmtLabelContext* cst, ASTNode::MemManagerType& mem) ;
             LabelStatement(ASTNode::MemManagerType& mem) ;
+            LabelStatement(const LabelStatement&) = delete ;
             ~LabelStatement() override = default ;
 
             std::string getLabelName() const ;
@@ -188,6 +189,9 @@ namespace horseIR {
 
         protected:
             std::string labelName ;
+
+            void __duplicateShallow(const LabelStatement* labelStmt) ;
+            void __duplicateDeep(const LabelStatement* labelStmt, ASTNode::MemManagerType& mem) ;
         } ;
 
         class Method : public ASTNode {
@@ -195,6 +199,7 @@ namespace horseIR {
             Method() = delete ;
             Method(ASTNode* parent, HorseIRParser::MethodContext* cst, ASTNode::MemManagerType& mem) ;
             Method(ASTNode::MemManagerType& mem) ;
+            Method(const Method&) = delete ;
             ~Method() override = default ;
 
             StatementIterator begin() const ;
@@ -213,9 +218,11 @@ namespace horseIR {
             Type* returnType ;
             std::vector<Statement*> statements ;
 
+            void __duplicateShallow(const Method* method) ;
+            void __duplicateDeep(const Method* method, ASTNode::MemManagerType& mem) ;
+
         private:
             void linkStatementFlow() ;
-            void inferStatementParameterSignature() ;
         } ;
 
         class Module : public ASTNode {
@@ -223,6 +230,7 @@ namespace horseIR {
             Module() = delete ;
             Module(ASTNode* parent, HorseIRParser::ModuleContext* cst, ASTNode::MemManagerType& mem) ;
             Module(ASTNode::MemManagerType& mem) ;
+            Module(const Module&) = delete ;
             ~Module() override = default ;
 
             std::string getModuleName() const ;
@@ -241,6 +249,9 @@ namespace horseIR {
             std::vector<std::string> importedModules ;
             std::vector<std::pair<Identifier*, Type*>> globalVariables ;
             std::vector<Method*> methods ;
+
+            void __duplicateShallow(const Module* module) ;
+            void __duplicateDeep(const Module* module, ASTNode::MemManagerType& mem) ;
         } ;
 
         class CompilationUnit : public ASTNode {
@@ -263,6 +274,9 @@ namespace horseIR {
 
         protected:
             std::vector<Module*> modules ;
+
+            void __duplicateShallow(const CompilationUnit* compilationUnit) ;
+            void __duplicateDeep(const CompilationUnit* compilationUnit, ASTNode::MemManagerType& mem) ;
         } ;
     }
 }

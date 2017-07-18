@@ -96,3 +96,26 @@ std::string CompilationUnit::toTreeString() const
     stream << ")" ;
     return stream.str() ;
 }
+
+void CompilationUnit::__duplicateShallow(const CompilationUnit* compilationUnit)
+{
+    assert(compilationUnit != nullptr) ;
+    ASTNode::__duplicateShallow(compilationUnit) ;
+    modules = compilationUnit->modules ;
+    return ;
+}
+
+void CompilationUnit::__duplicateDeep(const CompilationUnit* compilationUnit, ASTNode::MemManagerType& mem)
+{
+    assert(compilationUnit != nullptr) ;
+    ASTNode::__duplicateDeep(compilationUnit, mem) ;
+    decltype(modules) duplicateModules {} ;
+    for (auto iter = compilationUnit->modules.cbegin(); iter != compilationUnit->modules.cend(); ++iter) {
+        assert(*iter != nullptr) ;
+        Module* duplicateModule = static_cast<Module*>((*iter)->duplicateDeep(mem)) ;
+        (void) duplicateModule->setParentASTNode(this) ;
+        duplicateModules.push_back(duplicateModule) ;
+    }
+    modules = std::move(duplicateModules) ;
+    return ;
+}
