@@ -2,54 +2,66 @@
 
 ## <p id="alias">1. Type alias</p>
 
-- A = B, H, I, L, F, E
-- K = B, C, H, I, L, F, E, S, M, D, Z, U, W, T
+1-level
+
+- Int     = B, H, I, L
+- Float   = F, E
+- Clex    = X
+- Time    = M, D, Z, U, W, T
+- String  = C, S
+
+2-level
+
+- Real    = Int,  Flt
+- Numeric = Real, Time
+- Basic   = Real, Time, String
+- Advance = A, N, K 
   
 
 ## <p id="basic">2. Basics</p>
 
 ### 2.1 Unary
 
-No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
-:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
-1  | abs(x)               | Absolute value of x         | A                                | Same as argument              | [link](builtin/abs.md)       |1  |
-2  | neg(x)               | Negative value of x         | A                                | Same as argument              | [link](builtin/neg.md)       |2  |
-3  | ceil(x)              | Ceiling value of x          | A                                | Various                       | [link](builtin/ceil.md)      |3  |
-4  | floor(x)             | Floor value of x            | A                                | Various                       | [link](builtin/floor.md)     |4  |
-5  | round(x)             | Round value of x            | A                                | Various                       | link                         |5  |
-6  | conj(x)              | Conjugate value of x        | X                                | X                             | [link](builtin/conj.md)      |6  |
-7  | recip(x)             | Reciprocal                  | A                                | Various                       | [link](builtin/recip.md)     |7  |
-8  | signum(x)            | Signum                      | A                                | Various                       | [link](builtin/signum.md)    |8  |
-9  | pi(x)                | PI times x                  | A,X                              | Various                       | [link](builtin/pi.md)        |9  |
-10 | not(x)               | Not                         | B                                | B                             | [link](builtin/logic.md#not) |10 |
-11 | date(x)              | Time: date                  | Z                                | D                             | [link](date.md#date)         |11 |
-12 | date_year(x)         | Time: year                  | D,M,Z                            | L                             | [link](date.md#date-year)    |12 |
-13 | date_month(x)        | Time: month                 | D,M,Z                            | L                             | [link](date.md#date-month)   |13 |
-14 | date_day(x)          | Time: day                   | D,Z                              | L                             | [link](date.md#date-day)     |14 |
-15 | time(x)              | Time: time                  | Z                                | T                             | [link](date.md#time)         |15 |
-16 | time_hour(x)         | Time: hour                  | U,W,T,Z                          | L                             | [link](date.md#time-hour)    |16 |
-17 | time_minute(x)       | Time: minute                | U,W,T,Z                          | L                             | [link](date.md#time-minute)  |17 |
-18 | time_second(x)       | Time: second                | W,T,Z                            | L                             | [link](date.md#time-second)  |18 |
-19 | time_mill(x)         | Time: millisecond           | T,Z                              | L                             | [link](date.md#time-mill)    |19 |
+No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.| Status |
+:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--| :------|
+1  | abs(x)               | Absolute value of x         | Real                             | Same as argument              | [link](builtin/abs.md)       |1  |&#10004;|
+2  | neg(x)               | Negative value of x         | Real                             | Same as argument              | [link](builtin/neg.md)       |2  |&#10004;|
+3  | ceil(x)              | Ceiling value of x          | Real                             | Various                       | [link](builtin/ceil.md)      |3  |&#10004;|
+4  | floor(x)             | Floor value of x            | Real                             | Various                       | [link](builtin/floor.md)     |4  |&#10004;|
+5  | round(x)             | Round value of x            | Real                             | Various                       | link                         |5  |&#10004;|
+6  | conj(x)              | Conjugate value of x        | X                                | X                             | [link](builtin/conj.md)      |6  | |
+7  | recip(x)             | Reciprocal                  | Real                             | Various                       | [link](builtin/recip.md)     |7  | |
+8  | signum(x)            | Signum                      | Real                             | Various                       | [link](builtin/signum.md)    |8  | |
+9  | pi(x)                | PI times x                  | Real, X                          | Various                       | [link](builtin/pi.md)        |9  | |
+10 | not(x)               | Not                         | B                                | B                             | [link](builtin/logic.md#not) |10 | |
+11 | date(x)              | Time: date                  | Z                                | D                             | [link](date.md#date)         |11 | |
+12 | date_year(x)         | Time: year                  | D,M,Z                            | L                             | [link](date.md#date-year)    |12 | |
+13 | date_month(x)        | Time: month                 | D,M,Z                            | L                             | [link](date.md#date-month)   |13 | |
+14 | date_day(x)          | Time: day                   | D,Z                              | L                             | [link](date.md#date-day)     |14 | |
+15 | time(x)              | Time: time                  | Z                                | T                             | [link](date.md#time)         |15 | |
+16 | time_hour(x)         | Time: hour                  | U,W,T,Z                          | L                             | [link](date.md#time-hour)    |16 | |
+17 | time_minute(x)       | Time: minute                | U,W,T,Z                          | L                             | [link](date.md#time-minute)  |17 | |
+18 | time_second(x)       | Time: second                | W,T,Z                            | L                             | [link](date.md#time-second)  |18 | |
+19 | time_mill(x)         | Time: millisecond           | T,Z                              | L                             | [link](date.md#time-mill)    |19 | |
 
 
 ### 2.2 Binary
 
 No.| Function             | Description                 | Type of Argument(s)\*            | Type of Value                 | Details                      |No.|
 :--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
-1  | lt(x,y)              | x < y                       | (K;K)                            | B                             | [link](builtin/lt.md)        |1  |
-2  | gt(x,y)              | x > y                       | (K;K)                            | B                             | [link](builtin/gt.md)        |2  |
-3  | leq(x,y)             | x <= y                      | (K;K)                            | B                             | [link](builtin/leq.md)       |3  |
-4  | geq(x,y)             | x >= y                      | (K;K)                            | B                             | [link](builtin/geq.md)       |4  |
-5  | eq(x,y)              | x == y                      | (K;K)                            | B                             | [link](builtin/eq.md)        |5  |
-6  | neq(x,y)             | x != y                      | (K;K)                            | B                             | [link](builtin/neq.md)       |6  |
+1  | lt(x,y)              | x < y                       | (Numeric;Numeric)                | B                             | [link](builtin/lt.md)        |1  |
+2  | gt(x,y)              | x > y                       | (Numeric;Numeric)                | B                             | [link](builtin/gt.md)        |2  |
+3  | leq(x,y)             | x <= y                      | (Numeric;Numeric)                | B                             | [link](builtin/leq.md)       |3  |
+4  | geq(x,y)             | x >= y                      | (Numeric;Numeric)                | B                             | [link](builtin/geq.md)       |4  |
+5  | eq(x,y)              | x == y                      | (Numeric;Numeric)                | B                             | [link](builtin/eq.md)        |5  |
+6  | neq(x,y)             | x != y                      | (Numeric;Numeric)                | B                             | [link](builtin/neq.md)       |6  |
 7  | plus(x,y)            | Addition                    | Various                          | Various                       | [link](builtin/plus.md)      |7  |
 8  | minus(x,y)           | Subtraction                 | Various                          | Various                       | [link](builtin/minus.md)     |8  |
-9  | mul(x,y)             | Multiplication              | (A;A)                            | Various                       | [link](builtin/mul.md)       |9  |
-10 | div(x,y)             | Division                    | (A;A)                            | Various                       | [link](builtin/div.md)       |10 |
-11 | power(x,y)           | Power x of y                | (A;A)                            | Various                       | link                         |11 |
-12 | log(x,y)             | log_x(y)                    | (A;A)                            | Various                       | link                         |12 |
-13 | mod(x,y)             | x mod y                     | (A;A)                            | Various                       | link                         |13 |
+9  | mul(x,y)             | Multiplication              | (Real;Real)                      | Various                       | [link](builtin/mul.md)       |9  |
+10 | div(x,y)             | Division                    | (Real;Real)                      | Various                       | [link](builtin/div.md)       |10 |
+11 | power(x,y)           | Power x of y                | (Real;Real)                      | Various                       | link                         |11 |
+12 | log(x,y)             | log_x(y)                    | (Real;Real)                      | Various                       | link                         |12 |
+13 | mod(x,y)             | x mod y                     | (Real;Real)                      | Various                       | link                         |13 |
 14 | and(x,y)             | And                         | (B;B)                            | B                             | [link](builtin/logic.md#and) |14 |
 15 | or(x,y)              | Or                          | (B;B)                            | B                             | [link](builtin/logic.md#or)  |15 |
 16 | nand(x,y)            | NAND                        | (B;B)                            | B                             | [link](builtin/logic.md#nand)|16 |
