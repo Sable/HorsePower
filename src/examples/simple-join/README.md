@@ -32,15 +32,29 @@ where Employee.DepartmentID = Department.DepartmentID;
  */
 module default {
     import Builtin.*;
+    def find_valid_index(list<i64> colVal, list<i64> indexBool) : list<i64> {
+        colSize   :? = @len(colVal);
+        validBool :? = @lt(indexBool,colSize);
+        indexSize :? = @len(indexBool);
+        indexRange:? = @range(indexSize);
+        validIndex:? = @reduce(validBool, indexRange);
+        return validIndex;
+    }
+    def find_valid_item(list<i64> colVal, list<i64> indexBool)  : list<i64> {
+        colSize   :? = @len(colVal);
+        validBool :? = @lt(indexBool,colSize);
+        validItem :? = @reduce(validBool, indexBool);
+        return validItem;
+    }
     def main() : table {
         s0:list<sym> = check_cast(@column_value(`Employee,   `LastName)      , list<sym>);
         s1:list<i64> = check_cast(@column_value(`Employee,   `DepartmentID)  , list<i64>);
         s2:list<i64> = check_cast(@column_value(`Department, `DepartmentID)  , list<i64>);
         s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);
 
-        t0:list<i64> = @index_of        (s2,s1);
-        t1:list<i64> = @find_valid_index(s2,t0);
-        t2:list<i64> = @find_valid_item (s2,t0);
+        t0:list<i64> = @index_of       (s2,s1);
+        t1:list<i64> = find_valid_index(s2,t0);
+        t2:list<i64> = find_valid_item (s2,t0);
 
         r0:list<sym> = @index(s0,t1);
         r1:list<i64> = @index(s1,t1);
