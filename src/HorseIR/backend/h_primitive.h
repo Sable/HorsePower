@@ -25,14 +25,34 @@ extern "C" {
 #define vx(x)  x->x
 #define vg(x)  x->g
 
-#define vB(x) ((B*)(vg(x)))
-#define vL(x) ((L*)(vg(x)))
-#define vS(x) ((S*)(vg(x)))
-#define vV(x) ((V )(vg(x)))
+#define sB(x) ((B*)(vg(x)))
+#define sH(x) ((B*)(vg(x)))
+#define sI(x) ((B*)(vg(x)))
+#define sL(x) ((L*)(vg(x)))
+#define sE(x) ((L*)(vg(x)))
+#define sF(x) ((L*)(vg(x)))
+#define sS(x) ((S*)(vg(x)))
+#define sX(x) ((X*)(vg(x)))
+#define sV(x) ((V )(vg(x)))
 
-#define isSymbol(x) (vp(x) == H_S)
+#define vB(x,i) sB(x)[i]
+#define vH(x,i) sH(x)[i]
+#define vI(x,i) sI(x)[i]
+#define vL(x,i) sL(x)[i]
+#define vE(x,i) sE(x)[i]
+#define vF(x,i) sF(x)[i]
+#define vS(x,i) sS(x)[i]
+#define vX(x,i) sX(x)[i]
+#define vV(x,i) sV(x)[i]
+
+#define xReal(x) ((x).real)
+#define xImag(x) ((x).imag)
+
+#define isBool(x)      (H_B==vp(x))
+#define isSymbol(x)    (H_S==vp(x))
+#define isInteger(x)   (H_L==vp(x))
+#define isComplex(x)   (H_X==vp(x))
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
-#define isInteger(x) (vp(x) == H_L)
 
 L pfnColumnValue   (V z, V x, V y);
 L pfnIndexOf       (V z, V x, V y);
@@ -42,6 +62,21 @@ L pfnIndex         (V z, V x, V y);
 L pfnList          (V z, L n, ...);
 L pfnDict          (V z, V x, V y);
 L pfnTable         (V z, V x);
+
+
+/* Implement in order */
+
+L pfnAbs           (V z, V x);
+L pfnNeg           (V z, V x);
+L pfnCeil          (V z, V x);
+L pfnFloor         (V z, V x);
+L pfnRound         (V z, V x);
+
+L pfnConj          (V z, V x);
+L pfnRecip         (V z, V x);
+L pfnSignum        (V z, V x);
+L pfnPi            (V z, V x);
+L pfnNot           (V z, V x);
 
 #ifdef	__cplusplus
 }
