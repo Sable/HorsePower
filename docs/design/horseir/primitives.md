@@ -29,11 +29,11 @@ No.| Function             | Description                 | Type of Argument(s)\* 
 3  | ceil(x)              | Ceiling value of x          | Real                             | Various                       | [link](builtin/ceil.md)      |3  |&#10004;|
 4  | floor(x)             | Floor value of x            | Real                             | Various                       | [link](builtin/floor.md)     |4  |&#10004;|
 5  | round(x)             | Round value of x            | Real                             | Various                       | link                         |5  |&#10004;|
-6  | conj(x)              | Conjugate value of x        | X                                | X                             | [link](builtin/conj.md)      |6  | |
-7  | recip(x)             | Reciprocal                  | Real                             | Various                       | [link](builtin/recip.md)     |7  | |
-8  | signum(x)            | Signum                      | Real                             | Various                       | [link](builtin/signum.md)    |8  | |
-9  | pi(x)                | PI times x                  | Real, X                          | Various                       | [link](builtin/pi.md)        |9  | |
-10 | not(x)               | Not                         | B                                | B                             | [link](builtin/logic.md#not) |10 | |
+6  | conj(x)              | Conjugate value of x        | X                                | X                             | [link](builtin/conj.md)      |6  |&#10004;|
+7  | recip(x)             | Reciprocal                  | Real                             | Various                       | [link](builtin/recip.md)     |7  |&#10004;|
+8  | signum(x)            | Signum                      | Real                             | Various                       | [link](builtin/signum.md)    |8  |&#10004;|
+9  | pi(x)                | PI times x                  | Real, X                          | Various                       | [link](builtin/pi.md)        |9  |&#10004;|
+10 | not(x)               | Not                         | B                                | B                             | [link](builtin/logic.md#not) |10 |&#10004;|
 11 | date(x)              | Time: date                  | Z                                | D                             | [link](date.md#date)         |11 | |
 12 | date_year(x)         | Time: year                  | D,M,Z                            | L                             | [link](date.md#date-year)    |12 | |
 13 | date_month(x)        | Time: month                 | D,M,Z                            | L                             | [link](date.md#date-month)   |13 | |
