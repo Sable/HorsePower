@@ -10,14 +10,14 @@
 ### Type rules
 
 ```
-bool -> f64
-char -> f64
-i16 -> f64
-i32 -> f64
-i64 -> f64
-f32 -> f32
-f64 -> f64
-_ -> domain error
+bool    -> f64
+i16     -> f64
+i32     -> f64
+i64     -> f64
+f32     -> f32
+f64     -> f64
+complex -> complex
+_       -> domain error
 ```
 
 ### Examples

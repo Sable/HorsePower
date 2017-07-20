@@ -10,7 +10,6 @@
 
 ```
 bool -> bool
-char -> char
 i16 -> i16
 i32 -> i32
 i64 -> i64
