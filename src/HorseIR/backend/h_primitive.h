@@ -4,55 +4,20 @@
 extern "C" {
 #endif
 
-#define vp(x)  x->typ
-#define vn(x)  x->len
-
-#define vb(x)  x->b
-#define vh(x)  x->h
-#define vi(x)  x->i32
-#define vl(x)  x->i64
-#define vf(x)  x->f32
-#define ve(x)  x->f64
-#define vc(x)  x->c
-#define vs(x)  x->s
-#define vy(x)  x->y
-#define vm(x)  x->m
-#define vd(x)  x->d
-#define vz(x)  x->z
-#define vu(x)  x->u
-#define vw(x)  x->w
-#define vt(x)  x->t
-#define vx(x)  x->x
-#define vg(x)  x->g
-
-#define sB(x) ((B*)(vg(x)))
-#define sH(x) ((B*)(vg(x)))
-#define sI(x) ((B*)(vg(x)))
-#define sL(x) ((L*)(vg(x)))
-#define sE(x) ((L*)(vg(x)))
-#define sF(x) ((L*)(vg(x)))
-#define sS(x) ((S*)(vg(x)))
-#define sX(x) ((X*)(vg(x)))
-#define sV(x) ((V )(vg(x)))
-
-#define vB(x,i) sB(x)[i]
-#define vH(x,i) sH(x)[i]
-#define vI(x,i) sI(x)[i]
-#define vL(x,i) sL(x)[i]
-#define vE(x,i) sE(x)[i]
-#define vF(x,i) sF(x)[i]
-#define vS(x,i) sS(x)[i]
-#define vX(x,i) sX(x)[i]
-#define vV(x,i) sV(x)[i]
-
 #define xReal(x) ((x).real)
 #define xImag(x) ((x).imag)
+#define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
 
 #define isBool(x)      (H_B==vp(x))
 #define isSymbol(x)    (H_S==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
+
+#define isOne(x) (1==vn(x))
+
+#define isValidLength(x,y) ((!isOne(x))&&(!isOne(y))&&(vn(x)==vn(y)))
+#define isValidType(x,y) ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
 L pfnColumnValue   (V z, V x, V y);
 L pfnIndexOf       (V z, V x, V y);
@@ -77,6 +42,29 @@ L pfnRecip         (V z, V x);
 L pfnSignum        (V z, V x);
 L pfnPi            (V z, V x);
 L pfnNot           (V z, V x);
+L pfnLen           (V z, V x);
+L pfnRange         (V z, V x);
+
+L pfnCompare       (V z, V x, V y, L op);
+L pfnLt            (V z, V x, V y);
+L pfnLeq           (V z, V x, V y);
+L pfnGt            (V z, V x, V y);
+L pfnGeq           (V z, V x, V y);
+L pfnEq            (V z, V x, V y);
+L pfnNeq           (V z, V x, V y);
+
+L pfnArith         (V z, V x, V y, L op);
+L pfnPlus          (V z, V x, V y);
+L pfnMinus         (V z, V x, V y);
+L pfnMul           (V z, V x, V y);
+L pfnDiv           (V z, V x, V y);
+
+L pfnLogic         (V z, V x, V y, L op);
+L pfnAnd           (V z, V x, V y);
+L pfnNand          (V z, V x, V y);
+L pfnOr            (V z, V x, V y);
+L pfnNor           (V z, V x, V y);
+L pfnXor           (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

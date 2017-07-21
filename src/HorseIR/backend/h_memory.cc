@@ -117,7 +117,7 @@ V allocKTable(){
 V initV(V x, L typ, L len){
 	xp = typ;
 	xn = len;
-	xg = (len>1)?getHeapMem(typ, len):NULL;
+	xg = (len>1)?getHeapMem(typ, len):(G)&xb;
 	R x;
 }
 

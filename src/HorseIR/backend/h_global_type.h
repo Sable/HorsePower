@@ -43,33 +43,77 @@
 #define caseK case H_K:
 #define caseV case H_V:
 
-#define xp  x->typ
-#define xn  x->len
+#define vp(x)  x->typ
+#define vn(x)  x->len
 
-#define xb  x->b
-#define xh  x->h
-#define xi  x->i32
-#define xl  x->i64
-#define xf  x->f32
-#define xe  x->f64
-#define xc  x->c
-#define xs  x->s
-#define xy  x->y
-#define xm  x->m
-#define xd  x->d
-#define xz  x->z
-#define xu  x->u
-#define xw  x->w
-#define xt  x->t
-#define xx  x->x
-#define xg  x->g
+#define vb(x)  x->b
+#define vh(x)  x->h
+#define vi(x)  x->i32
+#define vl(x)  x->i64
+#define vf(x)  x->f32
+#define ve(x)  x->f64
+#define vc(x)  x->c
+#define vs(x)  x->s
+#define vy(x)  x->y
+#define vm(x)  x->m
+#define vd(x)  x->d
+#define vz(x)  x->z
+#define vu(x)  x->u
+#define vw(x)  x->w
+#define vt(x)  x->t
+#define vx(x)  x->x
+#define vg(x)  x->g
 
-#define xB(k) ((B*)(xg))[k]
-#define xI(k) ((I*)(xg))[k]
-#define xL(k) ((L*)(xg))[k]
-#define xF(k) ((F*)(xg))[k]
-#define xE(k) ((E*)(xg))[k]
-#define xS(k) xL(k)
+#define sB(x) ((B*)(vg(x)))
+#define sH(x) ((H*)(vg(x)))
+#define sI(x) ((I*)(vg(x)))
+#define sL(x) ((L*)(vg(x)))
+#define sE(x) ((E*)(vg(x)))
+#define sF(x) ((F*)(vg(x)))
+#define sS(x) ((L*)(vg(x)))
+#define sX(x) ((X*)(vg(x)))
+#define sV(x) ((V )(vg(x)))
+
+#define vB(x,i) sB(x)[i]
+#define vH(x,i) sH(x)[i]
+#define vI(x,i) sI(x)[i]
+#define vL(x,i) sL(x)[i]
+#define vE(x,i) sE(x)[i]
+#define vF(x,i) sF(x)[i]
+#define vS(x,i) sS(x)[i]
+#define vX(x,i) sX(x)[i]
+#define vV(x,i) sV(x)[i]
+
+/* special x */
+
+#define xp  vp(x)
+#define xn  vn(x)
+
+#define xb  vb(x)
+#define xh  vh(x)
+#define xi  vi(x)
+#define xl  vl(x)
+#define xf  vf(x)
+#define xe  ve(x)
+#define xc  vc(x)
+#define xs  vs(x)
+#define xy  vy(x)
+#define xm  vm(x)
+#define xd  vd(x)
+#define xz  vz(x)
+#define xu  vu(x)
+#define xw  vw(x)
+#define xt  vt(x)
+#define xx  vx(x)
+#define xg  vg(x)
+
+#define xB(k) vB(x,k)
+#define xH(k) vH(x,k)
+#define xI(k) vI(x,k)
+#define xL(k) vL(x,k)
+#define xF(k) vF(x,k)
+#define xE(k) vE(x,k)
+#define xS(k) vS(x,k)
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)

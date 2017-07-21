@@ -15,28 +15,28 @@ typedef int        I;
 typedef long long  L,Y,M,D,Z,U,W,T;
 typedef float      F;
 typedef double     E;
-typedef struct { E real,imag; } X;
+typedef struct { F real,imag; } X;
 
+/* size: 3 * 8 + 8 = 40 */
 typedef struct node_value{
-	L typ,len;
+	L typ,len; G g;
 	union{
-		B b;   //bool
-		H h;   //short
-		I i32; //int
-		L i64; //long
-		F f32; //float
-		E f64; //double
-		C c;   //char
-		L s;   //symbol
-		Y y;   //year
-		M m;   //month
-		D d;   //date
-		Z z;   //date time
-		U u;   //minute
-		W w;   //second
-		T t;   //time
-		X x;   //complex
-		S g;
+		B b;   //boolean   1 byte
+		H h;   //short     2 bytes
+		I i32; //int       4 bytes
+		L i64; //long      8 bytes
+		F f32; //float     4 bytes
+		E f64; //double    8 bytes
+		C c;   //char      1 byte
+		L s;   //symbol    8 bytes
+		Y y;   //year      4 bytes
+		M m;   //month     4 bytes
+		D d;   //date      4 bytes
+		Z z;   //date time 8 bytes
+		U u;   //minute    4 bytes
+		W w;   //second    4 bytes
+		T t;   //time      4 bytes
+		X x;   //complex   8 bytes
 	};
 }V0,*V;
 
