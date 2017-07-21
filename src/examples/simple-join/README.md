@@ -32,7 +32,7 @@ where Employee.DepartmentID = Department.DepartmentID;
  */
 module default {
     import Builtin.*;
-    def find_valid_index(list<i64> colVal, list<i64> indexBool) : list<i64> {
+    def find_valid_index(colVal:list<i64>, indexBool:list<i64>) : list<i64> {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
         indexSize :? = @len(indexBool);
@@ -40,7 +40,7 @@ module default {
         validIndex:? = @reduce(validBool, indexRange);
         return validIndex;
     }
-    def find_valid_item(list<i64> colVal, list<i64> indexBool)  : list<i64> {
+    def find_valid_item(colVal:list<i64>, indexBool:list<i64>)  : list<i64> {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
         validItem :? = @reduce(validBool, indexBool);
