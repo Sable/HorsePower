@@ -28,7 +28,7 @@ namespace horseIR {
             StatementIterator::value_type operator *() ;
             StatementIterator& operator =(const StatementIterator& iterator) ;
             StatementIterator& operator =(StatementIterator&& iterator) ;
-
+            
             bool operator ==(const StatementIterator& iterator) ;
             bool operator !=(const StatementIterator& iterator) ;
         protected:

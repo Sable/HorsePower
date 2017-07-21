@@ -7,7 +7,7 @@
 
 #include "ASTNode.h"
 #include "antlr4-runtime.h"
-#include "../grammar/HorseIRParser.h"
+#include "HorseIRParser.h"
 
 namespace horseIR {
     namespace ast {

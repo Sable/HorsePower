@@ -1,18 +1,3 @@
 
 .DS_Store
-src/HorseIR/ast/.clang_complete
-src/HorseIR/grammar/HorseIRBaseVisitor.h
-src/HorseIR/grammar/HorseIRBaseListener.h
-src/HorseIR/grammar/HorseIRLexer.h
-src/HorseIR/grammar/HorseIRListener.h
-src/HorseIR/grammar/HorseIRParser.h
-src/HorseIR/grammar/HorseIRVisitor.h
-src/HorseIR/grammar/libMIRParser.a
-src/HorseIR/ast/debug.cc
-src/HorseIR/ast/demo
-src/HorseIR/ast/build/
-src/HorseIR/backend/*.o
-src/HorseIR/backend/h_primitive.o
-src/HorseIR/*.o
-src/HorseIR/horse
-src/HorseIR/ast/compile_commands.json
+src/HorseIR/frontend/build/
