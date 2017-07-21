@@ -16,6 +16,11 @@ ASTNode::ASTNode(ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* pTree,
     mem.manage(this) ;
 }
 
+ASTNode::ASTNodeClass ASTNode::getASTNodeClass() const
+{
+    return nodeType ;
+}
+
 ASTNode* ASTNode::getParentASTNode() const
 {
     return parentASTNode ;

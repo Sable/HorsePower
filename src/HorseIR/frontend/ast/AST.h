@@ -5,7 +5,6 @@
 #include "HorseIRParser.h"
 
 #include "ASTNode.h"
-#include "ASTVisitor.h"
 
 #include "Type.h"
 #include "Operand.h"

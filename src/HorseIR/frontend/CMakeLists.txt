@@ -7,24 +7,24 @@ set(ANTLR4CPP_JAR_LOCATION "${PROJECT_SOURCE_DIR}/jar/antlr-4.7-complete.jar")
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-include(ExternalAntlr4Cpp)
+find_package(ANTLR4CPP)
+if (NOT ANTLR4CPP_FOUND)
+  message(FATAL_ERROR "require antlr4-cpp-runtime") 
+endif()
 include_directories(${ANTLR4CPP_INCLUDE_DIRS})
-link_directories(${ANTLR4CPP_LIBS})
 
-antlr4cpp_process_grammar(horseIR horseIR
-  ${CMAKE_CURRENT_SOURCE_DIR}/grammar/HorseIR.g4
-  ${CMAKE_CURRENT_SOURCE_DIR}/grammar/HorseIR.g4)
-include_directories(${antlr4cpp_include_dirs_horseIR})
-list(REMOVE_ITEM antlr4cpp_src_files_horseIR
-  ${ANTLR4CPP_GENERATED_SRC_DIR}/horseIR/HorseIRVisitor.cpp
-  ${ANTLR4CPP_GENERATED_SRC_DIR}/horseIR/HorseIRBaseVisitor.cpp
-  ${ANTLR4CPP_GENERATED_SRC_DIR}/horseIR/HorseIRListener.cpp
-  ${ANTLR4CPP_GENERATED_SRC_DIR}/horseIR/HorseIRBaseListener.cpp)
-foreach (generated_header ${antlr4cpp_src_headers_horseIR})
-  file(COPY ${generated_header} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-endforeach(generated_header)
+include(GenerateAntlr4Grammar)
+GenerateANTLR4Grammar(horseIR "${CMAKE_CURRENT_SOURCE_DIR}/grammar/HorseIR.g4")
+include_directories(${ANTLR4_GEN_DIR})
+list(REMOVE_ITEM ANTLR4_horseIR_SOURCE ${ANTLR4_GEN_DIR}/HorseIRListener.cpp)
+list(REMOVE_ITEM ANTLR4_horseIR_SOURCE ${ANTLR4_GEN_DIR}/HorseIRVisitor.cpp)
+list(REMOVE_ITEM ANTLR4_horseIR_SOURCE ${ANTLR4_GEN_DIR}/HorseIRBaseListener.cpp)
+list(REMOVE_ITEM ANTLR4_horseIR_SOURCE ${ANTLR4_GEN_DIR}/HorseIRBaseVisitor.cpp)
+foreach(header_file ${ANTLR4_horseIR_HEADER})
+  file(COPY ${header_file} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
+endforeach()
 
-file(GLOB_RECURSE AST_SOURCES ./ast/*.cc)
+file(GLOB_RECURSE AST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ast/*.cc)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/Structure.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/Operand.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
@@ -33,5 +33,11 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTNode.h DESTINATION ${CMAKE_CURRENT_
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTVisitor.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/AST.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
 
-add_library(HorseIR ${AST_SOURCES} ${antlr4cpp_src_files_horseIR})
-add_dependencies(HorseIR antlr4cpp)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/Suppiler.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/misc)
+
+add_library(HorseIR ${AST_SOURCES} ${ANTLR4_horseIR_SOURCE})
+
+# == debug == 
+add_executable(HorseIRDebug ${CMAKE_CURRENT_SOURCE_DIR}/Debug.cc)
+add_dependencies(HorseIRDebug HorseIR)
+target_link_libraries(HorseIRDebug ${ANTLR4CPP_LIBRARIES} HorseIR)

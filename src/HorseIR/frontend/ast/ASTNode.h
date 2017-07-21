@@ -12,8 +12,6 @@
 
 namespace horseIR {
     namespace ast {
-        class ASTVisitor ;
-
         class ASTNode {
         public:
             class MemManagerType {
@@ -26,10 +24,8 @@ namespace horseIR {
 
             enum class ASTNodeClass {
                 NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
-                Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
-                FP64Literal, SymbolLiteral, TimeMonthLiteral, TimeDateLiteral, TimeDateTimeLiteral,
-                TimeMinuteLiteral, TimeSecondLiteral, TimeTimeLiteral, FunctionLiteral, TableLiteral,
-                KeyTableLiteral, StringLiteral,
+                Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
+                FunctionLiteral, TableLiteral,
 
                 Identifier,
 
@@ -45,6 +41,8 @@ namespace horseIR {
             ASTNode (ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
             virtual ~ASTNode() = default ;
 
+            ASTNodeClass getASTNodeClass() const ;
+            
             virtual std::size_t getNumNodesRecursively() const = 0;
             virtual std::vector<ASTNode*> getChildren() const = 0 ;
             virtual ASTNode* duplicateShallow(ASTNode::MemManagerType& mem) const ; /* TODO */
