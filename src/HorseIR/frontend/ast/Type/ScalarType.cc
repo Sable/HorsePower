@@ -55,6 +55,10 @@ ScalarType::ScalarType(ASTNode* parent, HorseIRParser::TypeCaseScalarContext* cs
     }
 }
 
+ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
+    : ScalarType(nullptr, cst, mem)
+{}
+
 ScalarType::ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem)
     : scalarClass(type),
       Type(mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)

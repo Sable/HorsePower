@@ -9,6 +9,10 @@ WildcardType::WildcardType(ASTNode* parent, HorseIRParser::TypeCaseWildcardConte
     : Type(parent, cst, mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
 {}
 
+WildcardType::WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem)
+    : WildcardType(nullptr, cst, mem)
+{}
+
 WildcardType::WildcardType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Wildcard, ASTNode::ASTNodeClass::WildcardType)
 {}

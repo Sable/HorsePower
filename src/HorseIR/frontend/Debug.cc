@@ -3,6 +3,8 @@
 #include "./ast/AST.h"
 #include "./ast/ASTVisitor.h"
 
+#include "./misc/Collections.h"
+
 const char* rawProgram = ""
     "/*\n"
     " * varchar(99) -> sym\n"
@@ -50,6 +52,8 @@ const char* rawProgram = ""
     "}"
     "" ;
 
+const char* rawType = "i32,     list<?> ,   dict<i8, str>" ;
+
 class StructurePrinter : horseIR::ast::ASTVisitor<void> {
 public:
     void visit(horseIR::ast::ASTNode* ast) override {
@@ -69,7 +73,18 @@ int main(int argc, char *argv[])
     auto compilationUnit = new horseIR::ast::CompilationUnit(compilationUnitContext, mem) ;
     std::cout << compilationUnit->toString() << std::endl ;
 
-    StructurePrinter demoVisitor ;
-    demoVisitor.visit(compilationUnit) ;
+    antlr4::ANTLRInputStream typeInStream(rawType) ;
+    horseIR::HorseIRLexer typeLexer(&typeInStream) ;
+    antlr4::CommonTokenStream typeTokenStream(&typeLexer) ;
+    horseIR::HorseIRParser typeParser(&typeTokenStream) ;
+    auto typeList = typeParser.typeSignatureList() ;
+
+    auto signatureASTNodes = horseIR::ast::Type::makeTypeSignatureASTNodes(typeList, mem) ;
+    auto signatureString = horseIR::misc::Collections::applyAndCollect(
+        signatureASTNodes,
+        [](horseIR::ast::Type* type) -> std::string {
+            return type->toString() ;
+        }) ;
+    horseIR::misc::Collections::writeToStream(std::cout, signatureString, ", ", "\n") ;
     return 0;
 }

@@ -17,13 +17,18 @@ macro(GenerateANTLR4Grammar ANTLR4_PROJECT_NAMESPACE ANTLR4_FILE)
     -package "${ANTLR4_PROJECT_NAMESPACE}"
     "${ANTLR4_FILE}")
 
-  file(GLOB ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_SOURCE ${ANTLR4_GEN_DIR}/*.cpp)
-  file(GLOB ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_HEADER ${ANTLR4_GEN_DIR}/*.h)
-
-  foreach(source_file ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_SOURCE)
+  file(GLOB ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_SOURCE_T ${ANTLR4_GEN_DIR}/*.cpp)
+  file(GLOB ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_HEADER_T ${ANTLR4_GEN_DIR}/*.h)
+  
+  foreach(source_file ${ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_SOURCE_T})
     set_source_files_properties(
       ${source_file}
       PROPERTIES
       COMPILE_FLAGS -Wno-overloaded-virtual)
+    list(APPEND ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_SOURCE ${source_file})
   endforeach(source_file)
+
+  foreach(header_file ${ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_HEADER_T})
+    list(APPEND ANTLR4_${ANTLR4_PROJECT_NAMESPACE}_HEADER ${header_file})
+  endforeach(header_file)
 endmacro()

@@ -51,6 +51,10 @@ FunctionType::FunctionType(ASTNode* parent, HorseIRParser::TypeCaseFuncContext* 
     }
 }
 
+FunctionType::FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem)
+    : FunctionType(nullptr, cst, mem) 
+{}
+
 FunctionType::FunctionType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType),
       flexible(false),
