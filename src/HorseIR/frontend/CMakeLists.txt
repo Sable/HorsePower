@@ -17,14 +17,19 @@ include(BuildHorseIRGrammar)
 
 file(GLOB_RECURSE AST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ast/*.cc)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/Structure.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/Operand.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/Type.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTNode.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTVisitor.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ast/AST.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
+file(GLOB DIR_AST_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/ast/*.h)
+file(GLOB DIR_MISC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/misc/*.h)
+file(GLOB DIR_INTERPRETER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/interpreter/*.h)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/misc/Suppiler.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/misc)
+foreach(header ${DIR_AST_HEADERS})
+  file(COPY ${header} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/ast)
+endforeach(header)
+foreach(header ${DIR_MISC_HEADERS})
+  file(COPY ${header} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/misc)
+endforeach(header)
+foreach(header ${DIR_INTERPRETER_HEADERS})
+  file(COPY ${header} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/interpreter)
+endforeach(header)
 
 add_library(HorseIR ${AST_SOURCES} ${ANTLR4_horseIR_SOURCE})
 
