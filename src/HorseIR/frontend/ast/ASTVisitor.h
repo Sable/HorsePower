@@ -11,9 +11,9 @@ namespace horseIR {
         template <class T, class Suppiler = horseIR::misc::TrivialSuppiler<T>>
         class ASTVisitor {
         public:
-            T visit(ASTNode* ast) ;
+            virtual T visit(ASTNode* ast) ;
         protected:
-            virtual T visitChildren(ASTNode* ast) ;
+            T visitChildren(ASTNode* ast) ;
 
             virtual T visitType(Type* type) ;
             virtual T visitScalarType(ScalarType* scalarType) {

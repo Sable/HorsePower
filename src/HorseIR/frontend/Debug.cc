@@ -50,6 +50,14 @@ const char* rawProgram = ""
     "}"
     "" ;
 
+class StructurePrinter : horseIR::ast::ASTVisitor<void> {
+public:
+    void visit(horseIR::ast::ASTNode* ast) override {
+        std::cout << typeid(*ast).name()  << std::endl ;
+        ASTVisitor<void>::visit(ast) ;
+    }
+} ;
+
 int main(int argc, char *argv[])
 {
     antlr4::ANTLRInputStream inStream(rawProgram) ;
@@ -61,7 +69,7 @@ int main(int argc, char *argv[])
     auto compilationUnit = new horseIR::ast::CompilationUnit(compilationUnitContext, mem) ;
     std::cout << compilationUnit->toString() << std::endl ;
 
-    horseIR::ast::ASTVisitor<void> demoVisitor ;
+    StructurePrinter demoVisitor ;
     demoVisitor.visit(compilationUnit) ;
     return 0;
 }
