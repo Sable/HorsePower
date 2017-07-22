@@ -114,6 +114,13 @@ L getSingleIntValue(V x){
 	R (1==xn)?(H_B==xp?xb:H_H==xp?xh:H_I==xp?xi:H_L==xp?xl:-1):-1;
 }
 
+L calcFact(L n){
+	if(n>=0){
+		L z = 1; DOI(n, z*=(i+1)) R z;
+	}
+	else R -1;
+}
+
 
 /* Type checking */
 

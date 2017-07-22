@@ -70,6 +70,7 @@
 #define sL(x) ((L*)(vg(x)))
 #define sE(x) ((E*)(vg(x)))
 #define sF(x) ((F*)(vg(x)))
+#define sC(x) ((C*)(vg(x)))
 #define sS(x) ((L*)(vg(x)))
 #define sX(x) ((X*)(vg(x)))
 #define sV(x) ((V )(vg(x)))
@@ -80,6 +81,7 @@
 #define vL(x,i) sL(x)[i]
 #define vE(x,i) sE(x)[i]
 #define vF(x,i) sF(x)[i]
+#define vC(x,i) sC(x)[i]
 #define vS(x,i) sS(x)[i]
 #define vX(x,i) sX(x)[i]
 #define vV(x,i) sV(x)[i]

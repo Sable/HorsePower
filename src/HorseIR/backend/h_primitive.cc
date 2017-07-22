@@ -152,6 +152,9 @@ const E PI = acos(-1);
 #define SIGNUM(x) (0<(x)?1:0>(x)?-1:0)
 #define PIMUL(x) (PI*x)
 #define NOT(x) (~x)
+#define POWER(x,y) pow(x,y)
+#define LOG(x,y) (log(y)/log(x))
+#define FACT(n) calcFact(n)
 
 /* abs */
 L pfnAbs(V z, V x){
@@ -243,6 +246,102 @@ L pfnRound(V z, V x){
 	else R E_DOMAIN;
 }
 
+#define TRIG(op,x) (2>op?TRIGSIN(op,x):4>op?TRIGCOS(op,x):TRIGTAN(op,x))
+#define TRIGSIN(op,x) (0==op?sin(x):asin(x))
+#define TRIGCOS(op,x) (2==op?cos(x):acos(x))
+#define TRIGTAN(op,x) (4==op?tan(x):atan(x))
+
+L pfnTrig(V z, V x, L op){
+	if(isTypeGroupReal(vp(x))){
+		L typZ = H_E;
+		L lenZ = vn(x);
+		initV(z,typZ,lenZ);
+		switch(vp(x)){
+			caseB DOI(lenZ, vE(z,i)=TRIG(op,vB(x,i))) break;
+			caseH DOI(lenZ, vE(z,i)=TRIG(op,vH(x,i))) break;
+			caseI DOI(lenZ, vE(z,i)=TRIG(op,vI(x,i))) break;
+			caseL DOI(lenZ, vE(z,i)=TRIG(op,vL(x,i))) break;
+			caseF DOI(lenZ, vE(z,i)=TRIG(op,vF(x,i))) break;
+			caseE DOI(lenZ, vE(z,i)=TRIG(op,vE(x,i))) break;
+			default: R E_NOT_IMPL;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnTrigSin(V z, V x){
+	R pfnTrig(z,x,0);
+}
+
+L pfnTrigAsin(V z, V x){
+	R pfnTrig(z,x,1);
+}
+
+L pfnTrigCos(V z, V x){
+	R pfnTrig(z,x,2);
+}
+
+L pfnTrigAcos(V z, V x){
+	R pfnTrig(z,x,3);
+}
+
+L pfnTrigTan(V z, V x){
+	R pfnTrig(z,x,4);
+}
+
+L pfnTrigAtan(V z, V x){
+	R pfnTrig(z,x,5);
+}
+
+#define HYPER(op,x) (2>op?HYPERSIN(op,x):4>op?HYPERCOS(op,x):HYPERTAN(op,x))
+#define HYPERSIN(op,x) (0==op?sinh(x):asinh(x))
+#define HYPERCOS(op,x) (2==op?cosh(x):acosh(x))
+#define HYPERTAN(op,x) (4==op?tanh(x):atanh(x))
+
+L pfnHyper(V z, V x, L op){
+	if(isTypeGroupReal(vp(x))){
+		L typZ = H_E;
+		L lenZ = vn(x);
+		initV(z,typZ,lenZ);
+		switch(vp(x)){
+			caseB DOI(lenZ, vE(z,i)=HYPER(op,vB(x,i))) break;
+			caseH DOI(lenZ, vE(z,i)=HYPER(op,vH(x,i))) break;
+			caseI DOI(lenZ, vE(z,i)=HYPER(op,vI(x,i))) break;
+			caseL DOI(lenZ, vE(z,i)=HYPER(op,vL(x,i))) break;
+			caseF DOI(lenZ, vE(z,i)=HYPER(op,vF(x,i))) break;
+			caseE DOI(lenZ, vE(z,i)=HYPER(op,vE(x,i))) break;
+			default: R E_NOT_IMPL;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnHyperSinh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
+L pfnHyperAsinh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
+L pfnHyperCosh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
+L pfnHyperAcosh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
+L pfnHyperTanh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
+L pfnHyperAtanh(V z, V x){
+	R pfnHyper(z,x,0);
+}
+
 L pfnConj(V z, V x){
 	if(isComplex(x)){
 		L typZ = H_X;
@@ -329,10 +428,45 @@ L pfnLen(V z, V x){
 }
 
 L pfnRange(V z, V x){
-	if(isTypeGroupInt(x)){
+	if(isOne(x) && isTypeGroupInt(xp)){
 		L size = getSingleIntValue(x);
 		initV(z,H_L,size);
 		DOI(size, vL(z,i)=i) // opt, stride?
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnFact(V z, V x){
+	if(isTypeGroupInt(xp)){
+		initV(z,H_L,xn);
+		switch(xp){
+			caseB DOI(xn, vL(z,i)=FACT(vB(x,i))) break;
+			caseH DOI(xn, vL(z,i)=FACT(vH(x,i))) break;
+			caseI DOI(xn, vL(z,i)=FACT(vI(x,i))) break;
+			caseL DOI(xn, vL(z,i)=FACT(vL(x,i))) break;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnReverse(V z, V x){
+	if(isTypeGroupBasic(xp)){
+		L typZ = xp, lenZ = xn;
+		initV(z,typZ,lenZ);
+		switch(typZ){
+			caseB DOI(lenZ, vB(z,i)=vB(x,lenZ-i-1)) break;
+			caseH DOI(lenZ, vH(z,i)=vH(x,lenZ-i-1)) break;
+			caseI DOI(lenZ, vI(z,i)=vI(x,lenZ-i-1)) break;
+			caseL DOI(lenZ, vL(z,i)=vL(x,lenZ-i-1)) break;
+			caseF DOI(lenZ, vF(z,i)=vF(x,lenZ-i-1)) break;
+			caseE DOI(lenZ, vE(z,i)=vE(x,lenZ-i-1)) break;
+			caseX DOI(lenZ, vX(z,i)=vX(x,lenZ-i-1)) break;
+			caseC DOI(lenZ, vC(z,i)=vC(x,lenZ-i-1)) break;
+			caseS DOI(lenZ, vS(z,i)=vS(x,lenZ-i-1)) break;
+			default: R E_NOT_IMPL;
+		}
 		R 0;
 	}
 	else R E_DOMAIN;
@@ -545,11 +679,70 @@ L pfnNor(V z, V x, V y){
 	R pfnLogic(z,x,y,3);
 }
 
-/* nor: 4 */
+/* xor: 4 */
 L pfnXor(V z, V x, V y){
 	R pfnLogic(z,x,y,4);
 }
 
+#define POWERLOG(op,x,y) (op==0?POWER(x,y):LOG(x,y))
 
+L pfnPowerLog(V z, V x, V y, L op){
+	if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+		if(!isValidLength(x,y)) R E_LENGTH;
+		L lenZ  = isOne(x)?vn(y):vn(x), typZ = H_E; // default: E
+		L typMax= max(vp(x),vp(y));
+		V tempX = promoteValue(x,typMax);
+		V tempY = promoteValue(y,typMax);
+		initV(z,typZ,lenZ);
+		if(isOne(x)){
+			switch(typMax){
+				caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,0),vB(tempY,i))) break;
+				caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,0),vH(tempY,i))) break;
+				caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,0),vI(tempY,i))) break;
+				caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,0),vL(tempY,i))) break;
+				caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,0),vF(tempY,i))) break;
+				caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,0),vE(tempY,i))) break;
+				default: R E_NOT_IMPL;
+			}
+		}
+		else if(isOne(y)){
+			switch(typMax){
+				caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,0))) break;
+				caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,0))) break;
+				caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,0))) break;
+				caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,0))) break;
+				caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,0))) break;
+				caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,0))) break;
+				default: R E_NOT_IMPL;
+			}
+		}
+		else {
+			switch(typMax){
+				caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,i))) break;
+				caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,i))) break;
+				caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,i))) break;
+				caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,i))) break;
+				caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,i))) break;
+				caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,i))) break;
+				default: R E_NOT_IMPL;
+			}
+		}
+		/* 
+		 * Next steps:
+		 * 1) check if error cases occur (e.g. (-1)^0.5)
+		 * 2) if yes, redo the power with complex numbers
+		 */
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnPower(V z, V x, V y){
+	R pfnPowerLog(z,x,y,0);
+}
+
+L pfnLog(V z, V x, V y){
+	R pfnPowerLog(z,x,y,1);
+}
 
 

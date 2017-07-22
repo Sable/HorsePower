@@ -19,7 +19,11 @@ L copyV             (V z, V x);
 L findColFromTable  (V x, L cId);
 V promoteValue      (V x, L typMax);
 B checkZero         (V x);
+L getSingleIntValue (V x);
+L calcFact          (L n);
 
+B isTypeGroupInt    (L t);
+B isTypeGroupFloat  (L t);
 B isTypeGroupReal   (L t);
 B isTypeGroupRealX  (L t);
 B isTypeGroupTime   (L t);
