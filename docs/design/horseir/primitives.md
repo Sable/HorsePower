@@ -39,7 +39,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 6  | conj(x)              | Conjugate value of x        | Complex                     | Complex                       | [link](builtin/conj.md)      |6  |&#10004;|
 7  | recip(x)             | Reciprocal                  | Real                        | Various                       | [link](builtin/recip.md)     |7  |&#10004;|
 8  | signum(x)            | Signum                      | Real                        | Various                       | [link](builtin/signum.md)    |8  |&#10004;|
-9  | pi(x)                | PI times x                  | Real, Complex               | Various                       | [link](builtin/pi.md)        |9  |&#10004;|
+9  | pi(x)                | PI times x                  | Real,Complex                | Various                       | [link](builtin/pi.md)        |9  |&#10004;|
 10 | not(x)               | Not                         | B                           | B                             | [link](builtin/logic.md#not) |10 |&#10004;|
 11 | date(x)              | Time: date                  | Z                           | D                             | [link](date.md#date)         |11 | |
 12 | date_year(x)         | Time: year                  | D,M,Z                       | L                             | [link](date.md#date-year)    |12 | |
@@ -50,6 +50,18 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 17 | time_minute(x)       | Time: minute                | U,W,T,Z                     | L                             | [link](date.md#time-minute)  |17 | |
 18 | time_second(x)       | Time: second                | W,T,Z                       | L                             | [link](date.md#time-second)  |18 | |
 19 | time_mill(x)         | Time: millisecond           | T,Z                         | L                             | [link](date.md#time-mill)    |19 | |
+20 | cos(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#cos)  |20 |&#10004;|
+21 | sin(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#sin)  |21 |&#10004;|
+22 | tan(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#tan)  |22 |&#10004;|
+23 | acos(x)              | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#acos) |23 |&#10004;|
+24 | asin(x)              | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#asin) |24 |&#10004;|
+25 | atan(x)              | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#atan) |25 |&#10004;|
+26 | cosh(x)              | Hyperbolic functions        | Real                        | Real                          | [link](builtin/hyper.md#cosh)|26 |&#10004;|
+27 | sinh(x)              | Hyperbolic functions        | Real                        | Real                          | [link](builtin/hyper.md#sinh)|27 |&#10004;|
+28 | tanh(x)              | Hyperbolic functions        | Real                        | Real                          | [link](builtin/hyper.md#tanh)|28 |&#10004;|
+29 | acosh(x)             | Hyperbolic functions        | Real                        | Real                          |[link](builtin/hyper.md#acosh)|29 |&#10004;|
+30 | asinh(x)             | Hyperbolic functions        | Real                        | Real                          |[link](builtin/hyper.md#asinh)|30 |&#10004;|
+31 | atanh(x)             | Hyperbolic functions        | Real                        | Real                          |[link](builtin/hyper.md#atanh)|31 |&#10004;|
 
 
 ### 2.2 Binary
@@ -99,7 +111,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 11 | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                         |11 | |
 12 | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |12 | |
 13 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |13 | |
-14 | reverse(x)           | Reverse                     | Pending                     | Pending                       | link                         |14 | |
+14 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |14 |&#10004;|
 15 | where(x)             | Find all trues              | B                           | L                             | link                         |15 | |
 16 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |16 | |
 17 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |17 | |
@@ -135,11 +147,11 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 ## <p id="others">5. Others</p>
 
 No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.|
-:--| :------------------- | :-------------------------- | :------------------------------- | :---------------------------- | :--------------------------- |:--|
-1  | trig(k,x)            | Trigonometric functions     | Pending                          | Pending                       | [link](builtin/trig.md)      |1  |
-2  | alphabet()           | All alphabet set            | Pending                          | S                             | link                         |2  |
-3  | index(x,y)           | List indexing (x[y])        | Pending                          | S                             | link                         |3  |
-4  | index_a              | List indexing assignment    | Pending                          | S                             | link                         |4  |
-5  | print                | Output                      | Pending                          | S                             | link                         |5  |
-6  | load_csv             | Load a csv file             | Pending                          | S                             | link                         |6  |
+:--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--|
+1  | trig(k,x)            | Trigonometric functions     | Pending                     | Pending                       | [link](builtin/trig.md)      |1  |
+2  | alphabet()           | All alphabet set            | Pending                     | S                             | link                         |2  |
+3  | index(x,y)           | List indexing (x[y])        | Pending                     | S                             | link                         |3  |
+4  | index_a              | List indexing assignment    | Pending                     | S                             | link                         |4  |
+5  | print                | Output                      | Pending                     | S                             | link                         |5  |
+6  | load_csv             | Load a csv file             | Pending                     | S                             | link                         |6  |
 
