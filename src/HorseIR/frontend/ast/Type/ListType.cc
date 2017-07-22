@@ -14,6 +14,10 @@ ListType::ListType(ASTNode* parent, HorseIRParser::TypeCaseListContext* cst, AST
     elementType = Type::makeTypeASTNode(this, listCST->element, mem) ;
 }
 
+ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
+    : ListType(nullptr, cst, mem) 
+{}
+
 ListType::ListType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::List, ASTNode::ASTNodeClass::ListType),
       elementType(nullptr)

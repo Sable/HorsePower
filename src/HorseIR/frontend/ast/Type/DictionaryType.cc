@@ -15,6 +15,10 @@ DictionaryType::DictionaryType(ASTNode* parent, HorseIRParser::TypeCaseDictConte
     valueType = Type::makeTypeASTNode(this, dictCST->value, mem) ;
 }
 
+DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
+    : DictionaryType(nullptr, cst, mem)
+{}
+
 DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeClass::DictionaryType),
       keyType(nullptr),

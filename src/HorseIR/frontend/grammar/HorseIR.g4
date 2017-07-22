@@ -135,6 +135,10 @@ literalKtable   : value=ID ':' valueType='ktable' ;
 
 literalString   : value=LITERAL_STRING (':' valueType='str')? ;
 
+typeSignatureList :
+                  | type (',' type)*
+                  ;
+
 /*
   ScalarMonth = 'm'  ScalarDate = 'd'  ScalarDateTime = 'z'  ScalarMinute = 'u'
   ScalarSecond = 'v' ScalarTime = 't'

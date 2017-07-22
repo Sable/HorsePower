@@ -25,6 +25,9 @@ namespace horseIR {
             virtual bool isGeneralizationOf(const Type*) const = 0 ;
             
             static Type* makeTypeASTNode(ASTNode* parent, HorseIRParser::TypeContext* cst, ASTNode::MemManagerType& mem) ;
+            static Type* makeTypeASTNode(HorseIRParser::TypeContext* cst, ASTNode::MemManagerType& mem) ;
+            static std::vector<Type*> makeTypeSignatureASTNodes(ASTNode* parent, HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
+            static std::vector<Type*> makeTypeSignatureASTNodes(HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
         protected:
             const Type::TypeClass typeClass ;
         } ;
@@ -39,6 +42,7 @@ namespace horseIR {
             
             ScalarType() = delete ;
             ScalarType(ASTNode* parent, HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem) ;
+            ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem) ;
             ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem) ;
             ScalarType(ASTNode::MemManagerType& mem) ;
             ~ScalarType() override = default ;
@@ -60,6 +64,7 @@ namespace horseIR {
         public:
             WildcardType() = delete ;
             WildcardType(ASTNode* parent, HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem) ;
+            WildcardType(HorseIRParser::TypeCaseWildcardContext* cst, ASTNode::MemManagerType& mem) ;
             WildcardType(ASTNode::MemManagerType& mem) ;
             ~WildcardType() override = default ;
             
@@ -75,6 +80,7 @@ namespace horseIR {
         public:
             ListType() = delete ;
             ListType(ASTNode* parent, HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem) ;
+            ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem) ;
             ListType(ASTNode::MemManagerType& mem) ;
             ~ListType() override = default ;
 
@@ -95,6 +101,7 @@ namespace horseIR {
         public:
             DictionaryType() = delete ;
             DictionaryType(ASTNode* parent, HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem) ;
+            DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem) ;
             DictionaryType(ASTNode::MemManagerType& mem) ;
             ~DictionaryType() override = default ;
             
@@ -118,6 +125,7 @@ namespace horseIR {
         public:
             EnumerationType() = delete ;
             EnumerationType(ASTNode* parent, HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem) ;
+            EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem) ;
             EnumerationType(ASTNode::MemManagerType& mem) ;
             ~EnumerationType() override = default ;
             
@@ -138,6 +146,7 @@ namespace horseIR {
         public:
             FunctionType() = delete ;
             FunctionType(ASTNode* parent, HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem) ;
+            FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionType(ASTNode::MemManagerType& mem) ;
             ~FunctionType() override = default ;
             

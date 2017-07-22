@@ -14,6 +14,10 @@ EnumerationType::EnumerationType(ASTNode* parent, HorseIRParser::TypeCaseEnumCon
     elementType = Type::makeTypeASTNode(this, enumCST->element, mem) ;
 }
 
+EnumerationType::EnumerationType(HorseIRParser::TypeCaseEnumContext* cst, ASTNode::MemManagerType& mem)
+    : EnumerationType(nullptr, cst, mem) 
+{}
+
 EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::Enumeration, ASTNode::ASTNodeClass::EnumerationType),
       elementType(nullptr)
