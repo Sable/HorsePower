@@ -66,9 +66,9 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 8  | minus(x,y)           | Subtraction                 | Various                     | Various                       | [link](builtin/minus.md)     |8  |P|
 9  | mul(x,y)             | Multiplication              | (Real;Real)                 | Various                       | [link](builtin/mul.md)       |9  |P|
 10 | div(x,y)             | Division                    | (Real;Real)                 | Various                       | [link](builtin/div.md)       |10 |P|
-11 | power(x,y)           | Power x of y                | (Real;Real)                 | Various                       | link                         |11 | |
-12 | log(x,y)             | log_x(y)                    | (Real;Real)                 | Various                       | link                         |12 | |
-13 | mod(x,y)             | x mod y                     | (Real;Real)                 | Various                       | link                         |13 | |
+11 | power(x,y)           | Power x of y                | (Real;Real)                 | Various                       | [link](builtin/power.md)     |11 |P|
+12 | log(x,y)             | log_x(y)                    | (Real;Real)                 | Various                       | [link](builtin/log.md)       |12 |P|
+13 | mod(x,y)             | x mod y                     | (Real;Real)                 | Various                       | [link](builtin/mod.md)       |13 |&#10004;|
 14 | and(x,y)             | And                         | (B;B)                       | B                             | [link](builtin/logic.md#and) |14 |&#10004;|
 15 | or(x,y)              | Or                          | (B;B)                       | B                             | [link](builtin/logic.md#or)  |15 |&#10004;|
 16 | nand(x,y)            | NAND                        | (B;B)                       | B                             | [link](builtin/logic.md#nand)|16 |&#10004;|
@@ -92,7 +92,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 4  | str(x)               | Format                      | Pending                     | S                             | [link](builtin/str.md)       |4  | |
 5  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |5  |&#10004;|
 6  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |6  |&#10004;|
-7  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)      |7  | |
+7  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)      |7  |&#10004;|
 8  | at(x)                | Member                      | Pending                     | B                             | [link](builtin/at.md)        |8  | |
 9  | max(x)               | Maximum                     | Pending                     | Same as argument              | link                         |9  | |
 10 | min(x)               | Minimum                     | Pending                     | Same as argument              | link                         |10 | |
