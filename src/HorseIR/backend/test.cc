@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../ast/AST.h"
+#include "../frontend/build/include/ast/AST.h"
 #include "antlr4-runtime.h"
 
 #include "h_global.h"
@@ -149,10 +149,10 @@ L simulateSimple(){
 	R 0;
     */
     antlr4::ANTLRInputStream inStream(program) ;
-    HorseIRLexer lexer(&inStream) ;
+    horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream tokenStream(&lexer) ;
-    HorseIRParser parser(&tokenStream) ;
-    HorseIRParser::ProgramContext* program = parser.program() ;
+    horseIR::HorseIRParser parser(&tokenStream) ;
+    horseIR::HorseIRParser::ProgramContext* program = parser.program() ;
 
     horseIR::ast::ASTNode::MemManagerType mem ;
     auto* compilationUnit = new horseIR::ast::CompilationUnit(program, mem) ;
