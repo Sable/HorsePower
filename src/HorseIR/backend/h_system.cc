@@ -121,6 +121,13 @@ L calcFact(L n){
 	else R -1;
 }
 
+L getNumOfNonZero(V x){
+	if(H_B==xp){
+		L z = 0; DOI(xn, z+=vB(x,i)) R z;
+	}
+	R -1;
+}
+
 
 /* Type checking */
 

@@ -63,6 +63,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 30 | asinh(x)             | Hyperbolic functions        | Real                        | Real                          |[link](builtin/hyper.md#asinh)|30 |&#10004;|
 31 | atanh(x)             | Hyperbolic functions        | Real                        | Real                          |[link](builtin/hyper.md#atanh)|31 |&#10004;|
 
+\* [Math.h](http://www.cplusplus.com/reference/cmath/)
 
 ### 2.2 Binary
 
@@ -119,16 +120,16 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 
 ### 3.2 Binary
 
-No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.|
-:--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--|
-1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | link                         |1  |
-2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | link                         |2  |
-3  | concat(x,y)          | Concatenate x and y         | Pending                     | Pending                       | link                         |3  |
-4  | reduce(x,y)          | Reduction on y based on x   | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/reduce.md)    |4  |
-5  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |5  |
-6  | index_of(x,y)        | index of y in x             | Pending                     | Pending                       | link                         |6  |
-7  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |7  |
-8  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |8  |
+No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.| Status |
+:--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--| :----- |
+1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | link                         |1  | |
+2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | link                         |2  | |
+3  | concat(x,y)          | Concatenate x and y         | Pending                     | Pending                       | link                         |3  | |
+4  | reduce(x,y)          | Reduction on y based on x   | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/reduce.md)    |4  |&#10004;|
+5  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |5  | |
+6  | index_of(x,y)        | index of y in x             | Pending                     | Pending                       | link                         |6  | |
+7  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |7  | |
+8  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |8  | |
 
 ## <p id="database">4. Database related</p>
 

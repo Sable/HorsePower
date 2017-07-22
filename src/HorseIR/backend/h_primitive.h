@@ -16,7 +16,8 @@ extern "C" {
 
 #define isOne(x) (1==vn(x))
 
-#define isValidLength(x,y) ((!isOne(x))&&(!isOne(y))&&(vn(x)==vn(y)))
+#define isEqualLength(x,y) (vn(x)==vn(y))
+#define isValidLength(x,y) (isOne(x) || isOne(y) || isEqualLength(x,y))
 #define isValidType(x,y) ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
 L pfnColumnValue   (V z, V x, V y);
@@ -87,6 +88,7 @@ L pfnXor           (V z, V x, V y);
 L pfnPowerLog      (V z, V x, V y, L op);
 L pfnPower         (V z, V x, V y);
 L pfnLog           (V z, V x, V y);
+L pfnReduce        (V z, V x, V y);
 
 #ifdef	__cplusplus
 }
