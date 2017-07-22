@@ -21,6 +21,7 @@ V promoteValue      (V x, L typMax);
 B checkZero         (V x);
 L getSingleIntValue (V x);
 L calcFact          (L n);
+L getNumOfNonZero   (V x);
 
 B isTypeGroupInt    (L t);
 B isTypeGroupFloat  (L t);

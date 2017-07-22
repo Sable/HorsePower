@@ -745,4 +745,38 @@ L pfnLog(V z, V x, V y){
 	R pfnPowerLog(z,x,y,1);
 }
 
+L pfnReduce(V z, V x, V y){
+	if(isBool(x)){
+		if(!isEqualLength(x,y)) R E_LENGTH;
+		L lenX = vn(x);
+		L typZ = vp(y);
+		L lenZ = getNumOfNonZero(y);
+		L k    = 0;
+		initV(z,typZ,lenZ);
+		if(k == lenZ){ // copy all of items
+			switch(typZ){
+				caseB DOI(lenX, vB(z,i)=vB(y,i)) break;
+				caseH DOI(lenX, vH(z,i)=vH(y,i)) break;
+				caseI DOI(lenX, vI(z,i)=vI(y,i)) break;
+				caseL DOI(lenX, vL(z,i)=vL(y,i)) break;
+				caseF DOI(lenX, vF(z,i)=vF(y,i)) break;
+				caseE DOI(lenX, vE(z,i)=vE(y,i)) break;
+				default: R E_NOT_IMPL;
+			}
+		}
+		else{
+			switch(typZ){
+				caseB DOI(lenX, if(vB(x,i))vB(z,k++)=vB(y,i)) break;
+				caseH DOI(lenX, if(vB(x,i))vH(z,k++)=vH(y,i)) break;
+				caseI DOI(lenX, if(vB(x,i))vI(z,k++)=vI(y,i)) break;
+				caseL DOI(lenX, if(vB(x,i))vL(z,k++)=vL(y,i)) break;
+				caseF DOI(lenX, if(vB(x,i))vF(z,k++)=vF(y,i)) break;
+				caseE DOI(lenX, if(vB(x,i))vE(z,k++)=vE(y,i)) break;
+				default: R E_NOT_IMPL;
+			}
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
 
