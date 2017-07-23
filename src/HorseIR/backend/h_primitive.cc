@@ -1,17 +1,15 @@
 #include "h_global.h"
 #include <math.h>
+#include <float.h>
+#include <limits.h>
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-/* temp */
-L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
-	DOI(tlen, {B f=1;\
-		DOJ(slen, if(targ[i]==src[j]){indx[i]=j;f=0;break;})\
-		if(f)indx[i]=slen;})
-	R 0;
-}
+#ifndef min
+#define min(a,b) ((a)>(b)?(b):(a))
+#endif
 
 /*
  * primitive function -> pfn
@@ -27,28 +25,16 @@ L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
 L pfnColumnValue(V z, V x, V y){
 	P("-> Entering column_value\n");
 	if(isOneSymbol(x) && isOneSymbol(y)){
-		V t = findTableByName(vs(x));
+		V t = findTableByName(vq(x));
 		if(!t) R E_TABLE_NOT_FOUND;
 		else {
-			L colId = vs(y);
+			L colId = vq(y);
 			L colIndex = findColFromTable(t,colId);
 			if(colIndex < 0) R E_COL_NOT_FOUND;
 			else {
 				R copyColumnValue(z, getDictVal(getTableDict(t,colIndex)));
 			}
 		}
-	}
-	else R E_DOMAIN;
-}
-
-L pfnIndexOf(V z, V x, V y){
-	P("-> Entering index_of\n");
-	if(vp(x) == vp(y)){
-		initV(z, H_L, vn(y));
-		switch(vp(y)){
-			caseL lib_index_of_i32(sL(z),sL(x),vn(x),sL(y),vn(y)); break;
-		}
-		R 0;
 	}
 	else R E_DOMAIN;
 }
@@ -98,7 +84,7 @@ L pfnIndex(V z, V x, V y){
 			DOI(lenZ, if(lenX <= vL(y,i))R E_INDEX)
 			initV(z, typZ, lenZ);
 			switch(typZ){
-				caseS DOI(lenZ, vS(z,i) = vS(x,vL(y,i))) break;
+				caseQ DOI(lenZ, vQ(z,i) = vQ(x,vL(y,i))) break;
 				caseL DOI(lenZ, vL(z,i) = vL(x,vL(y,i))) break;
 			}
 			R 0;
@@ -464,12 +450,56 @@ L pfnReverse(V z, V x){
 			caseE DOI(lenZ, vE(z,i)=vE(x,lenZ-i-1)) break;
 			caseX DOI(lenZ, vX(z,i)=vX(x,lenZ-i-1)) break;
 			caseC DOI(lenZ, vC(z,i)=vC(x,lenZ-i-1)) break;
-			caseS DOI(lenZ, vS(z,i)=vS(x,lenZ-i-1)) break;
+			caseQ DOI(lenZ, vQ(z,i)=vQ(x,lenZ-i-1)) break;
 			default: R E_NOT_IMPL;
 		}
 		R 0;
 	}
 	else R E_DOMAIN;
+}
+
+#define REDUCELONG(op) (0==op?LLONG_MAX:LLONG_MIN)
+#define REDUCEFLT(op)  (0==op?FLT_MAX:FLT_MIN)
+#define REDUCEDBL(op)  (0==op?DBL_MAX:DBL_MIN)
+#define REDUCE(op,t,x) (0==op?min(t,x):1==op?max(t,x):-1)
+#define REDUCELINE(p,op,x) {p t=v##p(x,0); DOI(vn(x), t=REDUCE(op,t,v##p(x,i)))}
+
+L pfnReduce(V z, V x, L op){
+	if(isTypeGroupReal(vp(x))){
+		if(1>vn(x)){
+			L typZ = isTypeGroupInt(vp(x))?H_L:vp(x);
+			L lenZ = 1;
+			initV(z,typZ,lenZ);
+			switch(typZ){
+				caseL vl(z) = REDUCELONG(op); break;
+				caseF vf(z) = REDUCEFLT(op);  break;
+				caseE ve(z) = REDUCEDBL(op);  break;
+			}
+		}
+		else{
+			L typZ = vp(x);
+			L lenZ = 1;
+			initV(z,typZ,lenZ);
+			switch(typZ){
+				caseB REDUCELINE(B,op,x); break;
+				caseH REDUCELINE(H,op,x); break;
+				caseI REDUCELINE(I,op,x); break;
+				caseL REDUCELINE(L,op,x); break;
+				caseF REDUCELINE(F,op,x); break;
+				caseE REDUCELINE(E,op,x); break;
+			}
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnMin(V z, V x){
+	R pfnReduce(z,x,0);
+}
+
+L pfnMax(V z, V x){
+	R pfnReduce(z,x,1);
 }
 
 /* Binary */
@@ -745,7 +775,7 @@ L pfnLog(V z, V x, V y){
 	R pfnPowerLog(z,x,y,1);
 }
 
-L pfnReduce(V z, V x, V y){
+L pfnCompress(V z, V x, V y){
 	if(isBool(x)){
 		if(!isEqualLength(x,y)) R E_LENGTH;
 		L lenX = vn(x);
@@ -779,4 +809,30 @@ L pfnReduce(V z, V x, V y){
 	}
 	else R E_DOMAIN;
 }
+
+#define INDEXOF(p,z,x,y) lib_index_of_##p(sL(z),s##p(x),vn(x),s##p(y),vn(y))
+
+L pfnIndexOf(V z, V x, V y){
+	if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+		L typMax = max(vp(x), vp(y));
+		L lenZ   = vn(y);
+		V tempX  = promoteValue(x, typMax);
+		V tempY  = promoteValue(y, typMax);
+		initV(z,H_L,lenZ);
+		switch(typMax){
+			caseB INDEXOF(B, z, tempX, tempY); break;
+			caseH INDEXOF(H, z, tempX, tempY); break;
+			caseI INDEXOF(I, z, tempX, tempY); break;
+			caseL INDEXOF(L, z, tempX, tempY); break;
+			caseF INDEXOF(F, z, tempX, tempY); break;
+			caseE INDEXOF(E, z, tempX, tempY); break;
+			caseC INDEXOF(C, z, tempX, tempY); break;
+			caseQ INDEXOF(Q, z, tempX, tempY); break;
+			default: R E_NOT_IMPL;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
 

@@ -6,7 +6,7 @@
 #define H_F 4
 #define H_E 5
 #define H_C 6
-#define H_S 7
+#define H_Q 7
 #define H_Y 8
 #define H_M 9
 #define H_D 10
@@ -28,7 +28,7 @@
 #define caseF case H_F:
 #define caseE case H_E:
 #define caseC case H_C:
-#define caseS case H_S:
+#define caseQ case H_Q:
 #define caseY case H_Y:
 #define caseM case H_M:
 #define caseD case H_D:
@@ -53,7 +53,7 @@
 #define vf(x)  x->f32
 #define ve(x)  x->f64
 #define vc(x)  x->c
-#define vs(x)  x->s
+#define vq(x)  x->q
 #define vy(x)  x->y
 #define vm(x)  x->m
 #define vd(x)  x->d
@@ -71,7 +71,7 @@
 #define sE(x) ((E*)(vg(x)))
 #define sF(x) ((F*)(vg(x)))
 #define sC(x) ((C*)(vg(x)))
-#define sS(x) ((L*)(vg(x)))
+#define sQ(x) ((Q*)(vg(x)))
 #define sX(x) ((X*)(vg(x)))
 #define sV(x) ((V )(vg(x)))
 
@@ -82,7 +82,7 @@
 #define vE(x,i) sE(x)[i]
 #define vF(x,i) sF(x)[i]
 #define vC(x,i) sC(x)[i]
-#define vS(x,i) sS(x)[i]
+#define vQ(x,i) sQ(x)[i]
 #define vX(x,i) sX(x)[i]
 #define vV(x,i) sV(x)[i]
 
@@ -98,7 +98,7 @@
 #define xf  vf(x)
 #define xe  ve(x)
 #define xc  vc(x)
-#define xs  vs(x)
+#define xq  vq(x)
 #define xy  vy(x)
 #define xm  vm(x)
 #define xd  vd(x)
@@ -115,7 +115,7 @@
 #define xL(k) vL(x,k)
 #define xF(k) vF(x,k)
 #define xE(k) vE(x,k)
-#define xS(k) vS(x,k)
+#define xQ(k) vQ(x,k)
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)

@@ -38,7 +38,7 @@ L copyV(V z, V x){
 
 
 L findColFromTable(V x, L cId){
-	DOI(vn(x), if(cId == vs(getDictKey(getTableDict(x,i))))R i)
+	DOI(vn(x), if(cId == vq(getDictKey(getTableDict(x,i))))R i)
 	R -1;
 }
 
@@ -156,7 +156,7 @@ B isTypeGroupNumeric(L t){
 }
 
 B isTypeGroupBasic(L t){
-	R (isTypeGroupReal(t) || H_C==t || H_S==t || isTypeGroupTime(t));
+	R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupTime(t));
 }
 
 /* Type inference */

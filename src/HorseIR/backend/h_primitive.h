@@ -9,7 +9,7 @@ extern "C" {
 #define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
 
 #define isBool(x)      (H_B==vp(x))
-#define isSymbol(x)    (H_S==vp(x))
+#define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
@@ -21,7 +21,6 @@ extern "C" {
 #define isValidType(x,y) ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
 L pfnColumnValue   (V z, V x, V y);
-L pfnIndexOf       (V z, V x, V y);
 L pfnFindValidIndex(V z, V x, V y);
 L pfnFindValidItem (V z, V x, V y);
 L pfnIndex         (V z, V x, V y);
@@ -64,6 +63,10 @@ L pfnRange         (V z, V x);
 L pfnFact          (V z, V x);
 L pfnReverse       (V z, V x);
 
+L pfnReduce        (V z, V x, L op);
+L pfnMin           (V z, V x);
+L pfnMax           (V z, V x);
+
 L pfnCompare       (V z, V x, V y, L op);
 L pfnLt            (V z, V x, V y);
 L pfnLeq           (V z, V x, V y);
@@ -88,7 +91,9 @@ L pfnXor           (V z, V x, V y);
 L pfnPowerLog      (V z, V x, V y, L op);
 L pfnPower         (V z, V x, V y);
 L pfnLog           (V z, V x, V y);
-L pfnReduce        (V z, V x, V y);
+L pfnCompress      (V z, V x, V y);
+
+L pfnIndexOf       (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

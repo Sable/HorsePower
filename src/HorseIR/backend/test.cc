@@ -40,8 +40,8 @@ const char* program = ""
 
 C CSV_EMP[] = "data/simple-join/employee.csv";
 C CSV_DEP[] = "data/simple-join/department.csv";
-L TYPE_EMP[]  = {H_S, H_L};
-L TYPE_DEP[]  = {H_L, H_S};
+L TYPE_EMP[]  = {H_Q, H_L};
+L TYPE_DEP[]  = {H_L, H_Q};
 const L NUM_COL_EMP = 2;
 const L NUM_COL_DEP = 2;
 L SYM_LIST_EMP[2];

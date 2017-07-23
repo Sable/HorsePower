@@ -59,7 +59,7 @@ L getTypeSize(L typ){
 		case H_F  : r = sizeof(F);     break;
 		case H_E  : r = sizeof(E);     break;
 		case H_X  : r = sizeof(X);     break;
-		case H_S  : r = sizeof(L);     break;
+		case H_Q  : r = sizeof(L);     break;
 		case H_M  : r = sizeof(M);     break;
 		case H_D  : r = sizeof(D);     break;
 		case H_Z  : r = sizeof(Z);     break;
@@ -126,8 +126,8 @@ V initDict(V x){
 }
 
 V initSymbol(V x, L val){
-	initV(x, H_S, 1);
-	xs = val;
+	initV(x, H_Q, 1);
+	xq = val;
 	R x;
 }
 
@@ -154,7 +154,7 @@ void printTypeStr(L x, S buff){
 	switch(x){
 		caseB SP(buff, "t::bool");    break;
 		caseL SP(buff, "t::long");    break;
-		caseS SP(buff, "t::symbol");  break;
+		caseQ SP(buff, "t::symbol");  break;
 		caseA SP(buff, "t::table");   break;
 		caseN SP(buff, "t::dict");    break;
 		caseV SP(buff, "value_item"); break;

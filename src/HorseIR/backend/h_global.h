@@ -12,7 +12,7 @@ typedef bool       B;
 typedef char       C,*S,*G;
 typedef short      H;
 typedef int        I;
-typedef long long  L,Y,M,D,Z,U,W,T;
+typedef long long  L,Q,Y,M,D,Z,U,W,T;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
@@ -28,7 +28,7 @@ typedef struct node_value{
 		F f32; //float     4 bytes
 		E f64; //double    8 bytes
 		C c;   //char      1 byte
-		L s;   //symbol    8 bytes
+		Q q;   //symbol    8 bytes
 		Y y;   //year      4 bytes
 		M m;   //month     4 bytes
 		D d;   //date      4 bytes
@@ -63,6 +63,8 @@ typedef struct list_table{
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;}
 
+#define DOIa(n, x) {for(L i=1,i2=n;i<i2;i++)x;}
+
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
@@ -85,6 +87,7 @@ extern G H_heap;
 #include <stdarg.h>
 #include "h_memory.h"
 #include "h_symbol.h"
+#include "h_libs.h"
 #include "h_io.h"
 #include "h_system.h"
 #include "h_primitive.h"

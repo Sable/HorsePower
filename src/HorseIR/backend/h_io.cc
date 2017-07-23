@@ -85,7 +85,7 @@ void loadItem(V x, L k, L typ, S s){
 		caseB xB(k) = atoi(s); break;
 		caseI xI(k) = atoi(s); break;
 		caseL xL(k) = atol(s); break;
-		caseS xS(k) = insertSym(createSymbol(s)); break;
+		caseQ xQ(k) = insertSym(createSymbol(s)); break;
 	}
 }
 
@@ -133,7 +133,7 @@ void printItem(V x, S strBuff){
 		caseI SP(strBuff, "%d"  , xi); break;
 		caseL SP(strBuff, "%lld", xl); break;
 		caseE SP(strBuff, "%lf" , xe); break;
-		caseS printSymbol(xs, strBuff);break;
+		caseQ printSymbol(xq, strBuff);break;
 	}
 }
 
@@ -147,7 +147,7 @@ void printListItem(V x, L k, S strBuff){
 			caseI SP(strBuff, "%d"  , xI(k)); break;
 			caseL SP(strBuff, "%lld", xL(k)); break;
 			caseE SP(strBuff, "%lf" , xF(k)); break;
-			caseS printSymbol(xS(k), strBuff);break;
+			caseQ printSymbol(xQ(k), strBuff);break;
 			caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
 		}
 	}
@@ -200,7 +200,7 @@ void printTablePretty(V x){
 		// DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
 		/* print head */
 		DOI(vn(x), {V d=getTableDict(x,i); V key = getDictKey(d); \
-			printSymbol(vs(key),buff); prettyItem(buff,colWidth[i]); P("%s|",buff); })
+			printSymbol(vq(key),buff); prettyItem(buff,colWidth[i]); P("%s|",buff); })
 		P("\n");
 		DOI(totSize, P("-"));
 		P("\n");
@@ -221,7 +221,7 @@ L getColWidth(V x){
 	V key = getDictKey(x);
 	V val = getDictVal(x);
 	C buff[99];
-	L maxSize = getSymbolSize(vs(key));
+	L maxSize = getSymbolSize(vq(key));
 	DOI(vn(val), {L t=getListInfo(val,i,buff); if(t>maxSize)maxSize=t;})
 	R maxSize;
 }
@@ -236,7 +236,7 @@ L getListInfo(V x, L k, S strBuff){
 			caseI SP(strBuff, "%d"  , xI(k)); break;
 			caseL SP(strBuff, "%lld", xL(k)); break;
 			caseE SP(strBuff, "%lf" , xF(k)); break;
-			caseS printSymbol(xS(k), strBuff);break;
+			caseQ printSymbol(xQ(k), strBuff);break;
 			default: P("Error in getListInfo: type %lld\n",xp); exit(99);
 		}
 	}
