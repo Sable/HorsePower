@@ -91,7 +91,9 @@ int main(int argc, char *argv[])
     horseIR::misc::Collections::writeToStream(std::cout, signatureString, ", ", "\n") ;
 
     using namespace horseIR::interpreter ;
-    ExternalMethod<void*> method("package", "method", rawType) ;
+    ExternalMethod<void*,
+                   std::uint16_t,
+                   horseIR::misc::HasherDJB2<std::string, std::uint16_t>> method("package", "method", rawType) ;
     std::cout << method.toString() << std::endl ;
     return 0;
 }

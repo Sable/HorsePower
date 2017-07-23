@@ -96,7 +96,11 @@ inline std::string
 horseIR::interpreter::MethodMETA<T, V, R>::toString() const
 {
     std::ostringstream stream ;
-    stream << "[HASH:0x" << std::hex << std::setw(sizeof(V) * 2)<< hashCode << "] "
+    std::ios init(nullptr) ;
+    stream << "[HASH:0x" 
+           << std::hex << std::setw(sizeof(V) * 2) << std::setfill('0')
+           << unsigned(hashCode)
+           << "] "
            << moduleName << '.' << methodName ;
     auto inputParamToString = horseIR::misc::Collections::applyAndCollect(
         inputTypes,
