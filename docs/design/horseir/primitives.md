@@ -8,7 +8,7 @@
 - Float   = F, E
 - Complex = X
 - Time    = M, D, Z, U, W, T
-- String  = C, S
+- String  = C, Q 
 
 2-level
 
@@ -102,21 +102,19 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 1  | asc(x)               | Ascending order (index)     | Pending                     | L                             | [link](builtin/asc.md)       |1  | |
 2  | desc(x)              | Descending order (index)    | Pending                     | L                             | [link](builtin/desc.md)      |2  | |
 3  | unique(x)            | Unique values               | Pending                     | Same as argument              | [link](builtin/unique.md)    |3  | |
-4  | str(x)               | Format                      | Pending                     | S                             | [link](builtin/str.md)       |4  | |
+4  | str(x)               | Format                      | Pending                     | C                             | [link](builtin/str.md)       |4  | |
 5  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |5  |&#10004;|
 6  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |6  |&#10004;|
 7  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)      |7  |&#10004;|
 8  | at(x)                | Member                      | Pending                     | B                             | [link](builtin/at.md)        |8  | |
-9  | max(x)               | Maximum                     | Pending                     | Same as argument              | link                         |9  | |
-10 | min(x)               | Minimum                     | Pending                     | Same as argument              | link                         |10 | |
-11 | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                         |11 | |
-12 | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |12 | |
-13 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |13 | |
-14 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |14 |&#10004;|
-15 | where(x)             | Find all trues              | B                           | L                             | link                         |15 | |
-16 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |16 | |
-17 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |17 | |
-18 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | link                         |18 | |
+9  | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                         |9  | |
+10 | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |10 | |
+11 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |11 | |
+12 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |12 |&#10004;|
+13 | where(x)             | Find all trues              | B                           | L                             | link                         |13 | |
+14 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |14 | |
+15 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |15 | |
+16 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | link                         |16 | |
 
 ### 3.2 Binary
 
@@ -125,11 +123,21 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | link                         |1  | |
 2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | link                         |2  | |
 3  | concat(x,y)          | Concatenate x and y         | Pending                     | Pending                       | link                         |3  | |
-4  | reduce(x,y)          | Reduction on y based on x   | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/reduce.md)    |4  |&#10004;|
+4  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |4  |&#10004;|
 5  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |5  | |
-6  | index_of(x,y)        | index of y in x             | Pending                     | Pending                       | link                         |6  | |
+6  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |6  |&#10004;|
 7  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |7  | |
 8  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |8  | |
+
+### 3.3 Reduction
+
+No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.| Status |
+:--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--| :----- |
+1  | count(x)             | Alias of @len               | See @len                    | See @len                      | [link](builtin/len.md)       |1  |&#10004;|
+2  | sum(x)               | Sum of items in x           | Real                        | Same as argument              | [link](builtin/sum.md)       |2  |&#10004;|
+3  | avg(x)               | sum(x) / len(x)             | Real                        | Real                          | N/A                          |3  |&#10004;|
+4  | min(x)               | Minimum                     | Real                        | Real                          | [link](builtin/reduce.md#min)|4  |&#10004;|
+5  | max(x)               | Maximum                     | Real                        | Real                          | [link](builtin/reduce.md#max)|5  |&#10004;|
 
 ## <p id="database">4. Database related</p>
 
@@ -150,9 +158,9 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.|
 :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--|
 1  | trig(k,x)            | Trigonometric functions     | Pending                     | Pending                       | [link](builtin/trig.md)      |1  |
-2  | alphabet()           | All alphabet set            | Pending                     | S                             | link                         |2  |
-3  | index(x,y)           | List indexing (x[y])        | Pending                     | S                             | link                         |3  |
-4  | index_a              | List indexing assignment    | Pending                     | S                             | link                         |4  |
-5  | print                | Output                      | Pending                     | S                             | link                         |5  |
-6  | load_csv             | Load a csv file             | Pending                     | S                             | link                         |6  |
+2  | alphabet()           | All alphabet set            | Pending                     | Pending                       | link                         |2  |
+3  | index(x,y)           | List indexing (x[y])        | Pending                     | Pending                       | link                         |3  |
+4  | index_a              | List indexing assignment    | Pending                     | Pending                       | link                         |4  |
+5  | print                | Output                      | Pending                     | Pending                       | link                         |5  |
+6  | load_csv             | Load a csv file             | Pending                     | Pending                       | link                         |6  |
 
