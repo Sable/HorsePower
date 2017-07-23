@@ -4,6 +4,7 @@
 #include "./ast/ASTVisitor.h"
 
 #include "./misc/Collections.h"
+#include "./interpreter/ExternalMethod.h"
 
 const char* rawProgram = ""
     "/*\n"
@@ -52,7 +53,7 @@ const char* rawProgram = ""
     "}"
     "" ;
 
-const char* rawType = "i32,     list<?> ,   dict<i8, str>" ;
+const char* rawType = "(i32,     list<?> ,   dict<i8, str>) -> bool" ;
 
 class StructurePrinter : horseIR::ast::ASTVisitor<void> {
 public:
@@ -61,6 +62,8 @@ public:
         ASTVisitor<void>::visit(ast) ;
     }
 } ;
+
+#include "./misc/Hasher.h"
 
 int main(int argc, char *argv[])
 {
@@ -86,5 +89,9 @@ int main(int argc, char *argv[])
             return type->toString() ;
         }) ;
     horseIR::misc::Collections::writeToStream(std::cout, signatureString, ", ", "\n") ;
+
+    using namespace horseIR::interpreter ;
+    ExternalMethod<void*> method("package", "method", rawType) ;
+    std::cout << method.toString() << std::endl ;
     return 0;
 }

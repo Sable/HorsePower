@@ -103,6 +103,34 @@ namespace horseIR {
                 return visitChildren(compilationUnit) ;
             }
         } ;
+
+        namespace __implementation {
+            template <typename UnaryOperation>
+            class ASTNodeUnaryOperationAppiler : protected horseIR::ast::ASTVisitor<void> {
+            public:
+                ASTNodeUnaryOperationAppiler(const UnaryOperation& p_f) : f(p_f) {}   
+                void apply(horseIR::ast::ASTNode* ast) {
+                    visit(ast) ;
+                }
+            protected:
+                const UnaryOperation& f ;
+                virtual void visit(horseIR::ast::ASTNode* ast) override {
+                    (void) f(ast) ;
+                    horseIR::ast::ASTVisitor<void>::visit(ast) ;
+                    return ;
+                }
+            } ;
+        } 
+        
+        struct ASTVisitors {
+            template <typename UnaryOperation>
+            static void applyToEachNode(horseIR::ast::ASTNode* ast, const UnaryOperation& f) {
+                using namespace ast::__implementation ;
+                ASTNodeUnaryOperationAppiler<UnaryOperation> v(f) ;
+                v.apply(ast) ;
+                return ;
+            }
+        } ;
     }
 }
 

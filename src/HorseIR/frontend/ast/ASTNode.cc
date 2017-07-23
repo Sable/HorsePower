@@ -37,6 +37,12 @@ const antlr4::tree::ParseTree* ASTNode::getCST() const
     return cst ;
 }
 
+ASTNode& ASTNode::setCST(const antlr4::tree::ParseTree *p_cst)
+{
+    cst = p_cst ;
+    return *this ;
+}
+
 ASTNode::ASTNodeClass ASTNode::getNodeType() const
 {
     return nodeType ;

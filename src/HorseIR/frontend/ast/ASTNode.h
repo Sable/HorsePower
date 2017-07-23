@@ -51,6 +51,7 @@ namespace horseIR {
             ASTNode& setParentASTNode(ASTNode* p_parentASTNode) ;
 
             const antlr4::tree::ParseTree* getCST() const ;
+            ASTNode& setCST(const antlr4::tree::ParseTree* cst) ;
             ASTNode::ASTNodeClass getNodeType() const ;
 
             virtual std::string toString() const = 0 ;

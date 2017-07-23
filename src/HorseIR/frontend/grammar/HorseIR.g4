@@ -135,8 +135,10 @@ literalKtable   : value=ID ':' valueType='ktable' ;
 
 literalString   : value=LITERAL_STRING (':' valueType='str')? ;
 
-typeSignatureList :
-                  | type (',' type)*
+// this parse rule is only used to provide better interface to create builtin
+// functions
+typeSignatureList : '(' ')' '->' type
+                  | '(' type (',' type)* ')' '->' type 
                   ;
 
 /*

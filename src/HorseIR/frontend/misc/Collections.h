@@ -31,6 +31,22 @@ namespace horseIR {
                 return ret ;
             }
 
+            template <class Container, class UnaryOperation>
+            static void apply(const Container& container, const UnaryOperation& f) {
+                for (auto iter = container.begin(); iter != container.end(); ++iter) {
+                    (void) f(*iter) ;
+                }
+                return ;
+            }
+
+            template <class T, class UnaryOperation>
+            static void apply(const T arr[], std::size_t size, const UnaryOperation& f) {
+                for (std::size_t iter = 0; iter < size; ++iter) {
+                    (void) f(arr[iter]) ;
+                }
+                return ;
+            }
+
             template <class Container, class Stream, class Delimiter>
             static Stream& writeToStream(Stream& s, const Container& c, const Delimiter& delimiter) {
                 for (auto iter = c.cbegin(); iter != c.cend(); ++iter) {
