@@ -11,7 +11,7 @@ HorseIR supports ASCII charset, except for string encoding, i.e. strings and sym
 ### 1.2 Keywords
 
 ```
-def   import   return   goto   check_type   check_cast   nil
+def   import   return   goto   check_type   check_cast
 ```
 
 ### 1.3 Built-in functions
@@ -48,7 +48,7 @@ NB. Unicode is allowed.
 
 HorseIR has a rich set of literals for each type.
 
-- nil
+- null
 - bool
 - char / string
 - integer
@@ -190,8 +190,26 @@ See [types](types.md).
 HorseIR supports basic types as follows.
 
 ```
-boolean, byte, short, int, long, float, double and complex numbers.
+boolean, byte (optional), short, int, long, float, double and complex numbers.
 ```
+
+#### Real numbers
+
+```
+bool, short, int, long, float, double, char (ascii value)
+```
+
+#### Complex numbers
+
+A complex number consists of two parts: real numbers and imaginary unit.
+
+For example,
+
+```
+2 + 3i
+```
+
+where `2` is the real number and `3i` is the imagninary unit.
 
 #### String
 
