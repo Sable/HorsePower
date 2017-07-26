@@ -502,6 +502,33 @@ L pfnMax(V z, V x){
 	R pfnReduce(z,x,1);
 }
 
+L pfnOrder(V z, V x, L op){
+	B isUp = 0 == op;
+	if(isTypeGroupReal(vp(x))){
+		L typZ = H_L;
+		L lenZ = vn(x);
+		initV(z,typZ,lenZ);
+		switch(typZ){
+			caseB lib_order_B(sL(z),sB(x),vn(x),isUp); break;
+			caseH lib_order_H(sL(z),sH(x),vn(x),isUp); break;
+			caseI lib_order_I(sL(z),sI(x),vn(x),isUp); break;
+			caseL lib_order_L(sL(z),sL(x),vn(x),isUp); break;
+			caseF lib_order_F(sL(z),sF(x),vn(x),isUp); break;
+			caseE lib_order_E(sL(z),sE(x),vn(x),isUp); break;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnAsc(V z, V x){
+	R pfnOrder(z,x,0);
+}
+
+L pfnDesc(V z, V x){
+	R pfnOrder(z,x,1);
+}
+
 /* Binary */
 
 #define COMP(op,x,y) (2>op?COMPLESS(op,x,y):4>op?COMPMORE(op,x,y):6>op?COMPEQ(op,x,y):0)

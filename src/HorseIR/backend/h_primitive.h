@@ -67,6 +67,10 @@ L pfnReduce        (V z, V x, L op);
 L pfnMin           (V z, V x);
 L pfnMax           (V z, V x);
 
+L pfnOrder         (V z, V x, L op);
+L pfnAsc           (V z, V x);
+L pfnDesc          (V z, V x);
+
 L pfnCompare       (V z, V x, V y, L op);
 L pfnLt            (V z, V x, V y);
 L pfnLeq           (V z, V x, V y);

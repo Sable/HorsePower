@@ -90,14 +90,29 @@ void lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen){
 }
 
 void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen){
+	L buff[256];
+	memset(buff,-1,256*sizeof(L));
+	DOI(sLen, if(buff[src[i]]==-1) buff[src[i]]=i)
+	DOI(vLen, {L t=buff[val[i]]; targ[i]=-1==t?sLen:t;})
 }
 
-void lib_index_of_Q(L* targ, Q* src, L sLen, Q* val, L vLen){
+void lib_order_B(L* targ, B* val, L vLen, B isUp){
 }
 
+void lib_order_H(L* targ, H* val, L vLen, B isUp){
+}
 
+void lib_order_I(L* targ, I* val, L vLen, B isUp){
+}
 
+void lib_order_L(L* targ, L* val, L vLen, B isUp){
+}
 
+void lib_order_F(L* targ, F* val, L vLen, B isUp){
+}
+
+void lib_order_E(L* targ, E* val, L vLen, B isUp){
+}
 
 
 
