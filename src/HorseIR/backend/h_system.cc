@@ -159,6 +159,14 @@ B isTypeGroupBasic(L t){
 	R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupTime(t));
 }
 
+B isTypeGroupAdvanced(L t){
+	R 1;
+}
+
+B isTypeGroupAll(L t){
+	R (isTypeGroupBasic(t) || isTypeGroupAdvanced(t));
+}
+
 /* Type inference */
 
 L inferNeg(L t){

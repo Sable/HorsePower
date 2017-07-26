@@ -62,6 +62,8 @@ L pfnLen           (V z, V x);
 L pfnRange         (V z, V x);
 L pfnFact          (V z, V x);
 L pfnReverse       (V z, V x);
+L pfnUnique        (V z, V x);
+L pfnWhere         (V z, V x);
 
 L pfnReduce        (V z, V x, L op);
 L pfnMin           (V z, V x);

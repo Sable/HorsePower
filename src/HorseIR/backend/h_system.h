@@ -13,30 +13,31 @@ extern "C" {
 void initSys();
 void deleteSys();
 
-L registerTable     (S tableName, V tablePtr);
-V findTableByName   (L sid);
-L copyV             (V z, V x);
-L findColFromTable  (V x, L cId);
-V promoteValue      (V x, L typMax);
-B checkZero         (V x);
-L getSingleIntValue (V x);
-L calcFact          (L n);
-L getNumOfNonZero   (V x);
+L registerTable       (S tableName, V tablePtr);
+V findTableByName     (L sid);
+L copyV               (V z, V x);
+L findColFromTable    (V x, L cId);
+V promoteValue        (V x, L typMax);
+B checkZero           (V x);
+L getSingleIntValue   (V x);
+L calcFact            (L n);
+L getNumOfNonZero     (V x);
 
-B isTypeGroupInt    (L t);
-B isTypeGroupFloat  (L t);
-B isTypeGroupReal   (L t);
-B isTypeGroupRealX  (L t);
-B isTypeGroupTime   (L t);
-B isTypeGroupNumeric(L t);
-B isTypeGroupBasic  (L t);
+B isTypeGroupInt      (L t);
+B isTypeGroupFloat    (L t);
+B isTypeGroupReal     (L t);
+B isTypeGroupRealX    (L t);
+B isTypeGroupTime     (L t);
+B isTypeGroupNumeric  (L t);
+B isTypeGroupBasic    (L t);
+B isTypeGroupAdvanced (L t);
+B isTypeGroupAll      (L t);
 
-
-L inferReal2Int     (L t);
-L inferNeg          (L t);
-L inferRecip        (L t);
-L inferSignum       (L t);
-L inferPi           (L t);
+L inferReal2Int       (L t);
+L inferNeg            (L t);
+L inferRecip          (L t);
+L inferSignum         (L t);
+L inferPi             (L t);
 
 /* error messages */
 #define E_DOMAIN          1

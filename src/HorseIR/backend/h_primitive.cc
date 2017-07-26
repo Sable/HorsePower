@@ -458,6 +458,40 @@ L pfnReverse(V z, V x){
 	else R E_DOMAIN;
 }
 
+
+L pfnUnique(V z, V x){
+	if(isTypeGroupBasic(vp(x))){
+		V z0 = allocNode();
+		L e0 = pfnIndexOf(z0,x,x); if(0!=e0) R e0;
+		L typZ = xp, lenZ = 0, c = 0;
+		DOI(vn(z0), lenZ += vL(z0,i)==i)
+		initV(z,typZ,lenZ);
+		switch(typZ){
+			caseB DOI(vn(x), if(vL(z0,i)==i)vB(z,c++)=vB(x,i)) break;
+			caseH DOI(vn(x), if(vL(z0,i)==i)vH(z,c++)=vH(x,i)) break;
+			caseI DOI(vn(x), if(vL(z0,i)==i)vI(z,c++)=vI(x,i)) break;
+			caseL DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=vL(x,i)) break;
+			caseF DOI(vn(x), if(vL(z0,i)==i)vF(z,c++)=vF(x,i)) break;
+			caseE DOI(vn(x), if(vL(z0,i)==i)vE(z,c++)=vE(x,i)) break;
+			default: R E_NOT_IMPL; /* time */
+		}
+		/* free z0 */
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnWhere(V z, V x){
+	if(isBool(x)){
+		L typZ = H_L, lenZ = 0, c = 0;
+		DOI(vn(x), lenZ+=vB(x,i))
+		initV(z,typZ,lenZ);
+		DOI(vn(x), if(vB(x,i))vL(z,c++)=i)
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
 #define REDUCELONG(op) (0==op?LLONG_MAX:LLONG_MIN)
 #define REDUCEFLT(op)  (0==op?FLT_MAX:FLT_MIN)
 #define REDUCEDBL(op)  (0==op?DBL_MAX:DBL_MIN)
