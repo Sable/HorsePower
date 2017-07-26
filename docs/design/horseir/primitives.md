@@ -101,7 +101,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- |:--| :----- |
 1  | asc(x)               | Ascending order (index)     | Pending                     | L                             | [link](builtin/asc.md)       |1  |&#10004;|
 2  | desc(x)              | Descending order (index)    | Pending                     | L                             | [link](builtin/desc.md)      |2  |&#10004;|
-3  | unique(x)            | Unique values               | Pending                     | Same as argument              | [link](builtin/unique.md)    |3  | |
+3  | unique(x)            | Unique values               | Pending                     | Same as argument              | [link](builtin/unique.md)    |3  |&#10004;|
 4  | str(x)               | Format                      | Pending                     | C                             | [link](builtin/str.md)       |4  | |
 5  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |5  |&#10004;|
 6  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |6  |&#10004;|
@@ -111,7 +111,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 10 | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |10 | |
 11 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |11 | |
 12 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |12 |&#10004;|
-13 | where(x)             | Find all trues              | B                           | L                             | link                         |13 | |
+13 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)     |13 |&#10004;|
 14 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |14 | |
 15 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |15 | |
 16 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | link                         |16 | |
