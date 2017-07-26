@@ -4,11 +4,15 @@ using namespace horseIR::ast ;
 
 const std::string ASTNode::INDENT = "    " ;
 
-ASTNode::ASTNode(ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type)
+ASTNode::ASTNode(ASTNode::MemManagerType& mem,
+                 ASTNode::ASTNodeClass type)
     : ASTNode(nullptr, nullptr, mem, type)
 {}
 
-ASTNode::ASTNode(ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* pTree, ASTNode::MemManagerType& mem, ASTNode::ASTNodeClass type)
+ASTNode::ASTNode(ASTNode* p_parentASTNode,
+                 const antlr4::tree::ParseTree* pTree,
+                 ASTNode::MemManagerType& mem,
+                 ASTNode::ASTNodeClass type)
     : cst{pTree},
       nodeType{type} ,
       parentASTNode{p_parentASTNode}
@@ -106,7 +110,6 @@ void ASTNode::__duplicateShallow(const ASTNode *astNode)
 {
     assert(astNode != nullptr) ;
     cst = astNode->cst ;
-    nodeType = astNode->nodeType ;
     parentASTNode = nullptr ;
     return ;
 }
@@ -116,7 +119,6 @@ void ASTNode::__duplicateDeep(const ASTNode *astNode, ASTNode::MemManagerType& m
     assert(astNode != nullptr) ;
     (void) mem ;
     cst = astNode->cst ;
-    nodeType = astNode->nodeType ;
     parentASTNode = nullptr ;
     return ;
 }

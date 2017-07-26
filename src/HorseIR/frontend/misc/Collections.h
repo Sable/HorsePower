@@ -9,7 +9,7 @@ namespace horseIR {
         struct Collections {
             template <class Container, class Function>
             static std::vector<typename std::result_of<Function(const typename Container::value_type&)>::type>
-            applyAndCollect(const Container& c, Function f) {
+            applyAndCollect(const Container& c, const Function& f) {
                 using RType = typename std::result_of<Function(const typename Container::value_type&)>::type ;
                 std::vector<RType> ret ;
                 ret.reserve(c.size()) ;
@@ -21,7 +21,7 @@ namespace horseIR {
 
             template <class T, class Function>
             static std::vector<typename std::result_of<Function(const T&)>::type>
-            applyAndCollect(const T arr[], std::size_t size, Function f) {
+            applyAndCollect(const T arr[], std::size_t size, const Function& f) {
                 using RType = typename std::result_of<Function(const T&)>::type ;
                 std::vector<RType> ret ;
                 ret.reserve(size) ;

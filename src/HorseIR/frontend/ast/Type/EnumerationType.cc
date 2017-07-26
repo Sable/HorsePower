@@ -23,14 +23,6 @@ EnumerationType::EnumerationType(ASTNode::MemManagerType& mem)
       elementType(nullptr)
 {}
 
-bool EnumerationType::isGeneralizationOf(const Type *type) const {
-    assert(type != nullptr) ;
-    if (type->getTypeClass() != Type::TypeClass::Enumeration) return false ;
-    auto enumType = static_cast<const EnumerationType*>(type) ;
-
-    return elementType->isGeneralizationOf(enumType->elementType) ;
-}
-
 std::size_t EnumerationType::getNumNodesRecursively() const
 {
     if (elementType == nullptr) {
@@ -55,14 +47,47 @@ std::string EnumerationType::toTreeString() const
     return "(EnumerationType " + elementType->toTreeString() + ")" ;
 }
 
+EnumerationType* EnumerationType::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    EnumerationType* enumerationType = new EnumerationType(mem) ;
+    enumerationType->__duplicateShallow(this) ;
+    return enumerationType ;
+}
+
+EnumerationType* EnumerationType::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    EnumerationType* enumerationType = new EnumerationType(mem) ;
+    enumerationType->__duplicateDeep(this, mem) ;
+    return enumerationType ;
+}
+
 Type* EnumerationType::getElementType() const
 {
     return elementType ;
 }
 
-EnumerationType& EnumerationType::setElementType(const Type *type)
+EnumerationType& EnumerationType::setElementType(Type *type)
 {
     assert(type != nullptr) ;
-    elementType = const_cast<Type*>(type) ;
+    elementType = type ;
     return *this ;
+}
+
+void EnumerationType::__duplicateShallow(const EnumerationType* enumType)
+{
+    assert(enumType != nullptr) ;
+    elementType = enumType->elementType ;
+    return ;
+}
+
+void EnumerationType::__duplicateDeep(const EnumerationType* enumType, ASTNode::MemManagerType& mem)
+{
+    assert(enumType != nullptr) ;
+    Type* duplicateElementType = nullptr ;
+    if (enumType->elementType != nullptr) {
+        duplicateElementType = static_cast<Type*>(enumType->elementType->duplicateDeep(mem)) ;
+        (void) duplicateElementType->setParentASTNode(this) ;
+    }
+    elementType = duplicateElementType ;
+    return ;
 }

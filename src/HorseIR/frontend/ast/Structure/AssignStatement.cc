@@ -144,7 +144,7 @@ Type* AssignStatement::getLHSType() const
     return lhsType ;
 }
 
-bool AssignStatement::isInvocation() const
+bool AssignStatement::getIsInvocation() const
 {
     return isInvoke.first ;
 }

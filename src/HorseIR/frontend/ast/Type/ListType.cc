@@ -5,7 +5,9 @@
 
 using namespace horseIR::ast ;
 
-ListType::ListType(ASTNode* parent, HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
+ListType::ListType(ASTNode* parent,
+                   HorseIRParser::TypeCaseListContext* cst,
+                   ASTNode::MemManagerType& mem)
     : Type(parent, cst, mem, Type::TypeClass::List, ASTNode::ASTNodeClass::ListType)
 {
     assert(cst != nullptr) ;
@@ -14,7 +16,8 @@ ListType::ListType(ASTNode* parent, HorseIRParser::TypeCaseListContext* cst, AST
     elementType = Type::makeTypeASTNode(this, listCST->element, mem) ;
 }
 
-ListType::ListType(HorseIRParser::TypeCaseListContext* cst, ASTNode::MemManagerType& mem)
+ListType::ListType(HorseIRParser::TypeCaseListContext* cst,
+                   ASTNode::MemManagerType& mem)
     : ListType(nullptr, cst, mem) 
 {}
 
@@ -22,14 +25,6 @@ ListType::ListType(ASTNode::MemManagerType& mem)
     : Type(mem, Type::TypeClass::List, ASTNode::ASTNodeClass::ListType),
       elementType(nullptr)
 {}
-      
-bool ListType::isGeneralizationOf(const Type *type) const
-{
-    assert(type != nullptr) ;
-    if (type->getTypeClass() != Type::TypeClass::List) return false ;
-    auto listType = static_cast<const ListType*>(type) ;
-    return elementType->isGeneralizationOf(listType->elementType) ;
-}
 
 std::size_t ListType::getNumNodesRecursively() const
 {
@@ -55,14 +50,47 @@ std::string ListType::toTreeString() const
     return "(ListType " + elementType->toTreeString() + ")" ;
 }
 
+ListType* ListType::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    ListType* listType = new ListType(mem) ;
+    listType->__duplicateShallow(this) ;
+    return listType ;
+}
+
+ListType* ListType::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    ListType* listType = new ListType(mem) ;
+    listType->__duplicateDeep(this, mem) ;
+    return listType ;
+}
+
 Type* ListType::getElementType() const
 {
     return elementType ;
 }
 
-ListType& ListType::setElementType(const Type *type)
+ListType& ListType::setElementType(Type *type)
 {
     assert(type != nullptr) ;
-    elementType = const_cast<Type*>(type) ;
+    elementType = type ;
     return *this ;
+}
+
+void ListType::__duplicateShallow(const ListType* listType)
+{
+    assert(listType != nullptr) ;
+    elementType = listType->elementType ;
+    return ;
+}
+
+void ListType::__duplicateDeep(const ListType* listType, ASTNode::MemManagerType& mem)
+{
+    assert(listType != nullptr) ;
+    Type* duplicateElementType = nullptr ;
+    if (listType->elementType != nullptr) {
+        duplicateElementType = static_cast<Type*>(listType->elementType->duplicateDeep(mem)) ;
+        (void) duplicateElementType->setParentASTNode(this) ;
+    }
+    elementType = duplicateElementType ;
+    return ;
 }

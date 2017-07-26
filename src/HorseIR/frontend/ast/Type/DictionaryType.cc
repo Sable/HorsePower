@@ -5,7 +5,9 @@
 
 using namespace horseIR::ast ;
 
-DictionaryType::DictionaryType(ASTNode* parent, HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
+DictionaryType::DictionaryType(ASTNode* parent,
+                               HorseIRParser::TypeCaseDictContext* cst,
+                               ASTNode::MemManagerType& mem)
     : Type(parent, cst, mem, Type::TypeClass::Dictionary, ASTNode::ASTNodeClass::DictionaryType)
 {
     assert(cst != nullptr) ;
@@ -15,7 +17,8 @@ DictionaryType::DictionaryType(ASTNode* parent, HorseIRParser::TypeCaseDictConte
     valueType = Type::makeTypeASTNode(this, dictCST->value, mem) ;
 }
 
-DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst, ASTNode::MemManagerType& mem)
+DictionaryType::DictionaryType(HorseIRParser::TypeCaseDictContext* cst,
+                               ASTNode::MemManagerType& mem)
     : DictionaryType(nullptr, cst, mem)
 {}
 
@@ -24,18 +27,6 @@ DictionaryType::DictionaryType(ASTNode::MemManagerType& mem)
       keyType(nullptr),
       valueType(nullptr)
 {}
-
-bool DictionaryType::isGeneralizationOf(const Type *type) const
-{
-    assert(type != nullptr) ;
-    if (type->getTypeClass() != Type::TypeClass::Dictionary) return false ;
-    auto dictType = static_cast<const DictionaryType*>(type) ;
-
-    bool keyIsGeneralization = keyType->isGeneralizationOf(dictType->keyType) ;
-    bool valueIsGeneralization = valueType->isGeneralizationOf(dictType->valueType) ;
-
-    return keyIsGeneralization && valueIsGeneralization ;
-}
 
 std::size_t DictionaryType::getNumNodesRecursively() const
 {
@@ -61,15 +52,29 @@ std::string DictionaryType::toTreeString() const
         valueType->toTreeString() + ")" ;
 }
 
+DictionaryType* DictionaryType::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    DictionaryType* dictionaryType = new DictionaryType(mem) ;
+    dictionaryType->__duplicateShallow(this) ;
+    return dictionaryType ;
+}
+
+DictionaryType* DictionaryType::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    DictionaryType* dictionaryType = new DictionaryType(mem) ;
+    dictionaryType->__duplicateDeep(this, mem) ;
+    return dictionaryType ;
+}
+
 Type* DictionaryType::getKeyType() const
 {
     return keyType ;
 }
 
-DictionaryType& DictionaryType::setKeyType(const Type* type)
+DictionaryType& DictionaryType::setKeyType(Type* type)
 {
     assert(type != nullptr) ;
-    keyType = const_cast<Type*>(type) ;
+    keyType = type ;
     return *this ;
 }
 
@@ -78,9 +83,35 @@ Type* DictionaryType::getValueType() const
     return valueType ;
 }
 
-DictionaryType& DictionaryType::setValueType(const Type* type)
+DictionaryType& DictionaryType::setValueType(Type* type)
 {
     assert(type != nullptr) ;
-    valueType = const_cast<Type*>(type) ;
+    valueType = type ;
     return *this ;
+}
+
+void DictionaryType::__duplicateShallow(const DictionaryType* dicType)
+{
+    assert(dicType != nullptr) ;
+    keyType = dicType->keyType ;
+    valueType = dicType->valueType ;
+    return ;
+}
+
+void DictionaryType::__duplicateDeep(const DictionaryType* dicType, ASTNode::MemManagerType& mem)
+{
+    assert(dicType != nullptr) ;
+    Type* duplicateKeyType = nullptr ;
+    if (dicType->keyType != nullptr) {
+        duplicateKeyType = static_cast<Type*>(dicType->keyType->duplicateDeep(mem)) ;
+        (void) duplicateKeyType->setParentASTNode(this) ;
+    }
+    keyType = duplicateKeyType ;
+    Type* duplicateValueType = nullptr ;
+    if (dicType->valueType != nullptr) {
+        duplicateValueType = static_cast<Type*>(dicType->valueType->duplicateDeep(mem)) ;
+        (void) duplicateValueType->setParentASTNode(this) ;
+    }
+    valueType = duplicateValueType ;
+    return ;
 }

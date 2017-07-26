@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../AST.h"
+#include "../../misc/Collections.h"
 
 using namespace horseIR::ast ;
 
@@ -61,33 +62,6 @@ FunctionType::FunctionType(ASTNode::MemManagerType& mem)
       returnType(nullptr)
 {}
 
-bool FunctionType::isGeneralizationOf(const Type *type) const
-{
-    assert(type != nullptr) ;
-    if (type->getTypeClass() != Type::TypeClass::Function) return false ;
-    auto functionType = static_cast<const FunctionType*>(type) ;
-    
-    bool paramGeneralization = true ;
-    if (flexible) {
-        if (parameterTypes.size() > functionType->parameterTypes.size()) {
-            paramGeneralization = false ;
-        }
-    } else {
-        if (parameterTypes.size() != functionType->parameterTypes.size()) {
-            paramGeneralization = false ;
-        }
-    }
-    if (!paramGeneralization) return false ;
-
-    for (std::size_t ptr = 0; ptr < parameterTypes.size(); ++ptr) {
-        const auto myParam = parameterTypes.at(ptr) ;
-        const auto targetParam = parameterTypes.at(ptr) ;
-        if (!myParam->isGeneralizationOf(targetParam)) return false ;
-    }
-
-    return returnType->isGeneralizationOf(functionType->returnType) ;
-}
-
 std::size_t FunctionType::getNumNodesRecursively() const
 {
     std::size_t count = 1 ;
@@ -125,7 +99,7 @@ std::string FunctionType::toString() const
         ostream << paramType->toString()
                 << ((ptr + 1 == parameterTypes.cend())? "" : ", ") ;
     }
-    if (parameterTypes.size() != 0) ostream << ", " ;
+    if (parameterTypes.size() != 0 && flexible) ostream << ", " ;
     ostream << (flexible? "..." : "")
             << " :"
             << ((returnType!= nullptr)? returnType->toString() : "nullptr")
@@ -151,12 +125,26 @@ std::string FunctionType::toTreeString() const
     return ostream.str() ;
 }
 
-std::size_t FunctionType::getMinNumParameters() const
+FunctionType* FunctionType::duplicateShallow(ASTNode::MemManagerType &mem) const
 {
-    return parameterTypes.size() ;
+    FunctionType* functionType = new FunctionType(mem) ;
+    functionType->__duplicateShallow(this) ;
+    return functionType ;
 }
 
-bool FunctionType::isFlexible() const
+FunctionType* FunctionType::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    FunctionType* functionType = new FunctionType(mem) ;
+    functionType->__duplicateDeep(this, mem) ;
+    return functionType ;
+}
+
+std::vector<Type*> FunctionType::getParameterTypes() const
+{
+    return parameterTypes ;
+}
+
+bool FunctionType::getIsFlexible() const
 {
     return flexible ;
 }
@@ -166,59 +154,51 @@ Type* FunctionType::getReturnType() const
     return returnType ;
 }
 
-std::vector<Type*> FunctionType::getParameterTypes() const
+FunctionType& FunctionType::setParameterTypes(const std::vector<Type *>& p_parameterTypes)
 {
-    return parameterTypes ;
-}
-
-Type* FunctionType::getParameterTypeAt(std::size_t pos) const
-{
-    return parameterTypes.at(pos) ;
-}
-
-FunctionType& FunctionType::addParameterType(horseIR::ast::Type *type)
-{
-    assert(type != nullptr) ;
-    
-    parameterTypes.push_back(type) ;
-
+    parameterTypes = p_parameterTypes ;
     return *this ;
 }
 
-FunctionType& FunctionType::setParameterTypeAt(std::size_t pos, horseIR::ast::Type *type)
+FunctionType& FunctionType::setIsFlexible(bool p_flexable)
 {
-    assert(type != nullptr) ;
-    assert(pos < parameterTypes.size()) ;
-
-    parameterTypes[pos] = type ;
-
+    flexible = p_flexable ;
     return *this ;
 }
 
-FunctionType& FunctionType::setFlexible(bool f)
+FunctionType& FunctionType::setReturnType(horseIR::ast::Type *p_type)
 {
-    flexible = f ;
+    returnType = p_type ;
     return *this ;
 }
 
-FunctionType& FunctionType::setReturnType(horseIR::ast::Type *type)
+void FunctionType::__duplicateShallow(const FunctionType* funcType)
 {
-    assert(type != nullptr) ;
-
-    returnType = type ;
-
-    return *this ;
+    assert(funcType != nullptr) ;
+    parameterTypes = funcType->parameterTypes ;
+    flexible = funcType->flexible ;
+    returnType = funcType->returnType ;
+    return ;
 }
 
-FunctionType& FunctionType::truncateNumParameter(std::size_t num)
+void FunctionType::__duplicateDeep(const FunctionType* funcType, ASTNode::MemManagerType& mem)
 {
-    if (num >= parameterTypes.size()) return *this ; /* NO-OP */
-
-    std::vector<Type*> org_parameterTypes = parameterTypes ;
-    parameterTypes.clear() ;
-    for (std::size_t ptr = 0; ptr < num; ++ptr) {
-        parameterTypes.push_back(org_parameterTypes[ptr]) ;
+    assert(funcType != nullptr) ;
+    auto duplicateParamTypes = horseIR::misc::Collections::applyAndCollect(
+        funcType->parameterTypes,
+        [&] (Type* type) -> Type* {
+            assert(type != nullptr) ;
+            Type* duplicateType = static_cast<Type*>(type->duplicateDeep(mem)) ;
+            (void) duplicateType->setParentASTNode(this) ;
+            return duplicateType ;
+        }) ;
+    parameterTypes = std::move(duplicateParamTypes) ;
+    flexible = funcType->flexible ;
+    Type* duplicateReturnType = nullptr ;
+    if (funcType->returnType != nullptr) {
+        duplicateReturnType = static_cast<Type*>(funcType->returnType->duplicateDeep(mem)) ;
+        (void) duplicateReturnType->setParentASTNode(this) ;
     }
-
-    return *this ;
+    returnType = duplicateReturnType ;
+    return ;
 }

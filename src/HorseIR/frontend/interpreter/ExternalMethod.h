@@ -24,6 +24,8 @@ namespace horseIR {
                            const std::vector<ast::Type*> inputTypes,
                            ast::Type* outputType) ;
             virtual ~ExternalMethod() = default ;
+
+            // virtual IntermediateType invoke(std::size_t argc, IntermediateType args[]) = 0 ;
         } ;
     }
 }

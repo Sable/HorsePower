@@ -79,6 +79,8 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
 
+            Identifier* getIdentifier() const ;
+            ReturnStatement& setIdentifier(Identifier* id) ;
         protected:
             Identifier* id ;
 
@@ -99,10 +101,16 @@ namespace horseIR {
 
             Identifier* getLHSName() const ;
             Type* getLHSType() const ;
-            bool isInvocation() const ;
+            bool getIsInvocation() const ;
             Operand* getInvokeTarget() const ;
             std::vector<Operand*> getParameters() const ;
 
+            AssignStatement& setLHSName(Identifier* id) ;
+            AssignStatement& setLHSType(Type* type) ;
+            AssignStatement& setIsInvocation(bool isInvocation) ;
+            AssignStatement& setInvokeTarget(Operand* operand) ;
+            AssignStatement& setParameters(const std::vector<Operand*> parameters) ;
+            
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;
             virtual std::string toString() const override ;
@@ -140,6 +148,14 @@ namespace horseIR {
             virtual std::string toString() const override ;
             virtual std::string toTreeString() const override ;
 
+            std::map<std::string, Identifier*> getInFlowMap() const ;
+            Identifier* getInFlowMapAt(const std::string& label) const ;
+            Identifier* getLHSID() const ;
+            Type* getLHSType() const ;
+            PhiStatement& setInFlowMap(const std::map<std::string, Identifier*>& map) ;
+            PhiStatement& setInFlowMapAt(const std::string& label, Identifier* id) ;
+            PhiStatement& setLHSID(Identifier* id) ;
+            PhiStatement& setLHSType(Type* type) ;
         protected:
             std::map<std::string, Identifier*> inFlowMap ;
             Identifier* lhsID ;
@@ -158,6 +174,8 @@ namespace horseIR {
             ~BranchStatement() override = default ;
 
             std::string getTargetLabelName() const ;
+            bool getIsConditional() const ;
+            Identifier* getConditionID() const ;
 
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;

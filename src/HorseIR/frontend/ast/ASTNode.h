@@ -37,8 +37,12 @@ namespace horseIR {
             } ;
             
             ASTNode () = delete ;
-            ASTNode (MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
-            ASTNode (ASTNode* p_parentASTNode, const antlr4::tree::ParseTree* cst, MemManagerType& mem, const ASTNode::ASTNodeClass type) ;
+            ASTNode (MemManagerType& mem,
+                     const ASTNode::ASTNodeClass type) ;
+            ASTNode (ASTNode* p_parentASTNode,
+                     const antlr4::tree::ParseTree* cst,
+                     MemManagerType& mem,
+                     const ASTNode::ASTNodeClass type) ;
             virtual ~ASTNode() = default ;
 
             ASTNodeClass getASTNodeClass() const ;
@@ -60,7 +64,7 @@ namespace horseIR {
         protected:
             static const std::string INDENT ;
             const antlr4::tree::ParseTree* cst ;
-            ASTNode::ASTNodeClass nodeType ;
+            const ASTNode::ASTNodeClass nodeType ;
             ASTNode* parentASTNode ;
 
             static std::string CSTNameToString(HorseIRParser::NameContext* nameContext) ;

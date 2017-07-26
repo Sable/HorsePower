@@ -5,7 +5,9 @@
 
 using namespace horseIR::ast ;
 
-ScalarType::ScalarType(ASTNode* parent, HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
+ScalarType::ScalarType(ASTNode* parent,
+                       HorseIRParser::TypeCaseScalarContext* cst,
+                       ASTNode::MemManagerType& mem)
     : Type(parent, cst, mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)
 {
     assert(cst != nullptr) ;
@@ -55,11 +57,13 @@ ScalarType::ScalarType(ASTNode* parent, HorseIRParser::TypeCaseScalarContext* cs
     }
 }
 
-ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst, ASTNode::MemManagerType& mem)
+ScalarType::ScalarType(HorseIRParser::TypeCaseScalarContext* cst,
+                       ASTNode::MemManagerType& mem)
     : ScalarType(nullptr, cst, mem)
 {}
 
-ScalarType::ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& mem)
+ScalarType::ScalarType(const ScalarType::ScalarClass& type,
+                       ASTNode::MemManagerType& mem)
     : scalarClass(type),
       Type(mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)
 {}
@@ -67,15 +71,7 @@ ScalarType::ScalarType(ScalarType::ScalarClass type, ASTNode::MemManagerType& me
 ScalarType::ScalarType(ASTNode::MemManagerType& mem)
     : scalarClass(ScalarType::ScalarClass::Integer8),
       Type(mem, Type::TypeClass::Scalar, ASTNode::ASTNodeClass::ScalarType)
-{}
-                  
-bool ScalarType::isGeneralizationOf(const Type *type) const 
-{
-    assert(type != nullptr) ;
-    if (type->getTypeClass() != Type::TypeClass::Scalar) return false ;
-    auto scalarType = static_cast<const ScalarType*>(type) ;
-    return this->scalarClass == scalarType->scalarClass ;
-}
+{}                 
 
 std::size_t ScalarType::getNumNodesRecursively() const
 {
@@ -117,13 +113,42 @@ std::string ScalarType::toTreeString() const
     return "(ScalarType " + toString() + ")" ;
 }
 
+ScalarType* ScalarType::duplicateShallow(ASTNode::MemManagerType &mem) const
+{
+    ScalarType* scalarType = new ScalarType(mem) ;
+    scalarType->__duplicateShallow(this) ;
+    return scalarType ;
+}
+
+ScalarType* ScalarType::duplicateDeep(ASTNode::MemManagerType &mem) const
+{
+    ScalarType* scalarType = new ScalarType(mem) ;
+    scalarType->__duplicateDeep(this, mem) ;
+    return scalarType ;
+}
+
 ScalarType::ScalarClass ScalarType::getScalarClass() const
 {
     return scalarClass ;
 }
 
-ScalarType& ScalarType::setScalarClass(const ScalarType::ScalarClass type)
+ScalarType& ScalarType::setScalarClass(const ScalarType::ScalarClass& type)
 {
     scalarClass = type ;
     return *this ;
+}
+
+void ScalarType::__duplicateShallow(const ScalarType* scalarType)
+{
+    assert(scalarType != nullptr) ;
+    scalarClass = scalarType->scalarClass ;
+    return ;
+}
+
+void ScalarType::__duplicateDeep(const ScalarType* scalarType, ASTNode::MemManagerType& mem)
+{
+    assert(scalarType != nullptr) ;
+    (void) mem ;
+    scalarClass = scalarType->scalarClass ;
+    return ;
 }
