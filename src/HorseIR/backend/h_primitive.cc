@@ -463,16 +463,16 @@ L pfnUnique(V z, V x){
 	if(isTypeGroupBasic(vp(x))){
 		V z0 = allocNode();
 		L e0 = pfnIndexOf(z0,x,x); if(0!=e0) R e0;
-		L typZ = xp, lenZ = 0, c = 0;
+		L typZ = H_L, lenZ = 0, c = 0;
 		DOI(vn(z0), lenZ += vL(z0,i)==i)
 		initV(z,typZ,lenZ);
 		switch(typZ){
-			caseB DOI(vn(x), if(vL(z0,i)==i)vB(z,c++)=vB(x,i)) break;
-			caseH DOI(vn(x), if(vL(z0,i)==i)vH(z,c++)=vH(x,i)) break;
-			caseI DOI(vn(x), if(vL(z0,i)==i)vI(z,c++)=vI(x,i)) break;
-			caseL DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=vL(x,i)) break;
-			caseF DOI(vn(x), if(vL(z0,i)==i)vF(z,c++)=vF(x,i)) break;
-			caseE DOI(vn(x), if(vL(z0,i)==i)vE(z,c++)=vE(x,i)) break;
+			caseB DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
+			caseH DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
+			caseI DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
+			caseL DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
+			caseF DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
+			caseE DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
 			default: R E_NOT_IMPL; /* time */
 		}
 		/* free z0 */
