@@ -4,26 +4,26 @@
 
 `unique(x)`
 
-- unique value of x
+- unique value of x (in indices)
 
 ### Type rules
 
 ```
-bool -> bool
-char -> char
-i16  -> i16
-i32  -> i32
+bool -> i64
+char -> i64
+i16  -> i64
+i32  -> i64
 i64  -> i64
-f32  -> f32
-f64  -> f64
-sym  -> sym
-str  -> str
-m    -> m
-d    -> d
-z    -> z
-u    -> u
-v    -> v
-t    -> t
+f32  -> i64
+f64  -> i64
+sym  -> i64
+str  -> i64
+m    -> i64
+d    -> i64
+z    -> i64
+u    -> i64
+v    -> i64
+t    -> i64
 _    -> domain error
 ```
 
@@ -31,5 +31,5 @@ _    -> domain error
 
 ```
 unique(-1 2 2 3 3)
-> -1 2 3
+> 0 1 3
 ```

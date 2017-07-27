@@ -101,7 +101,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- |:--| :----- |
 1  | asc(x)               | Ascending order (index)     | Pending                     | L                             | [link](builtin/asc.md)       |1  |&#10004;|
 2  | desc(x)              | Descending order (index)    | Pending                     | L                             | [link](builtin/desc.md)      |2  |&#10004;|
-3  | unique(x)            | Unique values               | Pending                     | Same as argument              | [link](builtin/unique.md)    |3  |&#10004;|
+3  | unique(x)            | Unique values               | Pending                     | L                             | [link](builtin/unique.md)    |3  |&#10004;|
 4  | str(x)               | Format                      | Pending                     | C                             | [link](builtin/str.md)       |4  | |
 5  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |5  |&#10004;|
 6  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |6  |&#10004;|
