@@ -41,21 +41,25 @@ namespace horseIR {
             static std::vector<Type*> makeTypeSignatureASTNodes(ASTNode* parent, HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
             static std::vector<Type*> makeTypeSignatureASTNodes(HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
 
-            static Type* selectivityMerge(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-        protected:
-            struct __selectivityMerge {
-                class SelectivityMergeAbortException : public std::runtime_error {
+            class SpecificityJoinAbortException : public std::runtime_error {
                 public:
-                    SelectivityMergeAbortException() : std::runtime_error("Selectivity Merge Abort") {} 
+                    SpecificityJoinAbortException(const Type* p_lhsSite, const Type* p_rhsSite) ;
+                    const Type* getLHSSite() const ;
+                    const Type* getRHSSite() const ;
+                protected:
+                    const Type* const lhsSite ;
+                    const Type* const rhsSite ;
                 } ;
-
-                static Type* selectivityMerge(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeScalar(const ScalarType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeWildcard(const WildcardType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeList(const ListType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeDictionary(const DictionaryType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeEnumeration(const EnumerationType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
-                static Type* mergeFunction(const FunctionType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+            static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+        protected:
+            struct __specificityJoin {
+                static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinScalar(const ScalarType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinWildcard(const WildcardType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinList(const ListType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinDictionary(const DictionaryType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinEnumeration(const EnumerationType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+                static Type* joinFunction(const FunctionType* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
             } ;
             const Type::TypeClass typeClass ;
             void __duplicateShallow(const Type* type) ;

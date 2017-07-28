@@ -121,10 +121,26 @@ std::vector<Type*> Type::makeTypeSignatureASTNodes(HorseIRParser::TypeSignatureL
         }) ;
 }
 
-Type* Type::selectivityMerge(const horseIR::ast::Type *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type::SpecificityJoinAbortException::SpecificityJoinAbortException(const Type* p_lhsSite, const Type* p_rhsSite)
+    : std::runtime_error("Specificity Join Abort"),
+    lhsSite(p_lhsSite),
+    rhsSite(p_rhsSite)
+{}
+
+const Type* Type::SpecificityJoinAbortException::getLHSSite() const
+{
+    return lhsSite ;
+}
+
+const Type* Type::SpecificityJoinAbortException::getRHSSite() const
+{
+    return rhsSite ;
+}
+
+Type* Type::specificityJoin(const horseIR::ast::Type *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
     assert(lhs != nullptr && rhs != nullptr) ;
-    Type* retType = Type::__selectivityMerge::selectivityMerge(lhs, rhs, mem) ;
+    Type* retType = Type::__specificityJoin::specificityJoin(lhs, rhs, mem) ;
     ASTVisitors::applyToEachNode(
         retType,
         [] (ASTNode* node) -> void {
@@ -138,34 +154,33 @@ Type* Type::selectivityMerge(const horseIR::ast::Type *lhs, const horseIR::ast::
     return retType ;
 }
 
-Type* Type::__selectivityMerge::selectivityMerge(const horseIR::ast::Type *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::specificityJoin(const horseIR::ast::Type *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (lhs->getTypeClass()) {
     case TypeClass::Dictionary:
-        return __selectivityMerge::mergeDictionary(static_cast<const DictionaryType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinDictionary(static_cast<const DictionaryType*>(lhs), rhs, mem) ;
     case TypeClass::Enumeration:
-        return __selectivityMerge::mergeEnumeration(static_cast<const EnumerationType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinEnumeration(static_cast<const EnumerationType*>(lhs), rhs, mem) ;
     case TypeClass::Function:
-        return __selectivityMerge::mergeFunction(static_cast<const FunctionType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinFunction(static_cast<const FunctionType*>(lhs), rhs, mem) ;
     case TypeClass::List:
-        return __selectivityMerge::mergeList(static_cast<const ListType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinList(static_cast<const ListType*>(lhs), rhs, mem) ;
     case TypeClass::Scalar:
-        return __selectivityMerge::mergeScalar(static_cast<const ScalarType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinScalar(static_cast<const ScalarType*>(lhs), rhs, mem) ;
     case TypeClass::Wildcard:
-        return __selectivityMerge::mergeWildcard(static_cast<const WildcardType*>(lhs), rhs, mem) ;
+        return __specificityJoin::joinWildcard(static_cast<const WildcardType*>(lhs), rhs, mem) ;
     }
 }
 
-Type* Type::__selectivityMerge::mergeScalar(const horseIR::ast::ScalarType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinScalar(const horseIR::ast::ScalarType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (rhs->getTypeClass()) {
-    case TypeClass::Dictionary:  throw SelectivityMergeAbortException() ;
-    case TypeClass::Enumeration: throw SelectivityMergeAbortException() ;
-    case TypeClass::Function:    throw SelectivityMergeAbortException() ;
-    case TypeClass::List:        throw SelectivityMergeAbortException() ;
+    case TypeClass::Dictionary:  throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Enumeration: throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Function:    throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::List:        throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Scalar: {
         const ScalarType* castedPtr = static_cast<const ScalarType*>(rhs) ;
         if (lhs->getScalarClass() == castedPtr->getScalarClass()) {
@@ -173,7 +188,7 @@ Type* Type::__selectivityMerge::mergeScalar(const horseIR::ast::ScalarType *lhs,
             (void) retType->setScalarClass(lhs->getScalarClass()) ;
             return retType ;
         } else {
-            throw SelectivityMergeAbortException() ;
+            throw SpecificityJoinAbortException(lhs, rhs) ;
         }
     }
     case TypeClass::Wildcard: {
@@ -184,33 +199,31 @@ Type* Type::__selectivityMerge::mergeScalar(const horseIR::ast::ScalarType *lhs,
     }
 }
 
-Type* Type::__selectivityMerge::mergeWildcard(const horseIR::ast::WildcardType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinWildcard(const horseIR::ast::WildcardType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     auto duplicateRHS = rhs->duplicateDeep(mem) ;
     return static_cast<Type*>(duplicateRHS) ;
 }
 
-Type* Type::__selectivityMerge::mergeList(const horseIR::ast::ListType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinList(const horseIR::ast::ListType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (rhs->getTypeClass()) {
-    case TypeClass::Dictionary:  throw SelectivityMergeAbortException() ;
-    case TypeClass::Enumeration: throw SelectivityMergeAbortException() ;
-    case TypeClass::Function:    throw SelectivityMergeAbortException() ;
+    case TypeClass::Dictionary:  throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Enumeration: throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Function:    throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::List: {
         ListType* retType = new ListType(mem) ;
         const ListType* castedPtr = static_cast<const ListType*>(rhs) ;
-        Type* mergedElem = Type::__selectivityMerge::selectivityMerge(
+        Type* mergedElem = Type::__specificityJoin::specificityJoin(
             lhs->getElementType(),
             castedPtr->getElementType(),
             mem) ;
         (void) retType->setElementType(mergedElem) ;
         return retType ;
     }
-    case TypeClass::Scalar:     throw SelectivityMergeAbortException() ;
+    case TypeClass::Scalar:     throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Wildcard: {
         ListType* type = lhs->duplicateDeep(mem) ;
         return type ;
@@ -218,29 +231,28 @@ Type* Type::__selectivityMerge::mergeList(const horseIR::ast::ListType *lhs, con
     } 
 }
 
-Type* Type::__selectivityMerge::mergeDictionary(const horseIR::ast::DictionaryType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinDictionary(const horseIR::ast::DictionaryType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (rhs->getTypeClass()) {
     case TypeClass::Dictionary: {
         DictionaryType* retType = new DictionaryType(mem) ;
         const DictionaryType* castedPtr = static_cast<const DictionaryType*>(rhs) ;
-        Type* mergedKey = Type::__selectivityMerge::selectivityMerge(
+        Type* mergedKey = Type::__specificityJoin::specificityJoin(
             lhs->getKeyType(),
             castedPtr->getKeyType(),
             mem) ;
-        Type* mergedValue = Type::__selectivityMerge::selectivityMerge(
+        Type* mergedValue = Type::__specificityJoin::specificityJoin(
             lhs->getValueType(),
             castedPtr->getValueType(),
             mem) ;
         (void) retType->setKeyType(mergedKey).setValueType(mergedKey) ;
         return retType ;
     }
-    case TypeClass::Enumeration: throw SelectivityMergeAbortException() ;
-    case TypeClass::Function:    throw SelectivityMergeAbortException() ;
-    case TypeClass::List:        throw SelectivityMergeAbortException() ;
-    case TypeClass::Scalar:      throw SelectivityMergeAbortException() ;
+    case TypeClass::Enumeration: throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Function:    throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::List:        throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Scalar:      throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Wildcard: {
         DictionaryType* dictType = lhs->duplicateDeep(mem) ;
         return dictType ;
@@ -248,25 +260,24 @@ Type* Type::__selectivityMerge::mergeDictionary(const horseIR::ast::DictionaryTy
     }
 }
 
-Type* Type::__selectivityMerge::mergeEnumeration(const horseIR::ast::EnumerationType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinEnumeration(const horseIR::ast::EnumerationType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (rhs->getTypeClass()) {
-    case TypeClass::Dictionary:  throw SelectivityMergeAbortException() ;
+    case TypeClass::Dictionary:  throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Enumeration: {
         EnumerationType* retType = new EnumerationType(mem) ;
         const EnumerationType* castedPtr = static_cast<const EnumerationType*>(rhs) ;
-        Type* mergedElement = Type::__selectivityMerge::selectivityMerge(
+        Type* mergedElement = Type::__specificityJoin::specificityJoin(
             lhs->getElementType(),
             castedPtr->getElementType(),
             mem) ;
         (void) retType->setElementType(mergedElement) ;
         return retType ;
     }
-    case TypeClass::Function:    throw SelectivityMergeAbortException() ;
-    case TypeClass::List:        throw SelectivityMergeAbortException() ;
-    case TypeClass::Scalar:      throw SelectivityMergeAbortException() ;
+    case TypeClass::Function:    throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::List:        throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Scalar:      throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Wildcard: {
         EnumerationType* enumType = lhs->duplicateDeep(mem) ;
         return enumType ;
@@ -274,23 +285,22 @@ Type* Type::__selectivityMerge::mergeEnumeration(const horseIR::ast::Enumeration
     }
 }
 
-Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
+Type* Type::__specificityJoin::joinFunction(const horseIR::ast::FunctionType *lhs, const horseIR::ast::Type *rhs, ASTNode::MemManagerType &mem)
 {
-    using SelectivityMergeAbortException = Type::__selectivityMerge::SelectivityMergeAbortException ;
     assert(lhs != nullptr && rhs != nullptr) ;
     switch (rhs->getTypeClass()) {
-    case TypeClass::Dictionary:  throw SelectivityMergeAbortException() ;
-    case TypeClass::Enumeration: throw SelectivityMergeAbortException() ;
+    case TypeClass::Dictionary:  throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Enumeration: throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Function: {
         const FunctionType* castedPtr = static_cast<const FunctionType*>(rhs) ;
         const std::vector<Type*> lhsParameters = lhs->getParameterTypes() ;
         const std::vector<Type*> rhsParameters = castedPtr->getParameterTypes() ;
         if (lhsParameters.size() < rhsParameters.size()) {
-            if (!lhs->getIsFlexible()) throw SelectivityMergeAbortException() ;
+            if (!lhs->getIsFlexible()) throw SpecificityJoinAbortException(lhs, rhs) ;
             std::vector<Type*> retParameterTypes {} ;
             std::vector<Type*>::size_type iterSize = lhsParameters.size() ;
             for (decltype(iterSize) iter = 0; iter < iterSize; ++iter) {
-                Type* mergedParameter = Type::__selectivityMerge::selectivityMerge(
+                Type* mergedParameter = Type::__specificityJoin::specificityJoin(
                     lhsParameters[iter],
                     rhsParameters[iter],
                     mem) ;
@@ -300,7 +310,7 @@ Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *
                 auto duplicateParameter = rhsParameters[iter]->duplicateDeep(mem) ;
                 retParameterTypes.push_back(static_cast<Type*>(duplicateParameter)) ;
             }
-            Type* retReturnType = Type::__selectivityMerge::selectivityMerge(
+            Type* retReturnType = Type::__specificityJoin::specificityJoin(
                 lhs->getReturnType(),
                 castedPtr->getReturnType(),
                 mem) ;
@@ -314,13 +324,13 @@ Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *
             std::vector<Type*> retParameterTypes {} ;
             std::vector<Type*>::size_type iterSize = lhsParameters.size() ;
             for (decltype(iterSize) iter = 0; iter < iterSize; ++iter) {
-                Type* mergedParameter = Type::__selectivityMerge::selectivityMerge(
+                Type* mergedParameter = Type::__specificityJoin::specificityJoin(
                     lhsParameters[iter],
                     rhsParameters[iter],
                     mem) ;
                 retParameterTypes.push_back(mergedParameter) ;
             }
-            Type* retReturnType = Type::__selectivityMerge::selectivityMerge(
+            Type* retReturnType = Type::__specificityJoin::specificityJoin(
                 lhs->getReturnType(),
                 castedPtr->getReturnType(),
                 mem) ;
@@ -331,10 +341,10 @@ Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *
                 .setReturnType(retReturnType) ;
             return retType ;
         } else /* lhsParameters.size() > rhsParameters.size() */ {
-            if (!castedPtr->getIsFlexible()) throw SelectivityMergeAbortException() ;
+            if (!castedPtr->getIsFlexible()) throw SpecificityJoinAbortException(lhs, rhs) ;
             std::vector<Type*> retParameterTypes {} ;
             for (auto iter = 0; iter < rhsParameters.size(); ++iter) {
-                Type* mergedParameter = Type::__selectivityMerge::selectivityMerge(
+                Type* mergedParameter = Type::__specificityJoin::specificityJoin(
                     lhsParameters[iter],
                     rhsParameters[iter],
                     mem) ;
@@ -344,7 +354,7 @@ Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *
                 auto duplicateParameter = lhsParameters[iter]->duplicateDeep(mem) ;
                 retParameterTypes.push_back(static_cast<Type*>(duplicateParameter)) ;
             }
-            Type* retReturnType = Type::__selectivityMerge::selectivityMerge(
+            Type* retReturnType = Type::__specificityJoin::specificityJoin(
                 lhs->getReturnType(),
                 castedPtr->getReturnType(),
                 mem) ;
@@ -356,8 +366,8 @@ Type* Type::__selectivityMerge::mergeFunction(const horseIR::ast::FunctionType *
             return retType ;
         }
     }
-    case TypeClass::List:        throw SelectivityMergeAbortException() ;
-    case TypeClass::Scalar:      throw SelectivityMergeAbortException() ;
+    case TypeClass::List:        throw SpecificityJoinAbortException(lhs, rhs) ;
+    case TypeClass::Scalar:      throw SpecificityJoinAbortException(lhs, rhs) ;
     case TypeClass::Wildcard: {
         FunctionType* funcType = lhs->duplicateDeep(mem) ;
         return funcType ;

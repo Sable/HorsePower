@@ -53,7 +53,7 @@ const char* rawProgram = ""
     "}"
     "" ;
 
-const char* rawType = "(func<?, i32, ...:?>, func<i32, ?:bool> ,   dict<i8, str>) -> bool" ;
+const char* rawType = "(func<?, i32, ...:?>, func<i32 :bool> ,   dict<i8, str>) -> bool" ;
 
 class StructurePrinter : horseIR::ast::ASTVisitor<void> {
 public:
@@ -100,10 +100,16 @@ int main(int argc, char *argv[])
               << signatureASTNodes[0]->isGeneralizationOf(signatureASTNodes[1]) << std::endl 
               << signatureASTNodes[1]->isGeneralizationOf(signatureASTNodes[0]) << std::endl ;
 */
-    horseIR::ast::Type* type = horseIR::ast::Type::selectivityMerge(
-        signatureASTNodes[0],
-        signatureASTNodes[1],
-        mem) ;
-    std::cout << type->toString() << std::endl ;
+    try {
+        horseIR::ast::Type* type = horseIR::ast::Type::specificityJoin(
+            signatureASTNodes[0],
+            signatureASTNodes[1],
+            mem) ;
+        std::cout << type->toString() << std::endl ;
+    } catch(const horseIR::ast::Type::SpecificityJoinAbortException& exception) {
+        std::cout << exception.what() << std::endl
+                  << exception.getLHSSite()->toString() << std::endl
+                  << exception.getRHSSite()->toString() << std::endl ;
+    }
     return 0;
 }
