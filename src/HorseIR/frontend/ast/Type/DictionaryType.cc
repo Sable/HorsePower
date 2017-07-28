@@ -66,6 +66,16 @@ DictionaryType* DictionaryType::duplicateDeep(ASTNode::MemManagerType &mem) cons
     return dictionaryType ;
 }
 
+bool DictionaryType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Dictionary) return false ;
+    auto castedPtr = static_cast<const Type*>(type) ;
+    const bool keyIsGeneralized = keyType->isGeneralizationOf(type) ;
+    const bool valueIsGeneralied = valueType->isGeneralizationOf(type) ;
+    return keyIsGeneralized && valueIsGeneralied ;
+}
+
 Type* DictionaryType::getKeyType() const
 {
     return keyType ;

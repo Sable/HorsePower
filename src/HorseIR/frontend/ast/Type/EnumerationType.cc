@@ -61,6 +61,14 @@ EnumerationType* EnumerationType::duplicateDeep(ASTNode::MemManagerType &mem) co
     return enumerationType ;
 }
 
+bool EnumerationType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Enumeration) return false ;
+    auto castedPtr = static_cast<const EnumerationType*>(type) ;
+    return elementType->isGeneralizationOf(castedPtr->getElementType()) ;
+}
+
 Type* EnumerationType::getElementType() const
 {
     return elementType ;

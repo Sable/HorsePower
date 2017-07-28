@@ -64,6 +64,14 @@ ListType* ListType::duplicateDeep(ASTNode::MemManagerType &mem) const
     return listType ;
 }
 
+bool ListType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::List) return false ;
+    auto castedPtr = static_cast<const ListType*>(type) ;
+    return elementType->isGeneralizationOf(castedPtr->getElementType()) ;
+}
+
 Type* ListType::getElementType() const
 {
     return elementType ;

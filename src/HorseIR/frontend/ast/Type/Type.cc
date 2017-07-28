@@ -318,6 +318,7 @@ Type* Type::__specificityJoin::joinFunction(const horseIR::ast::FunctionType *lh
             FunctionType* retType = new FunctionType(mem) ;
             (void) retType
                 ->setParameterTypes(retParameterTypes)
+                .setIsFlexible(lhs->getIsFlexible() && castedPtr->getIsFlexible())
                 .setReturnType(retReturnType) ;
             return retType ;
         } else if (lhsParameters.size() == rhsParameters.size()) {
@@ -338,6 +339,7 @@ Type* Type::__specificityJoin::joinFunction(const horseIR::ast::FunctionType *lh
             FunctionType* retType = new FunctionType(mem) ;
             (void) retType
                 ->setParameterTypes(retParameterTypes)
+                .setIsFlexible(lhs->getIsFlexible() && castedPtr->getIsFlexible())
                 .setReturnType(retReturnType) ;
             return retType ;
         } else /* lhsParameters.size() > rhsParameters.size() */ {
@@ -362,6 +364,7 @@ Type* Type::__specificityJoin::joinFunction(const horseIR::ast::FunctionType *lh
             FunctionType* retType = new FunctionType(mem) ;
             (void) retType
                 ->setParameterTypes(retParameterTypes)
+                .setIsFlexible(lhs->getIsFlexible() && castedPtr->getIsFlexible()) 
                 .setReturnType(retReturnType) ;
             return retType ;
         }

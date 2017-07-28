@@ -127,6 +127,14 @@ ScalarType* ScalarType::duplicateDeep(ASTNode::MemManagerType &mem) const
     return scalarType ;
 }
 
+bool ScalarType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Scalar) return false ;
+    auto castedPtr = static_cast<const ScalarType*>(type) ;
+    return scalarClass == castedPtr->getScalarClass() ; 
+}
+
 ScalarType::ScalarClass ScalarType::getScalarClass() const
 {
     return scalarClass ;

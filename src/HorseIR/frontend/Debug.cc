@@ -53,7 +53,7 @@ const char* rawProgram = ""
     "}"
     "" ;
 
-const char* rawType = "(func<?, i32, ...:?>, func<i32 :bool> ,   dict<i8, str>) -> bool" ;
+const char* rawType = "(func<?, i32, ...:?>, func<?, ?, ... :bool> ,   dict<i8, str>) -> bool" ;
 
 class StructurePrinter : horseIR::ast::ASTVisitor<void> {
 public:
@@ -95,11 +95,11 @@ int main(int argc, char *argv[])
                    std::uint16_t,
                    horseIR::misc::HasherDJB2<std::string, std::uint16_t>> method("package", "method", rawType) ;
     std::cout << method.toString() << std::endl ;
-/*
+
     std::cout << std::boolalpha
               << signatureASTNodes[0]->isGeneralizationOf(signatureASTNodes[1]) << std::endl 
               << signatureASTNodes[1]->isGeneralizationOf(signatureASTNodes[0]) << std::endl ;
-*/
+
     try {
         horseIR::ast::Type* type = horseIR::ast::Type::specificityJoin(
             signatureASTNodes[0],

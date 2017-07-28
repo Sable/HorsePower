@@ -139,6 +139,56 @@ FunctionType* FunctionType::duplicateDeep(ASTNode::MemManagerType &mem) const
     return functionType ;
 }
 
+bool FunctionType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Function) return false ;
+    auto castedPtr = static_cast<const FunctionType*>(type) ;
+    const std::vector<Type*> o_parameterTypes = castedPtr->getParameterTypes() ;
+    using ContainerSizeType = decltype(o_parameterTypes)::size_type ;
+    if (flexible) {
+        if (parameterTypes.size() <= o_parameterTypes.size()) {
+            const ContainerSizeType iterSize = parameterTypes.size() ;
+            for (ContainerSizeType iter = 0; iter < iterSize; ++iter) {
+                Type* const paramPtr = parameterTypes[iter] ;
+                Type* const o_paramPtr = o_parameterTypes[iter] ;
+                if (!paramPtr->isGeneralizationOf(o_paramPtr)) return false ;
+            }
+            return true ;
+        } else /* parameterTypes.size() > o_parameterTypes.size() */ {
+            if (!castedPtr->getIsFlexible()) return false ;
+            const ContainerSizeType iterSize = o_parameterTypes.size() ;
+            for (ContainerSizeType iter = 0; iter < iterSize; ++iter) {
+                Type* const paramPtr = parameterTypes[iter] ;
+                Type* const o_paramPtr = o_parameterTypes[iter] ;
+                if (!paramPtr->isGeneralizationOf(o_paramPtr)) return false ;
+            }
+            return true ;
+        }
+    } else /* !flexible */ {
+        if (parameterTypes.size() < o_parameterTypes.size()) {
+            return false ;
+        } else if (parameterTypes.size() == o_parameterTypes.size()) {
+            const ContainerSizeType iterSize = parameterTypes.size() ;
+            for (ContainerSizeType iter = 0; iter < iterSize; ++iter) {
+                Type* const paramPtr = parameterTypes[iter] ;
+                Type* const o_paramPtr = o_parameterTypes[iter] ;
+                if (!paramPtr->isGeneralizationOf(o_paramPtr)) return false ;
+            }
+            return true ;
+        }else /* parameterTypes.size > o_parameterTypes.size() */ {
+            if (!castedPtr->getIsFlexible()) return false ;
+            const ContainerSizeType iterSize = o_parameterTypes.size() ;
+            for (ContainerSizeType iter = 0; iter < iterSize; ++iter) {
+                Type* const paramPtr = parameterTypes[iter] ;
+                Type* const o_paramPtr = o_parameterTypes[iter] ;
+                if (!paramPtr->isGeneralizationOf(o_paramPtr)) return false ;
+            }
+            return true ;
+        }
+    }
+}
+
 std::vector<Type*> FunctionType::getParameterTypes() const
 {
     return parameterTypes ;

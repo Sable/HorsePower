@@ -51,6 +51,7 @@ namespace horseIR {
                     const Type* const rhsSite ;
                 } ;
             static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+            virtual bool isGeneralizationOf(const Type* type) const = 0 ;
         protected:
             struct __specificityJoin {
                 static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
@@ -90,6 +91,8 @@ namespace horseIR {
             virtual std::string toTreeString() const override ;
             virtual ScalarType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual ScalarType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
+
+            virtual bool isGeneralizationOf(const Type* type) const override ;
             
             ScalarType::ScalarClass getScalarClass() const ;
             ScalarType& setScalarClass(const ScalarType::ScalarClass& type) ;
@@ -117,6 +120,7 @@ namespace horseIR {
             virtual WildcardType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual WildcardType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
+            virtual bool isGeneralizationOf(const Type* type) const override ;
         protected:
             void __duplicateShallow(const WildcardType* wildcardType) ;
             void __duplicateDeep(const WildcardType* wildcardType, ASTNode::MemManagerType& mem) ;                                
@@ -139,6 +143,8 @@ namespace horseIR {
             virtual std::string toTreeString() const override ;
             virtual ListType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual ListType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
+
+            virtual bool isGeneralizationOf(const Type* type) const override ;
             
             Type* getElementType() const ;
             ListType& setElementType(Type* type) ;
@@ -165,6 +171,8 @@ namespace horseIR {
             virtual std::string toTreeString() const override ;
             virtual DictionaryType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual DictionaryType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
+
+            virtual bool isGeneralizationOf(const Type* type) const override ;
             
             Type* getKeyType() const ;
             Type* getValueType() const ;
@@ -194,6 +202,8 @@ namespace horseIR {
             virtual std::string toTreeString() const override ;
             virtual EnumerationType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual EnumerationType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
+
+            virtual bool isGeneralizationOf(const Type* type) const override ;
             
             Type* getElementType() const ;
             EnumerationType& setElementType(Type* type) ;
@@ -218,6 +228,8 @@ namespace horseIR {
             virtual FunctionType* duplicateShallow(ASTNode::MemManagerType& mem) const override ;
             virtual FunctionType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
+            virtual bool isGeneralizationOf(const Type* type) const override ;
+            
             std::vector<Type*> getParameterTypes() const ;
             bool getIsFlexible() const ;
             Type* getReturnType() const ;

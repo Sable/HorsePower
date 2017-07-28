@@ -54,6 +54,12 @@ WildcardType* WildcardType::duplicateDeep(ASTNode::MemManagerType &mem) const
     return wildcardType ;
 }
 
+bool WildcardType::isGeneralizationOf(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    return true ;
+}
+
 void WildcardType::__duplicateShallow(const WildcardType* wildcardType)
 {
     assert(wildcardType) ;
