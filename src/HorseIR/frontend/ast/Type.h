@@ -38,8 +38,6 @@ namespace horseIR {
             
             static Type* makeTypeASTNode(ASTNode* parent, HorseIRParser::TypeContext* cst, ASTNode::MemManagerType& mem) ;
             static Type* makeTypeASTNode(HorseIRParser::TypeContext* cst, ASTNode::MemManagerType& mem) ;
-            static std::vector<Type*> makeTypeSignatureASTNodes(ASTNode* parent, HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
-            static std::vector<Type*> makeTypeSignatureASTNodes(HorseIRParser::TypeSignatureListContext* cst, ASTNode::MemManagerType& mem) ;
 
             class SpecificityJoinAbortException : public std::runtime_error {
                 public:
@@ -218,6 +216,7 @@ namespace horseIR {
             FunctionType() = delete ;
             FunctionType(ASTNode* parent, HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionType(HorseIRParser::TypeCaseFuncContext* cst, ASTNode::MemManagerType& mem) ;
+            FunctionType(HorseIRParser::TypeFuncContext* cst, ASTNode::MemManagerType& mem) ;
             FunctionType(ASTNode::MemManagerType& mem) ;
             ~FunctionType() override = default ;
 

@@ -6,18 +6,15 @@
 #include <sstream>
 
 #include "../ast/AST.h"
-#include "../misc/Hasher.h"
 #include "../misc/Collections.h"
 
 namespace horseIR {
     namespace interpreter {
-        template <typename IntermediateType,
-                  typename HashCodeType = std::uint32_t,
-                  typename Hasher = misc::Hasher<std::basic_string<char>, HashCodeType>>
+        template <typename IntermediateType>
         class MethodMETA {
         public:
             enum class MethodMETAClass {
-                Primitive, UDF
+                Internal, External
             } ;
 
             MethodMETA(const std::string& p_moduleName,
@@ -25,11 +22,9 @@ namespace horseIR {
                        const MethodMETAClass& p_methodMETAClass) ;
             virtual ~MethodMETA() = default ;
 
-            HashCodeType getHashCode() const ;
             std::string getModuleName() const ;
             std::string getMethodName() const ;
-            std::vector<ast::Type*> getInputTypes() const ;
-            ast::Type* getOutputType() const ;
+            ast::FunctionType* getMethodType() const ;
 
             virtual std::string toString() const ;
             MethodMETAClass getMethodMETAClass() const ;
@@ -38,84 +33,57 @@ namespace horseIR {
             const std::string methodName ;
             const std::string moduleName ;
             const MethodMETAClass methodMETAClass ;
-            std::vector<ast::Type*> inputTypes ;
-            ast::Type* outputType ;
-            const HashCodeType hashCode ;
+            ast::FunctionType* methodType ;
         } ;
     }
 }
 
-template <typename T, typename V, typename R>
-inline horseIR::interpreter::MethodMETA<T, V, R>::MethodMETA (
+template <typename T>
+inline horseIR::interpreter::MethodMETA<T>::MethodMETA (
     const std::string& p_moduleName,
     const std::string& p_methodName,
     const MethodMETAClass& p_methodMETAClass)
     : methodName(p_methodName),
       moduleName(p_moduleName),
-      methodMETAClass(p_methodMETAClass),
-      hashCode(R::hash(moduleName + "." + methodName))
+      methodMETAClass(p_methodMETAClass)
 {}
 
-template <typename T, typename V, typename R>
-inline V
-horseIR::interpreter::MethodMETA<T, V, R>::getHashCode() const
-{
-    return hashCode ;
-}
-
-template <typename T, typename V, typename R>
+template <typename T>
 inline std::string
-horseIR::interpreter::MethodMETA<T, V, R>::getModuleName() const
+horseIR::interpreter::MethodMETA<T>::getModuleName() const
 {
     return moduleName ;
 }
 
-template <typename T, typename V, typename R>
+template <typename T>
 inline std::string
-horseIR::interpreter::MethodMETA<T, V, R>::getMethodName() const
+horseIR::interpreter::MethodMETA<T>::getMethodName() const
 {
     return methodName ;
 }
 
-template <typename T, typename V, typename R>
-inline std::vector<horseIR::ast::Type*>
-horseIR::interpreter::MethodMETA<T, V, R>::getInputTypes() const
+template <typename T>
+inline horseIR::ast::FunctionType*
+horseIR::interpreter::MethodMETA<T>::getMethodType() const
 {
-    return inputTypes ;
+    return methodType ;
 }
 
-template <typename T, typename V, typename R>
-inline horseIR::ast::Type*
-horseIR::interpreter::MethodMETA<T, V, R>::getOutputType() const
-{
-    return outputType ;
-}
-
-template <typename T, typename V, typename R>
+template <typename T>
 inline std::string
-horseIR::interpreter::MethodMETA<T, V, R>::toString() const
+horseIR::interpreter::MethodMETA<T>::toString() const
 {
     std::ostringstream stream ;
-    stream << "[HASH:0x" 
-           << std::hex << std::setw(sizeof(V) * 2) << std::setfill('0')
-           << unsigned(hashCode)
-           << "] "
-           << moduleName << '.' << methodName ;
-    auto inputParamToString = horseIR::misc::Collections::applyAndCollect(
-        inputTypes,
-        [] (const horseIR::ast::Type* type) -> std::string {
-            return type->toString() ;
-        }) ;
-    stream << '(' ;
-    (void) horseIR::misc::Collections::writeToStream(stream, inputParamToString, ", ") ;
-    stream << ")->"
-           << outputType->toString() ;
+    stream << moduleName << '.' << methodName
+           << '('
+           << methodType->toString()
+           << ')' ;
     return stream.str() ;
 }
 
-template <typename T, typename V, typename R>
-inline typename horseIR::interpreter::MethodMETA<T, V, R>::MethodMETAClass
-horseIR::interpreter::MethodMETA<T, V, R>::getMethodMETAClass() const
+template <typename T>
+inline typename horseIR::interpreter::MethodMETA<T>::MethodMETAClass
+horseIR::interpreter::MethodMETA<T>::getMethodMETAClass() const
 {
     return methodMETAClass ;
 }

@@ -22,6 +22,13 @@ namespace horseIR {
                                                  std::is_same<T, const char*>::value>::type>
             : std::true_type
         {} ;
+
+        template <typename InputType, typename HashCodeType>
+        struct TrivialHasher {
+            static HashCodeType hash(const InputType& input) {
+                return HashCodeType() ;
+            }
+        } ;
         
         template <typename InputType, typename HashCodeType, typename Enable = void>
         struct Hasher

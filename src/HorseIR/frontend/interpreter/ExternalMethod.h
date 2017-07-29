@@ -4,17 +4,14 @@
 #include <vector>
 #include "../ast/AST.h"
 #include "../ast/ASTVisitor.h"
-#include "../misc/Hasher.h"
 #include "../misc/Collections.h"
 
 #include "MethodMETA.h"
 
 namespace horseIR {
     namespace interpreter {
-        template <typename IntermediateType,
-                  typename HashCodeType = std::uint32_t,
-                  typename Hasher = misc::Hasher<std::basic_string<char>, HashCodeType>>
-        class ExternalMethod : public MethodMETA<IntermediateType, HashCodeType, Hasher> {
+        template <typename IntermediateType>
+        class ExternalMethod : public MethodMETA<IntermediateType> {
         public:
             ExternalMethod(const std::string& moduleName,
                            const std::string& methodName,
@@ -25,48 +22,38 @@ namespace horseIR {
                            ast::Type* outputType) ;
             virtual ~ExternalMethod() = default ;
 
-            // virtual IntermediateType invoke(std::size_t argc, IntermediateType args[]) = 0 ;
+            // virtual IntermediateType invoke(std::size_t argc, IntermediateType args[]) const  = 0 ;
         } ;
     }
 }
 
-template <typename T, typename V, typename R>
-inline horseIR::interpreter::ExternalMethod<T, V, R>::ExternalMethod(
+template <typename T>
+inline horseIR::interpreter::ExternalMethod<T>::ExternalMethod(
     const std::string& p_moduleName,
     const std::string& p_methodName,
     const std::string& signatureString)
-    : MethodMETA<T, V, R>(p_moduleName, p_methodName, MethodMETA<T, V, R>::MethodMETAClass::Primitive)
+    : MethodMETA<T>(p_moduleName, p_methodName, MethodMETA<T>::MethodMETAClass::External)
 {
     antlr4::ANTLRInputStream inStream(signatureString.c_str()) ;
     horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream tokenStream(&lexer) ;
     horseIR::HorseIRParser parser(&tokenStream) ;
-    auto signatureContext = parser.typeSignatureList() ;
-    auto signatures = horseIR::ast::Type::makeTypeSignatureASTNodes(signatureContext, this->mem) ;
-    horseIR::misc::Collections::apply(
-        signatures,
-        [] (horseIR::ast::Type* type) -> void {
-            horseIR::ast::ASTVisitors::applyToEachNode(type, [] (horseIR::ast::ASTNode* ast) -> void {
-                    (void) ast->setCST(nullptr) ;
-                }) ;
-        }) ;    
-    for (auto iter = signatures.cbegin(); iter != signatures.cend(); ++iter) {
-        auto iter_p = iter ;
-        if ((++iter_p) != signatures.cend()) {
-            this->inputTypes.push_back(*iter) ;
-        } else {
-            this->outputType = *iter ;
-        }
-    }
+    horseIR::HorseIRParser::TypeFuncContext* context = parser.typeFunc() ;
+    this->methodType = new ast::FunctionType(context, this->mem) ;
+    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+            node->setCST(nullptr) ;
+            return ;
+        }) ;
+    return ;
 }
 
-template <typename T, typename V, typename R>
-inline horseIR::interpreter::ExternalMethod<T, V, R>::ExternalMethod(
+template <typename T>
+inline horseIR::interpreter::ExternalMethod<T>::ExternalMethod(
     const std::string& p_moduleName,
     const std::string& p_methodName,
     const std::vector<ast::Type*> p_inputTypes,
     ast::Type* p_outputType)
-    : MethodMETA<T, V, R>(p_moduleName, p_methodName, MethodMETA<T, V, R>::MethodMETAClass::Primitive)
+    : MethodMETA<T>(p_moduleName, p_methodName, MethodMETA<T>::MethodMETAClass::Primitive)
 {
     this->inputTypes = horseIR::misc::Collections::applyAndCollect(
         p_inputTypes,

@@ -62,6 +62,49 @@ FunctionType::FunctionType(ASTNode::MemManagerType& mem)
       returnType(nullptr)
 {}
 
+FunctionType::FunctionType(HorseIRParser::TypeFuncContext* cst, ASTNode::MemManagerType& mem)
+    : Type(nullptr, cst, mem, Type::TypeClass::Function, ASTNode::ASTNodeClass::FunctionType)
+{
+    assert(cst != nullptr) ;
+
+    HorseIRParser::TypeFunc0Context* type0 = nullptr ;
+    HorseIRParser::TypeFunc1Context* type1 = nullptr ;
+    HorseIRParser::TypeFunc2Context* type2 = nullptr ;
+    HorseIRParser::TypeFunc3Context* type3 = nullptr ;
+
+    if ((type0 = dynamic_cast<decltype(type0)>(cst)) != nullptr) {
+        flexible = false ;
+        returnType = Type::makeTypeASTNode(this, type0->type(), mem) ;
+    } else if ((type1 = dynamic_cast<decltype(type1)>(cst)) != nullptr) {
+        flexible = true ;
+        returnType = Type::makeTypeASTNode(this, type1->type(), mem) ;
+    } else if ((type2 = dynamic_cast<decltype(type2)>(cst)) != nullptr) {
+        flexible = false ;
+        const std::vector<HorseIRParser::TypeContext*> types(std::move(type2->type())) ;
+        for (auto ptr = types.cbegin(); ptr != types.cend(); ++ptr) {
+            auto param = Type::makeTypeASTNode(this, *ptr, mem) ;
+            if (ptr + 1 != types.cend()) {
+                parameterTypes.push_back(param) ;
+            } else {
+                returnType = param ;
+            }
+        }
+    } else if ((type3 = dynamic_cast<decltype(type3)>(cst)) != nullptr) {
+        flexible = true ;
+        const std::vector<HorseIRParser::TypeContext*> types(std::move(type3->type())) ;
+        for (auto ptr = types.cbegin(); ptr != types.cend(); ++ptr) {
+            auto param = Type::makeTypeASTNode(this, *ptr, mem) ;
+            if (ptr + 1 != types.cend()) {
+                parameterTypes.push_back(param) ;
+            } else {
+                returnType = param ;
+            }
+        }
+    } else {
+        assert(false) ;
+    }
+}
+
 std::size_t FunctionType::getNumNodesRecursively() const
 {
     std::size_t count = 1 ;

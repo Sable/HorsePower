@@ -47,6 +47,29 @@ namespace horseIR {
                 return ;
             }
 
+            template <class Container, class UnaryPredicate>
+            static std::vector<typename Container::value_type>
+            filter(const Container& container, const UnaryPredicate& predicate) {
+                std::vector<typename Container::value_type> retVector ;
+                retVector.reserve(container.size()) ;
+                for (auto iter = container.cbegin(); iter != container.cend(); ++iter) {
+                    if (predicate(*iter)) retVector.push_back(*iter) ;
+                }
+                retVector.shrink_to_fit() ;
+                return retVector ;
+            }
+
+            template <class T, class UnaryPredicate>
+            static std::vector<T> filter(const T arr[], std::size_t size, const UnaryPredicate& predicate) {
+                std::vector<T> retVector ;
+                retVector.reserve(size) ;
+                for (std::size_t iter = 0; iter < size; ++iter) {
+                    if (predicate(arr[iter])) retVector.push_back(arr[iter]) ;
+                }
+                retVector.shrink_to_fit() ;
+                return retVector ;
+            }
+
             template <class Container, class Stream, class Delimiter>
             static Stream& writeToStream(Stream& s, const Container& c, const Delimiter& delimiter) {
                 for (auto iter = c.cbegin(); iter != c.cend(); ++iter) {

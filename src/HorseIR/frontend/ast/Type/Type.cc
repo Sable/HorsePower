@@ -96,31 +96,6 @@ Type* Type::makeTypeASTNode(HorseIRParser::TypeContext *cst, ASTNode::MemManager
     }
 }
 
-std::vector<Type*> Type::makeTypeSignatureASTNodes(horseIR::ast::ASTNode *parent,
-                                                   HorseIRParser::TypeSignatureListContext *cst,
-                                                   ASTNode::MemManagerType &mem)
-{
-    assert(cst != nullptr) ;
-    const std::vector<HorseIRParser::TypeContext*> signatures = cst->type() ;
-    return horseIR::misc::Collections::applyAndCollect(
-        signatures,
-        [&](HorseIRParser::TypeContext* cst) -> Type* {
-            return Type::makeTypeASTNode(parent, cst, mem) ;
-        }) ;
-}
-
-std::vector<Type*> Type::makeTypeSignatureASTNodes(HorseIRParser::TypeSignatureListContext* cst,
-                                                   ASTNode::MemManagerType& mem)
-{
-    assert(cst != nullptr) ;
-    const std::vector<HorseIRParser::TypeContext*> signatures = cst->type() ;
-    return horseIR::misc::Collections::applyAndCollect(
-        signatures,
-        [&](HorseIRParser::TypeContext* cst) -> Type* {
-            return Type::makeTypeASTNode(cst, mem) ;
-        }) ;
-}
-
 Type::SpecificityJoinAbortException::SpecificityJoinAbortException(const Type* p_lhsSite, const Type* p_rhsSite)
     : std::runtime_error("Specificity Join Abort"),
     lhsSite(p_lhsSite),
