@@ -91,7 +91,12 @@ int main(int argc, char *argv[])
     }
 
     using namespace horseIR::interpreter ;
-    ExternalMethod<void*> method ("MyModule", "foo", rawType) ;
-    std::cout << method.toString() << std::endl ;
+    ExternalMethod<void*>* bindedMethod = ExternalMethod<void*>::bindExternalMethod(
+        "MyModule", "foo", rawType, [] (std::size_t argc, void* argv[]) -> void* {
+            std::cout << "Method Invoked !" << std::endl ;
+            return nullptr ;
+        }) ;
+    std::cout << bindedMethod->toString() << std::endl ;
+    delete bindedMethod ;
     return 0;
 }
