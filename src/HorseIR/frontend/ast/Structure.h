@@ -224,6 +224,7 @@ namespace horseIR {
             StatementIterator end() const ;
 
             std::string getMethodName() const ;
+            FunctionType* makeSignatureFunctionType(ASTNode::MemManagerType& mem) const ;
             
             virtual std::size_t getNumNodesRecursively() const override ;
             virtual std::vector<ASTNode*> getChildren() const override ;

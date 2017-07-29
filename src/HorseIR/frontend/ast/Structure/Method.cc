@@ -6,6 +6,7 @@
 #include <map>
 
 #include "../AST.h"
+#include "../ASTVisitor.h"
 
 using namespace horseIR::ast ;
 
@@ -57,6 +58,27 @@ StatementIterator Method::end() const
 std::string Method::getMethodName() const
 {
     return methodName ;
+}
+
+FunctionType* Method::makeSignatureFunctionType(ASTNode::MemManagerType &mem) const
+{
+    FunctionType* retType = new FunctionType(mem) ;
+    std::vector<Type*> inputTypes {} ;
+    inputTypes.reserve(parameters.size()) ;
+    for (auto iter = parameters.cbegin(); iter != parameters.cend(); ++iter) {
+        Type* duplicateType = static_cast<Type*>(iter->second->duplicateDeep(mem)) ;
+        inputTypes.push_back(duplicateType) ;
+    }
+    Type* outputType = static_cast<Type*>(returnType->duplicateDeep(mem)) ;
+    (void) retType
+        ->setParameterTypes(inputTypes)
+        .setReturnType(outputType)
+        .setIsFlexible(false)
+        .setParentASTNode(nullptr) ;
+    ASTVisitors::applyToEachNode(retType, [](ASTNode* node) -> void {
+            (void) node->setCST(nullptr) ;
+        }) ;
+    return retType ;
 }
 
 std::size_t Method::getNumNodesRecursively() const
