@@ -49,7 +49,9 @@ public:
         const Type* const rhsSite ;
     } ;
     static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
+    static bool hasOverlap(const Type* lhs, const Type* rhs) ;
     virtual bool isGeneralizationOf(const Type* type) const = 0 ;
+    virtual bool isSameAs(const Type* type) const = 0 ;
 protected:
     struct __specificityJoin {
         static Type* specificityJoin(const Type* lhs, const Type* rhs, ASTNode::MemManagerType& mem) ;
@@ -91,6 +93,7 @@ public:
     virtual ScalarType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
             
     ScalarType::ScalarClass getScalarClass() const ;
     ScalarType& setScalarClass(const ScalarType::ScalarClass& type) ;
@@ -119,6 +122,7 @@ public:
     virtual WildcardType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
 protected:
     void __duplicateShallow(const WildcardType* wildcardType) ;
     void __duplicateDeep(const WildcardType* wildcardType, ASTNode::MemManagerType& mem) ;                                
@@ -143,6 +147,7 @@ public:
     virtual ListType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
             
     Type* getElementType() const ;
     ListType& setElementType(Type* type) ;
@@ -171,6 +176,7 @@ public:
     virtual DictionaryType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
             
     Type* getKeyType() const ;
     Type* getValueType() const ;
@@ -202,6 +208,7 @@ public:
     virtual EnumerationType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
             
     Type* getElementType() const ;
     EnumerationType& setElementType(Type* type) ;
@@ -228,6 +235,7 @@ public:
     virtual FunctionType* duplicateDeep(ASTNode::MemManagerType& mem) const override ;
 
     virtual bool isGeneralizationOf(const Type* type) const override ;
+    virtual bool isSameAs(const Type* type) const override ;
             
     std::vector<Type*> getParameterTypes() const ;
     bool getIsFlexible() const ;
@@ -243,5 +251,6 @@ protected:
     void __duplicateShallow(const FunctionType* funcType) ;
     void __duplicateDeep(const FunctionType* funcType, ASTNode::MemManagerType& mem) ;
 } ;
+
 }
 }

@@ -65,6 +65,7 @@ public:
 
 #include "./misc/Hasher.h"
 #include "./interpreter/Dispatcher.h"
+#include "./interpreter/Exception.h"
 
 #include <memory>
 
@@ -100,28 +101,36 @@ int main(int argc, char *argv[])
     }
 
     VectorDispatcher<void*>::ContainerType c ;
+    try{
     for (auto iter = internalMethod.cbegin(); iter != internalMethod.cend(); ++iter) {
         VectorDispatcher<void*>::manage(c, *iter); 
     }
-    VectorDispatcher<void*>::manage(
-        c,
-        ExternalMethod<void*>::bindExternalMethod(
-            "default", "main", "func<i32, i32 :table>", [](std::size_t argc, void* argv[]) -> void* {
-                return nullptr ;
-            })) ;
-    VectorDispatcher<void*>::manage(
-        c,
-        ExternalMethod<void*>::bindExternalMethod(
-            "default", "main", "func<?, i32 :table>", [](std::size_t argc, void* argv[]) -> void* {
-                return nullptr ;
-            })) ;
-    VectorDispatcher<void*>::manage(
-        c,
-        ExternalMethod<void*>::bindExternalMethod(
-            "default", "main", "func<?, ? :table>", [](std::size_t argc, void* argv[]) -> void* {
-                return nullptr ;
-            })) ;
+    VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
+                                        "default", "main", "func<?, i64 :table>",
+                                        [](std::size_t argc, void* argv[]) -> void* {
+                                            return nullptr ;
+                                        })) ;
+    VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
+                                        "default", "main", "func<i32, i32 :table>",
+                                        [](std::size_t argc, void* argv[]) -> void* {
+                                            return nullptr ;
+                                        })) ;
+    VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
+                                        "default", "main", "func<?, i32 :ktable>",
+                                        [](std::size_t argc, void* argv[]) -> void* {
+                                            return nullptr ;
+                                        })) ;
+    VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
+                                        "default", "main", "func<i32, ? :bool>",
+                                        [](std::size_t argc, void* argv[]) -> void* {
+                                            return nullptr ;
+                                        })) ;
     std::cout << VectorDispatcher<void*>::containerToString(c) << std::endl ;
+    } catch (const OverloadOverlapException<void*>& except) {
+        std::cout << except.toString() << std::endl ;
+    } catch (const OverloadDuplicateException<void*>& except) {
+        std::cout << except.toString() << std::endl ;
+    }
     
     return 0;
 }

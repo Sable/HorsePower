@@ -26,6 +26,7 @@ public:
     std::string getModuleName() const ;
     std::string getMethodName() const ;
     ast::FunctionType* getMethodType() const ;
+    ast::FunctionType* getDispatchType() const ;
 
     virtual std::string toString() const ;
     MethodMETAClass getMethodMETAClass() const ;
@@ -34,6 +35,7 @@ public:
     const std::string methodName ;
     const std::string moduleName ;
     const MethodMETAClass methodMETAClass ;
+    ast::FunctionType* dispatchType ;
     ast::FunctionType* methodType ;
 } ;
 
@@ -62,6 +64,12 @@ template <typename T>
 inline ast::FunctionType* MethodMETA<T>::getMethodType() const
 {
     return methodType ;
+}
+
+template <typename T>
+inline ast::FunctionType* MethodMETA<T>::getDispatchType() const
+{
+    return dispatchType ;
 }
 
 template <typename T>

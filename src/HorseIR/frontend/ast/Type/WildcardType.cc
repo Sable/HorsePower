@@ -60,6 +60,12 @@ bool WildcardType::isGeneralizationOf(const horseIR::ast::Type *type) const
     return true ;
 }
 
+bool WildcardType::isSameAs(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    return type->getTypeClass() == Type::TypeClass::Wildcard ;
+}
+
 void WildcardType::__duplicateShallow(const WildcardType* wildcardType)
 {
     assert(wildcardType) ;

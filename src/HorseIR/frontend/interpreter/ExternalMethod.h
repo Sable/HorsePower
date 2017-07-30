@@ -23,7 +23,8 @@ public:
                    const std::string& methodName,
                    ast::FunctionType* signatureType) ;
     virtual ~ExternalMethod() = default ;
-    
+
+    virtual std::string toString() const override ;
     virtual IntermediateType invoke(std::size_t argc, IntermediateType args[]) const  = 0 ;
     
     typedef std::function<IntermediateType(std::size_t, IntermediateType[])> BindFunctionType ;
@@ -62,12 +63,15 @@ inline ExternalMethod<T>::ExternalMethod(const std::string& p_moduleName,
     antlr4::CommonTokenStream tokenStream(&lexer) ;
     horseIR::HorseIRParser parser(&tokenStream) ;
     horseIR::HorseIRParser::TypeFuncContext* context = parser.typeFunc() ;
-    this->methodType = new ast::FunctionType(context, this->mem) ;
-    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+    ast::FunctionType* functionType = new ast::FunctionType(context, this->mem) ;
+    ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
             node->setCST(nullptr) ;
             return ;
         }) ;
-    (void) this->methodType->setParentASTNode(nullptr) ;
+    (void) functionType->setParentASTNode(nullptr) ;
+    this->methodType = functionType ;
+    this->dispatchType = functionType->duplicateDeep(this->mem) ;
+    (void) this->dispatchType->setReturnType(new ast::WildcardType(this->mem)) ;
     return ;
 }
 
@@ -78,13 +82,28 @@ inline ExternalMethod<T>::ExternalMethod(const std::string& p_moduleName,
     : MethodMETA<T>(p_moduleName, p_methodName, MethodMETA<T>::MethodMETAClass::External)
 {
     assert(p_signatureType) ;
-    this->methodType = p_signatureType->duplicateDeep(this->mem) ;
-    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+    ast::FunctionType* functionType = p_signatureType->duplicateDeep(this->mem) ;
+    ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
             (void) node->setCST(nullptr) ;
             return ;
         }) ;
-    (void) this->methodType->setParentASTNode(nullptr) ;
+    (void) functionType->setParentASTNode(nullptr) ;
+    this->methodType = functionType ;
+    this->dispatchType = functionType->duplicateDeep(this->mem) ;
+    (void) this->dispatchType->setReturnType(new ast::WildcardType(this->mem)) ;
     return ;
+}
+
+template <typename T>
+inline std::string ExternalMethod<T>::toString() const
+{
+    std::ostringstream stream ;
+    stream << this->moduleName << '.' << this->methodName
+           << '('
+           << this->methodType->toString()
+           << ')'
+           << " [external]" ;
+    return stream.str() ;
 }
 
 template <typename T>

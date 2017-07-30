@@ -72,6 +72,14 @@ bool ListType::isGeneralizationOf(const horseIR::ast::Type *type) const
     return elementType->isGeneralizationOf(castedPtr->getElementType()) ;
 }
 
+bool ListType::isSameAs(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::List) return false ;
+    auto castedPtr = static_cast<const ListType*>(type) ;
+    return elementType->isSameAs(castedPtr->elementType) ;
+}
+
 Type* ListType::getElementType() const
 {
     return elementType ;

@@ -96,7 +96,7 @@ inline void
 Collections::apply(const T1 &container, const T2 &unaryOperation)
 {
     for (auto iter = container.begin(); iter != container.end(); ++iter) {
-        (void) unaryOperation(iter) ;
+        (void) unaryOperation(*iter) ;
     }
     return ;
 }

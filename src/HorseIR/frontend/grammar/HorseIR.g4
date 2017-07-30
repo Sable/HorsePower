@@ -147,7 +147,7 @@ type            : tokenValue=( 'bool' |
                     'sym'     |
                     'm' | 'd' | 'z' | 'u' | 'v' | 't' |
                     'str'     |
-                    'table'   | 'ktbale'              )
+                    'table'   | 'ktable'              )
                                                       #typeCaseScalar
                 | tokenValue='?'                      #typeCaseWildcard
                 | typeList                            #typeCaseList

@@ -232,6 +232,30 @@ bool FunctionType::isGeneralizationOf(const horseIR::ast::Type *type) const
     }
 }
 
+bool FunctionType::isSameAs(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Function) return false ;
+    auto castedPtr = static_cast<const FunctionType*>(type) ;
+    bool parameterTypeIsSame = true ;
+    if (parameterTypes.size() != castedPtr->parameterTypes.size()) {
+        parameterTypeIsSame = false ;
+    } else {
+        auto iterSize = parameterTypes.size() ;
+        for (decltype(iterSize) iter = 0; iter < iterSize; ++iter) {
+            Type* const parameterType = parameterTypes[iter] ;
+            Type* const o_parameterType = castedPtr->parameterTypes[iter] ;
+            if (!parameterType->isSameAs(o_parameterType)) {
+                parameterTypeIsSame = false ;
+                break ;
+            }
+        }
+    }
+    const bool flexibleIsSame = (flexible == castedPtr->flexible) ;
+    const bool returnTypeIsSame = returnType->isSameAs(castedPtr->returnType) ;
+    return parameterTypeIsSame && flexibleIsSame && returnTypeIsSame ;
+}
+
 std::vector<Type*> FunctionType::getParameterTypes() const
 {
     return parameterTypes ;

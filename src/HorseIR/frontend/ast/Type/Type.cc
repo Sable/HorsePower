@@ -353,6 +353,18 @@ Type* Type::__specificityJoin::joinFunction(const horseIR::ast::FunctionType *lh
     }
 }
 
+bool Type::hasOverlap(const horseIR::ast::Type *lhs, const horseIR::ast::Type *rhs)
+{
+    assert(lhs != nullptr && rhs != nullptr) ;
+    ASTNode::MemManagerType mem ;
+    try {
+        Type* joinedType = Type::specificityJoin(lhs, rhs, mem) ;
+        return lhs->isGeneralizationOf(joinedType) && rhs->isGeneralizationOf(joinedType) ;
+    } catch (const Type::SpecificityJoinAbortException& expcetion) {
+        return false ;
+    }
+}
+
 void Type::__duplicateShallow(const Type* type)
 {
     assert(type != nullptr) ;

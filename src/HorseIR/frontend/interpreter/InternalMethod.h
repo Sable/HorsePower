@@ -24,7 +24,7 @@ public:
                    ast::Method* method) ;
     InternalMethod(ast::Method* method) ;
     virtual ~InternalMethod() = default ;
-
+    virtual std::string toString() const override ;
     ast::Method* getInvokedMethodAST() const ;
 protected:
     ast::Method* method ;
@@ -43,12 +43,15 @@ inline InternalMethod<T>::InternalMethod(const std::string& moduleName,
     antlr4::CommonTokenStream stream(&lexer) ;
     horseIR::HorseIRParser parser(&stream) ;
     horseIR::HorseIRParser::TypeFuncContext* context = parser.typeFunc() ;
-    this->methodType = new ast::FunctionType(context, this->mem) ;
-    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+    ast::FunctionType* functionType = new ast::FunctionType(context, this->mem) ;
+    ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
             node->setCST(nullptr) ;
             return ;
         }) ;
-    (void) this->methodType->setParentASTNode(nullptr) ;
+    (void) functionType->setParentASTNode(nullptr) ;
+    this->methodType = functionType ;
+    this->dispatchType = functionType->duplicateDeep(this->mem) ;
+    (void) this->dispatchType->setReturnType(new ast::WildcardType(this->mem)) ;
     return ;
 }
 
@@ -61,12 +64,15 @@ inline InternalMethod<T>::InternalMethod(const std::string& p_moduleName,
     method(p_method)
 {
     assert(p_method != nullptr) ;
-    this->methodType = p_method->makeSignatureFunctionType(this->mem) ;
-    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+    ast::FunctionType* functionType = p_method->makeSignatureFunctionType(this->mem) ;
+    ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
             (void) node->setCST(nullptr) ;
             return ;
         }) ;
-    (void) this->methodType->setParentASTNode(nullptr) ;
+    (void) functionType->setParentASTNode(nullptr) ;
+    this->methodType = functionType ;
+    this->dispatchType = functionType->duplicateDeep(this->mem) ;
+    (void) this->dispatchType->setReturnType(new ast::WildcardType(this->mem)) ;
     return ;
 }
 
@@ -74,21 +80,48 @@ template <typename T>
 inline InternalMethod<T>::InternalMethod(ast::Method* p_method)
     : MethodMETA<T>(static_cast<ast::Module*>(p_method->getParentASTNode())->getModuleName(),
                     p_method->getMethodName(),
-                    MethodMETA<T>::MethodMETAClass::Internal)
+                    MethodMETA<T>::MethodMETAClass::Internal),
+    method(p_method)
 {
     assert(p_method != nullptr) ;
-    this->methodType = p_method->makeSignatureFunctionType(this->mem) ;
-    ast::ASTVisitors::applyToEachNode(this->methodType, [](ast::ASTNode* node) -> void {
+    ast::FunctionType* functionType = p_method->makeSignatureFunctionType(this->mem) ;
+    ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
             (void) node->setCST(nullptr) ;
             return ;
         }) ;
-    (void) this->methodType->setParentASTNode(nullptr) ;
+    (void) functionType->setParentASTNode(nullptr) ;
+    this->methodType = functionType ;
+    this->dispatchType = functionType->duplicateDeep(this->mem) ;
+    (void) this->dispatchType->setReturnType(new ast::WildcardType(this->mem)) ;
     return ;
 }
 
 template <typename T>
-inline horseIR::ast::Method*
-InternalMethod<T>::getInvokedMethodAST() const
+inline std::string InternalMethod<T>::toString() const
+{
+    std::ostringstream stream ;
+    stream << this->moduleName << '.' << this->methodName
+           << '('
+           << this->methodType->toString()
+           << ')' ;
+    const antlr4::tree::ParseTree* tree = method->getCST() ;
+    if (tree == nullptr) {
+        stream << " [unknown]" ;
+    } else {
+        auto context = static_cast<const HorseIRParser::MethodContext*>(tree) ;
+        stream << " [in file: " << method->getEnclosingFilePath()
+               << " at "
+               << context->start->getLine()
+               << ':'
+               << context->start->getCharPositionInLine()
+               << ']' ;
+         
+    }
+    return stream.str() ;
+}
+
+template <typename T>
+inline horseIR::ast::Method* InternalMethod<T>::getInvokedMethodAST() const
 {
     return method ;
 }

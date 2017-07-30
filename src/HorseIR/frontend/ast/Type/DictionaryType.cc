@@ -76,6 +76,16 @@ bool DictionaryType::isGeneralizationOf(const horseIR::ast::Type *type) const
     return keyIsGeneralized && valueIsGeneralied ;
 }
 
+bool DictionaryType::isSameAs(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Dictionary) return false ;
+    auto castedPtr = static_cast<const DictionaryType*>(type) ;
+    const bool keyIsSame = keyType->isSameAs(castedPtr->keyType) ;
+    const bool valueIsSame = keyType->isSameAs(castedPtr->valueType) ;
+    return keyIsSame && valueIsSame ;
+}
+
 Type* DictionaryType::getKeyType() const
 {
     return keyType ;

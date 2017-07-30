@@ -52,6 +52,11 @@ ASTNode::ASTNodeClass ASTNode::getNodeType() const
     return nodeType ;
 }
 
+std::string ASTNode::getEnclosingFilePath() const
+{
+    return filePath ;
+}
+
 std::string ASTNode::CSTNameToString(HorseIRParser::NameContext *nameContext)
 {
     assert(nameContext != nullptr) ;
@@ -119,6 +124,7 @@ void ASTNode::__duplicateDeep(const ASTNode *astNode, ASTNode::MemManagerType& m
     assert(astNode != nullptr) ;
     (void) mem ;
     cst = astNode->cst ;
+    filePath = astNode->filePath ;
     parentASTNode = nullptr ;
     return ;
 }

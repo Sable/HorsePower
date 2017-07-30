@@ -58,6 +58,7 @@ public:
     const antlr4::tree::ParseTree* getCST() const ;
     ASTNode& setCST(const antlr4::tree::ParseTree* cst) ;
     ASTNode::ASTNodeClass getNodeType() const ;
+    std::string getEnclosingFilePath() const ;
 
     virtual std::string toString() const = 0 ;
     virtual std::string toTreeString() const = 0 ;
@@ -65,6 +66,7 @@ public:
 protected:
     static const std::string INDENT ;
     const antlr4::tree::ParseTree* cst ;
+    std::string filePath = "unknown" ;
     const ASTNode::ASTNodeClass nodeType ;
     ASTNode* parentASTNode ;
 

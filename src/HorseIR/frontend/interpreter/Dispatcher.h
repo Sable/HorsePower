@@ -8,6 +8,7 @@
 #include "MethodMETA.h"
 #include "ExternalMethod.h"
 #include "InternalMethod.h"
+#include "Exception.h"
 
 #include "../misc/Collections.h"
 
@@ -33,50 +34,40 @@ struct VectorDispatcher {
 } ;
 
 template <typename T>
-void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> *method)
+inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> *method)
 {
-    auto candidateVector = misc::Collections::filter(
-        container.container,
-        [&](MethodMETA<T>* o_method) -> bool {
-            if (method->getModuleName() != o_method->getModuleName() ||
-                method->getMethodName() != o_method->getMethodName()    ){
-                return false ;
-            } else {
-                ast::FunctionType* methodType = method->getMethodType() ;
-                ast::FunctionType* o_methodType = o_method->getMethodType() ;
-                if (o_methodType->isGeneralizationOf(methodType) ||
-                    methodType->isGeneralizationOf(o_methodType)    ) {
-                    return false ;
-                } else {
-                    return true ;
-                }
+    auto candidateVector = container.container ;
+    candidateVector = misc::Collections::filter(candidateVector, [&](MethodMETA<T>* m) -> bool {
+            if (method->getModuleName() != m->getModuleName()) return false ;
+            if (method->getMethodName() != m->getMethodName()) return false ;
+            return true ;
+        }) ;
+    misc::Collections::apply(candidateVector, [&](MethodMETA<T>* m) -> void {
+            ast::FunctionType* const methodType = method->getDispatchType() ;
+            ast::FunctionType* const o_methodType = m->getDispatchType() ;
+            if (methodType->isSameAs(o_methodType)) {
+                throw OverloadDuplicateException<T>(method, container.container) ;
             }
         }) ;
-    bool isValidInsert = misc::Collections::pairwiseCheck(
-        candidateVector,
-        [](MethodMETA<T>* m1, MethodMETA<T>* m2) -> bool {
-            ast::ASTNode::MemManagerType tempMem ;
-            ast::Type* const m1Type = m1->getMethodType() ;
-            ast::Type* const m2Type = m2->getMethodType() ;
-            ast::Type* joinedType = nullptr ;
-            try {
-                joinedType = ast::Type::specificityJoin(m1Type,m2Type,tempMem) ;
-            } catch (ast::Type::SpecificityJoinAbortException& except) {
-                return false ;
-            }
-            return !((m1Type->isGeneralizationOf(joinedType) &&
-                      m2Type->isGeneralizationOf(joinedType) )) ;
+    candidateVector = misc::Collections::filter(candidateVector, [&](MethodMETA<T>* m) -> bool {
+            ast::Type* const methodType = method->getDispatchType() ;
+            ast::Type* const mType = m->getDispatchType() ;
+            const bool methodIsGeneralizationOf = methodType->isGeneralizationOf(mType) ;
+            const bool mIsGeneralizationOf = mType->isGeneralizationOf(methodType) ;
+            return !(methodIsGeneralizationOf || mIsGeneralizationOf) ;
         }) ;
-    if (isValidInsert) {
-        container.container.emplace_back(method) ;
-        container.mem.emplace_back(method) ;
-    } else {
-        throw std::runtime_error("invalid manage") ;
-    }
+    misc::Collections::apply(candidateVector, [&](MethodMETA<T>* m) -> void {
+            if (ast::Type::hasOverlap(m->getDispatchType(), method->getDispatchType())) {
+                throw OverloadOverlapException<T>(method, container.container) ;
+            } 
+        }) ;
+
+    container.container.emplace_back(method) ;
+    container.mem.emplace_back(method) ;
 }
 
 template <typename T>
-std::string VectorDispatcher<T>::containerToString(const ContainerType &container)
+inline std::string VectorDispatcher<T>::containerToString(const ContainerType &container)
 {
     std::ostringstream stream ;
     stream << "[\n  " ;

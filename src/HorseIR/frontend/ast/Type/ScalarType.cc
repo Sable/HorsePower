@@ -135,6 +135,14 @@ bool ScalarType::isGeneralizationOf(const horseIR::ast::Type *type) const
     return scalarClass == castedPtr->getScalarClass() ; 
 }
 
+bool ScalarType::isSameAs(const horseIR::ast::Type *type) const
+{
+    assert(type != nullptr) ;
+    if (type->getTypeClass() != Type::TypeClass::Scalar) return false ;
+    auto castedPtr = static_cast<const ScalarType*>(type) ;
+    return scalarClass == castedPtr->scalarClass ;
+}
+
 ScalarType::ScalarClass ScalarType::getScalarClass() const
 {
     return scalarClass ;
