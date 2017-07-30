@@ -127,29 +127,17 @@ void errorMsg(S msg){
 
 /* output */
 
-void printItem(V x, S strBuff){
-	switch(xp){
-		caseB SP(strBuff, "%d"  , xb); break;
-		caseI SP(strBuff, "%d"  , xi); break;
-		caseL SP(strBuff, "%lld", xl); break;
-		caseE SP(strBuff, "%lf" , xe); break;
-		caseQ printSymbol(xq, strBuff);break;
-	}
-}
-
 void printListItem(V x, L k, S strBuff){
-	if(xn == 1){
-		printItem(x, strBuff);
-	}
-	else {
-		switch(xp){
-			caseB SP(strBuff, "%d"  , xB(k)); break;
-			caseI SP(strBuff, "%d"  , xI(k)); break;
-			caseL SP(strBuff, "%lld", xL(k)); break;
-			caseE SP(strBuff, "%lf" , xF(k)); break;
-			caseQ printSymbol(xQ(k), strBuff);break;
-			caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
-		}
+	switch(xp){
+		caseB SP(strBuff, "%d"  , xB(k)); break;
+		caseH SP(strBuff, "%d"  , xH(k)); break;
+		caseI SP(strBuff, "%d"  , xI(k)); break;
+		caseL SP(strBuff, "%lld", xL(k)); break;
+		caseF SP(strBuff, "%f",   xF(k)); break;
+		caseE SP(strBuff, "%lf" , xE(k)); break;
+		caseX SP(strBuff, "%g+%gi" , xReal(xX(k)),xImag(xX(k))); break;
+		caseQ printSymbol(xQ(k), strBuff);break;
+		caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
 	}
 	P(" %s", strBuff);
 }
@@ -166,7 +154,7 @@ void printList(V x){
 }
 
 void printDict(V x){
-	if(isN()){
+	if(isDict(x)){
 		printHead(x);
 		printList(xV(0));
 		P(",");
@@ -179,7 +167,7 @@ void printDict(V x){
 }
 
 void printTable(V x){
-	if(isA()){
+	if(isTable(x)){
 		printHead(x);
 		DOI(xn, {if(i>0)P(","); printDict(xV(i));})
 		P("}");
@@ -191,8 +179,8 @@ void printTable(V x){
 
 /* pretty print */
 
-void printTablePretty(V x){
-	if(isA()){
+void printTablePretty(V x, L rowLimit){
+	if(isTable(x)){
 		L *colWidth = (L*)malloc(sizeof(L) * vn(x));
 		L totSize = 0;  C buff[99];
 		DOI(vn(x), colWidth[i]=getColWidth(getTableDict(x,i)))
@@ -200,14 +188,15 @@ void printTablePretty(V x){
 		// DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
 		/* print head */
 		DOI(vn(x), {V d=getTableDict(x,i); V key = getDictKey(d); \
-			printSymbol(vq(key),buff); prettyItem(buff,colWidth[i]); P("%s|",buff); })
+			printSymbol(vq(key),buff); printStrPretty(buff,colWidth[i]); P("%s|",buff); })
 		P("\n");
 		DOI(totSize, P("-"));
 		P("\n");
 		/* print body */
-		DOI(getTableRowNumber(x),
+		L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
+		DOI(rowPrint,
 			{DOJ(vn(x), {V d=getTableDict(x,j); V val = getDictVal(d); \
-				getListInfo(val,i,buff); prettyItem(buff,colWidth[j]); P("%s|",buff);})
+				getListInfo(val,i,buff); printStrPretty(buff,colWidth[j]); P("%s|",buff);})
 			P("\n");})
 		P("\n");
 		free(colWidth);
@@ -215,6 +204,16 @@ void printTablePretty(V x){
 	else{
 		P("<Not a tbale> - From printTablePretty\n");
 	}
+}
+
+void printKTablePretty(V x, L rowLimit){
+}
+
+void printEnumPretty(V x){
+}
+
+/* JSON like */
+void printDictPretty(V x){
 }
 
 L getColWidth(V x){
@@ -227,24 +226,19 @@ L getColWidth(V x){
 }
 
 L getListInfo(V x, L k, S strBuff){
-	if(xn == 1){
-		printItem(x, strBuff);
-	}
-	else {
-		switch(xp){
-			caseB SP(strBuff, "%d"  , xB(k)); break;
-			caseI SP(strBuff, "%d"  , xI(k)); break;
-			caseL SP(strBuff, "%lld", xL(k)); break;
-			caseE SP(strBuff, "%lf" , xF(k)); break;
-			caseQ printSymbol(xQ(k), strBuff);break;
-			default: P("Error in getListInfo: type %lld\n",xp); exit(99);
-		}
+	switch(xp){
+		caseB SP(strBuff, "%d"  , xB(k)); break;
+		caseI SP(strBuff, "%d"  , xI(k)); break;
+		caseL SP(strBuff, "%lld", xL(k)); break;
+		caseE SP(strBuff, "%lf" , xF(k)); break;
+		caseQ printSymbol(xQ(k), strBuff);break;
+		default: P("Error in getListInfo: type %lld\n",xp); exit(99);
 	}
 	R strlen(strBuff);
 }
 
 
-void prettyItem(S str, L maxSize){
+void printStrPretty(S str, L maxSize){
 	L len = strlen(str);
 	while(len < maxSize) {
 		str[len++] = ' ';

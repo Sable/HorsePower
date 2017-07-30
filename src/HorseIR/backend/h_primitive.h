@@ -12,6 +12,8 @@ extern "C" {
 #define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
+#define isTable(x)     (H_A==vp(x))
+#define isDict(x)      (H_N==vp(x))
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
 
 #define isOne(x) (1==vn(x))

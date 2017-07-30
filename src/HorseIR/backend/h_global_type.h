@@ -5,21 +5,21 @@
 #define H_L 3
 #define H_F 4
 #define H_E 5
-#define H_C 6
-#define H_Q 7
-#define H_Y 8
+#define H_X 6
+#define H_C 7
+#define H_Q 8
 #define H_M 9
 #define H_D 10
 #define H_Z 11
 #define H_U 12
 #define H_W 13
 #define H_T 14
-#define H_X 15
-#define H_G 16 //list
-#define H_N 17 //dict
-#define H_A 18 //table
-#define H_K 19 //ktable
-#define H_V 20 //value item
+#define H_G 15 //list
+#define H_N 16 //dict
+#define H_Y 17 //enum
+#define H_A 90 //table
+#define H_K 91 //ktable
+#define H_V 93 //value item
 
 #define caseB case H_B:
 #define caseH case H_H:
@@ -29,7 +29,6 @@
 #define caseE case H_E:
 #define caseC case H_C:
 #define caseQ case H_Q:
-#define caseY case H_Y:
 #define caseM case H_M:
 #define caseD case H_D:
 #define caseZ case H_Z:
@@ -39,6 +38,7 @@
 #define caseX case H_X:
 #define caseG case H_G:
 #define caseN case H_N:
+#define caseY case H_Y:
 #define caseA case H_A:
 #define caseK case H_K:
 #define caseV case H_V:
@@ -116,17 +116,13 @@
 #define xF(k) vF(x,k)
 #define xE(k) vE(x,k)
 #define xQ(k) vQ(x,k)
+#define xX(k) vX(x,k)
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)
 
 /* save pointer to a slot */
 #define setXV(k, val) {V t=((V)xg)+(k); P("t = %lld\n",t); t=val; P("after: xg = %lld, t = %lld\n",xg,t);}
-
-#define isB() (H_B==xp)
-#define isH() (H_H==xp)
-#define isA() (H_A==xp)
-#define isN() (H_N==xp)
 
 #define VDexl(x, k) (((V)((x)->g))+(k))
 
