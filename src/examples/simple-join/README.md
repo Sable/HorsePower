@@ -37,13 +37,13 @@ module default {
         validBool :? = @lt(indexBool,colSize);
         indexSize :? = @len(indexBool);
         indexRange:? = @range(indexSize);
-        validIndex:? = @reduce(validBool, indexRange);
+        validIndex:? = @compress(validBool, indexRange);
         return validIndex;
     }
     def find_valid_item(colVal:list<i64>, indexBool:list<i64>)  : list<i64> {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
-        validItem :? = @reduce(validBool, indexBool);
+        validItem :? = @compress(validBool, indexBool);
         return validItem;
     }
     def main() : table {

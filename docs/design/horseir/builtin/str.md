@@ -9,7 +9,21 @@
 ### Type rules
 
 ```
-_ -> string
+bool -> string (y)
+i16  -> string (y)
+i32  -> string (y)
+i64  -> string (y)
+f32  -> string (y)
+f64  -> string (y)
+char -> string (y)
+sym  -> string (y)
+m    -> string
+d    -> string
+z    -> string
+u    -> string
+v    -> string
+t    -> string
+_    -> string
 ```
 
 **Note:** `dict`,`enum` and `table` have special string formats.
