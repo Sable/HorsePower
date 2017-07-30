@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     std::cout << bindedMethod->toString() << std::endl ;
     const auto modules = compilationUnit->getModules() ;
     
-    std::vector<std::unique_ptr<InternalMethod<void*>>> internalMethod ;
+    std::vector<InternalMethod<void*>*> internalMethod ;
     for (auto iter = modules.cbegin(); iter != modules.cend(); ++iter) {
         const auto methods = (*iter)->getMethods() ;
         const std::string moduleName = (*iter)->getModuleName() ;
@@ -99,9 +99,29 @@ int main(int argc, char *argv[])
         }
     }
 
+    VectorDispatcher<void*>::ContainerType c ;
     for (auto iter = internalMethod.cbegin(); iter != internalMethod.cend(); ++iter) {
-        std::cout << (*iter)->toString() << std::endl ;
+        VectorDispatcher<void*>::manage(c, *iter); 
     }
-
+    VectorDispatcher<void*>::manage(
+        c,
+        ExternalMethod<void*>::bindExternalMethod(
+            "default", "main", "func<i32, i32 :table>", [](std::size_t argc, void* argv[]) -> void* {
+                return nullptr ;
+            })) ;
+    VectorDispatcher<void*>::manage(
+        c,
+        ExternalMethod<void*>::bindExternalMethod(
+            "default", "main", "func<?, i32 :table>", [](std::size_t argc, void* argv[]) -> void* {
+                return nullptr ;
+            })) ;
+    VectorDispatcher<void*>::manage(
+        c,
+        ExternalMethod<void*>::bindExternalMethod(
+            "default", "main", "func<?, ? :table>", [](std::size_t argc, void* argv[]) -> void* {
+                return nullptr ;
+            })) ;
+    std::cout << VectorDispatcher<void*>::containerToString(c) << std::endl ;
+    
     return 0;
 }

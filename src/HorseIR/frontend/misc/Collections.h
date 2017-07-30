@@ -205,7 +205,8 @@ Collections::writeToStream(T1 &stream, const T2 &container, const T3 &delimiter,
         auto iterDuplicate = iter ;
         if ((++iterDuplicate) != container.cend()) stream << delimiter ;
     }
-    return (void) stream << finisher ;
+    stream << finisher ;
+    return ;
 }
 
 template <typename T1, typename T2, typename T3>
@@ -227,7 +228,8 @@ Collections::writeToStream(T1 &stream, const T2 array[], std::size_t arraySize, 
         stream << array[iter] ;
         if ((iter + 1) < arraySize) stream << delimiter ;
     }
-    return (void) stream << finisher ;
+    stream << finisher ;
+    return ;
 }
 
 }
