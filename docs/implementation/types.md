@@ -1,6 +1,6 @@
-# Memory management
+# Types
 
-## Types
+## Overview
 
 ```
 Name            Abbre.    Short     tID
@@ -45,6 +45,23 @@ typedef struct h_complex {
     double imag, real;
 }complex;
 ```
+
+**All about time**
+
+| Date type | Short | "Zero" value             |
+| :-------- | :---- | :----------------------- |
+| Month     | **M** | 0000.00m                 |
+| Date      | **D** | 0000.00.00               |
+| Datetime  | **Z** | 0000.00.00T00:00:00.000  |
+| Minute    | **U** | 00:00                    |
+| Second    | **W** | 00:00:00                 |
+| Time      | **T** | 00:00:00.000             |
+
+
+**Datetime (Z)**
+
+*Note*: TIMESTAMP has special automatic updating behavior (see [MySQL
+ref](https://dev.mysql.com/doc/refman/5.5/en/date-and-time-types.html))
 
 ### List
 
