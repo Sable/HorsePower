@@ -3,12 +3,14 @@
 #include <type_traits>
 
 namespace horseIR {
-    namespace misc {
-        template <class T>
-        struct TrivialSuppiler {
-            static T supply() {
-                return T() ;
-            }
-        } ;
+namespace misc {
+
+template <class T>
+struct TrivialSuppiler {
+    static T supply() {
+        return T() ;
     }
+} ;
+
+}
 }

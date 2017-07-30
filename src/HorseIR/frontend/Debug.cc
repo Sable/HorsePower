@@ -21,7 +21,7 @@ const char* rawProgram = ""
     "        validIndex:? = @reduce(validBool, indexRange);                                    \n"
     "        return validIndex;                                                                \n"
     "    }                                                                                     \n"
-    "    def find_valid_item(colVal :list<i64>, indexBool :list<i64>)  : list<i64> {.          \n"
+    "    def find_valid_item(colVal :list<i64>, indexBool :list<i64>)  : list<i64> {           \n"
     "        colSize   :? = @len(colVal);                                                      \n"
     "        validBool :? = @lt(indexBool,colSize);                                            \n"
     "        validItem :? = @reduce(validBool, indexBool);                                     \n"
@@ -66,6 +66,8 @@ public:
 #include "./misc/Hasher.h"
 #include "./interpreter/Dispatcher.h"
 
+#include <memory>
+
 int main(int argc, char *argv[])
 {
     antlr4::ANTLRInputStream inStream(rawProgram) ;
@@ -76,27 +78,30 @@ int main(int argc, char *argv[])
     horseIR::ast::ASTNode::MemManagerType mem ;
     auto compilationUnit = new horseIR::ast::CompilationUnit(compilationUnitContext, mem) ;
     std::cout << compilationUnit->toString() << std::endl ;
-
+    
+    using namespace horseIR::interpreter ;
+    std::unique_ptr<ExternalMethod<void*>> bindedMethod (
+        ExternalMethod<void*>::bindExternalMethod(
+            "MyModule", "foo", rawType, [] (std::size_t argc, void* argv[]) -> void* {
+                std::cout << "Method Invoked !" << std::endl ;
+                return nullptr ;
+            })) ;
+    std::cout << bindedMethod->toString() << std::endl ;
     const auto modules = compilationUnit->getModules() ;
+    
+    std::vector<std::unique_ptr<InternalMethod<void*>>> internalMethod ;
     for (auto iter = modules.cbegin(); iter != modules.cend(); ++iter) {
         const auto methods = (*iter)->getMethods() ;
         const std::string moduleName = (*iter)->getModuleName() ;
         for (auto methodIter = methods.cbegin(); methodIter != methods.cend(); ++methodIter) {
-            horseIR::ast::Type* signatureType = (*methodIter)->makeSignatureFunctionType(mem) ;
-            std::cout << moduleName << '.' << (*methodIter)->getMethodName()
-                      << '('
-                      << signatureType->toString()
-                      << ')' << std::endl ;
+            InternalMethod<void*>* ptr = new InternalMethod<void*>(*methodIter) ;
+            internalMethod.emplace_back(ptr) ;
         }
     }
 
-    using namespace horseIR::interpreter ;
-    ExternalMethod<void*>* bindedMethod = ExternalMethod<void*>::bindExternalMethod(
-        "MyModule", "foo", rawType, [] (std::size_t argc, void* argv[]) -> void* {
-            std::cout << "Method Invoked !" << std::endl ;
-            return nullptr ;
-        }) ;
-    std::cout << bindedMethod->toString() << std::endl ;
-    delete bindedMethod ;
+    for (auto iter = internalMethod.cbegin(); iter != internalMethod.cend(); ++iter) {
+        std::cout << (*iter)->toString() << std::endl ;
+    }
+
     return 0;
 }

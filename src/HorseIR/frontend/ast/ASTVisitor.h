@@ -7,131 +7,132 @@
 #include "AST.h"
 
 namespace horseIR {
-    namespace ast {
-        template <class T, class Suppiler = horseIR::misc::TrivialSuppiler<T>>
-        class ASTVisitor {
-        public:
-            virtual T visit(ASTNode* ast) ;
-        protected:
-            T visitChildren(ASTNode* ast) ;
+namespace ast {
 
-            virtual T visitType(Type* type) ;
-            virtual T visitScalarType(ScalarType* scalarType) {
-                return visitChildren(scalarType) ;
-            }
-            virtual T visitWildcardType(WildcardType* wildcardType) {
-                return visitChildren(wildcardType) ;
-            }
-            virtual T visitListType(ListType* listType) {
-                return visitChildren(listType) ;
-            }
-            virtual T visitDictionaryType(DictionaryType* dictionaryType) {
-                return visitChildren(dictionaryType) ;
-            }
-            virtual T visitEnumerationType(EnumerationType* enumerationType) {
-                return visitChildren(enumerationType) ;
-            }
-            virtual T visitFunctionType(FunctionType* functionType) {
-                return visitChildren(functionType) ;
-            }
+template <class T, class Suppiler = horseIR::misc::TrivialSuppiler<T>>
+class ASTVisitor {
+public:
+    virtual T visit(ASTNode* ast) ;
+protected:
+    T visitChildren(ASTNode* ast) ;
 
-            virtual T visitOperand(Operand* operand) ;
-            virtual T visitIdentifier(Identifier* identifier) {
-                return visitChildren(identifier) ;
-            }
-            
-            virtual T visitLiteral(Literal* literal) ;
-            virtual T visitNilLiteral(NilLiteral* nilLiteral) {
-                return visitChildren(nilLiteral) ;
-            }
-            virtual T visitComplexLiteral(ComplexLiteral* complexLiteral) {
-                return visitChildren(complexLiteral) ;
-            }
-            virtual T visitBoolLiteral(BoolLiteral* boolLiteral) {
-                return visitChildren(boolLiteral) ;
-            }
-            virtual T visitCharLiteral(CharLiteral* charLiteral) {
-                return visitChildren(charLiteral) ;
-            }
-            virtual T visitIntegerLiteral(IntegerLiteral* integerLiteral) ;
-            virtual T visitInteger8Literal(Integer8Literal* int8Literal) {
-                return visitChildren(int8Literal) ;
-            }
-            virtual T visitInteger16Literal(Integer16Literal* int16Literal) {
-                return visitChildren(int16Literal) ;
-            }
-            virtual T visitInteger32Literal(Integer32Literal* int32Literal) {
-                return visitChildren(int32Literal) ;
-            }
-            virtual T visitInteger64Literal(Integer64Literal* int64Literal) {
-                return visitChildren(int64Literal) ;
-            }
-            virtual T visitSymbolLiteral(SymbolLiteral* symbolLiteral) {
-                return visitChildren(symbolLiteral) ;
-            }
-            virtual T visitFunctionLiteral(FunctionLiteral* functionLiteral) {
-                return visitChildren(functionLiteral) ;
-            }
-            virtual T visitTableLiteral(TableLiteral* tabelLiteral) {
-                return visitChildren(tabelLiteral) ;
-            }
-
-            virtual T visitStatement(Statement* statement) ;
-            virtual T visitReturnStatement(ReturnStatement* returnStmt) {
-                return visitChildren(returnStmt) ;
-            }
-            virtual T visitBranchStatement(BranchStatement* branchStmt) {
-                return visitChildren(branchStmt) ;
-            }
-            virtual T visitAssignStatement(AssignStatement* assignStmt) {
-                return visitChildren(assignStmt) ;
-            }
-            virtual T visitLabelStatement(LabelStatement* labelStmt) {
-                return visitChildren(labelStmt) ;
-            }
-            virtual T visitPhiStatement(PhiStatement* phiStmt) {
-                return visitChildren(phiStmt) ;
-            }
-
-            virtual T visitMethod(Method* method) {
-                return visitChildren(method) ;
-            }
-            virtual T visitModule(Module* module) {
-                return visitChildren(module) ;
-            }
-            virtual T visitCompilationUnit(CompilationUnit* compilationUnit) {
-                return visitChildren(compilationUnit) ;
-            }
-        } ;
-
-        namespace __implementation {
-            template <typename UnaryOperation>
-            class ASTNodeUnaryOperationAppiler : protected horseIR::ast::ASTVisitor<void> {
-            public:
-                ASTNodeUnaryOperationAppiler(const UnaryOperation& p_f) : f(p_f) {}   
-                void apply(horseIR::ast::ASTNode* ast) {
-                    visit(ast) ;
-                }
-            protected:
-                const UnaryOperation& f ;
-                virtual void visit(horseIR::ast::ASTNode* ast) override {
-                    (void) f(ast) ;
-                    horseIR::ast::ASTVisitor<void>::visit(ast) ;
-                    return ;
-                }
-            } ;
-        } 
-        
-        struct ASTVisitors {
-            template <typename UnaryOperation>
-            static void applyToEachNode(horseIR::ast::ASTNode* ast, const UnaryOperation& f) {
-                using namespace ast::__implementation ;
-                ASTNodeUnaryOperationAppiler<UnaryOperation> v(f) ;
-                v.apply(ast) ;
-                return ;
-            }
-        } ;
+    virtual T visitType(Type* type) ;
+    virtual T visitScalarType(ScalarType* scalarType) {
+        return visitChildren(scalarType) ;
     }
+    virtual T visitWildcardType(WildcardType* wildcardType) {
+        return visitChildren(wildcardType) ;
+    }
+    virtual T visitListType(ListType* listType) {
+        return visitChildren(listType) ;
+    }
+    virtual T visitDictionaryType(DictionaryType* dictionaryType) {
+        return visitChildren(dictionaryType) ;
+    }
+    virtual T visitEnumerationType(EnumerationType* enumerationType) {
+        return visitChildren(enumerationType) ;
+    }
+    virtual T visitFunctionType(FunctionType* functionType) {
+        return visitChildren(functionType) ;
+    }
+
+    virtual T visitOperand(Operand* operand) ;
+    virtual T visitIdentifier(Identifier* identifier) {
+        return visitChildren(identifier) ;
+    }
+            
+    virtual T visitLiteral(Literal* literal) ;
+    virtual T visitNilLiteral(NilLiteral* nilLiteral) {
+        return visitChildren(nilLiteral) ;
+    }
+    virtual T visitComplexLiteral(ComplexLiteral* complexLiteral) {
+        return visitChildren(complexLiteral) ;
+    }
+    virtual T visitBoolLiteral(BoolLiteral* boolLiteral) {
+        return visitChildren(boolLiteral) ;
+    }
+    virtual T visitCharLiteral(CharLiteral* charLiteral) {
+        return visitChildren(charLiteral) ;
+    }
+    virtual T visitIntegerLiteral(IntegerLiteral* integerLiteral) ;
+    virtual T visitInteger8Literal(Integer8Literal* int8Literal) {
+        return visitChildren(int8Literal) ;
+    }
+    virtual T visitInteger16Literal(Integer16Literal* int16Literal) {
+        return visitChildren(int16Literal) ;
+    }
+    virtual T visitInteger32Literal(Integer32Literal* int32Literal) {
+        return visitChildren(int32Literal) ;
+    }
+    virtual T visitInteger64Literal(Integer64Literal* int64Literal) {
+        return visitChildren(int64Literal) ;
+    }
+    virtual T visitSymbolLiteral(SymbolLiteral* symbolLiteral) {
+        return visitChildren(symbolLiteral) ;
+    }
+    virtual T visitFunctionLiteral(FunctionLiteral* functionLiteral) {
+        return visitChildren(functionLiteral) ;
+    }
+    virtual T visitTableLiteral(TableLiteral* tabelLiteral) {
+        return visitChildren(tabelLiteral) ;
+    }
+
+    virtual T visitStatement(Statement* statement) ;
+    virtual T visitReturnStatement(ReturnStatement* returnStmt) {
+        return visitChildren(returnStmt) ;
+    }
+    virtual T visitBranchStatement(BranchStatement* branchStmt) {
+        return visitChildren(branchStmt) ;
+    }
+    virtual T visitAssignStatement(AssignStatement* assignStmt) {
+        return visitChildren(assignStmt) ;
+    }
+    virtual T visitLabelStatement(LabelStatement* labelStmt) {
+        return visitChildren(labelStmt) ;
+    }
+    virtual T visitPhiStatement(PhiStatement* phiStmt) {
+        return visitChildren(phiStmt) ;
+    }
+
+    virtual T visitMethod(Method* method) {
+        return visitChildren(method) ;
+    }
+    virtual T visitModule(Module* module) {
+        return visitChildren(module) ;
+    }
+    virtual T visitCompilationUnit(CompilationUnit* compilationUnit) {
+        return visitChildren(compilationUnit) ;
+    }
+} ;
+
+namespace __implementation {
+template <typename UnaryOperation>
+class ASTNodeUnaryOperationAppiler : protected horseIR::ast::ASTVisitor<void> {
+public:
+    ASTNodeUnaryOperationAppiler(const UnaryOperation& p_f) : f(p_f) {}   
+    void apply(horseIR::ast::ASTNode* ast) {
+        visit(ast) ;
+    }
+protected:
+    const UnaryOperation& f ;
+    virtual void visit(horseIR::ast::ASTNode* ast) override {
+        (void) f(ast) ;
+        horseIR::ast::ASTVisitor<void>::visit(ast) ;
+        return ;
+    }
+} ;
+} 
+        
+struct ASTVisitors {
+    template <typename UnaryOperation>
+    static void applyToEachNode(horseIR::ast::ASTNode* ast, const UnaryOperation& f) {
+        using namespace ast::__implementation ;
+        ASTNodeUnaryOperationAppiler<UnaryOperation> v(f) ;
+        v.apply(ast) ;
+        return ;
+    }
+} ;
+}
 }
 
 template <class T, class Suppiler>

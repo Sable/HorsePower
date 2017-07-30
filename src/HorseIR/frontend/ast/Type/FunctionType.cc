@@ -277,7 +277,7 @@ void FunctionType::__duplicateShallow(const FunctionType* funcType)
 void FunctionType::__duplicateDeep(const FunctionType* funcType, ASTNode::MemManagerType& mem)
 {
     assert(funcType != nullptr) ;
-    auto duplicateParamTypes = horseIR::misc::Collections::applyAndCollect(
+    auto duplicateParamTypes = horseIR::misc::Collections::map(
         funcType->parameterTypes,
         [&] (Type* type) -> Type* {
             assert(type != nullptr) ;
