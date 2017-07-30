@@ -22,6 +22,8 @@ B checkZero           (V x);
 L getSingleIntValue   (V x);
 L calcFact            (L n);
 L getNumOfNonZero     (V x);
+L appendList          (V z, V x, V y);
+L appendEnum          (V z, V x, V y);
 
 B isTypeGroupInt      (L t);
 B isTypeGroupFloat    (L t);

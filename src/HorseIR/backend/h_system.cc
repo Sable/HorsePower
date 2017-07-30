@@ -128,6 +128,10 @@ L getNumOfNonZero(V x){
 	R -1;
 }
 
+L appendList(V z, V x, V y){R E_NOT_IMPL;}
+/* x: enum, y: number */
+L appendEnum(V z, V x, V y){R E_NOT_IMPL;}
+
 
 /* Type checking */
 

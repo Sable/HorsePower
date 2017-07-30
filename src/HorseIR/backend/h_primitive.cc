@@ -409,7 +409,7 @@ L pfnNot(V z, V x){
 
 L pfnLen(V z, V x){
 	initV(z,H_L,1);
-	vl(z) = vn(x);
+	vl(z)= isTable(x)?getTableRowNumber(x):vn(x);
 	R 0;
 }
 
@@ -563,9 +563,9 @@ L pfnDesc(V z, V x){
 	R pfnOrder(z,x,1);
 }
 
-/* All about time */
-#define Z2D(x) ((x)/1000000000L)
-#define Z2T(x) ((x)%1000000000L)
+/* Date & Time */
+#define Z2D(x) ((x)/216000000LL)
+#define Z2T(x) ((x)%216000000LL) //60x60x60x10000
 #define CHOPM(op,x) (0==op?(x/100):(x%100))
 #define CHOPD(op,x) (0==op?(x/10000):1==op?(x/100%100):(x%100))
 #define CHOPZ(op,z,x) {L t=Z2D(x); z=CHOPD(op,t);}
@@ -604,8 +604,8 @@ L pfnDate(V z, V x){
 	else R E_DOMAIN;
 }
 
-#define CHOPU(op,x) (0==op?(x/100):(x%100))
-#define CHOPW(op,x) (0==op?(x/10000):1==op?(x/100%100):(x%100))
+#define CHOPU(op,x) (0==op?(x/60):(x%60))
+#define CHOPW(op,x) (0==op?(x/3600):1==op?(x/60%60):(x%60))
 #define CHOPT(op,z,x) {L t=T2W(x); z=4>op?CHOPW(op,x):x%1000;}
 #define T2W(x) ((x)/1E3)
 L pfnChopTime(V z, V x, L op){
@@ -981,4 +981,51 @@ L pfnIndexOf(V z, V x, V y){
 	else R E_DOMAIN;
 }
 
-
+L pfnAppend(V z, V x, V y){
+	if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+		L lenZ   = vn(x) + vn(y), c = vn(x);
+		L typMax = max(vp(x),vp(y));
+		V tempX  = promoteValue(x, typMax);
+		V tempY  = promoteValue(y, typMax);
+		initV(z,typMax,lenZ);
+		switch(typMax){
+			caseB DOI(vn(x),vB(z,i)=vB(x,i)) DOI(vn(y),vB(z,c+i)=vB(y,i)) break;
+			caseH DOI(vn(x),vH(z,i)=vB(x,i)) DOI(vn(y),vH(z,c+i)=vH(y,i)) break;
+			caseI DOI(vn(x),vI(z,i)=vB(x,i)) DOI(vn(y),vI(z,c+i)=vI(y,i)) break;
+			caseL DOI(vn(x),vL(z,i)=vB(x,i)) DOI(vn(y),vL(z,c+i)=vL(y,i)) break;
+			caseF DOI(vn(x),vF(z,i)=vB(x,i)) DOI(vn(y),vF(z,c+i)=vF(y,i)) break;
+			caseE DOI(vn(x),vE(z,i)=vB(x,i)) DOI(vn(y),vE(z,c+i)=vE(y,i)) break;
+		}
+		R 0;
+	}
+	else if(isSameType(x,y) && (isComplex(x)||isSymbol(x)||isString(x))){
+		L typZ = vp(x), c = vn(x);
+		L lenZ = vn(x) + vn(y);
+		initV(z,typZ,lenZ);
+		switch(vp(x)){
+			caseX DOI(vn(x), vX(z,i)=vX(x,i))
+			      DOI(vn(y), vX(z,c+i)=vX(y,i))
+			      break;
+			caseQ DOI(vn(x), vQ(z,i)=vQ(x,i))
+			      DOI(vn(y), vQ(z,c+i)=vQ(y,i))
+			      break;
+			caseC DOI(vn(x), vC(z,i)=vC(x,i))
+			      DOI(vn(y), vC(z,c+i)=vC(x,i))
+				  break;
+		}
+		R 0;
+	}
+	else if(isList(x)){
+		R appendList(z,x,y);
+	}
+	else if(isList(y)){
+		R appendList(z,y,x);
+	}
+	else if((isEnum(x) && isTypeGroupRealX(vp(y)))){
+		R appendEnum(z,x,y);
+	}
+	else if((isEnum(y) && isTypeGroupRealX(vp(x)))){
+		R appendEnum(z,y,x);
+	}
+	else R E_DOMAIN;
+}

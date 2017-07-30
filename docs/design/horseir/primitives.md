@@ -121,14 +121,13 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 
 No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.| Status |
 :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--| :----- |
-1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | link                         |1  | |
+1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | [link](builtin/append.md)    |1  |&#10004;|
 2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | link                         |2  | |
-3  | concat(x,y)          | Concatenate x and y         | Pending                     | Pending                       | link                         |3  | |
-4  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |4  |&#10004;|
-5  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |5  | |
-6  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |6  |&#10004;|
-7  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |7  | |
-8  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |8  | |
+3  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |3  |&#10004;|
+4  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |4  | |
+5  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |5  |&#10004;|
+6  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |6  | |
+7  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |7  | |
 
 ### 3.3 Reduction
 
