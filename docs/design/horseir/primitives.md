@@ -41,15 +41,15 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 8  | signum(x)            | Signum                      | Real                        | Various                       | [link](builtin/signum.md)    |8  |&#10004;|
 9  | pi(x)                | PI times x                  | Real,Complex                | Various                       | [link](builtin/pi.md)        |9  |&#10004;|
 10 | not(x)               | Not                         | B                           | B                             | [link](builtin/logic.md#not) |10 |&#10004;|
-11 | date(x)              | Time: date                  | Z                           | D                             | [link](date.md#date)         |11 | |
-12 | date_year(x)         | Time: year                  | D,M,Z                       | L                             | [link](date.md#date-year)    |12 | |
-13 | date_month(x)        | Time: month                 | D,M,Z                       | L                             | [link](date.md#date-month)   |13 | |
-14 | date_day(x)          | Time: day                   | D,Z                         | L                             | [link](date.md#date-day)     |14 | |
-15 | time(x)              | Time: time                  | Z                           | T                             | [link](date.md#time)         |15 | |
-16 | time_hour(x)         | Time: hour                  | U,W,T,Z                     | L                             | [link](date.md#time-hour)    |16 | |
-17 | time_minute(x)       | Time: minute                | U,W,T,Z                     | L                             | [link](date.md#time-minute)  |17 | |
-18 | time_second(x)       | Time: second                | W,T,Z                       | L                             | [link](date.md#time-second)  |18 | |
-19 | time_mill(x)         | Time: millisecond           | T,Z                         | L                             | [link](date.md#time-mill)    |19 | |
+11 | date(x)              | Time: date                  | Z                           | D                             | [link](date.md#date)         |11 |&#10004;|
+12 | date_year(x)         | Time: year                  | D,M,Z                       | L                             | [link](date.md#date-year)    |12 |&#10004;|
+13 | date_month(x)        | Time: month                 | D,M,Z                       | L                             | [link](date.md#date-month)   |13 |&#10004;|
+14 | date_day(x)          | Time: day                   | D,Z                         | L                             | [link](date.md#date-day)     |14 |&#10004;|
+15 | time(x)              | Time: time                  | Z                           | T                             | [link](date.md#time)         |15 |&#10004;|
+16 | time_hour(x)         | Time: hour                  | U,W,T,Z                     | L                             | [link](date.md#time-hour)    |16 |&#10004;|
+17 | time_minute(x)       | Time: minute                | U,W,T,Z                     | L                             | [link](date.md#time-minute)  |17 |&#10004;|
+18 | time_second(x)       | Time: second                | W,T,Z                       | L                             | [link](date.md#time-second)  |18 |&#10004;|
+19 | time_mill(x)         | Time: millisecond           | T,Z                         | L                             | [link](date.md#time-mill)    |19 |&#10004;|
 20 | cos(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#cos)  |20 |&#10004;|
 21 | sin(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#sin)  |21 |&#10004;|
 22 | tan(x)               | Trigonometric functions     | Real                        | Real                          | [link](builtin/trig.md#tan)  |22 |&#10004;|
