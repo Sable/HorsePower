@@ -11,8 +11,8 @@ extern "C" {
 typedef bool       B;
 typedef char       C,*S,*G;
 typedef short      H;
-typedef int        I;
-typedef long long  L,Q,Y,M,D,Z,U,W,T;
+typedef int        I,M,D,U,W,T;
+typedef long long  L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
@@ -29,7 +29,6 @@ typedef struct node_value{
 		E f64; //double    8 bytes
 		C c;   //char      1 byte
 		Q q;   //symbol    8 bytes
-		Y y;   //year      4 bytes
 		M m;   //month     4 bytes
 		D d;   //date      4 bytes
 		Z z;   //date time 8 bytes

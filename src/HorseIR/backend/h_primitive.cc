@@ -563,6 +563,91 @@ L pfnDesc(V z, V x){
 	R pfnOrder(z,x,1);
 }
 
+/* All about time */
+#define Z2D(x) ((x)/1000000000L)
+#define Z2T(x) ((x)%1000000000L)
+#define CHOPM(op,x) (0==op?(x/100):(x%100))
+#define CHOPD(op,x) (0==op?(x/10000):1==op?(x/100%100):(x%100))
+#define CHOPZ(op,z,x) {L t=Z2D(x); z=CHOPD(op,t);}
+L pfnChopDate(V z, V x, L op){
+	if(isTypeGroupDate(vp(x))){
+		initV(z,H_L,vn(x));
+		switch(vp(x)){
+			caseM DOI(vn(x), vL(z,i)=CHOPM(op,vM(x,i))) break;
+			caseD DOI(vn(x), vL(z,i)=CHOPD(op,vD(x,i))) break;
+			caseZ DOI(vn(x), CHOPZ(op,vL(z,i),vZ(x,i))) break;
+			default: R E_NOT_IMPL;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnDateYear(V z, V x){
+	R pfnChopDate(z,x,0);
+}
+
+L pfnDateMonth(V z, V x){
+	R pfnChopDate(z,x,1);
+}
+
+L pfnDateDay(V z, V x){
+	R (isDate(x)||isDateTime(x))?pfnChopDate(z,x,2):E_DOMAIN;
+}
+
+L pfnDate(V z, V x){
+	if(isDateTime(x)){
+		initV(z,H_D,vn(x));
+		DOI(vn(x), vD(z,i)=(D)Z2D(vZ(x,i)))
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+#define CHOPU(op,x) (0==op?(x/100):(x%100))
+#define CHOPW(op,x) (0==op?(x/10000):1==op?(x/100%100):(x%100))
+#define CHOPT(op,z,x) {L t=T2W(x); z=4>op?CHOPW(op,x):x%1000;}
+#define T2W(x) ((x)/1E3)
+L pfnChopTime(V z, V x, L op){
+	if(isTypeGroupTime(vp(x))){
+		initV(z,H_L,vn(x));
+		switch(vp(x)){
+			caseU DOI(vn(x), vL(z,i)=CHOPU(op,vU(x,i))) break;
+			caseW DOI(vn(x), vL(z,i)=CHOPW(op,vW(x,i))) break;
+			caseT DOI(vn(x), CHOPT(op,vL(z,i),vT(x,i))) break;
+			default: R E_NOT_IMPL;
+		}
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+L pfnTimeHour(V z, V x){
+	R pfnChopTime(z,x,0);
+}
+
+L pfnTimeMinute(V z, V x){
+	R pfnChopTime(z,x,1);
+}
+
+L pfnTimeSecond(V z, V x){
+	R (isSecond(x)||isTime(x))?pfnChopTime(z,x,2):E_DOMAIN;
+}
+
+L pfnTimeMill(V z, V x){
+	R isTime(x)?pfnChopTime(z,x,3):E_DOMAIN;
+}
+
+L pfnTime(V z, V x){
+	if(isDateTime(x)){
+		initV(z,H_T,vn(x));
+		DOI(vn(x), vT(z,i)=(T)Z2T(vZ(x,i)))
+		R 0;
+	}
+	else R E_DOMAIN;
+}
+
+
 /* Binary */
 
 #define COMP(op,x,y) (2>op?COMPLESS(op,x,y):4>op?COMPMORE(op,x,y):6>op?COMPEQ(op,x,y):0)
@@ -695,7 +780,7 @@ L pfnArith(V z, V x, V y, L op){
 		}
 		R 0;
 	}
-	else if(isTypeGroupTime(vp(x)) && isTypeGroupTime(vp(y))){
+	else if(isTypeGroupDTime(vp(x)) && isTypeGroupDTime(vp(y))){
 		switch(op){
 			case 0:  break; //plus
 			case 1:  break; //sub

@@ -147,16 +147,24 @@ B isTypeGroupRealX(L t){
 	R (isTypeGroupReal(t) || H_X==t);
 }
 
+B isTypeGroupDate(L t){
+	R (H_M==t || H_D==t || H_Z==t);
+}
+
 B isTypeGroupTime(L t){
-	R (H_M==t || H_D==t || H_Z==t || H_U==t || H_W==t || H_T==t);
+	R (H_U==t || H_W==t || H_T==t);
+}
+
+B isTypeGroupDTime(L t){
+	R isTypeGroupDate(t) || isTypeGroupTime(t);
 }
 
 B isTypeGroupNumeric(L t){
-	R isTypeGroupReal(t) || isTypeGroupTime(t);
+	R isTypeGroupReal(t) || isTypeGroupDTime(t);
 }
 
 B isTypeGroupBasic(L t){
-	R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupTime(t));
+	R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupDTime(t));
 }
 
 B isTypeGroupAdvanced(L t){

@@ -73,6 +73,12 @@
 #define sC(x) ((C*)(vg(x)))
 #define sQ(x) ((Q*)(vg(x)))
 #define sX(x) ((X*)(vg(x)))
+#define sM(x) ((M*)(vg(x)))
+#define sD(x) ((D*)(vg(x)))
+#define sZ(x) ((Z*)(vg(x)))
+#define sU(x) ((U*)(vg(x)))
+#define sW(x) ((W*)(vg(x)))
+#define sT(x) ((T*)(vg(x)))
 #define sV(x) ((V )(vg(x)))
 
 #define vB(x,i) sB(x)[i]
@@ -84,6 +90,12 @@
 #define vC(x,i) sC(x)[i]
 #define vQ(x,i) sQ(x)[i]
 #define vX(x,i) sX(x)[i]
+#define vM(x,i) sM(x)[i]
+#define vD(x,i) sD(x)[i]
+#define vZ(x,i) sZ(x)[i]
+#define vU(x,i) sU(x)[i]
+#define vW(x,i) sW(x)[i]
+#define vT(x,i) sT(x)[i]
 #define vV(x,i) sV(x)[i]
 
 /* special x */

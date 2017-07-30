@@ -12,6 +12,12 @@ extern "C" {
 #define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
+#define isMonth(x)     (H_M==vp(x))
+#define isDate(x)      (H_D==vp(x))
+#define isDateTime(x)  (H_Z==vp(x))
+#define isMinute(x)    (H_U==vp(x))
+#define isSecond(x)    (H_W==vp(x))
+#define isTime(x)      (H_T==vp(x))
 #define isTable(x)     (H_A==vp(x))
 #define isDict(x)      (H_N==vp(x))
 #define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
@@ -74,6 +80,20 @@ L pfnMax           (V z, V x);
 L pfnOrder         (V z, V x, L op);
 L pfnAsc           (V z, V x);
 L pfnDesc          (V z, V x);
+
+
+L pfnChopDate      (V z, V x, L op);
+L pfnDateYear      (V z, V x);
+L pfnDateMonth     (V z, V x);
+L pfnDateDay       (V z, V x);
+L pfnDate          (V z, V x);
+
+L pfnChopTime      (V z, V x, L op);
+L pfnTimeHour      (V z, V x);
+L pfnTimeMinute    (V z, V x);
+L pfnTimeSecond    (V z, V x);
+L pfnTimeMill      (V z, V x);
+L pfnTime          (V z, V x);
 
 L pfnCompare       (V z, V x, V y, L op);
 L pfnLt            (V z, V x, V y);
