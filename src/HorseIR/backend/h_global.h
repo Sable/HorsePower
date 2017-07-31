@@ -69,6 +69,7 @@ typedef struct list_table{
 
 /* constant code */
 #define ERROR_CODE 99
+#define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
 
 /* extern */
 
@@ -84,6 +85,7 @@ extern G H_heap;
 #include <stdlib.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <pcre2.h>
 #include "h_memory.h"
 #include "h_symbol.h"
 #include "h_libs.h"

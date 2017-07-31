@@ -132,6 +132,27 @@ L appendList(V z, V x, V y){R E_NOT_IMPL;}
 /* x: enum, y: number */
 L appendEnum(V z, V x, V y){R E_NOT_IMPL;}
 
+/*
+ * % -> .* // zero or more
+ * _ -> .  // single
+ */
+S genLikeString(S inStr, L inLen){
+	S outStr=NULL;
+	L outLen= inLen;
+	DOI(inLen, if(inStr[i]=='%' || inStr[i]=='.' || inStr[i]=='\\')outLen++)
+	if(inLen>0){
+		L c= 0; outLen+= 2;
+		outStr= (S)malloc(sizeof(C)*outLen);
+		outStr[c++]= '^';  /* begin */
+		DOI(inLen, \
+			{if(inStr[i]=='%'){outStr[c++]='.';outStr[c++]='*';}\
+			else if(inStr[i]=='.' || inStr[i]=='\\'){outStr[c++]='\\';outStr[c++]=inStr[i];}\
+			else outStr[c++]=inStr[i]=='_'?'.':inStr[i];})
+		outStr[c++]='$'; outStr[c]=0; /* end */
+	}
+	R outStr;
+}
+
 
 /* Type checking */
 
@@ -213,6 +234,8 @@ void printErrMsg(L eid){
 		errCaseCell(E_DIV_ZERO,        "Divide zero"        );
 		errCaseCell(E_LENGTH,          "Length error"       );
 		errCaseCell(E_TYPE,            "Type error"         );
+		errCaseCell(E_NULL_VALUE,      "Null value error"   );
+		errCaseCell(E_LIKE_PATTERN,    "Like pattern error" );
 		errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
 		errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
 		errCaseCell(E_NOT_IMPL,        "Not implement yet"  );

@@ -126,6 +126,8 @@ L pfnLog           (V z, V x, V y);
 L pfnCompress      (V z, V x, V y);
 
 L pfnIndexOf       (V z, V x, V y);
+L pfnAppend        (V z, V x, V y);
+L pfnLike          (V z, V x, V y);
 
 #ifdef	__cplusplus
 }
