@@ -17,6 +17,7 @@ namespace interpreter {
 template <typename IntermediateType>
 class ExternalMethod : public MethodMETA<IntermediateType> {
 public:
+    typedef InvalidSignatureStringException InvalidSignatureStringException ;
     ExternalMethod(const std::string& moduleName,
                    const std::string& methodName,
                    const std::string& signatureString) ;
@@ -66,7 +67,7 @@ inline ExternalMethod<T>::ExternalMethod(const std::string& p_moduleName,
     
     lexer.removeErrorListeners() ;
     parser.removeErrorListeners() ;
-    InvalidSignatureString::SignatureStringErrorListener errorListener(&signatureString) ;
+    InvalidSignatureStringException::SignatureStringErrorListener errorListener(&signatureString) ;
     lexer.addErrorListener(&errorListener) ;
     parser.addErrorListener(&errorListener) ;
     

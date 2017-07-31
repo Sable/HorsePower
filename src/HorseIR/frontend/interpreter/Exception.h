@@ -131,9 +131,9 @@ inline std::string OverloadDuplicateException<T>::toString() const noexcept
     return stream.str() ;
 }
 
-class InvalidSignatureString : public CompiletimeException {
+class InvalidSignatureStringException : public CompiletimeException {
 public:
-    InvalidSignatureString(const std::string& p_siteString,
+    InvalidSignatureStringException(const std::string& p_siteString,
                            std::size_t p_siteLocation,
                            std::size_t p_siteLine)
         : CompiletimeException(CompiletimeExceptionClass::InvalidSignatureString),
@@ -151,7 +151,7 @@ public:
                                  std::size_t line, std::size_t charPositionInLine,
                                  const std::string& msg, std::exception_ptr e) override
             {
-                throw InvalidSignatureString(*rawText, charPositionInLine, line) ;
+                throw InvalidSignatureStringException(*rawText, charPositionInLine, line) ;
             }
     protected:
         const std::string* rawText ;

@@ -126,11 +126,11 @@ int main(int argc, char *argv[])
                                             return nullptr ;
                                         })) ;
     std::cout << VectorDispatcher<void*>::containerToString(c) << std::endl ;
-    } catch (const OverloadOverlapException<void*>& except) {
+    } catch (const VectorDispatcher<void*>::OverloadOverlapException & except) {
         std::cout << except.toString() << std::endl ;
-    } catch (const OverloadDuplicateException<void*>& except) {
+    } catch (const VectorDispatcher<void*>::OverloadDuplicateException& except) {
         std::cout << except.toString() << std::endl ;
-    } catch (const InvalidSignatureString& except) {
+    } catch (const VectorDispatcher<void*>::InvalidSignatureStringException& except) {
         std::cout << except.toString() << std::endl ;
     }
 
