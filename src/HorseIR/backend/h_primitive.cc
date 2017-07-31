@@ -309,23 +309,23 @@ L pfnHyperSinh(V z, V x){
 }
 
 L pfnHyperAsinh(V z, V x){
-	R pfnHyper(z,x,0);
+	R pfnHyper(z,x,1);
 }
 
 L pfnHyperCosh(V z, V x){
-	R pfnHyper(z,x,0);
+	R pfnHyper(z,x,2);
 }
 
 L pfnHyperAcosh(V z, V x){
-	R pfnHyper(z,x,0);
+	R pfnHyper(z,x,3);
 }
 
 L pfnHyperTanh(V z, V x){
-	R pfnHyper(z,x,0);
+	R pfnHyper(z,x,4);
 }
 
 L pfnHyperAtanh(V z, V x){
-	R pfnHyper(z,x,0);
+	R pfnHyper(z,x,5);
 }
 
 L pfnConj(V z, V x){
@@ -1028,4 +1028,31 @@ L pfnAppend(V z, V x, V y){
 		R appendEnum(z,y,x);
 	}
 	else R E_DOMAIN;
+}
+
+/* 
+ * x: string
+ * y: string (done), symbol, list of string and symbol (pending)
+ */
+L pfnLike(V z, V x, V y){
+	if(isString(x) && isString(y)){
+		S newString = genLikeString(sC(y),vn(y));
+		if(!newString) R E_NULL_VALUE;
+		L newLen = strlen(newString);
+		PCRE2_SPTR pattern = (PCRE2_SPTR)newString;
+		I errNum; PCRE2_SIZE errOff;
+		pcre2_code *re = pcre2_compile(pattern,newLen,0,&errNum,&errOff,NULL);
+		if(re){
+			pcre2_match_data *matchData = pcre2_match_data_create_from_pattern(re, NULL);
+			initV(z,H_B,1);
+			vB(z,0) = pcre2_match(\
+				re,\
+				reinterpret_cast<unsigned char*>sC(x),\
+				vn(x),0,0,matchData,NULL\
+				)<0?0:1;
+			R 0;
+		}
+		else R E_LIKE_PATTERN;
+	}
+	R 0;
 }

@@ -5,6 +5,7 @@
 `len(x)`
 
 - the length of `x`
+- if x is a table, return the number of rows of the table
 
 ### Type rules
 
