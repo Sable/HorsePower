@@ -7,6 +7,7 @@
 #include "../ast/ASTVisitor.h"
 
 #include "MethodMETA.h"
+#include "Exception.h"
 
 namespace horseIR {
 namespace interpreter {
@@ -42,6 +43,13 @@ inline InternalMethod<T>::InternalMethod(const std::string& moduleName,
     horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream stream(&lexer) ;
     horseIR::HorseIRParser parser(&stream) ;
+
+    lexer.removeErrorListeners() ;
+    parser.removeParseListeners() ;
+    InvalidSignatureString::SignatureStringErrorListener errorListener(&signatureString) ;
+    lexer.addErrorListener(&errorListener) ;
+    parser.addErrorListener(&errorListener) ;
+    
     horseIR::HorseIRParser::TypeFuncContext* context = parser.typeFunc() ;
     ast::FunctionType* functionType = new ast::FunctionType(context, this->mem) ;
     ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
@@ -101,9 +109,18 @@ inline std::string InternalMethod<T>::toString() const
 {
     std::ostringstream stream ;
     stream << this->moduleName << '.' << this->methodName
-           << '('
-           << this->methodType->toString()
-           << ')' ;
+           << '(' ;
+    const std::vector<ast::Type*> inParamTypes (this->methodType->getParameterTypes()) ;
+    auto inParamTypesSegments = misc::Collections::map(
+        inParamTypes,
+        [](ast::Type* type) -> std::string {return type->toString() ;}) ;
+    misc::Collections::writeToStream(
+        stream,
+        inParamTypesSegments,
+        ", ",
+        (this->methodType->getIsFlexible()? ", ...) -> " : ") -> ")) ;
+    ast::Type* const outParamType = this->methodType->getReturnType() ;
+    stream << outParamType->toString() ;
     const antlr4::tree::ParseTree* tree = method->getCST() ;
     if (tree == nullptr) {
         stream << " [unknown]" ;

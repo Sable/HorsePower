@@ -77,9 +77,18 @@ inline std::string MethodMETA<T>::toString() const
 {
     std::ostringstream stream ;
     stream << moduleName << '.' << methodName
-           << '('
-           << methodType->toString()
-           << ')' ;
+           << '(' ;
+    const std::vector<ast::Type*> inParamTypes (methodType->getParameterTypes()) ;
+    auto inParamTypesSegments = misc::Collections::map(
+        inParamTypes,
+        [](ast::Type* type) -> std::string {return type->toString() ;}) ;
+    misc::Collections::writeToStream(
+        stream,
+        inParamTypesSegments,
+        ", ",
+        (methodType->getIsFlexible()? ", ...) -> " : ") -> ")) ;
+    ast::Type* const outParamType = methodType->getReturnType() ;
+    stream << outParamType->toString() ;
     return stream.str() ;
 }
 

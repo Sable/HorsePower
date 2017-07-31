@@ -10,6 +10,7 @@
 #include "InternalMethod.h"
 #include "Exception.h"
 
+#include "antlr4-runtime.h"
 #include "../misc/Collections.h"
 
 namespace horseIR {
@@ -28,10 +29,73 @@ struct VectorDispatcher {
     static MethodMETA<IntermediateType>* fetch(const ContainerType& container,
                                                const std::string& moduleName,
                                                const std::string& methodName,
-                                               ast::FunctionType* signatureType) ;
+                                               const std::vector<ast::Type*>& signatureType) ;
     static void manage(ContainerType& container, MethodMETA<IntermediateType>* method) ;
     static std::string containerToString(const ContainerType& container) ;
 } ;
+
+template <typename T>
+inline MethodMETA<T>* VectorDispatcher<T>::fetch(const ContainerType &container,
+                                                 const std::string &moduleName,
+                                                 const std::string &methodName,
+                                                 const std::string &signatureString)
+{
+    antlr4::ANTLRInputStream inStream(signatureString.c_str()) ;
+    HorseIRLexer lexer(&inStream) ;
+    antlr4::CommonTokenStream tokenStream(&lexer) ;
+    HorseIRParser parser(&tokenStream) ;
+
+    lexer.removeErrorListeners() ;
+    parser.removeErrorListeners() ;
+    InvalidSignatureString::SignatureStringErrorListener errorListener(&signatureString) ;
+    lexer.addErrorListener(&errorListener) ;
+    parser.addErrorListener(&errorListener) ;
+
+    HorseIRParser::DispatcherInTypeListContext* inParamContext = parser.dispatcherInTypeList() ;
+    const std::vector<HorseIRParser::TypeContext*> inParamTypeCTXs (inParamContext->type()) ;
+    ast::ASTNode::MemManagerType mem ;
+    const std::vector<ast::Type*> inParamTypes = misc::Collections::map(
+        inParamTypeCTXs,
+        [&](HorseIRParser::TypeContext* typeContext) -> ast::Type* {
+            return ast::Type::makeTypeASTNode(typeContext, mem) ;
+        }) ;
+    ast::FunctionType* fetchType = new ast::FunctionType(mem) ;
+    (void) fetchType
+        ->setReturnType(new ast::WildcardType(mem))
+        .setParameterTypes(inParamTypes)
+        .setIsFlexible(false) ;
+
+    auto candidates = container.container ;
+    candidates = misc::Collections::filter(candidates, [&](MethodMETA<T>* m) -> bool {
+            if (moduleName != m->getModuleName()) return false ;
+            if (methodName != m->getMethodName()) return false ;
+            return true ;
+        }) ;
+    candidates = misc::Collections::filter(candidates, [&](MethodMETA<T>* m) -> bool {
+            ast::Type* mType = m->getDispatchType() ;
+            return mType->isGeneralizationOf(fetchType) ;
+        }) ;
+    if (candidates.empty()) return nullptr ;
+    MethodMETA<T>* retMethod = nullptr ;
+    for (auto iterA = candidates.cbegin(); iterA != candidates.cend(); ++iterA) {
+        bool isMostSpecific = true ;
+        for (auto iterB = candidates.cbegin(); iterB != candidates.cend(); ++iterB) {
+            if (*iterA == *iterB) continue ;
+            ast::Type* aType = (*iterA)->getDispatchType() ;
+            ast::Type* bType = (*iterB)->getDispatchType() ;
+            if (aType->isGeneralizationOf(bType)) {
+                isMostSpecific = false ;
+                break ;
+            }
+        }
+        if (isMostSpecific) {
+            assert(retMethod == nullptr) ;
+            retMethod = (*iterA) ;
+        }
+    }
+    assert(retMethod != nullptr) ;
+    return retMethod ;
+}
 
 template <typename T>
 inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> *method)

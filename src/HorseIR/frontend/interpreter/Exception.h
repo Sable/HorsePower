@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "MethodMETA.h"
+#include "antlr4-runtime.h"
 #include "../ast/AST.h"
 #include "../misc/Collections.h"
 
@@ -28,7 +29,7 @@ protected:
 class CompiletimeException : public InterpreterException {
 public:
     enum class CompiletimeExceptionClass {
-        OverloadOverlap, OverloadDuplicate
+        OverloadOverlap, OverloadDuplicate, InvalidSignatureString
     } ;
     CompiletimeException(const CompiletimeExceptionClass& p_compiletimeExceptionClass)
         : InterpreterException(InterpreterExceptionClass::Compiletime),
@@ -49,12 +50,10 @@ public:
           candidateMethod(p_candidateMethod),
           existedOverloadOptions(p_existedOverload)
         {}
-    const char* what() const noexcept override {
-        return "Overload Type Matching Overlap" ;
-    }
-    MethodMETA<T>* getSiteCandidate() const {
-        return candidateMethod ;
-    }
+    const char* what() const noexcept override
+        {
+            return "Overload Type Matching Overlap" ;
+        }
     virtual std::string toString() const noexcept override ;
 protected:
     MethodMETA<T>* const candidateMethod ;
@@ -62,7 +61,8 @@ protected:
 } ;
 
 template <typename T>
-inline std::string OverloadOverlapException<T>::toString() const noexcept  {
+inline std::string OverloadOverlapException<T>::toString() const noexcept
+{
     std::ostringstream stream ;
     stream << "Overloading may result in ambiguity, with candidate method: "
            << candidateMethod->toString()
@@ -73,17 +73,12 @@ inline std::string OverloadOverlapException<T>::toString() const noexcept  {
             return (m->getModuleName() == candidateMethod->getModuleName() &&
                     m->getMethodName() == candidateMethod->getMethodName()   ) ;
         }) ;
-    candidates = misc::Collections::filter(candidates, [&](MethodMETA<T>* m) -> bool {
-            ast::Type* const candidateType = candidateMethod->getDispatchType() ;
-            ast::Type* const mType = m->getDispatchType() ;
-            const bool candidateGeneralized = candidateType->isGeneralizationOf(mType) ;
-            const bool mGeneralized = mType->isGeneralizationOf(candidateType) ;
-            return !(candidateGeneralized || mGeneralized) ;
-        }) ;
     for (auto iter = candidates.cbegin(); iter != candidates.cend(); ++iter) {
         ast::Type* const candidateType = candidateMethod->getDispatchType() ;
         ast::Type* const iterType = (*iter)->getDispatchType() ;
-        const bool overlap = ast::Type::hasOverlap(candidateType, iterType) ;
+        const bool overlap = ast::Type::hasOverlap(candidateType, iterType) &&
+            !(candidateType->isGeneralizationOf(iterType) ||
+              iterType->isGeneralizationOf(candidateType)) ;
         stream << (overlap? "  * " : "    ") << (*iter)->toString()
                << ((iter + 1 == candidates.cend())? "" : " ,")
                << std::endl ;
@@ -101,9 +96,10 @@ public:
           candidateMethod(p_candidateMethod),
           existedOverloadOptions(p_existedOverload)
         {}
-    const char* what() const noexcept override {
-        return "Overload Type Matching Duplicate" ;
-    }
+    const char* what() const noexcept override
+        {
+            return "Overload Type Matching Duplicate" ;
+        }
     virtual std::string toString() const noexcept override ;
 protected:
     MethodMETA<T>* const candidateMethod ;
@@ -134,6 +130,51 @@ inline std::string OverloadDuplicateException<T>::toString() const noexcept
     stream << "]" ;
     return stream.str() ;
 }
+
+class InvalidSignatureString : public CompiletimeException {
+public:
+    InvalidSignatureString(const std::string& p_siteString,
+                           std::size_t p_siteLocation,
+                           std::size_t p_siteLine)
+        : CompiletimeException(CompiletimeExceptionClass::InvalidSignatureString),
+          siteString(p_siteString),
+          siteLocation(p_siteLocation),
+          siteLine(p_siteLine)
+        {}
+    class SignatureStringErrorListener : public antlr4::BaseErrorListener {
+    public:
+        SignatureStringErrorListener(const std::string* p_rawText)
+            : rawText(p_rawText)
+            {}
+        
+        virtual void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol,
+                                 std::size_t line, std::size_t charPositionInLine,
+                                 const std::string& msg, std::exception_ptr e) override
+            {
+                throw InvalidSignatureString(*rawText, charPositionInLine, line) ;
+            }
+    protected:
+        const std::string* rawText ;
+    } ;
+    const char* what() const noexcept override
+        {
+            return "Invalid Signature String" ;
+        }
+    virtual std::string toString() const noexcept override
+        {
+            std::ostringstream stream ;
+            stream << "In signature string " << '"'
+                   << siteString
+                   << '"'
+                   << ", syntax error at character position "
+                   << siteLocation ;
+            return stream.str() ;
+        }
+protected:
+    const std::string siteString ;
+    const std::size_t siteLocation ;
+    const std::size_t siteLine ;
+} ;
 
 }
 }

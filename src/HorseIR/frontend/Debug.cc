@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     horseIR::ast::ASTNode::MemManagerType mem ;
     auto compilationUnit = new horseIR::ast::CompilationUnit(compilationUnitContext, mem) ;
     std::cout << compilationUnit->toString() << std::endl ;
-    
+
     using namespace horseIR::interpreter ;
     std::unique_ptr<ExternalMethod<void*>> bindedMethod (
         ExternalMethod<void*>::bindExternalMethod(
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
                                             return nullptr ;
                                         })) ;
     VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
-                                        "default", "main", "func<i32, i32 :table>",
+                                        "default", "main", "func<i32, i32, ... :table>",
                                         [](std::size_t argc, void* argv[]) -> void* {
                                             return nullptr ;
                                         })) ;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
                                             return nullptr ;
                                         })) ;
     VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
-                                        "default", "main", "func<i32, ? :bool>",
+                                        "default", "main", "func<?, ? :bool>",
                                         [](std::size_t argc, void* argv[]) -> void* {
                                             return nullptr ;
                                         })) ;
@@ -130,7 +130,15 @@ int main(int argc, char *argv[])
         std::cout << except.toString() << std::endl ;
     } catch (const OverloadDuplicateException<void*>& except) {
         std::cout << except.toString() << std::endl ;
+    } catch (const InvalidSignatureString& except) {
+        std::cout << except.toString() << std::endl ;
     }
-    
+
+    auto ptr = VectorDispatcher<void*>::fetch(c, "default", "main", "i32, ?") ;
+    if (ptr == nullptr) {
+        std::cout << "no viable overload found" << std::endl ;
+    } else {
+        std::cout << ptr->toString() << std::endl ;
+    }
     return 0;
 }

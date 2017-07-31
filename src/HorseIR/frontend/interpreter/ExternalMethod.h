@@ -9,6 +9,7 @@
 #include "../misc/Collections.h"
 
 #include "MethodMETA.h"
+#include "Exception.h"
 
 namespace horseIR {
 namespace interpreter {
@@ -62,6 +63,13 @@ inline ExternalMethod<T>::ExternalMethod(const std::string& p_moduleName,
     horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream tokenStream(&lexer) ;
     horseIR::HorseIRParser parser(&tokenStream) ;
+    
+    lexer.removeErrorListeners() ;
+    parser.removeErrorListeners() ;
+    InvalidSignatureString::SignatureStringErrorListener errorListener(&signatureString) ;
+    lexer.addErrorListener(&errorListener) ;
+    parser.addErrorListener(&errorListener) ;
+    
     horseIR::HorseIRParser::TypeFuncContext* context = parser.typeFunc() ;
     ast::FunctionType* functionType = new ast::FunctionType(context, this->mem) ;
     ast::ASTVisitors::applyToEachNode(functionType, [](ast::ASTNode* node) -> void {
@@ -99,9 +107,18 @@ inline std::string ExternalMethod<T>::toString() const
 {
     std::ostringstream stream ;
     stream << this->moduleName << '.' << this->methodName
-           << '('
-           << this->methodType->toString()
-           << ')'
+           << '(' ;
+    const std::vector<ast::Type*> inParamTypes (this->methodType->getParameterTypes()) ;
+    auto inParamTypesSegments = misc::Collections::map(
+        inParamTypes,
+        [](ast::Type* type) -> std::string {return type->toString() ;}) ;
+    misc::Collections::writeToStream(
+        stream,
+        inParamTypesSegments,
+        ", ",
+        (this->methodType->getIsFlexible()? ", ...) -> " : ") -> ")) ;
+    ast::Type* const outParamType = this->methodType->getReturnType() ;
+    stream << outParamType->toString() 
            << " [external]" ;
     return stream.str() ;
 }
