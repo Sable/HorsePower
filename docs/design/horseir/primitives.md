@@ -122,7 +122,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.| Status |
 :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |:--| :----- |
 1  | append(x,y)          | Append to a list            | Pending                     | Pending                       | [link](builtin/append.md)    |1  |&#10004;|
-2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | link                         |2  | |
+2  | like(x,y)            | Patten x matches y          | Pending                     | B                             | [link](builtin/like.md)      |2  |P|
 3  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |3  |&#10004;|
 4  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         |4  | |
 5  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |5  |&#10004;|
