@@ -48,33 +48,33 @@ L SYM_LIST_EMP[2];
 L SYM_LIST_DEP[2];
 
 L testInputFile(S filePath){
-	if(!filePath){
-		fprintf(stderr, "Correct path must be set (-p path)\n");
-		exit(99);
-	}
-	P("path = %s\n", filePath);
-	// readFile(filePath, 1);
-	R 0;
+    if(!filePath){
+        fprintf(stderr, "Correct path must be set (-p path)\n");
+        exit(99);
+    }
+    P("path = %s\n", filePath);
+    // readFile(filePath, 1);
+    R 0;
 }
 
 void initTable(){
-	const C* PRE_DEFINED[] = {
-		"LastName", "DepartmentID",
-		"DepartmentID", "DepartmentName"
-	};
-	DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
-	// printAllSymol();
-	SYM_LIST_EMP[0] = getSymbol((S)"LastName");
-	SYM_LIST_EMP[1] = getSymbol((S)"DepartmentID");
-	SYM_LIST_DEP[0] = getSymbol((S)"DepartmentID");
-	SYM_LIST_DEP[1] = getSymbol((S)"DepartmentName");
+    const C* PRE_DEFINED[] = {
+        "LastName", "DepartmentID",
+        "DepartmentID", "DepartmentName"
+    };
+    DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
+    // printAllSymol();
+    SYM_LIST_EMP[0] = getSymbol((S)"LastName");
+    SYM_LIST_EMP[1] = getSymbol((S)"DepartmentID");
+    SYM_LIST_DEP[0] = getSymbol((S)"DepartmentID");
+    SYM_LIST_DEP[1] = getSymbol((S)"DepartmentName");
 }
 
 /* return -1, if too large */
 L getNiceNumber(L n){
-	L k = 1, c = 62;
-	while(c>0 && k<n){c--;k<<=1;}
-	R (k<n?-1:k);
+    L k = 1, c = 62;
+    while(c>0 && k<n){c--;k<<=1;}
+    R (k<n?-1:k);
 }
 
 #define CHECK(e, x) { \
@@ -260,27 +260,27 @@ L simulateSimpleRaw(){
 }
 
 L testMain(){
-	initMain();  // memory
-	initSym();   // symbol
-	initSys();
-	initTable(); // table
-	P("Reading table Employee\n");
-	V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
-	registerTable((S)"Employee", tableEmp);
-	P("Reading table Department\n");
-	V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
-	registerTable((S)"Department", tableDep);
-	/* Simulation */
-	// simulateSimple();
+    initMain();  // memory
+    initSym();   // symbol
+    initSys();
+    initTable(); // table
+    P("Reading table Employee\n");
+    V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
+    registerTable((S)"Employee", tableEmp);
+    P("Reading table Department\n");
+    V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
+    registerTable((S)"Department", tableDep);
+    /* Simulation */
+    // simulateSimple();
     simulateSimpleRaw();
-	/* Print info */
-	printSymInfo();
-	printHeapInfo();
-	getchar();
-	R 0;
+    /* Print info */
+    printSymInfo();
+    printHeapInfo();
+    getchar();
+    R 0;
 }
 
 // L loadCSV(S filePath, L types, L size){
-// 	R readFile((S)CSV_EMP, 1);
+//  R readFile((S)CSV_EMP, 1);
 // }
 
