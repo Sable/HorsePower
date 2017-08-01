@@ -63,7 +63,7 @@ void initTable(){
 		"DepartmentID", "DepartmentName"
 	};
 	DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
-	printAllSymol();
+	// printAllSymol();
 	SYM_LIST_EMP[0] = getSymbol((S)"LastName");
 	SYM_LIST_EMP[1] = getSymbol((S)"DepartmentID");
 	SYM_LIST_DEP[0] = getSymbol((S)"DepartmentID");
@@ -77,7 +77,9 @@ L getNiceNumber(L n){
 	R (k<n?-1:k);
 }
 
-#define CHECK(e, x) { if(e!=0) { P("Error at line %d, (err=%lld)\n",x,e); exit(99); } P("Pass line %d\n",x); }
+#define CHECK(e, x) { \
+    if(e!=0) { P("Error at line %d, (err=%lld)\n",x,e); exit(99); } \
+    if(H_DEBUG)P("Pass line %d\n",x); }
 
 V handleLiteral(horseIR::ast::Literal* literal)
 {
@@ -106,48 +108,6 @@ V handleParameter(horseIR::ast::Operand* operand, std::map<std::string, V>& env)
         
 
 L simulateSimple(){
-    /*
-	L e;
-	V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V d0 = allocNode();
-	V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V d1 = allocNode();
-	V s2 = allocNode();  V t2 = allocNode();  V r2 = allocNode();  V d2 = allocNode();
-	V s3 = allocNode();
-	V z0 = allocNode();  V z = allocNode();
-	P("** Starting simulation\n");
-	e = pfnColumnValue(s0, \
-		  initSymbol(allocNode(),getSymbol((S)"Employee")), \
-		  initSymbol(allocNode(),getSymbol((S)"LastName")));       CHECK(e,1);
-	e = pfnColumnValue(s1, \
-		  initSymbol(allocNode(),getSymbol((S)"Employee")), \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,2);
-	e = pfnColumnValue(s2, \
-		  initSymbol(allocNode(),getSymbol((S)"Department")), \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,3);
-	e = pfnColumnValue(s3, \
-		  initSymbol(allocNode(),getSymbol((S)"Department")), \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentName"))); CHECK(e,4);
-
-	e = pfnIndexOf       (t0, s2, s1);     CHECK(e,5);
-	e = pfnFindValidIndex(t1, s2, t0);     CHECK(e,6);
-	e = pfnFindValidItem (t2, s2, t0);     CHECK(e,7);
-
-	e = pfnIndex    (r0, s0, t1);     CHECK(e,8);
-	e = pfnIndex    (r1, s1, t1);     CHECK(e,9);
-	e = pfnIndex    (r2, s3, t2);     CHECK(e,10);
-
-	e = pfnDict     (d0, \
-		  initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,11);
-	e = pfnDict     (d1, \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentID")),  r1);  CHECK(e,12);
-	e = pfnDict     (d2, \
-		  initSymbol(allocNode(),getSymbol((S)"DepartmentName")),r2);  CHECK(e,13);
-
-	e = pfnList     (z0, 3, d0, d1, d2); CHECK(e,14);
-	e = pfnTable    (z, z0);             CHECK(e,15);
-	P("\n");
-	printTablePretty(z);
-	R 0;
-    */
     antlr4::ANTLRInputStream inStream(program) ;
     horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream tokenStream(&lexer) ;
@@ -166,7 +126,8 @@ L simulateSimple(){
         switch (statement->getStatementClass()) {
         case horseIR::ast::Statement::StatementClass::Assign: {
             auto* invokeStmt = static_cast<horseIR::ast::AssignStatement*>(statement) ;
-            assert(invokeStmt->isInvocation()) ;
+            // assert(invokeStmt->isInvocation()) ;
+            assert(invokeStmt->getIsInvocation()) ;
             auto* invokeTargetOperand = invokeStmt->getInvokeTarget() ;
             assert(invokeTargetOperand->getOperandClass() == horseIR::ast::Operand::OperandClass::Literal) ;
             auto* literal = static_cast<horseIR::ast::Literal*>(invokeTargetOperand) ;
@@ -226,7 +187,75 @@ L simulateSimple(){
     }
 
     P("\n");
-    printTablePretty(variableStack["<local>.z"]);
+    printTablePretty(variableStack["<local>.z"], -1);
+    R 0;
+}
+
+/* UDF1:  */
+L udfFindValidIndex(V validIndex, V colVal, V indexBool){
+    L e;
+    V colSize   = allocNode(), validBool  = allocNode();
+    V indexSize = allocNode(), indexRange = allocNode();
+    e = pfnLen     (colSize, colVal);                    CHECK(e,1);
+    e = pfnLt      (validBool, indexBool, colSize);      CHECK(e,2);
+    e = pfnLen     (indexSize, indexBool);               CHECK(e,3);
+    e = pfnRange   (indexRange, indexSize);              CHECK(e,4);
+    e = pfnCompress(validIndex, validBool, indexRange);  CHECK(e,5);
+    R 0;
+}
+
+L udfFindValidItem(V validItem, V colVal, V indexBool){
+    L e;
+    V colSize = allocNode(), validBool = allocNode();
+    e = pfnLen     (colSize, colVal);                   CHECK(e,1);
+    e = pfnLt      (validBool, indexBool, colSize);     CHECK(e,2);
+    e = pfnCompress(validItem, validBool, indexBool);   CHECK(e,3);
+    R 0;
+}
+
+/*
+ * steps of simple examples
+ */
+L simulateSimpleRaw(){
+    L e;
+    V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V d0 = allocNode();
+    V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V d1 = allocNode();
+    V s2 = allocNode();  V t2 = allocNode();  V r2 = allocNode();  V d2 = allocNode();
+    V s3 = allocNode();
+    V z0 = allocNode();  V z = allocNode();
+    P("** Start simulation\n");
+    e = pfnColumnValue(s0, \
+          initSymbol(allocNode(),getSymbol((S)"Employee")), \
+          initSymbol(allocNode(),getSymbol((S)"LastName")));       CHECK(e,1);
+    e = pfnColumnValue(s1, \
+          initSymbol(allocNode(),getSymbol((S)"Employee")), \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,2);
+    e = pfnColumnValue(s2, \
+          initSymbol(allocNode(),getSymbol((S)"Department")), \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,3);
+    e = pfnColumnValue(s3, \
+          initSymbol(allocNode(),getSymbol((S)"Department")), \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentName"))); CHECK(e,4);
+
+    e = pfnIndexOf       (t0, s2, s1);     CHECK(e,5);
+    e = udfFindValidIndex(t1, s2, t0);     CHECK(e,6);
+    e = udfFindValidItem (t2, s2, t0);     CHECK(e,7);
+
+    e = pfnIndex    (r0, s0, t1);     CHECK(e,8);
+    e = pfnIndex    (r1, s1, t1);     CHECK(e,9);
+    e = pfnIndex    (r2, s3, t2);     CHECK(e,10);
+
+    e = pfnDict     (d0, \
+          initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,11);
+    e = pfnDict     (d1, \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentID")),  r1);  CHECK(e,12);
+    e = pfnDict     (d2, \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentName")),r2);  CHECK(e,13);
+
+    e = pfnList     (z0, 3, d0, d1, d2); CHECK(e,14);
+    e = pfnTable    (z, z0);             CHECK(e,15);
+    P("Result of the join of table Employee and Department:\n\n");
+    printTablePretty(z, -1);
     R 0;
 }
 
@@ -235,14 +264,15 @@ L testMain(){
 	initSym();   // symbol
 	initSys();
 	initTable(); // table
-	P("Reading table employee\n");
+	P("Reading table Employee\n");
 	V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
 	registerTable((S)"Employee", tableEmp);
-	P("Reading table department\n");
+	P("Reading table Department\n");
 	V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
 	registerTable((S)"Department", tableDep);
 	/* Simulation */
-	simulateSimple();
+	// simulateSimple();
+    simulateSimpleRaw();
 	/* Print info */
 	printSymInfo();
 	printHeapInfo();

@@ -23,7 +23,7 @@
 
 /* x.y */
 L pfnColumnValue(V z, V x, V y){
-	P("-> Entering column_value\n");
+	if(H_DEBUG) P("-> Entering column_value\n");
 	if(isOneSymbol(x) && isOneSymbol(y)){
 		V t = findTableByName(vq(x));
 		if(!t) R E_TABLE_NOT_FOUND;
@@ -45,7 +45,7 @@ L pfnColumnValue(V z, V x, V y){
  * find_valid_index: (y<#x)/!#y
  */
 L pfnFindValidIndex(V z, V x, V y){
-	P("-> Entering find_valid_index\n");
+	if(H_DEBUG) P("-> Entering find_valid_index\n");
 	if(vp(x) == vp(y) && isInteger(x)){
 		L lenZ = 0, typZ = H_L;
 		L lenY = vn(y), lenX = vn(x), cnt = 0;
@@ -61,7 +61,7 @@ L pfnFindValidIndex(V z, V x, V y){
  * find_valid_item: (y<#x)/y
  */
 L pfnFindValidItem(V z, V x, V y){
-	P("-> Entering find_valid_item\n");
+	if(H_DEBUG) P("-> Entering find_valid_item\n");
 	if(vp(x) == vp(y) && isInteger(x)){
 		L lenZ = 0, typZ = H_L;
 		L lenY = vn(y), lenX = vn(x), cnt = 0;
@@ -77,7 +77,7 @@ L pfnFindValidItem(V z, V x, V y){
  * indexing: x[y]
  */
 L pfnIndex(V z, V x, V y){
-	P("-> Entering index\n");
+	if(H_DEBUG) P("-> Entering index\n");
 	if(isInteger(y)){
 		L typZ = vp(x), lenZ = vn(y), lenX = vn(x);
 		if(isSymbol(x) || isInteger(x)){ // basic types, non-list
@@ -926,7 +926,7 @@ L pfnCompress(V z, V x, V y){
 		if(!isEqualLength(x,y)) R E_LENGTH;
 		L lenX = vn(x);
 		L typZ = vp(y);
-		L lenZ = getNumOfNonZero(y);
+		L lenZ = getNumOfNonZero(x);
 		L k    = 0;
 		initV(z,typZ,lenZ);
 		if(k == lenZ){ // copy all of items

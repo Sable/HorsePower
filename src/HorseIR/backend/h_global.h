@@ -68,8 +68,10 @@ typedef struct list_table{
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
 /* constant code */
+
 #define ERROR_CODE 99
 #define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
+#define H_DEBUG false
 
 /* extern */
 

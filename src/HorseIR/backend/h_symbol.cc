@@ -221,8 +221,9 @@ void printAllSymol(){
 }
 
 void printSymInfo(){
-    P("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
-        symSize, symCur+1, (symCur+1)*100.0/symSize);
+    if(H_DEBUG)
+        P("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
+            symSize, symCur+1, (symCur+1)*100.0/symSize);
 }
 
 L getSymbolSize(L x){

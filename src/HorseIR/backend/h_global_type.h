@@ -96,7 +96,7 @@
 #define vU(x,i) sU(x)[i]
 #define vW(x,i) sW(x)[i]
 #define vT(x,i) sT(x)[i]
-#define vV(x,i) sV(x)[i]
+#define vV(x,k) (sV(x)+(k))
 
 /* special x */
 
@@ -111,7 +111,6 @@
 #define xe  ve(x)
 #define xc  vc(x)
 #define xq  vq(x)
-#define xy  vy(x)
 #define xm  vm(x)
 #define xd  vd(x)
 #define xz  vz(x)
@@ -128,15 +127,15 @@
 #define xF(k) vF(x,k)
 #define xE(k) vE(x,k)
 #define xQ(k) vQ(x,k)
+#define xM(k) vM(x,k)
+#define xD(k) vD(x,k)
+#define xZ(k) vZ(x,k)
+#define xU(k) vU(x,k)
+#define xW(k) vW(x,k)
+#define xT(k) vT(x,k)
 #define xX(k) vX(x,k)
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)
-
-/* save pointer to a slot */
-#define setXV(k, val) {V t=((V)xg)+(k); P("t = %lld\n",t); t=val; P("after: xg = %lld, t = %lld\n",xg,t);}
-
-#define VDexl(x, k) (((V)((x)->g))+(k))
-
 
 

@@ -23,13 +23,13 @@ V readCSV(S fileName, L numCols, L *types, L *symList){
 	V x = allocTable(numCols);
 	DOI(numCols, {V newDict=xV(i); \
 		initDict(newDict); \
-		initSymbol(VDexl(newDict, 0), symList[i]); \
-		initValue (VDexl(newDict, 1), types[i], numRow);});
+		initSymbol(vV(newDict, 0), symList[i]); \
+		initValue (vV(newDict, 1), types[i], numRow);});
 
-	P("** Done with initialization **\n");
+	if(H_DEBUG) P("** Done with initialization **\n");
 	rewind(fp);
 	loadCSV(fp, true, x, numCols, types);
-	printTable(x); P("\n");
+	if(H_DEBUG) {printTable(x); P("\n");}
 	fclose(fp);
 	R x;
 }
@@ -52,7 +52,7 @@ L loadCSV(FILE *fp, B isLoading, V table, L numCols, L *types){
 		exit(ERROR_CODE);
 	}
 	if(!isLoading)
-		P("CSV info: %lld rows and %lld cols\n", rowSize, numCols);
+		P(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
 	R rowSize;
 }
 
