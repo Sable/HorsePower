@@ -606,15 +606,17 @@ L pfnDate(V z, V x){
 
 #define CHOPU(op,x) (0==op?(x/60):(x%60))
 #define CHOPW(op,x) (0==op?(x/3600):1==op?(x/60%60):(x%60))
-#define CHOPT(op,z,x) {L t=T2W(x); z=4>op?CHOPW(op,x):x%1000;}
+#define CHOPT(op,z,x) {L t=T2W(x); z=4>op?CHOPW(op,t):x%1000;}
+#define CHOPZT(op,z,x){L t=Z2T(x); CHOPT(op,z,t)}
 #define T2W(x) ((x)/1E3)
 L pfnChopTime(V z, V x, L op){
     if(isTypeGroupTime(vp(x))){
         initV(z,H_L,vn(x));
         switch(vp(x)){
-            caseU DOI(vn(x), vL(z,i)=CHOPU(op,vU(x,i))) break;
-            caseW DOI(vn(x), vL(z,i)=CHOPW(op,vW(x,i))) break;
-            caseT DOI(vn(x), CHOPT(op,vL(z,i),vT(x,i))) break;
+            caseU DOI(vn(x), vL(z,i)= CHOPU(op,vU(x,i))) break;
+            caseW DOI(vn(x), vL(z,i)= CHOPW(op,vW(x,i))) break;
+            caseT DOI(vn(x), CHOPT (op,vL(z,i),vT(x,i))) break;
+            caseZ DOI(vn(x), CHOPZT(op,vL(z,i),vZ(x,i))) break;
             default: R E_NOT_IMPL;
         }
         R 0;

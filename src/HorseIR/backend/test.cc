@@ -191,7 +191,7 @@ L simulateSimple(){
     R 0;
 }
 
-/* UDF1:  */
+/* UDF1: Find valid index */
 L udfFindValidIndex(V validIndex, V colVal, V indexBool){
     L e;
     V colSize   = allocNode(), validBool  = allocNode();
@@ -204,6 +204,7 @@ L udfFindValidIndex(V validIndex, V colVal, V indexBool){
     R 0;
 }
 
+/* UDF2: Find valid item */
 L udfFindValidItem(V validItem, V colVal, V indexBool){
     L e;
     V colSize = allocNode(), validBool = allocNode();
