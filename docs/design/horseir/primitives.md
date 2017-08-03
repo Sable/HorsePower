@@ -99,22 +99,20 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 
 No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |No.| Status |
 :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- |:--| :----- |
-1  | asc(x)               | Ascending order (index)     | Pending                     | L                             | [link](builtin/asc.md)       |1  |&#10004;|
-2  | desc(x)              | Descending order (index)    | Pending                     | L                             | [link](builtin/desc.md)      |2  |&#10004;|
-3  | unique(x)            | Unique values               | Pending                     | L                             | [link](builtin/unique.md)    |3  |&#10004;|
-4  | str(x)               | Format                      | Pending                     | C                             | [link](builtin/str.md)       |4  |P|
-5  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |5  |&#10004;|
-6  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |6  |&#10004;|
-7  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)      |7  |&#10004;|
-8  | at(x)                | Member                      | Pending                     | B                             | [link](builtin/at.md)        |8  | |
-9  | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                         |9  | |
-10 | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |10 | |
-11 | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |11 | |
-12 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |12 |&#10004;|
-13 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)     |13 |&#10004;|
-14 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |14 | |
-15 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |15 | |
-16 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | link                         |16 | |
+1  | unique(x)            | Unique values               | Pending                     | L                             | [link](builtin/unique.md)    |1  |&#10004;|
+2  | str(x)               | Format                      | Pending                     | C                             | [link](builtin/str.md)       |2  |P|
+3  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)       |3  |&#10004;|
+4  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)     |4  |&#10004;|
+5  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)      |5  |&#10004;|
+6  | at(x)                | Member                      | Pending                     | B                             | [link](builtin/at.md)        |6  | |
+7  | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                         |7  | |
+8  | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                         |8  | |
+9  | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                         |9  | |
+10 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)   |10 |&#10004;|
+11 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)     |11 |&#10004;|
+12 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                         |12 | |
+13 | enlist(x)            | Return a list               | Pending                     | Pending                       | link                         |13 | |
+14 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | link                         |14 | |
 
 
 ### 3.2 Binary
@@ -128,6 +126,7 @@ No.| Function             | Description                 | Type of Arg(s)\*      
 5  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |5  |&#10004;|
 6  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         |6  | |
 7  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         |7  | |
+8  | order(x,y)           | Sort x based on y           | (Real;B)                    | L                             | [link](builtin/order.md)     |8  |&#10004;|
 
 ### 3.3 Reduction
 
