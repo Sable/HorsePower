@@ -13,12 +13,11 @@ void lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen);
 void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen);
 #define lib_index_of_Q lib_index_of_L
 
-void lib_order_B(L* targ, B* val, L vLen, B isUp);
-void lib_order_H(L* targ, H* val, L vLen, B isUp);
-void lib_order_I(L* targ, I* val, L vLen, B isUp);
-void lib_order_L(L* targ, L* val, L vLen, B isUp);
-void lib_order_F(L* targ, F* val, L vLen, B isUp);
-void lib_order_E(L* targ, E* val, L vLen, B isUp);
+/* quick sort section */
+void lib_quicksort     (L *rtn, V val, L low, L high, B *isUp);
+L    lib_partition     (L *rtn, V val, L low, L high, B *isUp);
+L    lib_quicksort_cmp (V val, L a, L b, B *isUp);
+void lib_list_order_by (L *targ, L tLen, V val, B *isUp);
 
 #ifdef	__cplusplus
 }

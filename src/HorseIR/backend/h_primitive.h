@@ -81,11 +81,6 @@ L pfnReduce        (V z, V x, L op);
 L pfnMin           (V z, V x);
 L pfnMax           (V z, V x);
 
-L pfnOrder         (V z, V x, L op);
-L pfnAsc           (V z, V x);
-L pfnDesc          (V z, V x);
-
-
 L pfnChopDate      (V z, V x, L op);
 L pfnDateYear      (V z, V x);
 L pfnDateMonth     (V z, V x);
@@ -128,6 +123,7 @@ L pfnCompress      (V z, V x, V y);
 L pfnIndexOf       (V z, V x, V y);
 L pfnAppend        (V z, V x, V y);
 L pfnLike          (V z, V x, V y);
+L pfnOrderBy       (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

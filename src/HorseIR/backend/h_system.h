@@ -19,6 +19,7 @@ L copyV               (V z, V x);
 L findColFromTable    (V x, L cId);
 V promoteValue        (V x, L typMax);
 B checkZero           (V x);
+B checkMatch          (V x);
 L getSingleIntValue   (V x);
 L calcFact            (L n);
 L getNumOfNonZero     (V x);
@@ -53,6 +54,7 @@ L inferPi             (L t);
 #define E_TYPE            6
 #define E_NULL_VALUE      7
 #define E_LIKE_PATTERN    8
+#define E_MATCH           9
 #define E_TABLE_NOT_FOUND 50
 #define E_COL_NOT_FOUND   51
 #define E_NOT_IMPL        99

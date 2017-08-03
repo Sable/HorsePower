@@ -96,26 +96,49 @@ void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen){
     DOI(vLen, {L t=buff[val[i]]; targ[i]=-1==t?sLen:t;})
 }
 
-void lib_order_B(L* targ, B* val, L vLen, B isUp){
+
+void lib_quicksort(L *rtn, V val, L low, L high, B *isUp){
+    if(low < high){
+        L pos = lib_partition(rtn, val, low, high, isUp);
+        lib_quicksort(rtn, val, low, pos-1, isUp);
+        lib_quicksort(rtn, val, pos+1, high,isUp);
+    }
 }
 
-void lib_order_H(L* targ, H* val, L vLen, B isUp){
+L lib_partition(L *rtn, V val, L low, L high, B *isUp){
+    L pivot = low, i = low, j = high+1, t;
+    while(true){
+        do{++i;} while(lib_quicksort_cmp(val,rtn[i],rtn[pivot],isUp) <=0 && i < high);
+        do{--j;} while(lib_quicksort_cmp(val,rtn[j],rtn[pivot],isUp) > 0);
+        if(i>=j) break;
+        t = rtn[i]; rtn[i] = rtn[j]; rtn[j] = t;
+    }
+    t = rtn[low]; rtn[low] = rtn[j]; rtn[j] = t;
+    R j;
 }
 
-void lib_order_I(L* targ, I* val, L vLen, B isUp){
+#define cmp_switch(x) (x?-1:1):(x?1:-1)
+
+L lib_quicksort_cmp(V val, L a, L b, B *isUp){
+    DOI(vn(val), {V t=vV(val,i); B f = isUp[i]; \
+        switch(vp(t)){ \
+        caseB if(vB(t,a)!=vB(t,b)) R vB(t,a)<vB(t,b)?cmp_switch(f); break; \
+        caseH if(vH(t,a)!=vH(t,b)) R vH(t,a)<vH(t,b)?cmp_switch(f); break; \
+        caseI if(vI(t,a)!=vI(t,b)) R vI(t,a)<vI(t,b)?cmp_switch(f); break; \
+        caseL if(vL(t,a)!=vL(t,b)) R vL(t,a)<vL(t,b)?cmp_switch(f); break; \
+        caseF if(vF(t,a)!=vF(t,b)) R vF(t,a)<vF(t,b)?cmp_switch(f); break; \
+        caseE if(vE(t,a)!=vE(t,b)) R vE(t,a)<vE(t,b)?cmp_switch(f); break; \
+        caseQ if(vQ(t,a)!=vQ(t,b)) R compareSymbol(vQ(t,a),vQ(t,b))<0?cmp_switch(f); break; \
+        /* Pending: caseC */ \
+        } \
+    })
+    R 0;
 }
 
-void lib_order_L(L* targ, L* val, L vLen, B isUp){
+void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
+    DOI(tLen, targ[i]=i)
+    lib_quicksort(targ, val, 0, tLen-1, isUp);
 }
-
-void lib_order_F(L* targ, F* val, L vLen, B isUp){
-}
-
-void lib_order_E(L* targ, E* val, L vLen, B isUp){
-}
-
-
-
 
 
 

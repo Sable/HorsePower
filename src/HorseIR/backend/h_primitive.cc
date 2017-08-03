@@ -536,33 +536,6 @@ L pfnMax(V z, V x){
     R pfnReduce(z,x,1);
 }
 
-L pfnOrder(V z, V x, L op){
-    B isUp = 0 == op;
-    if(isTypeGroupReal(vp(x))){
-        L typZ = H_L;
-        L lenZ = vn(x);
-        initV(z,typZ,lenZ);
-        switch(typZ){
-            caseB lib_order_B(sL(z),sB(x),vn(x),isUp); break;
-            caseH lib_order_H(sL(z),sH(x),vn(x),isUp); break;
-            caseI lib_order_I(sL(z),sI(x),vn(x),isUp); break;
-            caseL lib_order_L(sL(z),sL(x),vn(x),isUp); break;
-            caseF lib_order_F(sL(z),sF(x),vn(x),isUp); break;
-            caseE lib_order_E(sL(z),sE(x),vn(x),isUp); break;
-        }
-        R 0;
-    }
-    else R E_DOMAIN;
-}
-
-L pfnAsc(V z, V x){
-    R pfnOrder(z,x,0);
-}
-
-L pfnDesc(V z, V x){
-    R pfnOrder(z,x,1);
-}
-
 /* Date & Time */
 #define Z2D(x) ((x)/216000000LL)
 #define Z2T(x) ((x)%216000000LL) //60x60x60x10000
@@ -1057,4 +1030,23 @@ L pfnLike(V z, V x, V y){
         else R E_LIKE_PATTERN;
     }
     R 0;
+}
+
+L pfnOrderBy(V z, V x, V y){
+    if(isList(x) && isBool(y) && isEqualLength(x,y)){
+        DOI(vn(x), if(!isTypeGroupReal(vp(vV(x,i))))R E_DOMAIN)
+        if(!checkMatch(x)) R E_MATCH;
+        L lenZ= 0==vn(x)?0:vn(vV(x,0));
+        initV(z,H_L,lenZ);
+        lib_list_order_by(sL(z), lenZ, x, sB(y));
+        R 0;
+    }
+    else if(isTypeGroupReal(vp(x)) && isBool(y) && 1==vn(y)){
+        V0 t0; V t= &t0;
+        vp(t)= H_G; vn(t)= 1; vg(t)= (G)x;
+        initV(z,H_L,vn(x));
+        lib_list_order_by(sL(z), vn(x), t, sB(y));
+        R 0;
+    }
+    else R E_DOMAIN;
 }

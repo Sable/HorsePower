@@ -51,6 +51,8 @@ void printAllSymol();
 void printSymInfo();
 
 L getSymbolSize(L x);
+S getSymbolStr (L x);
+L compareSymbol(L x, L y);
 
 #ifdef	__cplusplus
 }

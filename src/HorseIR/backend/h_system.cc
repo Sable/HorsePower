@@ -110,6 +110,13 @@ B checkZero(V x){
     R 1;
 }
 
+B checkMatch(V x){
+    switch(xp){
+        caseG if(xn>0){L n=vn(vV(x,0)); DOI(xn,if(n!=vn(vV(x,i)))R 0)} break; /* List */
+    }
+    R 1;
+}
+
 L getSingleIntValue(V x){
     R (1==xn)?(H_B==xp?xb:H_H==xp?xh:H_I==xp?xi:H_L==xp?xl:-1):-1;
 }
@@ -131,7 +138,6 @@ L getNumOfNonZero(V x){
 L appendList(V z, V x, V y){R E_NOT_IMPL;}
 /* x: enum, y: number */
 L appendEnum(V z, V x, V y){R E_NOT_IMPL;}
-
 /*
  * % -> .* // zero or more
  * _ -> .  // single
@@ -236,6 +242,7 @@ void printErrMsg(L eid){
         errCaseCell(E_TYPE,            "Type error"         );
         errCaseCell(E_NULL_VALUE,      "Null value error"   );
         errCaseCell(E_LIKE_PATTERN,    "Like pattern error" );
+        errCaseCell(E_MATCH,           "Columns not match"  );
         errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
         errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
         errCaseCell(E_NOT_IMPL,        "Not implement yet"  );

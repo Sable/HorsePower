@@ -260,6 +260,30 @@ L simulateSimpleRaw(){
     R 0;
 }
 
+void fillItem(V a, L *values, L len){
+    initV(a,H_L,len);
+    DOI(len, vL(a,i)=values[i])
+}
+
+void testOrderBy(){
+    P("Testing order by\n");
+    V a = allocNode();
+    initV(a,H_G,2);
+    L value_A[] = {32,12,7,78,12,45};
+    L value_B[] = {56,34,32,45,78,23};
+    fillItem(vV(a,0),value_A,6);
+    fillItem(vV(a,1),value_B,6);
+    P("a = "); printList(a); P("\n");
+    V b = allocNode();
+    initV(b,H_B,2);
+    vB(b,0) = true;  //ASC
+    vB(b,1) = false; //DESC
+    P("b = "); printList(b); P("\n");
+    V z = allocNode();
+    pfnOrderBy(z,a,b);
+    printList(z);
+}
+
 L testMain(){
     initMain();  // memory
     initSym();   // symbol
@@ -273,7 +297,8 @@ L testMain(){
     registerTable((S)"Department", tableDep);
     /* Simulation */
     // simulateSimple();
-    simulateSimpleRaw();
+    // simulateSimpleRaw();
+    testOrderBy();
     /* Print info */
     printSymInfo();
     printHeapInfo();

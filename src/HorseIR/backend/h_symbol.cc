@@ -230,3 +230,11 @@ L getSymbolSize(L x){
     R symTable[x]->data.len;
 }
 
+S getSymbolStr(L x){
+    R symTable[x]->data.str;
+}
+
+L compareSymbol(L x, L y){
+    R strcmp(getSymbolStr(x), getSymbolStr(y));
+}
+
