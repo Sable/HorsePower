@@ -107,17 +107,17 @@ L pfnList(V z, L n, ...){
 }
 
 /* copy alias */
-L pfnDict(V z, V x, V y){
-    initDict(z);
-    V key = getDictKey(z);
-    V val = getDictVal(z);
-    *key = *x;
-    *val = *y;
-    R 0;
-}
+// L pfnDict(V z, V x, V y){
+//     initDict(z);
+//     V key = getDictKey(z);
+//     V val = getDictVal(z);
+//     *key = *x;
+//     *val = *y;
+//     R 0;
+// }
 
 /* copy alias */
-L pfnTable(V z, V x){
+L pfnFlip(V z, V x){
     initTable(z, vn(x));
     /* need to check dict */
     DOI(vn(x), *(sV(z)+i)=*(sV(x)+i))
@@ -1046,6 +1046,115 @@ L pfnOrderBy(V z, V x, V y){
         vp(t)= H_G; vn(t)= 1; vg(t)= (G)x;
         initV(z,H_L,vn(x));
         lib_list_order_by(sL(z), vn(x), t, sB(y));
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+
+L pfnEach(V z, V x, V y, FUNC2(foo)){
+    L lenX = isList(x)?vn(x):1;
+    L lenY = isList(y)?vn(y):1;
+    if(isList(x) && isList(y)){
+        if(lenX==lenY){
+            initV(z,H_G,lenX);
+            DOI(lenX, CHECKE((*foo)(vV(z,i),vV(x,i),vV(y,i))))
+        }
+        else if(1==lenX){
+            initV(z,H_G,lenY);
+            DOI(lenY, CHECKE((*foo)(vV(z,i),vV(x,0),vV(y,i))))
+        }
+        else if(1==lenY){
+            initV(z,H_G,lenX);
+            DOI(lenY, CHECKE((*foo)(vV(z,i),vV(x,i),vV(y,0))))
+        }
+        else R E_LENGTH;
+    }
+    else if(isList(y)){
+        initV(z,H_G,lenY);
+        DOI(lenY, CHECKE((*foo)(vV(z,i),x,vV(y,i))))
+    }
+    else if(isList(x)){
+        initV(z,H_G,lenX);
+        DOI(lenX, CHECKE((*foo)(vV(z,i),vV(x,i),y)))
+    }
+    else { /* offload to foo */
+        CHECKE((*foo)(z,x,y));
+    }
+    R 0;
+}
+
+L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
+    if(isList(x)){
+        L lenZ = vn(x);
+        initV(z,H_G,lenZ);
+        DOI(lenZ, CHECKE((*foo)(vV(z,i),vV(x,i),y)))
+    }
+    else {
+        CHECKE((*foo)(z,x,y));
+    }
+    R 0;
+}
+
+L pfnEachRight(V z, V x, V y, FUNC2(foo)){
+    if(isList(y)){
+        L lenZ = vn(y);
+        initV(z,H_G,lenZ);
+        DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))
+    }
+    else {
+        CHECKE((*foo)(z,x,y));
+    }
+    R 0;
+}
+
+
+/* Literals */
+
+L pfnDictTable(V z, V x, V y, L op){
+    if(isList(x) && isList(y)){
+        if(isEqualLength(x,y)){
+            L lenZ = vn(x);
+            L typZ = 0==op?H_N:H_A;
+            initV(z,H_N,lenZ);
+            DOI(lenZ, {V t=vV(z,i); \
+                initList(t,2); \
+                CHECKE(copyV(vV(t,0),vV(x,i))) \
+                CHECKE(copyV(vV(t,1),vV(y,i))) })
+            R 0;
+        }
+        else R E_LENGTH;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnDict(V z, V x, V y){
+    R pfnDictTable(z,x,y,0);
+}
+
+L pfnTable(V z, V x, V y){
+    R pfnDictTable(z,x,y,1);
+}
+
+L pfnEnum(V z, V x, V y){
+    if(isOneSymbol(x)){
+        V eKey = getValueFromSymbol(vq(x));
+        V eVal = allocNode();
+        L lenZ = vn(eVal);
+        CHECKE(pfnIndexOf(eVal,y,eKey));
+        DOI(lenZ, if(vL(eVal,i)>=lenZ)R E_ENUM_INDEX)
+        initV(z,H_Y,lenZ);
+        initEnum(z,vq(x),vg(eVal));
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnKTable(V z, V x, V y){
+    if(isTable(x) && isTable(y)){
+        initKTable(z);
+        CHECKE(copyV(vV(z,0),x));
+        CHECKE(copyV(vV(z,1),y));
         R 0;
     }
     else R E_DOMAIN;

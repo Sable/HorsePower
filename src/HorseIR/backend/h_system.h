@@ -26,6 +26,7 @@ L getNumOfNonZero     (V x);
 L appendList          (V z, V x, V y);
 L appendEnum          (V z, V x, V y);
 S genLikeString       (S inStr, L inLen);
+V getValueFromSymbol  (Q id);
 
 B isTypeGroupInt      (L t);
 B isTypeGroupFloat    (L t);
@@ -55,6 +56,7 @@ L inferPi             (L t);
 #define E_NULL_VALUE      7
 #define E_LIKE_PATTERN    8
 #define E_MATCH           9
+#define E_ENUM_INDEX      10
 #define E_TABLE_NOT_FOUND 50
 #define E_COL_NOT_FOUND   51
 #define E_NOT_IMPL        99

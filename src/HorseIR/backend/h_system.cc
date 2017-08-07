@@ -32,10 +32,17 @@ V findTableByName(L sid){
 
 /* copy x to z */
 L copyV(V z, V x){
-    *z = *x; // alias
+    initV(z,xp,xn);
+    if(isTypeGroupScalar(xp)){
+        memcpy(vg(z),vg(x),getTypeSize(xp)*xn);
+    }
+    else {
+        switch(xp){
+            caseG DOI(xn, CHECKE(copyV(vV(z,i),vV(x,i)))) break;
+        }
+    }
     R 0;
 }
-
 
 L findColFromTable(V x, L cId){
     DOI(vn(x), if(cId == vq(getDictKey(getTableDict(x,i))))R i)
@@ -159,6 +166,10 @@ S genLikeString(S inStr, L inLen){
     R outStr;
 }
 
+V getValueFromSymbol(Q id){
+    R NULL;
+}
+
 
 /* Type checking */
 
@@ -243,6 +254,7 @@ void printErrMsg(L eid){
         errCaseCell(E_NULL_VALUE,      "Null value error"   );
         errCaseCell(E_LIKE_PATTERN,    "Like pattern error" );
         errCaseCell(E_MATCH,           "Columns not match"  );
+        errCaseCell(E_ENUM_INDEX,      "Enum index error"   );
         errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
         errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
         errCaseCell(E_NOT_IMPL,        "Not implement yet"  );

@@ -7,6 +7,7 @@ extern "C" {
 #define xReal(x) ((x).real)
 #define xImag(x) ((x).imag)
 #define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
+#define initEnum(x,key,val) {vq(x)=key; vg(x)=(G)val;}
 
 #define isBool(x)      (H_B==vp(x))
 #define isSymbol(x)    (H_Q==vp(x))
@@ -23,14 +24,18 @@ extern "C" {
 #define isEnum(x)      (H_Y==vp(x))
 #define isTable(x)     (H_A==vp(x))
 #define isDict(x)      (H_N==vp(x))
-#define isOneSymbol(x) (isSymbol(x) && vn(x)==1)
+#define isOneSymbol(x) (isSymbol(x) && 1==vn(x))
 
 #define isOne(x) (1==vn(x))
 
-#define isSameType(x,y) (vp(x)==vp(y))
+#define isSameType(x,y)    (vp(x)==vp(y))
 #define isEqualLength(x,y) (vn(x)==vn(y))
 #define isValidLength(x,y) (isOne(x) || isOne(y) || isEqualLength(x,y))
-#define isValidType(x,y) ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
+#define isValidType(x,y)   ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
+
+#define FUNC2(x) L (*x)(V,V,V)
+#define CHECKE(x) { L e=x; if(e) R e; }
+#define isTypeGroupScalar isTypeGroupRealX
 
 L pfnColumnValue   (V z, V x, V y);
 L pfnFindValidIndex(V z, V x, V y);
@@ -38,7 +43,7 @@ L pfnFindValidItem (V z, V x, V y);
 L pfnIndex         (V z, V x, V y);
 L pfnList          (V z, L n, ...); // change unknown args
 L pfnDict          (V z, V x, V y);
-L pfnTable         (V z, V x);
+L pfnFlip          (V z, V x);
 
 
 /* Implement in order */
@@ -124,6 +129,16 @@ L pfnIndexOf       (V z, V x, V y);
 L pfnAppend        (V z, V x, V y);
 L pfnLike          (V z, V x, V y);
 L pfnOrderBy       (V z, V x, V y);
+
+L pfnEach          (V z, V x, V y, FUNC2(foo));
+L pfnEachLeft      (V z, V x, V y, FUNC2(foo));
+L pfnEachRight     (V z, V x, V y, FUNC2(foo));
+
+L pfnDictTable     (V z, V x, V y, L op);
+L pfnDict          (V z, V x, V y);
+L pfnTable         (V z, V x, V y);
+L pfnEnum          (V z, V x, V y);
+L pfnKTable        (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

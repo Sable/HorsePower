@@ -141,6 +141,10 @@ V initTable(V x, L numCols){
     R initV(x, H_A, numCols);
 }
 
+V initKTable(V x){
+    R initV(x, H_K, 2);
+}
+
 
 void printType(L x){
     C buff[128];

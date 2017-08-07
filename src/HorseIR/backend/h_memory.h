@@ -28,6 +28,7 @@ V initSymbol  (V x, L val);
 V initList    (V x, L numItems);
 V initValue   (V x, L typ, L len);
 V initTable   (V x, L numCols);
+V initKTable  (V x);
 
 void printType    (L x);
 void printTypeStr (L x, S buff);
