@@ -37,6 +37,7 @@ pages:
     - "___": horseir/builtin/len.md
     - "___": horseir/builtin/leq.md
     - "___": horseir/builtin/like.md
+    - "___": horseir/builtin/list.md
     - "___": horseir/builtin/log.md
     - "___": horseir/builtin/logic.md
     - "___": horseir/builtin/liter.md

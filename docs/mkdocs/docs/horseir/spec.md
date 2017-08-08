@@ -111,15 +111,15 @@ def default{      // a module 'default'
 <u>Name issues</u>
 
 - Distinct name
-  + A module name
-  + A method name in a module
-  + A global variable in a module
-  + A local variable in a method
-  + Method name with global name
+    + A module name
+    + A method name in a module
+    + A global variable in a module
+    + A local variable in a method
+    + Method name with global name
 - Same name
-  + Module name with method / global / local variable name
-  + Method name with local variable name
-  + Global variable name with local variable name
+    + Module name with method / global / local variable name
+    + Method name with local variable name
+    + Global variable name with local variable name
 
 
 #### Variable declaration
