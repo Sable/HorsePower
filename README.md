@@ -10,19 +10,20 @@ the fine-grained parallelism.
 
 In HorsePower, we focus on the following parts.
 
-    - Static analysis for array-based HorseIR
-    - Highly tuned library support
     - High-level source language design
+    - Fine-grained primitives and highly tuned library
+    - Static analysis for an array-based IR (i.e. HorseIR)
     - Query optimizations with heuristics
-    - Query optimizations with data-flow analysis
+    - Query optimizations with data-flow analyses
 
 ## Quick entries
 
 - Design:
     [Grammar](src/HorseIR/grammar/HorseIR.g4)
-    | [IR Design](docs/design/horseir)
+    | [IR Design](docs/mkdocs/docs/horseir/)
     | [Valid examples](src/HorseIR/tests/valid)
     | [TPC-H](docs/tpch)
+    | [Reference](docs/mkdocs/docs)
     |
 - Implementation: 
     [Details](docs/implementation)
