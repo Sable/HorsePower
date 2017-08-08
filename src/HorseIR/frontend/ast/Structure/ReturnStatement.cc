@@ -42,6 +42,17 @@ std::string ReturnStatement::toTreeString() const
     return "(ReturnStatement)" ;
 }
 
+Identifier* ReturnStatement::getIdentifier() const
+{
+    return id ;
+}
+
+ReturnStatement& ReturnStatement::setIdentifier(horseIR::ast::Identifier *p_id)
+{
+    id = p_id ;
+    return *this ;
+}
+
 void ReturnStatement::__duplicateShallow(const ReturnStatement *returnStmt)
 {
     assert(returnStmt != nullptr) ;

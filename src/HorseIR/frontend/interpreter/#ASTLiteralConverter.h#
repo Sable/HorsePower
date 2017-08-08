@@ -1,0 +1,10 @@
+#pragma once
+
+#include "../ast/AST.h"
+
+namespace horseIR {
+namespace interpreter {
+
+
+}
+}

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
 
 #include "../ast/AST.h"
 #include "../ast/ASTVisitor.h"
@@ -17,7 +18,6 @@ namespace interpreter {
 template <typename IntermediateType>
 class ExternalMethod : public MethodMETA<IntermediateType> {
 public:
-    typedef InvalidSignatureStringException InvalidSignatureStringException ;
     ExternalMethod(const std::string& moduleName,
                    const std::string& methodName,
                    const std::string& signatureString) ;
@@ -64,7 +64,7 @@ inline ExternalMethod<T>::ExternalMethod(const std::string& p_moduleName,
     horseIR::HorseIRLexer lexer(&inStream) ;
     antlr4::CommonTokenStream tokenStream(&lexer) ;
     horseIR::HorseIRParser parser(&tokenStream) ;
-    
+
     lexer.removeErrorListeners() ;
     parser.removeErrorListeners() ;
     InvalidSignatureStringException::SignatureStringErrorListener errorListener(&signatureString) ;

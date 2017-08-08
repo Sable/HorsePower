@@ -37,6 +37,16 @@ std::string BranchStatement::getTargetLabelName() const
     return targetLabelName ;
 }
 
+bool BranchStatement::getIsConditional() const
+{
+    return checkCondition.first ;
+}
+
+Identifier* BranchStatement::getConditionID() const
+{
+    return checkCondition.second ;
+}
+
 std::size_t BranchStatement::getNumNodesRecursively() const
 {
     return (checkCondition.first)? checkCondition.second->getNumNodesRecursively() + 1 : 1 ;

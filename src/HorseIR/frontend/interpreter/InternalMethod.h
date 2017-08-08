@@ -15,7 +15,6 @@ namespace interpreter {
 template <typename IntermediateType>
 class InternalMethod : public MethodMETA<IntermediateType> {
 public:
-    typedef InvalidSignatureStringException InvalidSignatureStringException ;
     InternalMethod(const std::string& moduleName,
                    const std::string& methodName,
                    const std::string& signatureString,

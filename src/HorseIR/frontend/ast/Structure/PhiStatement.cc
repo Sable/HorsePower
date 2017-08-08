@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <sstream>
+#include <map>
 
 #include "../AST.h"
 
@@ -16,7 +17,7 @@ PhiStatement::PhiStatement(ASTNode* parent, HorseIRParser::StmtCoreContext *cst,
     auto stmtNameExprContext = dynamic_cast<HorseIRParser::StmtNameExprContext*>(cst->statementCore()) ;
     assert(stmtNameExprContext != nullptr) ;
 
-    lhsID = new Identifier(this, stmtNameExprContext->generalName(), mem) ;
+    lhsID = new Identifier(this, stmtNameExprContext->name(), mem) ;
     lhsType = Type::makeTypeASTNode(this, stmtNameExprContext->type(), mem) ;
 
     HorseIRParser::ExpressionContext* expressionContext = stmtNameExprContext->expression() ;
@@ -86,6 +87,26 @@ std::string PhiStatement::toString() const
 std::string PhiStatement::toTreeString() const
 {
     return "(PhiStatement)" ;
+}
+
+std::map<std::string, Identifier*> PhiStatement::getInFlowMap() const
+{
+    return inFlowMap ;
+}
+
+Identifier* PhiStatement::getInFlowMapAt(const std::string &label) const
+{
+    return inFlowMap.at(label) ; 
+}
+
+Identifier* PhiStatement::getLHSID() const
+{
+    return lhsID ;
+}
+
+Type* PhiStatement::getLHSType() const
+{
+    return lhsType ;
 }
 
 void PhiStatement::__duplicateShallow(const PhiStatement* phiStmt)

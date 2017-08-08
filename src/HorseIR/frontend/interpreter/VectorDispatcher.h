@@ -19,10 +19,6 @@ namespace interpreter {
 
 template <typename IntermediateType>
 struct VectorDispatcher {
-    typedef OverloadOverlapException<IntermediateType> OverloadOverlapException ;
-    typedef OverloadDuplicateException<IntermediateType> OverloadDuplicateException ;
-    typedef InvalidSignatureStringException InvalidSignatureStringException ;
-    
     typedef struct {
         std::vector<MethodMETA<IntermediateType>*> container ;
         std::vector<std::unique_ptr<MethodMETA<IntermediateType>>> mem ;
@@ -37,6 +33,11 @@ struct VectorDispatcher {
                                                const std::vector<ast::Type*>& signatureTypes) ;
     static void manage(ContainerType& container, MethodMETA<IntermediateType>* method) ;
     static std::string containerToString(const ContainerType& container) ;
+
+
+    typedef typename std::vector<MethodMETA<IntermediateType>*>::const_iterator ConstIteratorType ;
+    static ConstIteratorType cbegin(const ContainerType& container) ;
+    static ConstIteratorType cend(const ContainerType& container) ;
 } ;
 
 template <typename T>
@@ -120,8 +121,8 @@ inline MethodMETA<T>* VectorDispatcher<T>::fetch(const ContainerType& container,
 
     auto candidates = container.container ;
     candidates = misc::Collections::filter(candidates, [&](MethodMETA<T>* m) -> bool {
-            if (moduleName != m->getMoudleName) return false ;
-            if (methodName != m->getMethodName) return false ;
+            if (moduleName != m->getModuleName()) return false ;
+            if (methodName != m->getMethodName()) return false ;
             return true ;
         }) ;
     candidates = misc::Collections::filter(candidates, [&](MethodMETA<T>* m) -> bool {
@@ -151,7 +152,7 @@ inline MethodMETA<T>* VectorDispatcher<T>::fetch(const ContainerType& container,
 }
 
 template <typename T>
-inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> *method)
+inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T>* method)
 {
     auto candidateVector = container.container ;
     candidateVector = misc::Collections::filter(candidateVector, [&](MethodMETA<T>* m) -> bool {
@@ -163,7 +164,7 @@ inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> 
             ast::FunctionType* const methodType = method->getDispatchType() ;
             ast::FunctionType* const o_methodType = m->getDispatchType() ;
             if (methodType->isSameAs(o_methodType)) {
-                throw OverloadDuplicateException(method, container.container) ;
+                throw OverloadDuplicateException<T>(method, container.container) ;
             }
         }) ;
     candidateVector = misc::Collections::filter(candidateVector, [&](MethodMETA<T>* m) -> bool {
@@ -175,7 +176,7 @@ inline void VectorDispatcher<T>::manage(ContainerType &container, MethodMETA<T> 
         }) ;
     misc::Collections::apply(candidateVector, [&](MethodMETA<T>* m) -> void {
             if (ast::Type::hasOverlap(m->getDispatchType(), method->getDispatchType())) {
-                throw OverloadOverlapException(method, container.container) ;
+                throw OverloadOverlapException<T>(method, container.container) ;
             } 
         }) ;
 
@@ -195,6 +196,18 @@ inline std::string VectorDispatcher<T>::containerToString(const ContainerType &c
         }) ;
     misc::Collections::writeToStream(stream, segmentVector, ",\n  ", "\n]") ;
     return stream.str() ;
+}
+
+template <typename T>
+inline typename VectorDispatcher<T>::ConstIteratorType VectorDispatcher<T>::cbegin(const ContainerType &container)
+{
+    return container.container.cbegin() ;
+}
+
+template <typename T>
+inline typename VectorDispatcher<T>::ConstIteratorType VectorDispatcher<T>::cend(const ContainerType &container)
+{
+    return container.container.cend() ;
 }
 
 }

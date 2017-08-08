@@ -23,7 +23,6 @@ Module::Module(ASTNode* parent, HorseIRParser::ModuleContext *cst, ASTNode::MemM
         } else if ((*iter)->globalVar() != nullptr) {
             HorseIRParser::GlobalVarContext* globalVarContext = (*iter)->globalVar() ;
             Identifier* variable = new Identifier(this, globalVarContext->name(), mem) ;
-            (void) variable->setPackageName(moduleName) ;
             HorseIRParser::TypeContext* varTypeContext = globalVarContext->type() ;
             Type* varType = Type::makeTypeASTNode(this, varTypeContext, mem) ;
             globalVariables.emplace_back(variable, varType) ;
@@ -31,12 +30,8 @@ Module::Module(ASTNode* parent, HorseIRParser::ModuleContext *cst, ASTNode::MemM
         } else if ((*iter)->importModule() != nullptr) {
             HorseIRParser::ImportModuleContext* importModuleContext = (*iter)->importModule() ;
             HorseIRParser::ImportIDContext* importIDContext = nullptr ;
-            HorseIRParser::ImportCIDContext* importCIDContext = nullptr ;
             if ((importIDContext = dynamic_cast<decltype(importIDContext)>(importModuleContext)) != nullptr) {
                 std::string importModuleName = importIDContext->COMPOUND_ID()->getText() ;
-                importedModules.push_back(std::move(importModuleName)) ;
-            } else if ((importCIDContext = dynamic_cast<decltype(importCIDContext)>(importModuleContext)) != nullptr) {
-                std::string importModuleName = importCIDContext->IMPORT_COMPOUND_ID()->getText() ;
                 importedModules.push_back(std::move(importModuleName)) ;
             } else {
                 assert(false) ;
@@ -114,7 +109,7 @@ std::string Module::toString() const
     }
     for (auto iter = globalVariables.cbegin(); iter != globalVariables.cend(); ++iter) {
         stream << ASTNode::INDENT << "def "
-               << iter->first->getIDName() << " :"
+               << iter->first->getName() << " :"
                << iter->second->toString() << " ;" << std::endl ;
     }
     for (auto iter = methods.cbegin(); iter != methods.cend(); ++iter) {

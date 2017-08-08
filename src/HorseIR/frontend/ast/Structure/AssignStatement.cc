@@ -16,7 +16,7 @@ AssignStatement::AssignStatement(ASTNode* parent, HorseIRParser::StmtCoreContext
     auto stmtNameExprContext = dynamic_cast<HorseIRParser::StmtNameExprContext*>(cst->statementCore()) ;
     assert(stmtNameExprContext != nullptr) ;
 
-    lhsName = new Identifier(this, stmtNameExprContext->generalName(), mem) ;
+    lhsName = new Identifier(this, stmtNameExprContext->name(), mem) ;
     lhsType = Type::makeTypeASTNode(this, stmtNameExprContext->type(), mem) ;
 
     HorseIRParser::ExpressionContext* expressionContext = stmtNameExprContext->expression() ;
@@ -75,13 +75,13 @@ inline void AssignStatement::parseMethodInvoke(HorseIRParser::MethodCallContext 
     HorseIRParser::MethodInvContext* methodInvContext = nullptr ;
     HorseIRParser::MethodFunContext* methodFunContext = nullptr ;
     if ((methodInvContext = dynamic_cast<decltype(methodInvContext)>(methodCallContext)) != nullptr) {
-        Operand* invokeTarget = new Identifier(this, methodInvContext->generalName(), mem) ;
+        Operand* invokeTarget = new Identifier(this, methodInvContext->name(), mem) ;
         isInvoke = std::make_pair(true, invokeTarget) ;
         HorseIRParser::ArgumentListContext* argumentListContext = methodInvContext->argumentList() ;
         const auto argumentOperands (argumentListContext->operand()) ;
         for (auto iter = argumentOperands.cbegin(); iter != argumentOperands.cend(); ++iter) {
-            if ((*iter)->generalName() != nullptr) {
-                Operand* operand = new Identifier(this, (*iter)->generalName(), mem) ;
+            if ((*iter)->name() != nullptr) {
+                Operand* operand = new Identifier(this, (*iter)->name(), mem) ;
                 parameters.push_back(operand) ;
             } else if ((*iter)->literal() != nullptr) {
                 Operand* operand = Literal::makeLiteralASTNode(this, (*iter)->literal(), mem) ;
@@ -96,8 +96,8 @@ inline void AssignStatement::parseMethodInvoke(HorseIRParser::MethodCallContext 
         HorseIRParser::ArgumentListContext* argumentListContext = methodFunContext->argumentList() ;
         const auto argumentOperands (argumentListContext->operand()) ;
         for (auto iter = argumentOperands.cbegin(); iter != argumentOperands.cend(); ++iter) {
-            if ((*iter)->generalName() != nullptr) {
-                Operand* operand = new Identifier(this, (*iter)->generalName(), mem) ;
+            if ((*iter)->name() != nullptr) {
+                Operand* operand = new Identifier(this, (*iter)->name(), mem) ;
                 parameters.push_back(operand) ;
             } else if ((*iter)->literal() != nullptr) {
                 Operand* operand = Literal::makeLiteralASTNode(this, (*iter)->literal(), mem) ;
@@ -115,8 +115,8 @@ inline void AssignStatement::parseOperand(HorseIRParser::OperandContext *operand
 {
     assert(operandContext != nullptr) ;
     isInvoke = std::make_pair(false, nullptr) ;
-    if (operandContext->generalName() != nullptr) {
-        Operand* operand = new Identifier(this, operandContext->generalName(), mem) ;
+    if (operandContext->name() != nullptr) {
+        Operand* operand = new Identifier(this, operandContext->name(), mem) ;
         parameters.push_back(operand) ;
     } else if (operandContext->literal() != nullptr) {
         Operand* operand = Literal::makeLiteralASTNode(this, operandContext->literal(), mem) ;

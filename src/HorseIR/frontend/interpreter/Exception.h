@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include <sstream>
+#include <memory>
 
 #include "MethodMETA.h"
 #include "antlr4-runtime.h"
@@ -56,7 +57,7 @@ public:
         }
     virtual std::string toString() const noexcept override ;
 protected:
-    MethodMETA<T>* const candidateMethod ;
+    std::shared_ptr<MethodMETA<T>> const candidateMethod ;
     std::vector<MethodMETA<T>*> const existedOverloadOptions ;
 } ;
 
@@ -102,7 +103,7 @@ public:
         }
     virtual std::string toString() const noexcept override ;
 protected:
-    MethodMETA<T>* const candidateMethod ;
+    std::shared_ptr<MethodMETA<T>> const candidateMethod ;
     std::vector<MethodMETA<T>*> const existedOverloadOptions ;
 } ;
 

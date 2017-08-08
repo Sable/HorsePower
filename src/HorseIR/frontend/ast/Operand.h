@@ -30,25 +30,19 @@ protected:
 
 class Identifier : public Operand {
 public:
-    static const std::string LOCAL_NAME ;
-    Identifier(ASTNode* parent, HorseIRParser::GeneralNameContext* cst, ASTNode::MemManagerType& mem) ;
     Identifier(ASTNode* parent, HorseIRParser::NameContext* cst, ASTNode::MemManagerType& mem) ;
     Identifier(ASTNode::MemManagerType& mem) ;
     ~Identifier() override = default ;
 
-    std::string getFullName() const ;
-    std::string getIDName() const ;
-    std::string getPackageName() const ;
+    std::string getName() const ;
 
-    Identifier& setIDName(const std::string& p_idName) ;
-    Identifier& setPackageName(const std::string& p_packageName) ;
+    Identifier& setName(const std::string& p_idName) ;
 
     virtual std::size_t getNumNodesRecursively() const override ;
     virtual std::vector<ASTNode*> getChildren() const override ;
     virtual std::string toString() const override ;
     virtual std::string toTreeString() const override ;
 protected:
-    std::string packageName ;
     std::string idName ;
 };
 
@@ -576,7 +570,8 @@ protected:
 */
 class FunctionLiteral : public Literal {
 public:
-    typedef std::string InternalType ;
+    static const std::string UNDEFINED_PACKAGE ;
+    typedef std::pair<std::string, std::string> InternalType ;
 
     FunctionLiteral() = delete ;
     FunctionLiteral(ASTNode* parent, HorseIRParser::LiteralCaseFunctionContext* cst, ASTNode::MemManagerType& mem) ;
@@ -586,6 +581,8 @@ public:
 
     virtual horseIR::ast::Type* getLiteralType() const override ;
     InternalType getValue() const ;
+    InternalType::first_type getModuleName() const ;
+    InternalType::second_type getFunctionName() const ;
 
     virtual std::size_t getNumNodesRecursively() const override ;
     virtual std::vector<ASTNode*> getChildren() const override ;

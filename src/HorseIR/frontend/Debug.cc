@@ -64,8 +64,10 @@ public:
 } ;
 
 #include "./misc/Hasher.h"
-#include "./interpreter/Dispatcher.h"
+#include "./interpreter/VectorDispatcher.h"
 #include "./interpreter/Exception.h"
+#include "./interpreter/Interpreter.h"
+#include "./interpreter/VectorVarStorage.h"
 
 #include <memory>
 
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
     VectorDispatcher<void*>::ContainerType c ;
     try{
     for (auto iter = internalMethod.cbegin(); iter != internalMethod.cend(); ++iter) {
-        VectorDispatcher<void*>::manage(c, *iter); 
+        VectorDispatcher<void*>::manage(c, *iter) ;
     }
     VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
                                         "default", "main", "func<?, i64 :table>",
@@ -121,18 +123,18 @@ int main(int argc, char *argv[])
                                             return nullptr ;
                                         })) ;
     VectorDispatcher<void*>::manage(c, ExternalMethod<void*>::bindExternalMethod(
-                                        "default", "main", "func<?, ? :bool>",
+                                        "default", "main", "func<?, i32 :bool>",
                                         [](std::size_t argc, void* argv[]) -> void* {
                                             return nullptr ;
                                         })) ;
     std::cout << VectorDispatcher<void*>::containerToString(c) << std::endl ;
-    } catch (const VectorDispatcher<void*>::OverloadOverlapException & except) {
+    } catch (const OverloadDuplicateException<void*> & except) {
         std::cout << except.toString() << std::endl ;
-    } catch (const VectorDispatcher<void*>::OverloadDuplicateException& except) {
+    } catch (const OverloadOverlapException<void*>& except) {
         std::cout << except.toString() << std::endl ;
-    } catch (const VectorDispatcher<void*>::InvalidSignatureStringException& except) {
+    } catch (const InvalidSignatureStringException& except) {
         std::cout << except.toString() << std::endl ;
-    }
+    } 
 
     auto ptr = VectorDispatcher<void*>::fetch(c, "default", "main", "i32, ?") ;
     if (ptr == nullptr) {
@@ -140,5 +142,21 @@ int main(int argc, char *argv[])
     } else {
         std::cout << ptr->toString() << std::endl ;
     }
+
+    TreeWalkInterpreter<void*> interpreter ;
+
+    interpreter.handleAssignStatement(nullptr) ;
+    interpreter.handleReturnStatement(nullptr) ;
+    interpreter.handleBranchStatement(nullptr) ;
+    interpreter.handleLabelStatement(nullptr) ;
+    interpreter.handlePhiStatement(nullptr) ;
+    interpreter.handleLiteral(nullptr) ;
+    interpreter.resolveFunctionLiteralName() ;
+    
+    VectorVarStorage<void*>::ContainerType varStorage ;
+    VectorVarStorage<void*>::alloc(varStorage, "t01234", "i32") ;
+    VectorVarStorage<void*>::alloc(varStorage, "f0", "func<i32, i32 :i32>") ;
+    std::cout << VectorVarStorage<void*>::containerToString(varStorage) << std::endl ;
+    
     return 0;
 }

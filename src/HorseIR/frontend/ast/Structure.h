@@ -257,6 +257,7 @@ public:
     std::vector<Method*> getMethods() const ;
     Method* getMethod(std::size_t index) const ;
     Method* getMethod(const std::string& methodName) const ;
+    std::vector<std::string> getImportedModules() const ;
             
     virtual std::size_t getNumNodesRecursively() const override ;
     virtual std::vector<ASTNode*> getChildren() const override ;
