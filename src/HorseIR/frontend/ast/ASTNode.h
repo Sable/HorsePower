@@ -25,84 +25,107 @@ class ASTNode {
 
   class ASTNodeMemory {
    public:
-    ASTNodeMemory &manage (ast::ASTNode *managedPtr);
-    ASTNodeMemory &release (ast::ASTNode *releasedPtr);
+    ASTNodeMemory &manage (const ast::ASTNode *managedPtr);
+    ASTNodeMemory &release (const ast::ASTNode *releasedPtr);
 
    protected:
-    std::vector<std::unique_ptr<ASTNode>> pool;
+    std::vector<std::unique_ptr<const ASTNode>> pool;
   };
 
-  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass)
-      : cst (nullptr), astNodeClass (p_astNodeClass), parent (nullptr)
-  {
-    mem.manage (this);
-  }
+  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass);
   ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
-           const CSTType *parseTree)
-      : cst (parseTree), astNodeClass (p_astNodeClass), parent (nullptr)
-  {
-    mem.manage (this);
-  }
-  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
-           const CSTType *parseTree, ASTNode *p_parent)
-      : cst (parseTree), astNodeClass (p_astNodeClass), parent (p_parent)
-  {
-    mem.manage (this);
-  }
+           const CSTType *parseTree);
   ASTNode (ASTNode &&externASTNode) = default;
   ASTNode (const ASTNode &externASTNode) = default;
   ASTNode &operator= (ASTNode &&externASTNode) = delete;
   ASTNode &operator= (const ASTNode &externASTNode) = delete;
   virtual ~ASTNode () = default;
 
+  const CSTType *getCST () const;
+  ASTNodeClass getASTNodeClass () const;
+  std::string getEnclosingFilename () const;
+  ASTNode *getParentASTNode () const;
+
   virtual std::size_t getNumNodesRecursively () const = 0;
   virtual std::vector<ASTNode *> getChildren () const = 0;
   virtual ASTNode *duplicateDeep (ASTNode::ASTNodeMemory &mem) const = 0;
-
-  const CSTType *getCST () const
-  {
-    return cst;
-  }
-  ASTNodeClass getASTNodeClass () const
-  {
-    return astNodeClass;
-  }
-  std::string getEnclosingFilename () const
-  {
-    return enclosingFilename;
-  }
-  ASTNode *getParentASTNode () const
-  {
-    return parent;
-  }
-
   virtual std::string toString () const = 0;
+
  protected:
-  static const char *PRETTY_PRINT_INDENT = "    ";
   const CSTType *cst;
   const ASTNodeClass astNodeClass;
   std::string enclosingFilename = "unknown";
   ast::ASTNode *parent;
+
+  void __duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode);
 };
 
 inline ASTNode::ASTNodeMemory &
-ASTNode::ASTNodeMemory::manage (ast::ASTNode *managedPtr)
+ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
 {
-  auto findIter = std::find (pool.cbegin (), pool.cend (), managedPtr);
-  if (findIter == pool.cend ()) pool.push_back (std::make_unique (managedPtr));
+  const auto searchItr = std::find_if (
+      pool.cbegin (), pool.cend (),
+      [&] (const std::unique_ptr<const ASTNode> &iterPtr) -> bool
+      {
+        return iterPtr.get () == managedPtr;
+      });
+  if (searchItr == pool.cend ()) pool.emplace_back (managedPtr);
   return *this;
 }
 
 inline ASTNode::ASTNodeMemory &
-ASTNode::ASTNodeMemory::release (ast::ASTNode *releasedPtr)
+ASTNode::ASTNodeMemory::release (const ast::ASTNode *releasedPtr)
 {
-  const auto findIter = std::find (pool.cbegin (), pool.cend (), releasedPtr);
-  if (findIter != pool.cend ())
-    {
-      pool.erase (std::remove (pool.begin (), pool.end (), releasedPtr),
-                  pool.end ());
-    }
+  const auto removeIter = std::remove_if (
+      pool.begin (), pool.end (),
+      [&] (const std::unique_ptr<const ASTNode> &iterPtr) -> bool
+      {
+        return iterPtr.get () == releasedPtr;
+      });
+  pool.erase (removeIter, pool.end ());
   return *this;
+}
+
+inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass)
+    : cst (nullptr), astNodeClass (p_astNodeClass), parent (nullptr)
+{
+  (void) mem.manage (this);
+}
+
+inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
+                         const CSTType *parseTree)
+    : cst (parseTree), astNodeClass (p_astNodeClass), parent (nullptr)
+{
+  (void) mem.manage (this);
+}
+
+inline const ASTNode::CSTType *ASTNode::getCST () const
+{
+  return cst;
+}
+
+inline ASTNode::ASTNodeClass ASTNode::getASTNodeClass () const
+{
+  return astNodeClass;
+}
+
+inline std::string ASTNode::getEnclosingFilename () const
+{
+  return enclosingFilename;
+}
+
+inline ASTNode *ASTNode::getParentASTNode () const
+{
+  return parent;
+}
+
+inline void
+ASTNode::__duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode)
+{
+  assert (astNode != nullptr);
+  cst = astNode->cst;
+  enclosingFilename = astNode->enclosingFilename;
+  parent = astNode->parent;
 }
 
 }

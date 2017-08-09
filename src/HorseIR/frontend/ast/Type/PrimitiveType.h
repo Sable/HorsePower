@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <cstddef>
 #include "../AST.h"
 
 namespace horseIR
@@ -16,35 +18,36 @@ class PrimitiveType : public Type {
     KeyTable
   };
 
-  explicit PrimitiveType (ASTNodeMemory &mem)
-      : Type (mem, ASTNodeClass::PrimitiveType, TypeClass::Primitive)
-  {}
-  PrimitiveType (ASTNodeMemory &mem, const CSTType *parseTree)
-      : Type (mem, ASTNodeClass::PrimitiveType, parseTree, TypeClass::Primitive)
-  {}
-  PrimitiveType (ASTNodeMemory &mem, const CSTType *parseTree, ASTNode *parent)
-      : Type (mem, ASTNodeClass::PrimitiveType, parseTree, parent,
-              TypeClass::Primitive)
-  {}
+  explicit PrimitiveType (ASTNodeMemory &mem);
+  PrimitiveType (ASTNodeMemory &mem, const CSTType *cst);
   PrimitiveType (PrimitiveType &&externPrimitive) = default;
   PrimitiveType (const PrimitiveType &externPrimitive) = default;
   PrimitiveType &operator= (PrimitiveType &&externPrimitive) = default;
   PrimitiveType &operator= (const PrimitiveType &externPrimitive) = default;
-  virtual ~PrimitiveType () override = default;
+  ~PrimitiveType () override = default;
 
-  virtual std::size_t getNumNodesRecursively () const override;
-  virtual std::vector<ASTNode *> getChildren () const override;
-  virtual std::string toString () const override;
-  virtual PrimitiveType *duplicateDeep (ASTNodeMemory &mem) const override;
-
-  virtual bool isGeneralizationOf (Type *type) const override;
-  virtual bool isSameAs (Type *type) const override;
+  std::size_t getNumNodesRecursively () const override;
+  std::vector<ASTNode *> getChildren () const override;
+  PrimitiveType *duplicateDeep (ASTNodeMemory &mem) const override;
+  std::string toString () const override;
 
   PrimitiveClass getPrimitiveClass () const;
-  PrimitiveClass &setPrimitiveClass (const PrimitiveClass &p_primitiveClass);
+  PrimitiveType &setPrimitiveClass (const PrimitiveClass &p_primitiveClass);
+
  protected:
   PrimitiveClass primitiveClass;
+  void __duplicateDeep (ASTNodeMemory &mem, const PrimitiveType *type);
 };
+
+inline PrimitiveType::PrimitiveType (ASTNodeMemory &mem)
+    : Type (mem, ASTNodeClass::PrimitiveType, TypeClass::Primitive),
+      primitiveClass (PrimitiveClass::Bool)
+{}
+
+inline PrimitiveType::PrimitiveType (ASTNodeMemory &mem, const CSTType *cst)
+    : Type (mem, ASTNodeClass::PrimitiveType, cst, TypeClass::Primitive),
+      primitiveClass (PrimitiveClass::Bool)
+{}
 
 inline std::size_t PrimitiveType::getNumNodesRecursively () const
 {
@@ -54,6 +57,13 @@ inline std::size_t PrimitiveType::getNumNodesRecursively () const
 inline std::vector<ASTNode *> PrimitiveType::getChildren () const
 {
   return std::vector<ASTNode *> {};
+}
+
+inline PrimitiveType *PrimitiveType::duplicateDeep (ASTNodeMemory &mem) const
+{
+  PrimitiveType *primitiveType = new PrimitiveType (mem);
+  primitiveType->__duplicateDeep (mem, this);
+  return primitiveType;
 }
 
 inline std::string PrimitiveType::toString () const
@@ -80,6 +90,26 @@ inline std::string PrimitiveType::toString () const
       case PrimitiveClass::Table: return "table";
       case PrimitiveClass::KeyTable: return "ktable";
     }
+}
+
+inline PrimitiveType::PrimitiveClass PrimitiveType::getPrimitiveClass () const
+{
+  return primitiveClass;
+}
+
+inline PrimitiveType &
+PrimitiveType::setPrimitiveClass (const PrimitiveClass &p_primitiveClass)
+{
+  primitiveClass = p_primitiveClass;
+  return *this;
+}
+
+inline void
+PrimitiveType::__duplicateDeep (ASTNodeMemory &mem, const PrimitiveType *type)
+{
+  assert (type != nullptr);
+  Type::__duplicateDeep (mem, type);
+  primitiveClass = type->primitiveClass;
 }
 
 }

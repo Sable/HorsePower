@@ -51,36 +51,36 @@ literal          : literalBool
                  | literalKTable
                  ;
 
-boolValueN       : ('+' | '-')? LITERAL_INTEGER | NULL ;
+boolValueN       : ('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
 literalBool      : boolValueN ':' 'bool'
                  | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'
                  ;
 charValue        : LITERAL_CHAR ;
-charValueN       : LITERAL_CHAR | NULL ;
+charValueN       : LITERAL_CHAR | NULL_TOKEN ;
 literalChar      : charValue (':' 'char')?
                  | LITERAL_CHAR_VECTOR (':' 'char')?
                  | '(' charValue (',' charValue)* ')' (':' 'char')?
                  | '(' ')' ':' 'char'
-                 | '(' NULL (',' charValueN)* (',' charValue) (',' charValueN)* ')' (':' 'char')?
-                 | '(' charValue (',' charValueN)* (',' NULL) (',' charValueN)* ')' (':' 'char')?
-                 | '(' NULL (',' NULL)* ')' ':' 'char'
-                 | NULL ':' 'char'
+                 | '(' NULL_TOKEN (',' charValueN)* (',' charValue) (',' charValueN)* ')' (':' 'char')?
+                 | '(' charValue (',' charValueN)* (',' NULL_TOKEN) (',' charValueN)* ')' (':' 'char')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'
+                 | NULL_TOKEN ':' 'char'
                  ;
 stringValue      : LITERAL_STRING ;
-stringValueN     : LITERAL_STRING | NULL ;
+stringValueN     : LITERAL_STRING | NULL_TOKEN ;
 literalString    : stringValue (':' 'str')?
                  | '(' stringValue (',' stringValue)* ')' (':' 'str')?
                  | '(' ')' ':' 'str'
-                 | '(' NULL (',' stringValueN)* (',' stringValue) (',' stringValueN)* ')' (':' 'str')?
-                 | '(' stringValue (',' stringValueN)* (',' NULL) (',' stringValueN)* ')' (':' 'str')?
-                 | '(' NULL (',' NULL)* ')' ':' 'str'
-                 | NULL ':' 'str'
+                 | '(' NULL_TOKEN (',' stringValueN)* (',' stringValue) (',' stringValueN)* ')' (':' 'str')?
+                 | '(' stringValue (',' stringValueN)* (',' NULL_TOKEN) (',' stringValueN)* ')' (':' 'str')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'
+                 | NULL_TOKEN ':' 'str'
                  ;
-intValueN        : ('+' | '-')? LITERAL_INTEGER | NULL ;
+intValueN        : ('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
 literalInteger   : intValueN ':' ('i8' | 'i16' | 'i32' | 'i64')
                  | '(' (intValueN (',' intValueN)*)? ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
                  ;
-floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | NULL ;
+floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | NULL_TOKEN ;
 literalFloat     : floatValueN ':' ('f32' | 'f64')
                  | '(' (floatValueN (',' floatValueN)*)? ')' ':' ('f32' | 'f64')
                  ;
@@ -88,74 +88,92 @@ complexValueN    : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER)
                  | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j')
                  | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('+' | '-') (LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
                  | ('+' | '-')? ('i' | 'j')
-                 | NULL
+                 | NULL_TOKEN
                  ;
 literalComplex   : complexValueN ':' 'complex'
                  | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'
                  ;
 symbolValue      : LITERAL_SYMBOL ;
-symbolValueN     : LITERAL_SYMBOL | NULL ;
+symbolValueN     : LITERAL_SYMBOL | NULL_TOKEN ;
 literalSymbol    : symbolValue (':' 'sym')?
                  | '(' symbolValue (',' symbolValue)* ')' (':' 'sym')?
                  | '(' ')' ':' 'sym'
-                 | '(' NULL (',' symbolValueN)* (',' symbolValue) (',' symbolValueN)* ')' (':' 'sym')?
-                 | '(' symbolValue (',' symbolValueN)* (',' NULL) (',' symbolValueN)* ')' (':' 'sym')?
-                 | '(' NULL (',' NULL)* ')' ':' 'sym'
-                 | NULL ':' 'sym'
+                 | '(' NULL_TOKEN (',' symbolValueN)* (',' symbolValue) (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' symbolValue (',' symbolValueN)* (',' NULL_TOKEN) (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'sym'
+                 | NULL_TOKEN ':' 'sym'
                  ;
-tMonthValueN     : LITERAL_FLOAT | NULL ;
+tMonthValueN     : LITERAL_FLOAT | NULL_TOKEN ;
 literalTMonth    : tMonthValueN ':' 'm'
                  | '(' (tMonthValueN (',' tMonthValueN)*)? ')' ':' 'm'
                  ;
-tDateValueN      : LITERAL_GROUP_3 | NULL ;
-literalTDate     : tDateValueN ':' 'd'
-                 | '(' (tDateValueN (',' tDateValueN)*)? ')' ':' 'd'
+tDateValue       : LITERAL_GROUP_3_DATE ;
+tDateValueN      : LITERAL_GROUP_3_DATE | NULL_TOKEN ;
+literalTDate     : tDateValue (':' 'd')?
+                 | '(' tDateValue (',' tDateValue)* ')' (':' 'd')?
+                 | '(' ')' ':' 'd'
+                 | '(' NULL_TOKEN (',' tDateValueN)* (',' tDateValue) (',' tDateValueN)* ')' (':' 'd')?
+                 | '(' tDateValue (',' tDateValueN)* (',' NULL_TOKEN) (',' tDateValueN)* ')' (':' 'd')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'd'
+                 | NULL_TOKEN ':' 'd'
                  ;
-tDateTimeValue   : LITERAL_GROUP_7 ;
-tDateTimeValueN  : LITERAL_GROUP_7 | NULL ;
+tDateTimeValue   : LITERAL_GROUP_7_DATETIME ;
+tDateTimeValueN  : LITERAL_GROUP_7_DATETIME | NULL_TOKEN ;
 literalTDateTime : tDateTimeValue (':' 'z')?
                  | '(' tDateTimeValue (',' tDateTimeValue)* ')' (':' 'z')?
                  | '(' ')' ':' 'z'
-                 | '(' NULL (',' tDateTimeValueN)* (',' tDateTimeValue) (',' tDateTimeValueN)* ')' (':' 'z')?
-                 | '(' tDateTimeValue (',' tDateTimeValueN)* (',' NULL) (',' tDateTimeValueN)* ')' (':' 'z')?
-                 | '(' NULL (',' NULL)* ')' ':' 'z'
-                 | NULL ':' 'z'
+                 | '(' NULL_TOKEN (',' tDateTimeValueN)* (',' tDateTimeValue) (',' tDateTimeValueN)* ')' (':' 'z')?
+                 | '(' tDateTimeValue (',' tDateTimeValueN)* (',' NULL_TOKEN) (',' tDateTimeValueN)* ')' (':' 'z')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'
+                 | NULL_TOKEN ':' 'z'
                  ;
-tMinuteValueN    : LITERAL_FLOAT | NULL ;
-literalTMinute   : tMinuteValueN ':' 'u'
-                 | '(' (tMinuteValueN (',' tMinuteValueN)*)? ')' ':' 'u'
+tMinuteValue     : LITERAL_GROUP_2_MINUTE ;
+tMinuteValueN    : LITERAL_GROUP_2_MINUTE | NULL_TOKEN ;
+literalTMinute   : tMinuteValue (':' 'u')?
+                 | '(' tMinuteValue (',' tMinuteValue)* ')' (':' 'u')?
+                 | '(' ')' ':' 'u'
+                 | '(' NULL_TOKEN (',' tMinuteValueN)* (',' tMinuteValue) (',' tMinuteValueN)* ')' (':' 'u')?
+                 | '(' tMinuteValue (',' tMinuteValueN)* (',' NULL_TOKEN) (',' tMinuteValueN)* ')' (':' 'u')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'u'
+                 | NULL_TOKEN ':' 'u'
                  ;
-tSecondValueN    : LITERAL_GROUP_3 | NULL ;
-literalTSecond   : tSecondValueN ':' 'v'
-                 | '(' (tSecondValueN (',' tSecondValueN)*)? ')' ':' 'v'
+tSecondValue     : LITERAL_GROUP_3_SECOND ;
+tSecondValueN    : LITERAL_GROUP_3_SECOND | NULL_TOKEN ;
+literalTSecond   : tSecondValue (':' 'v')?
+                 | '(' tSecondValue (',' tSecondValue)* ')' (':' 'v')?
+                 | '(' ')' ':' 'v'
+                 | '(' NULL_TOKEN (',' tSecondValueN)* (',' tSecondValue) (',' tSecondValueN)* ')' (':' 'v')?
+                 | '(' tSecondValue (',' tSecondValueN)* (',' NULL_TOKEN) (',' tSecondValueN)* ')' (':' 'v')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'v'
+                 | NULL_TOKEN ':' 'v'
                  ;
-tTimeValue       : LITERAL_GROUP_4 ;
-tTimeValueN      : LITERAL_GROUP_4 | NULL ;
+tTimeValue       : LITERAL_GROUP_4_TIME ;
+tTimeValueN      : LITERAL_GROUP_4_TIME | NULL_TOKEN ;
 literalTTime     : tTimeValue (':' 't')?
                  | '(' tTimeValue (',' tTimeValue)* ')' (':' 't')?
                  | '(' ')' ':' 't'
-                 | '(' NULL (',' tTimeValueN)* (',' tTimeValue) (',' tTimeValueN)* ')' (':' 't')?
-                 | '(' tTimeValue (',' tTimeValueN)* (',' NULL) (',' tTimeValueN)* ')' (':' 't')?
-                 | '(' NULL (',' NULL)* ')' ':' 'z'
-                 | NULL ':' 'z'
+                 | '(' NULL_TOKEN (',' tTimeValueN)* (',' tTimeValue) (',' tTimeValueN)* ')' (':' 't')?
+                 | '(' tTimeValue (',' tTimeValueN)* (',' NULL_TOKEN) (',' tTimeValueN)* ')' (':' 't')?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'
+                 | NULL_TOKEN ':' 'z'
                  ;
 functionValue    : LITERAL_FUNCTION ;
-functionValueN   : LITERAL_FUNCTION | NULL ;
+functionValueN   : LITERAL_FUNCTION | NULL_TOKEN ;
 literalFunction  : functionValue (':' typeFunc)?
                  | '(' functionValue (',' functionValue) ')' (':' typeFunc)?
                  | '(' ')' ':' typeFunc
-                 | '(' NULL (',' functionValueN)* (',' functionValue) (',' functionValueN)* ')' (':' typeFunc)?
-                 | '(' functionValue (',' functionValueN)* (',' NULL) (',' functionValueN)* ')' (':' typeFunc)?
-                 | '(' NULL (',' NULL)* ')' ':' typeFunc
-                 | NULL ':' typeFunc
+                 | '(' NULL_TOKEN (',' functionValueN)* (',' functionValue) (',' functionValueN)* ')' (':' typeFunc)?
+                 | '(' functionValue (',' functionValueN)* (',' NULL_TOKEN) (',' functionValueN)* ')' (':' typeFunc)?
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' typeFunc
+                 | NULL_TOKEN ':' typeFunc
                  ;
 literalList      : '[' ']' ':' typeList
                  | '[' literal (',' literal)* ']' (typeList)?
-                 | NULL ':' typeList
+                 | NULL_TOKEN ':' typeList
                  ;
 literalDict      : '{' '}' ':' typeDict
                  | '{' (literal '->' literal) (',' literal '->' literal)* '}' (':' typeDict)?
-                 | NULL ':' typeDict
+                 | NULL_TOKEN ':' typeDict
                  ;
 tableHeader      : name | LITERAL_SYMBOL ;
 dbContent        : literalBool    | literalChar    | literalInteger | literalFloat
@@ -168,12 +186,12 @@ tableColumn      : (tableHeader) '->' dbContent ;
 tableKeyedColumn : '[' (tableHeader) '->' dbContent ']' ;
 literalTable     : '{' '}' ':' 'table'
                  | '{' tableColumn (',' tableColumn)* '}' ':' 'table'
-                 | NULL ':' 'table'
+                 | NULL_TOKEN ':' 'table'
                  ;
 literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn)* '}' ':' 'ktable'
-                 | NULL ':' 'ktable' ;
+                 | NULL_TOKEN ':' 'ktable' ;
 literalEnum      : '<' tableColumn '>' (':' typeEnum)?
-                 | NULL ':' typeEnum
+                 | NULL_TOKEN ':' typeEnum
                  ;
 
 
@@ -188,13 +206,13 @@ type            : token=( 'bool'    |
                           'complex' |
                           'sym'     |
                           'm' | 'd' | 'z' | 'u' | 'v' | 't' |
-                          'table'   | 'ktable'              )
+                          'table'   | 'ktable'              ) #typeCasePrimitive
 
-                | '?'
-                | typeList
-                | typeDict
-                | typeEnum
-                | typeFunc
+                | '?'                                         #typeCaseWildcard
+                | typeList                                    #typeCaseList
+                | typeDict                                    #typeCaseDict
+                | typeEnum                                    #typeCaseEnum
+                | typeFunc                                    #typeCaseFunc
                 ;
 
 typeList        : 'list' '<' element=type '>' ;
@@ -209,13 +227,15 @@ typeFunc        : 'func' '<' ':' type '>'
                 | 'func' '<' type (',' type)* ',' '...' ':' type '>'
                 ;
 
-NULL            : 'null' ;
-LITERAL_GROUP_3 : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+NULL_TOKEN            : 'NULL_TOKEN' ;
+LITERAL_GROUP_2_MINUTE : [0-9]+ ':' [0-9]+ ;
+LITERAL_GROUP_3_DATE   : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+LITERAL_GROUP_3_SECOND : [0-9]+ ':' [0-9]+ ':' [0-9]+ ;
 
-LITERAL_GROUP_4 : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+LITERAL_GROUP_4_TIME :   [0-9]+ ':' [0-9]+ ':' [0-9]+ '.' [0-9]+ ;
 
-LITERAL_GROUP_7 : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
-                  [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
+LITERAL_GROUP_7_DATETIME : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
+                           [0-9]+ ':' [0-9]+ ':' [0-9]+ '.' [0-9]+ ;
 
 LITERAL_INTEGER : FRAGMENT_INTEGER ;
 
