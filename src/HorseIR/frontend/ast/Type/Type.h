@@ -29,7 +29,7 @@ class Type : public ASTNode {
   Type (const Type &externType) = default;
   Type &operator= (Type &&externType) = delete;
   Type &operator= (const Type &externType) = delete;
-  virtual ~Type () = default;
+  virtual ~Type () override = default;
 
   virtual bool isGeneralizationOf (Type *type) const = 0;
   virtual bool isSameAs (Type *type) const = 0;

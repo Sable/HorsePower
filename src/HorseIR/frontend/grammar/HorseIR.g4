@@ -11,10 +11,10 @@ globalVar        : 'def' name ':' type ';' ;
 importModule     : 'import' COMPOUND_ID ';' ;
 
 statement        : '[' name ']'
-                 | name ':' type '=' name ';'
-                 | name ':' type '=' '(' type ')' name ';'
-                 | name ':' type '=' 'check_type' '(' name ',' type ')' ';'
-                 | name ':' type '=' 'check_cast' '(' name ',' type ')' ';'
+                 | name ':' type '=' operand ';'
+                 | name ':' type '=' '(' type ')' operand ';'
+                 | name ':' type '=' 'check_type' '(' operand ',' type ')' ';'
+                 | name ':' type '=' 'check_cast' '(' operand ',' type ')' ';'
                  | name ':' type '=' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
                  | name ':' type '=' '(' type ')' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
                  | name ':' type '=' 'check_type' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
@@ -32,6 +32,7 @@ name             : id=(ID | 'i' | 'j' | 'm' | 'd' | 'z' | 'u' | 'v' | 't') ;
 
 literal          : literalBool
                  | literalChar
+                 | literalString
                  | literalInteger
                  | literalFloat
                  | literalComplex
@@ -45,162 +46,134 @@ literal          : literalBool
                  | literalFunction
                  | literalList
                  | literalDict
+                 | literalEnum
                  | literalTable
                  | literalKTable
-                 | literalNull
-                 ;
-boolValue        : ('+' | '-')? LITERAL_INTEGER ;
-boolValueN       : ('+' | '-')? LITERAL_INTEGER | 'null' ;
-literalBool      : boolValue ':' 'bool'
-                 | '(' ')' ':' 'bool'
-                 | '(' boolValue (',' boolValue)* ')' ':' 'bool'
-                 | '(' 'null' (',' boolValueN)* (',' boolValue) (',' boolValueN)* ')' ':' 'bool'
-                 | '(' boolValue (',' boolValueN)* (',' 'null') (',' boolValueN)* ')' ':' 'bool'
                  ;
 
+boolValueN       : ('+' | '-')? LITERAL_INTEGER | NULL ;
+literalBool      : boolValueN ':' 'bool'
+                 | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'
+                 ;
 charValue        : LITERAL_CHAR ;
-charValueN       : LITERAL_CHAR | 'null' ;
+charValueN       : LITERAL_CHAR | NULL ;
 literalChar      : charValue (':' 'char')?
-                 | '(' ')' ':' 'char'
+                 | LITERAL_CHAR_VECTOR (':' 'char')?
                  | '(' charValue (',' charValue)* ')' (':' 'char')?
-                 | '(' 'null' (',' charValueN)* (',' charValue) (',' charValueN)* ')' (':' 'char')?
-                 | '(' charValue (',' charValueN)* (',' 'null') (',' charValueN)* ')' (':' 'char')?
-                 | LITERAL_CHAR_VECTOR
+                 | '(' ')' ':' 'char'
+                 | '(' NULL (',' charValueN)* (',' charValue) (',' charValueN)* ')' (':' 'char')?
+                 | '(' charValue (',' charValueN)* (',' NULL) (',' charValueN)* ')' (':' 'char')?
+                 | '(' NULL (',' NULL)* ')' ':' 'char'
+                 | NULL ':' 'char'
                  ;
-
-intValue         : ('+' | '-')? LITERAL_INTEGER ;
-intValueN        : ('+' | '-')? LITERAL_INTEGER | 'null' ;
-literalInteger   : intValue ':' ('i8' | 'i16' | 'i32' | 'i64')
-                 | '(' intValue (',' intValue)* ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
-                 | '(' ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
-                 | '(' 'null' (',' intValueN)* (',' intValue) (',' intValueN)* ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
-                 | '(' intValue (',' intValueN)* (',' 'null') (',' intValueN)* ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
+stringValue      : LITERAL_STRING ;
+stringValueN     : LITERAL_STRING | NULL ;
+literalString    : stringValue (':' 'str')?
+                 | '(' stringValue (',' stringValue)* ')' (':' 'str')?
+                 | '(' ')' ':' 'str'
+                 | '(' NULL (',' stringValueN)* (',' stringValue) (',' stringValueN)* ')' (':' 'str')?
+                 | '(' stringValue (',' stringValueN)* (',' NULL) (',' stringValueN)* ')' (':' 'str')?
+                 | '(' NULL (',' NULL)* ')' ':' 'str'
+                 | NULL ':' 'str'
                  ;
-
-floatValue       : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ;
-floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | 'null' ;
-literalFloat     : floatValue ':' ('f32' | 'f64')
-                 | '(' ')' ':' ('f32' | 'f64')
-                 | '(' floatValue (',' floatValue)* ')' ':' ('f32' | 'f64')
-                 | '(' 'null' (',' floatValueN)* (',' floatValue) (',' floatValueN)* ')' ('f32' | 'f64')
-                 | '(' floatValue (',' floatValueN)* (',' 'null') (',' floatValueN)* ')' ('f32' | 'f64')
+intValueN        : ('+' | '-')? LITERAL_INTEGER | NULL ;
+literalInteger   : intValueN ':' ('i8' | 'i16' | 'i32' | 'i64')
+                 | '(' (intValueN (',' intValueN)*)? ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
                  ;
-
-complexValue     : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER)
-                 | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j')
-                 | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('+' | '-') (LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
-                 | ('+' | '-')? ('i' | 'j')
+floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | NULL ;
+literalFloat     : floatValueN ':' ('f32' | 'f64')
+                 | '(' (floatValueN (',' floatValueN)*)? ')' ':' ('f32' | 'f64')
                  ;
 complexValueN    : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER)
                  | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j')
                  | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('+' | '-') (LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
                  | ('+' | '-')? ('i' | 'j')
-                 | 'null'
+                 | NULL
                  ;
-literalComplex   : complexValue ':' 'complex'
-                 | '(' ')' ':' 'complex'
-                 | '(' complexValue (',' complexValue)* ')' ':' 'complex'
-                 | '(' 'null' (',' complexValueN)* (',' complexValue) (',' complexValueN)* ')' ':' 'complex'
-                 | '(' complexValue (',' complexValueN)* (',' 'null') (',' complexValueN)* ')' ':' 'complex'
+literalComplex   : complexValueN ':' 'complex'
+                 | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'
                  ;
-
 symbolValue      : LITERAL_SYMBOL ;
-symbolValueN     : LITERAL_SYMBOL | 'null' ;
+symbolValueN     : LITERAL_SYMBOL | NULL ;
 literalSymbol    : symbolValue (':' 'sym')?
-                 | '(' ')' ':' 'sym'
                  | '(' symbolValue (',' symbolValue)* ')' (':' 'sym')?
-                 | '(' 'null' (',' symbolValueN)* (',' symbolValue) (',' symbolValueN)* ')' (':' 'sym')?
-                 | '(' symbolValue (',' symbolValueN)* (',' 'null') (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' ')' ':' 'sym'
+                 | '(' NULL (',' symbolValueN)* (',' symbolValue) (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' symbolValue (',' symbolValueN)* (',' NULL) (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' NULL (',' NULL)* ')' ':' 'sym'
+                 | NULL ':' 'sym'
                  ;
-
-tMonthValue      : LITERAL_FLOAT ;
-tMonthValueN     : LITERAL_FLOAT | 'null' ;
-literalTMonth    : tMonthValue ':' 'm'
-                 | '(' ')' ':' 'm'
-                 | '(' tMonthValue (',' tMonthValue)* ')' ':' 'm'
-                 | '(' 'null' (',' tMonthValueN)* (',' tMonthValue) (',' tMonthValueN)* ')' ':' 'm'
-                 | '(' tMonthValue (',' tMonthValueN)* (',' 'null') (',' tMonthValueN)* ')' ':' 'm'
+tMonthValueN     : LITERAL_FLOAT | NULL ;
+literalTMonth    : tMonthValueN ':' 'm'
+                 | '(' (tMonthValueN (',' tMonthValueN)*)? ')' ':' 'm'
                  ;
-
-tDateValue       : LITERAL_GROUP_3;
-tDateValueN      : LITERAL_GROUP_3 | 'null' ;
-literalTDate     : tDateValue ':' 'd'
-                 | '(' ')' ':' 'd'
-                 | '(' tDateValue (',' tDateValue)* ')' ':' 'd'
-                 | '(' 'null' (',' tDateValueN)* (',' tDateValue) (',' tDateValueN)* ')' ':' 'd'
-                 | '(' tDateValue (',' tDateValueN)* (',' 'null') (',' tDateValueN)* ')' ':' 'd'
+tDateValueN      : LITERAL_GROUP_3 | NULL ;
+literalTDate     : tDateValueN ':' 'd'
+                 | '(' (tDateValueN (',' tDateValueN)*)? ')' ':' 'd'
                  ;
-
 tDateTimeValue   : LITERAL_GROUP_7 ;
-tDateTimeValueN  : LITERAL_GROUP_7 | 'null' ;
-literalTDateTime : tDateTimeValue ':' (':' 'z')?
+tDateTimeValueN  : LITERAL_GROUP_7 | NULL ;
+literalTDateTime : tDateTimeValue (':' 'z')?
+                 | '(' tDateTimeValue (',' tDateTimeValue)* ')' (':' 'z')?
                  | '(' ')' ':' 'z'
-                 | '(' tDateTimeValue (',' tDateTimeValue)* ')' ':' (':' 'z')?
-                 | '(' 'null' (',' tDateTimeValueN)* (',' tDateTimeValue) (',' tDateTimeValueN)* ')' ':' (':' 'z')?
-                 | '(' tDateTimeValue (',' tDateTimeValueN)* (',' 'null') (',' tDateTimeValueN)* ')' ':' (':' 'z')?
+                 | '(' NULL (',' tDateTimeValueN)* (',' tDateTimeValue) (',' tDateTimeValueN)* ')' (':' 'z')?
+                 | '(' tDateTimeValue (',' tDateTimeValueN)* (',' NULL) (',' tDateTimeValueN)* ')' (':' 'z')?
+                 | '(' NULL (',' NULL)* ')' ':' 'z'
+                 | NULL ':' 'z'
                  ;
-
-tMinuteValue     : LITERAL_FLOAT ;
-tMinuteValueN    : LITERAL_FLOAT | 'null' ;
-literalTMinute   :  tMinuteValue ':' 'u'
-                 | '(' ')' ':' 'u'
-                 | '(' tMinuteValue (',' tMinuteValue)* ')' ':' 'u'
-                 | '(' 'null' (',' tMinuteValueN)* (',' tMinuteValue) (',' tMinuteValueN)* ')' ':' 'u'
-                 | '(' tMinuteValue (',' tMinuteValueN)* (',' 'null') (',' tMinuteValueN)* ')' ':' 'u'
+tMinuteValueN    : LITERAL_FLOAT | NULL ;
+literalTMinute   : tMinuteValueN ':' 'u'
+                 | '(' (tMinuteValueN (',' tMinuteValueN)*)? ')' ':' 'u'
                  ;
-
-
-tSecondValue     : LITERAL_GROUP_3 ;
-tSecondValueN    : LITERAL_GROUP_3 | 'null' ;
-literalTSecond   : tSecondValue ':' 'v'
-                 | '(' ')' ':' 'v'
-                 | '(' tSecondValue (',' tSecondValue)* ')' ':' 'v'
-                 | '(' 'null' (',' tSecondValueN)* (',' tSecondValue) (',' tSecondValueN)* ')' ':' 'v'
-                 | '(' tSecondValue (',' tSecondValueN)* (',' 'null') (',' tSecondValueN)* ')' ':' 'v'
+tSecondValueN    : LITERAL_GROUP_3 | NULL ;
+literalTSecond   : tSecondValueN ':' 'v'
+                 | '(' (tSecondValueN (',' tSecondValueN)*)? ')' ':' 'v'
                  ;
-
 tTimeValue       : LITERAL_GROUP_4 ;
-tTimeValueN      : LITERAL_GROUP_4 | 'null' ;
-literalTTime     : tTimeValue ':' (':' 't')?
+tTimeValueN      : LITERAL_GROUP_4 | NULL ;
+literalTTime     : tTimeValue (':' 't')?
+                 | '(' tTimeValue (',' tTimeValue)* ')' (':' 't')?
                  | '(' ')' ':' 't'
-                 | '(' tTimeValue (',' tTimeValue)* ')' ':' (':' 't')?
-                 | '(' 'null' (',' tTimeValueN)* (',' tTimeValue) (',' tTimeValueN)* ')' ':' (':' 't')?
-                 | '(' tTimeValue (',' tTimeValueN)* (',' 'null') (',' tTimeValueN)* ')' ':' (':' 't')?
+                 | '(' NULL (',' tTimeValueN)* (',' tTimeValue) (',' tTimeValueN)* ')' (':' 't')?
+                 | '(' tTimeValue (',' tTimeValueN)* (',' NULL) (',' tTimeValueN)* ')' (':' 't')?
+                 | '(' NULL (',' NULL)* ')' ':' 'z'
+                 | NULL ':' 'z'
                  ;
-
 functionValue    : LITERAL_FUNCTION ;
-functionValueN   : LITERAL_FUNCTION | 'null' ;
-literalFunction  : functionValue ':' (':' typeFunc)?
+functionValueN   : LITERAL_FUNCTION | NULL ;
+literalFunction  : functionValue (':' typeFunc)?
+                 | '(' functionValue (',' functionValue) ')' (':' typeFunc)?
                  | '(' ')' ':' typeFunc
-                 | '(' functionValue (',' functionValue)* ')' ':' (':' typeFunc)?
-                 | '(' 'null' (',' functionValueN)* (',' functionValue) (',' functionValueN)* ')' ':' (':' typeFunc)?
-                 | '(' functionValue (',' functionValueN)* (',' 'null') (',' functionValueN)* ')' ':' (':' typeFunc)?
+                 | '(' NULL (',' functionValueN)* (',' functionValue) (',' functionValueN)* ')' (':' typeFunc)?
+                 | '(' functionValue (',' functionValueN)* (',' NULL) (',' functionValueN)* ')' (':' typeFunc)?
+                 | '(' NULL (',' NULL)* ')' ':' typeFunc
+                 | NULL ':' typeFunc
                  ;
-
 literalList      : '[' ']' ':' typeList
                  | '[' literal (',' literal)* ']' (typeList)?
+                 | NULL ':' typeList
                  ;
-
 literalDict      : '{' '}' ':' typeDict
-                 | '{' (literal '->' literal) (',' literal '->' literal)* '}' (':' typeDict)? ;
-
-tableHeader      : name | LITERAL_SYMBOL ;
-tableContent     : literalBool      | literalChar      | literalInteger
-                 | literalFloat     | literalComplex   | literalSymbol
-                 | literalTTime     | literalTSecond   | literalTMonth
-                 | literalTMinute   | literalTDateTime | literalTDate
-                 | '[' ']' (':' 'list' '<' 'char' '>')?
-                 | '[' literalChar (',' literalChar)* ']' (':' 'list' '<' 'char' '>')?
+                 | '{' (literal '->' literal) (',' literal '->' literal)* '}' (':' typeDict)?
+                 | NULL ':' typeDict
                  ;
-tableColumn      : (tableHeader) '->' tableContent ;
-tableKeyedColumn : '[' (tableHeader) '->' tableContent ']' ;
+tableHeader      : name | LITERAL_SYMBOL ;
+dbContent        : literalBool    | literalChar    | literalInteger | literalFloat
+                 | literalComplex | literalSymbol  | literalTTime   | literalTSecond
+                 | literalTMonth  | literalTMinute | literalTDate   | literalTDateTime
+                 | literalString
+                 ;
+
+tableColumn      : (tableHeader) '->' dbContent ;
+tableKeyedColumn : '[' (tableHeader) '->' dbContent ']' ;
 literalTable     : '{' '}' ':' 'table'
                  | '{' tableColumn (',' tableColumn)* '}' ':' 'table'
+                 | NULL ':' 'table'
                  ;
-literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn)* '}' ':' 'ktable' ;
-
-literalNull      : 'null' ':' type
-                 | '(' 'null' (',' 'null')* ')' ':' type
+literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn)* '}' ':' 'ktable'
+                 | NULL ':' 'ktable' ;
+literalEnum      : '<' tableColumn '>' (':' typeEnum)?
+                 | NULL ':' typeEnum
                  ;
 
 
@@ -236,7 +209,7 @@ typeFunc        : 'func' '<' ':' type '>'
                 | 'func' '<' type (',' type)* ',' '...' ':' type '>'
                 ;
 
-
+NULL            : 'null' ;
 LITERAL_GROUP_3 : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 
 LITERAL_GROUP_4 : [0-9]+ '.' [0-9]+ '.' [0-9]+ '.' [0-9]+ ;

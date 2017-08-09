@@ -11,7 +11,7 @@ Method = "def" Identifier "(" {(Identifier ":" Type) || ","}* ")" ":" Type
 Statement = ("[" Identifier "]")
           | (Identifier ":" Type "=" Identifier ";")
           | (Identifier ":" Type "=" "(" Type ")" (Identifier | Invocation) ";")
-          | (Identifier ":" Type "=" ("check_cast" | "check_type") "("
+          | (Identifier ":" Type "=" ("check_cast" | "is_type") "("
                                        (Identifier | Invocation) "," Type
                                      ")" ";")
           | (Identifier ":" Type "=" "phi" "("
@@ -86,8 +86,8 @@ SecondValue     = {Digits}+ "." {Digits}+ "." {Digits}+ .
 TimeValue       = {Digits}+ "." {Digits}+ "." {Digits}+ "." {Digits}+ .
 DateTimeValue   = Date "T" Time .
 
-MonthLiteral    = ((DateValue | "null") ":" "m")
-                | ("(" {(DateValue | "null") || ","}* ")" ":" "m")
+MonthLiteral    = ((MonthValue | "null") ":" "m")
+                | ("(" {(MonthValue | "null") || ","}* ")" ":" "m")
                 .
 DateLiteral     = ((DateValue | "null") ":" "d")
                 | ("(" {(DateValue | "null") || ","}* ")" ":" "d")

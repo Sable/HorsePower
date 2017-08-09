@@ -3,4 +3,4 @@
 #include "ASTNode.h"
 
 #include "type/Type.h"
-#include "type/Primitive.h"
+#include "type/PrimitiveType.h"
