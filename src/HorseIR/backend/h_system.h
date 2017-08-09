@@ -27,6 +27,8 @@ L appendList          (V z, V x, V y);
 L appendEnum          (V z, V x, V y);
 S genLikeString       (S inStr, L inLen);
 V getValueFromSymbol  (Q id);
+L getCommonType       (V x, L *typ, L *len);
+L fillRaze            (V z, L *n0, V x);
 
 B isTypeGroupInt      (L t);
 B isTypeGroupFloat    (L t);
@@ -57,6 +59,8 @@ L inferPi             (L t);
 #define E_LIKE_PATTERN    8
 #define E_MATCH           9
 #define E_ENUM_INDEX      10
+#define E_RAZE_LIST       11
+#define E_UNKNOWN         12
 #define E_TABLE_NOT_FOUND 50
 #define E_COL_NOT_FOUND   51
 #define E_NOT_IMPL        99

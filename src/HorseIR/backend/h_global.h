@@ -67,6 +67,14 @@ typedef struct list_table{
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+
+#ifndef min
+#define min(a,b) ((a)>(b)?(b):(a))
+#endif
+
 /* constant code */
 
 #define ERROR_CODE 99

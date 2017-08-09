@@ -3,14 +3,6 @@
 #include <float.h>
 #include <limits.h>
 
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
-
-#ifndef min
-#define min(a,b) ((a)>(b)?(b):(a))
-#endif
-
 /*
  * primitive function -> pfn
  * input  parameters  -> x, y, m ...
@@ -622,6 +614,27 @@ L pfnTime(V z, V x){
     else R E_DOMAIN;
 }
 
+L pfnEnlist(V z, V x){
+    if(isTypeGroupAll(vp(x))){
+        initV(z,H_G,1);
+        CHECKE(copyV(vV(z,0),x));
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnRaze(V z, V x){
+    if(isTypeGroupBasic(vp(x))){
+        L typZ, lenZ, n;
+        CHECKE(getCommonType(x, &typZ, &lenZ));
+        initV(z,typZ,lenZ);
+        CHECKE(fillRaze(z,&n,x));
+        CHECKE(n!=lenZ?E_UNKNOWN:0);
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
 
 /* Binary */
 
@@ -1159,3 +1172,6 @@ L pfnKTable(V z, V x, V y){
     }
     else R E_DOMAIN;
 }
+
+
+

@@ -170,6 +170,59 @@ V getValueFromSymbol(Q id){
     R NULL;
 }
 
+/* error code -2 */
+L decideType(L x, L y){
+    if(isTypeGroupScalar(x) && isTypeGroupScalar(y)){
+        R max(x,y);
+    }
+    else if(x == y){
+        R x;
+    }
+    else R -2;
+}
+
+/* typ init. -1 */
+L getCommonType(V x, L *typ, L *len){
+    if(isList(x)){
+        DOI(xn, CHECKE(getCommonType(vV(x,i),typ,len)))
+    }
+    else {
+        *typ = (-1==*typ)?xp:decideType(*typ,xp); CHECKE(-2==(*typ)?E_RAZE_LIST:0);
+        *len+= xn;
+    }
+    R 0;
+}
+
+
+L fillRaze(V z, L *n0, V x){
+    if(isList(x)){
+        DOI(xn, CHECKE(fillRaze(z,n0,vV(x,i))))
+    }
+    else {
+        L n = *n0;
+        switch(vp(z)){
+             caseB DOI(xn, vB(z,n++)=vB(x,i)); break;
+             caseH { switch(xp){
+                     caseB DOI(xn, vH(z,n++)=vB(x,i)); break;
+                     caseH DOI(xn, vH(z,n++)=vH(x,i)); break; } } break;
+             caseI { switch(xp){
+                     caseB DOI(xn, vI(z,n++)=vB(x,i)); break;
+                     caseH DOI(xn, vI(z,n++)=vH(x,i)); break;
+                     caseI DOI(xn, vI(z,n++)=vI(x,i)); break; } } break;
+             caseL { switch(xp){
+                     caseB DOI(xn, vL(z,n++)=vB(x,i)); break;
+                     caseH DOI(xn, vL(z,n++)=vH(x,i)); break;
+                     caseI DOI(xn, vL(z,n++)=vI(x,i)); break;
+                     caseL DOI(xn, vL(z,n++)=vL(x,i)); break; } } break;
+             caseX DOI(xn, vX(z,n++)=vX(x,i)); break;
+             caseQ DOI(xn, vQ(z,n++)=vQ(x,i)); break;
+             default: R E_NOT_IMPL;
+        }
+        *n0 = n;
+    }
+    R 0;
+}
+
 
 /* Type checking */
 
@@ -255,6 +308,8 @@ void printErrMsg(L eid){
         errCaseCell(E_LIKE_PATTERN,    "Like pattern error" );
         errCaseCell(E_MATCH,           "Columns not match"  );
         errCaseCell(E_ENUM_INDEX,      "Enum index error"   );
+        errCaseCell(E_RAZE_LIST,       "Raze list error"    );
+        errCaseCell(E_UNKNOWN,         "Unknown error"      );
         errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
         errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
         errCaseCell(E_NOT_IMPL,        "Not implement yet"  );
