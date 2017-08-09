@@ -33,6 +33,7 @@ extern "C" {
 #define isValidLength(x,y) (isOne(x) || isOne(y) || isEqualLength(x,y))
 #define isValidType(x,y)   ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
+#define FUNC1(x) L (*x)(V,V)
 #define FUNC2(x) L (*x)(V,V,V)
 #define CHECKE(x) { L e=x; if(e) R e; }
 #define isTypeGroupScalar isTypeGroupRealX
@@ -130,7 +131,8 @@ L pfnAppend        (V z, V x, V y);
 L pfnLike          (V z, V x, V y);
 L pfnOrderBy       (V z, V x, V y);
 
-L pfnEach          (V z, V x, V y, FUNC2(foo));
+L pfnEach          (V z, V x,      FUNC1(foo));
+L pfnEachItem      (V z, V x, V y, FUNC2(foo));
 L pfnEachLeft      (V z, V x, V y, FUNC2(foo));
 L pfnEachRight     (V z, V x, V y, FUNC2(foo));
 

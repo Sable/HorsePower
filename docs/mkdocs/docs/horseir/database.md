@@ -52,7 +52,7 @@ For example, `ORDER BY salary DESC` can be represented as follows.
 
 ```no-highlight
 // t0 is a partial or full set of the salary column
-t1:list<i32> = desc(t0);
+t1:i64 = desc(t0);
 ```
 
 A list of integers (indices) is returned and saved into `t1`;
@@ -65,7 +65,7 @@ For example, `GROUP BY lastname`
 
 ```no-highlight
 // t0 is a partial or full set of the lastname column
-t1:list<list<i32>> = group_by(t0);
+t1:list<i64> = @group_by(t0);
 ```
 
 The returned `t1` is a list of lists.  The internal list has integers (indices)
@@ -79,7 +79,8 @@ For example, `LIMIT 10` takes the first 10 elements.
 
 ```no-highlight
 // t0 is a partial or full set of the column
-t1:list<type> = take(t0, 10:i32);
+// @take is a primitive function
+t1:? = @take(t0, 10:i32);
 ```
 
 Another similar function, `limit_range` for range queries, can select items
@@ -87,10 +88,10 @@ within a range `(m,n)`.
 
 ```no-highlight
 // t0 is a partial or full set of the column
-t1:list<i64> = substract(n,m);   // range size
-t2:list<i64> = range(t0);        // iota(t0)
-t3:list<i64> = add(t2, m);       // addition
-t4:list<type> = index(t0, t3);   // indexing
+t1:i64 = @substract(n,m);  // range size
+t2:i64 = @range(t0);       // iota(t0)
+t3:i64 = @add(t2, m);      // addition
+t4:?   = @index(t0, t3);   // indexing
 ```
 
 ## <p id="operations">Implementing database operations using array operations</p>
@@ -124,9 +125,10 @@ t0:list<i32> = index_of(x,y);
 For example,
 
 ```no-highlight
-   x <- 25 36 15
-   y <- 36 17 25
-   index_of(x,y)
+   x:i64 = 25 36 15
+   y:i64 = 36 17 25
+   t0:list<i64> = @index_of(x,y);
+   t1:i64       = @print(t0);
 > 1 3 0
 ```
 
@@ -139,19 +141,20 @@ We see
 **Return all matches**
 
 ```no-highlight
-t0:list<list<bool>> = outer(eq,x,y);
-t1:list<list<i32>>  = each(where,t0);
+t0:list<bool> = outer(@eq,x,y);
+t1:list<i64>  = each(@where,t0);
 ```
 
 For example,
 
 ```no-highlight
-   x <- 25 36 36
-   y <- 36 17 25
-   t0 <- outer(eq,x,y)
-> (0 1 1;0 0 0;1 0 0)
-   each(where, t0);
-> (1 2; ;0)
+     x:i32         = 25 36 36;
+     y:i32         = 36 17 25;
+     t0:list<bool> = @outer(@eq,x,y);
+(0 1 1;0 0 0;1 0 0)
+     t1:list<i64>  = @each(@where, t0);
+     t2:i64        = @print(t1);
+(1 2; ;0)
 ```
 
 We see
@@ -174,8 +177,9 @@ aggregation function `f`.  Its syntax is `reduce(@f, T)`.
 For example,
 
 ```no-highlight
-   t0 <- (1 1 1;2 2);
-   t1 <- reduce(@count, t0);
+   t0:list<i64> = (1 1 1;2 2);
+   t1:list<i64> = @reduce(@count, t0);
+   t2:i64       = @print(t1);
 > (3;2)
 ```
 

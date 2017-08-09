@@ -1,4 +1,5 @@
-## Pretty printing
+
+## Principles
 
 We propose a couple of pretty printing modes as follows.
 
@@ -8,78 +9,150 @@ We propose a couple of pretty printing modes as follows.
 - Print customized sizes (e.g. 20 rows and 5 columns max)
 - Print within current window (Optional)
 
-### Real numbers
+
+### Numeric types
 
 #### Bool
 
-```
-0 1:b
+```no-highlight
+(0,1):bool
 ```
 
 #### Short
 
+```no-highlight
+(10,20):short
 ```
-10 20:h
-```
-
 
 #### Int
 
-```
-1234567 2:i32
+```no-highlight
+(1234567,2):i32
 ```
 
 #### Long
 
-```
-123456789012345 123:i64
-123456789012345 123
+```no-highlight
+(123456789012345,123):i64
+(123456789012345,123)
 ```
 
 #### Float
 
-```
-12.3 2.5:f32
+```no-highlight
+(12.3,2.5):f32
 ```
 
 #### Double
 
-```
-12.3 2.5:f64
-12.3 2.5
+```no-highlight
+(12.3,2.5)
+(12.3,2.5):f64
 ```
 
 #### Char
 
-```
-abcd
-abcd:c
-```
-
-### Complex numbers
-
-```
-1+2i 2 3i
-1+2i 2 3i:x
+```no-highlight
+'abcd'
+'abcd':char
 ```
 
-### Symbols
+#### Complex numbers
 
-```
-`apple `"my name":q
-`apple `"my name"
-```
-
-### Dictionary
-
-```
-// dict<key, value>
-dict<`name, 1 2 3:i32>
+```no-highlight
+(1+2i,2,3i)
+(1+2i,2,3i):complex
 ```
 
-### Enumeration
-### Table
-### Keyed table
+#### Symbols
 
+```no-highlight
+(`apple,`"my name"):sym
+(`apple,`"my name")
+```
+
+
+### Advanced types
+
+#### List
+
+Input literal:
+
+```no-highlight
+((1,2,3):i32, (2,0.5):f32)
+```
+
+Output:
+
+```no-highlight
+((1,2,3):i32, (2,0.5):f32)
+```
+
+#### Dictionary
+
+Input literal:
+
+```no-highlight
+{`key1 -> (1,2,3):i32, `key2 -> (2,0.5):f32}
+```
+
+Output:
+
+```no-highlight
+{
+    `key1 -> (1,2,3):i32,
+    `key2 -> (2,0.5):f32
+}
+```
+
+#### Enumeration
+
+Input literal:
+
+```no-highlight
+<`u, `a`b`c>
+```
+
+Output:
+
+```no-highlight
+<`u, `a`b`c:sym>
+```
+
+#### Table
+
+Input literal:
+
+```no-highlight
+{`col1 -> `a`b`c, `col2 -> (1,2,3):i32}
+```
+
+Output:
+
+```no-highlight
+| col1 | col2 |
+---------------
+| a    | 1    |
+| b    | 2    |
+| c    | 3    |
+```
+
+#### Keyed table
+
+Input literal:
+
+```no-highlight
+{[`col1 -> `a`b`c], `col2 -> (1,2,3):i32}
+```
+
+Output:
+
+```no-highlight
+| col1 | col2 |
+---------------
+| a    | 1    |
+| b    | 2    |
+| c    | 3    |
+```
 
 

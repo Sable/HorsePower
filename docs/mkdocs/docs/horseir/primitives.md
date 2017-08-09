@@ -2,23 +2,59 @@
 
 ## <p id="alias">1. Type alias</p>
 
-| 1-level | Description      |
-| :------ | :--------------- |
-| Int     | B, H, I, L       |
-| Float   | F, E             |
-| Complex | X                |
-| Time    | M, D, Z, U, W, T |
-| String  | C, Q             |
+<table style="width:50%;float:left">
+<tr>
+    <th> 1-level </th>
+    <th> Description </th>
+</tr>
+<tr>
+    <td>Int</td>
+    <td>B, H, I, L</td>
+</tr>
+<tr>
+    <td>Float</td>
+    <td>F, E</td>
+</tr>
+<tr>
+    <td>Complex</td>
+    <td>X</td>
+</tr>
+<tr>
+    <td>Time</td>
+    <td>M, D, Z, U, W, T</td>
+</tr>
+<tr>
+    <td>String</td>
+    <td>C, Q</td>
+</tr>
+</table>
 
-
-| 2-level | Description                 |
-| :------ | :-------------------------- |
-| Real    | Int,  Flt                   | 
-| Numeric | Real, Time                  | 
-| Basic   | Real, Time, String, Complex |
-| Advance | A, N, K                     |
-| Any     | Any of all types            |
-
+<table style="width:50%;float:left">
+<tr>
+    <th> 2-level </th>
+    <th> Description </th>
+</tr>
+<tr>
+    <td>Real</td>
+    <td>Int, Flt</td>
+</tr>
+<tr>
+    <td>Numeric</td>
+    <td>Real, Time</td>
+</tr>
+<tr>
+    <td>Basic</td>
+    <td>Real, Time, String, Complex</td>
+</tr>
+<tr>
+    <td>Advanced</td>
+    <td>A, N, K</td>
+</tr>
+<tr>
+    <td>Any</td>
+    <td>Any of all types</td>
+</tr>
+</table>
 
 ## <p id="basic">2. Basics</p>
 
@@ -111,9 +147,6 @@ Status
 | 9  | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                          | |
 | 10 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)    |&#10004;|
 | 11 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)      |&#10004;|
-| 12 | raze(x)              | Raze a nested list          | Pending                     | Pending                       | link                          | |
-| 13 | enlist(x)            | Return a list               | Pending                     | Pending                       | [link](builtin/list.md#enlist)|&#10004;|
-| 14 | scalar(x)            | Return a scalar             | Pending                     | Pending                       | [link](builtin/list.md#raze)  |&#10004;|
 
 
 ### 3.2 Binary
@@ -138,6 +171,17 @@ Status
 | 3  | avg(x)               | sum(x) / len(x)             | Real                        | Real                          | N/A                          |&#10004;|
 | 4  | min(x)               | Minimum                     | Real                        | Real                          | [link](builtin/reduce.md#min)|&#10004;|
 | 5  | max(x)               | Maximum                     | Real                        | Real                          | [link](builtin/reduce.md#max)|&#10004;|
+
+### 3.4 List
+
+| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                           | Status |
+| :--| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :-------------------------------- | :----- |
+| 1  | raze(x)              | Raze a nested list          | List, numeric               | Numeric              | [link](builtin/list.md#enlist)    |&#10004;|
+| 2  | enlist(x)            | Return a list               | Any                         | List                 | [link](builtin/list.md#raze)      |&#10004;|
+| 3  | each(fn,x)           | Each on x with func `fn`    | (Func; List)                | List                 | [link](builtin/list.md#each)      |&#10004;|
+| 4  | eachitem(fn,x,y)     | Each on both sides          | (Func; List; List)          | List                 | [link](builtin/list.md#eachitem)  |&#10004;|
+| 5  | eachleft(fn,x,y)     | Each on left side           | (Func; List; List)          | List                 | [link](builtin/list.md#eachleft)  |&#10004;|
+| 6  | eachright(fn,x,y)    | Each on Right side          | (Func; List; List)          | List                 | [link](builtin/list.md#eachright) |&#10004;|
 
 ## <p id="database">4. Database related</p>
 

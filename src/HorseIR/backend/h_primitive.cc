@@ -1064,8 +1064,15 @@ L pfnOrderBy(V z, V x, V y){
     else R E_DOMAIN;
 }
 
+L pfnEach(V z, V x, FUNC1(foo)){
+    if(isList(x)){
+        DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
+        R 0;
+    }
+    else R E_DOMAIN;
+}
 
-L pfnEach(V z, V x, V y, FUNC2(foo)){
+L pfnEachItem(V z, V x, V y, FUNC2(foo)){
     L lenX = isList(x)?vn(x):1;
     L lenY = isList(y)?vn(y):1;
     if(isList(x) && isList(y)){

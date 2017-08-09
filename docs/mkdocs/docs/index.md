@@ -10,6 +10,6 @@ queries while keeping response time as low as possible.
 HorsePower consists of several parts:
 
 - [HorseIR](horseir/spec.md): An array-based IR for handling and optimizing queries
-- **HorseSQL**: A translator for generating HorseIR from standard SQL
-- **HorseDB**: A customized database system
+- **HorseSQL**: An extension of standard SQL
+- **HorseDB**: A runtime system for In-Memory Database Systems (IMDB)
 
