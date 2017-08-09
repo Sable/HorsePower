@@ -1,80 +1,109 @@
 #pragma once
 
-#include <cstddef>
 #include <vector>
-#include <string>
-#include <cassert>
 #include <memory>
 #include <algorithm>
+#include <antlr4-runtime.h>
 
-#include "antlr4-runtime.h"
-#include "HorseIRParser.h"
-
-namespace horseIR {
-namespace ast {
+namespace horseIR
+{
+namespace ast
+{
 
 class ASTNode {
-public:
-    class MemManagerType {
-    public:
-        MemManagerType& manage(ASTNode* ptr) ;
-        MemManagerType& release(ASTNode* ptr) ;
-    private:
-        std::vector<std::unique_ptr<ASTNode>> pool ;
-    } ;
+ public:
+  typedef antlr4::tree::ParseTree CSTType;
 
-    enum class ASTNodeClass {
-        NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
-        Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
-        FunctionLiteral, TableLiteral,
+  enum class ASTNodeClass {
+    NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
+    Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
+    FunctionLiteral, TableLiteral, Identifier, PrimitiveType, WildcardType,
+    ListType, DictionaryType, EnumerationType, FunctionType,
+    CompilationUnit, Module, Method, LabelStatement, BranchStatement,
+    PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
+  };
 
-        Identifier,
+  class ASTNodeMemory {
+   public:
+    ASTNodeMemory &manage (ast::ASTNode *managedPtr);
+    ASTNodeMemory &release (ast::ASTNode *releasedPtr);
 
-        ScalarType, WildcardType, ListType, DictionaryType,
-        EnumerationType, FunctionType,
+   protected:
+    std::vector<std::unique_ptr<ASTNode>> pool;
+  };
 
-        CompilationUnit, Module, Method, LabelStatement, BranchStatement, PhiStatement,
-        AssignStatement, ReturnStatement
-    } ;
-            
-    ASTNode () = delete ;
-    ASTNode (MemManagerType& mem,
-             const ASTNode::ASTNodeClass type) ;
-    ASTNode (ASTNode* p_parentASTNode,
-             const antlr4::tree::ParseTree* cst,
-             MemManagerType& mem,
-             const ASTNode::ASTNodeClass type) ;
-    virtual ~ASTNode() = default ;
+  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass)
+      : cst (nullptr), astNodeClass (p_astNodeClass), parent (nullptr)
+  {
+    mem.manage (this);
+  }
+  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
+           const CSTType *parseTree)
+      : cst (parseTree), astNodeClass (p_astNodeClass), parent (nullptr)
+  {
+    mem.manage (this);
+  }
+  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
+           const CSTType *parseTree, ASTNode *p_parent)
+      : cst (parseTree), astNodeClass (p_astNodeClass), parent (p_parent)
+  {
+    mem.manage (this);
+  }
+  ASTNode (ASTNode &&externASTNode) = default;
+  ASTNode (const ASTNode &externASTNode) = default;
+  ASTNode &operator= (ASTNode &&externASTNode) = delete;
+  ASTNode &operator= (const ASTNode &externASTNode) = delete;
+  virtual ~ASTNode () = default;
 
-    ASTNodeClass getASTNodeClass() const ;
-            
-    virtual std::size_t getNumNodesRecursively() const = 0;
-    virtual std::vector<ASTNode*> getChildren() const = 0 ;
-    virtual ASTNode* duplicateShallow(ASTNode::MemManagerType& mem) const ; /* TODO */
-    virtual ASTNode* duplicateDeep(ASTNode::MemManagerType& mem) const ;    /* TODO */
-    ASTNode* getParentASTNode() const ;
-    ASTNode& setParentASTNode(ASTNode* p_parentASTNode) ;
+  virtual std::size_t getNumNodesRecursively () const = 0;
+  virtual std::vector<ASTNode *> getChildren () const = 0;
+  virtual ASTNode *duplicateDeep (ASTNode::ASTNodeMemory &mem) const = 0;
 
-    const antlr4::tree::ParseTree* getCST() const ;
-    ASTNode& setCST(const antlr4::tree::ParseTree* cst) ;
-    ASTNode::ASTNodeClass getNodeType() const ;
-    std::string getEnclosingFilePath() const ;
+  const CSTType *getCST () const
+  {
+    return cst;
+  }
+  ASTNodeClass getASTNodeClass () const
+  {
+    return astNodeClass;
+  }
+  std::string getEnclosingFilename () const
+  {
+    return enclosingFilename;
+  }
+  ASTNode *getParentASTNode () const
+  {
+    return parent;
+  }
 
-    virtual std::string toString() const = 0 ;
-    virtual std::string toTreeString() const = 0 ;
+  virtual std::string toString () const = 0;
+ protected:
+  static const char *PRETTY_PRINT_INDENT = "    ";
+  const CSTType *cst;
+  const ASTNodeClass astNodeClass;
+  std::string enclosingFilename = "unknown";
+  ast::ASTNode *parent;
+};
 
-protected:
-    static const std::string INDENT ;
-    const antlr4::tree::ParseTree* cst ;
-    std::string filePath = "unknown" ;
-    const ASTNode::ASTNodeClass nodeType ;
-    ASTNode* parentASTNode ;
+inline ASTNode::ASTNodeMemory &
+ASTNode::ASTNodeMemory::manage (ast::ASTNode *managedPtr)
+{
+  auto findIter = std::find (pool.cbegin (), pool.cend (), managedPtr);
+  if (findIter == pool.cend ()) pool.push_back (std::make_unique (managedPtr));
+  return *this;
+}
 
-    static std::string CSTNameToString(HorseIRParser::NameContext* nameContext) ;
-
-    void __duplicateShallow(const ASTNode* astNode) ;
-    void __duplicateDeep(const ASTNode* astNode, ASTNode::MemManagerType& mem) ;
-} ;
+inline ASTNode::ASTNodeMemory &
+ASTNode::ASTNodeMemory::release (ast::ASTNode *releasedPtr)
+{
+  const auto findIter = std::find (pool.cbegin (), pool.cend (), releasedPtr);
+  if (findIter != pool.cend ())
+    {
+      pool.erase (std::remove (pool.begin (), pool.end (), releasedPtr),
+                  pool.end ());
+    }
+  return *this;
+}
 
 }
 }
