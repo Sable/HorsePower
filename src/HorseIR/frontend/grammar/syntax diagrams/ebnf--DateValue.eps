@@ -1,0 +1,1284 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 372 50
+%%Title: ebnf--DateValue.eps
+%%CreationDate: 02:52:41 Aug 09 2017
+%%Creator: Hongji Chen  (using ebnf2ps v4.4)
+%%DocumentNeededResources: font Helvetica-Bold
+%%+ font Courier
+%%+ font Helvetica
+%%+ font Courier-BoldOblique
+%%Pages: 0
+%%EndComments
+
+%%BeginProlog
+
+/#ebnf2ps#dict 230 dict def
+#ebnf2ps#dict begin
+
+% Initialize variables to avoid name-conflicting with document variables.
+% This is the case when using `bind' operator.
+/-fillp-		0 def		/h		0 def
+/-ox-			0 def		/half		0 def
+/-oy-			0 def		/height		0 def
+/-save-			0 def		/ow		0 def
+/Ascent			0 def		/quarter	0 def
+/Descent		0 def		/rXX		0 def
+/Effect			0 def		/rYY		0 def
+/FontHeight		0 def		/rwidth		0 def
+/LineThickness		0 def		/rxx		0 def
+/OverlinePosition	0 def		/ryy		0 def
+/SpaceBackground	0 def		/shadow		0 def
+/StrikeoutPosition	0 def		/shape		0 def
+/UnderlinePosition	0 def		/shapecolor	0 def
+/XBox			0 def		/space		0 def
+/XX			0 def		/st		1 string def
+/Xshadow		0 def		/w		0 def
+/YBox			0 def		/width		0 def
+/YY			0 def		/xi		0 def
+/Yshadow		0 def		/xo		0 def
+/arrow			0 def		/xp		0 def
+/bg			false def	/xt		0 def
+/bgcolor		0 def		/xw		0 def
+/bordercolor		0 def		/xx		0 def
+/borderwidth		0 def		/yi		0 def
+/dd			0 def		/yo		0 def
+/entry			0 def		/yp		0 def
+/foreground		0 def		/yt		0 def
+					/yy		0 def
+
+
+% ISOLatin1Encoding stolen from ps_init.ps in GhostScript 2.6.1.4:
+/ISOLatin1Encoding where
+{pop}
+{% -- The ISO Latin-1 encoding vector isn't known, so define it.
+ % -- The first half is the same as the standard encoding,
+ % -- except for minus instead of hyphen at code 055.
+ /ISOLatin1Encoding
+  StandardEncoding 0  45 getinterval aload pop
+  /minus
+  StandardEncoding 46 82 getinterval aload pop
+ %*** NOTE: the following are missing in the Adobe documentation,
+ %*** but appear in the displayed table:
+ %*** macron at 0225, dieresis at 0230, cedilla at 0233, space at 0240.
+ % 0200 (128)
+  /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+  /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+  /dotlessi /grave /acute /circumflex /tilde /macron /breve /dotaccent
+  /dieresis /.notdef /ring /cedilla /.notdef /hungarumlaut /ogonek /caron
+ % 0240 (160)
+  /space /exclamdown /cent /sterling
+	/currency /yen /brokenbar /section
+  /dieresis /copyright /ordfeminine /guillemotleft
+	/logicalnot /hyphen /registered /macron
+  /degree /plusminus /twosuperior /threesuperior
+	/acute /mu /paragraph /periodcentered
+  /cedilla /onesuperior /ordmasculine /guillemotright
+	/onequarter /onehalf /threequarters /questiondown
+ % 0300 (192)
+  /Agrave /Aacute /Acircumflex /Atilde
+	/Adieresis /Aring /AE /Ccedilla
+  /Egrave /Eacute /Ecircumflex /Edieresis
+	/Igrave /Iacute /Icircumflex /Idieresis
+  /Eth /Ntilde /Ograve /Oacute
+	/Ocircumflex /Otilde /Odieresis /multiply
+  /Oslash /Ugrave /Uacute /Ucircumflex
+	/Udieresis /Yacute /Thorn /germandbls
+ % 0340 (224)
+  /agrave /aacute /acircumflex /atilde
+	/adieresis /aring /ae /ccedilla
+  /egrave /eacute /ecircumflex /edieresis
+	/igrave /iacute /icircumflex /idieresis
+  /eth /ntilde /ograve /oacute
+	/ocircumflex /otilde /odieresis /divide
+  /oslash /ugrave /uacute /ucircumflex
+	/udieresis /yacute /thorn /ydieresis
+ 256 packedarray def
+}ifelse
+
+/reencodeFontISO	%def
+{dup
+ length 12 add dict	% Make a new font (a new dict the same size
+			% as the old one) with room for our new symbols.
+
+ begin			% Make the new font the current dictionary.
+  {1 index /FID ne
+   {def}{pop pop}ifelse
+  }forall		% Copy each of the symbols from the old dictionary
+			% to the new one except for the font ID.
+
+  currentdict /FontType get 0 ne
+  {/Encoding ISOLatin1Encoding def}if	% Override the encoding with
+					% the ISOLatin1 encoding.
+
+  % Use the font's bounding box to determine the ascent, descent,
+  % and overall height; don't forget that these values have to be
+  % transformed using the font's matrix.
+
+  %          ^    (x2 y2)
+  %          |       |
+  %          |       v
+  %          |  +----+ - -
+  %          |  |    |   ^
+  %          |  |    |   | Ascent (usually > 0)
+  %          |  |    |   |
+  % (0 0) -> +--+----+-------->
+  %             |    |   |
+  %             |    |   v Descent (usually < 0)
+  % (x1 y1) --> +----+ - -
+
+  currentdict /FontType get 0 ne
+  {/FontBBox load aload pop		% -- x1 y1 x2 y2
+   FontMatrix transform /Ascent  exch def pop
+   FontMatrix transform /Descent exch def pop}
+  {/PrimaryFont FDepVector 0 get def
+   PrimaryFont /FontBBox get aload pop
+   PrimaryFont /FontMatrix get transform /Ascent exch def pop
+   PrimaryFont /FontMatrix get transform /Descent exch def pop
+  }ifelse
+
+  /FontHeight Ascent Descent sub def	% use `sub' because descent < 0
+
+  % Define these in case they're not in the FontInfo
+  % (also, here they're easier to get to).
+  /UnderlinePosition  Descent 0.70 mul def
+  /OverlinePosition   Descent UnderlinePosition sub Ascent add def
+  /StrikeoutPosition  Ascent 0.30 mul def
+  /LineThickness      FontHeight 0.05 mul def
+  /Xshadow            FontHeight  0.08 mul def
+  /Yshadow            FontHeight -0.09 mul def
+  /SpaceBackground    Descent neg UnderlinePosition add def
+  /XBox               Descent neg def
+  /YBox               LineThickness 0.7 mul def
+
+  currentdict	% Leave the new font on the stack
+ end		% Stop using the font as the current dictionary
+ definefont	% Put the font into the font dictionary
+ pop		% Discard the returned font
+}bind def
+
+% Font definition
+/DefFont{findfont exch scalefont reencodeFontISO}def
+
+% Font selection
+/F
+{findfont
+ dup /Ascent            get /Ascent            exch def
+ dup /Descent           get /Descent           exch def
+ dup /FontHeight        get /FontHeight        exch def
+ dup /UnderlinePosition get /UnderlinePosition exch def
+ dup /OverlinePosition  get /OverlinePosition  exch def
+ dup /StrikeoutPosition get /StrikeoutPosition exch def
+ dup /LineThickness     get /LineThickness     exch def
+ dup /Xshadow           get /Xshadow           exch def
+ dup /Yshadow           get /Yshadow           exch def
+ dup /SpaceBackground   get /SpaceBackground   exch def
+ dup /XBox              get /XBox              exch def
+ dup /YBox              get /YBox              exch def
+ setfont
+}def
+
+/BG
+{dup /bg exch def
+ {mark 4 1 roll ]}
+ {[ 1.0 1.0 1.0 ]}
+ ifelse
+ /bgcolor exch def
+}def
+
+% stack:  --
+/FillBgColor{bgcolor aload pop setrgbcolor fill}bind def
+
+% stack:  fill-or-not lower-x lower-y upper-x upper-y  |-  --
+/doRect
+{/rYY exch def
+ /rXX exch def
+ /ryy exch def
+ /rxx exch def
+ gsave
+ newpath
+ rXX rYY moveto
+ rxx rYY lineto
+ rxx ryy lineto
+ rXX ryy lineto
+ closepath
+ % top of stack: fill-or-not
+ {FillBgColor}
+ {LineThickness setlinewidth stroke}
+ ifelse
+ grestore
+}bind def
+
+% stack:  string fill-or-not  |-  --
+/doOutline
+{/-fillp- exch def
+ /-ox- currentpoint /-oy- exch def def
+ gsave
+ LineThickness setlinewidth
+ {st 0 3 -1 roll put
+  st dup true charpath
+  -fillp- {gsave FillBgColor grestore}if
+  stroke stringwidth
+  -oy- add /-oy- exch def
+  -ox- add /-ox- exch def
+  -ox- -oy- moveto
+ }forall
+ grestore
+ -ox- -oy- moveto
+}bind def
+
+% stack:  fill-or-not delta  |-  --
+/doBox
+{/dd exch def
+ xx XBox sub dd sub yy YBox sub dd sub
+ XX XBox add dd add YY YBox add dd add
+ doRect
+}bind def
+
+% stack:  string  |-  --
+/doShadow
+{gsave
+ Xshadow Yshadow rmoveto
+ false doOutline
+ grestore
+}bind def
+
+% stack:  position  |-  --
+/Hline
+{currentpoint exch pop add dup
+ gsave
+ newpath
+ xx exch moveto
+ XX exch lineto
+ closepath
+ LineThickness setlinewidth stroke
+ grestore
+}bind def
+
+% stack:  string  |-  --
+% effect: 1  - underline  2   - strikeout  4  - overline
+%         8  - shadow     16  - box        32 - outline
+/S
+{/xx currentpoint dup Descent add /yy exch def
+ Ascent add /YY exch def def
+ dup stringwidth pop xx add /XX exch def
+ Effect 8 and 0 ne
+ {/yy yy Yshadow add def
+  /XX XX Xshadow add def
+ }if
+ bg
+ {true
+  Effect 16 and 0 ne
+  {SpaceBackground doBox}
+  {xx yy XX YY doRect}
+  ifelse
+ }if						% background
+ Effect 16 and 0 ne{false 0 doBox}if		% box
+ Effect 8  and 0 ne{dup doShadow}if		% shadow
+ Effect 32 and 0 ne
+ {true doOutline}				% outline
+ {show}						% normal text
+ ifelse
+ Effect 1  and 0 ne{UnderlinePosition Hline}if	% underline
+ Effect 2  and 0 ne{StrikeoutPosition Hline}if	% strikeout
+ Effect 4  and 0 ne{OverlinePosition  Hline}if	% overline
+}bind def
+
+
+
+% === begin EBNF settings
+
+/Header        () def
+/Footer        () def
+/ShowHeader    false def
+/fH            11.000 /Helvetica-Bold DefFont
+/ForegroundH   [0.000 0.000 0.000] def % Black
+/BackgroundH   [1.000 1.000 1.000] def % White
+/EffectH       0 def
+/ShowFooter    false def
+/fF            7.000 /Helvetica-Bold DefFont
+/ForegroundF   [0.000 0.000 0.000] def % Black
+/BackgroundF   [1.000 1.000 1.000] def % White
+/EffectF       0 def
+/fP            10.000 /Helvetica-Bold DefFont
+/ForegroundP   [0.000 0.000 0.000] def % Black
+/BackgroundP   [1.000 1.000 1.000] def % White
+/EffectP       0 def
+/fT            7.000 /Courier DefFont
+/ForegroundT   [0.000 0.000 0.000] def % Black
+/BackgroundT   [1.000 1.000 1.000] def % White
+/EffectT       0 def
+/BorderWidthT  1.000 def
+/BorderColorT  [0.000 0.000 0.000] def % Black
+/ShapeT        0 def
+/ShadowT       false def
+/fNT           7.000 /Helvetica DefFont
+/ForegroundNT  [0.000 0.000 0.000] def % Black
+/BackgroundNT  [1.000 1.000 1.000] def % White
+/EffectNT      0 def
+/BorderWidthNT 1.000 def
+/BorderColorNT [0.000 0.000 0.000] def % Black
+/ShapeNT       1 def
+/ShadowNT      false def
+/fS            7.000 /Courier-BoldOblique DefFont
+/ForegroundS   [0.000 0.000 0.000] def % Black
+/BackgroundS   [0.949 0.949 0.949] def % Gray95
+/EffectS       0 def
+/BorderWidthS  0.500 def
+/BorderColorS  [0.000 0.000 0.000] def % Black
+/ShapeS        2 def
+/ShadowS       false def
+/fE            7.000 /Courier-BoldOblique DefFont
+/ForegroundE   [0.000 0.000 0.000] def % Black
+/BackgroundE   [0.898 0.898 0.898] def % Gray90
+/EffectE       0 def
+/BorderWidthE  0.250 def
+/BorderColorE  [0.000 0.000 0.000] def % Black
+/ShapeE        2 def
+/ShadowE       false def
+/fR            7.000 /Courier-BoldOblique DefFont
+/ForegroundR   [0.000 0.000 0.000] def % Black
+/BackgroundR   [0.851 0.851 0.851] def % Gray85
+/EffectR       0 def
+/BorderWidthR  0.000 def
+/BorderColorR  [0.000 0.000 0.000] def % Black
+/ShapeR        2 def
+/ShadowR       false def
+/ExtraWidth    1.453 def
+/ArrowScale    1.000 def
+/DefaultWidth  0.600 def
+/LineWidth     1.000 def
+/LineColor     [0.000 0.000 0.000] def % Black
+/ArrowShape    5 def
+/ChartShape    1 def
+/UserArrow{}def
+
+% === end   EBNF settings
+
+
+% === begin EBNF engine
+
+% --- Basic Definitions
+
+/fS F
+/SpaceS FontHeight 0.5 mul def
+/HeightS FontHeight FontHeight add def
+
+/fE F
+/SpaceE FontHeight 0.5 mul def
+/HeightE FontHeight FontHeight add def
+
+/fR F
+/SpaceR FontHeight 0.5 mul def
+/HeightR FontHeight FontHeight add def
+
+/fT F
+/SpaceT FontHeight 0.5 mul def
+/HeightT FontHeight FontHeight add def
+
+/fNT F
+/SpaceNT FontHeight 0.5 mul def
+/HeightNT FontHeight FontHeight add def
+
+/T HeightT HeightNT add 0.5 mul def
+/hT   T 0.5  mul def
+/hT2 hT 0.5  mul ArrowScale mul def
+/hT4 hT 0.25 mul ArrowScale mul def
+
+/Er 0.1 def	% Error factor
+
+
+/c{currentpoint}bind def
+/xyi{/xi c /yi exch def def}bind def
+/xyo{/xo c /yo exch def def}bind def
+/xyp{/xp c /yp exch def def}bind def
+/xyt{/xt c /yt exch def def}bind def
+
+% vertical movement: x y height vm
+/vm{add moveto}bind def
+
+% horizontal movement: x y width hm
+/hm{3 -1 roll exch add exch moveto}bind def
+
+% set color: [R G B] SetRGB
+/SetRGB{aload pop setrgbcolor}bind def
+
+% filling gray area: gray-scale FillGray
+/FillGray{gsave setgray fill grestore}bind def
+
+% filling color area: [R G B] FillRGB
+/FillRGB{gsave SetRGB fill grestore}bind def
+
+/Stroke{LineWidth setlinewidth LineColor SetRGB stroke}bind def
+/StrokeShape{borderwidth setlinewidth bordercolor SetRGB stroke}bind def
+/Gstroke{gsave Stroke grestore}bind def
+
+% Empty Line: width EL
+/EL{0 rlineto Gstroke}bind def
+
+% --- Arrows
+
+/Down{hT2 neg hT4 neg rlineto}bind def
+
+/Arrow
+{hT2 neg hT4 rmoveto
+ hT2 hT4 neg rlineto
+ Down
+}bind def
+
+/ArrowPath{c newpath moveto Arrow closepath}bind def
+
+/UpPath
+{c newpath moveto
+ hT2 neg 0   rmoveto
+ 0       hT4 rlineto
+ hT2 hT4 neg rlineto
+ closepath
+}bind def
+
+/DownPath
+{c newpath moveto
+ hT2 neg 0   rmoveto
+ 0   hT4 neg rlineto
+ hT2     hT4 rlineto
+ closepath
+}bind def
+
+%>Right Arrow: RA
+%    \
+% *---+
+%    /
+/RA-vector
+[{}					% 0  - none
+ {hT2 neg hT4 rlineto}			% 1  - semi-up
+ {Down}					% 2  - semi-down
+ {Arrow}				% 3  - simple
+ {Gstroke ArrowPath}			% 4  - transparent
+ {Gstroke ArrowPath 1 FillGray}		% 5  - hollow
+ {Gstroke ArrowPath LineColor FillRGB}	% 6  - full
+ {Gstroke UpPath 1 FillGray}		% 7  - semi-up-hollow
+ {Gstroke UpPath LineColor FillRGB}	% 8  - semi-up-full
+ {Gstroke DownPath 1 FillGray}		% 9  - semi-down-hollow
+ {Gstroke DownPath LineColor FillRGB}	% 10 - semi-down-full
+ {Gstroke gsave UserArrow grestore}	% 11 - user
+]def
+
+/RA
+{hT 0 rlineto
+ c
+ RA-vector ArrowShape get exec
+ Gstroke
+ moveto
+ ExtraWidth 0 rmoveto
+}def
+
+% rotation DrawArrow
+/DrawArrow
+{gsave
+ 0 0 translate
+ rotate
+ RA
+ c
+ grestore
+ rmoveto
+}def
+
+%>Left Arrow: LA
+%  /
+% +---*
+%  \
+/LA{180 DrawArrow}def
+
+%>Up Arrow: UA
+%  +
+% /|\
+%  |
+%  *
+/UA{90 DrawArrow}def
+
+%>Down Arrow: DA
+%  *
+%  |
+% \|/
+%  +
+/DA{270 DrawArrow}def
+
+% --- Corners
+
+%>corner Right Descendant: height arrow corner_RD
+%   _             | arrow
+%  /   height > 0 |  0 - none
+% |               |  1 - right
+% *    ---------- |  2 - left
+% |               |  3 - vertical
+%  \   height < 0 |
+%   -             |
+/cRD0-vector
+[% 0 - none
+ {0 h rlineto
+  hT 0 rlineto}
+ % 1 - right
+ {0 h rlineto
+  RA}
+ % 2 - left
+ {hT 0 rmoveto xyi
+  LA
+  0 h neg rlineto
+  xi yi moveto}
+ % 3 - vertical
+ {hT h rmoveto xyi
+  hT neg 0 rlineto
+  h 0 gt{DA}{UA}ifelse
+  xi yi moveto}
+]def
+
+/cRD-vector
+[{cRD0-vector arrow get exec}	% 0 - miter
+ {0 0 0 h hT h rcurveto}	% 1 - rounded
+ {hT h rlineto}			% 2 - bevel
+]def
+
+/corner_RD
+{/arrow exch def /h exch def
+ cRD-vector ChartShape get exec
+ Gstroke
+}def
+
+%>corner Right Ascendant: height arrow corner_RA
+%                 | arrow
+%    | height > 0 |  0 - none
+%   /             |  1 - right
+% *-   ---------- |  2 - left
+%   \             |  3 - vertical
+%    | height < 0 |
+%                 |
+/cRA0-vector
+[% 0 - none
+ {hT 0 rlineto
+  0 h rlineto}
+ % 1 - right
+ {RA
+  0 h rlineto}
+ % 2 - left
+ {hT h rmoveto xyi
+  0 h neg rlineto
+  LA
+  xi yi moveto}
+ % 3 - vertical
+ {hT h rmoveto xyi
+  h 0 gt{DA}{UA}ifelse
+  hT neg 0 rlineto
+  xi yi moveto}
+]def
+
+/cRA-vector
+[{cRA0-vector arrow get exec}	% 0 - miter
+ {0 0 hT 0 hT h rcurveto}	% 1 - rounded
+ {hT h rlineto}			% 2 - bevel
+]def
+
+/corner_RA
+{/arrow exch def /h exch def
+ cRA-vector ChartShape get exec
+ Gstroke
+}def
+
+%>corner Left Descendant: height arrow corner_LD
+%  _              | arrow
+%   \  height > 0 |  0 - none
+%    |            |  1 - right
+%    * ---------- |  2 - left
+%    |            |  3 - vertical
+%   /  height < 0 |
+%  -              |
+/cLD0-vector
+[% 0 - none
+ {0 h rlineto
+  hT neg 0 rlineto}
+ % 1 - right
+ {hT neg h rmoveto xyi
+  RA
+  0 h neg rlineto
+  xi yi moveto}
+ % 2 - left
+ {0 h rlineto
+  LA}
+ % 3 - vertical
+ {hT neg h rmoveto xyi
+  hT 0 rlineto
+  h 0 gt{DA}{UA}ifelse
+  xi yi moveto}
+]def
+
+/cLD-vector
+[{cLD0-vector arrow get exec}	% 0 - miter
+ {0 0 0 h hT neg h rcurveto}	% 1 - rounded
+ {hT neg h rlineto}		% 2 - bevel
+]def
+
+/corner_LD
+{/arrow exch def /h exch def
+ cLD-vector ChartShape get exec
+ Gstroke
+}def
+
+%>corner Left Ascendant: height arrow corner_LA
+%                 | arrow
+% |    height > 0 |  0 - none
+%  \              |  1 - right
+%   -* ---------- |  2 - left
+%  /              |  3 - vertical
+% |    height < 0 |
+%                 |
+/cLA0-vector
+[% 0 - none
+ {hT neg 0 rlineto
+  0 h rlineto}
+ % 1 - right
+ {hT neg h rmoveto xyi
+  0 h neg rlineto
+  RA
+  xi yi moveto}
+ % 2 - left
+ {LA
+  0 h rlineto}
+ % 3 - vertical
+ {hT neg h rmoveto xyi
+  h 0 gt{DA}{UA}ifelse
+  hT 0 rlineto
+  xi yi moveto}
+]def
+
+/cLA-vector
+[{cLA0-vector arrow get exec}		% 0 - miter
+ {0 0 hT neg 0 hT neg h rcurveto}	% 1 - rounded
+ {hT neg h rlineto}			% 2 - bevel
+]def
+
+/corner_LA
+{/arrow exch def /h exch def
+ cLA-vector ChartShape get exec
+ Gstroke
+}def
+
+% --- Flow Stuff
+
+% height prepare-height |- line_height corner_height corner_height
+/prepare-height
+{dup 0 gt
+ {T sub hT}
+ {T add hT neg}ifelse
+ dup
+}def
+
+%>Left Alternative: height LAlt
+%      _
+%     /
+%    |   height > 0
+%    |
+%   /
+% *-     ----------
+%   \
+%    |
+%    |   height < 0
+%     \
+%      -
+/LAlt
+{dup 0 eq
+ {T exch rlineto}
+ {dup abs T lt
+  {0.5 mul dup
+   1 corner_RA
+   0 corner_RD}
+  {prepare-height
+   1 corner_RA
+   exch 0 exch rlineto
+   0 corner_RD
+  }ifelse
+ }ifelse
+}def
+
+%>Left Loop: height LLoop
+%   _
+%  /
+% |      height > 0
+% |
+%  \
+%   -*   ----------
+%  /
+% |
+% |      height < 0
+%  \
+%   -
+/LLoop
+{prepare-height
+ 3 corner_LA
+ exch 0 exch rlineto
+ 0 corner_RD
+}def
+
+%>Right Alternative: height RAlt
+% _
+%  \
+%   |    height > 0
+%   |
+%    \
+%     -* ----------
+%    /
+%   |
+%   |    height < 0
+%  /
+% -
+/RAlt
+{dup 0 eq
+ {T neg exch rlineto}
+ {dup abs T lt
+  {0.5 mul dup
+   1 corner_LA
+   0 corner_LD}
+  {prepare-height
+   1 corner_LA
+   exch 0 exch rlineto
+   0 corner_LD
+  }ifelse
+ }ifelse
+}def
+
+%>Right Loop: height RLoop
+%  _
+%   \
+%    |   height > 0
+%    |
+%   /
+% *-     ----------
+%   \
+%    |
+%    |   height < 0
+%   /
+%  -
+/RLoop
+{prepare-height
+ 1 corner_RA
+ exch 0 exch rlineto
+ 0 corner_LD
+}def
+
+% --- Terminal, Non-terminal and Special Basics
+
+% string width prepare-width |- string
+/prepare-width
+{/width exch def
+ dup stringwidth pop space add space add width exch sub ExtraWidth sub 0.5 mul
+ /w exch def
+}def
+
+% string width begin-right
+/begin-right
+{xyo
+ prepare-width
+ w hT sub EL
+ RA
+}def
+
+% end-right
+/end-right
+{xo width add Er add yo moveto
+ w Er add neg EL
+ xo yo moveto
+}def
+
+% string width begin-left
+/begin-left
+{xyo
+ prepare-width
+ w EL
+}def
+
+% end-left
+/end-left
+{xo width add Er add yo moveto
+ hT w sub Er add EL
+ LA
+ xo yo moveto
+}def
+
+/ShapePath-vector
+[% 0 - miter
+ {xx yy moveto
+  xx YY lineto
+  XX YY lineto
+  XX yy lineto}
+ % 1 - rounded
+ {/half YY yy sub 0.5 mul abs def
+  xx half add YY moveto
+  0 0 half neg 0 half neg half neg rcurveto
+  0 0 0 half neg half half neg rcurveto
+  XX xx sub abs half sub half sub 0 rlineto
+  0 0 half 0 half half rcurveto
+  0 0 0 half half neg half rcurveto}
+ % 2 - bevel
+ {/quarter YY yy sub 0.25 mul abs def
+  xx quarter add YY moveto
+  quarter neg quarter neg rlineto
+  0 quarter quarter add neg rlineto
+  quarter quarter neg rlineto
+  XX xx sub abs quarter sub quarter sub 0 rlineto
+  quarter quarter rlineto
+  0 quarter quarter add rlineto
+  quarter neg quarter rlineto}
+]def
+
+/doShapePath
+{newpath
+ ShapePath-vector shape get exec
+ closepath
+}def
+
+/doShapeShadow
+{gsave
+ Xshadow Xshadow add Xshadow add
+ Yshadow Yshadow add Yshadow add translate
+ doShapePath
+ 0.9 FillGray
+ grestore
+}def
+
+/doShape
+{gsave
+ doShapePath
+ shapecolor FillRGB
+ StrokeShape
+ grestore
+}def
+
+% string SBound |- string
+/SBound
+{/xx c dup /yy exch def
+ FontHeight add /YY exch def def
+ dup stringwidth pop xx add /XX exch def
+ Effect 8 and 0 ne
+ {/yy yy YShadow add def
+  /XX XX XShadow add def
+ }if
+}def
+
+% string SBox
+/SBox
+{gsave
+ c space sub moveto
+ SBound
+ /XX XX space add space add def
+ /YY YY space add def
+ /yy yy space sub def
+ shadow{doShapeShadow}if
+ doShape
+ space Descent abs rmoveto
+ foreground SetRGB S
+ grestore
+}def
+
+% --- Terminal
+
+% TeRminal: string TR
+/TR
+{/Effect EffectT def
+ /shape ShapeT def
+ /shapecolor BackgroundT def
+ /borderwidth BorderWidthT def
+ /bordercolor BorderColorT def
+ /foreground ForegroundT def
+ /shadow ShadowT def
+ SBox
+}def
+
+%>Right Terminal: string width RT |- x y
+/RT
+{xyt
+ /fT F
+ /space SpaceT def
+ begin-right
+ TR
+ end-right
+ xt yt
+}def
+
+%>Left Terminal: string width LT |- x y
+/LT
+{xyt
+ /fT F
+ /space SpaceT def
+ begin-left
+ TR
+ end-left
+ xt yt
+}def
+
+%>Right Terminal Default: string width RTD |- x y
+/RTD
+{/-save- BorderWidthT def
+ /BorderWidthT BorderWidthT DefaultWidth add def
+ RT
+ /BorderWidthT -save- def
+}def
+
+%>Left Terminal Default: string width LTD |- x y
+/LTD
+{/-save- BorderWidthT def
+ /BorderWidthT BorderWidthT DefaultWidth add def
+ LT
+ /BorderWidthT -save- def
+}def
+
+% --- Non-Terminal
+
+% Non-Terminal: string NT
+/NT
+{/Effect EffectNT def
+ /shape ShapeNT def
+ /shapecolor BackgroundNT def
+ /borderwidth BorderWidthNT def
+ /bordercolor BorderColorNT def
+ /foreground ForegroundNT def
+ /shadow ShadowNT def
+ SBox
+}def
+
+%>Right Non-Terminal: string width RNT |- x y
+/RNT
+{xyt
+ /fNT F
+ /space SpaceNT def
+ begin-right
+ NT
+ end-right
+ xt yt
+}def
+
+%>Left Non-Terminal: string width LNT |- x y
+/LNT
+{xyt
+ /fNT F
+ /space SpaceNT def
+ begin-left
+ NT
+ end-left
+ xt yt
+}def
+
+%>Right Non-Terminal Default: string width RNTD |- x y
+/RNTD
+{/-save- BorderWidthNT def
+ /BorderWidthNT BorderWidthNT DefaultWidth add def
+ RNT
+ /BorderWidthNT -save- def
+}def
+
+%>Left Non-Terminal Default: string width LNTD |- x y
+/LNTD
+{/-save- BorderWidthNT def
+ /BorderWidthNT BorderWidthNT DefaultWidth add def
+ LNT
+ /BorderWidthNT -save- def
+}def
+
+% --- Special
+
+% SPecial: string SP
+/SP
+{/Effect EffectS def
+ /shape ShapeS def
+ /shapecolor BackgroundS def
+ /borderwidth BorderWidthS def
+ /bordercolor BorderColorS def
+ /foreground ForegroundS def
+ /shadow ShadowS def
+ SBox
+}def
+
+%>Right SPecial: string width RSP |- x y
+/RSP
+{xyt
+ /fS F
+ /space SpaceS def
+ begin-right
+ SP
+ end-right
+ xt yt
+}def
+
+%>Left SPecial: string width LSP |- x y
+/LSP
+{xyt
+ /fS F
+ /space SpaceS def
+ begin-left
+ SP
+ end-left
+ xt yt
+}def
+
+%>Right SPecial Default: string width RSPD |- x y
+/RSPD
+{/-save- BorderWidthS def
+ /BorderWidthS BorderWidthS DefaultWidth add def
+ RSP
+ /BorderWidthS -save- def
+}def
+
+%>Left SPecial Default: string width LSPD |- x y
+/LSPD
+{/-save- BorderWidthS def
+ /BorderWidthS BorderWidthS DefaultWidth add def
+ LSP
+ /BorderWidthS -save- def
+}def
+
+% --- Repeat and Except basics
+
+/begin-direction
+{/w width rwidth sub 0.5 mul def
+ width 0 rmoveto}def
+
+/end-direction
+{gsave
+ /xx c entry add /YY exch def def
+ /yy YY height sub def
+ /XX xx rwidth add def
+ shadow{doShapeShadow}if
+ doShape
+ grestore
+}def
+
+/right-direction
+{begin-direction
+ w neg EL
+ xt yt moveto
+ w hT sub EL RA
+ end-direction
+}def
+
+/left-direction
+{begin-direction
+ hT w sub EL LA
+ xt yt moveto
+ w EL
+ end-direction
+}def
+
+% --- Repeat
+
+% entry height width rwidth begin-repeat
+/begin-repeat
+{/rwidth exch def
+ /width exch def
+ /height exch def
+ /entry exch def
+ /fR F
+ /space SpaceR def
+ /Effect EffectR def
+ /shape ShapeR def
+ /shapecolor BackgroundR def
+ /borderwidth BorderWidthR def
+ /bordercolor BorderColorR def
+ /foreground ForegroundR def
+ /shadow ShadowR def
+ xyt
+}def
+
+% string end-repeat |- x y
+/end-repeat
+{gsave
+ space Descent rmoveto
+ foreground SetRGB S
+ c Descent sub
+ grestore
+ exch space add exch moveto
+ xt yt
+}def
+
+%>Right RePeat: string entry height width rwidth RRP |- x y
+/RRP{begin-repeat right-direction end-repeat}def
+
+%>Left RePeat: string entry height width rwidth LRP |- x y
+/LRP{begin-repeat left-direction end-repeat}def
+
+% --- Except
+
+% entry height width rwidth begin-except
+/begin-except
+{/rwidth exch def
+ /width exch def
+ /height exch def
+ /entry exch def
+ /fE F
+ /space SpaceE def
+ /Effect EffectE def
+ /shape ShapeE def
+ /shapecolor BackgroundE def
+ /borderwidth BorderWidthE def
+ /bordercolor BorderColorE def
+ /foreground ForegroundE def
+ /shadow ShadowE def
+ xyt
+}def
+
+% x-width end-except |- x y
+/end-except
+{gsave
+ space space add add Descent rmoveto
+ (-) foreground SetRGB S
+ grestore
+ space 0 rmoveto
+ xt yt
+}def
+
+%>Right EXcept: x-width entry height width rwidth REX |- x y
+/REX{begin-except right-direction end-except}def
+
+%>Left EXcept: x-width entry height width rwidth LEX |- x y
+/LEX{begin-except left-direction end-except}def
+
+% --- Sequence
+
+%>Beginning Of Sequence: BOS |- x y
+/BOS{currentpoint}bind def
+
+%>End Of Sequence: x y x1 y1 EOS |- x y
+/EOS{pop pop}bind def
+
+% --- Production
+
+%>Beginning Of Production: string width height BOP |- y x
+/BOP
+{xyp
+ neg yp add /yw exch def
+ xp add T sub /xw exch def
+ dup length 0 gt	% empty string ==> no production name
+ {/Effect EffectP def
+  /fP F ForegroundP SetRGB BackgroundP aload pop true BG S
+  /Effect 0 def
+  ( :) S false BG}{pop}ifelse
+ xw yw moveto
+ hT EL RA
+ xp yw moveto
+ T EL
+ yp xp
+}def
+
+%>End Of Production: y x delta EOP
+/EOPH{add exch moveto}bind def			% horizontal
+/EOPV{exch pop sub 0 exch moveto}bind def	% vertical
+
+% --- Empty Alternative
+
+%>Empty Alternative: width EA |- x y
+/EA
+{gsave
+ Er add 0 rlineto
+ Stroke
+ grestore
+ c
+}def
+
+% --- Alternative
+
+%>AlTernative: h1 h2 ... hn n width AT |- x y
+/AT
+{xyo xo add /xw exch def
+ xw yo moveto
+ Er EL
+ {xw yo moveto
+  dup RAlt
+  xo yo moveto
+  LAlt}repeat
+ xo yo
+}def
+
+% --- Optional
+
+%>OPtional: height width OP |- x y
+/OP
+{xyo
+ T sub /ow exch def
+ ow Er sub 0 rmoveto
+ T Er add EL
+ neg dup RAlt
+ ow T sub neg EL
+ xo yo moveto
+ LAlt
+ xo yo moveto
+ T EL
+ xo yo
+}def
+
+% --- List Flow
+
+%>One or More: height width OM |- x y
+/OM
+{xyo
+ /ow exch def
+ ow Er add 0 rmoveto
+ T Er add neg EL
+ dup RLoop
+ xo T add yo moveto
+ LLoop
+ xo yo moveto
+ T EL
+ xo yo
+}def
+
+%>Zero or More: h2 h1 width ZM |- x y
+/ZM
+{xyo
+ Er add EL
+ Er neg 0 rmoveto
+ dup RAlt
+ exch dup RLoop
+ xo yo moveto
+ exch dup LAlt
+ exch LLoop
+ yo add xo T add exch moveto
+ xo yo
+}def
+
+% === end EBNF engine
+
+
+end
+
+% x y #ebnf2ps#begin
+/#ebnf2ps#begin
+{#ebnf2ps#dict begin /#ebnf2ps#save save def
+ moveto false BG 0.0 0.0 0.0 setrgbcolor}def
+
+/#ebnf2ps#end{showpage #ebnf2ps#save restore end}def
+
+%%EndProlog
+
+0 40.998 #ebnf2ps#begin
+(DateValue) 371.019 27.438 BOP
+BOS
+19.700 83.550 OM
+(Digits) 46.411 RNT
+19.700 vm
+46.411 EA
+EOS
+83.550 hm
+( .  ) 41.115 RT
+41.115 hm
+19.700 83.550 OM
+(Digits) 46.411 RNT
+19.700 vm
+46.411 EA
+EOS
+83.550 hm
+( .  ) 41.115 RT
+41.115 hm
+19.700 83.550 OM
+(Digits) 46.411 RNT
+19.700 vm
+46.411 EA
+EOS
+EOS
+EOS
+#ebnf2ps#end
+%%EOF

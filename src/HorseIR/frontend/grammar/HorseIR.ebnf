@@ -1,0 +1,207 @@
+Program = {Module | ModuleContent}* .
+Module = "module" Identifier "{" {ModuleContent}* "}" .
+ModuleContent = Method | GlobalVariableDeclaration | ImportModuleDeclaration .
+GlobalVariableDeclaration = "def" Identifier ":" Type ";" .
+ImportModuleDeclaration = "import" Identifier ["." (Identifier | "*")] ";" .
+Method = "def" Identifier "(" {(Identifier ":" Type) || ","}* ")" ":" Type
+         "{"
+             {Statement}*
+         "}" .
+
+Statement = ("[" Identifier "]")
+          | (Identifier ":" Type "=" Identifier ";")
+          | (Identifier ":" Type "=" "(" Type ")" (Identifier | Invocation) ";")
+          | (Identifier ":" Type "=" ("check_cast" | "check_type") "("
+                                       (Identifier | Invocation) "," Type
+                                     ")" ";")
+          | (Identifier ":" Type "=" "phi" "("
+                                       {("[" Identifier "]" Identifier)|| ","}+
+                                     ")" ";")
+          | ("return" Identifier ";")
+          | ("goto" "[" Identifier "]" [Identifier] ";") .
+
+Invocation = FunctionName "(" {(Identifier | Literal) || ","}* ")" .
+
+Literal = BoolLiteral     | CharLiteral    | IntLiteral        | FPLiteral
+        | SymbolLiteral   | ComplexLiteral | DateLiteral       | DateTimeLiteral
+        | MinuteLiteral   | MonthLiteral   | SecondLiteral     | TimeLiteral
+        | FunctionLiteral | ListLiteral    | DictionaryLiteral | TableLiteral
+        | KTableLiteral   | EnumerationLiteral
+        .
+
+BoolLiteral     = (((["+" | "-"] Integer) | "null") ":" "bool")
+                | ("(" {((["+"|"-"] Integer) | "null") || ","}* ")" ":" "bool")
+                .
+CharLiteral     = ("'" {Character}* "'" [":" "char"])
+                | ("(" {"'" Character "'" || ","}+ ")" [":" "char"])
+                | ("(" ")" ":" "char")
+                | ("(" "null" {"," "'" Character "'" | "null"}*
+                              ("," "'" Character "'" )
+                              {"," "'" Character "'" | "null"}*
+                   ")" [":" "char"])
+                | ("(" "'" Character "'" {"," "'" Character "'" | "null"}*
+                                         "," "null"
+                                         {"," "'" Character "'" | "null"}*
+                   ")" [":" "char"])
+                | ("(" {"null" || ","}+ ")" ":" "char")
+                | ("null" ":" "char")
+                .
+IntLiteral      = (((["+"|"-"] Integer) | "null")
+                   ":" ("i8" | "i16" | "i32" | "i64"))
+                | ("(" {((["+" | "-"] Integer) | "null") || ","}* ")"
+                   ":" ("i8" | "i16" | "i32" | "i64"))
+                   .
+FPLiteral       = (((["+"|"-"] Integer | FPValue) | "null") ":" ("f32" | "f64"))
+                | ("(" {((["+" | "-"] Integer | FPValue) | "null") || ","}* ")"
+                  ":" ("f32" | "f64"))
+                .
+ComplexValue    = (["+" | "-"] (Integer | FPValue))
+                | (["+" | "-"] (Integer | FPValue) ("i" | "j"))
+                | (["+" | "-"] (Integer | FPValue)
+                   ["+" | "-"] [(Integer | FPValue)] ("i" | "j"))
+                | (["+" | "-"] ("i" | "j"))
+                .
+ComplexLiteral  = (ComplexValue | "null") ":" "complex"
+                | ("(" {(ComplexValue | "null") || ","}* ")" ":" "complex")
+                .
+SymbolLiteral   = ({"`" Identifier} [":" "sym"])
+                | ("(" {"`" Identifier || ","}+ ")" [":" "sym"])
+                | ("(" ")" ":" "sym")
+                | ("(" "null" {"," "`" Identifier | "null"}*
+                              ("," "`" Identifier )
+                              {"," "`" Identifier | "null"}*
+                   ")" [":" "sym"])
+                | ("(" "`" Identifier {"," "`" Identifier | "null"}*
+                                      "," "null"
+                                      {"," "`" Identifier | "null"}*
+                   ")" [":" "sym"])
+                | ("(" {"null" || ","}+ ")" ":" "sym")
+                | ("null" ":" "sym")
+                .
+
+MonthValue      = {Digits}+ "." {Digits}+ .
+DateValue       = {Digits}+ "." {Digits}+ "." {Digits}+ .
+MinuteValue     = {Digits}+ "." {Digits}+ .
+SecondValue     = {Digits}+ "." {Digits}+ "." {Digits}+ .
+TimeValue       = {Digits}+ "." {Digits}+ "." {Digits}+ "." {Digits}+ .
+DateTimeValue   = Date "T" Time .
+
+MonthLiteral    = ((DateValue | "null") ":" "m")
+                | ("(" {(DateValue | "null") || ","}* ")" ":" "m")
+                .
+DateLiteral     = ((DateValue | "null") ":" "d")
+                | ("(" {(DateValue | "null") || ","}* ")" ":" "d")
+                .
+DateTimeLiteral = (DateTimeValue [":" "z"])
+                | ("(" {DateTimeValue || ","}+ ")" [":" "z"])
+                | ("(" ")" ":" "z")
+                | ("(" "null" {"," DateTimeValue | "null"}*
+                              ("," DateTimeValue )
+                              {"," DateTimeValue | "null"}*
+                   ")" [":" "z"])
+                | ("(" DateTimeValue {"," DateTimeValue | "null"}*
+                                     "," "null"
+                                     {"," DateTimeValue | "null"}*
+                                   ")" [":" "z"])
+                | ("(" {"null" || ","}+ ")" ":" "z")
+                | ("null" ":" "z")
+                .
+MinuteLiteral   = ((MinuteValue | "null") ":" "u")
+                | ("(" {(MinuteValue | "null") || ","}* ")" ":" "u")
+                .
+SecondLiteral   = ((SecondValue | "null") ":" "v")
+                | ("(" {(SecondValue | "null") || ","}* ")" ":" "v")
+                .
+TimeLiteral     = (TimeValue [":" "t"])
+                | ("(" {TimeValue || ","}+ ")" [":" "t" ])
+                | ("(" ")" ":" "t")
+                | ("(" "null" {"," TimeValue | "null"}*
+                              ("," TimeValue )
+                              {"," TimeValue | "null"}*
+                   ")" [":" "t"])
+                | ("(" TimeValue {"," TimeValue | "null"}*
+                                 "," "null"
+                                 {"," TimeValue | "null"}*
+                   ")" [":" "t"])
+                | ("(" {"null" || ","}+ ")" ":" "z")
+                | ("null" ":" "z")
+                .
+FunctionLiteral = (FunctionName [":" TypeFunction])
+                | ("(" {FunctionName || ","}+ ")" [":" TypeFunction ])
+                | ("(" ")" ":" TypeFunction)
+                | ("(" "null" {"," FunctionName | "null"}*
+                              ("," FunctionName)
+                              {"," FunctionName | "null"}*
+                   ")" [":" TypeFunction])
+                | ("(" FunctionName {"," FunctionName | "null"}*
+                                    "," "null"
+                                    {"," FunctionName | "null"}*
+                   ")" [":" TypeFunction])
+                | ("(" {"null" || ","}+ ")" ":" TypeFunction)
+                | ("null" ":" TypeFunction)
+                .
+ListLiteral     = ("[" "]" ":" TypeList)
+                | ("[" {Literal || ","}+ "]" [":" TypeList])
+                | "null" ":" TypeList
+                .
+DictionaryLiteral = ("{" "}" ":" TypeDictionary)
+                  | ("{" {(Literal "->" Literal) || ","}+ "}"
+                    [":" TypeDictionary])
+                  | "null" ":" TypeDictionary
+                  .
+EnumerationLiteral = "<" SymbolLiteral "->" DBContent ">" [":" TypeEnumeration]
+                   | "null" ":" TypeEnumeration
+                   .
+TableHeader     = Identifier
+                | '`' Identifier
+                .
+DBContent       = BoolLiteral    | CharLiteral   | IntLiteral  | FPLiteral
+                | ComplexLiteral | SymbolLiteral | TimeLiteral | SecondLiteral
+                | MonthLiteral   | MinuteLiteral | DateLiteral | DateTimeLiteral
+                | StringLiteral
+                .
+TableColumn     = TableHeader "->" DBContent .
+TableKeyedColumn= "[" TableHeader "->" DBContent "]" .
+TableLiteral    = "{" {TableColumn || ","}* "}" ":" "table"
+                | "null" ":" "table"
+                .
+KTableLiteral   = "{" {TableKeyedColumn || ","}+ {TableColumn || ","}* "}"
+                  ":" "ktable"
+                | "null" ":" "ktable"
+                .
+
+Type = ("bool"    | "char"  | "i8" | "i16" | "i32" | "i64" | "f32" | "f64" |
+        "complex" | "sym"   | "m"  | "d"   | "z"   | "u"   | "v"   | "t"   |
+        "string"  | "table" | "ktable")
+     | TypeList | TypeDictionary | TypeEnumeration | TypeFunction
+     .
+TypeList = "list" "<" Type ">" .
+TypeDictionary = "dict" "<" Type "," Type ">" .
+TypeEnumeration = "enum" "<" Type ">" .
+TypeFunction = "func" "<" (({Type || ","}+ ["," "..." ] ":" Type) |
+                          (["..."] ":" Type))                        ">" .
+
+FunctionName = "@" Identifier ["." Identifier] .
+Symbol = '`' Identifier .
+Identifier = {ALPHABET | "_"} {Alphabet | Digits | "_"}* .
+Integer = "0"
+        | (("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9") {Digits}*)
+        .
+FPValue = Integer "." {Digits}+ .
+Character = ("ASCII Alphabet")
+          | ("\\" ("a" | "b" | "f" | "n" | "r" | "t" | "v" | "\\" | "'" |
+                   "?" | "\""                                          ))
+          | ("\\" 3*3 Octal)
+          | ("\\x" 2*2 Hexadecimal)
+          .
+Digits = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+Octal  = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" .
+Hexadecimal = "0" | "1" | "2" | "3" | "3" | "4" | "5" | "6" | "8" | "9" | "A"
+            | "B" | "C" | "D" | "E" | "F" | "a" | "b" | "c" | "d" | "e" | "f"
+            .
+Alphabet = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k"
+         | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v"
+         | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G"
+         | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R"
+         | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+         .
