@@ -141,12 +141,11 @@ Status
 | 3  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)        |&#10004;|
 | 4  | range(x)             | Iota                        | Real                        | List                          | [link](builtin/range.md)      |&#10004;|
 | 5  | fact(x)              | Factorial                   | Real                        | E                             | [link](builtin/fact.md)       |&#10004;|
-| 6  | at(x)                | Member                      | Pending                     | B                             | [link](builtin/at.md)         | |
-| 7  | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                          | |
-| 8  | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                          | |
-| 9  | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                          | |
-| 10 | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)    |&#10004;|
-| 11 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)      |&#10004;|
+| 6  | rand(x)              | Random number generator     | B,H,I,L                     | Same as argument              | link                          | |
+| 7  | seed(x)              | Random seed                 | B,H,I,L                     | L                             | link                          | |
+| 8  | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                          | |
+| 9  | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)    |&#10004;|
+| 10 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)      |&#10004;|
 
 
 ### 3.2 Binary
@@ -161,6 +160,7 @@ Status
 | 6  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         | |
 | 7  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         | |
 | 8  | order(x,y)           | Sort x based on y           | (Real;B)                    | L                             | [link](builtin/order.md)     |&#10004;|
+| 9  | member(x)            | Member                      | (Basic;Basic)               | B                             | [link](builtin/member.md)    |P|
 
 ### 3.3 Reduction
 
@@ -176,34 +176,43 @@ Status
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                           | Status |
 | :--| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :-------------------------------- | :----- |
-| 1  | raze(x)              | Raze a nested list          | List, numeric               | Numeric              | [link](builtin/list.md#enlist)    |&#10004;|
-| 2  | enlist(x)            | Return a list               | Any                         | List                 | [link](builtin/list.md#raze)      |&#10004;|
-| 3  | each(fn,x)           | Each on x with func `fn`    | (Func; List)                | List                 | [link](builtin/list.md#each)      |&#10004;|
-| 4  | eachitem(fn,x,y)     | Each on both sides          | (Func; List; List)          | List                 | [link](builtin/list.md#eachitem)  |&#10004;|
-| 5  | eachleft(fn,x,y)     | Each on left side           | (Func; List; List)          | List                 | [link](builtin/list.md#eachleft)  |&#10004;|
-| 6  | eachright(fn,x,y)    | Each on Right side          | (Func; List; List)          | List                 | [link](builtin/list.md#eachright) |&#10004;|
+| 1  | raze(x)              | Raze a nested list          | List, Basic                 | Basic                | [link](builtin/list.md#raze)      |&#10004;|
+| 2  | enlist(x)            | Return a list               | Any                         | List                 | [link](builtin/list.md#enlist)    |&#10004;|
+| 7  | tolist(x)            | Vector to list              | Basic                       | List                 | [link](builtin/list.md#tolist)    |&#10004;|
+| 3  | each_item(fn,x)      | Each on x with func `fn`    | (Func; List)                | List                 | [link](builtin/list.md#each_item) |&#10004;|
+| 4  | each(fn,x,y)         | Each on both sides          | (Func; List; List)          | List                 | [link](builtin/list.md#each)      |&#10004;|
+| 5  | each_left(fn,x,y)    | Each on left side           | (Func; List; List)          | List                 | [link](builtin/list.md#each_left) |&#10004;|
+| 6  | each_right(fn,x,y)   | Each on Right side          | (Func; List; List)          | List                 | [link](builtin/list.md#each_right)|&#10004;|
+| 7  | match(x,y)           | Check if both match         | (Any; Any)                  | Bool                 | link                              |&#10004;|
 
 ## <p id="database">4. Database related</p>
 
-| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |
-| :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- |
-| 1  | list                 |                             | Pending                     | Pending                       | link                         |
-| 2  | enum                 | Create an enum              | (Sym;Any)                   | Enum                          | [link](builtin/liter.md#enum)|
-| 3  | dict                 |                             | Pending                     | Pending                       | link                         |
-| 4  | table                |                             | Pending                     | Pending                       | link                         |
-| 5  | key                  |                             | Pending                     | Pending                       | link                         |
-| 6  | value                |                             | Pending                     | Pending                       | link                         |
-| 7  | meta                 |                             | Pending                     | Pending                       | link                         |
-| 8  | ktable               |                             | Pending                     | Pending                       | link                         |
-| 9  | column_value         |                             | Pending                     | Pending                       | link                         |
+| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                      | Status |
+| :--| :------------------- | :-------------------------- | :---------------------------| :------------------- | :--------------------------- | :----- |
+| 1  | enum                 | enum(variable, values)      | (Sym;Any)                   | Enum                 | [link](builtin/liter.md#enum)|&#10004;|
+| 2  | dict                 | dict(keys, values)          | (Any;Any)                   | Dict                 | link                         |&#10004;|
+| 3  | table                | table(col_names, values)    | (List;Column)               | Table                | link                         |&#10004;|
+| 4  | ktable               | ktable(table1, table2)      | (Table;Table)               | Pending              | link                         |&#10004;|
+| 5  | keys                 | Return keys                 | A, K, N                     | List                 | link                         |&#10004;|
+| 6  | values               |                             | Pending                     | Pending              | link                         | |
+| 7  | meta                 |                             | Pending                     | Pending              | link                         | |
+| 8  | column_value         |                             | A, K                        | Various              | link                         |&#10004;|
+| 9  | load_table           | Load a table                | Symbol                      | A, K                 | link                         |&#10004;|
 
-## <p id="others">5. Others</p>
+## <p id="indexing">5. Indexing</p>
 
-| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- |
-| 1  | trig(k,x)            | Trigonometric functions     | Pending                     | Pending                       | [link](builtin/trig.md)      |
-| 2  | alphabet()           | All alphabet set            | Pending                     | Pending                       | link                         |
-| 3  | index(x,y)           | List indexing (x[y])        | Pending                     | Pending                       | link                         |
-| 4  | index_a              | List indexing assignment    | Pending                     | Pending                       | link                         |
-| 5  | print                | Output                      | Pending                     | Pending                       | link                         |
-| 6  | load_csv             | Load a csv file             | Pending                     | Pending                       | link                         |
+| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                            | Status |
+| :--| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :--------------------------------- | :----- |
+| 1  | index(x,y)           | List indexing (x[y])        | Pending                     | Pending              | [link](builtin/indexing.md#index)  | |
+| 2  | index_a              | List indexing assignment    | Pending                     | Pending              | link                               | |
+
+## <p id="others">6. Others</p>
+
+| No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
+| :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- | :----- |
+| 1  | load_csv             | Load a csv file             | String                      | Table                         | link                         |&#10004;|
+| 2  | print                | Output                      | Any                         | Long (exit code)              | link                         | |
+| 3  | format               | Format output               | Any                         | String                        | link                         | |
+
+
+

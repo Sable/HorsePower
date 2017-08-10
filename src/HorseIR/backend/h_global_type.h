@@ -54,14 +54,15 @@
 #define ve(x)  x->f64
 #define vc(x)  x->c
 #define vq(x)  x->q
-#define vy(x)  x->y
 #define vm(x)  x->m
 #define vd(x)  x->d
 #define vz(x)  x->z
 #define vu(x)  x->u
 #define vw(x)  x->w
 #define vt(x)  x->t
-#define vx(x)  x->x
+#define vx(y)  y->x
+#define vy(x)  x->y.value
+#define va(x)  x->a
 #define vg(x)  x->g
 
 #define sB(x) ((B*)(vg(x)))
@@ -73,6 +74,7 @@
 #define sC(x) ((C*)(vg(x)))
 #define sQ(x) ((Q*)(vg(x)))
 #define sX(x) ((X*)(vg(x)))
+#define sY(x) ((L*)(vg(x)))
 #define sM(x) ((M*)(vg(x)))
 #define sD(x) ((D*)(vg(x)))
 #define sZ(x) ((Z*)(vg(x)))
@@ -90,6 +92,7 @@
 #define vC(x,i) sC(x)[i]
 #define vQ(x,i) sQ(x)[i]
 #define vX(x,i) sX(x)[i]
+#define vY(x,i) sY(x)[i]
 #define vM(x,i) sM(x)[i]
 #define vD(x,i) sD(x)[i]
 #define vZ(x,i) sZ(x)[i]

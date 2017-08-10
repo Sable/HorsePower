@@ -28,7 +28,7 @@ groups.
 - General
 - Database related
 
-See [built-in functions](primitives.md).
+See [built-in functions](functions.md).
 
 ### 1.4 Comments
 
@@ -361,7 +361,7 @@ Basics
 - [Names](names.md)
 - [Types](types.md)
 - [Date time](date.md)
-- [Builtins](primitives.md)
+- [Built-in functions](functions.md)
 
 Database operations
 

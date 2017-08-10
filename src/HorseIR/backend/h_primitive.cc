@@ -13,89 +13,43 @@
  *    in-lining + CSE
  */
 
-/* x.y */
-L pfnColumnValue(V z, V x, V y){
-    if(H_DEBUG) P("-> Entering column_value\n");
-    if(isOneSymbol(x) && isOneSymbol(y)){
-        V t = findTableByName(vq(x));
-        if(!t) R E_TABLE_NOT_FOUND;
-        else {
-            L colId = vq(y);
-            L colIndex = findColFromTable(t,colId);
-            if(colIndex < 0) R E_COL_NOT_FOUND;
-            else {
-                R copyColumnValue(z, getDictVal(getTableDict(t,colIndex)));
-            }
-        }
-    }
-    else R E_DOMAIN;
-}
-
-// example: (21 45 7 9), (45 36 9)
-
-/*
- * find_valid_index: (y<#x)/!#y
- */
-L pfnFindValidIndex(V z, V x, V y){
-    if(H_DEBUG) P("-> Entering find_valid_index\n");
-    if(vp(x) == vp(y) && isInteger(x)){
-        L lenZ = 0, typZ = H_L;
-        L lenY = vn(y), lenX = vn(x), cnt = 0;
-        DOI(lenY, {L t=vL(y,i); lenZ+=(t>=0&&t<lenX);})
-        initV(z, typZ, lenZ);
-        DOI(lenY, {L t=vL(y,i); if(t>=0 && t<lenX)vL(z,cnt++)=i;})
+L pfnLoadTable(V z, V x){
+    if(isSymbol(x)){
+        z = findTableByName(vq(x));
+        if(!z) R E_TABLE_NOT_FOUND;
         R 0;
     }
     else R E_DOMAIN;
 }
 
-/*
- * find_valid_item: (y<#x)/y
- */
-L pfnFindValidItem(V z, V x, V y){
-    if(H_DEBUG) P("-> Entering find_valid_item\n");
-    if(vp(x) == vp(y) && isInteger(x)){
-        L lenZ = 0, typZ = H_L;
-        L lenY = vn(y), lenX = vn(x), cnt = 0;
-        DOI(lenY, {L t=vL(y,i); lenZ+=(t>=0&&t<lenX);})
-        initV(z, typZ, lenZ);
-        DOI(lenY, {L t=vL(y,i); if(t>=0 && t<lenX)vL(z,cnt++)=t;})
-        R 0;
-    }
-    else R E_DOMAIN;
-}
 
 /*
  * indexing: x[y]
  */
 L pfnIndex(V z, V x, V y){
     if(H_DEBUG) P("-> Entering index\n");
-    if(isInteger(y)){
+    if(isTypeGroupInt(vp(y))){
         L typZ = vp(x), lenZ = vn(y), lenX = vn(x);
-        if(isSymbol(x) || isInteger(x)){ // basic types, non-list
-            DOI(lenZ, if(lenX <= vL(y,i))R E_INDEX)
+        V tempY;
+        CHECKE(promoteValue(tempY, y, H_L));
+        DOI(lenZ, if(lenX <= vL(tempY,i))R E_INDEX)
+        if(isTypeGroupBasic(vp(x))){
             initV(z, typZ, lenZ);
-            switch(typZ){
-                caseQ DOI(lenZ, vQ(z,i) = vQ(x,vL(y,i))) break;
-                caseL DOI(lenZ, vL(z,i) = vL(x,vL(y,i))) break;
+            switch(vp(x)){
+                caseB DOI(lenZ, vB(z,i)=vB(x,vL(y,i))) break;
+                caseH DOI(lenZ, vH(z,i)=vH(x,vL(y,i))) break;
+                caseI DOI(lenZ, vI(z,i)=vI(x,vL(y,i))) break;
+                caseL DOI(lenZ, vL(z,i)=vL(x,vL(y,i))) break;
+                caseF DOI(lenZ, vF(z,i)=vF(x,vL(y,i))) break;
+                caseE DOI(lenZ, vE(z,i)=vE(x,vL(y,i))) break;
+                caseX DOI(lenZ, vX(z,i)=vX(x,vL(y,i))) break;
+                caseQ DOI(lenZ, vQ(z,i)=vQ(x,vL(y,i))) break;
             }
             R 0;
         }
-        else R E_DOMAIN;
+        else R E_NOT_IMPL;
     }
     else R E_DOMAIN;
-}
-
-/* list, dict, table */
-
-/* copy alias */
-L pfnList(V z, L n, ...){
-    va_list args;
-    initList(z, n);
-    va_start(args, n);
-    DOI(n, {V x=va_arg(args,V);*(sV(z)+i)=*x;})
-    va_end  (args);
-    R 0;
 }
 
 /* copy alias */
@@ -116,6 +70,60 @@ L pfnFlip(V z, V x){
     R 0;
 }
 
+L pfnMatch(V z, V x, V y){
+    initV(z,H_B,1);
+    B t; CHECKE(matchPair(&t,x,y)); vb(z)=t;
+    R 0;
+}
+
+L pfnMeta(V z, V x);
+L pfnKeys(V z, V x){
+    if(isTable(x) || isDict(x)){
+        L lenZ = vn(x);
+        initV(z,H_G,lenZ);
+        DOI(lenZ, CHECKE(copyV(vV(z,i),getDictKey(vV(x,i)))))
+        R 0;
+    }
+    else if(isKTable(x)){
+        V keyTable = getKTableKey(x);
+        V valTable = getKTableVal(x);
+        L lenKey = vn(keyTable);
+        L lenVal = vn(valTable);
+        L lenZ = lenKey + lenVal, c = 0;
+        initV(z,H_G,lenZ);
+        DOI(lenKey, CHECKE(copyV(vV(z,i       ),getDictKey(vV(x,i)))))
+        DOI(lenVal, CHECKE(copyV(vV(z,i+lenKey),getDictKey(vV(x,i)))))
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnValues(V z, V x){
+    if(isTable2(x)){
+        CHECKE(getColumnValue(z,x));
+    }
+    else if(isDict(x)){
+        CHECKE(getDictValue(z,x));
+    }
+    else if(isEnum(x)){
+        CHECKE(getEnumValue(z,x));
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
+L pfnColumnValue(V z, V x, V y){
+    if(H_DEBUG) P("-> Entering column_value\n");
+    if(isTable2(x) && isOneSymbol(y)){
+        L colId = vq(y);
+        L colIndex = findColFromTable(x,colId);
+        if(colIndex >= 0){
+            R copyColumnValue(z, getDictVal(getTableDict(x,colIndex)));
+        }
+        else R E_COL_NOT_FOUND;
+    }
+    else R E_DOMAIN;
+}
 
 /* Implement in order */
 
@@ -624,7 +632,7 @@ L pfnEnlist(V z, V x){
 }
 
 L pfnRaze(V z, V x){
-    if(isTypeGroupBasic(vp(x))){
+    if(isList(x)){
         L typZ, lenZ, n;
         CHECKE(getCommonType(x, &typZ, &lenZ));
         initV(z,typZ,lenZ);
@@ -632,9 +640,32 @@ L pfnRaze(V z, V x){
         CHECKE(n!=lenZ?E_UNKNOWN:0);
         R 0;
     }
+    else if(isTypeGroupBasic(vp(x))){
+        R copyV(z,x);
+    }
     else R E_DOMAIN;
 }
 
+L pfnTolist(V z, V x){
+    if(isTypeGroupBasic(xp)){
+        initV(z,H_G,xn);
+        DOI(xn, { V t=vV(z,i); initV(t,xp,1); \
+                switch(xp){ \
+                    caseB vb(t)=vb(x); break; \
+                    caseH vh(t)=vh(x); break; \
+                    caseI vi(t)=vi(x); break; \
+                    caseL vl(t)=vl(x); break; \
+                    caseF vf(t)=vf(x); break; \
+                    caseE ve(t)=ve(x); break; \
+                    caseX vx(t)=vx(x); break; \
+                    caseQ vq(t)=vq(x); break; \
+                    default: R E_NOT_IMPL; \
+                } \
+            })
+        R 0;
+    }
+    else R E_DOMAIN;
+}
 
 /* Binary */
 
@@ -650,8 +681,9 @@ L pfnCompare(V z, V x, V y, L op){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ   = isOne(x)?vn(y):vn(x), typZ = H_B;
         L typMax = max(vp(x),vp(y));
-        V tempX  = promoteValue(x, typMax);
-        V tempY  = promoteValue(y, typMax);
+        V tempX, tempY;
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
         if(isOne(x)) {
             switch(typMax){
@@ -730,8 +762,9 @@ L pfnArith(V z, V x, V y, L op){
         L lenZ   = isOne(x)?vn(y):vn(x);
         L typMax = max(vp(x),vp(y));
         L typZ   = typMax;
-        V tempX  = promoteValue(x, typMax);
-        V tempY  = promoteValue(y, typMax);
+        V tempX, tempY;
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
         if(isOne(x)) {
             switch(typMax){
@@ -855,8 +888,9 @@ L pfnPowerLog(V z, V x, V y, L op){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ  = isOne(x)?vn(y):vn(x), typZ = H_E; // default: E
         L typMax= max(vp(x),vp(y));
-        V tempX = promoteValue(x,typMax);
-        V tempY = promoteValue(y,typMax);
+        V tempX, tempY;
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
         if(isOne(x)){
             switch(typMax){
@@ -950,8 +984,9 @@ L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L typMax = max(vp(x), vp(y));
         L lenZ   = vn(y);
-        V tempX  = promoteValue(x, typMax);
-        V tempY  = promoteValue(y, typMax);
+        V tempX, tempY;
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
         initV(z,H_L,lenZ);
         switch(typMax){
             caseB INDEXOF(B, z, tempX, tempY); break;
@@ -973,8 +1008,9 @@ L pfnAppend(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L lenZ   = vn(x) + vn(y), c = vn(x);
         L typMax = max(vp(x),vp(y));
-        V tempX  = promoteValue(x, typMax);
-        V tempY  = promoteValue(y, typMax);
+        V tempX, tempY;
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typMax,lenZ);
         switch(typMax){
             caseB DOI(vn(x),vB(z,i)=vB(x,i)) DOI(vn(y),vB(z,c+i)=vB(y,i)) break;
@@ -1149,7 +1185,12 @@ L pfnDictTable(V z, V x, V y, L op){
 }
 
 L pfnDict(V z, V x, V y){
-    R pfnDictTable(z,x,y,0);
+    if(isList(x) && isList(y)){
+        DOI(vn(x), if(!isSymbol(vV(x,i)))R E_DOMAIN)
+        DOI(vn(y), if(!isTypeGroupColumn(vp(vV(x,i))))R E_DOMAIN)
+        R pfnDictTable(z,x,y,0);
+    }
+    else R E_DOMAIN;
 }
 
 L pfnTable(V z, V x, V y){
@@ -1180,5 +1221,6 @@ L pfnKTable(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-
-
+L pfnMember(V z, V x, V y){
+    R 0;
+}

@@ -248,8 +248,3 @@ void printStrPretty(S str, L maxSize){
     }
 }
 
-L getTableRowNumber(V x){
-    R (vn(x)>0?vn(getDictVal(getTableDict(x,0))):0);
-}
-
-

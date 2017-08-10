@@ -8,12 +8,12 @@ pages:
 - Home    : 'index.md'
 - Overview: 'overview.md'
 - HorseIR : 
-    - Specifications     : 'horseir/spec.md'
-    - Naming             : 'horseir/naming.md'
-    - Types              : 'horseir/types.md'
-    - "Built-in"         : 'horseir/primitives.md'
-    - Database           : 'horseir/database.md'
-    - Printing           : 'horseir/pretty.md'
+    - IR overview  : 'horseir/spec.md'
+    - Naming       : 'horseir/naming.md'
+    - Types        : 'horseir/types.md'
+    - Functions    : 'horseir/functions.md'
+    - Database     : 'horseir/database.md'
+    - Pretty print : 'horseir/pretty.md'
 #- HorseSQL: []
 #- HorseDB : []
 
@@ -21,7 +21,6 @@ pages:
 - "___" :
     - "___": horseir/builtin/abs.md
     - "___": horseir/builtin/append.md
-    - "___": horseir/builtin/at.md
     - "___": horseir/builtin/ceil.md
     - "___": horseir/builtin/circle.md
     - "___": horseir/builtin/compress.md
@@ -42,6 +41,7 @@ pages:
     - "___": horseir/builtin/logic.md
     - "___": horseir/builtin/liter.md
     - "___": horseir/builtin/lt.md
+    - "___": horseir/builtin/member.md
     - "___": horseir/builtin/minus.md
     - "___": horseir/builtin/mod.md
     - "___": horseir/builtin/mul.md

@@ -7,6 +7,7 @@ extern "C" {
 #define xReal(x) ((x).real)
 #define xImag(x) ((x).imag)
 #define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
+#define xEqual(x,y) (xReal(x)==xReal(y) && xImag(x)==xImag(y))
 #define initEnum(x,key,val) {vq(x)=key; vg(x)=(G)val;}
 
 #define isBool(x)      (H_B==vp(x))
@@ -23,7 +24,9 @@ extern "C" {
 #define isList(x)      (H_G==vp(x))
 #define isEnum(x)      (H_Y==vp(x))
 #define isTable(x)     (H_A==vp(x))
+#define isKTable(x)    (H_K==vp(x))
 #define isDict(x)      (H_N==vp(x))
+#define isTable2(x)    (isTable(x) || isKTable(x))
 #define isOneSymbol(x) (isSymbol(x) && 1==vn(x))
 
 #define isOne(x) (1==vn(x))
@@ -38,14 +41,14 @@ extern "C" {
 #define CHECKE(x) { L e=x; if(e) R e; }
 #define isTypeGroupScalar isTypeGroupRealX
 
-L pfnColumnValue   (V z, V x, V y);
-L pfnFindValidIndex(V z, V x, V y);
-L pfnFindValidItem (V z, V x, V y);
+L pfnLoadTable     (V z, V x);
 L pfnIndex         (V z, V x, V y);
-L pfnList          (V z, L n, ...); // change unknown args
-L pfnDict          (V z, V x, V y);
 L pfnFlip          (V z, V x);
-
+L pfnMatch         (V z, V x, V y);
+L pfnMeta          (V z, V x);
+L pfnKeys          (V z, V x);
+L pfnValues        (V z, V x);
+L pfnColumnValue   (V z, V x, V y);
 
 /* Implement in order */
 
@@ -99,6 +102,10 @@ L pfnTimeMinute    (V z, V x);
 L pfnTimeSecond    (V z, V x);
 L pfnTimeMill      (V z, V x);
 L pfnTime          (V z, V x);
+
+L pfnEnlist        (V z, V x);
+L pfnRaze          (V z, V x);
+L pfnTolist        (V z, V x);
 
 L pfnCompare       (V z, V x, V y, L op);
 L pfnLt            (V z, V x, V y);

@@ -49,10 +49,10 @@ L findColFromTable(V x, L cId){
     R -1;
 }
 
-V promoteValue(V x, L typMax){
-    if(vp(x) == typMax) R x;
+L promoteValue(V z, V x, L typMax){
+    if(vp(x) == typMax) R copyV(z,x);
     else{
-        V z = allocV(typMax, xn); //opt?
+        initV(z, typMax, xn); //opt?
         switch(vp(z)){
             caseH {
                 switch(vp(x)){
@@ -99,9 +99,9 @@ V promoteValue(V x, L typMax){
                     caseE DOI(xn, xCopy(vX(z,i),vE(x,i),0)) break;
                 }
             } break;
-            default: R NULL;
+            default: R E_DOMAIN;
         }
-        R z;
+        R 0;
     }
 }
 
@@ -224,6 +224,60 @@ L fillRaze(V z, L *n0, V x){
 }
 
 
+L matchPair(B *t, V x, V y){
+    *t=0;
+    if(isSameType(x,y) && isEqualLength(x,y)){
+        if(isTypeGroupBasic(vp(x))){
+            switch(vp(x)){
+                caseB DOI(vn(x), if(vB(x,i)!=vB(y,i))R 0) break;
+                caseH DOI(vn(x), if(vH(x,i)!=vH(y,i))R 0) break;
+                caseI DOI(vn(x), if(vI(x,i)!=vI(y,i))R 0) break;
+                caseL DOI(vn(x), if(vL(x,i)!=vL(y,i))R 0) break;
+                caseF DOI(vn(x), if(vF(x,i)!=vF(y,i))R 0) break;
+                caseE DOI(vn(x), if(vE(x,i)!=vE(y,i))R 0) break;
+                caseX DOI(vn(x), if(!xEqual(vX(x,i),vX(y,i)))R 0) break;
+                caseQ DOI(vn(x), if(vQ(x,i)!=vQ(y,i))R 0) break;
+                default: R E_NOT_IMPL;
+            }
+            *t=1; R 0;
+        }
+        else if(isList(x)){
+            DOI(xn, {CHECKE(matchPair(t,vV(x,i),vV(y,i)))if(!(*t))R 0;})
+            R 0;
+        }
+        else R E_DOMAIN; /* more: dict, enum, table */
+    }
+    else R 0;
+}
+
+/* helper functions */
+
+L getEnumValue(V z, V x){
+    R 0;
+}
+L getDictValue(V z, V x){
+    R 0;
+}
+L getColumnValue(V z, V x, V y){
+    R 0;
+}
+
+V getDictKey(V x) { R xV(0); }
+
+V getDictVal(V x) { R xV(1); }
+
+V getTableDict(V x, L k) { R xV(k); }
+
+L getTableRowNumber(V x){
+    R va(x).row;
+    // R (vn(x)>0?vn(getDictVal(getTableDict(x,0))):0);
+}
+
+L getTableColNumber(V x){
+    R va(x).col;
+}
+
+
 /* Type checking */
 
 B isTypeGroupInt(L t){
@@ -260,6 +314,10 @@ B isTypeGroupNumeric(L t){
 
 B isTypeGroupBasic(L t){
     R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupDTime(t));
+}
+
+B isTypeGroupColumn(L t){
+    R (isTypeGroupReal(t) || H_Q==t || isTypeGroupDTime(t));
 }
 
 B isTypeGroupAdvanced(L t){
@@ -299,6 +357,7 @@ L inferPi(L t){
 void printErrMsg(L eid){
     P("Error: ");
     switch(eid){
+        errCaseCell(E_DOMAIN,          "Domain error"       );
         errCaseCell(E_GENERAL,         "General error"      );
         errCaseCell(E_INDEX,           "Index error"        );
         errCaseCell(E_DIV_ZERO,        "Divide zero"        );

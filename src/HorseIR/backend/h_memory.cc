@@ -164,10 +164,5 @@ void printTypeStr(L x, S buff){
     }
 }
 
-/* helper functions */
-
-V getDictKey(V x) { R xV(0); }
-V getDictVal(V x) { R xV(1); }
-V getTableDict(V x, L k) { R xV(k); }
 
 

@@ -34,10 +34,6 @@ void printType    (L x);
 void printTypeStr (L x, S buff);
 void printHeapInfo();
 
-V getDictKey  (V x);
-V getDictVal  (V x);
-V getTableDict(V x, L k);
-
 #ifdef	__cplusplus
 }
 #endif

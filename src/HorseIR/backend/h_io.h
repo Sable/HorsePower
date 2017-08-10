@@ -33,7 +33,6 @@ void printStrPretty   (S str, L maxSize);
 
 L    getColWidth      (V x);
 L    getListInfo      (V x, L k, S strBuff);
-L    getTableRowNumber(V x);
 
 #ifdef	__cplusplus
 }

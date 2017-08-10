@@ -16,6 +16,8 @@ typedef long long  L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
+typedef struct { Q name; L value; } Y;
+typedef struct { L row, col; } A;
 
 /* size: 3 * 8 + 8 = 40 */
 typedef struct node_value{
@@ -36,6 +38,8 @@ typedef struct node_value{
 		W w;   //second    4 bytes
 		T t;   //time      4 bytes
 		X x;   //complex   8 bytes
+		Y y;   //enum      8 bytes
+		A a;   //table     8 bytes
 	};
 }V0,*V;
 

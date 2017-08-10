@@ -8,6 +8,9 @@ extern "C" {
 
 #define copyColumnValue(z,x) copyV(z,x)
 
+#define getKTableKey(x) vV(x,0)
+#define getKTableVal(x) vV(x,1)
+
 /* methods */
 
 void initSys();
@@ -17,7 +20,7 @@ L registerTable       (S tableName, V tablePtr);
 V findTableByName     (L sid);
 L copyV               (V z, V x);
 L findColFromTable    (V x, L cId);
-V promoteValue        (V x, L typMax);
+L promoteValue        (V z, V x, L typMax);
 B checkZero           (V x);
 B checkMatch          (V x);
 L getSingleIntValue   (V x);
@@ -29,6 +32,16 @@ S genLikeString       (S inStr, L inLen);
 V getValueFromSymbol  (Q id);
 L getCommonType       (V x, L *typ, L *len);
 L fillRaze            (V z, L *n0, V x);
+L matchPair           (B *t, V x, V y);
+
+L getEnumValue        (V z, V x);
+L getDictValue        (V z, V x);
+L getColumnValue      (V z, V x);
+V getDictKey          (V x);
+V getDictVal          (V x);
+V getTableDict        (V x, L k);
+L getTableRowNumber   (V x);
+L getTableColNumber   (V x);
 
 B isTypeGroupInt      (L t);
 B isTypeGroupFloat    (L t);
@@ -39,6 +52,7 @@ B isTypeGroupTime     (L t);
 B isTypeGroupDTime    (L t);
 B isTypeGroupNumeric  (L t);
 B isTypeGroupBasic    (L t);
+B isTypeGroupColumn   (L t);
 B isTypeGroupAdvanced (L t);
 B isTypeGroupAll      (L t);
 

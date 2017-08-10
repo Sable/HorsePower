@@ -1,8 +1,8 @@
-## at
+## member
 
 ### Description
 
-`at(x,y)`
+`member(x,y)`
 
 - $x \in y$
 - if x in y, return true
@@ -27,6 +27,6 @@ _ -> domain error
 ### Examples
 
 ```
-at(-1 2 3, 1 3 -1)
-> 1 0 1
+member((-1,2,3), (1,3,-1))
+> (1,0,1):bool
 ```
