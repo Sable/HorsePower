@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include "../AST.h"
-#include "../../misc/Collections.h"
+#include "../../misc/InfixOStreamIterator.h"
 
 namespace horseIR
 {
@@ -37,7 +37,7 @@ class FunctionType : public Type {
   bool getIsFlexible () const;
   void setIsFlexible (bool flexible);
  protected:
-  std::vector<Type *> parameterTypes;
+  std::vector<Type *> parameterTypes = {};
   Type *returnType = nullptr;
   bool isFlexible = false;
   void __duplicateDeep (ASTNodeMemory &mem, const FunctionType *type);
@@ -94,15 +94,12 @@ inline std::string FunctionType::toString () const
         return (type == nullptr) ? "nullptr" : type->toString ();
       }
   );
+  if (isFlexible) paramSegments.push_back ("...");
   auto retSeg = (returnType == nullptr) ? "nullptr" : returnType->toString ();
   std::ostringstream stream;
   stream << "func<";
-  misc::Collections::toStream (stream, paramSegments.cbegin (),
-                               paramSegments.cend (), ", ");
-  if (isFlexible)
-    {
-      stream << (paramSegments.empty () ? "..." : ", ...");
-    }
+  std::copy (paramSegments.cbegin (), paramSegments.cend (),
+             horseIR::misc::InfixOStreamIterator<std::string> (stream, ", "));
   stream << " :" << retSeg << ">";
   return stream.str ();
 }

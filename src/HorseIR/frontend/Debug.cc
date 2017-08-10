@@ -55,7 +55,7 @@ const char* rawProgram = ""
 int main (int argc, const char *argv[])
 {
 
-  const std::string raw = ("func<?:bool>") ;
+  const std::string raw = ("func<?, ?, ?, ...:bool>") ;
 
   antlr4::ANTLRInputStream stream(raw) ;
   HorseIRLexer lexer (&stream) ;
