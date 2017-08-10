@@ -46,6 +46,10 @@ class ASTNode {
   std::string getEnclosingFilename () const;
   ASTNode *getParentASTNode () const;
 
+  void setCST (const CSTType *p_cst);
+  void setEnclosingFilename (const std::string &filename);
+  void setParentASTNode (ast::ASTNode *p_parent);
+
   virtual std::size_t getNumNodesRecursively () const = 0;
   virtual std::vector<ASTNode *> getChildren () const = 0;
   virtual ASTNode *duplicateDeep (ASTNode::ASTNodeMemory &mem) const = 0;
@@ -117,6 +121,21 @@ inline std::string ASTNode::getEnclosingFilename () const
 inline ASTNode *ASTNode::getParentASTNode () const
 {
   return parent;
+}
+
+inline void ASTNode::setCST (const CSTType *p_cst)
+{
+  cst = p_cst;
+}
+
+inline void ASTNode::setEnclosingFilename (const std::string &filename)
+{
+  enclosingFilename = filename;
+}
+
+inline void ASTNode::setParentASTNode (ast::ASTNode *p_parent)
+{
+  parent = p_parent;
 }
 
 inline void

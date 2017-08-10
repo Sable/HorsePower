@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.5)
 project(HorseIR)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -15,7 +15,8 @@ include_directories(${ANTLR4CPP_INCLUDE_DIRS})
 
 include(BuildHorseIRGrammar)
 
-file(GLOB_RECURSE DIR_AST_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/ast/*.h)
+file(GLOB DIR_AST_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/ast/*.h)
+file(GLOB DIR_AST_TYPE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/ast/type/*.h)
 file(GLOB DIR_MISC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/misc/*.h)
 file(GLOB DIR_INTERPRETER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/interpreter/*.h)
 
@@ -30,5 +31,10 @@ foreach(header ${DIR_INTERPRETER_HEADERS})
 endforeach(header)
 
 # == debug ==
-add_executable(HorseIRDebug ${CMAKE_SOURCE_DIR}/Debug.cc ${DIR_AST_HEADERS})
+list(APPEND HorseIRDebug_SRC ${CMAKE_SOURCE_DIR}/Debug.cc )
+list(APPEND HorseIRDebug_SRC ${DIR_AST_HEADERS} )
+list(APPEND HorseIRDebug_SRC ${DIR_AST_TYPE_HEADERS} )
+list(APPEND HorseIRDebug_SRC ${DIR_MISC_HEADERS})
+list(APPEND HorseIRDebug_SRC ${ANTLR4_horseIR_SOURCE})
+add_executable(HorseIRDebug ${HorseIRDebug_SRC})
 target_link_libraries(HorseIRDebug ${ANTLR4CPP_LIBRARIES})

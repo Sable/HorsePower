@@ -11,3 +11,8 @@
 
 #include "type/Type.h"
 #include "type/PrimitiveType.h"
+#include "type/WildcardType.h"
+#include "type/ListType.h"
+#include "type/DictionaryType.h"
+#include "type/EnumerationType.h"
+#include "type/FunctionType.h"

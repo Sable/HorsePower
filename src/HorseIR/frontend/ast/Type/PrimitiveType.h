@@ -22,8 +22,8 @@ class PrimitiveType : public Type {
   PrimitiveType (ASTNodeMemory &mem, const CSTType *cst);
   PrimitiveType (PrimitiveType &&externPrimitive) = default;
   PrimitiveType (const PrimitiveType &externPrimitive) = default;
-  PrimitiveType &operator= (PrimitiveType &&externPrimitive) = default;
-  PrimitiveType &operator= (const PrimitiveType &externPrimitive) = default;
+  PrimitiveType &operator= (PrimitiveType &&externPrimitive) = delete;
+  PrimitiveType &operator= (const PrimitiveType &externPrimitive) = delete;
   ~PrimitiveType () override = default;
 
   std::size_t getNumNodesRecursively () const override;
@@ -32,7 +32,7 @@ class PrimitiveType : public Type {
   std::string toString () const override;
 
   PrimitiveClass getPrimitiveClass () const;
-  PrimitiveType &setPrimitiveClass (const PrimitiveClass &p_primitiveClass);
+  void setPrimitiveClass (const PrimitiveClass &p_primitiveClass);
 
  protected:
   PrimitiveClass primitiveClass;
@@ -97,11 +97,10 @@ inline PrimitiveType::PrimitiveClass PrimitiveType::getPrimitiveClass () const
   return primitiveClass;
 }
 
-inline PrimitiveType &
+inline void
 PrimitiveType::setPrimitiveClass (const PrimitiveClass &p_primitiveClass)
 {
   primitiveClass = p_primitiveClass;
-  return *this;
 }
 
 inline void

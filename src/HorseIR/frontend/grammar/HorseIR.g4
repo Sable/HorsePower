@@ -221,13 +221,13 @@ typeDict        : 'dict' '<' key=type ',' value=type '>' ;
 
 typeEnum        : 'enum' '<' element=type '>' ;
 
-typeFunc        : 'func' '<' ':' type '>'
-                | 'func' '<' '...' ':' type '>'
-                | 'func' '<' type (',' type)* ':' type '>'
-                | 'func' '<' type (',' type)* ',' '...' ':' type '>'
+typeFunc        : 'func' '<' ':' type '>'                            #typeFuncCase0
+                | 'func' '<' '...' ':' type '>'                      #typeFuncCase1
+                | 'func' '<' type (',' type)* ':' type '>'           #typeFuncCase2
+                | 'func' '<' type (',' type)* ',' '...' ':' type '>' #typeFuncCase3
                 ;
 
-NULL_TOKEN            : 'NULL_TOKEN' ;
+NULL_TOKEN            : 'null' ;
 LITERAL_GROUP_2_MINUTE : [0-9]+ ':' [0-9]+ ;
 LITERAL_GROUP_3_DATE   : [0-9]+ '.' [0-9]+ '.' [0-9]+ ;
 LITERAL_GROUP_3_SECOND : [0-9]+ ':' [0-9]+ ':' [0-9]+ ;
