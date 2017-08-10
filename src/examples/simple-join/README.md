@@ -32,7 +32,7 @@ where Employee.DepartmentID = Department.DepartmentID;
  */
 module default {
     import Builtin.*;
-    def find_valid_index(colVal:list<i64>, indexBool:list<i64>) : list<i64> {
+    def find_valid_index(colVal:i64, indexBool:i64) : i64 {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
         indexSize :? = @len(indexBool);
@@ -40,32 +40,34 @@ module default {
         validIndex:? = @compress(validBool, indexRange);
         return validIndex;
     }
-    def find_valid_item(colVal:list<i64>, indexBool:list<i64>)  : list<i64> {
+    def find_valid_item(colVal:i64, indexBool:i64)  : i64 {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
         validItem :? = @compress(validBool, indexBool);
         return validItem;
     }
     def main() : table {
-        s0:list<sym> = check_cast(@column_value(`Employee,   `LastName)      , list<sym>);
-        s1:list<i64> = check_cast(@column_value(`Employee,   `DepartmentID)  , list<i64>);
-        s2:list<i64> = check_cast(@column_value(`Department, `DepartmentID)  , list<i64>);
-        s3:list<sym> = check_cast(@column_value(`Department, `DepartmentName), list<sym>);
+        a0:table = @load_table(`Employee);
+        a1:table = @load_table(`Department);
+        
+        s0:sym = check_cast(@column_value(a0, `LastName)      , sym);
+        s1:i64 = check_cast(@column_value(a0, `DepartmentID)  , i64);
+        s2:i64 = check_cast(@column_value(a1, `DepartmentID)  , i64);
+        s3:sym = check_cast(@column_value(a1, `DepartmentName), sym);        
 
-        t0:list<i64> = @index_of       (s2,s1);
-        t1:list<i64> = find_valid_index(s2,t0);
-        t2:list<i64> = find_valid_item (s2,t0);
+        t0:i64 = @index_of       (s2,s1);
+        t1:i64 = find_valid_index(s2,t0);
+        t2:i64 = find_valid_item (s2,t0);
 
-        r0:list<sym> = @index(s0,t1);
-        r1:list<i64> = @index(s1,t1);
-        r2:list<sym> = @index(s3,t2);
+        r0:sym = @index(s0,t1);
+        r1:i64 = @index(s1,t1);
+        r2:sym = @index(s3,t2);
 
-        d0:dict<sym,sym> = @dict(`LastName      , r0);
-        d1:dict<sym,i64> = @dict(`DepartmentID  , r1);
-        d2:dict<sym,sym> = @dict(`DepartmentName, r2);
+        k0:sym       = (`LastName,`DepartmentID,`DepartmentName);
+        k1:list<sym> = @tolist(k0);
+        k2:list<?>   = @list(r0,r1,r2);
+        z:table      = @table(k1,k2);
 
-        z0:?    = @list(d0,d1,d2);
-        z:table = @table(z0);
         return z;
     }
     
