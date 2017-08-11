@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
-#include <sstream>
 #include "../AST.h"
 
 namespace horseIR
@@ -73,14 +69,10 @@ inline std::string ListType::toString () const
 }
 
 inline Type *ListType::getElementType () const
-{
-  return elementType;
-}
+{ return elementType; }
 
 inline void ListType::setElementType (Type *type)
-{
-  elementType = type;
-}
+{ elementType = type; }
 
 inline void
 ListType::__duplicateDeep (ASTNodeMemory &mem, const ListType *listType)

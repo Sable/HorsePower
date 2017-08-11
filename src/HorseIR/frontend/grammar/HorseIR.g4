@@ -51,20 +51,18 @@ literal          : literalBool
                  | literalKTable
                  ;
 
-boolValueN       : ('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
-literalBool      : boolValueN ':' 'bool'
-                 | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'
+boolValueN       : value=LITERAL_INTEGER | value=NULL_TOKEN ;
+literalBool      : boolValueN ':' 'bool'                               #literalBoolCase0
+                 | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'  #literalBoolCase1
                  ;
-charValue        : LITERAL_CHAR ;
-charValueN       : LITERAL_CHAR | NULL_TOKEN ;
-literalChar      : charValue (':' 'char')?
-                 | LITERAL_CHAR_VECTOR (':' 'char')?
-                 | '(' charValue (',' charValue)* ')' (':' 'char')?
-                 | '(' ')' ':' 'char'
-                 | '(' NULL_TOKEN (',' charValueN)* (',' charValue) (',' charValueN)* ')' (':' 'char')?
-                 | '(' charValue (',' charValueN)* (',' NULL_TOKEN) (',' charValueN)* ')' (':' 'char')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'
-                 | NULL_TOKEN ':' 'char'
+charValue        : value=LITERAL_CHAR ;
+literalChar      : charValue (':' 'char')?                            #literalCharCase0
+                 | LITERAL_CHAR_VECTOR (':' 'char')?                  #literalCharCase1
+                 | '(' ')' ':' 'char'                                 #literalCharCase2
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? charValue (',' (charValue | NULL_TOKEN))* ')' (':' 'char')?
+                                                                      #literalCharCase3
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'    #literalCharCase4
+                 | NULL_TOKEN ':' 'char'                              #literalCharCase5
                  ;
 stringValue      : LITERAL_STRING ;
 stringValueN     : LITERAL_STRING | NULL_TOKEN ;

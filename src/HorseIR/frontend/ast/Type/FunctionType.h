@@ -1,11 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
 #include "../AST.h"
 #include "../../misc/InfixOStreamIterator.h"
 
@@ -30,10 +24,13 @@ class FunctionType : public Type {
   std::string toString () const override;
 
   std::vector<Type *> getParameterTypes () const;
-  void setParameterTypes (const std::vector<Type *> &types);
-  void setParameterTypes (std::vector<Type *> &&types);
+  template<class T>
+  std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>
+  setParameterTypes (T &&types);
+
   Type *getReturnType () const;
   void setReturnType (Type *type);
+
   bool getIsFlexible () const;
   void setIsFlexible (bool flexible);
  protected:
@@ -94,7 +91,7 @@ inline std::string FunctionType::toString () const
         return (type == nullptr) ? "nullptr" : type->toString ();
       }
   );
-  if (isFlexible) paramSegments.push_back ("...");
+  if (isFlexible) paramSegments.emplace_back ("...");
   auto retSeg = (returnType == nullptr) ? "nullptr" : returnType->toString ();
   std::ostringstream stream;
   stream << "func<";
@@ -105,39 +102,24 @@ inline std::string FunctionType::toString () const
 }
 
 inline std::vector<Type *> FunctionType::getParameterTypes () const
-{
-  return parameterTypes;
-}
+{ return parameterTypes; }
 
-inline void FunctionType::setParameterTypes (const std::vector<Type *> &types)
-{
-  parameterTypes = types;
-}
-
-inline void FunctionType::setParameterTypes (std::vector<Type *> &&types)
-{
-  parameterTypes = types;
-}
+template<class T>
+inline std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>
+FunctionType::setParameterTypes (T &&types)
+{ parameterTypes = std::forward<T> (types); }
 
 inline Type *FunctionType::getReturnType () const
-{
-  return returnType;
-}
+{ return returnType; }
 
 inline void FunctionType::setReturnType (Type *type)
-{
-  returnType = type;
-}
+{ returnType = type; }
 
 inline bool FunctionType::getIsFlexible () const
-{
-  return isFlexible;
-}
+{ return isFlexible; }
 
 inline void FunctionType::setIsFlexible (bool flexible)
-{
-  isFlexible = flexible;
-}
+{ isFlexible = flexible; }
 
 inline void
 FunctionType::__duplicateDeep (ASTNodeMemory &mem, const FunctionType *type)

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
-#include <sstream>
 #include "../AST.h"
 
 namespace horseIR
@@ -39,14 +35,10 @@ inline WildcardType::WildcardType (ASTNodeMemory &mem, const CSTType *cst)
 {}
 
 inline std::size_t WildcardType::getNumNodesRecursively () const
-{
-  return 1;
-}
+{ return 1; }
 
 inline std::vector<ASTNode *> WildcardType::getChildren () const
-{
-  return std::vector<ASTNode *> {};
-}
+{ return std::vector<ASTNode *> {}; }
 
 inline WildcardType *WildcardType::duplicateDeep (ASTNodeMemory &mem) const
 {
@@ -56,9 +48,7 @@ inline WildcardType *WildcardType::duplicateDeep (ASTNodeMemory &mem) const
 }
 
 inline std::string WildcardType::toString () const
-{
-  return "?";
-}
+{ return "?"; }
 
 inline void
 WildcardType::__duplicateDeep (ASTNodeMemory &mem, const WildcardType *type)

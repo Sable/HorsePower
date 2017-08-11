@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
 #include "../AST.h"
 
 namespace horseIR
@@ -93,15 +90,11 @@ inline std::string PrimitiveType::toString () const
 }
 
 inline PrimitiveType::PrimitiveClass PrimitiveType::getPrimitiveClass () const
-{
-  return primitiveClass;
-}
+{ return primitiveClass; }
 
 inline void
 PrimitiveType::setPrimitiveClass (const PrimitiveClass &p_primitiveClass)
-{
-  primitiveClass = p_primitiveClass;
-}
+{ primitiveClass = p_primitiveClass; }
 
 inline void
 PrimitiveType::__duplicateDeep (ASTNodeMemory &mem, const PrimitiveType *type)

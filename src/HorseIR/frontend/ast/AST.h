@@ -1,5 +1,21 @@
 #pragma once
 
+#include <vector>
+#include <string>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+#include <locale>
+#include <memory>
+#include <stdexcept>
+#include <unordered_map>
+#include <antlr4-runtime.h>
+
 #include "HorseIRLexer.h"
 #include "HorseIRParser.h"
 #include "HorseIRListener.h"
@@ -16,3 +32,9 @@
 #include "type/DictionaryType.h"
 #include "type/EnumerationType.h"
 #include "type/FunctionType.h"
+
+#include "operand/Operand.h"
+#include "operand/Identifier.h"
+#include "operand/Literal.h"
+#include "operand/BoolLiteral.h"
+#include "operand/CharLiteral.h"

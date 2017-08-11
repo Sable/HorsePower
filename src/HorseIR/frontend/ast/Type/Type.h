@@ -29,16 +29,18 @@ class Type : public ASTNode {
   Type &operator= (const Type &externType) = delete;
   ~Type () override = default;
 
+  TypeClass getTypeClass () const
+  { return typeClass; }
+
  protected:
   const TypeClass typeClass;
-  void __duplicateDeep (ASTNodeMemory &mem, const Type *type);
-};
 
-inline void Type::__duplicateDeep (ASTNodeMemory &mem, const Type *type)
-{
-  assert (type != nullptr);
-  ASTNode::__duplicateDeep (mem, type) ;
-}
+  void __duplicateDeep (ASTNodeMemory &mem, const Type *type)
+  {
+    assert (type != nullptr);
+    ASTNode::__duplicateDeep (mem, type);
+  }
+};
 
 }
 }

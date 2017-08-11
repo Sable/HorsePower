@@ -33,20 +33,13 @@ class InfixOStreamIterator : public std::iterator<std::output_iterator_tag,
   }
 
   InfixOStreamIterator &operator* ()
-  {
-    return *this;
-  }
+  { return *this; }
 
   InfixOStreamIterator &operator++ ()
-  {
-    return *this;
-  }
+  { return *this; }
 
-  InfixOStreamIterator &operator++ (int offset)
-  {
-    (void) offset;
-    return *this;
-  }
+  InfixOStreamIterator &operator++ (int)
+  { return *this; }
 
  protected:
   ostream_type &outputStream;

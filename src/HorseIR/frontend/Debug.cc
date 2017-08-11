@@ -5,7 +5,7 @@
 
 using namespace horseIR;
 
-const char* rawProgram = ""
+const char *rawProgram = ""
     "/*                                                                                        \n"
     " * varchar(99) -> sym                                                                     \n"
     " * int         -> i64                                                                     \n"
@@ -50,22 +50,25 @@ const char* rawProgram = ""
     "    }                                                                                     \n"
     "                                                                                          \n"
     "}                                                                                         \n"
-    "" ;
+    "";
 
 int main (int argc, const char *argv[])
 {
 
-  const std::string raw = ("func<?, ?, ?, ...:bool>") ;
+  const std::string raw = R"((null, null, '\x4B', '\071') : char)";
 
-  antlr4::ANTLRInputStream stream(raw) ;
-  HorseIRLexer lexer (&stream) ;
-  antlr4::CommonTokenStream tokenStream(&lexer) ;
-  HorseIRParser parser(&tokenStream) ;
-  HorseIRParser::TypeContext* context = parser.type () ;
+  antlr4::ANTLRInputStream stream (raw);
+  HorseIRLexer lexer (&stream);
+  antlr4::CommonTokenStream tokenStream (&lexer);
+  HorseIRParser parser (&tokenStream);
+  HorseIRParser::LiteralCharContext *context = parser.literalChar ();
+
 
   ast::ASTNode::ASTNodeMemory mem ;
   auto astNode = ast::CSTConverter::convert (mem, context) ;
+  astNode->setEnclosingFilename ("stdin") ;
   std::cout << astNode->toString () << std::endl ;
+
 
   return 0;
 }

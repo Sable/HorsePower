@@ -1,10 +1,6 @@
 #pragma once
 
-#include <unordered_map>
-#include <algorithm>
-#include <iterator>
-#include <vector>
-#include <string>
+#include <limits>
 #include "AST.h"
 
 namespace horseIR
@@ -13,7 +9,346 @@ namespace ast
 {
 
 struct CSTConverter {
+  class CSTConverterException : public std::logic_error {
+   public:
+    using CSTType = antlr4::tree::ParseTree;
+
+    explicit CSTConverterException (const CSTType *exceptionSite)
+        : logic_error ("CSTConverterException"), site (exceptionSite)
+    {}
+
+    const antlr4::tree::ParseTree *getExceptionSite () const
+    { return site; }
+
+   protected:
+    const antlr4::tree::ParseTree *site = nullptr;
+  };
+
   using ASTNodeMemory = ASTNode::ASTNodeMemory;
+
+
+  using LiteralBool = HorseIRParser::LiteralBoolContext;
+  using LiteralBoolCase0 = HorseIRParser::LiteralBoolCase0Context;
+  using LiteralBoolCase1 = HorseIRParser::LiteralBoolCase1Context;
+
+  static BoolLiteral *convert (ASTNodeMemory &mem, LiteralBool *literalBool)
+  {
+    assert (literalBool != nullptr);
+    LiteralBoolCase0 *case0 = nullptr;
+    LiteralBoolCase1 *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literalBool)) != nullptr)
+      return convert (mem, case0);
+    if ((case1 = dynamic_cast<decltype (case1)>(literalBool)) != nullptr)
+      return convert (mem, case1);
+
+    throw CSTConverterException (literalBool);
+  }
+
+  static BoolLiteral *
+  convert (ASTNodeMemory &mem, LiteralBoolCase0 *literalBool)
+  {
+    assert (literalBool != nullptr);
+    auto boolValueNContext = literalBool->boolValueN ();
+    std::vector<BoolLiteral::ElementType> valueVector{};
+    assert (boolValueNContext->value != nullptr);
+    const std::string stringValue = boolValueNContext->value->getText ();
+    if (stringValue != "null")
+      {
+        const std::string valueString = boolValueNContext->getText ();
+        if (valueString == "0")
+          { valueVector.emplace_back (false); }
+        else if (valueString == "1")
+          { valueVector.emplace_back (true); }
+        else
+          { throw CSTConverterException (literalBool); }
+      }
+    else
+      { valueVector.emplace_back (nullptr); }
+    auto boolLiteral = new BoolLiteral (mem, literalBool);
+    boolLiteral->setValue (std::move (valueVector));
+    return boolLiteral;
+  }
+
+  static BoolLiteral *
+  convert (ASTNodeMemory &mem, LiteralBoolCase1 *literalBool)
+  {
+    assert (literalBool != nullptr);
+    using BoolValueN = HorseIRParser::BoolValueNContext;
+    const std::vector<BoolValueN *> boolValueNs = literalBool->boolValueN ();
+    std::vector<BoolLiteral::ElementType> valueVector{};
+    std::transform (
+        boolValueNs.cbegin (), boolValueNs.cend (),
+        std::back_inserter (valueVector),
+        [=] (const BoolValueN *context) -> BoolLiteral::ElementType
+        {
+          using ElementType = BoolLiteral::ElementType;
+          assert (context->value != nullptr);
+          const std::string stringValue = context->value->getText ();
+          if (stringValue != "null")
+            {
+              const std::string valueString = context->value->getText ();
+              if (valueString == "0") return ElementType (false);
+              if (valueString == "1") return ElementType (true);
+              throw CSTConverterException (literalBool);
+            }
+          else
+            { return ElementType (nullptr); }
+        });
+    auto boolLiteral = new BoolLiteral (mem, literalBool);
+    boolLiteral->setValue (std::move (valueVector));
+    return boolLiteral;
+  }
+
+  using LiteralCharContext = HorseIRParser::LiteralCharContext;
+  using LiteralCharCase0Context = HorseIRParser::LiteralCharCase0Context;
+  using LiteralCharCase1Context = HorseIRParser::LiteralCharCase1Context;
+  using LiteralCharCase2Context = HorseIRParser::LiteralCharCase2Context;
+  using LiteralCharCase3Context = HorseIRParser::LiteralCharCase3Context;
+  using LiteralCharCase4Context = HorseIRParser::LiteralCharCase4Context;
+  using LiteralCharCase5Context = HorseIRParser::LiteralCharCase5Context;
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharContext *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    LiteralCharCase0Context *case0 = nullptr;
+    LiteralCharCase1Context *case1 = nullptr;
+    LiteralCharCase2Context *case2 = nullptr;
+    LiteralCharCase3Context *case3 = nullptr;
+    LiteralCharCase4Context *case4 = nullptr;
+    LiteralCharCase5Context *case5 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literalCharContext)) != nullptr)
+      return convert (mem, case0);
+    if ((case1 = dynamic_cast<decltype (case1)>(literalCharContext)) != nullptr)
+      return convert (mem, case1);
+    if ((case2 = dynamic_cast<decltype (case2)>(literalCharContext)) != nullptr)
+      return convert (mem, case2);
+    if ((case3 = dynamic_cast<decltype (case3)>(literalCharContext)) != nullptr)
+      return convert (mem, case3);
+    if ((case4 = dynamic_cast<decltype (case4)>(literalCharContext)) != nullptr)
+      return convert (mem, case4);
+    if ((case5 = dynamic_cast<decltype (case5)>(literalCharContext)) != nullptr)
+      return convert (mem, case5);
+
+    throw CSTConverterException (literalCharContext);
+  }
+
+  static std::vector<std::uint8_t>
+  convertEscapedChar (const std::basic_string<char> &rawString)
+  {
+    std::vector<std::uint8_t> returnVector{};
+    for (auto iter = rawString.cbegin (); iter != rawString.cend (); ++iter)
+      {
+        if (*iter != '\\')
+          { returnVector.push_back (static_cast<std::uint8_t>(*iter)); }
+        else
+          {
+            std::advance (iter, 1);
+            if (*iter == 'a')
+              { returnVector.push_back (0x07); }
+            else if (*iter == 'b')
+              { returnVector.push_back (0x08); }
+            else if (*iter == 'f')
+              { returnVector.push_back (0x0C); }
+            else if (*iter == 'n')
+              { returnVector.push_back (0x0A); }
+            else if (*iter == 'r')
+              { returnVector.push_back (0x0D); }
+            else if (*iter == 't')
+              { returnVector.push_back (0x09); }
+            else if (*iter == 'v')
+              { returnVector.push_back (0x0B); }
+            else if (*iter == '\\')
+              { returnVector.push_back (0x5C); }
+            else if (*iter == '\'')
+              { returnVector.push_back (0x27); }
+            else if (*iter == '\"')
+              { returnVector.push_back (0x22); }
+            else if (*iter == '?')
+              { returnVector.push_back (0x3F); }
+            else if (*iter == 'x')
+              {
+                std::string convertBuffer;
+                auto bufferInserter = std::back_inserter (convertBuffer);
+                *bufferInserter = *(++iter);
+                *bufferInserter = *(++iter);
+                auto ret = std::stoi (convertBuffer, nullptr, 16);
+                returnVector.push_back (static_cast<std::uint8_t >(ret));
+              }
+            else
+              {
+                std::string convertBuffer;
+                auto bufferInserter = std::back_inserter (convertBuffer);
+                *bufferInserter = *(iter);
+                *bufferInserter = *(++iter);
+                *bufferInserter = *(++iter);
+                auto ret = std::stoi (convertBuffer, nullptr, 8);
+                returnVector.push_back (static_cast<std::uint8_t>(ret));
+              }
+          }
+      }
+    return returnVector;
+  }
+
+  static bool verifyEscapeChar (const std::string &rawString)
+  {
+    for (auto iter = rawString.cbegin (); iter != rawString.cend (); ++iter)
+      {
+        if (*iter != '\\') continue;
+
+        std::advance (iter, 1);
+        if (*iter == 'a') continue;
+        if (*iter == 'b') continue;
+        if (*iter == 'f') continue;
+        if (*iter == 'n') continue;
+        if (*iter == 'r') continue;
+        if (*iter == 't') continue;
+        if (*iter == 'v') continue;
+        if (*iter == '\\') continue;
+        if (*iter == '\'') continue;
+        if (*iter == '\"') continue;
+        if (*iter == '?') continue;
+        if (*iter == 'x')
+          {
+            std::string convertBuffer;
+            auto bufferInserter = std::back_inserter (convertBuffer);
+            *bufferInserter = *(++iter);
+            *bufferInserter = *(++iter);
+            auto ret = std::stoi (convertBuffer, nullptr, 16);
+            if (ret >= std::numeric_limits<std::uint8_t>::max ()) return false;
+            continue;
+          }
+        else
+          {
+            std::string convertBuffer;
+            auto bufferInserter = std::back_inserter (convertBuffer);
+            *bufferInserter = *(iter);
+            *bufferInserter = *(++iter);
+            *bufferInserter = *(++iter);
+            auto ret = std::stoi (convertBuffer, nullptr, 8);
+            if (ret >= std::numeric_limits<std::uint8_t>::max ()) return false;
+            continue;
+          }
+      }
+    return true;
+  }
+
+  static CharLiteral::ElementType
+  convert (HorseIRParser::CharValueContext *charValue)
+  {
+    assert (charValue != nullptr);
+    std::string rawString = charValue->value->getText ();
+    rawString = rawString.substr (1, rawString.length () - 2);
+    if (!verifyEscapeChar (rawString)) throw CSTConverterException (charValue);
+    const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
+    assert (converted.size () == 1);
+    return
+        CharLiteral::ElementType (converted[0]);
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase0Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    std::vector<CharLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convert (literalCharContext->charValue ()));
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    charLiteral->setValue (std::move (valueVector));
+    return charLiteral;
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase1Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    const auto tokenPtr = literalCharContext->LITERAL_CHAR_VECTOR ();
+    std::string rawString = tokenPtr->getText ();
+    rawString = rawString.substr (1, rawString.size () - 2);
+    std::vector<CharLiteral::ElementType> valueVector{};
+    const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
+    std::transform (
+        converted.cbegin (), converted.cend (),
+        std::back_inserter (valueVector),
+        [] (const std::uint8_t value) -> CharLiteral::ElementType
+        { return CharLiteral::ElementType (value); });
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    charLiteral->setValue (std::move (valueVector));
+    return charLiteral;
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase2Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    return charLiteral;
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase3Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    using CharValueContext = HorseIRParser::CharValueContext;
+    const std::vector<ParseTree *> rawChildren = literalCharContext->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
+        {
+          if (dynamic_cast<CharValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<CharLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> CharLiteral::ElementType
+        {
+          CharValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convert (value); }
+          else
+            { return CharLiteral::ElementType (nullptr); }
+        });
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    charLiteral->setValue (std::move (valueVector));
+    return charLiteral;
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase4Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const std::vector<ParseTree *> rawChildren = literalCharContext->children;
+    std::size_t nullElementCount = 0;
+    for (auto iter = rawChildren.cbegin (); iter != rawChildren.cend (); ++iter)
+      { if ((*iter)->getText () == "null") nullElementCount += 1; }
+    std::vector<CharLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullElementCount);
+    for (std::size_t iter = 0; iter < nullElementCount; ++iter)
+      { valueVector.emplace_back (nullptr); }
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    charLiteral->setValue (std::move (valueVector));
+    return charLiteral;
+  }
+
+  static CharLiteral *
+  convert (ASTNodeMemory &mem, LiteralCharCase5Context *literalCharContext)
+  {
+    assert (literalCharContext != nullptr);
+    std::vector<CharLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (nullptr);
+    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    charLiteral->setValue (std::move (valueVector));
+    return charLiteral;
+  }
 
   using TypeContext = HorseIRParser::TypeContext;
   using TypeCasePrimitiveContext = HorseIRParser::TypeCasePrimitiveContext;
@@ -35,25 +370,18 @@ struct CSTConverter {
 
     if ((primitive = dynamic_cast<decltype (primitive)>(type)) != nullptr)
       return convert (mem, primitive);
-
     if ((wildcard = dynamic_cast<decltype (wildcard)>(type)) != nullptr)
       return convert (mem, wildcard);
-
     if ((list = dynamic_cast<decltype (list)>(type)) != nullptr)
       return convert (mem, list);
-
     if ((dict = dynamic_cast<decltype (dict)>(type)) != nullptr)
       return convert (mem, dict);
-
     if ((enume = dynamic_cast<decltype (enume)>(type)) != nullptr)
       return convert (mem, enume);
-
     if ((func = dynamic_cast<decltype (func)>(type)) != nullptr)
       return convert (mem, func);
 
-    assert (false);
-    return nullptr;
-
+    throw CSTConverterException (type);
   }
 
   static WildcardType *
@@ -103,9 +431,11 @@ struct CSTConverter {
     const auto typeListContext = cst->typeList ();
     const auto elementTypeContext = typeListContext->element;
     auto listType = new ListType (mem, typeListContext);
+
     Type *elementType = convert (mem, elementTypeContext);
     elementType->setParentASTNode (listType);
     listType->setElementType (elementType);
+
     return listType;
   }
 
@@ -116,24 +446,29 @@ struct CSTConverter {
     const auto keyTypeContext = typeDictContext->key;
     const auto valueTypeContext = typeDictContext->value;
     auto dictionaryType = new DictionaryType (mem, typeDictContext);
+
     Type *keyType = convert (mem, keyTypeContext);
     keyType->setParentASTNode (dictionaryType);
     dictionaryType->setKeyType (keyType);
+
     Type *valueType = convert (mem, valueTypeContext);
     valueType->setParentASTNode (dictionaryType);
     dictionaryType->setValueType (valueType);
+
     return dictionaryType;
   }
 
   static EnumerationType *convert (ASTNodeMemory &mem, TypeCaseEnumContext *cst)
   {
     assert (cst != nullptr);
-    const auto typeEnumCotnext = cst->typeEnum ();
-    const auto elementContext = typeEnumCotnext->element;
-    auto enumerationType = new EnumerationType (mem);
+    const auto pTypeEnumContext = cst->typeEnum ();
+    const auto elementContext = pTypeEnumContext->element;
+    auto enumerationType = new EnumerationType (mem, pTypeEnumContext);
+
     Type *elementType = convert (mem, elementContext);
     elementType->setParentASTNode (enumerationType);
     enumerationType->setElementType (elementType);
+
     return enumerationType;
   }
 
@@ -153,28 +488,26 @@ struct CSTConverter {
 
     if ((case0 = dynamic_cast<decltype (case0)>(typeFunc)) != nullptr)
       return convert (mem, case0);
-
     if ((case1 = dynamic_cast<decltype (case1)>(typeFunc)) != nullptr)
       return convert (mem, case1);
-
     if ((case2 = dynamic_cast<decltype (case2)>(typeFunc)) != nullptr)
       return convert (mem, case2);
-
     if ((case3 = dynamic_cast<decltype (case3)>(typeFunc)) != nullptr)
       return convert (mem, case3);
 
-    assert (false);
-    return nullptr;
+    throw CSTConverterException (cst);
   }
 
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase0Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem);
+    auto functionType = new FunctionType (mem, cst);
     auto returnTypeContext = cst->type ();
+
     Type *returnType = convert (mem, returnTypeContext);
     returnType->setParentASTNode (functionType);
     functionType->setReturnType (returnType);
+
     functionType->setIsFlexible (false);
     return functionType;
   }
@@ -182,11 +515,13 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase1Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem);
+    auto functionType = new FunctionType (mem, cst);
     auto returnTypeContext = cst->type ();
+
     Type *returnType = convert (mem, returnTypeContext);
     returnType->setParentASTNode (functionType);
     functionType->setReturnType (returnType);
+
     functionType->setIsFlexible (true);
     return functionType;
   }
@@ -194,10 +529,9 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase2Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem);
+    auto functionType = new FunctionType (mem, cst);
 
     const auto types (cst->type ());
-    assert (!cst->isEmpty ());
     std::vector<Type *> parameterTypes{};
     std::transform (
         types.cbegin (), std::prev (types.cend ()),
@@ -223,10 +557,9 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase3Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem);
+    auto functionType = new FunctionType (mem, cst);
 
     const auto types (cst->type ());
-    assert (!cst->isEmpty ());
     std::vector<Type *> parameterTypes{};
     std::transform (
         types.cbegin (), std::prev (types.cend ()),

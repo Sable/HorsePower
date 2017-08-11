@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
-#include <sstream>
 #include "../AST.h"
 
 namespace horseIR
@@ -81,24 +77,16 @@ inline std::string DictionaryType::toString () const
 }
 
 inline Type *DictionaryType::getKeyType () const
-{
-  return keyType;
-}
+{ return keyType; }
 
 inline Type *DictionaryType::getValueType () const
-{
-  return valueType;
-}
+{ return valueType; }
 
 inline void DictionaryType::setKeyType (Type *type)
-{
-  keyType = type;
-}
+{ keyType = type; }
 
 inline void DictionaryType::setValueType (Type *type)
-{
-  valueType = type;
-}
+{ valueType = type; }
 
 inline void
 DictionaryType::__duplicateDeep (ASTNodeMemory &mem, const DictionaryType *type)

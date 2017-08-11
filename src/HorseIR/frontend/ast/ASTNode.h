@@ -1,9 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <algorithm>
-#include <antlr4-runtime.h>
+#include "AST.h"
 
 namespace horseIR
 {
@@ -25,8 +22,15 @@ class ASTNode {
 
   class ASTNodeMemory {
    public:
-    ASTNodeMemory &manage (const ast::ASTNode *managedPtr);
-    ASTNodeMemory &release (const ast::ASTNode *releasedPtr);
+    ASTNodeMemory () = default;
+    ASTNodeMemory (ASTNodeMemory &&astNodeMemory) = default;
+    ASTNodeMemory (const ASTNodeMemory &astNodeMemory) = delete;
+    ASTNodeMemory &operator= (ASTNodeMemory &&astNodeMemory) = default;
+    ASTNodeMemory &operator= (const ASTNodeMemory &astNodeMemory) = delete;
+    ~ASTNodeMemory () = default;
+
+    void manage (const ast::ASTNode *managedPtr);
+    void release (const ast::ASTNode *releasedPtr);
 
    protected:
     std::vector<std::unique_ptr<const ASTNode>> pool;
@@ -47,7 +51,9 @@ class ASTNode {
   ASTNode *getParentASTNode () const;
 
   void setCST (const CSTType *p_cst);
-  void setEnclosingFilename (const std::string &filename);
+  template<class T>
+  std::enable_if_t<std::is_assignable<std::string, T>::value>
+  setEnclosingFilename (T &&filename);
   void setParentASTNode (ast::ASTNode *p_parent);
 
   virtual std::size_t getNumNodesRecursively () const = 0;
@@ -64,8 +70,7 @@ class ASTNode {
   void __duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode);
 };
 
-inline ASTNode::ASTNodeMemory &
-ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
+inline void ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
 {
   const auto searchItr = std::find_if (
       pool.cbegin (), pool.cend (),
@@ -74,11 +79,9 @@ ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
         return iterPtr.get () == managedPtr;
       });
   if (searchItr == pool.cend ()) pool.emplace_back (managedPtr);
-  return *this;
 }
 
-inline ASTNode::ASTNodeMemory &
-ASTNode::ASTNodeMemory::release (const ast::ASTNode *releasedPtr)
+inline void ASTNode::ASTNodeMemory::release (const ast::ASTNode *releasedPtr)
 {
   const auto removeIter = std::remove_if (
       pool.begin (), pool.end (),
@@ -87,56 +90,39 @@ ASTNode::ASTNodeMemory::release (const ast::ASTNode *releasedPtr)
         return iterPtr.get () == releasedPtr;
       });
   pool.erase (removeIter, pool.end ());
-  return *this;
 }
 
 inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass)
     : cst (nullptr), astNodeClass (p_astNodeClass), parent (nullptr)
-{
-  (void) mem.manage (this);
-}
+{ mem.manage (this); }
 
 inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
                          const CSTType *parseTree)
     : cst (parseTree), astNodeClass (p_astNodeClass), parent (nullptr)
-{
-  (void) mem.manage (this);
-}
+{ mem.manage (this); }
 
 inline const ASTNode::CSTType *ASTNode::getCST () const
-{
-  return cst;
-}
+{ return cst; }
 
 inline ASTNode::ASTNodeClass ASTNode::getASTNodeClass () const
-{
-  return astNodeClass;
-}
+{ return astNodeClass; }
 
 inline std::string ASTNode::getEnclosingFilename () const
-{
-  return enclosingFilename;
-}
+{ return enclosingFilename; }
 
 inline ASTNode *ASTNode::getParentASTNode () const
-{
-  return parent;
-}
+{ return parent; }
 
 inline void ASTNode::setCST (const CSTType *p_cst)
-{
-  cst = p_cst;
-}
+{ cst = p_cst; }
 
-inline void ASTNode::setEnclosingFilename (const std::string &filename)
-{
-  enclosingFilename = filename;
-}
+template<class T>
+inline std::enable_if_t<std::is_assignable<std::string, T>::value>
+ASTNode::setEnclosingFilename (T &&filename)
+{ enclosingFilename = std::forward<T> (filename); };
 
 inline void ASTNode::setParentASTNode (ast::ASTNode *p_parent)
-{
-  parent = p_parent;
-}
+{ parent = p_parent; }
 
 inline void
 ASTNode::__duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode)

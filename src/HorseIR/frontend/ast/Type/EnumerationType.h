@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstddef>
-#include <sstream>
 #include "../AST.h"
 
 namespace horseIR
@@ -74,14 +70,10 @@ inline std::string EnumerationType::toString () const
 }
 
 inline Type *EnumerationType::getElementType () const
-{
-  return elementType;
-}
+{ return elementType; }
 
 inline void EnumerationType::setElementType (Type *type)
-{
-  elementType = type;
-}
+{ elementType = type; }
 
 inline void
 EnumerationType::__duplicateDeep (ASTNodeMemory &mem, const EnumerationType *t)
