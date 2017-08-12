@@ -19,7 +19,7 @@ In HorsePower, we focus on the following parts.
 ## Quick entries
 
 - Design:
-    [Grammar](src/HorseIR/grammar/HorseIR.g4)
+    [Grammar](src/HorseIR/frontend/grammar/HorseIR.g4)
     | [IR Design](docs/mkdocs/docs/horseir/)
     | [Valid examples](src/HorseIR/tests/valid)
     | [TPC-H](docs/tpch)
