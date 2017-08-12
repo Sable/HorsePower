@@ -211,8 +211,12 @@ Elemtype createSymbol(S s){
     R x;
 }
 
-void printSymbol(L x, S strBuff){
-    SP(strBuff, "%s", symTable[x]->data.str);
+L printSymbol(L x, S strBuff){
+    R SP(strBuff, "%s", symTable[x]->data.str);
+}
+
+L printSymTick(L x, S strBuff){
+    R SP(strBuff, "`%s", symTable[x]->data.str);
 }
 
 void printAllSymol(){

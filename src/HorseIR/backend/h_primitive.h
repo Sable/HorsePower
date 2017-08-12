@@ -41,7 +41,11 @@ extern "C" {
 #define CHECKE(x) { L e=x; if(e) R e; }
 #define isTypeGroupScalar isTypeGroupRealX
 
+#define tableRow(x) (va(x).row)
+#define tableCol(x) (va(x).col)
+
 L pfnLoadTable     (V z, V x);
+L pfnList          (V z, L n, ...);
 L pfnIndex         (V z, V x, V y);
 L pfnFlip          (V z, V x);
 L pfnMatch         (V z, V x, V y);
@@ -148,6 +152,8 @@ L pfnDict          (V z, V x, V y);
 L pfnTable         (V z, V x, V y);
 L pfnEnum          (V z, V x, V y);
 L pfnKTable        (V z, V x, V y);
+
+L pfnMember        (V z, V x, V y);
 
 #ifdef	__cplusplus
 }

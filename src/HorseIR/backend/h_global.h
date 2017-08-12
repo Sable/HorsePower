@@ -11,15 +11,15 @@ extern "C" {
 typedef bool       B;
 typedef char       C,*S,*G;
 typedef short      H;
-typedef int        I,M,D,U,W,T;
-typedef long long  L,Q,Z;
+typedef int        I,Q,M,D,U,W,T;
+typedef long long  L,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
-typedef struct { Q name; L value; } Y;
-typedef struct { L row, col; } A;
+typedef struct { Q name; I value; } Y;
+typedef struct { I row, col; } A;
 
-/* size: 3 * 8 + 8 = 40 */
+/* size: 3 * 8 + 8 = 32 */
 typedef struct node_value{
 	L typ,len; G g;
 	union{

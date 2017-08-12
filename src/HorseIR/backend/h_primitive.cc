@@ -15,11 +15,22 @@
 
 L pfnLoadTable(V z, V x){
     if(isSymbol(x)){
-        z = findTableByName(vq(x));
-        if(!z) R E_TABLE_NOT_FOUND;
+        V t = findTableByName(vq(x));
+        if(!t) R E_TABLE_NOT_FOUND;
+        *z = *t;
         R 0;
     }
     else R E_DOMAIN;
+}
+
+/* copy alias */
+L pfnList(V z, L n, ...){
+    va_list args;
+    initList(z, n);
+    va_start(args, n);
+    DOI(n, {V x=va_arg(args,V);*(sV(z)+i)=*x;})
+    va_end  (args);
+    R 0;
 }
 
 
@@ -30,7 +41,7 @@ L pfnIndex(V z, V x, V y){
     if(H_DEBUG) P("-> Entering index\n");
     if(isTypeGroupInt(vp(y))){
         L typZ = vp(x), lenZ = vn(y), lenX = vn(x);
-        V tempY;
+        V tempY = allocNode();
         CHECKE(promoteValue(tempY, y, H_L));
         DOI(lenZ, if(lenX <= vL(tempY,i))R E_INDEX)
         if(isTypeGroupBasic(vp(x))){
@@ -81,7 +92,7 @@ L pfnKeys(V z, V x){
     if(isTable(x) || isDict(x)){
         L lenZ = vn(x);
         initV(z,H_G,lenZ);
-        DOI(lenZ, CHECKE(copyV(vV(z,i),getDictKey(vV(x,i)))))
+        DOI(lenZ, CHECKE(copyV(vV(z,i),getColKey(vV(x,i)))))
         R 0;
     }
     else if(isKTable(x)){
@@ -91,8 +102,8 @@ L pfnKeys(V z, V x){
         L lenVal = vn(valTable);
         L lenZ = lenKey + lenVal, c = 0;
         initV(z,H_G,lenZ);
-        DOI(lenKey, CHECKE(copyV(vV(z,i       ),getDictKey(vV(x,i)))))
-        DOI(lenVal, CHECKE(copyV(vV(z,i+lenKey),getDictKey(vV(x,i)))))
+        DOI(lenKey, CHECKE(copyV(vV(z,i       ),getColKey(vV(x,i)))))
+        DOI(lenVal, CHECKE(copyV(vV(z,i+lenKey),getColKey(vV(x,i)))))
         R 0;
     }
     else R E_DOMAIN;
@@ -118,7 +129,7 @@ L pfnColumnValue(V z, V x, V y){
         L colId = vq(y);
         L colIndex = findColFromTable(x,colId);
         if(colIndex >= 0){
-            R copyColumnValue(z, getDictVal(getTableDict(x,colIndex)));
+            R copyColumnValue(z, getColVal(getTableCol(x,colIndex)));
         }
         else R E_COL_NOT_FOUND;
     }
@@ -649,16 +660,16 @@ L pfnRaze(V z, V x){
 L pfnTolist(V z, V x){
     if(isTypeGroupBasic(xp)){
         initV(z,H_G,xn);
-        DOI(xn, { V t=vV(z,i); initV(t,xp,1); \
+        DOI(xn, { V t=vV(z,i); initV(t,xp,1);\
                 switch(xp){ \
-                    caseB vb(t)=vb(x); break; \
-                    caseH vh(t)=vh(x); break; \
-                    caseI vi(t)=vi(x); break; \
-                    caseL vl(t)=vl(x); break; \
-                    caseF vf(t)=vf(x); break; \
-                    caseE ve(t)=ve(x); break; \
-                    caseX vx(t)=vx(x); break; \
-                    caseQ vq(t)=vq(x); break; \
+                    caseB vb(t)=vB(x,i); break; \
+                    caseH vh(t)=vH(x,i); break; \
+                    caseI vi(t)=vI(x,i); break; \
+                    caseL vl(t)=vL(x,i); break; \
+                    caseF vf(t)=vF(x,i); break; \
+                    caseE ve(t)=vE(x,i); break; \
+                    caseX vx(t)=vX(x,i); break; \
+                    caseQ vq(t)=vQ(x,i); break; \
                     default: R E_NOT_IMPL; \
                 } \
             })
@@ -681,7 +692,8 @@ L pfnCompare(V z, V x, V y, L op){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ   = isOne(x)?vn(y):vn(x), typZ = H_B;
         L typMax = max(vp(x),vp(y));
-        V tempX, tempY;
+        V tempX = allocNode();
+        V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
@@ -762,7 +774,8 @@ L pfnArith(V z, V x, V y, L op){
         L lenZ   = isOne(x)?vn(y):vn(x);
         L typMax = max(vp(x),vp(y));
         L typZ   = typMax;
-        V tempX, tempY;
+        V tempX = allocNode();
+        V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
@@ -888,7 +901,8 @@ L pfnPowerLog(V z, V x, V y, L op){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ  = isOne(x)?vn(y):vn(x), typZ = H_E; // default: E
         L typMax= max(vp(x),vp(y));
-        V tempX, tempY;
+        V tempX = allocNode();
+        V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typZ,lenZ);
@@ -984,7 +998,8 @@ L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L typMax = max(vp(x), vp(y));
         L lenZ   = vn(y);
-        V tempX, tempY;
+        V tempX = allocNode();
+        V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,H_L,lenZ);
@@ -1008,7 +1023,8 @@ L pfnAppend(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L lenZ   = vn(x) + vn(y), c = vn(x);
         L typMax = max(vp(x),vp(y));
-        V tempX, tempY;
+        V tempX = allocNode();
+        V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typMax,lenZ);
@@ -1172,7 +1188,7 @@ L pfnDictTable(V z, V x, V y, L op){
         if(isEqualLength(x,y)){
             L lenZ = vn(x);
             L typZ = 0==op?H_N:H_A;
-            initV(z,H_N,lenZ);
+            initV(z,typZ,lenZ);
             DOI(lenZ, {V t=vV(z,i); \
                 initList(t,2); \
                 CHECKE(copyV(vV(t,0),vV(x,i))) \
@@ -1185,17 +1201,21 @@ L pfnDictTable(V z, V x, V y, L op){
 }
 
 L pfnDict(V z, V x, V y){
+    R pfnDictTable(z,x,y,0);
+}
+
+L pfnTable(V z, V x, V y){
     if(isList(x) && isList(y)){
         DOI(vn(x), if(!isSymbol(vV(x,i)))R E_DOMAIN)
         DOI(vn(y), if(!isTypeGroupColumn(vp(vV(x,i))))R E_DOMAIN)
-        R pfnDictTable(z,x,y,0);
+        CHECKE(pfnDictTable(z,x,y,1));
+        va(z).row = (0>=vn(z))?0:vn(getColVal(getTableCol(z,0)));
+        va(z).col = vn(x);
+        R 0;
     }
     else R E_DOMAIN;
 }
 
-L pfnTable(V z, V x, V y){
-    R pfnDictTable(z,x,y,1);
-}
 
 L pfnEnum(V z, V x, V y){
     if(isOneSymbol(x)){
@@ -1213,14 +1233,55 @@ L pfnEnum(V z, V x, V y){
 
 L pfnKTable(V z, V x, V y){
     if(isTable(x) && isTable(y)){
-        initKTable(z);
-        CHECKE(copyV(vV(z,0),x));
-        CHECKE(copyV(vV(z,1),y));
-        R 0;
+        /* todo: check key table */
+        if(tableRow(x) == tableRow(y)){
+            initKTable(z);
+            CHECKE(copyV(vV(z,0),x));
+            CHECKE(copyV(vV(z,1),y));
+            va(z).row = tableRow(x);
+            va(z).col = tableCol(x)+tableCol(y);
+            R 0;
+        }
+        else R E_MATCH;
     }
     else R E_DOMAIN;
 }
 
+
+#define MEMBER(t,z,x,y) case##t lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y)); break
 L pfnMember(V z, V x, V y){
+    if(isTypeGroupReal(vp(x))){
+        V tempX = allocNode();
+        V tempY = allocNode();
+        L typMax = max(vp(x),vp(y));
+        CHECKE(promoteValue(tempX,x,typMax));
+        CHECKE(promoteValue(tempY,y,typMax));
+        initV(z,H_B,vn(y));
+        switch(typMax){
+            MEMBER(B,z,tempX,tempY);
+            MEMBER(H,z,tempX,tempY);
+            MEMBER(I,z,tempX,tempY);
+            MEMBER(L,z,tempX,tempY);
+            MEMBER(F,z,tempX,tempY);
+            MEMBER(E,z,tempX,tempY);
+        }
+    }
+    else if(isSymbol(x) || isComplex(x) || isString(x) || isTypeGroupDTime(vp(x))){
+        initV(z,H_B,vn(y));
+        switch(vp(x)){
+            MEMBER(Q,z,x,y);
+            MEMBER(X,z,x,y);
+            MEMBER(C,z,x,y);
+            MEMBER(M,z,x,y); /* time */
+            MEMBER(D,z,x,y);
+            MEMBER(Z,z,x,y);
+            MEMBER(U,z,x,y);
+            MEMBER(W,z,x,y);
+            MEMBER(T,z,x,y);
+        }
+    }
+    else R E_DOMAIN;
     R 0;
 }
+
+

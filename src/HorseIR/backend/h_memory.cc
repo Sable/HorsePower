@@ -113,10 +113,15 @@ V allocKTable(){
 /* initialization */
 
 V initV(V x, L typ, L len){
-    xp = typ;
+    xp= typ;
     xn = len;
-    xg = (len>1)?getHeapMem(typ, len):(G)&xb;
-    R x;
+    if(isTypeGroupBasic(typ)){
+        xg = (len>1)?getHeapMem(typ, len):(G)&xb;
+    }
+    else {
+        xg = getHeapMem(typ, len);
+    }
+    R x; 
 }
 
 V initDict(V x){
@@ -145,24 +150,6 @@ V initKTable(V x){
     R initV(x, H_K, 2);
 }
 
-
-void printType(L x){
-    C buff[128];
-    printTypeStr(x, buff);
-    P("%s",buff);
-}
-
-void printTypeStr(L x, S buff){
-    switch(x){
-        caseB SP(buff, "t::bool");    break;
-        caseL SP(buff, "t::long");    break;
-        caseQ SP(buff, "t::symbol");  break;
-        caseA SP(buff, "t::table");   break;
-        caseN SP(buff, "t::dict");    break;
-        caseV SP(buff, "value_item"); break;
-        default: SP(buff, "<unknown::%lld>",x); break;
-    }
-}
 
 
 

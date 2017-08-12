@@ -141,7 +141,7 @@
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)
 
-
+#define getEnumName(x) ((x)->y.name)
 
 
 

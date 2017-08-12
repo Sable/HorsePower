@@ -46,7 +46,8 @@ B symLess       (Elemtype h1, Elemtype h2);
 B symLessEqual  (Elemtype h1, Elemtype h2);
 
 Elemtype createSymbol(S s);
-void printSymbol(L x, S strBuff);
+L    printSymbol(L x, S strBuff);
+L    printSymTick(L x, S strBuff);
 void printAllSymol();
 void printSymInfo();
 

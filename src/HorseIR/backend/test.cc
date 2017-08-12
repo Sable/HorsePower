@@ -38,8 +38,10 @@ const char* program = ""
     "}  \n"
     ;
 
-C CSV_EMP[] = "data/simple-join/employee.csv";
-C CSV_DEP[] = "data/simple-join/department.csv";
+// C CSV_EMP[] = "data/simple-join/employee.csv";
+// C CSV_DEP[] = "data/simple-join/department.csv";
+C CSV_EMP[] = "data/test-tables/employee.csv";
+C CSV_DEP[] = "data/test-tables/department.csv";
 L TYPE_EMP[]  = {H_Q, H_L};
 L TYPE_DEP[]  = {H_L, H_Q};
 const L NUM_COL_EMP = 2;
@@ -108,86 +110,86 @@ V handleParameter(horseIR::ast::Operand* operand, std::map<std::string, V>& env)
         
 
 L simulateSimple(){
-    antlr4::ANTLRInputStream inStream(program) ;
-    horseIR::HorseIRLexer lexer(&inStream) ;
-    antlr4::CommonTokenStream tokenStream(&lexer) ;
-    horseIR::HorseIRParser parser(&tokenStream) ;
-    horseIR::HorseIRParser::ProgramContext* program = parser.program() ;
+    // antlr4::ANTLRInputStream inStream(program) ;
+    // horseIR::HorseIRLexer lexer(&inStream) ;
+    // antlr4::CommonTokenStream tokenStream(&lexer) ;
+    // horseIR::HorseIRParser parser(&tokenStream) ;
+    // horseIR::HorseIRParser::ProgramContext* program = parser.program() ;
 
-    horseIR::ast::ASTNode::MemManagerType mem ;
-    auto* compilationUnit = new horseIR::ast::CompilationUnit(program, mem) ;
-    auto* module = compilationUnit->getModule("default") ;
-    auto* method = module->getMethod("main") ;
+    // horseIR::ast::ASTNode::MemManagerType mem ;
+    // auto* compilationUnit = new horseIR::ast::CompilationUnit(program, mem) ;
+    // auto* module = compilationUnit->getModule("default") ;
+    // auto* method = module->getMethod("main") ;
 
-    std::map<std::string, V> variableStack ;
+    // std::map<std::string, V> variableStack ;
     
-    for (horseIR::ast::StatementIterator iterator = method->begin(); iterator != method->end(); ) {
-        auto* statement = *iterator ;
-        switch (statement->getStatementClass()) {
-        case horseIR::ast::Statement::StatementClass::Assign: {
-            auto* invokeStmt = static_cast<horseIR::ast::AssignStatement*>(statement) ;
-            // assert(invokeStmt->isInvocation()) ;
-            assert(invokeStmt->getIsInvocation()) ;
-            auto* invokeTargetOperand = invokeStmt->getInvokeTarget() ;
-            assert(invokeTargetOperand->getOperandClass() == horseIR::ast::Operand::OperandClass::Literal) ;
-            auto* literal = static_cast<horseIR::ast::Literal*>(invokeTargetOperand) ;
-            assert(literal->getLiteralClass() == horseIR::ast::Literal::LiteralClass::FunctionLiteral) ;
-            auto* function = static_cast<horseIR::ast::FunctionLiteral*>(literal) ;
-            std::string builtinFunc = function->getValue() ;
-            V lhsValue = allocNode() ;
-            const std::vector<horseIR::ast::Operand*> parameters = invokeStmt->getParameters() ;
-            if (builtinFunc == "column_value") {
-                pfnColumnValue(lhsValue,
-                               handleParameter(parameters[0], variableStack),
-                               handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "index_of") {
-                pfnIndexOf(lhsValue,
-                           handleParameter(parameters[0], variableStack),
-                           handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "find_valid_index") {
-                pfnFindValidIndex(lhsValue,
-                                  handleParameter(parameters[0], variableStack),
-                                  handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "find_valid_item") {
-                pfnFindValidItem(lhsValue,
-                                 handleParameter(parameters[0], variableStack),
-                                 handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "index") {
-                pfnIndex(lhsValue,
-                         handleParameter(parameters[0], variableStack),
-                         handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "dict") {
-                pfnDict(lhsValue,
-                        handleParameter(parameters[0], variableStack),
-                        handleParameter(parameters[1], variableStack)) ;
-            } else if (builtinFunc == "list") {
-                pfnList(lhsValue, 3,
-                        handleParameter(parameters[0], variableStack),
-                        handleParameter(parameters[1], variableStack),
-                        handleParameter(parameters[2], variableStack)) ;
-            } else if (builtinFunc == "table") {
-                pfnTable(lhsValue,
-                         handleParameter(parameters[0], variableStack)) ;
-            } else {
-                assert(false) ;
-                break;
-            }
-            variableStack[invokeStmt->getLHSName()->getFullName()] = lhsValue ;
-            break ;
-        }
-        case horseIR::ast::Statement::StatementClass::Return : {
-            break ;
-        }
-        default: {
-            assert(false) ;
-            break ;
-        }
-        }
-        (void) iterator.nextOnTrue() ;
-    }
+    // for (horseIR::ast::StatementIterator iterator = method->begin(); iterator != method->end(); ) {
+    //     auto* statement = *iterator ;
+    //     switch (statement->getStatementClass()) {
+    //     case horseIR::ast::Statement::StatementClass::Assign: {
+    //         auto* invokeStmt = static_cast<horseIR::ast::AssignStatement*>(statement) ;
+    //         // assert(invokeStmt->isInvocation()) ;
+    //         assert(invokeStmt->getIsInvocation()) ;
+    //         auto* invokeTargetOperand = invokeStmt->getInvokeTarget() ;
+    //         assert(invokeTargetOperand->getOperandClass() == horseIR::ast::Operand::OperandClass::Literal) ;
+    //         auto* literal = static_cast<horseIR::ast::Literal*>(invokeTargetOperand) ;
+    //         assert(literal->getLiteralClass() == horseIR::ast::Literal::LiteralClass::FunctionLiteral) ;
+    //         auto* function = static_cast<horseIR::ast::FunctionLiteral*>(literal) ;
+    //         std::string builtinFunc = function->getValue() ;
+    //         V lhsValue = allocNode() ;
+    //         const std::vector<horseIR::ast::Operand*> parameters = invokeStmt->getParameters() ;
+    //         if (builtinFunc == "column_value") {
+    //             pfnColumnValue(lhsValue,
+    //                            handleParameter(parameters[0], variableStack),
+    //                            handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "index_of") {
+    //             pfnIndexOf(lhsValue,
+    //                        handleParameter(parameters[0], variableStack),
+    //                        handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "find_valid_index") {
+    //             pfnFindValidIndex(lhsValue,
+    //                               handleParameter(parameters[0], variableStack),
+    //                               handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "find_valid_item") {
+    //             pfnFindValidItem(lhsValue,
+    //                              handleParameter(parameters[0], variableStack),
+    //                              handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "index") {
+    //             pfnIndex(lhsValue,
+    //                      handleParameter(parameters[0], variableStack),
+    //                      handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "dict") {
+    //             pfnDict(lhsValue,
+    //                     handleParameter(parameters[0], variableStack),
+    //                     handleParameter(parameters[1], variableStack)) ;
+    //         } else if (builtinFunc == "list") {
+    //             pfnList(lhsValue, 3,
+    //                     handleParameter(parameters[0], variableStack),
+    //                     handleParameter(parameters[1], variableStack),
+    //                     handleParameter(parameters[2], variableStack)) ;
+    //         } else if (builtinFunc == "table") {
+    //             pfnTable(lhsValue,
+    //                      handleParameter(parameters[0], variableStack)) ;
+    //         } else {
+    //             assert(false) ;
+    //             break;
+    //         }
+    //         variableStack[invokeStmt->getLHSName()->getFullName()] = lhsValue ;
+    //         break ;
+    //     }
+    //     case horseIR::ast::Statement::StatementClass::Return : {
+    //         break ;
+    //     }
+    //     default: {
+    //         assert(false) ;
+    //         break ;
+    //     }
+    //     }
+    //     (void) iterator.nextOnTrue() ;
+    // }
 
-    P("\n");
-    printTablePretty(variableStack["<local>.z"], -1);
+    // P("\n");
+    // printTablePretty(variableStack["<local>.z"], -1);
     R 0;
 }
 
@@ -196,11 +198,11 @@ L udfFindValidIndex(V validIndex, V colVal, V indexBool){
     L e;
     V colSize   = allocNode(), validBool  = allocNode();
     V indexSize = allocNode(), indexRange = allocNode();
-    e = pfnLen     (colSize, colVal);                    CHECK(e,1);
-    e = pfnLt      (validBool, indexBool, colSize);      CHECK(e,2);
-    e = pfnLen     (indexSize, indexBool);               CHECK(e,3);
-    e = pfnRange   (indexRange, indexSize);              CHECK(e,4);
-    e = pfnCompress(validIndex, validBool, indexRange);  CHECK(e,5);
+    e = pfnLen     (colSize, colVal);                    CHECK(e,101);
+    e = pfnLt      (validBool, indexBool, colSize);      CHECK(e,102);
+    e = pfnLen     (indexSize, indexBool);               CHECK(e,103);
+    e = pfnRange   (indexRange, indexSize);              CHECK(e,104);
+    e = pfnCompress(validIndex, validBool, indexRange);  CHECK(e,105);
     R 0;
 }
 
@@ -208,9 +210,9 @@ L udfFindValidIndex(V validIndex, V colVal, V indexBool){
 L udfFindValidItem(V validItem, V colVal, V indexBool){
     L e;
     V colSize = allocNode(), validBool = allocNode();
-    e = pfnLen     (colSize, colVal);                   CHECK(e,1);
-    e = pfnLt      (validBool, indexBool, colSize);     CHECK(e,2);
-    e = pfnCompress(validItem, validBool, indexBool);   CHECK(e,3);
+    e = pfnLen     (colSize, colVal);                   CHECK(e,201);
+    e = pfnLt      (validBool, indexBool, colSize);     CHECK(e,202);
+    e = pfnCompress(validItem, validBool, indexBool);   CHECK(e,203);
     R 0;
 }
 
@@ -219,42 +221,46 @@ L udfFindValidItem(V validItem, V colVal, V indexBool){
  */
 L simulateSimpleRaw(){
     L e;
-    V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V d0 = allocNode();
-    V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V d1 = allocNode();
-    V s2 = allocNode();  V t2 = allocNode();  V r2 = allocNode();  V d2 = allocNode();
+    V s0 = allocNode();  V t0 = allocNode();  V r0 = allocNode();  V k0 = allocNode();
+    V s1 = allocNode();  V t1 = allocNode();  V r1 = allocNode();  V k1 = allocNode();
+    V s2 = allocNode();  V t2 = allocNode();  V r2 = allocNode();  V k2 = allocNode();
     V s3 = allocNode();
     V z0 = allocNode();  V z = allocNode();
+    V a0 = allocNode();  V a1= allocNode();
     P("** Start simulation\n");
+    e = pfnLoadTable(a0, initSymbol(allocNode(),getSymbol((S)"Employee")));   CHECK(e,1);
+    e = pfnLoadTable(a1, initSymbol(allocNode(),getSymbol((S)"Department"))); CHECK(e,2);
+
     e = pfnColumnValue(s0, \
-          initSymbol(allocNode(),getSymbol((S)"Employee")), \
-          initSymbol(allocNode(),getSymbol((S)"LastName")));       CHECK(e,1);
+          a0, \
+          initSymbol(allocNode(),getSymbol((S)"LastName")));       CHECK(e,3);
     e = pfnColumnValue(s1, \
-          initSymbol(allocNode(),getSymbol((S)"Employee")), \
-          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,2);
+          a0, \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,4);
     e = pfnColumnValue(s2, \
-          initSymbol(allocNode(),getSymbol((S)"Department")), \
-          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,3);
+          a1, \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentID")));   CHECK(e,5);
     e = pfnColumnValue(s3, \
-          initSymbol(allocNode(),getSymbol((S)"Department")), \
-          initSymbol(allocNode(),getSymbol((S)"DepartmentName"))); CHECK(e,4);
+          a1, \
+          initSymbol(allocNode(),getSymbol((S)"DepartmentName"))); CHECK(e,6);
 
-    e = pfnIndexOf       (t0, s2, s1);     CHECK(e,5);
-    e = udfFindValidIndex(t1, s2, t0);     CHECK(e,6);
-    e = udfFindValidItem (t2, s2, t0);     CHECK(e,7);
+    e = pfnIndexOf       (t0, s2, s1);     CHECK(e,7);
+    e = udfFindValidIndex(t1, s2, t0);     CHECK(e,8);
+    e = udfFindValidItem (t2, s2, t0);     CHECK(e,9);
 
-    e = pfnIndex    (r0, s0, t1);     CHECK(e,8);
-    e = pfnIndex    (r1, s1, t1);     CHECK(e,9);
-    e = pfnIndex    (r2, s3, t2);     CHECK(e,10);
+    e = pfnIndex    (r0, s0, t1);     CHECK(e,10);
+    e = pfnIndex    (r1, s1, t1);     CHECK(e,11);
+    e = pfnIndex    (r2, s3, t2);     CHECK(e,12);
 
-    e = pfnDict     (d0, \
-          initSymbol(allocNode(),getSymbol((S)"LastName")),      r0);  CHECK(e,11);
-    e = pfnDict     (d1, \
-          initSymbol(allocNode(),getSymbol((S)"DepartmentID")),  r1);  CHECK(e,12);
-    e = pfnDict     (d2, \
-          initSymbol(allocNode(),getSymbol((S)"DepartmentName")),r2);  CHECK(e,13);
+    initV(k0,H_Q,3);                  CHECK(e,13);
+    vQ(k0,0)=getSymbol((S)"LastName");
+    vQ(k0,1)=getSymbol((S)"DepartmentID");
+    vQ(k0,2)=getSymbol((S)"DepartmentName");
 
-    e = pfnList     (z0, 3, d0, d1, d2); CHECK(e,14);
-    e = pfnTable    (z, z0);             CHECK(e,15);
+    e = pfnTolist(k1, k0);          CHECK(e,14);
+    e = pfnList(k2, 3, r0, r1, r2); CHECK(e,15);
+    e = pfnTable(z, k1, k2);        CHECK(e,16);
+
     P("Result of the join of table Employee and Department:\n\n");
     printTablePretty(z, -1);
     R 0;
@@ -284,21 +290,34 @@ void testOrderBy(){
     printList(z);
 }
 
+#include "test_types.h"
+
 L testMain(){
     initMain();  // memory
     initSym();   // symbol
     initSys();
     initTable(); // table
-    P("Reading table Employee\n");
-    V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
-    registerTable((S)"Employee", tableEmp);
-    P("Reading table Department\n");
-    V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
-    registerTable((S)"Department", tableDep);
-    /* Simulation */
-    // simulateSimple();
-    // simulateSimpleRaw();
-    testOrderBy();
+    L op = 2;
+    if(1==op){
+        P("Reading table Employee\n");
+        V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
+        registerTable((S)"Employee", tableEmp);
+        P("Reading table Department\n");
+        V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
+        registerTable((S)"Department", tableDep);
+        /* Simulation */
+        // simulateSimple();
+        simulateSimpleRaw();
+    }
+    else if(2==op){
+        testTypes();
+    }
+    else if(3==op){
+        testOrderBy();
+    }
+    else {
+        /* .... */
+    }
     /* Print info */
     printSymInfo();
     printHeapInfo();

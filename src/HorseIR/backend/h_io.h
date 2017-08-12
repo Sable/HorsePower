@@ -20,19 +20,24 @@ void errorMsg         (S msg);
 
 /* output */
 
-void printItem        (V x, S strBuff);
-void printListItem    (V x, L k, S strBuff);
-void printList        (V x);
-void printDict        (V x);
-void printTable       (V x);
-void printTablePretty (V x, L rowLimit);
-void printKTablePretty(V x, L rowLimit);
-void printEnumPretty  (V x);
-void printDictPretty  (V x);
-void printStrPretty   (S str, L maxSize);
+L getTypeStr          (L x, S buff);
+L getComplexStr       (X x, S buff);
+L getBasicItemStr     (V x, L k, S buff, B hasTick);
+L getColWidth         (V x);
+L getStrPretty        (S str, L maxSize);
 
-L    getColWidth      (V x);
-L    getListInfo      (V x, L k, S strBuff);
+L printType           (L x);
+L printBasicItem      (V x, L k);
+L printInfo           (V x);
+L printBasicValue     (V x, B hasTag);
+L printList           (V x);
+L printDict           (V x);
+L printEnum           (V x);
+L printValue          (V x);
+L printV              (V x);
+L printTable          (V x);
+L printKTable         (V x);
+L printTablePretty    (V x, L rowLimit);
 
 #ifdef	__cplusplus
 }

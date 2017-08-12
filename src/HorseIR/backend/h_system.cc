@@ -32,20 +32,24 @@ V findTableByName(L sid){
 
 /* copy x to z */
 L copyV(V z, V x){
-    initV(z,xp,xn);
-    if(isTypeGroupScalar(xp)){
-        memcpy(vg(z),vg(x),getTypeSize(xp)*xn);
-    }
-    else {
-        switch(xp){
-            caseG DOI(xn, CHECKE(copyV(vV(z,i),vV(x,i)))) break;
-        }
-    }
+    *z = *x;
     R 0;
 }
+// L copyV(V z, V x){
+//     initV(z,xp,xn);
+//     if(isTypeGroupScalar(xp)){
+//         memcpy(vg(z),vg(x),getTypeSize(xp)*xn);
+//     }
+//     else {
+//         switch(xp){
+//             caseG DOI(xn, CHECKE(copyV(vV(z,i),vV(x,i)))) break;
+//         }
+//     }
+//     R 0;
+// }
 
 L findColFromTable(V x, L cId){
-    DOI(vn(x), if(cId == vq(getDictKey(getTableDict(x,i))))R i)
+    DOI(vn(x), if(cId == vq(getColKey(getTableCol(x,i))))R i)
     R -1;
 }
 
@@ -258,19 +262,19 @@ L getEnumValue(V z, V x){
 L getDictValue(V z, V x){
     R 0;
 }
-L getColumnValue(V z, V x, V y){
+L getColumnValue(V z, V x){
     R 0;
 }
 
-V getDictKey(V x) { R xV(0); }
+V getColKey(V x) { R xV(0); }
 
-V getDictVal(V x) { R xV(1); }
+V getColVal(V x) { R xV(1); }
 
-V getTableDict(V x, L k) { R xV(k); }
+V getTableCol(V x, L k) { R xV(k); }
 
 L getTableRowNumber(V x){
     R va(x).row;
-    // R (vn(x)>0?vn(getDictVal(getTableDict(x,0))):0);
+    // R (vn(x)>0?vn(getColVal(getTableCol(x,0))):0);
 }
 
 L getTableColNumber(V x){
@@ -313,7 +317,7 @@ B isTypeGroupNumeric(L t){
 }
 
 B isTypeGroupBasic(L t){
-    R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupDTime(t));
+    R (isTypeGroupReal(t) || H_C==t || H_Q==t || H_X==t || isTypeGroupDTime(t));
 }
 
 B isTypeGroupColumn(L t){

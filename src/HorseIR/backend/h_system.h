@@ -37,9 +37,9 @@ L matchPair           (B *t, V x, V y);
 L getEnumValue        (V z, V x);
 L getDictValue        (V z, V x);
 L getColumnValue      (V z, V x);
-V getDictKey          (V x);
-V getDictVal          (V x);
-V getTableDict        (V x, L k);
+V getColKey           (V x);
+V getColVal           (V x);
+V getTableCol         (V x, L k);
 L getTableRowNumber   (V x);
 L getTableColNumber   (V x);
 

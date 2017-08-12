@@ -141,8 +141,35 @@ void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
 }
 
 
+void lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
+    B flag[2]={0};
+    DOI(sLen, flag[src[i]]=1)
+    DOI(vLen, targ[i]=flag[val[i]])
+}
 
+void lib_member_H(B* targ, H* src, L sLen, H* val, L vLen){
+}
 
+void lib_member_I(B* targ, I* src, L sLen, I* val, L vLen){
+}
+
+void lib_member_L(B* targ, L* src, L sLen, L* val, L vLen){
+}
+
+void lib_member_F(B* targ, F* src, L sLen, F* val, L vLen){
+}
+
+void lib_member_E(B* targ, E* src, L sLen, E* val, L vLen){
+}
+
+void lib_member_C(B* targ, C* src, L sLen, C* val, L vLen){
+}
+
+void lib_member_X(B* targ, X* src, L sLen, X* val, L vLen){
+}
+
+void lib_member_Q(B* targ, Q* src, L sLen, Q* val, L vLen){
+}
 
 
 

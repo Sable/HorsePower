@@ -2,6 +2,7 @@
 
 const L LINE_MAX_CHAR = 1024;
 const C LINE_SEP      = '|';
+const L BUFF_SIZE     = 128;
 
 /*
  * 1: csv
@@ -21,10 +22,10 @@ V readCSV(S fileName, L numCols, L *types, L *symList){
     FILE *fp = openFile(fileName);
     L numRow = loadCSV(fp, false, NULL, numCols, NULL);
     V x = allocTable(numCols);
-    DOI(numCols, {V newDict=xV(i); \
-        initDict(newDict); \
-        initSymbol(vV(newDict, 0), symList[i]); \
-        initValue (vV(newDict, 1), types[i], numRow);});
+    DOI(numCols, {V cell=xV(i); \
+        initList(cell,2); \
+        initSymbol(vV(cell,0), symList[i]); \
+        initValue (vV(cell,1), types[i], numRow);})
 
     if(H_DEBUG) P("** Done with initialization **\n");
     rewind(fp);
@@ -51,8 +52,13 @@ L loadCSV(FILE *fp, B isLoading, V table, L numCols, L *types){
         fprintf(stderr, "readCSV error at line %lld\n", rowID);
         exit(ERROR_CODE);
     }
-    if(!isLoading)
+    if(!isLoading){
         P(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
+    }
+    else {
+        va(table).row = rowSize;
+        va(table).col = numCols;
+    }
     R rowSize;
 }
 
@@ -64,7 +70,7 @@ L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
     DOI(strLen, {\
         if(sp==lineT[i]){\
             tmp[cnt]=0; trimSelf(tmp); \
-            loadItem(getDictVal(getTableDict(x,numCols)),rowID,types[numCols],tmp);\
+            loadItem(getColVal(getTableCol(x,numCols)),rowID,types[numCols],tmp);\
             cnt=0;numCols++;}\
         else{tmp[cnt++]=lineT[i];}})
     R numCols;
@@ -127,118 +133,228 @@ void errorMsg(S msg){
 
 /* output */
 
-void printListItem(V x, L k, S strBuff){
+#define FT(s,x) FP(stdout,s,x)
+#define FS(x)   FT("%s",x)
+
+L getTypeStr(L x, S buff){
+    L c = 0;
+    switch(x){
+        caseB c=SP(buff, "bool");    break;
+        caseH c=SP(buff, "short");   break;
+        caseI c=SP(buff, "i32");     break;
+        caseL c=SP(buff, "i64");     break;
+        caseF c=SP(buff, "f32");     break;
+        caseE c=SP(buff, "f64");     break;
+        caseQ c=SP(buff, "sym");     break;
+        caseX c=SP(buff, "complex"); break;
+        caseM c=SP(buff, "m");       break;
+        caseD c=SP(buff, "d");       break;
+        caseZ c=SP(buff, "z");       break;
+        caseU c=SP(buff, "u");       break;
+        caseW c=SP(buff, "w");       break;
+        caseT c=SP(buff, "t");       break;
+        caseG c=SP(buff, "List");    break;
+        caseN c=SP(buff, "dict");    break;
+        caseY c=SP(buff, "enum");    break;
+        caseA c=SP(buff, "table");   break;
+        caseK c=SP(buff, "ktable");  break;
+        caseV c=SP(buff, "item");    break;
+        default: c=SP(buff, "<unknown::%lld>",x); break;
+    }
+    R c;
+}
+
+L printType(L x){
+    C buff[BUFF_SIZE];
+    getTypeStr(x, buff);
+    R FS(buff);
+}
+
+L getComplexStr(X x, S buff){
+    L c0=SP(buff, "%g",xReal(x)),c1;
+    if(xImag(x)<0){
+        c1=SP(buff+c0, "%gi",xImag(x));
+    }
+    else if(xImag(x)>0){
+        c1=SP(buff+c0, "+%gi",xImag(x));
+    }
+    R c0+c1;
+}
+
+/*
+ * hasTick: true (default)
+ */
+L getBasicItemStr(V x, L k, S buff, B hasTick){
+    L c = 0;
     switch(xp){
-        caseB SP(strBuff, "%d"  , xB(k)); break;
-        caseH SP(strBuff, "%d"  , xH(k)); break;
-        caseI SP(strBuff, "%d"  , xI(k)); break;
-        caseL SP(strBuff, "%lld", xL(k)); break;
-        caseF SP(strBuff, "%f",   xF(k)); break;
-        caseE SP(strBuff, "%lf" , xE(k)); break;
-        caseX SP(strBuff, "%g+%gi" , xReal(xX(k)),xImag(xX(k))); break;
-        caseQ printSymbol(xQ(k), strBuff);break;
-        caseA DOI(xn, {printListItem(xG(i),i,strBuff);}) return;
+        caseB c=SP(buff, "%d"  , xB(k));   break;
+        caseH c=SP(buff, "%d"  , xH(k));   break;
+        caseI c=SP(buff, "%d"  , xI(k));   break;
+        caseL c=SP(buff, "%lld", xL(k));   break;
+        caseF c=SP(buff, "%f"  , xF(k));   break;
+        caseE c=SP(buff, "%lf" , xE(k));   break;
+        caseX c=getComplexStr(xX(k),buff); break;
+        caseQ c=hasTick? \
+                printSymTick(xQ(k), buff): \
+                printSymbol(xQ(k), buff);  break;
+        /* date time */
+        caseM c=SP(buff, "%d.%02d", \
+                   xM(k)/100, \
+                   xM(k)%100);             break;
+        caseD c=SP(buff, "%d.%02d.%02d", \
+                   xD(k)/10000, \
+                   xD(k)/100%100, \
+                   xD(k)%100);             break;
+        // caseZ c=SP(buff, "%d.%02d.%02dT%02d:%02d:%02d.%03d")
     }
-    P(" %s", strBuff);
+    R c;
 }
 
-void printHead(V x){
-    P("{["); printType(xp); P("]");
+L printBasicItem(V x, L k){
+    C buff[BUFF_SIZE];
+    getBasicItemStr(x,k,buff,1);
+    R FS(buff);
 }
 
-void printList(V x){
-    C buff[128];
-    printHead(x); P("*%lld*",xn);
-    DOI(xn, printListItem(x,i,buff));
-    P("}");
+L printInfo(V x){
+    FS("{["); printType(xp); FT("*%lld*",xn); FS("]}"); R 0;
 }
 
-void printDict(V x){
-    if(isDict(x)){
-        printHead(x);
-        printList(xV(0));
-        P(",");
-        printList(xV(1));
-        P("}");
+L printBasicValue(V x, B hasTag){
+    if(xn==1) printBasicItem(x,0);
+    else {
+        FS("("); DOI(xn, {if(i>0)FS(","); printBasicItem(x,i);}); FS(")");
     }
-    else{
-        P("<Not a dictionary>");
+    if(hasTag) {
+        FS(":"); printType(xp);
     }
+    R 0;
 }
 
-void printTable(V x){
-    if(isTable(x)){
-        printHead(x);
-        DOI(xn, {if(i>0)P(","); printDict(xV(i));})
-        P("}");
+L printList(V x){
+    FS("(");
+    DOI(xn, {if(i>0)FS(","); printValue(xV(i));})
+    FS("):List"); R 0;
+}
+
+L printDict(V x){
+    FS("{");
+    DOI(xn, {printValue(vV(xV(i),0)); FS(" -> "); printValue(vV(xV(i),1));})
+    FS("}"); R 0;
+}
+
+L printEnum(V x){
+    FS("<");
+    FS(getSymbolStr(getEnumName(x)));
+    /* print enum */
+    FS(">"); R 0;
+}
+
+L printValue(V x){
+    if(H_DEBUG) printInfo(x);
+    if(isTypeGroupBasic(xp)){
+        printBasicValue(x, true);
     }
     else {
-        P("<Not a table>\n");
+        switch(xp){
+            caseG printList(x);   break;
+            caseN printDict(x);   break;
+            caseY printEnum(x);   break;
+            caseA printTable(x);  break;
+            caseK printKTable(x); break;
+            default: R E_DOMAIN;
+        }
     }
+    R 0;
+}
+
+L printV(V x){
+    printValue(x); FS("\n"); R 0;
+}
+
+L printTable(V x){
+    printTablePretty(x,-1);
+    R 0;
+}
+
+L printKTable(V x){
+    printTablePretty(x,-1);
+    R 0;
 }
 
 /* pretty print */
 
-void printTablePretty(V x, L rowLimit){
+L printTablePretty(V x, L rowLimit){
+    L totSize = 0;  C buff[BUFF_SIZE];
     if(isTable(x)){
         L *colWidth = (L*)malloc(sizeof(L) * vn(x));
-        L totSize = 0;  C buff[99];
-        DOI(vn(x), colWidth[i]=getColWidth(getTableDict(x,i)))
+        DOI(vn(x), colWidth[i]=getColWidth(getTableCol(x,i)))
         DOI(vn(x), totSize+=colWidth[i]); totSize += vn(x);
         // DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
         /* print head */
-        DOI(vn(x), {V d=getTableDict(x,i); V key = getDictKey(d); \
-            printSymbol(vq(key),buff); printStrPretty(buff,colWidth[i]); P("%s|",buff); })
-        P("\n");
-        DOI(totSize, P("-"));
-        P("\n");
+        FS("|");
+        DOI(vn(x), {V key = getColKey(getTableCol(x,i)); \
+            printSymbol(vq(key),buff); getStrPretty(buff,colWidth[i]); FT("%s|",buff); })
+        FS("\n");
+        DOI(totSize+1, FS("-"));
+        FS("\n");
         /* print body */
         L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
-        DOI(rowPrint,
-            {DOJ(vn(x), {V d=getTableDict(x,j); V val = getDictVal(d); \
-                getListInfo(val,i,buff); printStrPretty(buff,colWidth[j]); P("%s|",buff);})
-            P("\n");})
-        P("\n");
+        DOI(rowPrint,  {FS("|"); \
+            DOJ(vn(x), {V val = getColVal(getTableCol(x,j)); \
+                getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s|",buff);}) \
+            FS("\n"); \
+            })
+        FS("\n");
         free(colWidth);
     }
-    else{
-        P("<Not a tbale> - From printTablePretty\n");
+    else if(isKTable(x)){
+        V key = getKTableKey(x);
+        V val = getKTableVal(x);
+        L *colWidthKey = (L*)malloc(sizeof(L) * vn(key));
+        L *colWidthVal = (L*)malloc(sizeof(L) * vn(val));
+        DOI(vn(key), colWidthKey[i]=getColWidth(getTableCol(key,i)))
+        DOI(vn(key), totSize+=colWidthKey[i]); totSize += vn(key);
+        DOI(vn(val), colWidthVal[i]=getColWidth(getTableCol(val,i)))
+        DOI(vn(val), totSize+=colWidthVal[i]); totSize += vn(val);
+        /* print head */
+        P("|");
+        DOI(vn(key),{V t=getColKey(getTableCol(key,i)); \
+            printSymbol(vq(t),buff); getStrPretty(buff,colWidthKey[i]); FT("%s|",buff); })
+        DOI(vn(val),{V t=getColKey(getTableCol(val,i)); \
+            printSymbol(vq(t),buff); getStrPretty(buff,colWidthVal[i]); FT("%s|",buff); })
+        FS("\n");
+        DOI(totSize+1, FS("-"));
+        FS("\n");
+        /* print body */
+        L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
+        DOI(rowPrint, {P("|");\
+             DOJ(vn(key), {V t=getColVal(getTableCol(key,j)); \
+                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthKey[j]); FT("%s|",buff);}) \
+             DOJ(vn(val), {V t=getColVal(getTableCol(val,j)); \
+                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthVal[j]); FT("%s|",buff);}) \
+             FS("\n"); \
+            })
+        FS("\n");
+        free(colWidthKey);
+        free(colWidthVal);
     }
-}
-
-void printKTablePretty(V x, L rowLimit){
-}
-
-void printEnumPretty(V x){
-}
-
-/* JSON like */
-void printDictPretty(V x){
+    else{
+        P("<Not a table/ktable> - From printTablePretty\n");
+    }
+    R 0;
 }
 
 L getColWidth(V x){
-    V key = getDictKey(x);
-    V val = getDictVal(x);
-    C buff[99];
+    V key = getColKey(x);
+    V val = getColVal(x);
+    C buff[BUFF_SIZE];
     L maxSize = getSymbolSize(vq(key));
-    DOI(vn(val), {L t=getListInfo(val,i,buff); if(t>maxSize)maxSize=t;})
+    DOI(vn(val), {L t=getBasicItemStr(val,i,buff,0); if(t>maxSize)maxSize=t;})
     R maxSize;
 }
 
-L getListInfo(V x, L k, S strBuff){
-    switch(xp){
-        caseB SP(strBuff, "%d"  , xB(k)); break;
-        caseI SP(strBuff, "%d"  , xI(k)); break;
-        caseL SP(strBuff, "%lld", xL(k)); break;
-        caseE SP(strBuff, "%lf" , xF(k)); break;
-        caseQ printSymbol(xQ(k), strBuff);break;
-        default: P("Error in getListInfo: type %lld\n",xp); exit(99);
-    }
-    R strlen(strBuff);
-}
-
-
-void printStrPretty(S str, L maxSize){
+L getStrPretty(S str, L maxSize){
     L len = strlen(str);
     while(len < maxSize) {
         str[len++] = ' ';
@@ -246,5 +362,6 @@ void printStrPretty(S str, L maxSize){
     if(len == maxSize) {
         str[len] = 0;
     }
+    R 0;
 }
 

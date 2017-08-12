@@ -30,8 +30,6 @@ V initValue   (V x, L typ, L len);
 V initTable   (V x, L numCols);
 V initKTable  (V x);
 
-void printType    (L x);
-void printTypeStr (L x, S buff);
 void printHeapInfo();
 
 #ifdef	__cplusplus
