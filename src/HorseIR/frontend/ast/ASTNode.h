@@ -14,8 +14,8 @@ class ASTNode {
   enum class ASTNodeClass {
     NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
     Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
-    FunctionLiteral, TableLiteral, Identifier, PrimitiveType, WildcardType,
-    ListType, DictionaryType, EnumerationType, FunctionType,
+    StringLiteral, FunctionLiteral, TableLiteral, Identifier, PrimitiveType,
+    WildcardType, ListType, DictionaryType, EnumerationType, FunctionType,
     CompilationUnit, Module, Method, LabelStatement, BranchStatement,
     PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
   };

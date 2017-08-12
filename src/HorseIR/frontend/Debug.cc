@@ -55,13 +55,13 @@ const char *rawProgram = ""
 int main (int argc, const char *argv[])
 {
 
-  const std::string raw = R"((null, null, '\x4B', '\071') : char)";
+  const std::string raw = R"((null, "first string","second string"))";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  HorseIRParser::LiteralCharContext *context = parser.literalChar ();
+  HorseIRParser::LiteralStringContext *context = parser.literalString ();
 
 
   ast::ASTNode::ASTNodeMemory mem ;

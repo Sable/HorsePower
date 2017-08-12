@@ -56,23 +56,21 @@ literalBool      : boolValueN ':' 'bool'                               #literalB
                  | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'  #literalBoolCase1
                  ;
 charValue        : value=LITERAL_CHAR ;
-literalChar      : charValue (':' 'char')?                            #literalCharCase0
-                 | LITERAL_CHAR_VECTOR (':' 'char')?                  #literalCharCase1
-                 | '(' ')' ':' 'char'                                 #literalCharCase2
+literalChar      : charValue (':' 'char')?                             #literalCharCase0
+                 | LITERAL_CHAR_VECTOR (':' 'char')?                   #literalCharCase1
+                 | '(' ')' ':' 'char'                                  #literalCharCase2
                  | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? charValue (',' (charValue | NULL_TOKEN))* ')' (':' 'char')?
-                                                                      #literalCharCase3
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'    #literalCharCase4
-                 | NULL_TOKEN ':' 'char'                              #literalCharCase5
+                                                                       #literalCharCase3
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'     #literalCharCase4
+                 | NULL_TOKEN ':' 'char'                               #literalCharCase5
                  ;
 stringValue      : LITERAL_STRING ;
-stringValueN     : LITERAL_STRING | NULL_TOKEN ;
-literalString    : stringValue (':' 'str')?
-                 | '(' stringValue (',' stringValue)* ')' (':' 'str')?
-                 | '(' ')' ':' 'str'
-                 | '(' NULL_TOKEN (',' stringValueN)* (',' stringValue) (',' stringValueN)* ')' (':' 'str')?
-                 | '(' stringValue (',' stringValueN)* (',' NULL_TOKEN) (',' stringValueN)* ')' (':' 'str')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'
-                 | NULL_TOKEN ':' 'str'
+literalString    : stringValue (':' 'str')?                            #literalStringCase0
+                 | '(' ')' ':' 'str'                                   #literalStringCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? stringValue (',' (stringValue | NULL_TOKEN))* ')' (':' 'str')?
+                                                                       #literalStringCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'      #literalStringCase3
+                 | NULL_TOKEN ':' 'str'                                #literalStringCase4
                  ;
 intValueN        : ('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
 literalInteger   : intValueN ':' ('i8' | 'i16' | 'i32' | 'i64')
@@ -202,8 +200,8 @@ type            : token=( 'bool'    |
                           'i8'      | 'i16' | 'i32' | 'i64' |
                           'f32'     | 'f64' |
                           'complex' |
-                          'sym'     |
-                          'm' | 'd' | 'z' | 'u' | 'v' | 't' |
+                          'sym'     | 'str' |
+                          'm' | 'd' | 'z'   | 'u'   | 'v'   | 't' |
                           'table'   | 'ktable'              ) #typeCasePrimitive
 
                 | '?'                                         #typeCaseWildcard

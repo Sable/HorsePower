@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../AST.h"
 #include "../../misc/InfixOStreamIterator.h"
+#include "../AST.h"
 
 namespace horseIR
 {
@@ -10,7 +10,7 @@ namespace ast
 
 class CharLiteral : public Literal {
  public:
-  using ElementType = Literal::VectorElemWrapper<std::uint_fast8_t>;
+  using ElementType = Literal::VectorElemWrapper<std::uint8_t>;
 
   explicit CharLiteral (ASTNodeMemory &mem);
   CharLiteral (ASTNodeMemory &mem, const CSTType *cst);
@@ -80,9 +80,7 @@ inline std::string CharLiteral::toString () const
   std::transform (
       value.begin (), value.cend (), std::back_inserter (segments),
       [] (const ElementType &elementType) -> std::string
-      {
-        return CharLiteral::elementToString (elementType);
-      });
+      { return CharLiteral::elementToString (elementType); });
   std::copy (segments.cbegin (), segments.cend (),
              misc::InfixOStreamIterator<std::string> (stream, ", "));
   stream << ") :"

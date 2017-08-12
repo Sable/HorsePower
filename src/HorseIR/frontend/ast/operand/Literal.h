@@ -11,8 +11,8 @@ class Literal : public Operand {
  public:
   enum class LiteralClass {
     Bool, Character, Integer8, Integer16, Integer32, Integer64, FP32, FP64,
-    Complex, Symbol, Date, DateTime, Minute, Month, Second, Time, Function,
-    List, Dictionary, Enumeration, Table, KeyTable
+    Complex, Symbol, String, Date, DateTime, Minute, Month, Second, Time,
+    Function, List, Dictionary, Enumeration, Table, KeyTable
   };
 
   template<class T, typename = std::enable_if_t<!std::is_pointer<T>::value>>

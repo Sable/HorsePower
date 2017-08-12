@@ -26,7 +26,6 @@ struct CSTConverter {
 
   using ASTNodeMemory = ASTNode::ASTNodeMemory;
 
-
   using LiteralBool = HorseIRParser::LiteralBoolContext;
   using LiteralBoolCase0 = HorseIRParser::LiteralBoolCase0Context;
   using LiteralBoolCase1 = HorseIRParser::LiteralBoolCase1Context;
@@ -244,8 +243,7 @@ struct CSTConverter {
     if (!verifyEscapeChar (rawString)) throw CSTConverterException (charValue);
     const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
     assert (converted.size () == 1);
-    return
-        CharLiteral::ElementType (converted[0]);
+    return CharLiteral::ElementType (converted[0]);
   }
 
   static CharLiteral *
@@ -266,6 +264,8 @@ struct CSTConverter {
     const auto tokenPtr = literalCharContext->LITERAL_CHAR_VECTOR ();
     std::string rawString = tokenPtr->getText ();
     rawString = rawString.substr (1, rawString.size () - 2);
+    if (!verifyEscapeChar (rawString))
+      throw CSTConverterException (literalCharContext);
     std::vector<CharLiteral::ElementType> valueVector{};
     const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
     std::transform (
@@ -348,6 +348,132 @@ struct CSTConverter {
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
     return charLiteral;
+  }
+
+  using LiteralStringContext = HorseIRParser::LiteralStringContext;
+  using LiteralStringCase0Context = HorseIRParser::LiteralStringCase0Context;
+  using LiteralStringCase1Context = HorseIRParser::LiteralStringCase1Context;
+  using LiteralStringCase2Context = HorseIRParser::LiteralStringCase2Context;
+  using LiteralStringCase3Context = HorseIRParser::LiteralStringCase3Context;
+  using LiteralStringCase4Context = HorseIRParser::LiteralStringCase4Context;
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringContext *stringContext)
+  {
+    assert (stringContext != nullptr);
+    LiteralStringCase0Context *case0 = nullptr;
+    LiteralStringCase1Context *case1 = nullptr;
+    LiteralStringCase2Context *case2 = nullptr;
+    LiteralStringCase3Context *case3 = nullptr;
+    LiteralStringCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(stringContext)) != nullptr)
+      return convert (mem, case0);
+    if ((case1 = dynamic_cast<decltype (case1)>(stringContext)) != nullptr)
+      return convert (mem, case1);
+    if ((case2 = dynamic_cast<decltype (case2)>(stringContext)) != nullptr)
+      return convert (mem, case2);
+    if ((case3 = dynamic_cast<decltype (case3)>(stringContext)) != nullptr)
+      return convert (mem, case3);
+    if ((case4 = dynamic_cast<decltype (case4)>(stringContext)) != nullptr)
+      return convert (mem, case4);
+
+    throw CSTConverterException (stringContext);
+  }
+
+  static StringLiteral::ElementType
+  convert (HorseIRParser::StringValueContext *stringValueContext)
+  {
+    assert (stringValueContext != nullptr);
+    std::string rawString = stringValueContext->LITERAL_STRING ()->getText ();
+    rawString = rawString.substr (1, rawString.length () - 2);
+    if (!verifyEscapeChar (rawString))
+      throw CSTConverterException (stringValueContext);
+    const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
+    return StringLiteral::ElementType (std::move (converted));
+  }
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringCase0Context *stringContext)
+  {
+    assert (stringContext != nullptr);
+    std::vector<StringLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convert (stringContext->stringValue ()));
+    auto stringLiteral = new StringLiteral (mem, stringContext);
+    stringLiteral->setValue (std::move (valueVector));
+    return stringLiteral;
+  }
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringCase1Context *stringContext)
+  {
+    assert (stringContext != nullptr);
+    auto stringLiteral = new StringLiteral (mem, stringContext);
+    return stringLiteral;
+  }
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringCase2Context *stringContext)
+  {
+    assert (stringContext != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    using StringValueContext = HorseIRParser::StringValueContext;
+    const std::vector<ParseTree *> rawChildren = stringContext->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
+        {
+          if (dynamic_cast<StringValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<StringLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> StringLiteral::ElementType
+        {
+          StringValueContext *string = nullptr;
+          if ((string = dynamic_cast<decltype (string)>(parseTree)) != nullptr)
+            { return convert (string); }
+          else
+            { return StringLiteral::ElementType (nullptr); }
+        });
+    auto stringLiteral = new StringLiteral (mem, stringContext);
+    stringLiteral->setValue (std::move (valueVector));
+    return stringLiteral;
+  }
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringCase3Context *stringContext)
+  {
+    assert (stringContext != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    std::size_t nullCount = 0;
+    const std::vector<ParseTree *> rawChildren = stringContext->children;
+    for (auto iter = rawChildren.cbegin (); iter != rawChildren.cend (); ++iter)
+      { if ((*iter)->getText () == "null") nullCount += 1; }
+    std::vector<StringLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullCount);
+    for (std::size_t iter = 0; iter < nullCount; ++iter)
+      { valueVector.emplace_back (nullptr); }
+    auto stringLiteral = new StringLiteral (mem, stringContext);
+    stringLiteral->setValue (std::move (valueVector));
+    return stringLiteral;
+  }
+
+  static StringLiteral *
+  convert (ASTNodeMemory &mem, LiteralStringCase4Context *stringContext)
+  {
+    assert (stringContext != nullptr);
+    std::vector<StringLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (nullptr);
+    auto stringLiteral = new StringLiteral (mem, stringContext);
+    stringLiteral->setValue (std::move (valueVector));
+    return stringLiteral;
   }
 
   using TypeContext = HorseIRParser::TypeContext;

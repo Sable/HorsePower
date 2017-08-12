@@ -38,3 +38,4 @@
 #include "operand/Literal.h"
 #include "operand/BoolLiteral.h"
 #include "operand/CharLiteral.h"
+#include "operand/StringLiteral.h"
