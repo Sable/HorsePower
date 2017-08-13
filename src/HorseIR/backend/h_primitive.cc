@@ -389,7 +389,7 @@ L pfnSignum(V z, V x){
 }
 
 L pfnPi(V z, V x){
-    if(isTypeGroupRealX(vp(x))){
+    if(isTypeGroupNumber(vp(x))){
         L typZ = inferPi(vp(x));
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
@@ -473,19 +473,11 @@ L pfnReverse(V z, V x){
 L pfnUnique(V z, V x){
     if(isTypeGroupBasic(vp(x))){
         V z0 = allocNode();
-        L e0 = pfnIndexOf(z0,x,x); if(0!=e0) R e0;
+        CHECKE(pfnIndexOf(z0,x,x));  /* refer to indexof */
         L typZ = H_L, lenZ = 0, c = 0;
         DOI(vn(z0), lenZ += vL(z0,i)==i)
         initV(z,typZ,lenZ);
-        switch(typZ){
-            caseB DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            caseH DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            caseI DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            caseL DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            caseF DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            caseE DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i) break;
-            default: R E_NOT_IMPL; /* time */
-        }
+        DOI(vn(x), if(vL(z0,i)==i)vL(z,c++)=i)
         /* free z0 */
         R 0;
     }
@@ -634,7 +626,7 @@ L pfnTime(V z, V x){
 }
 
 L pfnEnlist(V z, V x){
-    if(isTypeGroupAll(vp(x))){
+    if(isTypeGroupAny(vp(x))){
         initV(z,H_G,1);
         CHECKE(copyV(vV(z,0),x));
         R 0;
@@ -685,51 +677,93 @@ L pfnTolist(V z, V x){
 #define COMPMORE(op,x,y) (2==op?(x>y):x>=y)
 #define COMPEQ(op,x,y) (4==op?(x==y):x!=y)
 
-/* Not impl.: C, S, Time  */
+#define COMPFN(op,x,y,fn) (2>op?COMPLESSFN(op,x,y,fn):4>op?COMPMOREFN(op,x,y,fn):6>op?COMPEQFN(op,x,y,fn):0)
+#define COMPLESSFN(op,x,y,fn) (0==op?fn(x,y)<0:fn(x,y)<=0)
+#define COMPMOREFN(op,x,y,fn) (2==op?fn(x,y)>0:fn(x,y)>=0)
+#define COMPEQFN(op,x,y,fn) (4==op?fn(x,y)==0:fn(x,y)!=0)
+
 L pfnCompare(V z, V x, V y, L op){
-    if(isTypeGroupBasic(vp(x)) && isTypeGroupBasic(vp(y))){
-        if(!isValidType  (x,y)) R E_TYPE;
+    if(isTypeGroupComparable(vp(x)) && isTypeGroupComparable(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;
-        L lenZ   = isOne(x)?vn(y):vn(x), typZ = H_B;
-        L typMax = max(vp(x),vp(y));
-        V tempX = allocNode();
-        V tempY = allocNode();
-        CHECKE(promoteValue(tempX, x, typMax));
-        CHECKE(promoteValue(tempY, y, typMax));
-        initV(z,typZ,lenZ);
-        if(isOne(x)) {
-            switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
-                caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
-                caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
-                caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
-                caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,0),vF(tempY,i))) break;
-                caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,0),vE(tempY,i))) break;
-                default: R E_NOT_IMPL;
+        L lenZ = isOne(x)?vn(y):vn(x), typZ = H_B;
+        if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+            L typMax = max(vp(x),vp(y));
+            V tempX = allocNode();
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempX, x, typMax));
+            CHECKE(promoteValue(tempY, y, typMax));
+            initV(z,typZ,lenZ);
+            if(isOne(x)) {
+                switch(typMax){
+                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
+                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
+                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
+                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
+                    caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,0),vF(tempY,i))) break;
+                    caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,0),vE(tempY,i))) break;
+                }
+            }
+            else if(isOne(y)) {
+                switch(typMax){
+                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
+                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
+                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
+                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
+                    caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,i),vF(tempY,0))) break;
+                    caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,i),vE(tempY,0))) break;
+                }
+            }
+            else {
+                switch(typMax){
+                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
+                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
+                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
+                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
+                    caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,i),vF(tempY,i))) break;
+                    caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,i),vE(tempY,i))) break;
+                }
             }
         }
-        else if(isOne(y)) {
-            switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
-                caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
-                caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
-                caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
-                caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,i),vF(tempY,0))) break;
-                caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,i),vE(tempY,0))) break;
-                default: R E_NOT_IMPL;
+        else if(isSameType(x,y)){
+            initV(z,typZ,lenZ);
+            if(isOne(x)) {
+                switch(vp(x)){
+                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
+                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
+                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
+                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
+                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,0),vZ(y,i))) break;
+                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,0),vU(y,i))) break;
+                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,0),vV(y,i))) break;
+                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,0),vT(y,i))) break;
+                }
+            }
+            else if(isOne(y)) {
+                switch(vp(x)){
+                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
+                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
+                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
+                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
+                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,0))) break;
+                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,0))) break;
+                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,0))) break;
+                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,0))) break;
+                }
+            }
+            else {
+                switch(vp(x)){
+                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
+                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
+                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
+                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
+                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,i))) break;
+                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,i))) break;
+                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,i))) break;
+                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,i))) break;
+                }
             }
         }
-        else {
-            switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
-                caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
-                caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
-                caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
-                caseF DOI(lenZ, vB(z,i)=COMP(op,vF(tempX,i),vF(tempY,i))) break;
-                caseE DOI(lenZ, vB(z,i)=COMP(op,vE(tempX,i),vE(tempY,i))) break;
-                default: R E_NOT_IMPL;
-            }
-        }
+        else R E_TYPE;
         R 0;
     }
     else R E_DOMAIN;
@@ -1061,10 +1095,10 @@ L pfnAppend(V z, V x, V y){
     else if(isList(y)){
         R appendList(z,y,x);
     }
-    else if((isEnum(x) && isTypeGroupRealX(vp(y)))){
+    else if((isEnum(x) && isTypeGroupNumber(vp(y)))){
         R appendEnum(z,x,y);
     }
-    else if((isEnum(y) && isTypeGroupRealX(vp(x)))){
+    else if((isEnum(y) && isTypeGroupNumber(vp(x)))){
         R appendEnum(z,y,x);
     }
     else R E_DOMAIN;
@@ -1233,7 +1267,7 @@ L pfnEnum(V z, V x, V y){
 
 L pfnKTable(V z, V x, V y){
     if(isTable(x) && isTable(y)){
-        /* todo: check key table */
+        /* Todo: check key table */
         if(tableRow(x) == tableRow(y)){
             initKTable(z);
             CHECKE(copyV(vV(z,0),x));

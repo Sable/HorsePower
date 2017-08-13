@@ -37,7 +37,7 @@ L copyV(V z, V x){
 }
 // L copyV(V z, V x){
 //     initV(z,xp,xn);
-//     if(isTypeGroupScalar(xp)){
+//     if(isTypeGroupNumber(xp)){
 //         memcpy(vg(z),vg(x),getTypeSize(xp)*xn);
 //     }
 //     else {
@@ -176,7 +176,7 @@ V getValueFromSymbol(Q id){
 
 /* error code -2 */
 L decideType(L x, L y){
-    if(isTypeGroupScalar(x) && isTypeGroupScalar(y)){
+    if(isTypeGroupNumber(x) && isTypeGroupNumber(y)){
         R max(x,y);
     }
     else if(x == y){
@@ -282,8 +282,9 @@ L getTableColNumber(V x){
 }
 
 
-/* Type checking */
+/* Checking types */
 
+/* 1-level */
 B isTypeGroupInt(L t){
     R (H_B==t || H_H==t || H_I==t || H_L==t);
 }
@@ -296,10 +297,6 @@ B isTypeGroupReal(L t){
     R (isTypeGroupInt(t) || isTypeGroupFloat(t));
 }
 
-B isTypeGroupRealX(L t){
-    R (isTypeGroupReal(t) || H_X==t);
-}
-
 B isTypeGroupDate(L t){
     R (H_M==t || H_D==t || H_Z==t);
 }
@@ -308,28 +305,33 @@ B isTypeGroupTime(L t){
     R (H_U==t || H_W==t || H_T==t);
 }
 
-B isTypeGroupDTime(L t){
-    R isTypeGroupDate(t) || isTypeGroupTime(t);
+B isTypeGroupCompound(L t){
+    R (H_G==t || H_N==t || H_Y==t || H_A==t || H_K==t);
 }
 
-B isTypeGroupNumeric(L t){
-    R isTypeGroupReal(t) || isTypeGroupDTime(t);
+/* 2-level */
+B isTypeGroupNumber(L t){
+    R (isTypeGroupReal(t) || H_X==t);
+}
+
+B isTypeGroupDTime(L t){
+    R (isTypeGroupDate(t) || isTypeGroupTime(t));
+}
+
+B isTypeGroupColumn(L t){
+    R (isTypeGroupReal(t) || H_Q==t || isTypeGroupDTime(t) || H_X==t);
+}
+
+B isTypeGroupComparable(L t){
+    R (isTypeGroupReal(t) || H_C==t || H_Q==t || isTypeGroupDTime(t));
 }
 
 B isTypeGroupBasic(L t){
     R (isTypeGroupReal(t) || H_C==t || H_Q==t || H_X==t || isTypeGroupDTime(t));
 }
 
-B isTypeGroupColumn(L t){
-    R (isTypeGroupReal(t) || H_Q==t || isTypeGroupDTime(t));
-}
-
-B isTypeGroupAdvanced(L t){
-    R 1;
-}
-
-B isTypeGroupAll(L t){
-    R (isTypeGroupBasic(t) || isTypeGroupAdvanced(t));
+B isTypeGroupAny(L t){
+    R (isTypeGroupBasic(t) || isTypeGroupCompound(t));
 }
 
 /* Type inference */

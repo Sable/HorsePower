@@ -39,7 +39,6 @@ extern "C" {
 #define FUNC1(x) L (*x)(V,V)
 #define FUNC2(x) L (*x)(V,V,V)
 #define CHECKE(x) { L e=x; if(e) R e; }
-#define isTypeGroupScalar isTypeGroupRealX
 
 #define tableRow(x) (va(x).row)
 #define tableCol(x) (va(x).col)

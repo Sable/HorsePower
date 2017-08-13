@@ -16,51 +16,52 @@ extern "C" {
 void initSys();
 void deleteSys();
 
-L registerTable       (S tableName, V tablePtr);
-V findTableByName     (L sid);
-L copyV               (V z, V x);
-L findColFromTable    (V x, L cId);
-L promoteValue        (V z, V x, L typMax);
-B checkZero           (V x);
-B checkMatch          (V x);
-L getSingleIntValue   (V x);
-L calcFact            (L n);
-L getNumOfNonZero     (V x);
-L appendList          (V z, V x, V y);
-L appendEnum          (V z, V x, V y);
-S genLikeString       (S inStr, L inLen);
-V getValueFromSymbol  (Q id);
-L getCommonType       (V x, L *typ, L *len);
-L fillRaze            (V z, L *n0, V x);
-L matchPair           (B *t, V x, V y);
+L registerTable         (S tableName, V tablePtr);
+V findTableByName       (L sid);
+L copyV                 (V z, V x);
+L findColFromTable      (V x, L cId);
+L promoteValue          (V z, V x, L typMax);
+B checkZero             (V x);
+B checkMatch            (V x);
+L getSingleIntValue     (V x);
+L calcFact              (L n);
+L getNumOfNonZero       (V x);
+L appendList            (V z, V x, V y);
+L appendEnum            (V z, V x, V y);
+S genLikeString         (S inStr, L inLen);
+V getValueFromSymbol    (Q id);
+L getCommonType         (V x, L *typ, L *len);
+L fillRaze              (V z, L *n0, V x);
+L matchPair             (B *t, V x, V y);
 
-L getEnumValue        (V z, V x);
-L getDictValue        (V z, V x);
-L getColumnValue      (V z, V x);
-V getColKey           (V x);
-V getColVal           (V x);
-V getTableCol         (V x, L k);
-L getTableRowNumber   (V x);
-L getTableColNumber   (V x);
+L getEnumValue          (V z, V x);
+L getDictValue          (V z, V x);
+L getColumnValue        (V z, V x);
+V getColKey             (V x);
+V getColVal             (V x);
+V getTableCol           (V x, L k);
+L getTableRowNumber     (V x);
+L getTableColNumber     (V x);
 
-B isTypeGroupInt      (L t);
-B isTypeGroupFloat    (L t);
-B isTypeGroupReal     (L t);
-B isTypeGroupRealX    (L t);
-B isTypeGroupDate     (L t);
-B isTypeGroupTime     (L t);
-B isTypeGroupDTime    (L t);
-B isTypeGroupNumeric  (L t);
-B isTypeGroupBasic    (L t);
-B isTypeGroupColumn   (L t);
-B isTypeGroupAdvanced (L t);
-B isTypeGroupAll      (L t);
+B isTypeGroupInt        (L t);
+B isTypeGroupFloat      (L t);
+B isTypeGroupReal       (L t);
+B isTypeGroupDate       (L t);
+B isTypeGroupTime       (L t);
+B isTypeGroupCompound   (L t);
 
-L inferReal2Int       (L t);
-L inferNeg            (L t);
-L inferRecip          (L t);
-L inferSignum         (L t);
-L inferPi             (L t);
+B isTypeGroupNumber     (L t);
+B isTypeGroupDTime      (L t);
+B isTypeGroupColumn     (L t);
+B isTypeGroupComparable (L t);
+B isTypeGroupBasic      (L t);
+B isTypeGroupAny        (L t);
+
+L inferReal2Int         (L t);
+L inferNeg              (L t);
+L inferRecip            (L t);
+L inferSignum           (L t);
+L inferPi               (L t);
 
 /* error messages */
 #define E_DOMAIN          1
