@@ -90,7 +90,7 @@ Status
 | 2  | neg(x)               | Negative value of x         | Real                        | Same as argument              | [link](builtin/neg.md)       |&#10004;|
 | 3  | ceil(x)              | Ceiling value of x          | Real                        | Various                       | [link](builtin/ceil.md)      |&#10004;|
 | 4  | floor(x)             | Floor value of x            | Real                        | Various                       | [link](builtin/floor.md)     |&#10004;|
-| 5  | round(x)             | Round value of x            | Real                        | Various                       | link                         |&#10004;|
+| 5  | round(x)             | Round value of x            | Real                        | Various                       | [link](builtin/round.md)     |&#10004;|
 | 6  | conj(x)              | Conjugate value of x        | Complex                     | Complex                       | [link](builtin/conj.md)      |&#10004;|
 | 7  | recip(x)             | Reciprocal                  | Real                        | Various                       | [link](builtin/recip.md)     |&#10004;|
 | 8  | signum(x)            | Signum                      | Real                        | Various                       | [link](builtin/signum.md)    |&#10004;|

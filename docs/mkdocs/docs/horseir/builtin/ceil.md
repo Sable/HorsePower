@@ -8,7 +8,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 bool -> bool
 i16 -> i16
 i32 -> i32
@@ -20,7 +20,7 @@ _ -> domain error
 
 ### Examples
 
-```
-ceil(-1.2 0 1.2)
-> -1 0 2
+```no-highlight
+ceil((-1.2,0,1.2))
+> (-1,0,2):i64
 ```
