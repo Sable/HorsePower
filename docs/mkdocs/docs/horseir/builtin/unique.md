@@ -8,7 +8,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 bool -> i64
 char -> i64
 i16  -> i64
@@ -29,7 +29,7 @@ _    -> domain error
 
 ### Examples
 
-```
+```no-highlight
 unique(-1 2 2 3 3)
 > 0 1 3
 ```

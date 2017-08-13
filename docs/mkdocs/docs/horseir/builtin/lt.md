@@ -8,7 +8,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 Real,Real  -> bool
 c,c        -> bool
 sym,sym    -> bool
@@ -24,7 +24,7 @@ _          -> domain error
 
 ### Examples
 
-```
+```no-highlight
 lt(-1 2 3, 0)
 > 1 0 0:bool
 ```
