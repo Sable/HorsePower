@@ -15,34 +15,6 @@ class Literal : public Operand {
     Function, List, Dictionary, Enumeration, Table, KeyTable
   };
 
-  template<class T, typename = std::enable_if_t<!std::is_pointer<T>::value>>
-  class VectorElemWrapper {
-   public:
-    typedef T ValueType;
-
-    explicit VectorElemWrapper (T &&elementValue)
-        : ptr (new T (elementValue)), nullElement (false)
-    {}
-
-    explicit VectorElemWrapper (const T &elementValue)
-        : ptr (new T (elementValue)), nullElement (false)
-    {}
-
-    explicit VectorElemWrapper (std::nullptr_t)
-        : ptr (nullptr), nullElement (true)
-    {}
-
-    bool isNull () const
-    { return nullElement; }
-
-    T getValue () const
-    { return *ptr; }
-
-   protected:
-    std::shared_ptr<T> ptr;
-    bool nullElement;
-  };
-
   Literal (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
            const LiteralClass &p_literalClass)
       : Operand (mem, astNodeClass, OperandClass::Literal),

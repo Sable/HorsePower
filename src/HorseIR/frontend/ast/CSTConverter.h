@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <stdexcept>
 #include "AST.h"
 
 namespace horseIR
@@ -474,6 +475,164 @@ struct CSTConverter {
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
     return stringLiteral;
+  }
+
+  using LiteralIntegerContext = HorseIRParser::LiteralIntegerContext;
+  using LiteralIntegerCase0Context = HorseIRParser::LiteralIntegerCase0Context;
+  using LiteralIntegerCase1Context = HorseIRParser::LiteralIntegerCase1Context;
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralIntegerContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralIntegerCase0Context *case0 = nullptr;
+    LiteralIntegerCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      return convert (mem, case0);
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      return convert (mem, case1);
+
+    throw CSTConverterException (literal);
+  }
+
+  template<class T, typename = std::enable_if_t<std::is_signed<T>::value>>
+  static typename VectorLiteral<T>::ElementType
+  convertIntValueN (HorseIRParser::IntValueNContext *context)
+  {
+    using ElementType = typename VectorLiteral<T>::ElementType;
+    if (context->NULL_TOKEN () != nullptr)
+      { return ElementType (nullptr); }
+    int sign = 1;
+    const auto signToken = context->op;
+    if (signToken != nullptr)
+      {
+        if (signToken->getText () == "-") sign = -1;
+      }
+    const std::string valueString = context->LITERAL_INTEGER ()->getText ();
+    try
+      {
+        signed long long rawValue = std::stoll (valueString, nullptr, 10);
+        if (rawValue < std::numeric_limits<T>::min ())
+          { throw CSTConverterException (context); }
+        if (rawValue > std::numeric_limits<T>::max ())
+          { throw CSTConverterException (context); }
+        T castedValue = static_cast<T>(rawValue);
+        return ElementType (sign * castedValue);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (context); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (context); }
+  }
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralIntegerCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    using IntValueNContext = HorseIRParser::IntValueNContext;
+    const std::string typeString = literal->typeToken->getText ();
+    IntValueNContext *intValueNContext = literal->intValueN ();
+
+    if (typeString == "i8")
+      {
+        auto integer8Literal = new Integer8Literal (mem, literal);
+        std::vector<Integer8Literal::ElementType> valueVector{};
+        auto element = convertIntValueN<std::int8_t> (literal->intValueN ());
+        valueVector.emplace_back (std::move (element));
+        integer8Literal->setValue (std::move (valueVector));
+        return integer8Literal;
+      }
+    if (typeString == "i16")
+      {
+        auto integer16Literal = new Integer16Literal (mem, literal);
+        std::vector<Integer16Literal::ElementType> valueVector{};
+        auto element = convertIntValueN<std::int16_t> (literal->intValueN ());
+        valueVector.emplace_back (std::move (element));
+        integer16Literal->setValue (std::move (valueVector));
+        return integer16Literal;
+      }
+    if (typeString == "i32")
+      {
+        auto integer32Literal = new Integer32Literal (mem, literal);
+        std::vector<Integer32Literal::ElementType> valueVector{};
+        auto element = convertIntValueN<std::int32_t> (literal->intValueN ());
+        valueVector.emplace_back (std::move (element));
+        integer32Literal->setValue (std::move (valueVector));
+        return integer32Literal;
+      }
+    if (typeString == "i64")
+      {
+        auto integer64Literal = new Integer64Literal (mem, literal);
+        std::vector<Integer64Literal::ElementType> valueVector{};
+        auto element = convertIntValueN<std::int64_t> (literal->intValueN ());
+        valueVector.emplace_back (std::move (element));
+        integer64Literal->setValue (std::move (valueVector));
+        return integer64Literal;
+      }
+    throw CSTConverterException (literal);
+  }
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralIntegerCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    using IntValueNContext = HorseIRParser::IntValueNContext;
+    const std::string typeString = literal->typeToken->getText ();
+    const std::vector<IntValueNContext *> rawContexts = literal->intValueN ();
+    if (typeString == "i8")
+      {
+        auto integer8Literal = new Integer8Literal (mem, literal);
+        std::vector<Integer8Literal::ElementType> valueVector{};
+        valueVector.reserve (rawContexts.size ());
+        std::transform (
+            rawContexts.cbegin (), rawContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (IntValueNContext *context) -> Integer8Literal::ElementType
+            { return convertIntValueN<std::int8_t> (context); });
+        integer8Literal->setValue (std::move (valueVector));
+        return integer8Literal;
+      }
+    if (typeString == "i16")
+      {
+        auto integer16Literal = new Integer16Literal (mem, literal);
+        std::vector<Integer16Literal::ElementType> valueVector{};
+        valueVector.reserve (rawContexts.size ());
+        std::transform (
+            rawContexts.cbegin (), rawContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (IntValueNContext *context) -> Integer16Literal::ElementType
+            { return convertIntValueN<std::int16_t> (context); });
+        integer16Literal->setValue (std::move (valueVector));
+        return integer16Literal;
+      }
+    if (typeString == "i32")
+      {
+        auto integer32Literal = new Integer32Literal (mem, literal);
+        std::vector<Integer32Literal::ElementType> valueVector{};
+        valueVector.reserve (rawContexts.size ());
+        std::transform (
+            rawContexts.cbegin (), rawContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (IntValueNContext *context) -> Integer32Literal::ElementType
+            { return convertIntValueN<std::int32_t> (context); });
+        integer32Literal->setValue (std::move (valueVector));
+        return integer32Literal;
+      }
+    if (typeString == "i64")
+      {
+        auto integer64Literal = new Integer64Literal (mem, literal);
+        std::vector<Integer64Literal::ElementType> valueVector{};
+        valueVector.reserve (rawContexts.size ());
+        std::transform (
+            rawContexts.cbegin (), rawContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (IntValueNContext *context) -> Integer64Literal::ElementType
+            { return convertIntValueN<std::int64_t> (context); });
+        integer64Literal->setValue (std::move (valueVector));
+        return integer64Literal;
+      }
+    throw CSTConverterException (literal);
   }
 
   using TypeContext = HorseIRParser::TypeContext;

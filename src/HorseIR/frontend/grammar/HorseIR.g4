@@ -72,9 +72,9 @@ literalString    : stringValue (':' 'str')?                            #literalS
                  | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'      #literalStringCase3
                  | NULL_TOKEN ':' 'str'                                #literalStringCase4
                  ;
-intValueN        : ('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
-literalInteger   : intValueN ':' ('i8' | 'i16' | 'i32' | 'i64')
-                 | '(' (intValueN (',' intValueN)*)? ')' ':' ('i8' | 'i16' | 'i32' | 'i64')
+intValueN        : op=('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
+literalInteger   : intValueN ':' typeToken=('i8' | 'i16' | 'i32' | 'i64')                             #literalIntegerCase0
+                 | '(' (intValueN (',' intValueN)*)? ')' ':' typeToken=('i8' | 'i16' | 'i32' | 'i64') #literalIntegerCase1
                  ;
 floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | NULL_TOKEN ;
 literalFloat     : floatValueN ':' ('f32' | 'f64')
@@ -153,15 +153,9 @@ literalTTime     : tTimeValue (':' 't')?
                  | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'
                  | NULL_TOKEN ':' 'z'
                  ;
-functionValue    : LITERAL_FUNCTION ;
 functionValueN   : LITERAL_FUNCTION | NULL_TOKEN ;
-literalFunction  : functionValue (':' typeFunc)?
-                 | '(' functionValue (',' functionValue) ')' (':' typeFunc)?
-                 | '(' ')' ':' typeFunc
-                 | '(' NULL_TOKEN (',' functionValueN)* (',' functionValue) (',' functionValueN)* ')' (':' typeFunc)?
-                 | '(' functionValue (',' functionValueN)* (',' NULL_TOKEN) (',' functionValueN)* ')' (':' typeFunc)?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' typeFunc
-                 | NULL_TOKEN ':' typeFunc
+literalFunction  : functionValueN ':' typeFunc
+                 | '(' (functionValueN (',' functionValueN)*)? ')' ':' typeFunc
                  ;
 literalList      : '[' ']' ':' typeList
                  | '[' literal (',' literal)* ']' (typeList)?

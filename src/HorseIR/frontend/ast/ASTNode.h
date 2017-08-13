@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include "AST.h"
 
 namespace horseIR
@@ -14,10 +15,11 @@ class ASTNode {
   enum class ASTNodeClass {
     NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
     Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
-    StringLiteral, FunctionLiteral, TableLiteral, Identifier, PrimitiveType,
-    WildcardType, ListType, DictionaryType, EnumerationType, FunctionType,
-    CompilationUnit, Module, Method, LabelStatement, BranchStatement,
-    PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
+    StringLiteral, FunctionLiteral, TableLiteral, KeyTableLiteral,
+    EnumerationLiteral, Identifier, PrimitiveType, WildcardType, ListType,
+    DictionaryType, EnumerationType, FunctionType, CompilationUnit, Module,
+    Method, LabelStatement, BranchStatement, PhiStatement, InvokeStatement,
+    AssignStatement, ReturnStatement
   };
 
   class ASTNodeMemory {
@@ -131,6 +133,46 @@ ASTNode::__duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode)
   cst = astNode->cst;
   enclosingFilename = astNode->enclosingFilename;
   parent = astNode->parent;
+}
+
+inline std::ostream &
+operator<< (std::ostream &stream, const ASTNode::ASTNodeClass &astNodeClass)
+{
+  using ASTNodeClass = ASTNode::ASTNodeClass;
+  switch (astNodeClass)
+    {
+      case ASTNodeClass::NilLiteral: return stream << "NilLiteral";
+      case ASTNodeClass::ComplexLiteral: return stream << "ComplexLiteral";
+      case ASTNodeClass::BoolLiteral: return stream << "BoolLiteral";
+      case ASTNodeClass::CharLiteral: return stream << "CharLiteral";
+      case ASTNodeClass::Integer8Literal: return stream << "Integer8Literal";
+      case ASTNodeClass::Integer16Literal: return stream << "Integer16Literal";
+      case ASTNodeClass::Integer32Literal: return stream << "Integer32Literal";
+      case ASTNodeClass::Integer64Literal: return stream << "Integer64Literal";
+      case ASTNodeClass::SymbolLiteral: return stream << "SymbolLiteral";
+      case ASTNodeClass::StringLiteral: return stream << "StringLiteral";
+      case ASTNodeClass::FunctionLiteral: return stream << "FunctionLiteral";
+      case ASTNodeClass::TableLiteral: return stream << "TableLiteral";
+      case ASTNodeClass::KeyTableLiteral: return stream << "KeyTableLiteral";
+      case ASTNodeClass::EnumerationLiteral:
+        return stream << "EnumerationLiteral";
+      case ASTNodeClass::Identifier: return stream << "Identifier";
+      case ASTNodeClass::PrimitiveType: return stream << "PrimitiveType";
+      case ASTNodeClass::WildcardType: return stream << "WildcardType";
+      case ASTNodeClass::ListType: return stream << "ListType";
+      case ASTNodeClass::DictionaryType: return stream << "DictionaryType";
+      case ASTNodeClass::EnumerationType: return stream << "EnumerationType";
+      case ASTNodeClass::FunctionType: return stream << "FunctionType";
+      case ASTNodeClass::CompilationUnit: return stream << "CompilationUnit";
+      case ASTNodeClass::Module: return stream << "Module";
+      case ASTNodeClass::Method: return stream << "Method";
+      case ASTNodeClass::LabelStatement: return stream << "LabelStatement";
+      case ASTNodeClass::BranchStatement: return stream << "BranchStatement";
+      case ASTNodeClass::PhiStatement: return stream << "PhiStatement";
+      case ASTNodeClass::InvokeStatement: return stream << "InvokeStatement";
+      case ASTNodeClass::AssignStatement: return stream << "AssignStatement";
+      case ASTNodeClass::ReturnStatement: return stream << "ReturnStatement";
+    }
 }
 
 }
