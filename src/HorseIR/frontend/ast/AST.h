@@ -44,3 +44,6 @@
 #include "operand/Integer16Literal.h"
 #include "operand/Integer32Literal.h"
 #include "operand/Integer64Literal.h"
+#include "operand/FP32Literal.h"
+#include "operand/FP64Literal.h"
+#include "operand/ComplexLiteral.h"

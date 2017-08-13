@@ -54,18 +54,17 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"((100, 200, -300, null) :i16)";
+  const std::string raw = R"(i :complex)";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  HorseIRParser::LiteralIntegerContext *context = parser.literalInteger ();
+  auto context = parser.literalComplex ();
 
-
-  ast::ASTNode::ASTNodeMemory mem ;
-  auto astNode = ast::CSTConverter::convert (mem, context) ;
-  astNode->setEnclosingFilename ("stdin") ;
-  std::cout << astNode->toString () << std::endl ;
+  ast::ASTNode::ASTNodeMemory mem;
+  auto astNode = ast::CSTConverter::convert (mem, context);
+  astNode->setEnclosingFilename ("stdin");
+  std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
 }

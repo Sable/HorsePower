@@ -76,26 +76,25 @@ intValueN        : op=('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
 literalInteger   : intValueN ':' typeToken=('i8' | 'i16' | 'i32' | 'i64')                             #literalIntegerCase0
                  | '(' (intValueN (',' intValueN)*)? ')' ':' typeToken=('i8' | 'i16' | 'i32' | 'i64') #literalIntegerCase1
                  ;
-floatValueN      : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) | NULL_TOKEN ;
-literalFloat     : floatValueN ':' ('f32' | 'f64')
-                 | '(' (floatValueN (',' floatValueN)*)? ')' ':' ('f32' | 'f64')
+floatValueN      : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER)
+                 | NULL_TOKEN ;
+literalFloat     : floatValueN ':' typeToken=('f32' | 'f64')                               #literalFloatCase0
+                 | '(' (floatValueN (',' floatValueN)*)? ')' ':' typeToken=('f32' | 'f64') #literalFloatCase1
                  ;
-complexValueN    : ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER)
-                 | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j')
-                 | ('+' | '-')? (LITERAL_FLOAT | LITERAL_INTEGER) ('+' | '-') (LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
-                 | ('+' | '-')? ('i' | 'j')
-                 | NULL_TOKEN
+complexValueN    : realOp=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)         #complexValueNCase0
+                 | imOp=('+' | '-')? im=(LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j') #complexValueNCase1
+                 | realOp=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER) imOp=('+' | '-') im=(LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
+                                                                                      #complexValueNCase2
+                 | imOp=('+' | '-')? ('i' | 'j')                                      #complexValueNCase3
+                 | NULL_TOKEN                                                         #complexValueNCase4
                  ;
-literalComplex   : complexValueN ':' 'complex'
-                 | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'
+literalComplex   : complexValueN ':' 'complex'                                  #literalComplexCase0
+                 | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'  #literalComplexCase1
                  ;
 symbolValue      : LITERAL_SYMBOL ;
-symbolValueN     : LITERAL_SYMBOL | NULL_TOKEN ;
 literalSymbol    : symbolValue (':' 'sym')?
-                 | '(' symbolValue (',' symbolValue)* ')' (':' 'sym')?
                  | '(' ')' ':' 'sym'
-                 | '(' NULL_TOKEN (',' symbolValueN)* (',' symbolValue) (',' symbolValueN)* ')' (':' 'sym')?
-                 | '(' symbolValue (',' symbolValueN)* (',' NULL_TOKEN) (',' symbolValueN)* ')' (':' 'sym')?
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? symbolValue (',' (symbolValue | NULL_TOKEN))* ')' (':' 'sym')?
                  | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'sym'
                  | NULL_TOKEN ':' 'sym'
                  ;
@@ -229,7 +228,11 @@ LITERAL_GROUP_7_DATETIME : [0-9]+ '.' [0-9]+ '.' [0-9]+ 'T'
 
 LITERAL_INTEGER : FRAGMENT_INTEGER ;
 
-LITERAL_FLOAT   : FRAGMENT_FLOAT ;
+LITERAL_FLOAT   : FRAGMENT_FLOAT (('e' | 'E') ('+' | '-')? ('0')* FRAGMENT_INTEGER)?
+                | FRAGMENT_INTEGER (('e' | 'E') ('+' | '-')? ('0')* FRAGMENT_INTEGER)
+                | ('inf' | 'INF')
+                | ('nan' | 'NAN')
+                ;
 
 LITERAL_STRING  : '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"' ;
 

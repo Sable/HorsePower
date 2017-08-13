@@ -220,17 +220,13 @@ struct CSTConverter {
             if (ret >= std::numeric_limits<std::uint8_t>::max ()) return false;
             continue;
           }
-        else
-          {
-            std::string convertBuffer;
-            auto bufferInserter = std::back_inserter (convertBuffer);
-            *bufferInserter = *(iter);
-            *bufferInserter = *(++iter);
-            *bufferInserter = *(++iter);
-            auto ret = std::stoi (convertBuffer, nullptr, 8);
-            if (ret >= std::numeric_limits<std::uint8_t>::max ()) return false;
-            continue;
-          }
+        std::string convertBuffer;
+        auto bufferInserter = std::back_inserter (convertBuffer);
+        *bufferInserter = *(iter);
+        *bufferInserter = *(++iter);
+        *bufferInserter = *(++iter);
+        auto ret = std::stoi (convertBuffer, nullptr, 8);
+        if (ret >= std::numeric_limits<std::uint8_t>::max ()) return false;
       }
     return true;
   }
@@ -314,8 +310,7 @@ struct CSTConverter {
           CharValueContext *value = nullptr;
           if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
             { return convert (value); }
-          else
-            { return CharLiteral::ElementType (nullptr); }
+          return CharLiteral::ElementType (nullptr);
         });
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
@@ -329,8 +324,8 @@ struct CSTConverter {
     using ParseTree = antlr4::tree::ParseTree;
     const std::vector<ParseTree *> rawChildren = literalCharContext->children;
     std::size_t nullElementCount = 0;
-    for (auto iter = rawChildren.cbegin (); iter != rawChildren.cend (); ++iter)
-      { if ((*iter)->getText () == "null") nullElementCount += 1; }
+    for (const auto &rawChild : rawChildren)
+      { if (rawChild->getText () == "null") nullElementCount += 1; }
     std::vector<CharLiteral::ElementType> valueVector{};
     valueVector.reserve (nullElementCount);
     for (std::size_t iter = 0; iter < nullElementCount; ++iter)
@@ -390,7 +385,7 @@ struct CSTConverter {
     rawString = rawString.substr (1, rawString.length () - 2);
     if (!verifyEscapeChar (rawString))
       throw CSTConverterException (stringValueContext);
-    const std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
+    std::vector<std::uint8_t> converted = convertEscapedChar (rawString);
     return StringLiteral::ElementType (std::move (converted));
   }
 
@@ -440,8 +435,7 @@ struct CSTConverter {
           StringValueContext *string = nullptr;
           if ((string = dynamic_cast<decltype (string)>(parseTree)) != nullptr)
             { return convert (string); }
-          else
-            { return StringLiteral::ElementType (nullptr); }
+          return StringLiteral::ElementType (nullptr);
         });
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
@@ -455,8 +449,8 @@ struct CSTConverter {
     using ParseTree = antlr4::tree::ParseTree;
     std::size_t nullCount = 0;
     const std::vector<ParseTree *> rawChildren = stringContext->children;
-    for (auto iter = rawChildren.cbegin (); iter != rawChildren.cend (); ++iter)
-      { if ((*iter)->getText () == "null") nullCount += 1; }
+    for (const auto &rawChild : rawChildren)
+      { if (rawChild->getText () == "null") nullCount += 1; }
     std::vector<StringLiteral::ElementType> valueVector{};
     valueVector.reserve (nullCount);
     for (std::size_t iter = 0; iter < nullCount; ++iter)
@@ -500,6 +494,7 @@ struct CSTConverter {
   static typename VectorLiteral<T>::ElementType
   convertIntValueN (HorseIRParser::IntValueNContext *context)
   {
+    assert (context != nullptr);
     using ElementType = typename VectorLiteral<T>::ElementType;
     if (context->NULL_TOKEN () != nullptr)
       { return ElementType (nullptr); }
@@ -512,12 +507,14 @@ struct CSTConverter {
     const std::string valueString = context->LITERAL_INTEGER ()->getText ();
     try
       {
-        signed long long rawValue = std::stoll (valueString, nullptr, 10);
+        std::size_t pos = 0;
+        signed long long rawValue = std::stoll (valueString, &pos, 10);
+        if (pos != valueString.length ()) throw CSTConverterException (context);
         if (rawValue < std::numeric_limits<T>::min ())
           { throw CSTConverterException (context); }
         if (rawValue > std::numeric_limits<T>::max ())
           { throw CSTConverterException (context); }
-        T castedValue = static_cast<T>(rawValue);
+        auto castedValue = static_cast<T>(rawValue);
         return ElementType (sign * castedValue);
       }
     catch (const std::invalid_argument &exception)
@@ -633,6 +630,320 @@ struct CSTConverter {
         return integer64Literal;
       }
     throw CSTConverterException (literal);
+  }
+
+  using LiteralFloatContext = HorseIRParser::LiteralFloatContext;
+  using LiteralFloatCase0Context = HorseIRParser::LiteralFloatCase0Context;
+  using LiteralFloatCase1Context = HorseIRParser::LiteralFloatCase1Context;
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralFloatContext *literal)
+  {
+    LiteralFloatCase0Context *case0 = nullptr;
+    LiteralFloatCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (literal);
+  }
+
+  template<class T, typename = std::enable_if<std::is_floating_point<T>::value>>
+  static typename VectorLiteral<T>::ElementType
+  convertFloatValueN (
+      HorseIRParser::FloatValueNContext *context,
+      T (*func) (const std::string &, std::size_t *))
+  {
+    assert (context != nullptr);
+    assert (func != nullptr);
+    using ElementType = typename VectorLiteral<T>::ElementType;
+    if (context->NULL_TOKEN () != nullptr) return ElementType (nullptr);
+    std::ostringstream stream;
+    const auto opToken = context->op;
+    if (opToken != nullptr) stream << opToken->getText ();
+    const std::string valueString = context->value->getText ();
+    stream << valueString;
+    try
+      {
+        const std::string streamStream = stream.str ();
+        size_t pos = 0;
+        T converted = func (streamStream, &pos);
+        if (pos != streamStream.length ())
+          { throw CSTConverterException (context); }
+        return ElementType (converted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (context); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (context); }
+  }
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralFloatCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    const std::string typeString = literal->typeToken->getText ();
+    if (typeString == "f32")
+      {
+
+        auto fp32Literal = new FP32Literal (mem, literal);
+        std::vector<FP32Literal::ElementType> valueVector{};
+        auto element = convertFloatValueN<float> (literal->floatValueN (),
+                                                  std::stof);
+        valueVector.emplace_back (std::move (element));
+        fp32Literal->setValue (std::move (valueVector));
+        return fp32Literal;
+      }
+    if (typeString == "f64")
+      {
+        auto fp64Literal = new FP64Literal (mem, literal);
+        std::vector<FP64Literal::ElementType> valueVector{};
+        auto element = convertFloatValueN<double> (literal->floatValueN (),
+                                                   std::stod);
+        valueVector.emplace_back (std::move (element));
+        fp64Literal->setValue (std::move (valueVector));
+        return fp64Literal;
+      }
+    throw CSTConverterException (literal);
+  }
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralFloatCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    using FloatValueNContext = HorseIRParser::FloatValueNContext;
+    const std::string typeString = literal->typeToken->getText ();
+    const std::vector<FloatValueNContext *> valueContexts =
+        literal->floatValueN ();
+    if (typeString == "f32")
+      {
+        auto fp32Literal = new FP32Literal (mem, literal);
+        std::vector<FP32Literal::ElementType> valueVector{};
+        valueVector.reserve (valueContexts.size ());
+        std::transform (
+            valueContexts.cbegin (), valueContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (FloatValueNContext *context) -> FP32Literal::ElementType
+            { return convertFloatValueN<float> (context, std::stof); });
+        fp32Literal->setValue (std::move (valueVector));
+        return fp32Literal;
+      }
+    if (typeString == "f64")
+      {
+        auto fp64Literal = new FP64Literal (mem, literal);
+        std::vector<FP64Literal::ElementType> valueVector{};
+        valueVector.reserve (valueContexts.size ());
+        std::transform (
+            valueContexts.cbegin (), valueContexts.cend (),
+            std::back_inserter (valueVector),
+            [] (FloatValueNContext *context) -> FP64Literal::ElementType
+            { return convertFloatValueN<double> (context, std::stod); });
+        fp64Literal->setValue (std::move (valueVector));
+        return fp64Literal;
+      };
+    throw CSTConverterException (literal);
+  }
+
+  using LiteralComplexContext = HorseIRParser::LiteralComplexContext;
+  using LiteralComplexCase0Context = HorseIRParser::LiteralComplexCase0Context;
+  using LiteralComplexCase1Context = HorseIRParser::LiteralComplexCase1Context;
+  using ComplexValueNContext = HorseIRParser::ComplexValueNContext;
+  using ComplexValueNCase0Context = HorseIRParser::ComplexValueNCase0Context;
+  using ComplexValueNCase1Context = HorseIRParser::ComplexValueNCase1Context;
+  using ComplexValueNCase2Context = HorseIRParser::ComplexValueNCase2Context;
+  using ComplexValueNCase3Context = HorseIRParser::ComplexValueNCase3Context;
+  using ComplexValueNCase4Context = HorseIRParser::ComplexValueNCase4Context;
+
+  static ComplexLiteral *
+  convert (ASTNodeMemory &mem, LiteralComplexContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralComplexCase0Context *case0 = nullptr;
+    LiteralComplexCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static ComplexLiteral::ElementType
+  convertComplexValueN (ComplexValueNContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    ComplexValueNCase0Context *case0 = nullptr;
+    ComplexValueNCase1Context *case1 = nullptr;
+    ComplexValueNCase2Context *case2 = nullptr;
+    ComplexValueNCase3Context *case3 = nullptr;
+    ComplexValueNCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(valueContext)) != nullptr)
+      { return convertComplexValueN (case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(valueContext)) != nullptr)
+      { return convertComplexValueN (case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(valueContext)) != nullptr)
+      { return convertComplexValueN (case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(valueContext)) != nullptr)
+      { return convertComplexValueN (case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(valueContext)) != nullptr)
+      { return convertComplexValueN (case4); }
+
+    throw CSTConverterException (valueContext);
+  }
+
+  static ComplexLiteral::ElementType
+  covertComplexValueN (ComplexValueNCase0Context *valueContext)
+  {
+    assert (valueContext != nullptr);
+    int sign = 1;
+    if (valueContext->realOp != nullptr)
+      {
+        const std::string opString = valueContext->realOp->getText ();
+        if (opString == "+") sign = 1;
+        if (opString == "-") sign = -1;
+      }
+    try
+      {
+        std::size_t pos = 0;
+        const std::string realString = valueContext->real->getText ();
+        double realValue = std::stod (realString, &pos);
+        if (pos != realString.length ())
+          { throw CSTConverterException (valueContext); }
+        std::complex<double> element (sign * realValue, 0.0);
+        return ComplexLiteral::ElementType (element);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+  }
+
+  static ComplexLiteral::ElementType
+  convertComplexValueN (ComplexValueNCase1Context *valueContext)
+  {
+    assert (valueContext != nullptr);
+    int sign = 1;
+    if (valueContext->imOp != nullptr)
+      {
+        const std::string opString = valueContext->imOp->getText ();
+        if (opString == "+") sign = 1;
+        if (opString == "-") sign = -1;
+      }
+    try
+      {
+        std::size_t pos = 0;
+        const std::string imString = valueContext->im->getText ();
+        double imValue = std::stod (imString, &pos);
+        if (pos != imString.length ())
+          { throw CSTConverterException (valueContext); }
+        std::complex<double> element (0.0, sign * imValue);
+        return ComplexLiteral::ElementType (element);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+  }
+
+  static ComplexLiteral::ElementType
+  convertComplexValueN (ComplexValueNCase2Context *valueContext)
+  {
+    assert (valueContext != nullptr);
+    int realSign = 1, imSign = 1;
+    if (valueContext->realOp != nullptr)
+      {
+        const std::string realOpString = valueContext->realOp->getText ();
+        if (realOpString == "+") realSign = 1;
+        if (realOpString == "-") realSign = -1;
+      }
+    const std::string imOpString = valueContext->imOp->getText ();
+    if (imOpString == "+") imSign = 1;
+    if (imOpString == "-") imSign = -1;
+
+    double realValue, imValue = 1.0;
+    try
+      {
+        std::size_t pos = 0;
+        const std::string realValueString = valueContext->real->getText ();
+        realValue = std::stod (realValueString, &pos);
+        if (pos != realValueString.length ())
+          { throw CSTConverterException (valueContext); }
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    if (valueContext->im != nullptr)
+      {
+        try
+          {
+            std::size_t pos = 0;
+            const std::string imValueString = valueContext->im->getText ();
+            imValue = std::stod (imValueString, &pos);
+            if (pos != imValueString.length ())
+              { throw CSTConverterException (valueContext); }
+          }
+        catch (const std::invalid_argument &exception)
+          { throw CSTConverterException (valueContext); }
+        catch (const std::out_of_range &exception)
+          { throw CSTConverterException (valueContext); }
+      }
+    std::complex<double> element (realSign * realValue, imSign * imValue);
+    return ComplexLiteral::ElementType (element);
+  }
+
+  static ComplexLiteral::ElementType
+  convertComplexValueN (ComplexValueNCase3Context *valueContext)
+  {
+    assert (valueContext != nullptr);
+    if (valueContext->imOp == nullptr)
+      { return ComplexLiteral::ElementType (std::complex<double> (0.0, 1.0)); }
+    const std::string imOpString = valueContext->imOp->getText ();
+    if (imOpString == "+")
+      { return ComplexLiteral::ElementType (std::complex<double> (0.0, 1.0)); }
+    if (imOpString == "-")
+      { return ComplexLiteral::ElementType (std::complex<double> (0.0, -1.0)); }
+    throw CSTConverterException (valueContext);
+  }
+
+  static ComplexLiteral::ElementType
+  convertComplexValueN (ComplexValueNCase4Context *valueContext)
+  {
+    assert (valueContext != nullptr);
+    return ComplexLiteral::ElementType (nullptr);
+  }
+
+  static ComplexLiteral *
+  convert (ASTNodeMemory &mem, LiteralComplexCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto complexLiteral = new ComplexLiteral (mem, literal);
+    std::vector<ComplexLiteral::ElementType> valueVector{};
+    auto element = convertComplexValueN (literal->complexValueN ());
+    valueVector.emplace_back (std::move (element));
+    complexLiteral->setValue (std::move (valueVector));
+    return complexLiteral;
+  }
+
+  static ComplexLiteral *
+  convert (ASTNodeMemory &mem, LiteralComplexCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto complexLiteral = new ComplexLiteral (mem, literal);
+    const auto valueContexts = literal->complexValueN ();
+    std::vector<ComplexLiteral::ElementType> valueVector{};
+    valueVector.reserve (valueContexts.size ());
+    std::transform (
+        valueContexts.cbegin (), valueContexts.cend (),
+        std::back_inserter (valueVector),
+        [] (ComplexValueNContext *context) -> ComplexLiteral::ElementType
+        { return convertComplexValueN (context); });
+    complexLiteral->setValue (std::move (valueVector));
+    return complexLiteral;
   }
 
   using TypeContext = HorseIRParser::TypeContext;

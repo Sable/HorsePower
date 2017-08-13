@@ -14,12 +14,12 @@ class ASTNode {
 
   enum class ASTNodeClass {
     NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
-    Integer16Literal, Integer32Literal, Integer64Literal, SymbolLiteral,
-    StringLiteral, FunctionLiteral, TableLiteral, KeyTableLiteral,
-    EnumerationLiteral, Identifier, PrimitiveType, WildcardType, ListType,
-    DictionaryType, EnumerationType, FunctionType, CompilationUnit, Module,
-    Method, LabelStatement, BranchStatement, PhiStatement, InvokeStatement,
-    AssignStatement, ReturnStatement
+    Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
+    FP64Literal, SymbolLiteral, StringLiteral, FunctionLiteral, TableLiteral,
+    KeyTableLiteral, EnumerationLiteral, Identifier, PrimitiveType,
+    WildcardType, ListType, DictionaryType, EnumerationType, FunctionType,
+    CompilationUnit, Module, Method, LabelStatement, BranchStatement,
+    PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
   };
 
   class ASTNodeMemory {
@@ -149,6 +149,8 @@ operator<< (std::ostream &stream, const ASTNode::ASTNodeClass &astNodeClass)
       case ASTNodeClass::Integer16Literal: return stream << "Integer16Literal";
       case ASTNodeClass::Integer32Literal: return stream << "Integer32Literal";
       case ASTNodeClass::Integer64Literal: return stream << "Integer64Literal";
+      case ASTNodeClass::FP32Literal: return stream << "FP32Literal";
+      case ASTNodeClass::FP64Literal: return stream << "FP64Literal";
       case ASTNodeClass::SymbolLiteral: return stream << "SymbolLiteral";
       case ASTNodeClass::StringLiteral: return stream << "StringLiteral";
       case ASTNodeClass::FunctionLiteral: return stream << "FunctionLiteral";
