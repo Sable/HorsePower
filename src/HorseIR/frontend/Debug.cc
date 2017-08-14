@@ -54,13 +54,13 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"(i :complex)";
+  const std::string raw = R"(`appl)";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.literalComplex ();
+  auto context = parser.literalSymbol ();
 
   ast::ASTNode::ASTNodeMemory mem;
   auto astNode = ast::CSTConverter::convert (mem, context);

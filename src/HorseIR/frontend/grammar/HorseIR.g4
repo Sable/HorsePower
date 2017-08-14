@@ -92,11 +92,12 @@ literalComplex   : complexValueN ':' 'complex'                                  
                  | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'  #literalComplexCase1
                  ;
 symbolValue      : LITERAL_SYMBOL ;
-literalSymbol    : symbolValue (':' 'sym')?
-                 | '(' ')' ':' 'sym'
+literalSymbol    : symbolValue (':' 'sym')?                                     #literalSymbolCase0
+                 | '(' ')' ':' 'sym'                                            #literalSymbolCase1
                  | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? symbolValue (',' (symbolValue | NULL_TOKEN))* ')' (':' 'sym')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'sym'
-                 | NULL_TOKEN ':' 'sym'
+                                                                                #literalSymbolCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'sym'               #literalSymbolCase3
+                 | NULL_TOKEN ':' 'sym'                                         #literalSymbolCase4
                  ;
 tMonthValueN     : LITERAL_FLOAT | NULL_TOKEN ;
 literalTMonth    : tMonthValueN ':' 'm'

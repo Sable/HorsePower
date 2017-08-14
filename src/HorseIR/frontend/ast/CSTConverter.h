@@ -232,7 +232,7 @@ struct CSTConverter {
   }
 
   static CharLiteral::ElementType
-  convert (HorseIRParser::CharValueContext *charValue)
+  convertCharValue (HorseIRParser::CharValueContext *charValue)
   {
     assert (charValue != nullptr);
     std::string rawString = charValue->value->getText ();
@@ -248,7 +248,8 @@ struct CSTConverter {
   {
     assert (literalCharContext != nullptr);
     std::vector<CharLiteral::ElementType> valueVector{};
-    valueVector.emplace_back (convert (literalCharContext->charValue ()));
+    auto element = convertCharValue (literalCharContext->charValue ());
+    valueVector.emplace_back (std::move (element));
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
     return charLiteral;
@@ -309,7 +310,7 @@ struct CSTConverter {
         {
           CharValueContext *value = nullptr;
           if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-            { return convert (value); }
+            { return convertCharValue (value); }
           return CharLiteral::ElementType (nullptr);
         });
     auto charLiteral = new CharLiteral (mem, literalCharContext);
@@ -378,7 +379,7 @@ struct CSTConverter {
   }
 
   static StringLiteral::ElementType
-  convert (HorseIRParser::StringValueContext *stringValueContext)
+  convertStringValue (HorseIRParser::StringValueContext *stringValueContext)
   {
     assert (stringValueContext != nullptr);
     std::string rawString = stringValueContext->LITERAL_STRING ()->getText ();
@@ -394,7 +395,8 @@ struct CSTConverter {
   {
     assert (stringContext != nullptr);
     std::vector<StringLiteral::ElementType> valueVector{};
-    valueVector.emplace_back (convert (stringContext->stringValue ()));
+    auto element = convertStringValue (stringContext->stringValue ());
+    valueVector.emplace_back (element);
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
     return stringLiteral;
@@ -434,7 +436,7 @@ struct CSTConverter {
         {
           StringValueContext *string = nullptr;
           if ((string = dynamic_cast<decltype (string)>(parseTree)) != nullptr)
-            { return convert (string); }
+            { return convertStringValue (string); }
           return StringLiteral::ElementType (nullptr);
         });
     auto stringLiteral = new StringLiteral (mem, stringContext);
@@ -944,6 +946,129 @@ struct CSTConverter {
         { return convertComplexValueN (context); });
     complexLiteral->setValue (std::move (valueVector));
     return complexLiteral;
+  }
+
+  using SymbolValueContext = HorseIRParser::SymbolValueContext;
+  using LiteralSymbolContext = HorseIRParser::LiteralSymbolContext;
+  using LiteralSymbolCase0Context = HorseIRParser::LiteralSymbolCase0Context;
+  using LiteralSymbolCase1Context = HorseIRParser::LiteralSymbolCase1Context;
+  using LiteralSymbolCase2Context = HorseIRParser::LiteralSymbolCase2Context;
+  using LiteralSymbolCase3Context = HorseIRParser::LiteralSymbolCase3Context;
+  using LiteralSymbolCase4Context = HorseIRParser::LiteralSymbolCase4Context;
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralSymbolCase0Context *case0 = nullptr;
+    LiteralSymbolCase1Context *case1 = nullptr;
+    LiteralSymbolCase2Context *case2 = nullptr;
+    LiteralSymbolCase3Context *case3 = nullptr;
+    LiteralSymbolCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static SymbolLiteral::ElementType
+  convertSymbolValue (SymbolValueContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    const std::string rawString = valueContext->LITERAL_SYMBOL ()->getText ();
+    std::string valueString = rawString.substr (1, std::string::npos);
+    return SymbolLiteral::ElementType (std::move (valueString));
+  }
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    std::vector<SymbolLiteral::ElementType> valueVector{};
+    auto element = convertSymbolValue (literal->symbolValue ());
+    valueVector.emplace_back (std::move (element));
+    symbolLiteral->setValue (std::move (valueVector));
+    return symbolLiteral;
+  }
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    return symbolLiteral;
+  }
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    const auto rawChildren = literal->children;
+    std::vector<antlr4::tree::ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (antlr4::tree::ParseTree *parseTree) -> bool
+        {
+          if ((dynamic_cast<SymbolValueContext *>(parseTree)) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<SymbolLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (),
+        std::back_inserter (valueVector),
+        [] (antlr4::tree::ParseTree *parseTree) -> SymbolLiteral::ElementType
+        {
+          SymbolValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertSymbolValue (value); }
+          return SymbolLiteral::ElementType (nullptr);
+        });
+    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    symbolLiteral->setValue (std::move (valueVector));
+    return symbolLiteral;
+  }
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolCase3Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    std::size_t nullCount = 0;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    for (const auto &child : rawChildren)
+      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    std::vector<SymbolLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullCount);
+    for (std::size_t iter = 0; iter < nullCount; ++iter)
+      { valueVector.emplace_back (SymbolLiteral::ElementType (nullptr)); }
+    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    symbolLiteral->setValue (std::move (valueVector));
+    return symbolLiteral;
+  }
+
+  static SymbolLiteral *
+  convert (ASTNodeMemory &mem, LiteralSymbolCase4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    std::vector<SymbolLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (SymbolLiteral::ElementType (nullptr));
+    symbolLiteral->setValue (std::move (valueVector));
+    return symbolLiteral;
   }
 
   using TypeContext = HorseIRParser::TypeContext;
