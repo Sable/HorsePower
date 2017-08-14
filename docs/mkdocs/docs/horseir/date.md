@@ -2,6 +2,24 @@
 
 Basic built-in functions for datetime types in database systems
 
+## Limit
+
+The ranges of date and time are defined as follows.
+
+### Date
+
+- Year: [1900, 2100]
+- Month: [01, 12]
+- Day (non-leap year): {31,28,31,30,31,30,31,31,30,31,30,31}
+- Day (leap year): {31,29,31,30,31,30,31,31,30,31,30,31}
+
+### Time
+
+- Hour: [00,23]
+- Minute: [00,59]
+- Second: [00,59]
+- Millisecond: [000,999]
+
 ## About date
 
 ### date
@@ -84,9 +102,9 @@ _ -> domain error
 Description: extract a time from a date
 
 ```
-  dt <- 2011.03.15T15.12.57.001z
+  dt <- 2011.03.15T15:12:57.001z
   time(dt)
-> 15.12.57.001t
+> 15:12:57.001t
 ```
 
 Type rules
@@ -101,7 +119,7 @@ _ -> domain error
 Description: return an hour from a time
 
 ```
-  t <- 15.12.57.001t
+  t <- 15:12:57.001t
   time_hour(t)
 > 15:i64
 ```
@@ -121,7 +139,7 @@ _ -> domain error
 Description: return a minute from a time
 
 ```
-  t <- 15.12.57.001t
+  t <- 15:12:57.001t
   time_minute(t)
 > 12:i64
 ```
@@ -141,7 +159,7 @@ _ -> domain error
 Description: return a second from a time
 
 ```
-  t <- 15.12.57.001t
+  t <- 15:12:57.001t
   time_second(t)
 > 57:i64
 ```
@@ -161,7 +179,7 @@ _ -> domain error
 Description: return a millisecond from a time
 
 ```
-  t <- 15.12.57.001t
+  t <- 15:12:57.001t
   time_mill(t)
 > 1:i64
 ```
@@ -194,8 +212,8 @@ Description: return the difference between two times
   d2 <- 2011.03.16d
   datetime_diff(d1,d2)
 > 1:i64
-  t1 <- 15.12.57.001t
-  t2 <- 15.12.57.101t
+  t1 <- 15:12:57.001t
+  t2 <- 15:12:57.101t
   datetime_diff(t1,t2)
 > 100:i64
 ```
@@ -224,9 +242,9 @@ Description: substract an interval to a time
   x <- 1:i64
   datetime_sub(d,x,`year)
 > 2010.03.15d
-  t <- 15.12.57.001t
+  t <- 15:12:57.001t
   x <- 2:i64
   datetime_sub(t,x,`second)
-> 15.12.56.001t
+> 15:12:56.001t
 ```
 
