@@ -17,7 +17,7 @@ class ComplexLiteral : public VectorLiteral<std::complex<double>> {
 
   ComplexLiteral (ASTNodeMemory &mem, const CSTType *cst)
       : VectorLiteral<std::complex<double>>
-            (mem, ASTNodeClass::ComplexLiteral, LiteralClass::Complex)
+            (mem, ASTNodeClass::ComplexLiteral, cst, LiteralClass::Complex)
   {}
 
   ComplexLiteral (ComplexLiteral &&literal) = default;

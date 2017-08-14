@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <limits>
 #include <stdexcept>
+#include <regex>
 #include "AST.h"
 
 namespace horseIR
@@ -1069,6 +1071,195 @@ struct CSTConverter {
     valueVector.emplace_back (SymbolLiteral::ElementType (nullptr));
     symbolLiteral->setValue (std::move (valueVector));
     return symbolLiteral;
+  }
+
+  using LiteralTMonthContext = HorseIRParser::LiteralTMonthContext;
+  using LiteralTMonthCase0Context = HorseIRParser::LiteralTMonthCase0Context;
+  using LiteralTMonthCase1Context = HorseIRParser::LiteralTMonthCase1Context;
+
+  static MonthLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMonthContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTMonthCase0Context *case0 = nullptr;
+    LiteralTMonthCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static MonthLiteral::ElementType
+  convertMonthValueN (HorseIRParser::TMonthValueNContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    if (valueContext->NULL_TOKEN () != nullptr)
+      { return MonthLiteral::ElementType (nullptr); }
+    const std::string valueString = valueContext->LITERAL_FLOAT ()->getText ();
+    const std::regex matchRegex (R"REGEX(([0-9]{4})\.([0-9]{1,2}))REGEX");
+    std::smatch matchResult;
+    if (!std::regex_match (valueString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string yearString = matchResult[1];
+    const std::string monthString = matchResult[2];
+    std::uint16_t yearValue = 0;
+    std::uint8_t monthValue = 0;
+    try
+      {
+        std::size_t pos = 0;
+        unsigned long yearConverted = std::stoul (yearString, &pos, 10);
+        if (pos != yearString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (yearConverted < 1900) throw CSTConverterException (valueContext);
+        if (yearConverted > 2100) throw CSTConverterException (valueContext);
+        yearValue = static_cast<std::uint16_t>(yearConverted);
+
+        unsigned long monthConverted = std::stoul (monthString, &pos, 10);
+        if (pos != monthString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (monthConverted > 12) throw CSTConverterException (valueContext);
+        monthValue = static_cast<std::uint8_t>(monthConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    storage::Month element;
+    element.year = yearValue;
+    element.month = monthValue;
+    return MonthLiteral::ElementType (std::move (element));
+  }
+
+  static MonthLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMonthCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto monthLiteral = new MonthLiteral (mem, literal);
+    std::vector<MonthLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convertMonthValueN (literal->tMonthValueN ()));
+    monthLiteral->setValue (std::move (valueVector));
+    return monthLiteral;
+  }
+
+  static MonthLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMonthCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    using TMonthValueNContext = HorseIRParser::TMonthValueNContext;
+    const auto monthValueContexts = literal->tMonthValueN ();
+    std::vector<MonthLiteral::ElementType> valueVector{};
+    valueVector.reserve (monthValueContexts.size ());
+    std::transform (
+        monthValueContexts.cbegin (), monthValueContexts.cend (),
+        std::back_inserter (valueVector),
+        [] (TMonthValueNContext *context) -> MonthLiteral::ElementType
+        { return convertMonthValueN (context); });
+    auto monthLiteral = new MonthLiteral (mem, literal);
+    monthLiteral->setValue (std::move (valueVector));
+    return monthLiteral;
+  }
+
+  using LiteralTDateContext = HorseIRParser::LiteralTDateContext;
+  using LiteralTDateCase0Context = HorseIRParser::LiteralTDateCase0Context;
+  using LiteralTDateCase1Context = HorseIRParser::LiteralTDateCase1Context;
+  using LiteralTDateCase2Context = HorseIRParser::LiteralTDateCase2Context;
+  using LiteralTDateCase3Context = HorseIRParser::LiteralTDateCase3Context;
+  using LiteralTDateCase4Context = HorseIRParser::LiteralTDateCase4Context;
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTDateCase0Context *case0 = nullptr;
+    LiteralTDateCase1Context *case1 = nullptr;
+    LiteralTDateCase2Context *case2 = nullptr;
+    LiteralTDateCase3Context *case3 = nullptr;
+    LiteralTDateCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static DateLiteral::ElementType
+  convertDateValue (HorseIRParser::TDateValueContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    const auto dateContext = valueContext->LITERAL_GROUP_3_DATE ();
+    const std::string valueString = dateContext->getText ();
+    const std::regex matchRegex (
+        R"REGEX(([0-9]{4})\.([0-9]{1,2}\.([0-9]{1,2}))REGEX"
+    );
+    std::smatch matchResult;
+    if (!std::regex_match (valueString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string yearString = matchResult[1];
+    const std::string monthString = matchResult[2];
+    const std::string dayString = matchResult[3];
+    std::uint16_t yearValue = 0;
+    std::uint8_t monthValue = 0;
+    std::uint8_t dayValue = 0;
+    try
+      {
+        std::size_t pos = 0;
+        unsigned long yearConverted = std::stoul (yearString, &pos, 10);
+        if (pos != yearString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (yearConverted < 1900) throw CSTConverterException (valueContext);
+        if (yearConverted > 2100) throw CSTConverterException (valueContext);
+        yearValue = static_cast<std::uint16_t>(yearConverted);
+
+        unsigned long monthConverted = std::stoul (monthString, &pos, 10);
+        if (pos != monthString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (monthConverted > 12) throw CSTConverterException (valueContext);
+        monthValue = static_cast<std::uint8_t>(monthConverted);
+
+        unsigned long dayConverted = std::stoul (dayString, &pos, 10);
+        if (pos != monthString.length ())
+          { throw CSTConverterException (valueContext); }
+
+        bool isLeapYear;
+        if (yearValue % 4 != 0)
+          { isLeapYear = false; }
+        else if (yearValue % 100 != 0)
+          { isLeapYear = true; }
+        else
+          { isLeapYear = (yearValue % 400 == 0); }
+
+        const std::array<std::uint8_t, 12> nonLeapYearMax = {
+            31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        };
+        const std::array<std::uint8_t, 12> leapYearMax = {
+            31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        };
+        if (isLeapYear && dayConverted > leapYearMax[monthValue])
+          { throw CSTConverterException (valueContext); }
+        if ((!isLeapYear) && dayConverted > nonLeapYearMax[monthValue])
+          { throw CSTConverterException (valueContext); }
+        dayValue = static_cast<std::uint8_t>(dayConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    storage::Date date;
+    date.year = yearValue;
+    date.month = monthValue;
+    date.day = dayValue;
+    return DateLiteral::ElementType (std::move (date));
   }
 
   using TypeContext = HorseIRParser::TypeContext;

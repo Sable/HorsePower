@@ -16,7 +16,7 @@ class SymbolLiteral : public VectorLiteral<std::string> {
 
   SymbolLiteral (ASTNodeMemory &mem, const CSTType *cst)
       : VectorLiteral<std::string>
-            (mem, ASTNodeClass::SymbolLiteral, LiteralClass::Symbol)
+            (mem, ASTNodeClass::SymbolLiteral, cst, LiteralClass::Symbol)
   {}
 
   SymbolLiteral (SymbolLiteral &&literal) = default;

@@ -52,41 +52,44 @@ literal          : literalBool
                  ;
 
 boolValueN       : value=LITERAL_INTEGER | value=NULL_TOKEN ;
-literalBool      : boolValueN ':' 'bool'                               #literalBoolCase0
-                 | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'  #literalBoolCase1
+literalBool      : boolValueN ':' 'bool'                                        #literalBoolCase0
+                 | '(' (boolValueN (',' boolValueN)*)? ')' ':' 'bool'           #literalBoolCase1
                  ;
 charValue        : value=LITERAL_CHAR ;
-literalChar      : charValue (':' 'char')?                             #literalCharCase0
-                 | LITERAL_CHAR_VECTOR (':' 'char')?                   #literalCharCase1
-                 | '(' ')' ':' 'char'                                  #literalCharCase2
+literalChar      : charValue (':' 'char')?                                      #literalCharCase0
+                 | LITERAL_CHAR_VECTOR (':' 'char')?                            #literalCharCase1
+                 | '(' ')' ':' 'char'                                           #literalCharCase2
                  | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? charValue (',' (charValue | NULL_TOKEN))* ')' (':' 'char')?
-                                                                       #literalCharCase3
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'     #literalCharCase4
-                 | NULL_TOKEN ':' 'char'                               #literalCharCase5
+                                                                                #literalCharCase3
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'char'              #literalCharCase4
+                 | NULL_TOKEN ':' 'char'                                        #literalCharCase5
                  ;
 stringValue      : LITERAL_STRING ;
-literalString    : stringValue (':' 'str')?                            #literalStringCase0
-                 | '(' ')' ':' 'str'                                   #literalStringCase1
+literalString    : stringValue (':' 'str')?                                     #literalStringCase0
+                 | '(' ')' ':' 'str'                                            #literalStringCase1
                  | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? stringValue (',' (stringValue | NULL_TOKEN))* ')' (':' 'str')?
-                                                                       #literalStringCase2
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'      #literalStringCase3
-                 | NULL_TOKEN ':' 'str'                                #literalStringCase4
+                                                                                #literalStringCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'str'               #literalStringCase3
+                 | NULL_TOKEN ':' 'str'                                         #literalStringCase4
                  ;
 intValueN        : op=('+' | '-')? LITERAL_INTEGER | NULL_TOKEN ;
-literalInteger   : intValueN ':' typeToken=('i8' | 'i16' | 'i32' | 'i64')                             #literalIntegerCase0
-                 | '(' (intValueN (',' intValueN)*)? ')' ':' typeToken=('i8' | 'i16' | 'i32' | 'i64') #literalIntegerCase1
+literalInteger   : intValueN ':' typeToken=('i8' | 'i16' | 'i32' | 'i64')       #literalIntegerCase0
+                 | '(' (intValueN (',' intValueN)*)? ')' ':' typeToken=('i8' | 'i16' | 'i32' | 'i64')
+                                                                                #literalIntegerCase1
                  ;
 floatValueN      : op=('+' | '-')? value=(LITERAL_FLOAT | LITERAL_INTEGER)
                  | NULL_TOKEN ;
-literalFloat     : floatValueN ':' typeToken=('f32' | 'f64')                               #literalFloatCase0
-                 | '(' (floatValueN (',' floatValueN)*)? ')' ':' typeToken=('f32' | 'f64') #literalFloatCase1
+literalFloat     : floatValueN ':' typeToken=('f32' | 'f64')                    #literalFloatCase0
+                 | '(' (floatValueN (',' floatValueN)*)? ')' ':' typeToken=('f32' | 'f64')
+                                                                                #literalFloatCase1
                  ;
-complexValueN    : realOp=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)         #complexValueNCase0
-                 | imOp=('+' | '-')? im=(LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j') #complexValueNCase1
+complexValueN    : realOp=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER)   #complexValueNCase0
+                 | imOp=('+' | '-')? im=(LITERAL_FLOAT | LITERAL_INTEGER) ('i' | 'j')
+                                                                                #complexValueNCase1
                  | realOp=('+' | '-')? real=(LITERAL_FLOAT | LITERAL_INTEGER) imOp=('+' | '-') im=(LITERAL_FLOAT | LITERAL_INTEGER)? ('i' | 'j')
-                                                                                      #complexValueNCase2
-                 | imOp=('+' | '-')? ('i' | 'j')                                      #complexValueNCase3
-                 | NULL_TOKEN                                                         #complexValueNCase4
+                                                                                #complexValueNCase2
+                 | imOp=('+' | '-')? ('i' | 'j')                                #complexValueNCase3
+                 | NULL_TOKEN                                                   #complexValueNCase4
                  ;
 literalComplex   : complexValueN ':' 'complex'                                  #literalComplexCase0
                  | '(' (complexValueN (',' complexValueN)*)? ')' ':' 'complex'  #literalComplexCase1
@@ -100,18 +103,16 @@ literalSymbol    : symbolValue (':' 'sym')?                                     
                  | NULL_TOKEN ':' 'sym'                                         #literalSymbolCase4
                  ;
 tMonthValueN     : LITERAL_FLOAT | NULL_TOKEN ;
-literalTMonth    : tMonthValueN ':' 'm'
-                 | '(' (tMonthValueN (',' tMonthValueN)*)? ')' ':' 'm'
+literalTMonth    : tMonthValueN ':' 'm'                                         #literalTMonthCase0
+                 | '(' (tMonthValueN (',' tMonthValueN)*)? ')' ':' 'm'          #literalTMonthCase1
                  ;
 tDateValue       : LITERAL_GROUP_3_DATE ;
-tDateValueN      : LITERAL_GROUP_3_DATE | NULL_TOKEN ;
-literalTDate     : tDateValue (':' 'd')?
-                 | '(' tDateValue (',' tDateValue)* ')' (':' 'd')?
-                 | '(' ')' ':' 'd'
-                 | '(' NULL_TOKEN (',' tDateValueN)* (',' tDateValue) (',' tDateValueN)* ')' (':' 'd')?
-                 | '(' tDateValue (',' tDateValueN)* (',' NULL_TOKEN) (',' tDateValueN)* ')' (':' 'd')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'd'
-                 | NULL_TOKEN ':' 'd'
+literalTDate     : tDateValue (':' 'd')?                                        #literalTDateCase0
+                 | '(' ')' ':' 'd'                                              #literalTDateCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? tDateValue (',' (tDateValue | NULL_TOKEN))* ')' (':' 'd')?
+                                                                                #literalTDateCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'd'                 #literalTDateCase3
+                 | NULL_TOKEN ':' 'd'                                           #literalTDateCase4
                  ;
 tDateTimeValue   : LITERAL_GROUP_7_DATETIME ;
 tDateTimeValueN  : LITERAL_GROUP_7_DATETIME | NULL_TOKEN ;

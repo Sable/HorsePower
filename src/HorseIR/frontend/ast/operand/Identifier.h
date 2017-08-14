@@ -28,7 +28,7 @@ class Identifier : public Operand {
   setName (T &&identifierName);
 
  protected:
-  std::string name;
+  std::string name = "";
   void __duplicateDeep (ASTNodeMemory &mem, const Identifier *identifier);
 };
 

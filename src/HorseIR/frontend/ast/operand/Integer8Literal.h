@@ -28,7 +28,8 @@ class Integer8Literal : public VectorLiteral<std::int8_t> {
   Integer8Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
     auto integer8Literal = new Integer8Literal (mem);
-    integer8Literal->VectorLiteral<std::int8_t>::__duplicateDeep (mem, this);
+    integer8Literal->
+        VectorLiteral<std::int8_t>::__duplicateDeep (mem, this);
     return integer8Literal;
   }
 

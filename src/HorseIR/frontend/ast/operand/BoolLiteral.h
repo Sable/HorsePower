@@ -9,9 +9,9 @@ namespace ast
 
 class BoolLiteral : public VectorLiteral<bool> {
  public:
-
   explicit BoolLiteral (ASTNodeMemory &mem)
-      : VectorLiteral<bool> (mem, ASTNodeClass::BoolLiteral, LiteralClass::Bool)
+      : VectorLiteral<bool>
+            (mem, ASTNodeClass::BoolLiteral, LiteralClass::Bool)
   {}
 
   BoolLiteral (ASTNodeMemory &mem, const CSTType *parseTree)

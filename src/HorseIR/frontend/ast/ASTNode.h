@@ -15,11 +15,13 @@ class ASTNode {
   enum class ASTNodeClass {
     NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
     Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
-    FP64Literal, SymbolLiteral, StringLiteral, FunctionLiteral, TableLiteral,
-    KeyTableLiteral, EnumerationLiteral, Identifier, PrimitiveType,
-    WildcardType, ListType, DictionaryType, EnumerationType, FunctionType,
-    CompilationUnit, Module, Method, LabelStatement, BranchStatement,
-    PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
+    FP64Literal, SymbolLiteral, StringLiteral, MonthLiteral, SecondLiteral,
+    TimeLiteral, DateLiteral, DateTimeLiteral, MinuteLiteral,
+    FunctionLiteral, TableLiteral, KeyTableLiteral, EnumerationLiteral,
+    Identifier, PrimitiveType, WildcardType, ListType, DictionaryType,
+    EnumerationType, FunctionType, CompilationUnit, Module, Method,
+    LabelStatement, BranchStatement, PhiStatement, InvokeStatement,
+    AssignStatement, ReturnStatement
   };
 
   class ASTNodeMemory {
@@ -153,6 +155,12 @@ operator<< (std::ostream &stream, const ASTNode::ASTNodeClass &astNodeClass)
       case ASTNodeClass::FP64Literal: return stream << "FP64Literal";
       case ASTNodeClass::SymbolLiteral: return stream << "SymbolLiteral";
       case ASTNodeClass::StringLiteral: return stream << "StringLiteral";
+      case ASTNodeClass::DateLiteral: return stream << "DateLiteral";
+      case ASTNodeClass::DateTimeLiteral: return stream << "DateTimeLiteral";
+      case ASTNodeClass::MinuteLiteral: return stream << "MinuteLiteral";
+      case ASTNodeClass::MonthLiteral:return stream << "MonthLiteral";
+      case ASTNodeClass::SecondLiteral: return stream << "SecondLiteral";
+      case ASTNodeClass::TimeLiteral: return stream << "TimeLiteral";
       case ASTNodeClass::FunctionLiteral: return stream << "FunctionLiteral";
       case ASTNodeClass::TableLiteral: return stream << "TableLiteral";
       case ASTNodeClass::KeyTableLiteral: return stream << "KeyTableLiteral";

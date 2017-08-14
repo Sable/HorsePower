@@ -9,7 +9,6 @@ namespace ast
 
 class CharLiteral : public VectorLiteral<std::uint8_t> {
  public:
-
   explicit CharLiteral (ASTNodeMemory &mem)
       : VectorLiteral<std::uint8_t>
             (mem, ASTNodeClass::CharLiteral, LiteralClass::Character)

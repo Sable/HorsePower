@@ -54,17 +54,19 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"(`appl)";
+  const std::string raw = R"((2012.4, 1996.09, 2017.09, 1988.04, null):m)";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.literalSymbol ();
+  auto context = parser.literalTMonth ();
 
   ast::ASTNode::ASTNodeMemory mem;
+
   auto astNode = ast::CSTConverter::convert (mem, context);
   astNode->setEnclosingFilename ("stdin");
   std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
+
 }

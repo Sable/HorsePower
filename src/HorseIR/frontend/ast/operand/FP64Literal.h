@@ -16,7 +16,7 @@ class FP64Literal : public VectorLiteral<double> {
 
   FP64Literal (ASTNodeMemory &mem, const CSTType *cst)
       : VectorLiteral<double>
-            (mem, ASTNodeClass::FP64Literal, LiteralClass::FP64)
+            (mem, ASTNodeClass::FP64Literal, cst, LiteralClass::FP64)
   {}
 
   FP64Literal (FP64Literal &&literal) = default;

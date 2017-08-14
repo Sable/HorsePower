@@ -48,3 +48,5 @@
 #include "operand/FP64Literal.h"
 #include "operand/ComplexLiteral.h"
 #include "operand/SymbolLiteral.h"
+#include "operand/MonthLiteral.h"
+#include "operand/DateLiteral.h"

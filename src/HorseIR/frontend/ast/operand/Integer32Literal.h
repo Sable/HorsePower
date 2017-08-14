@@ -16,7 +16,7 @@ class Integer32Literal : public VectorLiteral<std::int32_t> {
 
   Integer32Literal (ASTNodeMemory &mem, const CSTType *cst)
       : VectorLiteral<std::int32_t>
-            (mem, ASTNodeClass::Integer32Literal, LiteralClass::Integer32)
+            (mem, ASTNodeClass::Integer32Literal, cst, LiteralClass::Integer32)
   {}
 
   Integer32Literal (Integer32Literal &&literal) = default;
