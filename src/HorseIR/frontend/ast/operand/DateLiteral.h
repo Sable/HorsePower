@@ -49,9 +49,9 @@ class DateLiteral : public VectorLiteral<storage::Date> {
     std::ostringstream stream;
     stream << elementType.year
            << '.'
-           << elementType.month
+           << unsigned(elementType.month)
            << '.'
-           << elementType.day;
+           << unsigned(elementType.day);
     return stream.str ();
   }
 };

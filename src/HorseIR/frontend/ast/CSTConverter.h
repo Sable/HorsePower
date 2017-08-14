@@ -17,14 +17,15 @@ struct CSTConverter {
     using CSTType = antlr4::tree::ParseTree;
 
     explicit CSTConverterException (const CSTType *exceptionSite)
-        : logic_error ("CSTConverterException"), site (exceptionSite)
+        : logic_error ("error occurred during transformation from CST to AST"),
+          site (exceptionSite)
     {}
 
     const antlr4::tree::ParseTree *getExceptionSite () const
     { return site; }
 
    protected:
-    const antlr4::tree::ParseTree *site = nullptr;
+    const antlr4::tree::ParseTree *const site;
   };
 
   using ASTNodeMemory = ASTNode::ASTNodeMemory;
@@ -1120,6 +1121,7 @@ struct CSTConverter {
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
         if (pos != monthString.length ())
           { throw CSTConverterException (valueContext); }
+        if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
         monthValue = static_cast<std::uint8_t>(monthConverted);
       }
@@ -1200,7 +1202,7 @@ struct CSTConverter {
     const auto dateContext = valueContext->LITERAL_GROUP_3_DATE ();
     const std::string valueString = dateContext->getText ();
     const std::regex matchRegex (
-        R"REGEX(([0-9]{4})\.([0-9]{1,2}\.([0-9]{1,2}))REGEX"
+        R"REGEX(([0-9]{4})\.([0-9]{1,2})\.([0-9]{1,2}))REGEX"
     );
     std::smatch matchResult;
     if (!std::regex_match (valueString, matchResult, matchRegex))
@@ -1224,6 +1226,7 @@ struct CSTConverter {
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
         if (pos != monthString.length ())
           { throw CSTConverterException (valueContext); }
+        if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
         monthValue = static_cast<std::uint8_t>(monthConverted);
 
@@ -1245,9 +1248,9 @@ struct CSTConverter {
         const std::array<std::uint8_t, 12> leapYearMax = {
             31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
         };
-        if (isLeapYear && dayConverted > leapYearMax[monthValue])
+        if (isLeapYear && dayConverted > leapYearMax[monthValue - 1])
           { throw CSTConverterException (valueContext); }
-        if ((!isLeapYear) && dayConverted > nonLeapYearMax[monthValue])
+        if ((!isLeapYear) && dayConverted > nonLeapYearMax[monthValue - 1])
           { throw CSTConverterException (valueContext); }
         dayValue = static_cast<std::uint8_t>(dayConverted);
       }
@@ -1260,6 +1263,88 @@ struct CSTConverter {
     date.month = monthValue;
     date.day = dayValue;
     return DateLiteral::ElementType (std::move (date));
+  }
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateLiteral = new DateLiteral (mem, literal);
+    std::vector<DateLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convertDateValue (literal->tDateValue ()));
+    dateLiteral->setValue (std::move (valueVector));
+    return dateLiteral;
+  }
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateLiteral = new DateLiteral (mem, literal);
+    return dateLiteral;
+  }
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const auto rawChildren = literal->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
+        {
+          using TDateValueContext = HorseIRParser::TDateValueContext;
+          if (dynamic_cast<TDateValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<DateLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (),
+        std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> DateLiteral::ElementType
+        {
+          HorseIRParser::TDateValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertDateValue (value); }
+          return DateLiteral::ElementType (nullptr);
+        });
+    auto dateLiteral = new DateLiteral (mem, literal);
+    dateLiteral->setValue (std::move (valueVector));
+    return dateLiteral;
+  }
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateCase3Context *literal)
+  {
+    assert (literal != nullptr);
+    std::size_t nullCount = 0;
+    const auto rawChildren = literal->children;
+    for (const auto &child : rawChildren)
+      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    auto dateLiteral = new DateLiteral (mem, literal);
+    std::vector<DateLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullCount);
+    for (std::size_t iter = 0; iter < nullCount; ++iter)
+      { valueVector.emplace_back (DateLiteral::ElementType (nullptr)); }
+    dateLiteral->setValue (std::move (valueVector));
+    return dateLiteral;
+  }
+
+  static DateLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateCase4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateLiteral = new DateLiteral (mem, literal);
+    std::vector<DateLiteral::ElementType> dateValue{};
+    dateValue.emplace_back (DateLiteral::ElementType (nullptr));
+    dateLiteral->setValue (std::move (dateValue));
+    return dateLiteral;
   }
 
   using TypeContext = HorseIRParser::TypeContext;

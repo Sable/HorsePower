@@ -54,13 +54,13 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"((2012.4, 1996.09, 2017.09, 1988.04, null):m)";
+  const std::string raw = R"((null, 2012.12.21, 1996.0009.06, null))";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.literalTMonth ();
+  auto context = parser.literalTDate ();
 
   ast::ASTNode::ASTNodeMemory mem;
 
