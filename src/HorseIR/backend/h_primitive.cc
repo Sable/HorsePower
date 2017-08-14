@@ -55,6 +55,7 @@ L pfnIndex(V z, V x, V y){
                 caseE DOI(lenZ, vE(z,i)=vE(x,vL(y,i))) break;
                 caseX DOI(lenZ, vX(z,i)=vX(x,vL(y,i))) break;
                 caseQ DOI(lenZ, vQ(z,i)=vQ(x,vL(y,i))) break;
+                caseS DOI(lenZ, vS(z,i)=vS(x,vL(y,i))) break;
             }
             R 0;
         }
@@ -462,6 +463,7 @@ L pfnReverse(V z, V x){
             caseX DOI(lenZ, vX(z,i)=vX(x,lenZ-i-1)) break;
             caseC DOI(lenZ, vC(z,i)=vC(x,lenZ-i-1)) break;
             caseQ DOI(lenZ, vQ(z,i)=vQ(x,lenZ-i-1)) break;
+            caseS DOI(lenZ, vS(z,i)=vS(x,lenZ-i-1)) break;
             default: R E_NOT_IMPL;
         }
         R 0;
@@ -662,6 +664,7 @@ L pfnTolist(V z, V x){
                     caseE ve(t)=vE(x,i); break; \
                     caseX vx(t)=vX(x,i); break; \
                     caseQ vq(t)=vQ(x,i); break; \
+                    caseS vs(t)=vS(x,i); break; \
                     default: R E_NOT_IMPL; \
                 } \
             })
@@ -729,6 +732,7 @@ L pfnCompare(V z, V x, V y, L op){
             if(isOne(x)) {
                 switch(vp(x)){
                     caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
+                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,0),vS(y,i),strcmp))        break;
                     caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
                     caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
                     caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
@@ -741,6 +745,7 @@ L pfnCompare(V z, V x, V y, L op){
             else if(isOne(y)) {
                 switch(vp(x)){
                     caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
+                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,0),strcmp))        break;
                     caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
                     caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
                     caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
@@ -753,6 +758,7 @@ L pfnCompare(V z, V x, V y, L op){
             else {
                 switch(vp(x)){
                     caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
+                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,i),strcmp))        break;
                     caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
                     caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
                     caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
@@ -1044,13 +1050,27 @@ L pfnIndexOf(V z, V x, V y){
             caseL INDEXOF(L, z, tempX, tempY); break;
             caseF INDEXOF(F, z, tempX, tempY); break;
             caseE INDEXOF(E, z, tempX, tempY); break;
-            caseC INDEXOF(C, z, tempX, tempY); break;
-            caseQ INDEXOF(Q, z, tempX, tempY); break;
             default: R E_NOT_IMPL;
         }
         R 0;
     }
-    else R E_DOMAIN;
+    else if(isSameType(x,y)) {
+        switch(xp){
+            caseX INDEXOF(X, z, x, y); break;
+            caseC INDEXOF(C, z, x, y); break;
+            caseQ INDEXOF(Q, z, x, y); break;
+            caseS INDEXOF(S, z, x, y); break;
+            caseM INDEXOF(M, z, x, y); break;
+            caseD INDEXOF(D, z, x, y); break;
+            caseZ INDEXOF(Z, z, x, y); break;
+            caseU INDEXOF(U, z, x, y); break;
+            caseW INDEXOF(W, z, x, y); break;
+            caseT INDEXOF(T, z, x, y); break;
+            default: R E_DOMAIN;
+        }
+        R 0;
+    }
+    else R E_TYPE;
 }
 
 L pfnAppend(V z, V x, V y){
@@ -1072,7 +1092,7 @@ L pfnAppend(V z, V x, V y){
         }
         R 0;
     }
-    else if(isSameType(x,y) && (isComplex(x)||isSymbol(x)||isString(x))){
+    else if(isSameType(x,y) && (isTypeGroupString(vp(x)) || isComplex(x))) {
         L typZ = vp(x), c = vn(x);
         L lenZ = vn(x) + vn(y);
         initV(z,typZ,lenZ);
@@ -1085,6 +1105,9 @@ L pfnAppend(V z, V x, V y){
                   break;
             caseC DOI(vn(x), vC(z,i)=vC(x,i))
                   DOI(vn(y), vC(z,c+i)=vC(x,i))
+                  break;
+            caseS DOI(vn(x), vS(z,i)=vS(x,i))
+                  DOI(vn(y), vS(z,c+i)=vS(x,i))
                   break;
         }
         R 0;
@@ -1109,7 +1132,7 @@ L pfnAppend(V z, V x, V y){
  * y: string (done), symbol, list of string and symbol (pending)
  */
 L pfnLike(V z, V x, V y){
-    if(isString(x) && isString(y)){
+    if(isChar(x) && isChar(y)){
         S newString = genLikeString(sC(y),vn(y));
         if(!newString) R E_NULL_VALUE;
         L newLen = strlen(newString);
@@ -1300,12 +1323,13 @@ L pfnMember(V z, V x, V y){
             MEMBER(E,z,tempX,tempY);
         }
     }
-    else if(isSymbol(x) || isComplex(x) || isString(x) || isTypeGroupDTime(vp(x))){
+    else if(isTypeGroupString(vp(x)) || isComplex(x) || isTypeGroupDTime(vp(x))){
         initV(z,H_B,vn(y));
         switch(vp(x)){
-            MEMBER(Q,z,x,y);
             MEMBER(X,z,x,y);
+            MEMBER(Q,z,x,y);
             MEMBER(C,z,x,y);
+            MEMBER(S,z,x,y);
             MEMBER(M,z,x,y); /* time */
             MEMBER(D,z,x,y);
             MEMBER(Z,z,x,y);

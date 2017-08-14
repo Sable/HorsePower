@@ -6,17 +6,18 @@
 #define H_F 4
 #define H_E 5
 #define H_X 6
-#define H_C 7
-#define H_Q 8
-#define H_M 9
-#define H_D 10
-#define H_Z 11
-#define H_U 12
-#define H_W 13
-#define H_T 14
-#define H_G 15 //list
-#define H_N 16 //dict
-#define H_Y 17 //enum
+#define H_C 7  //char
+#define H_Q 8  //sym
+#define H_S 9  //str
+#define H_M 10
+#define H_D 11
+#define H_Z 12
+#define H_U 13
+#define H_W 14
+#define H_T 15
+#define H_G 16 //list
+#define H_N 17 //dict
+#define H_Y 18 //enum
 #define H_A 90 //table
 #define H_K 91 //ktable
 #define H_V 93 //value item
@@ -29,6 +30,7 @@
 #define caseE case H_E:
 #define caseC case H_C:
 #define caseQ case H_Q:
+#define caseS case H_S:
 #define caseM case H_M:
 #define caseD case H_D:
 #define caseZ case H_Z:
@@ -54,6 +56,7 @@
 #define ve(x)  x->f64
 #define vc(x)  x->c
 #define vq(x)  x->q
+#define vs(x)  x->s
 #define vm(x)  x->m
 #define vd(x)  x->d
 #define vz(x)  x->z
@@ -73,6 +76,7 @@
 #define sF(x) ((F*)(vg(x)))
 #define sC(x) ((C*)(vg(x)))
 #define sQ(x) ((Q*)(vg(x)))
+#define sS(x) ((S*)(vg(x)))
 #define sX(x) ((X*)(vg(x)))
 #define sY(x) ((L*)(vg(x)))
 #define sM(x) ((M*)(vg(x)))
@@ -91,6 +95,7 @@
 #define vF(x,i) sF(x)[i]
 #define vC(x,i) sC(x)[i]
 #define vQ(x,i) sQ(x)[i]
+#define vS(x,i) sS(x)[i]
 #define vX(x,i) sX(x)[i]
 #define vY(x,i) sY(x)[i]
 #define vM(x,i) sM(x)[i]
@@ -114,6 +119,7 @@
 #define xe  ve(x)
 #define xc  vc(x)
 #define xq  vq(x)
+#define xs  vs(x)
 #define xm  vm(x)
 #define xd  vd(x)
 #define xz  vz(x)
@@ -130,6 +136,7 @@
 #define xF(k) vF(x,k)
 #define xE(k) vE(x,k)
 #define xQ(k) vQ(x,k)
+#define xS(k) vS(x,k)
 #define xM(k) vM(x,k)
 #define xD(k) vD(x,k)
 #define xZ(k) vZ(x,k)
@@ -140,8 +147,6 @@
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)
-
-#define getEnumName(x) ((x)->y.name)
 
 
 

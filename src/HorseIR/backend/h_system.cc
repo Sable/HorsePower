@@ -220,6 +220,7 @@ L fillRaze(V z, L *n0, V x){
                      caseL DOI(xn, vL(z,n++)=vL(x,i)); break; } } break;
              caseX DOI(xn, vX(z,n++)=vX(x,i)); break;
              caseQ DOI(xn, vQ(z,n++)=vQ(x,i)); break;
+             caseS DOI(xn, vS(z,n++)=vS(x,i)); break;
              default: R E_NOT_IMPL;
         }
         *n0 = n;
@@ -239,8 +240,9 @@ L matchPair(B *t, V x, V y){
                 caseL DOI(vn(x), if(vL(x,i)!=vL(y,i))R 0) break;
                 caseF DOI(vn(x), if(vF(x,i)!=vF(y,i))R 0) break;
                 caseE DOI(vn(x), if(vE(x,i)!=vE(y,i))R 0) break;
-                caseX DOI(vn(x), if(!xEqual(vX(x,i),vX(y,i)))R 0) break;
-                caseQ DOI(vn(x), if(vQ(x,i)!=vQ(y,i))R 0) break;
+                caseX DOI(vn(x), if(!xEqual(vX(x,i),vX(y,i)))R 0)   break;
+                caseQ DOI(vn(x), if(vQ(x,i)!=vQ(y,i))R 0)           break;
+                caseS DOI(vn(x), if(0!=strcmp(vS(x,i),vS(y,i)))R 0) break;
                 default: R E_NOT_IMPL;
             }
             *t=1; R 0;
@@ -305,6 +307,10 @@ B isTypeGroupTime(L t){
     R (H_U==t || H_W==t || H_T==t);
 }
 
+B isTypeGroupString(L t){
+    R (H_C==t || H_Q==t || H_S==t);
+}
+
 B isTypeGroupCompound(L t){
     R (H_G==t || H_N==t || H_Y==t || H_A==t || H_K==t);
 }
@@ -319,7 +325,7 @@ B isTypeGroupDTime(L t){
 }
 
 B isTypeGroupColumn(L t){
-    R (isTypeGroupReal(t) || H_Q==t || isTypeGroupDTime(t) || H_X==t);
+    R (isTypeGroupReal(t) || H_Q==t || H_S==t || isTypeGroupDTime(t) || H_X==t);
 }
 
 B isTypeGroupComparable(L t){
@@ -327,7 +333,7 @@ B isTypeGroupComparable(L t){
 }
 
 B isTypeGroupBasic(L t){
-    R (isTypeGroupReal(t) || H_C==t || H_Q==t || H_X==t || isTypeGroupDTime(t));
+    R (isTypeGroupReal(t) || isTypeGroupString(t) || H_X==t || isTypeGroupDTime(t));
 }
 
 B isTypeGroupAny(L t){

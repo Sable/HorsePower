@@ -10,6 +10,7 @@ extern "C" {
 
 #define getKTableKey(x) vV(x,0)
 #define getKTableVal(x) vV(x,1)
+#define getEnumName(x)  ((x)->y.name)
 
 /* methods */
 
@@ -48,6 +49,7 @@ B isTypeGroupFloat      (L t);
 B isTypeGroupReal       (L t);
 B isTypeGroupDate       (L t);
 B isTypeGroupTime       (L t);
+B isTypeGroupString     (L t);
 B isTypeGroupCompound   (L t);
 
 B isTypeGroupNumber     (L t);

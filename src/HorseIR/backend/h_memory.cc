@@ -66,6 +66,7 @@ L getTypeSize(L typ){
         case H_E  : r = sizeof(E);     break;
         case H_X  : r = sizeof(X);     break;
         case H_Q  : r = sizeof(L);     break;
+        case H_S  : r = sizeof(S);     break;
         case H_M  : r = sizeof(M);     break;
         case H_D  : r = sizeof(D);     break;
         case H_Z  : r = sizeof(Z);     break;
@@ -150,6 +151,8 @@ V initKTable(V x){
     R initV(x, H_K, 2);
 }
 
-
-
+S insertString(S str){
+    L len = strlen(str);
+    R (S)memcpy(getHeapMem(H_C, len), str, len+1);
+}
 

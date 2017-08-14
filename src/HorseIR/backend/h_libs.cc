@@ -96,6 +96,12 @@ void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen){
     DOI(vLen, {L t=buff[val[i]]; targ[i]=-1==t?sLen:t;})
 }
 
+void lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
+}
+
+void lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen){
+}
+
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp){
     if(low < high){
@@ -168,7 +174,7 @@ void lib_member_C(B* targ, C* src, L sLen, C* val, L vLen){
 void lib_member_X(B* targ, X* src, L sLen, X* val, L vLen){
 }
 
-void lib_member_Q(B* targ, Q* src, L sLen, Q* val, L vLen){
+void lib_member_S(B* targ, S* src, L sLen, S* val, L vLen){
 }
 
 

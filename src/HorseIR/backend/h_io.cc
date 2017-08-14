@@ -146,6 +146,7 @@ L getTypeStr(L x, S buff){
         caseF c=SP(buff, "f32");     break;
         caseE c=SP(buff, "f64");     break;
         caseQ c=SP(buff, "sym");     break;
+        caseS c=SP(buff, "str");     break;
         caseX c=SP(buff, "complex"); break;
         caseM c=SP(buff, "m");       break;
         caseD c=SP(buff, "d");       break;
@@ -211,9 +212,14 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
 }
 
 L printBasicItem(V x, L k){
-    C buff[BUFF_SIZE];
-    getBasicItemStr(x,k,buff,1);
-    R FS(buff);
+    if(xp!=H_S){
+        C buff[BUFF_SIZE];
+        getBasicItemStr(x,k,buff,1);
+        R FS(buff);
+    }
+    else {
+        R FT("\"%s\"",xS(k));
+    }
 }
 
 L printInfo(V x){
@@ -231,10 +237,21 @@ L printBasicValue(V x, B hasTag){
     R 0;
 }
 
+L getStringItemStr(V x, L k){
+    R FT("'%s'",xS(k));
+}
+
+L printStr(V x){
+    getStringItemStr(x,0);
+    FS("(");
+    DOI(xn, {if(i>0)FS(","); getStringItemStr(x,i);})
+    FS("):str"); R 0;
+}
+
 L printList(V x){
     FS("(");
     DOI(xn, {if(i>0)FS(","); printValue(xV(i));})
-    FS("):List"); R 0;
+    FS("):list"); R 0;
 }
 
 L printDict(V x){

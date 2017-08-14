@@ -11,7 +11,16 @@ void lib_index_of_L(L* targ, L* src, L sLen, L* val, L vLen);
 void lib_index_of_F(L* targ, F* src, L sLen, F* val, L vLen);
 void lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen);
 void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen);
-#define lib_index_of_Q lib_index_of_I
+void lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen);
+void lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen);
+
+#define lib_index_of_Q lib_index_of_L
+#define lib_index_of_M lib_index_of_I
+#define lib_index_of_D lib_index_of_I
+#define lib_index_of_Z lib_index_of_L
+#define lib_index_of_U lib_index_of_I
+#define lib_index_of_W lib_index_of_I
+#define lib_index_of_T lib_index_of_I
 
 /* quick sort section */
 void lib_quicksort     (L *rtn, V val, L low, L high, B *isUp);
@@ -27,8 +36,9 @@ void lib_member_F(B* targ, F* src, L sLen, F* val, L vLen);
 void lib_member_E(B* targ, E* src, L sLen, E* val, L vLen);
 void lib_member_C(B* targ, C* src, L sLen, C* val, L vLen);
 void lib_member_X(B* targ, X* src, L sLen, X* val, L vLen);
-void lib_member_Q(B* targ, Q* src, L sLen, Q* val, L vLen);
+void lib_member_S(B* targ, S* src, L sLen, S* val, L vLen);
 
+#define lib_member_Q lib_member_L
 #define lib_member_M lib_member_I
 #define lib_member_D lib_member_I
 #define lib_member_Z lib_member_L

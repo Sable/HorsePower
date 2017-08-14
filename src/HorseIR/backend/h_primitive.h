@@ -14,6 +14,7 @@ extern "C" {
 #define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
+#define isChar(x)      (H_C==vp(x))
 #define isString(x)    (H_C==vp(x))
 #define isMonth(x)     (H_M==vp(x))
 #define isDate(x)      (H_D==vp(x))
