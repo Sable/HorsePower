@@ -115,14 +115,12 @@ literalTDate     : tDateValue (':' 'd')?                                        
                  | NULL_TOKEN ':' 'd'                                           #literalTDateCase4
                  ;
 tDateTimeValue   : LITERAL_GROUP_7_DATETIME ;
-tDateTimeValueN  : LITERAL_GROUP_7_DATETIME | NULL_TOKEN ;
-literalTDateTime : tDateTimeValue (':' 'z')?
-                 | '(' tDateTimeValue (',' tDateTimeValue)* ')' (':' 'z')?
-                 | '(' ')' ':' 'z'
-                 | '(' NULL_TOKEN (',' tDateTimeValueN)* (',' tDateTimeValue) (',' tDateTimeValueN)* ')' (':' 'z')?
-                 | '(' tDateTimeValue (',' tDateTimeValueN)* (',' NULL_TOKEN) (',' tDateTimeValueN)* ')' (':' 'z')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'
-                 | NULL_TOKEN ':' 'z'
+literalTDateTime : tDateTimeValue (':' 'z')?                                    #literalTDateTimeCase0
+                 | '(' ')' ':' 'z'                                              #literalTDateTimeCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? tDateTimeValue (',' (tDateTimeValue | NULL_TOKEN))* ')' (':' 'z')?
+                                                                                #literalTDateTimeCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'                 #literalTDateTimeCase3
+                 | NULL_TOKEN ':' 'z'                                           #literalTDateTimeCase4
                  ;
 tMinuteValue     : LITERAL_GROUP_2_MINUTE ;
 tMinuteValueN    : LITERAL_GROUP_2_MINUTE | NULL_TOKEN ;

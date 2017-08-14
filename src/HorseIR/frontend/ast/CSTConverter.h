@@ -25,7 +25,7 @@ struct CSTConverter {
     { return site; }
 
    protected:
-    const antlr4::tree::ParseTree *const site;
+    const antlr4::tree::ParseTree *site = nullptr;
   };
 
   using ASTNodeMemory = ASTNode::ASTNodeMemory;
@@ -1116,14 +1116,14 @@ struct CSTConverter {
           { throw CSTConverterException (valueContext); }
         if (yearConverted < 1900) throw CSTConverterException (valueContext);
         if (yearConverted > 2100) throw CSTConverterException (valueContext);
-        yearValue = static_cast<std::uint16_t>(yearConverted);
+        yearValue = static_cast<decltype (yearValue)>(yearConverted);
 
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
         if (pos != monthString.length ())
           { throw CSTConverterException (valueContext); }
         if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
-        monthValue = static_cast<std::uint8_t>(monthConverted);
+        monthValue = static_cast<decltype (monthValue)>(monthConverted);
       }
     catch (const std::invalid_argument &exception)
       { throw CSTConverterException (valueContext); }
@@ -1221,14 +1221,14 @@ struct CSTConverter {
           { throw CSTConverterException (valueContext); }
         if (yearConverted < 1900) throw CSTConverterException (valueContext);
         if (yearConverted > 2100) throw CSTConverterException (valueContext);
-        yearValue = static_cast<std::uint16_t>(yearConverted);
+        yearValue = static_cast<decltype (yearValue)>(yearConverted);
 
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
         if (pos != monthString.length ())
           { throw CSTConverterException (valueContext); }
         if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
-        monthValue = static_cast<std::uint8_t>(monthConverted);
+        monthValue = static_cast<decltype (monthValue)>(monthConverted);
 
         unsigned long dayConverted = std::stoul (dayString, &pos, 10);
         if (pos != monthString.length ())
@@ -1252,7 +1252,7 @@ struct CSTConverter {
           { throw CSTConverterException (valueContext); }
         if ((!isLeapYear) && dayConverted > nonLeapYearMax[monthValue - 1])
           { throw CSTConverterException (valueContext); }
-        dayValue = static_cast<std::uint8_t>(dayConverted);
+        dayValue = static_cast<decltype (dayValue)>(dayConverted);
       }
     catch (const std::invalid_argument &exception)
       { throw CSTConverterException (valueContext); }
@@ -1345,6 +1345,220 @@ struct CSTConverter {
     dateValue.emplace_back (DateLiteral::ElementType (nullptr));
     dateLiteral->setValue (std::move (dateValue));
     return dateLiteral;
+  }
+
+  using LiteralTDateTimeContext = HorseIRParser::LiteralTDateTimeContext;
+  using LiteralTDateTime0Context = HorseIRParser::LiteralTDateTimeCase0Context;
+  using LiteralTDateTime1Context = HorseIRParser::LiteralTDateTimeCase1Context;
+  using LiteralTDateTime2Context = HorseIRParser::LiteralTDateTimeCase2Context;
+  using LiteralTDateTime3Context = HorseIRParser::LiteralTDateTimeCase3Context;
+  using LiteralTDateTime4Context = HorseIRParser::LiteralTDateTimeCase4Context;
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTimeContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTDateTime0Context *case0 = nullptr;
+    LiteralTDateTime1Context *case1 = nullptr;
+    LiteralTDateTime2Context *case2 = nullptr;
+    LiteralTDateTime3Context *case3 = nullptr;
+    LiteralTDateTime4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static DateTimeLiteral::ElementType
+  convertDateTimeValue (HorseIRParser::TDateTimeValueContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    const auto dateTimeContext = valueContext->LITERAL_GROUP_7_DATETIME ();
+    const std::string valueString = dateTimeContext->getText ();
+    const std::regex matchRegex (
+        R"REGEX(([0-9]{4})\.([0-9]{1,2})\.([0-9]{1,2})T)REGEX"
+            R"REGEX(([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})\.([0-9]{1,3}))REGEX"
+    );
+    std::smatch matchResult;
+    if (!std::regex_match (valueString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string yearString = matchResult[1];
+    const std::string monthString = matchResult[2];
+    const std::string dayString = matchResult[3];
+    const std::string hourString = matchResult[4];
+    const std::string minuteString = matchResult[5];
+    const std::string secondString = matchResult[6];
+    const std::string msString = matchResult[7];
+    std::uint16_t yearValue = 0, msValue = 0;
+    std::uint8_t monthValue = 0, dayValue = 0, hourValue = 0, minuteValue = 0;
+    std::uint8_t secondValue = 0;
+    try
+      {
+        std::size_t pos = 0;
+        unsigned long yearConverted = std::stoul (yearString, &pos, 10);
+        if (pos != yearString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (yearConverted < 1900) throw CSTConverterException (valueContext);
+        if (yearConverted > 2100) throw CSTConverterException (valueContext);
+        yearValue = static_cast<decltype (yearValue)>(yearConverted);
+
+        unsigned long monthConverted = std::stoul (monthString, &pos, 10);
+        if (pos != monthString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (monthConverted == 0) throw CSTConverterException (valueContext);
+        if (monthConverted > 12) throw CSTConverterException (valueContext);
+        monthValue = static_cast<decltype (monthValue)>(monthConverted);
+
+        unsigned long dayConverted = std::stoul (dayString, &pos, 10);
+        if (pos != dayString.length ())
+          { throw CSTConverterException (valueContext); }
+        bool isLeapYear;
+        if (yearValue % 4 != 0)
+          { isLeapYear = false; }
+        else if (yearValue % 100 != 0)
+          { isLeapYear = true; }
+        else
+          { isLeapYear = (yearValue % 400 == 0); }
+        const std::array<std::uint8_t, 12> nonLeapYearMax = {
+            31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        };
+        const std::array<std::uint8_t, 12> leapYearMax = {
+            31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        };
+        if (isLeapYear && dayConverted > leapYearMax[monthValue - 1])
+          { throw CSTConverterException (valueContext); }
+        if ((!isLeapYear) && dayConverted > nonLeapYearMax[monthValue - 1])
+          { throw CSTConverterException (valueContext); }
+        dayValue = static_cast<decltype (dayValue)>(dayConverted);
+
+        unsigned long hourConverted = std::stoul (hourString, &pos, 10);
+        if (pos != hourString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (hourConverted >= 24) throw CSTConverterException (valueContext);
+        hourValue = static_cast<decltype (hourValue)>(hourConverted);
+
+        unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
+        if (pos != minuteString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (minuteConverted >= 60) throw CSTConverterException (valueContext);
+        minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
+
+        unsigned long secondConverted = std::stoul (secondString, &pos, 10);
+        if (pos != secondString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (secondConverted >= 60) throw CSTConverterException (valueContext);
+        secondValue = static_cast<decltype (secondValue)>(secondConverted);
+
+        unsigned long msConverted = std::stoul (msString, &pos, 10);
+        if (pos != msString.length ())
+          { throw CSTConverterException (valueContext); }
+        msValue = static_cast<decltype (msValue)>(msConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    storage::DateTime dateTime;
+    dateTime.year = yearValue;
+    dateTime.month = monthValue;
+    dateTime.day = dayValue;
+    dateTime.hour = hourValue;
+    dateTime.minute = minuteValue;
+    dateTime.second = secondValue;
+    dateTime.millisecond = msValue;
+    return DateTimeLiteral::ElementType (std::move (dateTime));
+  }
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTime0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    std::vector<DateTimeLiteral::ElementType> valueVector{};
+    const auto dateTimeValueContext = literal->tDateTimeValue ();
+    valueVector.emplace_back (convertDateTimeValue (dateTimeValueContext));
+    dateTimeLiteral->setValue (std::move (valueVector));
+    return dateTimeLiteral;
+  }
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTime1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    return dateTimeLiteral;
+  }
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTime2Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
+        {
+          using DateTimeValueContext = HorseIRParser::TDateTimeValueContext;
+          if (dynamic_cast<DateTimeValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<DateTimeLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> DateTimeLiteral::ElementType
+        {
+          HorseIRParser::TDateTimeValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertDateTimeValue (value); }
+          return DateTimeLiteral::ElementType (nullptr);
+        });
+    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    dateTimeLiteral->setValue (std::move (valueVector));
+    return dateTimeLiteral;
+  }
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTime3Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    std::size_t nullCount = 0;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    for (const auto &child : rawChildren)
+      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    std::vector<DateTimeLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullCount);
+    for (std::size_t iter = 0; iter < nullCount; ++iter)
+      { valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr)); }
+    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    dateTimeLiteral->setValue (std::move (valueVector));
+    return dateTimeLiteral;
+  }
+
+  static DateTimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTDateTime4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    std::vector<DateTimeLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr));
+    dateTimeLiteral->setValue (std::move (valueVector));
+    return dateTimeLiteral;
   }
 
   using TypeContext = HorseIRParser::TypeContext;
