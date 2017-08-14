@@ -8,14 +8,14 @@ Logarithm
 
 ### Type rules
 
-```
-Real, Real -> Real / Complex
+```no-highlight
+Real, Real -> f32 / f64 / Complex
 _          -> domain error
 ```
 
 ### Examples
 
-```
-log(2, 4 9 16)
-> 2 3 4
+```no-highlight
+log(2, (4,9,16))
+> (2,3,4):f64
 ```

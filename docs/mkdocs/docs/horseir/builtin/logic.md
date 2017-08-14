@@ -1,68 +1,68 @@
 # Logic
 
-All logic operations have the following type rules.
+All logic operations are defined with the following type rules.
 
-```
+```no-highlight
 // dyadic
 bool,bool -> bool
-_ -> domain error
+_         -> domain error
 
 // monadic
 bool -> bool
-_ -> domain error
+_    -> domain error
 ```
 
 ## and
 
 `and(x,y)`
 
-```
-      and(0 0 1, 0)
-0 0 0:bool
+```no-highlight
+      and((0,0,1):bool, 0:bool)
+(0,0,0):bool
 ```
 
 ## nand
 
 `nand(x,y)`
 
-```
-      nand(0 0 1, 0)
-> 1 1 1:bool
+```no-highlight
+      nand((0,0,1):bool, 0:bool)
+> (1,1,1):bool
 ```
 
 ## or
 
 `or(x,y)`
 
-```
-      or(0 0 1, 0)
-> 0 0 1:bool
+```no-highlight
+      or((0,0,1):bool, 0:bool)
+> (0,0,1):bool
 ```
 
 ## nor
 
 `nor(x,y)`
 
-```
-      nor(0 0 1, 0)
-> 1 1 0:bool
+```no-highlight
+      nor((0,0,1):bool, 0:bool)
+> (1,1,0):bool
 ```
 
 ## not
 
 `not(x)`
 
-```
-      not(0 0 1:bool)
-> 1 1 0:bool
+```no-highlight
+      not((0,0,1):bool)
+> (1,1,0):bool
 ```
 
 ## xor
 
 `xor(x,y)`
 
-```
-      xor(0 0 1,0)
-> 0 0 1:bool
+```no-highlight
+      xor((0,0,1):bool,0:bool)
+> (0,0,1):bool
 ```
 

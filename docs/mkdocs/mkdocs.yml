@@ -55,6 +55,7 @@ pages:
     - "___": horseir/builtin/recip.md
     - "___": horseir/builtin/reduce.md
     - "___": horseir/builtin/reverse.md
+    - "___": horseir/builtin/round.md
     - "___": horseir/builtin/signum.md
     - "___": horseir/builtin/str.md
     - "___": horseir/builtin/trig.md

@@ -4,16 +4,13 @@
 
 `div(x,y)`
 
-- $x \div y$
+- `x / y`
 
 ### Type rules
 
-Pre-requisite
-- Let TypeN = [bool, char, i16, i32, i64, f32, f64]; //a numerical type
-
-```
-TypeN1,TypeN2 -> (f32==max(TypeN1,TypeN2)?f32:f64)
-_ -> domain error
+```no-highlight
+Realx,Realy -> (f32==max(Realx,Realy)?f32:f64)
+_           -> domain error
 ```
 
 **Note:**
@@ -23,7 +20,7 @@ _ -> domain error
 
 ### Examples
 
-```
-div(-1 2 3:i32, 0.5:f32)
-> -2 4 6:f32
+```no-highlight
+div((-1,2,3):i32, 0.5:f32)
+> (-2,4,6):f32
 ```

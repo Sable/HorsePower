@@ -4,12 +4,12 @@
 
 `pi(x)`
 
-- return $\pi \times x$
-- $\pi = acos(-1.0)$ in C
+- return `pi * x`
+- `pi = acos(-1.0)` in C
 
 ### Type rules
 
-```
+```no-highlight
 bool    -> f64
 i16     -> f64
 i32     -> f64
@@ -22,7 +22,7 @@ _       -> domain error
 
 ### Examples
 
-```
-pi(0 1)
-> 0 3.1415...:f64
+```no-highlight
+pi((0,1))
+> (0,3.1415926)
 ```

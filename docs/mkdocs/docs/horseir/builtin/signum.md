@@ -10,7 +10,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 bool -> i64
 i16  -> i16
 i32  -> i32
@@ -22,7 +22,7 @@ _    -> domain error
 
 ### Examples
 
-```
-signum(-2 0 3)
-> -1 0 1
+```no-highlight
+signum((-2,0,3))
+> (-1,0,1)
 ```

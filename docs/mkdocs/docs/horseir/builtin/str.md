@@ -8,7 +8,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 bool -> string (y)
 i16  -> string (y)
 i32  -> string (y)
@@ -30,7 +30,7 @@ _    -> string
 
 ### Examples
 
-```
-str(-1 2 3)
-> -1 2 3:str   //length 6
+```no-highlight
+str((-1,2,3))
+> '-1,2,3':str   //length 6
 ```

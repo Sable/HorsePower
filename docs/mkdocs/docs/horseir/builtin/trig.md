@@ -1,24 +1,34 @@
 ## trig
 
-### Description
+### List of functions
+
+- cos
+- sin
+- tan
+- acos
+- asin
+- atan
+- cosh
+- sinh
+- tanh
+- acosh
+- asinh
+- atanh
+
+### Type rules
+
+
+```no-highlight
+Real -> Real
+_    -> domain error
+```
+
+### Table of trig functions (ELI)
 
 `trig(n,x)`
 
 - trigonometric functions
 - `n` is an integer
-
-### Type rules
-
-Pre-requisite
-- Let TypeI = [bool, i16, i32, i64]; //an integer
-- Let TypeN = [bool, char, i16, i32, i64, f32, f64]; //a numerical type
-
-```
-TypeI,TypeN -> TypeN
-_ -> domain error
-```
-
-### Table of trig functions
 
 | n              | x                | n              | x                              |
 | :------------- | :--------------- | :------------- | :------------------------------|
