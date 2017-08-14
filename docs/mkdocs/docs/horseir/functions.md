@@ -29,7 +29,7 @@
 </tr>
 <tr>
     <td>String</td>
-    <td>C, Q</td>
+    <td>C, Q, S</td>
 </tr>
 <tr>
     <td>Compound</td>
@@ -56,7 +56,7 @@
 </tr>
 <tr>
     <td>Column</td>
-    <td>Real, Date, Time, Q</td>
+    <td>Real, Date, Time, Q, S</td>
 </tr>
 <tr>
     <td>Comparable</td>

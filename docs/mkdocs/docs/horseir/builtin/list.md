@@ -20,6 +20,7 @@ f32    -> list
 f64    -> list 
 complex-> list 
 sym    -> list 
+str    -> list 
 m      -> list
 d      -> list
 z      -> list
@@ -61,6 +62,7 @@ list -> f32
 list -> f64
 list -> complex
 list -> sym
+list -> str
 list -> m
 list -> d
 list -> z
@@ -97,6 +99,7 @@ f32    -> list
 f64    -> list 
 complex-> list 
 sym    -> list 
+str    -> list 
 m      -> list
 d      -> list
 z      -> list
