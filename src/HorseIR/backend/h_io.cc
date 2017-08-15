@@ -309,24 +309,24 @@ L printKTable(V x){
 /* pretty print */
 
 L printTablePretty(V x, L rowLimit){
-    L totSize = 0;  C buff[BUFF_SIZE];
+    C buff[BUFF_SIZE];
     if(isTable(x)){
+        L totSize = 0;
         L *colWidth = (L*)malloc(sizeof(L) * vn(x));
         DOI(vn(x), colWidth[i]=getColWidth(getTableCol(x,i)))
         DOI(vn(x), totSize+=colWidth[i]); totSize += vn(x);
         // DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
         /* print head */
-        FS("|");
-        DOI(vn(x), {V key = getColKey(getTableCol(x,i)); \
-            printSymbol(vq(key),buff); getStrPretty(buff,colWidth[i]); FT("%s|",buff); })
+        DOI(vn(x), {if(i>0) FS(" "); V key = getColKey(getTableCol(x,i)); \
+            printSymbol(vq(key),buff); getStrPretty(buff,colWidth[i]); FT("%s",buff); })
         FS("\n");
-        DOI(totSize+1, FS("-"));
+        DOI(totSize-1, FS("-"));
         FS("\n");
         /* print body */
         L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
-        DOI(rowPrint,  {FS("|"); \
-            DOJ(vn(x), {V val = getColVal(getTableCol(x,j)); \
-                getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s|",buff);}) \
+        DOI(rowPrint,  { \
+            DOJ(vn(x), {if(j>0) FS(" "); V val = getColVal(getTableCol(x,j)); \
+                getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s",buff);}) \
             FS("\n"); \
             })
         FS("\n");
@@ -337,26 +337,30 @@ L printTablePretty(V x, L rowLimit){
         V val = getKTableVal(x);
         L *colWidthKey = (L*)malloc(sizeof(L) * vn(key));
         L *colWidthVal = (L*)malloc(sizeof(L) * vn(val));
+        L totSize1 = 0, totSize2 = 0;
         DOI(vn(key), colWidthKey[i]=getColWidth(getTableCol(key,i)))
-        DOI(vn(key), totSize+=colWidthKey[i]); totSize += vn(key);
+        DOI(vn(key), totSize1+=colWidthKey[i]); totSize1 += vn(key);
         DOI(vn(val), colWidthVal[i]=getColWidth(getTableCol(val,i)))
-        DOI(vn(val), totSize+=colWidthVal[i]); totSize += vn(val);
+        DOI(vn(val), totSize2+=colWidthVal[i]); totSize2 += vn(val);
         /* print head */
-        P("|");
-        DOI(vn(key),{V t=getColKey(getTableCol(key,i)); \
-            printSymbol(vq(t),buff); getStrPretty(buff,colWidthKey[i]); FT("%s|",buff); })
+        DOI(vn(key),{if(i>0) FS(" "); V t=getColKey(getTableCol(key,i)); \
+            printSymbol(vq(t),buff); getStrPretty(buff,colWidthKey[i]); FT("%s",buff); })
+        FS("|");
         DOI(vn(val),{V t=getColKey(getTableCol(val,i)); \
-            printSymbol(vq(t),buff); getStrPretty(buff,colWidthVal[i]); FT("%s|",buff); })
+            printSymbol(vq(t),buff); getStrPretty(buff,colWidthVal[i]); FT(" %s",buff); })
         FS("\n");
-        DOI(totSize+1, FS("-"));
+        DOI(totSize1-1, FS("-"));
+        FS("| ");
+        DOI(totSize2-1, FS("-"));
         FS("\n");
         /* print body */
         L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
-        DOI(rowPrint, {P("|");\
-             DOJ(vn(key), {V t=getColVal(getTableCol(key,j)); \
-                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthKey[j]); FT("%s|",buff);}) \
+        DOI(rowPrint, {\
+             DOJ(vn(key), {if(j>0) FS(" "); V t=getColVal(getTableCol(key,j)); \
+                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthKey[j]); FT("%s",buff);}) \
+             FS("|"); \
              DOJ(vn(val), {V t=getColVal(getTableCol(val,j)); \
-                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthVal[j]); FT("%s|",buff);}) \
+                 getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthVal[j]); FT(" %s",buff);}) \
              FS("\n"); \
             })
         FS("\n");
