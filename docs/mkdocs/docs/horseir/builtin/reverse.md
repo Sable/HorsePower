@@ -6,7 +6,7 @@ Reverse a list
 
 ### Type rules
 
-```
+```no-highlight
 B -> B
 H -> H
 I -> I
@@ -27,9 +27,9 @@ _ -> domain error
 
 ### Examples
 
-```
-reverse(4 9 16)
-> 16 9 4
+```no-highlight
+reverse((4,9,16))
+> (16,9,4):i64
 ```
 
 ### Note

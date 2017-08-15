@@ -8,17 +8,14 @@
 
 ### Type rules
 
-Pre-requisite
-- Let TypeI = [bool, i16, i32, i64]; //an integer
-
-```
-TypeI -> list<i64>
-_ -> domain error
+```no-highlight
+Int -> i64
+_   -> domain error
 ```
 
 ### Examples
 
-```
+```no-highlight
 range(3)
-> 0 1 2:i64
+> (0,1,2):i64
 ```

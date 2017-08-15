@@ -11,7 +11,7 @@ Reduction
 
 Case 1: size(x) == 0,
 
-```
+```no-highlight
 B -> L (max/min value)
 H -> L
 I -> L
@@ -23,7 +23,7 @@ _ -> domain error
 
 Case 2: size(x) > 0
 
-```
+```no-highlight
 B -> B
 H -> H
 I -> I
@@ -37,14 +37,14 @@ _ -> domain error
 
 #### min
 
-```
-min(4 9 16)
+```no-highlight
+min((4,9,16))
 > 4
 ```
 
 #### max
 
-```
-min(4 9 16)
+```no-highlight
+min((4,9,16))
 > 16
 ```

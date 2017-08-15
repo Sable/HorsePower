@@ -4,7 +4,7 @@
 
 `member(x,y)`
 
-- $x \in y$
+- latex : `$x \in y$`
 - if x in y, return true
 - else return false
 
@@ -14,6 +14,7 @@
 Real   , Real    -> bool
 Char   , Char    -> bool
 Sym    , Sym     -> bool
+Str    , Str     -> bool
 Complex, Complex -> bool
 m      , m       -> bool
 d      , d       -> bool

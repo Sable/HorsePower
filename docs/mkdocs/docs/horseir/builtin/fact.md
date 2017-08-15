@@ -2,23 +2,21 @@
 
 ### Description
 
-Factorial
+`fact(n)`
 
-- `fact(n)`
+- Factorial
+
 
 ### Type rules
 
-```
-B -> L
-H -> L
-I -> L
-L -> L
-_ -> domain error
+```no-highlight
+Int -> i64
+_   -> domain error
 ```
 
 ### Examples
 
-```
-fact(2 3 4)
-> 2 6 24
+```no-highlight
+fact((2,3,4))
+> (2,6,24):i64
 ```

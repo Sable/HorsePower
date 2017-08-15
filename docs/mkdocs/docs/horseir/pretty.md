@@ -110,13 +110,13 @@ Output:
 Input literal:
 
 ```no-highlight
-<`u, `a`b`c>
+<`u, (`a,`b,`c)>
 ```
 
 Output:
 
 ```no-highlight
-<`u, `a`b`c:sym>
+<`u, (`a,`b,`c):sym>
 ```
 
 #### Table
@@ -124,7 +124,7 @@ Output:
 Input literal:
 
 ```no-highlight
-{`col1 -> `a`b`c, `col2 -> (1,2,3):i32}
+{`col1 -> (`a,`b,`c), `col2 -> (1,2,3):i32}
 ```
 
 Output:
@@ -142,7 +142,7 @@ Output:
 Input literal:
 
 ```no-highlight
-{[`col1 -> `a`b`c], `col2 -> (1,2,3):i32}
+{[`col1 -> (`a,`b,`c)], `col2 -> (1,2,3):i32}
 ```
 
 Output:

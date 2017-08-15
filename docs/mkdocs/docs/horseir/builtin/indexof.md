@@ -12,7 +12,7 @@ Note: index starts from 0
 
 ### Type rules
 
-```
+```no-highlight
 B, B -> L
 H, H -> L
 I, I -> L
@@ -26,7 +26,7 @@ _, _ -> domain error
 
 ### Examples
 
-```
-index_of(4 9 16, 3 4)
-> 3 0
+```no-highlight
+index_of((4,9,16), (3,4))
+> (3,0):i64
 ```

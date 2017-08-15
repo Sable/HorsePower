@@ -8,10 +8,10 @@ P.
 
 ### Literal example
 
-```
-pValue = `chen`hendren`lavoie;
-fValue = `chen`chen`lavoie`hendren;
-eItem  = enum(`pValue, `fValue);
+```no-highlight
+pValue = (`chen,`hendren,`lavoie);
+fValue = (`chen,`chen,`lavoie,`hendren);
+eItem  = enum(`pValue, fValue);
 ```
 
 Description
@@ -22,7 +22,7 @@ Description
 
 Expected results
 
-```
+```no-highlight
 `pValue: 0 0 2 1
 ```
 

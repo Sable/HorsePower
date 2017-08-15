@@ -186,7 +186,7 @@ Status
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
 | :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- | :----- |
 | 1  | count(x)             | Alias of @len               | See @len                    | See @len                      | [link](builtin/len.md)       |&#10004;|
-| 2  | sum(x)               | Sum of items in x           | Real                        | Same as argument              | [link](builtin/sum.md)       |&#10004;|
+| 2  | sum(x)               | Sum of items in x           | Real                        | Same as argument              | link                         |&#10004;|
 | 3  | avg(x)               | sum(x) / len(x)             | Real                        | Same as argument              | N/A                          |&#10004;|
 | 4  | min(x)               | Minimum                     | Real                        | Same as argument              | [link](builtin/reduce.md#min)|&#10004;|
 | 5  | max(x)               | Maximum                     | Real                        | Same as argument              | [link](builtin/reduce.md#max)|&#10004;|

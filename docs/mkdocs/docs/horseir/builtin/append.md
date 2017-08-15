@@ -10,21 +10,22 @@
 
 ### Type rules
 
-Order: **vice versa**
-
-```
-Real, Real   -> Real
-Clex, Clex   -> Clex
-Sym , Sym    -> Sym
-Char, Char   -> Char
-List, _      -> List
-Enum, Number -> Enum
-_   , _      -> domain error
+```no-highlight
+Real , Real   -> Real
+Clex , Clex   -> Clex
+Sym  , Sym    -> Sym
+Char , Char   -> Char
+Str  , Str    -> Char
+List , _      -> List
+_    , List   -> List
+Enum , Basic  -> Enum
+Basic, Enum   -> Enum
+_    , _      -> domain error
 ```
 
 ### Examples
 
-```
-append(0, -1 2 3)
-> 0 -1 2 3
+```no-highlight
+append(0, (-1,2,3))
+> (0,-1,2,3):i64
 ```

@@ -10,7 +10,7 @@
 
 ### Type rules
 
-```
+```no-highlight
 bool, bool -> i64
 i16 , bool -> i64
 i32 , bool -> i64
@@ -31,9 +31,10 @@ _   , _    -> domain error
 
 ### Examples
 
-```
-order(32 12 7 78 23 45, true)
-> 2 1 4 0 5 3
-order({{32 12 7 78 12 45},{56 34 32 45 78 23}}, true false)
-> 2 4 1 0 5 3
+```no-highlight
+order((32,12,7,78,23,45), 1:bool)
+> (2,1,4,0,5,3):i64
+
+order(((32,12,7,78,12,45),(56,34,32,45,78,23)), (1,0):bool)
+> (2,1,4,0,5,3):i64
 ```

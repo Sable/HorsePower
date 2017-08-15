@@ -38,8 +38,8 @@ _      -> domain error
 ### Examples
 
 ```no-highlight
-enlist(-1,2,3)
-> (-1,2,3):list
+enlist((-1,2,3))
+> ((-1,2,3)):list<i64>
 ```
 
 ## raze
@@ -75,7 +75,7 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-raze(enlist(-1,2,3))
+raze(enlist((-1,2,3)))
 > (-1,2,3)
 ```
 
@@ -112,8 +112,8 @@ _      -> domain error
 ### Examples
 
 ```no-highlight
-tolist(-1,2,3)
-> ((-1), (2), (3)):list
+tolist((-1,2,3))
+> ((-1), (2), (3)):list<i64>
 ```
 
 ## each operations
