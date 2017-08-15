@@ -46,8 +46,7 @@ class MonthLiteral : public VectorLiteral<storage::Month> {
   std::string elementToString (const storage::Month &elementType) const override
   {
     std::ostringstream stream;
-    stream << elementType.year
-           << '.'
+    stream << elementType.year << '.'
            << unsigned(elementType.month);
     return stream.str ();
   }

@@ -53,16 +53,11 @@ class DateTimeLiteral : public VectorLiteral<storage::DateTime> {
   elementToString (const storage::DateTime &elementType) const override
   {
     std::ostringstream stream;
-    stream << elementType.year
-           << '.'
-           << unsigned (elementType.month)
-           << '.'
-           << unsigned (elementType.day)
-           << 'T'
-           << unsigned (elementType.hour)
-           << ':'
-           << unsigned (elementType.minute)
-           << '.'
+    stream << elementType.year << '.'
+           << unsigned (elementType.month) << '.'
+           << unsigned (elementType.day) << 'T'
+           << unsigned (elementType.hour) << ':'
+           << unsigned (elementType.minute) << '.'
            << elementType.millisecond;
     return stream.str ();
   }

@@ -123,46 +123,41 @@ literalTDateTime : tDateTimeValue (':' 'z')?                                    
                  | NULL_TOKEN ':' 'z'                                           #literalTDateTimeCase4
                  ;
 tMinuteValue     : LITERAL_GROUP_2_MINUTE ;
-tMinuteValueN    : LITERAL_GROUP_2_MINUTE | NULL_TOKEN ;
-literalTMinute   : tMinuteValue (':' 'u')?
-                 | '(' tMinuteValue (',' tMinuteValue)* ')' (':' 'u')?
-                 | '(' ')' ':' 'u'
-                 | '(' NULL_TOKEN (',' tMinuteValueN)* (',' tMinuteValue) (',' tMinuteValueN)* ')' (':' 'u')?
-                 | '(' tMinuteValue (',' tMinuteValueN)* (',' NULL_TOKEN) (',' tMinuteValueN)* ')' (':' 'u')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'u'
-                 | NULL_TOKEN ':' 'u'
+literalTMinute   : tMinuteValue (':' 'u')?                                      #literalTMinuteCase0
+                 | '(' ')' ':' 'u'                                              #literalTMinuteCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? tMinuteValue (',' (tMinuteValue | NULL_TOKEN))* ')' (':' 'u')?
+                                                                                #literalTMinuteCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'u'                 #literalTMinuteCase3
+                 | NULL_TOKEN ':' 'u'                                           #literalTMinuteCase4
                  ;
 tSecondValue     : LITERAL_GROUP_3_SECOND ;
-tSecondValueN    : LITERAL_GROUP_3_SECOND | NULL_TOKEN ;
-literalTSecond   : tSecondValue (':' 'v')?
-                 | '(' tSecondValue (',' tSecondValue)* ')' (':' 'v')?
-                 | '(' ')' ':' 'v'
-                 | '(' NULL_TOKEN (',' tSecondValueN)* (',' tSecondValue) (',' tSecondValueN)* ')' (':' 'v')?
-                 | '(' tSecondValue (',' tSecondValueN)* (',' NULL_TOKEN) (',' tSecondValueN)* ')' (':' 'v')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'v'
-                 | NULL_TOKEN ':' 'v'
+literalTSecond   : tSecondValue (':' 'v')?                                      #literalTSecondCase0
+                 | '(' ')' ':' 'v'                                              #literalTSecondCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? tSecondValue (',' (tSecondValue | NULL_TOKEN))* ')' (':' 'v')?
+                                                                                #literalTSecondCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'v'                 #literalTSecondCase3
+                 | NULL_TOKEN ':' 'v'                                           #literalTSecondCase4
                  ;
 tTimeValue       : LITERAL_GROUP_4_TIME ;
-tTimeValueN      : LITERAL_GROUP_4_TIME | NULL_TOKEN ;
-literalTTime     : tTimeValue (':' 't')?
-                 | '(' tTimeValue (',' tTimeValue)* ')' (':' 't')?
-                 | '(' ')' ':' 't'
-                 | '(' NULL_TOKEN (',' tTimeValueN)* (',' tTimeValue) (',' tTimeValueN)* ')' (':' 't')?
-                 | '(' tTimeValue (',' tTimeValueN)* (',' NULL_TOKEN) (',' tTimeValueN)* ')' (':' 't')?
-                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 'z'
-                 | NULL_TOKEN ':' 'z'
+literalTTime     : tTimeValue (':' 't')?                                        #literalTTimeCase0
+                 | '(' ')' ':' 't'                                              #literalTTimeCase1
+                 | '(' (NULL_TOKEN (',' NULL_TOKEN)* ',')? tTimeValue (',' (tTimeValue | NULL_TOKEN))* ')' (':' 't')?
+                                                                                #literalTTimeCase2
+                 | '(' NULL_TOKEN (',' NULL_TOKEN)* ')' ':' 't'                 #literalTTimeCase3
+                 | NULL_TOKEN ':' 't'                                           #literalTTimeCase4
                  ;
 functionValueN   : LITERAL_FUNCTION | NULL_TOKEN ;
-literalFunction  : functionValueN ':' typeFunc
-                 | '(' (functionValueN (',' functionValueN)*)? ')' ':' typeFunc
+literalFunction  : functionValueN ':' typeFunc                                  #literalFunctionCase0
+                 | '(' (functionValueN (',' functionValueN)*)? ')' ':' typeFunc #literalFunctionCase1
                  ;
-literalList      : '[' ']' ':' typeList
-                 | '[' literal (',' literal)* ']' (typeList)?
-                 | NULL_TOKEN ':' typeList
+literalList      : '[' ']' ':' typeList                                         #literalListCase0
+                 | '[' literal (',' literal)* ']' ':' typeList                  #literalListCase1
+                 | NULL_TOKEN ':' typeList                                      #literalListCase2
                  ;
-literalDict      : '{' '}' ':' typeDict
-                 | '{' (literal '->' literal) (',' literal '->' literal)* '}' (':' typeDict)?
-                 | NULL_TOKEN ':' typeDict
+literalDict      : '{' '}' ':' typeDict                                         #literalDictCase0
+                 | '{' (literal '->' literal) (',' literal '->' literal)* '}' ':' typeDict
+                                                                                #literalDictCase1
+                 | NULL_TOKEN ':' typeDict                                      #literalDictCase2
                  ;
 tableHeader      : name | LITERAL_SYMBOL ;
 dbContent        : literalBool    | literalChar    | literalInteger | literalFloat

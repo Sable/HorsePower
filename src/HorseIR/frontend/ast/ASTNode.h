@@ -17,11 +17,11 @@ class ASTNode {
     Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
     FP64Literal, SymbolLiteral, StringLiteral, MonthLiteral, SecondLiteral,
     TimeLiteral, DateLiteral, DateTimeLiteral, MinuteLiteral,
-    FunctionLiteral, TableLiteral, KeyTableLiteral, EnumerationLiteral,
-    Identifier, PrimitiveType, WildcardType, ListType, DictionaryType,
-    EnumerationType, FunctionType, CompilationUnit, Module, Method,
-    LabelStatement, BranchStatement, PhiStatement, InvokeStatement,
-    AssignStatement, ReturnStatement
+    FunctionLiteral, ListLiteral, DictionaryLiteral, TableLiteral,
+    KeyTableLiteral, EnumerationLiteral, Identifier, PrimitiveType,
+    WildcardType, ListType, DictionaryType, EnumerationType, FunctionType,
+    CompilationUnit, Module, Method, LabelStatement, BranchStatement,
+    PhiStatement, InvokeStatement, AssignStatement, ReturnStatement
   };
 
   class ASTNodeMemory {
@@ -162,6 +162,9 @@ operator<< (std::ostream &stream, const ASTNode::ASTNodeClass &astNodeClass)
       case ASTNodeClass::SecondLiteral: return stream << "SecondLiteral";
       case ASTNodeClass::TimeLiteral: return stream << "TimeLiteral";
       case ASTNodeClass::FunctionLiteral: return stream << "FunctionLiteral";
+      case ASTNodeClass::ListLiteral: return stream << "ListLiteral";
+      case ASTNodeClass::DictionaryLiteral :
+        return stream << "DictionaryLiteral";
       case ASTNodeClass::TableLiteral: return stream << "TableLiteral";
       case ASTNodeClass::KeyTableLiteral: return stream << "KeyTableLiteral";
       case ASTNodeClass::EnumerationLiteral:

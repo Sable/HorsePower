@@ -54,19 +54,21 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"((1996.09.06T12:30:00.500, null))";
+  const std::string raw = R"([`a, "asdb", 'abcd'] :list<?> )";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.literalTDateTime ();
+  auto context = parser.literal ();
 
   ast::ASTNode::ASTNodeMemory mem;
 
-  auto astNode = ast::CSTConverter::convert (mem, context);
+  auto astNode = static_cast<ast::ListLiteral *>(ast::CSTConverter::convert (mem, context));
+  ast::ListLiteral copyLiter (*astNode);
   astNode->setEnclosingFilename ("stdin");
   std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
+  std::cout << copyLiter.toString () << std::endl;
 
 }

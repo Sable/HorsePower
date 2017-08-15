@@ -51,3 +51,8 @@
 #include "operand/MonthLiteral.h"
 #include "operand/DateLiteral.h"
 #include "operand/DateTimeLiteral.h"
+#include "operand/MinuteLiteral.h"
+#include "operand/SecondLiteral.h"
+#include "operand/TimeLiteral.h"
+#include "operand/FunctionLiteral.h"
+#include "operand/ListLiteral.h"

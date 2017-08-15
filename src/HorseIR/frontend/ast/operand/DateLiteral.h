@@ -47,10 +47,8 @@ class DateLiteral : public VectorLiteral<storage::Date> {
   std::string elementToString (const storage::Date &elementType) const override
   {
     std::ostringstream stream;
-    stream << elementType.year
-           << '.'
-           << unsigned(elementType.month)
-           << '.'
+    stream << elementType.year << '.'
+           << unsigned(elementType.month) << '.'
            << unsigned(elementType.day);
     return stream.str ();
   }

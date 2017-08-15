@@ -30,22 +30,302 @@ struct CSTConverter {
 
   using ASTNodeMemory = ASTNode::ASTNodeMemory;
 
-  using LiteralBool = HorseIRParser::LiteralBoolContext;
+  using TypeContext = HorseIRParser::TypeContext;
+  using TypeCasePrimitiveContext = HorseIRParser::TypeCasePrimitiveContext;
+  using TypeCaseWildcardContext = HorseIRParser::TypeCaseWildcardContext;
+  using TypeListContext = HorseIRParser::TypeListContext;
+  using TypeDictContext = HorseIRParser::TypeDictContext;
+  using TypeEnumContext = HorseIRParser::TypeEnumContext;
+  using TypeFuncContext = HorseIRParser::TypeFuncContext;
+
+  static Type *convert (ASTNodeMemory &mem, TypeContext *type)
+  {
+    assert (type != nullptr);
+    TypeCasePrimitiveContext *primitive = nullptr;
+    TypeCaseWildcardContext *wildcard = nullptr;
+    HorseIRParser::TypeCaseListContext *list = nullptr;
+    HorseIRParser::TypeCaseDictContext *dict = nullptr;
+    HorseIRParser::TypeCaseEnumContext *enume = nullptr;
+    HorseIRParser::TypeCaseFuncContext *func = nullptr;
+
+    if ((primitive = dynamic_cast<decltype (primitive)>(type)) != nullptr)
+      return convert (mem, primitive);
+    if ((wildcard = dynamic_cast<decltype (wildcard)>(type)) != nullptr)
+      return convert (mem, wildcard);
+    if ((list = dynamic_cast<decltype (list)>(type)) != nullptr)
+      return convert (mem, list->typeList ());
+    if ((dict = dynamic_cast<decltype (dict)>(type)) != nullptr)
+      return convert (mem, dict->typeDict ());
+    if ((enume = dynamic_cast<decltype (enume)>(type)) != nullptr)
+      return convert (mem, enume->typeEnum ());
+    if ((func = dynamic_cast<decltype (func)>(type)) != nullptr)
+      return convert (mem, func->typeFunc ());
+
+    throw CSTConverterException (type);
+  }
+
+  static WildcardType *
+  convert (ASTNodeMemory &mem, TypeCaseWildcardContext *cst)
+  {
+    assert (cst != nullptr);
+    auto wildcardType = new WildcardType (mem, cst);
+    return wildcardType;
+  }
+
+  static PrimitiveType *
+  convert (ASTNodeMemory &mem, TypeCasePrimitiveContext *cst)
+  {
+    assert (cst != nullptr);
+    const std::string cstText = cst->token->getText ();
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    using ConvertMapT = std::unordered_map<std::string, PrimitiveClass>;
+    ConvertMapT convertMap = {
+        {"bool", PrimitiveClass::Bool},
+        {"char", PrimitiveClass::Character},
+        {"i8", PrimitiveClass::Integer8},
+        {"i16", PrimitiveClass::Integer16},
+        {"i32", PrimitiveClass::Integer32},
+        {"i64", PrimitiveClass::Integer64},
+        {"fp32", PrimitiveClass::FP32},
+        {"fp64", PrimitiveClass::FP64},
+        {"complex", PrimitiveClass::Complex},
+        {"sym", PrimitiveClass::Symbol},
+        {"m", PrimitiveClass::Month}, {"d", PrimitiveClass::Date},
+        {"z", PrimitiveClass::DateTime}, {"u", PrimitiveClass::Minute},
+        {"v", PrimitiveClass::Second}, {"t", PrimitiveClass::Time},
+        {"str", PrimitiveClass::String}, {"table", PrimitiveClass::Table},
+        {"ktable", PrimitiveClass::KeyTable}
+    };
+    auto iter = convertMap.find (cstText);
+    assert (iter != convertMap.end ());
+
+    auto primitiveType = new PrimitiveType (mem, cst);
+    primitiveType->setPrimitiveClass (iter->second);
+
+    return (primitiveType);
+  }
+
+  static ListType *convert (ASTNodeMemory &mem, TypeListContext *cst)
+  {
+    assert (cst != nullptr);
+    const auto elementTypeContext = cst->element;
+    auto listType = new ListType (mem, cst);
+
+    Type *elementType = convert (mem, elementTypeContext);
+    elementType->setParentASTNode (listType);
+    listType->setElementType (elementType);
+
+    return listType;
+  }
+
+  static DictionaryType *convert (ASTNodeMemory &mem, TypeDictContext *cst)
+  {
+    assert (cst != nullptr);
+    const auto keyTypeContext = cst->key;
+    const auto valueTypeContext = cst->value;
+    auto dictionaryType = new DictionaryType (mem, cst);
+
+    Type *keyType = convert (mem, keyTypeContext);
+    keyType->setParentASTNode (dictionaryType);
+    dictionaryType->setKeyType (keyType);
+
+    Type *valueType = convert (mem, valueTypeContext);
+    valueType->setParentASTNode (dictionaryType);
+    dictionaryType->setValueType (valueType);
+
+    return dictionaryType;
+  }
+
+  static EnumerationType *convert (ASTNodeMemory &mem, TypeEnumContext *cst)
+  {
+    assert (cst != nullptr);
+    const auto elementContext = cst->element;
+    auto enumerationType = new EnumerationType (mem, cst);
+
+    Type *elementType = convert (mem, elementContext);
+    elementType->setParentASTNode (enumerationType);
+    enumerationType->setElementType (elementType);
+
+    return enumerationType;
+  }
+
+  using TypeFuncCase0Context = HorseIRParser::TypeFuncCase0Context;
+  using TypeFuncCase1Context = HorseIRParser::TypeFuncCase1Context;
+  using TypeFuncCase2Context = HorseIRParser::TypeFuncCase2Context;
+  using TypeFuncCase3Context = HorseIRParser::TypeFuncCase3Context;
+
+  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncContext *cst)
+  {
+    assert (cst != nullptr);
+    TypeFuncCase0Context *case0 = nullptr;
+    TypeFuncCase1Context *case1 = nullptr;
+    TypeFuncCase2Context *case2 = nullptr;
+    TypeFuncCase3Context *case3 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(cst)) != nullptr)
+      return convert (mem, case0);
+    if ((case1 = dynamic_cast<decltype (case1)>(cst)) != nullptr)
+      return convert (mem, case1);
+    if ((case2 = dynamic_cast<decltype (case2)>(cst)) != nullptr)
+      return convert (mem, case2);
+    if ((case3 = dynamic_cast<decltype (case3)>(cst)) != nullptr)
+      return convert (mem, case3);
+
+    throw CSTConverterException (cst);
+  }
+
+  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase0Context *cst)
+  {
+    assert (cst != nullptr);
+    auto functionType = new FunctionType (mem, cst);
+    auto returnTypeContext = cst->type ();
+
+    Type *returnType = convert (mem, returnTypeContext);
+    returnType->setParentASTNode (functionType);
+    functionType->setReturnType (returnType);
+
+    functionType->setIsFlexible (false);
+    return functionType;
+  }
+
+  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase1Context *cst)
+  {
+    assert (cst != nullptr);
+    auto functionType = new FunctionType (mem, cst);
+    auto returnTypeContext = cst->type ();
+
+    Type *returnType = convert (mem, returnTypeContext);
+    returnType->setParentASTNode (functionType);
+    functionType->setReturnType (returnType);
+
+    functionType->setIsFlexible (true);
+    return functionType;
+  }
+
+  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase2Context *cst)
+  {
+    assert (cst != nullptr);
+    auto functionType = new FunctionType (mem, cst);
+
+    const auto types (cst->type ());
+    std::vector<Type *> parameterTypes{};
+    std::transform (
+        types.cbegin (), std::prev (types.cend ()),
+        std::back_inserter (parameterTypes),
+        [&] (TypeContext *typeContext) -> Type *
+        {
+          Type *retType = convert (mem, typeContext);
+          retType->setParentASTNode (functionType);
+          return retType;
+        });
+
+    TypeContext *returnContext = *(std::prev (types.cend ()));
+    Type *returnType = convert (mem, returnContext);
+    returnType->setParentASTNode (functionType);
+
+    functionType->setParameterTypes (std::move (parameterTypes));
+    functionType->setReturnType (returnType);
+    functionType->setIsFlexible (false);
+    return functionType;
+  }
+
+  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase3Context *cst)
+  {
+    assert (cst != nullptr);
+    auto functionType = new FunctionType (mem, cst);
+
+    const auto types (cst->type ());
+    std::vector<Type *> parameterTypes{};
+    std::transform (
+        types.cbegin (), std::prev (types.cend ()),
+        std::back_inserter (parameterTypes),
+        [&] (TypeContext *typeContext) -> Type *
+        {
+          Type *retType = convert (mem, typeContext);
+          retType->setParentASTNode (functionType);
+          return retType;
+        });
+
+    TypeContext *returnContext = *(std::prev (types.cend ()));
+    Type *returnType = convert (mem, returnContext);
+    returnType->setParentASTNode (functionType);
+
+    functionType->setParameterTypes (std::move (parameterTypes));
+    functionType->setReturnType (returnType);
+    functionType->setIsFlexible (true);
+    return functionType;
+  }
+
+  using LiteralContext = HorseIRParser::LiteralContext;
+  using LiteralBoolContext = HorseIRParser::LiteralBoolContext;
+  using LiteralCharContext = HorseIRParser::LiteralCharContext;
+  using LiteralStringContext = HorseIRParser::LiteralStringContext;
+  using LiteralIntegerContext = HorseIRParser::LiteralIntegerContext;
+  using LiteralFloatContext = HorseIRParser::LiteralFloatContext;
+  using LiteralComplexContext = HorseIRParser::LiteralComplexContext;
+  using LiteralSymbolContext = HorseIRParser::LiteralSymbolContext;
+  using LiteralTMonthContext = HorseIRParser::LiteralTMonthContext;
+  using LiteralTDateContext = HorseIRParser::LiteralTDateContext;
+  using LiteralTDateTimeContext = HorseIRParser::LiteralTDateTimeContext;
+  using LiteralTMinuteContext = HorseIRParser::LiteralTMinuteContext;
+  using LiteralTSecondContext = HorseIRParser::LiteralTSecondContext;
+  using LiteralTTimeContext = HorseIRParser::LiteralTTimeContext;
+  using LiteralFunctionContext = HorseIRParser::LiteralFunctionContext;
+  using LiteralListContext = HorseIRParser::LiteralListContext;
+
+  static Literal *
+  convert (ASTNodeMemory &mem, LiteralContext *literal)
+  {
+    assert (literal != nullptr);
+    if (literal->literalBool () != nullptr)
+      { return convert (mem, literal->literalBool ()); }
+    if (literal->literalChar () != nullptr)
+      { return convert (mem, literal->literalChar ()); }
+    if (literal->literalString () != nullptr)
+      { return convert (mem, literal->literalString ()); }
+    if (literal->literalInteger () != nullptr)
+      { return convert (mem, literal->literalInteger ()); }
+    if (literal->literalFloat () != nullptr)
+      { return convert (mem, literal->literalFloat ()); }
+    if (literal->literalComplex () != nullptr)
+      { return convert (mem, literal->literalComplex ()); }
+    if (literal->literalSymbol () != nullptr)
+      { return convert (mem, literal->literalSymbol ()); }
+    if (literal->literalTDate () != nullptr)
+      { return convert (mem, literal->literalTDate ()); }
+    if (literal->literalTDateTime () != nullptr)
+      { return convert (mem, literal->literalTDateTime ()); }
+    if (literal->literalTMinute () != nullptr)
+      { return convert (mem, literal->literalTMinute ()); }
+    if (literal->literalTMonth () != nullptr)
+      { return convert (mem, literal->literalTMonth ()); }
+    if (literal->literalTSecond () != nullptr)
+      { return convert (mem, literal->literalTSecond ()); }
+    if (literal->literalTTime () != nullptr)
+      { return convert (mem, literal->literalTTime ()); }
+    if (literal->literalFunction () != nullptr)
+      { return convert (mem, literal->literalFunction ()); }
+    if (literal->literalList () != nullptr)
+      { return convert (mem, literal->literalList ()); }
+
+    throw CSTConverterException (literal);
+  }
+
   using LiteralBoolCase0 = HorseIRParser::LiteralBoolCase0Context;
   using LiteralBoolCase1 = HorseIRParser::LiteralBoolCase1Context;
 
-  static BoolLiteral *convert (ASTNodeMemory &mem, LiteralBool *literalBool)
+  static BoolLiteral *convert (ASTNodeMemory &mem, LiteralBoolContext *literal)
   {
-    assert (literalBool != nullptr);
+    assert (literal != nullptr);
     LiteralBoolCase0 *case0 = nullptr;
     LiteralBoolCase1 *case1 = nullptr;
 
-    if ((case0 = dynamic_cast<decltype (case0)>(literalBool)) != nullptr)
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
       return convert (mem, case0);
-    if ((case1 = dynamic_cast<decltype (case1)>(literalBool)) != nullptr)
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
       return convert (mem, case1);
 
-    throw CSTConverterException (literalBool);
+    throw CSTConverterException (literal);
   }
 
   static BoolLiteral *
@@ -70,6 +350,9 @@ struct CSTConverter {
       { valueVector.emplace_back (nullptr); }
     auto boolLiteral = new BoolLiteral (mem, literalBool);
     boolLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalBool);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Bool);
+    boolLiteral->setLiteralType (primitiveType);
     return boolLiteral;
   }
 
@@ -100,10 +383,12 @@ struct CSTConverter {
         });
     auto boolLiteral = new BoolLiteral (mem, literalBool);
     boolLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalBool);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Bool);
+    boolLiteral->setLiteralType (primitiveType);
     return boolLiteral;
   }
 
-  using LiteralCharContext = HorseIRParser::LiteralCharContext;
   using LiteralCharCase0Context = HorseIRParser::LiteralCharCase0Context;
   using LiteralCharCase1Context = HorseIRParser::LiteralCharCase1Context;
   using LiteralCharCase2Context = HorseIRParser::LiteralCharCase2Context;
@@ -255,6 +540,9 @@ struct CSTConverter {
     valueVector.emplace_back (std::move (element));
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
@@ -276,6 +564,9 @@ struct CSTConverter {
         { return CharLiteral::ElementType (value); });
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
@@ -284,6 +575,9 @@ struct CSTConverter {
   {
     assert (literalCharContext != nullptr);
     auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
@@ -318,6 +612,9 @@ struct CSTConverter {
         });
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
@@ -325,17 +622,16 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralCharCase4Context *literalCharContext)
   {
     assert (literalCharContext != nullptr);
-    using ParseTree = antlr4::tree::ParseTree;
-    const std::vector<ParseTree *> rawChildren = literalCharContext->children;
-    std::size_t nullElementCount = 0;
-    for (const auto &rawChild : rawChildren)
-      { if (rawChild->getText () == "null") nullElementCount += 1; }
+    const auto nullTokens = literalCharContext->NULL_TOKEN ();
     std::vector<CharLiteral::ElementType> valueVector{};
-    valueVector.reserve (nullElementCount);
-    for (std::size_t iter = 0; iter < nullElementCount; ++iter)
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (nullptr); }
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
@@ -347,10 +643,12 @@ struct CSTConverter {
     valueVector.emplace_back (nullptr);
     auto charLiteral = new CharLiteral (mem, literalCharContext);
     charLiteral->setValue (std::move (valueVector));
+    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
+    charLiteral->setLiteralType (primitiveType);
     return charLiteral;
   }
 
-  using LiteralStringContext = HorseIRParser::LiteralStringContext;
   using LiteralStringCase0Context = HorseIRParser::LiteralStringCase0Context;
   using LiteralStringCase1Context = HorseIRParser::LiteralStringCase1Context;
   using LiteralStringCase2Context = HorseIRParser::LiteralStringCase2Context;
@@ -402,6 +700,10 @@ struct CSTConverter {
     valueVector.emplace_back (element);
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, stringContext);
+    primitiveType->setPrimitiveClass (PrimitiveClass::String);
+    stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
   }
 
@@ -410,6 +712,10 @@ struct CSTConverter {
   {
     assert (stringContext != nullptr);
     auto stringLiteral = new StringLiteral (mem, stringContext);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, stringContext);
+    primitiveType->setPrimitiveClass (PrimitiveClass::String);
+    stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
   }
 
@@ -444,6 +750,10 @@ struct CSTConverter {
         });
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, stringContext);
+    primitiveType->setPrimitiveClass (PrimitiveClass::String);
+    stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
   }
 
@@ -451,17 +761,17 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralStringCase3Context *stringContext)
   {
     assert (stringContext != nullptr);
-    using ParseTree = antlr4::tree::ParseTree;
-    std::size_t nullCount = 0;
-    const std::vector<ParseTree *> rawChildren = stringContext->children;
-    for (const auto &rawChild : rawChildren)
-      { if (rawChild->getText () == "null") nullCount += 1; }
+    const auto nullTokens = stringContext->NULL_TOKEN ();
     std::vector<StringLiteral::ElementType> valueVector{};
-    valueVector.reserve (nullCount);
-    for (std::size_t iter = 0; iter < nullCount; ++iter)
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (nullptr); }
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, stringContext);
+    primitiveType->setPrimitiveClass (PrimitiveClass::String);
+    stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
   }
 
@@ -473,10 +783,13 @@ struct CSTConverter {
     valueVector.emplace_back (nullptr);
     auto stringLiteral = new StringLiteral (mem, stringContext);
     stringLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, stringContext);
+    primitiveType->setPrimitiveClass (PrimitiveClass::String);
+    stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
   }
 
-  using LiteralIntegerContext = HorseIRParser::LiteralIntegerContext;
   using LiteralIntegerCase0Context = HorseIRParser::LiteralIntegerCase0Context;
   using LiteralIntegerCase1Context = HorseIRParser::LiteralIntegerCase1Context;
 
@@ -534,7 +847,6 @@ struct CSTConverter {
     assert (literal != nullptr);
     using IntValueNContext = HorseIRParser::IntValueNContext;
     const std::string typeString = literal->typeToken->getText ();
-    IntValueNContext *intValueNContext = literal->intValueN ();
 
     if (typeString == "i8")
       {
@@ -543,6 +855,10 @@ struct CSTConverter {
         auto element = convertIntValueN<std::int8_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer8Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer8);
+        integer8Literal->setLiteralType (primitiveType);
         return integer8Literal;
       }
     if (typeString == "i16")
@@ -552,6 +868,10 @@ struct CSTConverter {
         auto element = convertIntValueN<std::int16_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer16Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer16);
+        integer16Literal->setLiteralType (primitiveType);
         return integer16Literal;
       }
     if (typeString == "i32")
@@ -561,6 +881,10 @@ struct CSTConverter {
         auto element = convertIntValueN<std::int32_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer32Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer32);
+        integer32Literal->setLiteralType (primitiveType);
         return integer32Literal;
       }
     if (typeString == "i64")
@@ -570,6 +894,10 @@ struct CSTConverter {
         auto element = convertIntValueN<std::int64_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer64Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer64);
+        integer64Literal->setLiteralType (primitiveType);
         return integer64Literal;
       }
     throw CSTConverterException (literal);
@@ -593,6 +921,10 @@ struct CSTConverter {
             [] (IntValueNContext *context) -> Integer8Literal::ElementType
             { return convertIntValueN<std::int8_t> (context); });
         integer8Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer8);
+        integer8Literal->setLiteralType (primitiveType);
         return integer8Literal;
       }
     if (typeString == "i16")
@@ -606,6 +938,10 @@ struct CSTConverter {
             [] (IntValueNContext *context) -> Integer16Literal::ElementType
             { return convertIntValueN<std::int16_t> (context); });
         integer16Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer16);
+        integer16Literal->setLiteralType (primitiveType);
         return integer16Literal;
       }
     if (typeString == "i32")
@@ -619,6 +955,10 @@ struct CSTConverter {
             [] (IntValueNContext *context) -> Integer32Literal::ElementType
             { return convertIntValueN<std::int32_t> (context); });
         integer32Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer32);
+        integer32Literal->setLiteralType (primitiveType);
         return integer32Literal;
       }
     if (typeString == "i64")
@@ -632,12 +972,15 @@ struct CSTConverter {
             [] (IntValueNContext *context) -> Integer64Literal::ElementType
             { return convertIntValueN<std::int64_t> (context); });
         integer64Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::Integer64);
+        integer64Literal->setLiteralType (primitiveType);
         return integer64Literal;
       }
     throw CSTConverterException (literal);
   }
 
-  using LiteralFloatContext = HorseIRParser::LiteralFloatContext;
   using LiteralFloatCase0Context = HorseIRParser::LiteralFloatCase0Context;
   using LiteralFloatCase1Context = HorseIRParser::LiteralFloatCase1Context;
 
@@ -699,6 +1042,10 @@ struct CSTConverter {
                                                   std::stof);
         valueVector.emplace_back (std::move (element));
         fp32Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::FP32);
+        fp32Literal->setLiteralType (primitiveType);
         return fp32Literal;
       }
     if (typeString == "f64")
@@ -709,6 +1056,10 @@ struct CSTConverter {
                                                    std::stod);
         valueVector.emplace_back (std::move (element));
         fp64Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::FP64);
+        fp64Literal->setLiteralType (primitiveType);
         return fp64Literal;
       }
     throw CSTConverterException (literal);
@@ -733,6 +1084,10 @@ struct CSTConverter {
             [] (FloatValueNContext *context) -> FP32Literal::ElementType
             { return convertFloatValueN<float> (context, std::stof); });
         fp32Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::FP32);
+        fp32Literal->setLiteralType (primitiveType);
         return fp32Literal;
       }
     if (typeString == "f64")
@@ -746,12 +1101,15 @@ struct CSTConverter {
             [] (FloatValueNContext *context) -> FP64Literal::ElementType
             { return convertFloatValueN<double> (context, std::stod); });
         fp64Literal->setValue (std::move (valueVector));
+        using PrimitiveClass = PrimitiveType::PrimitiveClass;
+        auto primitiveType = new PrimitiveType (mem, literal);
+        primitiveType->setPrimitiveClass (PrimitiveClass::FP64);
+        fp64Literal->setLiteralType (primitiveType);
         return fp64Literal;
       };
     throw CSTConverterException (literal);
   }
 
-  using LiteralComplexContext = HorseIRParser::LiteralComplexContext;
   using LiteralComplexCase0Context = HorseIRParser::LiteralComplexCase0Context;
   using LiteralComplexCase1Context = HorseIRParser::LiteralComplexCase1Context;
   using ComplexValueNContext = HorseIRParser::ComplexValueNContext;
@@ -801,7 +1159,7 @@ struct CSTConverter {
   }
 
   static ComplexLiteral::ElementType
-  covertComplexValueN (ComplexValueNCase0Context *valueContext)
+  convertComplexValueN (ComplexValueNCase0Context *valueContext)
   {
     assert (valueContext != nullptr);
     int sign = 1;
@@ -931,6 +1289,10 @@ struct CSTConverter {
     auto element = convertComplexValueN (literal->complexValueN ());
     valueVector.emplace_back (std::move (element));
     complexLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Complex);
+    complexLiteral->setLiteralType (primitiveType);
     return complexLiteral;
   }
 
@@ -948,11 +1310,14 @@ struct CSTConverter {
         [] (ComplexValueNContext *context) -> ComplexLiteral::ElementType
         { return convertComplexValueN (context); });
     complexLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Complex);
+    complexLiteral->setLiteralType (primitiveType);
     return complexLiteral;
   }
 
   using SymbolValueContext = HorseIRParser::SymbolValueContext;
-  using LiteralSymbolContext = HorseIRParser::LiteralSymbolContext;
   using LiteralSymbolCase0Context = HorseIRParser::LiteralSymbolCase0Context;
   using LiteralSymbolCase1Context = HorseIRParser::LiteralSymbolCase1Context;
   using LiteralSymbolCase2Context = HorseIRParser::LiteralSymbolCase2Context;
@@ -1001,6 +1366,10 @@ struct CSTConverter {
     auto element = convertSymbolValue (literal->symbolValue ());
     valueVector.emplace_back (std::move (element));
     symbolLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
+    symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
   }
 
@@ -1009,6 +1378,10 @@ struct CSTConverter {
   {
     assert (literal != nullptr);
     auto symbolLiteral = new SymbolLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
+    symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
   }
 
@@ -1042,6 +1415,10 @@ struct CSTConverter {
         });
     auto symbolLiteral = new SymbolLiteral (mem, literal);
     symbolLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
+    symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
   }
 
@@ -1049,17 +1426,17 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralSymbolCase3Context *literal)
   {
     assert (literal != nullptr);
-    using ParseTree = antlr4::tree::ParseTree;
-    std::size_t nullCount = 0;
-    const std::vector<ParseTree *> rawChildren = literal->children;
-    for (const auto &child : rawChildren)
-      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    const auto nullTokens = literal->NULL_TOKEN ();
     std::vector<SymbolLiteral::ElementType> valueVector{};
-    valueVector.reserve (nullCount);
-    for (std::size_t iter = 0; iter < nullCount; ++iter)
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (SymbolLiteral::ElementType (nullptr)); }
     auto symbolLiteral = new SymbolLiteral (mem, literal);
     symbolLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
+    symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
   }
 
@@ -1071,10 +1448,13 @@ struct CSTConverter {
     std::vector<SymbolLiteral::ElementType> valueVector{};
     valueVector.emplace_back (SymbolLiteral::ElementType (nullptr));
     symbolLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
+    symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
   }
 
-  using LiteralTMonthContext = HorseIRParser::LiteralTMonthContext;
   using LiteralTMonthCase0Context = HorseIRParser::LiteralTMonthCase0Context;
   using LiteralTMonthCase1Context = HorseIRParser::LiteralTMonthCase1Context;
 
@@ -1129,10 +1509,10 @@ struct CSTConverter {
       { throw CSTConverterException (valueContext); }
     catch (const std::out_of_range &exception)
       { throw CSTConverterException (valueContext); }
-    storage::Month element;
+    storage::Month element{};
     element.year = yearValue;
     element.month = monthValue;
-    return MonthLiteral::ElementType (std::move (element));
+    return MonthLiteral::ElementType (element);
   }
 
   static MonthLiteral *
@@ -1143,6 +1523,10 @@ struct CSTConverter {
     std::vector<MonthLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertMonthValueN (literal->tMonthValueN ()));
     monthLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Month);
+    monthLiteral->setLiteralType (primitiveType);
     return monthLiteral;
   }
 
@@ -1161,10 +1545,13 @@ struct CSTConverter {
         { return convertMonthValueN (context); });
     auto monthLiteral = new MonthLiteral (mem, literal);
     monthLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Month);
+    monthLiteral->setLiteralType (primitiveType);
     return monthLiteral;
   }
 
-  using LiteralTDateContext = HorseIRParser::LiteralTDateContext;
   using LiteralTDateCase0Context = HorseIRParser::LiteralTDateCase0Context;
   using LiteralTDateCase1Context = HorseIRParser::LiteralTDateCase1Context;
   using LiteralTDateCase2Context = HorseIRParser::LiteralTDateCase2Context;
@@ -1258,11 +1645,11 @@ struct CSTConverter {
       { throw CSTConverterException (valueContext); }
     catch (const std::out_of_range &exception)
       { throw CSTConverterException (valueContext); }
-    storage::Date date;
+    storage::Date date{};
     date.year = yearValue;
     date.month = monthValue;
     date.day = dayValue;
-    return DateLiteral::ElementType (std::move (date));
+    return DateLiteral::ElementType (date);
   }
 
   static DateLiteral *
@@ -1273,6 +1660,10 @@ struct CSTConverter {
     std::vector<DateLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertDateValue (literal->tDateValue ()));
     dateLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Date);
+    dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
   }
 
@@ -1281,6 +1672,10 @@ struct CSTConverter {
   {
     assert (literal != nullptr);
     auto dateLiteral = new DateLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Date);
+    dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
   }
 
@@ -1316,6 +1711,10 @@ struct CSTConverter {
         });
     auto dateLiteral = new DateLiteral (mem, literal);
     dateLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Date);
+    dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
   }
 
@@ -1323,16 +1722,17 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateCase3Context *literal)
   {
     assert (literal != nullptr);
-    std::size_t nullCount = 0;
-    const auto rawChildren = literal->children;
-    for (const auto &child : rawChildren)
-      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    const auto nullTokens = literal->NULL_TOKEN ();
     auto dateLiteral = new DateLiteral (mem, literal);
     std::vector<DateLiteral::ElementType> valueVector{};
-    valueVector.reserve (nullCount);
-    for (std::size_t iter = 0; iter < nullCount; ++iter)
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (DateLiteral::ElementType (nullptr)); }
     dateLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Date);
+    dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
   }
 
@@ -1344,10 +1744,13 @@ struct CSTConverter {
     std::vector<DateLiteral::ElementType> dateValue{};
     dateValue.emplace_back (DateLiteral::ElementType (nullptr));
     dateLiteral->setValue (std::move (dateValue));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Date);
+    dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
   }
 
-  using LiteralTDateTimeContext = HorseIRParser::LiteralTDateTimeContext;
   using LiteralTDateTime0Context = HorseIRParser::LiteralTDateTimeCase0Context;
   using LiteralTDateTime1Context = HorseIRParser::LiteralTDateTimeCase1Context;
   using LiteralTDateTime2Context = HorseIRParser::LiteralTDateTimeCase2Context;
@@ -1467,7 +1870,7 @@ struct CSTConverter {
       { throw CSTConverterException (valueContext); }
     catch (const std::out_of_range &exception)
       { throw CSTConverterException (valueContext); }
-    storage::DateTime dateTime;
+    storage::DateTime dateTime{};
     dateTime.year = yearValue;
     dateTime.month = monthValue;
     dateTime.day = dayValue;
@@ -1475,7 +1878,7 @@ struct CSTConverter {
     dateTime.minute = minuteValue;
     dateTime.second = secondValue;
     dateTime.millisecond = msValue;
-    return DateTimeLiteral::ElementType (std::move (dateTime));
+    return DateTimeLiteral::ElementType (dateTime);
   }
 
   static DateTimeLiteral *
@@ -1487,6 +1890,10 @@ struct CSTConverter {
     const auto dateTimeValueContext = literal->tDateTimeValue ();
     valueVector.emplace_back (convertDateTimeValue (dateTimeValueContext));
     dateTimeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
+    dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
   }
 
@@ -1495,6 +1902,10 @@ struct CSTConverter {
   {
     assert (literal != nullptr);
     auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
+    dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
   }
 
@@ -1529,6 +1940,10 @@ struct CSTConverter {
         });
     auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
     dateTimeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
+    dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
   }
 
@@ -1536,17 +1951,17 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateTime3Context *literal)
   {
     assert (literal != nullptr);
-    using ParseTree = antlr4::tree::ParseTree;
-    std::size_t nullCount = 0;
-    const std::vector<ParseTree *> rawChildren = literal->children;
-    for (const auto &child : rawChildren)
-      { if (child->getText () == "null") nullCount = nullCount + 1; }
+    const auto nullTokens = literal->NULL_TOKEN ();
     std::vector<DateTimeLiteral::ElementType> valueVector{};
-    valueVector.reserve (nullCount);
-    for (std::size_t iter = 0; iter < nullCount; ++iter)
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr)); }
     auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
     dateTimeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
+    dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
   }
 
@@ -1558,239 +1973,671 @@ struct CSTConverter {
     std::vector<DateTimeLiteral::ElementType> valueVector{};
     valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr));
     dateTimeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
+    dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
   }
 
-  using TypeContext = HorseIRParser::TypeContext;
-  using TypeCasePrimitiveContext = HorseIRParser::TypeCasePrimitiveContext;
-  using TypeCaseWildcardContext = HorseIRParser::TypeCaseWildcardContext;
-  using TypeCaseListContext = HorseIRParser::TypeCaseListContext;
-  using TypeCaseDictContext = HorseIRParser::TypeCaseDictContext;
-  using TypeCaseEnumContext = HorseIRParser::TypeCaseEnumContext;
-  using TypeCaseFuncContext = HorseIRParser::TypeCaseFuncContext;
+  using LiteralTMinuteCase0Context = HorseIRParser::LiteralTMinuteCase0Context;
+  using LiteralTMinuteCase1Context = HorseIRParser::LiteralTMinuteCase1Context;
+  using LiteralTMinuteCase2Context = HorseIRParser::LiteralTMinuteCase2Context;
+  using LiteralTMinuteCase3Context = HorseIRParser::LiteralTMinuteCase3Context;
+  using LiteralTMinuteCase4Context = HorseIRParser::LiteralTMinuteCase4Context;
 
-  static Type *convert (ASTNodeMemory &mem, TypeContext *type)
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteContext *literal)
   {
-    assert (type != nullptr);
-    TypeCasePrimitiveContext *primitive = nullptr;
-    TypeCaseWildcardContext *wildcard = nullptr;
-    TypeCaseListContext *list = nullptr;
-    TypeCaseDictContext *dict = nullptr;
-    TypeCaseEnumContext *enume = nullptr;
-    TypeCaseFuncContext *func = nullptr;
+    assert (literal != nullptr);
+    LiteralTMinuteCase0Context *case0 = nullptr;
+    LiteralTMinuteCase1Context *case1 = nullptr;
+    LiteralTMinuteCase2Context *case2 = nullptr;
+    LiteralTMinuteCase3Context *case3 = nullptr;
+    LiteralTMinuteCase4Context *case4 = nullptr;
 
-    if ((primitive = dynamic_cast<decltype (primitive)>(type)) != nullptr)
-      return convert (mem, primitive);
-    if ((wildcard = dynamic_cast<decltype (wildcard)>(type)) != nullptr)
-      return convert (mem, wildcard);
-    if ((list = dynamic_cast<decltype (list)>(type)) != nullptr)
-      return convert (mem, list);
-    if ((dict = dynamic_cast<decltype (dict)>(type)) != nullptr)
-      return convert (mem, dict);
-    if ((enume = dynamic_cast<decltype (enume)>(type)) != nullptr)
-      return convert (mem, enume);
-    if ((func = dynamic_cast<decltype (func)>(type)) != nullptr)
-      return convert (mem, func);
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
 
-    throw CSTConverterException (type);
+    throw CSTConverterException (literal);
   }
 
-  static WildcardType *
-  convert (ASTNodeMemory &mem, TypeCaseWildcardContext *cst)
+  static MinuteLiteral::ElementType
+  convertMinuteValue (HorseIRParser::TMinuteValueContext *valueContext)
   {
-    assert (cst != nullptr);
-    auto wildcardType = new WildcardType (mem, cst);
-    return wildcardType;
+    assert (valueContext != nullptr);
+    const auto minuteContext = valueContext->LITERAL_GROUP_2_MINUTE ();
+    const std::string valueString = minuteContext->getText ();
+    const std::regex matchRegex (
+        R"REGEX(([0-9]{1,2}):([0-9]{1,2}))REGEX"
+    );
+    std::smatch matchResult;
+    if (!std::regex_match (valueString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string hourString = matchResult[1];
+    const std::string minuteString = matchResult[2];
+    std::uint8_t hourValue = 0, minuteValue = 0;
+    try
+      {
+        std::size_t pos;
+        unsigned long hourConverted = std::stoul (hourString, &pos, 10);
+        if (pos != hourString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (hourConverted >= 24) throw CSTConverterException (valueContext);
+        hourValue = static_cast<decltype (hourValue)>(hourConverted);
+
+        unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
+        if (pos != minuteString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (minuteConverted >= 60) throw CSTConverterException (valueContext);
+        minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    storage::Minute minute{};
+    minute.hour = hourValue;
+    minute.minute = minuteValue;
+    return MinuteLiteral::ElementType (minute);
   }
 
-  static PrimitiveType *
-  convert (ASTNodeMemory &mem, TypeCasePrimitiveContext *cst)
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteCase0Context *literal)
   {
-    assert (cst != nullptr);
-    const std::string cstText = cst->token->getText ();
+    assert (literal != nullptr);
+    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    std::vector<MinuteLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convertMinuteValue (literal->tMinuteValue ()));
+    minuteLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    using ConvertMapT = std::unordered_map<std::string, PrimitiveClass>;
-    ConvertMapT convertMap = {
-        {"bool", PrimitiveClass::Bool},
-        {"char", PrimitiveClass::Character},
-        {"i8", PrimitiveClass::Integer8},
-        {"i16", PrimitiveClass::Integer16},
-        {"i32", PrimitiveClass::Integer32},
-        {"i64", PrimitiveClass::Integer64},
-        {"fp32", PrimitiveClass::FP32},
-        {"fp64", PrimitiveClass::FP64},
-        {"complex", PrimitiveClass::Complex},
-        {"sym", PrimitiveClass::Symbol},
-        {"m", PrimitiveClass::Month}, {"d", PrimitiveClass::Date},
-        {"z", PrimitiveClass::DateTime}, {"u", PrimitiveClass::Minute},
-        {"v", PrimitiveClass::Second}, {"t", PrimitiveClass::Time},
-        {"str", PrimitiveClass::String}, {"table", PrimitiveClass::Table},
-        {"ktable", PrimitiveClass::KeyTable}
-    };
-    auto iter = convertMap.find (cstText);
-    assert (iter != convertMap.end ());
-
-    auto primitiveType = new PrimitiveType (mem, cst);
-    primitiveType->setPrimitiveClass (iter->second);
-
-    return (primitiveType);
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
+    minuteLiteral->setLiteralType (primitiveType);
+    return minuteLiteral;
   }
 
-  static ListType *convert (ASTNodeMemory &mem, TypeCaseListContext *cst)
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteCase1Context *literal)
   {
-    assert (cst != nullptr);
-    const auto typeListContext = cst->typeList ();
-    const auto elementTypeContext = typeListContext->element;
-    auto listType = new ListType (mem, typeListContext);
-
-    Type *elementType = convert (mem, elementTypeContext);
-    elementType->setParentASTNode (listType);
-    listType->setElementType (elementType);
-
-    return listType;
+    assert (literal != nullptr);
+    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
+    minuteLiteral->setLiteralType (primitiveType);
+    return minuteLiteral;
   }
 
-  static DictionaryType *convert (ASTNodeMemory &mem, TypeCaseDictContext *cst)
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteCase2Context *literal)
   {
-    assert (cst != nullptr);
-    const auto typeDictContext = cst->typeDict ();
-    const auto keyTypeContext = typeDictContext->key;
-    const auto valueTypeContext = typeDictContext->value;
-    auto dictionaryType = new DictionaryType (mem, typeDictContext);
-
-    Type *keyType = convert (mem, keyTypeContext);
-    keyType->setParentASTNode (dictionaryType);
-    dictionaryType->setKeyType (keyType);
-
-    Type *valueType = convert (mem, valueTypeContext);
-    valueType->setParentASTNode (dictionaryType);
-    dictionaryType->setValueType (valueType);
-
-    return dictionaryType;
-  }
-
-  static EnumerationType *convert (ASTNodeMemory &mem, TypeCaseEnumContext *cst)
-  {
-    assert (cst != nullptr);
-    const auto pTypeEnumContext = cst->typeEnum ();
-    const auto elementContext = pTypeEnumContext->element;
-    auto enumerationType = new EnumerationType (mem, pTypeEnumContext);
-
-    Type *elementType = convert (mem, elementContext);
-    elementType->setParentASTNode (enumerationType);
-    enumerationType->setElementType (elementType);
-
-    return enumerationType;
-  }
-
-  using TypeFuncCase0Context = HorseIRParser::TypeFuncCase0Context;
-  using TypeFuncCase1Context = HorseIRParser::TypeFuncCase1Context;
-  using TypeFuncCase2Context = HorseIRParser::TypeFuncCase2Context;
-  using TypeFuncCase3Context = HorseIRParser::TypeFuncCase3Context;
-
-  static FunctionType *convert (ASTNodeMemory &mem, TypeCaseFuncContext *cst)
-  {
-    assert (cst != nullptr);
-    auto typeFunc = cst->typeFunc ();
-    TypeFuncCase0Context *case0 = nullptr;
-    TypeFuncCase1Context *case1 = nullptr;
-    TypeFuncCase2Context *case2 = nullptr;
-    TypeFuncCase3Context *case3 = nullptr;
-
-    if ((case0 = dynamic_cast<decltype (case0)>(typeFunc)) != nullptr)
-      return convert (mem, case0);
-    if ((case1 = dynamic_cast<decltype (case1)>(typeFunc)) != nullptr)
-      return convert (mem, case1);
-    if ((case2 = dynamic_cast<decltype (case2)>(typeFunc)) != nullptr)
-      return convert (mem, case2);
-    if ((case3 = dynamic_cast<decltype (case3)>(typeFunc)) != nullptr)
-      return convert (mem, case3);
-
-    throw CSTConverterException (cst);
-  }
-
-  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase0Context *cst)
-  {
-    assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
-    auto returnTypeContext = cst->type ();
-
-    Type *returnType = convert (mem, returnTypeContext);
-    returnType->setParentASTNode (functionType);
-    functionType->setReturnType (returnType);
-
-    functionType->setIsFlexible (false);
-    return functionType;
-  }
-
-  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase1Context *cst)
-  {
-    assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
-    auto returnTypeContext = cst->type ();
-
-    Type *returnType = convert (mem, returnTypeContext);
-    returnType->setParentASTNode (functionType);
-    functionType->setReturnType (returnType);
-
-    functionType->setIsFlexible (true);
-    return functionType;
-  }
-
-  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase2Context *cst)
-  {
-    assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
-
-    const auto types (cst->type ());
-    std::vector<Type *> parameterTypes{};
-    std::transform (
-        types.cbegin (), std::prev (types.cend ()),
-        std::back_inserter (parameterTypes),
-        [&] (TypeContext *typeContext) -> Type *
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
         {
-          Type *retType = convert (mem, typeContext);
-          retType->setParentASTNode (functionType);
-          return retType;
+          using MinuteValueContext = HorseIRParser::TMinuteValueContext;
+          if (dynamic_cast<MinuteValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
         });
-
-    TypeContext *returnContext = nullptr;
-    returnContext = *(std::prev (types.cend ()));
-    Type *returnType = convert (mem, returnContext);
-    returnType->setParentASTNode (functionType);
-
-    functionType->setParameterTypes (std::move (parameterTypes));
-    functionType->setReturnType (returnType);
-    functionType->setIsFlexible (false);
-    return functionType;
+    std::vector<MinuteLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> MinuteLiteral::ElementType
+        {
+          HorseIRParser::TMinuteValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertMinuteValue (value); }
+          return MinuteLiteral::ElementType (nullptr);
+        });
+    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    minuteLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
+    minuteLiteral->setLiteralType (primitiveType);
+    return minuteLiteral;
   }
 
-  static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase3Context *cst)
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteCase3Context *literal)
   {
-    assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
+    assert (literal != nullptr);
+    const auto nullTokens = literal->NULL_TOKEN ();
+    std::vector<MinuteLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
+      { valueVector.emplace_back (MinuteLiteral::ElementType (nullptr)); }
+    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    minuteLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
+    minuteLiteral->setLiteralType (primitiveType);
+    return minuteLiteral;
+  }
 
-    const auto types (cst->type ());
-    std::vector<Type *> parameterTypes{};
-    std::transform (
-        types.cbegin (), std::prev (types.cend ()),
-        std::back_inserter (parameterTypes),
-        [&] (TypeContext *typeContext) -> Type *
+  static MinuteLiteral *
+  convert (ASTNodeMemory &mem, LiteralTMinuteCase4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    std::vector<MinuteLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (MinuteLiteral::ElementType (nullptr));
+    minuteLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
+    minuteLiteral->setLiteralType (primitiveType);
+    return minuteLiteral;
+  }
+
+  using LiteralTSecondCase0Context = HorseIRParser::LiteralTSecondCase0Context;
+  using LiteralTSecondCase1Context = HorseIRParser::LiteralTSecondCase1Context;
+  using LiteralTSecondCase2Context = HorseIRParser::LiteralTSecondCase2Context;
+  using LiteralTSecondCase3Context = HorseIRParser::LiteralTSecondCase3Context;
+  using LiteralTSecondCase4Context = HorseIRParser::LiteralTSecondCase4Context;
+
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTSecondCase0Context *case0 = nullptr;
+    LiteralTSecondCase1Context *case1 = nullptr;
+    LiteralTSecondCase2Context *case2 = nullptr;
+    LiteralTSecondCase3Context *case3 = nullptr;
+    LiteralTSecondCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static SecondLiteral::ElementType
+  convertSecondValue (HorseIRParser::TSecondValueContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    const auto secondContext = valueContext->LITERAL_GROUP_3_SECOND ();
+    const std::string valueString = secondContext->getText ();
+    const std::regex matchRegex (
+        R"REGEX(([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}))REGEX"
+    );
+    std::smatch matchResult;
+    if (!std::regex_match (valueString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string hourString = matchResult[1];
+    const std::string minuteString = matchResult[2];
+    const std::string secondString = matchResult[3];
+    std::uint8_t hourValue = 0, minuteValue = 0, secondValue = 0;
+    try
+      {
+        std::size_t pos;
+        unsigned long hourConverted = std::stoul (hourString, &pos, 10);
+        if (pos != hourString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (hourConverted >= 24) throw CSTConverterException (valueContext);
+        hourValue = static_cast<decltype (hourValue)>(hourConverted);
+
+        unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
+        if (pos != minuteString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (minuteConverted >= 60) throw CSTConverterException (valueContext);
+        minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
+
+        unsigned long secondConverted = std::stoul (secondString, &pos, 10);
+        if (pos != secondString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (secondConverted >= 60) throw CSTConverterException (valueContext);
+        secondValue = static_cast<decltype (secondValue)>(secondConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (nullptr); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (nullptr); }
+    storage::Second second{};
+    second.hour = hourValue;
+    second.minute = minuteValue;
+    second.second = secondValue;
+    return SecondLiteral::ElementType (second);
+  }
+
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto secondLiteral = new SecondLiteral (mem, literal);
+    std::vector<SecondLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convertSecondValue (literal->tSecondValue ()));
+    secondLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Second);
+    secondLiteral->setLiteralType (primitiveType);
+    return secondLiteral;
+  }
+
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto secondLiteral = new SecondLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Second);
+    secondLiteral->setLiteralType (primitiveType);
+    return secondLiteral;
+  }
+
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
         {
-          Type *retType = convert (mem, typeContext);
-          retType->setParentASTNode (functionType);
-          return retType;
+          using TSecondValueContext = HorseIRParser::TSecondValueContext;
+          if (dynamic_cast<TSecondValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
         });
+    std::vector<SecondLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> SecondLiteral::ElementType
+        {
+          HorseIRParser::TSecondValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertSecondValue (value); }
+          return SecondLiteral::ElementType (nullptr);
+        });
+    auto secondLiteral = new SecondLiteral (mem, literal);
+    secondLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Second);
+    secondLiteral->setLiteralType (primitiveType);
+    return secondLiteral;
+  }
 
-    TypeContext *returnContext = nullptr;
-    returnContext = *(std::prev (types.cend ()));
-    Type *returnType = convert (mem, returnContext);
-    returnType->setParentASTNode (functionType);
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondCase3Context *literal)
+  {
+    assert (literal != nullptr);
+    const auto nullTokens = literal->NULL_TOKEN ();
+    std::vector<SecondLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
+      { valueVector.emplace_back (SecondLiteral::ElementType (nullptr)); }
+    auto secondLiteral = new SecondLiteral (mem, literal);
+    secondLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Second);
+    secondLiteral->setLiteralType (primitiveType);
+    return secondLiteral;
+  }
 
-    functionType->setParameterTypes (std::move (parameterTypes));
-    functionType->setReturnType (returnType);
-    functionType->setIsFlexible (true);
-    return functionType;
+  static SecondLiteral *
+  convert (ASTNodeMemory &mem, LiteralTSecondCase4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto secondLiteral = new SecondLiteral (mem, literal);
+    std::vector<SecondLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (SecondLiteral::ElementType (nullptr));
+    secondLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Second);
+    secondLiteral->setLiteralType (primitiveType);
+    return secondLiteral;
+  }
+
+  using LiteralTTimeCase0Context = HorseIRParser::LiteralTTimeCase0Context;
+  using LiteralTTimeCase1Context = HorseIRParser::LiteralTTimeCase1Context;
+  using LiteralTTimeCase2Context = HorseIRParser::LiteralTTimeCase2Context;
+  using LiteralTTimeCase3Context = HorseIRParser::LiteralTTimeCase3Context;
+  using LiteralTTimeCase4Context = HorseIRParser::LiteralTTimeCase4Context;
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTTimeCase0Context *case0 = nullptr;
+    LiteralTTimeCase1Context *case1 = nullptr;
+    LiteralTTimeCase2Context *case2 = nullptr;
+    LiteralTTimeCase3Context *case3 = nullptr;
+    LiteralTTimeCase4Context *case4 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(literal)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(literal)) != nullptr)
+      { return convert (mem, case4); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static TimeLiteral::ElementType
+  convertTimeValue (HorseIRParser::TTimeValueContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    const auto timeContext = valueContext->LITERAL_GROUP_4_TIME ();
+    const std::string timeString = timeContext->getText ();
+    const std::regex matchRegex (
+        R"REGEX(([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})\.([0-9]{1,3}))REGEX"
+    );
+    std::smatch matchResult;
+    if (!std::regex_match (timeString, matchResult, matchRegex))
+      { throw CSTConverterException (valueContext); }
+    const std::string hourString = matchResult[1];
+    const std::string minuteString = matchResult[2];
+    const std::string secondString = matchResult[3];
+    const std::string msString = matchResult[4];
+    std::uint8_t hourValue = 0, minuteValue = 0, secondValue = 0;
+    std::uint16_t msValue = 0;
+    try
+      {
+        std::size_t pos;
+        unsigned long hourConverted = std::stoul (hourString, &pos, 10);
+        if (pos != hourString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (hourConverted >= 24) throw CSTConverterException (valueContext);
+        hourValue = static_cast<decltype (hourValue)>(hourConverted);
+
+        unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
+        if (pos != minuteString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (minuteConverted >= 60) throw CSTConverterException (valueContext);
+        minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
+
+        unsigned long secondConverted = std::stoul (secondString, &pos, 10);
+        if (pos != secondString.length ())
+          { throw CSTConverterException (valueContext); }
+        if (secondConverted >= 60) throw CSTConverterException (valueContext);
+        secondValue = static_cast<decltype (secondValue)>(secondConverted);
+
+        unsigned long msConverted = std::stoul (msString, &pos, 10);
+        if (pos != msString.length ())
+          { throw CSTConverterException (valueContext); }
+        msValue = static_cast<decltype (msValue)>(msConverted);
+      }
+    catch (const std::invalid_argument &exception)
+      { throw CSTConverterException (valueContext); }
+    catch (const std::out_of_range &exception)
+      { throw CSTConverterException (valueContext); }
+    storage::Time time{};
+    time.hour = hourValue;
+    time.minute = minuteValue;
+    time.second = secondValue;
+    time.millisecond = msValue;
+    return TimeLiteral::ElementType (time);
+  }
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto timeLiteral = new TimeLiteral (mem, literal);
+    std::vector<TimeLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (convertTimeValue (literal->tTimeValue ()));
+    timeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Time);
+    timeLiteral->setLiteralType (primitiveType);
+    return timeLiteral;
+  }
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto timeLiteral = new TimeLiteral (mem, literal);
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Time);
+    timeLiteral->setLiteralType (primitiveType);
+    return timeLiteral;
+  }
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    using ParseTree = antlr4::tree::ParseTree;
+    const std::vector<ParseTree *> rawChildren = literal->children;
+    std::vector<ParseTree *> children{};
+    children.reserve (rawChildren.size ());
+    std::copy_if (
+        rawChildren.cbegin (), rawChildren.cend (),
+        std::back_inserter (children),
+        [] (ParseTree *parseTree) -> bool
+        {
+          using TimeValueContext = HorseIRParser::TTimeValueContext;
+          if (dynamic_cast<TimeValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
+        });
+    std::vector<TimeLiteral::ElementType> valueVector{};
+    valueVector.reserve (children.size ());
+    std::transform (
+        children.cbegin (), children.cend (), std::back_inserter (valueVector),
+        [] (ParseTree *parseTree) -> TimeLiteral::ElementType
+        {
+          HorseIRParser::TTimeValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertTimeValue (value); }
+          return TimeLiteral::ElementType (nullptr);
+        });
+    auto timeLiteral = new TimeLiteral (mem, literal);
+    timeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Time);
+    timeLiteral->setLiteralType (primitiveType);
+    return timeLiteral;
+  }
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeCase3Context *literal)
+  {
+    assert (literal != nullptr);
+    const auto nullTokens = literal->NULL_TOKEN ();
+    std::vector<TimeLiteral::ElementType> valueVector{};
+    valueVector.reserve (nullTokens.size ());
+    for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
+      { valueVector.emplace_back (TimeLiteral::ElementType (nullptr)); }
+    auto timeLiteral = new TimeLiteral (mem, literal);
+    timeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Time);
+    timeLiteral->setLiteralType (primitiveType);
+    return timeLiteral;
+  }
+
+  static TimeLiteral *
+  convert (ASTNodeMemory &mem, LiteralTTimeCase4Context *literal)
+  {
+    assert (literal != nullptr);
+    auto timeLiteral = new TimeLiteral (mem, literal);
+    std::vector<TimeLiteral::ElementType> valueVector{};
+    valueVector.emplace_back (TimeLiteral::ElementType (nullptr));
+    timeLiteral->setValue (std::move (valueVector));
+    using PrimitiveClass = PrimitiveType::PrimitiveClass;
+    auto primitiveType = new PrimitiveType (mem, literal);
+    primitiveType->setPrimitiveClass (PrimitiveClass::Time);
+    timeLiteral->setLiteralType (primitiveType);
+    return timeLiteral;
+  }
+
+  using LiteralFunction0Context = HorseIRParser::LiteralFunctionCase0Context;
+  using LiteralFunction1Context = HorseIRParser::LiteralFunctionCase1Context;
+
+  static FunctionLiteral *
+  convert (ASTNodeMemory &mem, LiteralFunctionContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralFunction0Context *case0 = nullptr;
+    LiteralFunction1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static FunctionLiteral::ElementType
+  convertFunctionValue (HorseIRParser::FunctionValueNContext *valueContext)
+  {
+    assert (valueContext != nullptr);
+    if (valueContext->NULL_TOKEN () != nullptr)
+      { return FunctionLiteral::ElementType (nullptr); }
+    const auto functionContext = valueContext->LITERAL_FUNCTION ();
+    std::string functionString = functionContext->getText ();
+    functionString = functionString.substr (1, std::string::npos);
+    const auto commaPos = std::find (
+        functionString.cbegin (), functionString.cend (), '.'
+    );
+    std::string moduleName, methodName;
+    if (commaPos == functionString.cend ())
+      {
+        moduleName = "";
+        methodName = functionString;
+      }
+    else
+      {
+        std::copy (functionString.cbegin (), commaPos,
+                   std::back_inserter (moduleName));
+        std::copy (std::next (commaPos), functionString.cend (),
+                   std::back_inserter (methodName));
+      }
+    storage::Function function{};
+    function.moduleName = std::move (moduleName);
+    function.methodName = std::move (methodName);
+    return FunctionLiteral::ElementType (std::move (function));
+  }
+
+  static FunctionLiteral *
+  convert (ASTNodeMemory &mem, LiteralFunction0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto functionLiteral = new FunctionLiteral (mem, literal);
+    std::vector<FunctionLiteral::ElementType> valueVector{};
+    const auto functionValueContext = literal->functionValueN ();
+    valueVector.emplace_back (convertFunctionValue (functionValueContext));
+    functionLiteral->setValue (std::move (valueVector));
+    functionLiteral->setLiteralType (convert (mem, literal->typeFunc ()));
+    return functionLiteral;
+  }
+
+  static FunctionLiteral *
+  convert (ASTNodeMemory &mem, LiteralFunction1Context *literal)
+  {
+    assert (literal != nullptr);
+    using FunctionValueContext = HorseIRParser::FunctionValueNContext;
+    auto functionLiteral = new FunctionLiteral (mem, literal);
+    const auto functionValueContexts = literal->functionValueN ();
+    std::vector<FunctionLiteral::ElementType> valueVector{};
+    valueVector.reserve (functionValueContexts.size ());
+    std::transform (
+        functionValueContexts.cbegin (), functionValueContexts.cend (),
+        std::back_inserter (valueVector),
+        [] (FunctionValueContext *context) -> FunctionLiteral::ElementType
+        { return convertFunctionValue (context); });
+    functionLiteral->setValue (std::move (valueVector));
+    functionLiteral->setLiteralType (convert (mem, literal->typeFunc ()));
+    return functionLiteral;
+  }
+
+  using LiteralListCase0Context = HorseIRParser::LiteralListCase0Context;
+  using LiteralListCase1Context = HorseIRParser::LiteralListCase1Context;
+  using LiteralListCase2Context = HorseIRParser::LiteralListCase2Context;
+
+  static ListLiteral *
+  convert (ASTNodeMemory &mem, LiteralListContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralListCase0Context *case0 = nullptr;
+    LiteralListCase1Context *case1 = nullptr;
+    LiteralListCase2Context *case2 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static ListLiteral *
+  convert (ASTNodeMemory &mem, LiteralListCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto listLiteral = new ListLiteral (mem, literal);
+    std::vector<Literal *> valueVector{};
+    listLiteral->setValue (std::move (valueVector));
+    listLiteral->setLiteralType (convert (mem, literal->typeList ()));
+    return listLiteral;
+  }
+
+  static ListLiteral *
+  convert (ASTNodeMemory &mem, LiteralListCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto listLiteral = new ListLiteral (mem, literal);
+    const auto literalContexts = literal->literal ();
+    std::vector<Literal *> valueVector{};
+    valueVector.reserve (literalContexts.size ());
+    std::transform (
+        literalContexts.cbegin (), literalContexts.cend (),
+        std::back_inserter (valueVector),
+        [&] (HorseIRParser::LiteralContext *context) -> Literal *
+        { return convert (mem, context); });
+    listLiteral->setValue (std::move (valueVector));
+    listLiteral->setLiteralType (convert (mem, literal->typeList ()));
+    return listLiteral;
   }
 };
 
