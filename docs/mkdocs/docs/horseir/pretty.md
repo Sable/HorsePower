@@ -10,7 +10,7 @@ We propose a couple of pretty printing modes as follows.
 - Print within current window (Optional)
 
 
-### Numeric types
+### Basic types
 
 #### Bool
 
@@ -72,7 +72,7 @@ We propose a couple of pretty printing modes as follows.
 ```
 
 
-### Advanced types
+### Compound types
 
 #### List
 

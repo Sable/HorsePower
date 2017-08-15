@@ -37,6 +37,9 @@ extern "C" {
 #define isValidLength(x,y) (isOne(x) || isOne(y) || isEqualLength(x,y))
 #define isValidType(x,y)   ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
+/* keyed table */
+#define isKeySingle(x) (1==getTableColNumber(getKTableKey(x)))
+
 #define FUNC1(x) L (*x)(V,V)
 #define FUNC2(x) L (*x)(V,V,V)
 #define CHECKE(x) { L e=x; if(e) R e; }

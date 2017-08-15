@@ -1319,13 +1319,44 @@ L pfnEnum(V z, V x, V y){
 // L pfnEnum(V z, V x, V y){
 //     if(isOneSymbol(x)){
 //         V eKey = getValueFromSymbol(vq(x));
-//         V eVal = allocNode();
-//         CHECKE(pfnIndexOf(eVal,eKey,y));
-//         L lenZ = vn(eVal);
-//         DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
-//         initV(z,H_Y,lenZ);
-//         initEnum(z,vq(x),eKey,vg(eVal));
-//         R 0;
+//         if(isTypeGroupBasic(vp(eKey))){
+//             V eVal = allocNode();
+//             CHECKE(pfnIndexOf(eVal,eKey,y));
+//             L lenZ = vn(eVal);
+//             DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
+//             initV(z,H_Y,lenZ);
+//             initEnum(z,vq(x),eKey,vg(eVal));
+//             R 0;
+//         }
+//         else if(isKTable(eKey)){
+//             if(isKeySingle(x)){
+//                 V keyCol = getTableCol(eKey, 0);
+//                 V eVal   = allocNode();
+//                 CHECKE(pfnIndexOf(eVal,keyCol,y));
+//                 L lenZ   = vn(eVal);
+//                 DOI(lenZ, if(vL(eVal,i)>=vn(keyCol))R E_ENUM_INDEX)
+//                 initV(z,H_Y,lenZ);
+//                 initEnum(z,vq(x),keyCol,vg(eVal));
+//                 R 0;
+//             }
+//             else R E_DOMAIN;
+//         }
+//         else R E_DOMAIN;
+//     }
+//     else if(2==vn(x)){
+//         V eKey = getValueFromSymbol(vQ(x,0));
+//         if(isKTable(eKey)){
+//             V keyCol;
+//             CHECKE(findColFromTable2(&keyCol,eKey,vQ(x,1)));
+//             V eVal = allocNode();
+//             CHECKE(pfnIndexOf(eVal,keyCol,y));
+//             L lenZ = vn(eVal);
+//             DOI(lenZ, if(vL(eVal,i)>=vn(keyCol))R E_ENUM_INDEX)
+//             initV(z,H_Y,lenZ);
+//             initEnum(z,vQ(x,0),keyCol,vg(eVal));
+//             R 0;
+//         }
+//         else R E_DOMAIN;
 //     }
 //     else R E_DOMAIN;
 // }

@@ -56,7 +56,7 @@
 </tr>
 <tr>
     <td>Column</td>
-    <td>Real, Date, Time, Q, S</td>
+    <td>Number, Date, Time, Q, S, Y</td>
 </tr>
 <tr>
     <td>Comparable</td>

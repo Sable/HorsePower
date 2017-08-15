@@ -21,7 +21,10 @@ void deleteSys();
 L registerTable         (S tableName, V tablePtr);
 V findTableByName       (L sid);
 L copyV                 (V z, V x);
+
+L findColFromTable2     (V *z, V x, L cId);
 L findColFromTable      (V x, L cId);
+
 L promoteValue          (V z, V x, L typMax);
 B checkZero             (V x);
 B checkMatch            (V x);

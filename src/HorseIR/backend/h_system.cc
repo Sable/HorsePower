@@ -48,6 +48,32 @@ L copyV(V z, V x){
 //     R 0;
 // }
 
+/*
+ * Include: table and keyed table
+ * Status: 0 or >0
+ * Return: *z
+ */
+L findColFromTable2(V *z, V x, L cId){
+    if(isTable(x)) {
+        L t = findColFromTable(x,cId);
+        if(t>=0) *z = getTableCol(x,t);
+        else R E_DOMAIN;
+    }
+    else if(isKTable(x)) {
+        V key = getKTableKey(x);
+        V val = getKTableVal(x);
+        L t = findColFromTable(key,cId);
+        if(t>=0) *z = getTableCol(key,t);
+        else{
+            t = findColFromTable(val,cId);
+            if(t>=0) *z = getTableCol(val,t);
+            else R E_DOMAIN;
+        }
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
 L findColFromTable(V x, L cId){
     DOI(vn(x), if(cId == vq(getColKey(getTableCol(x,i))))R i)
     R -1;
@@ -345,7 +371,7 @@ B isTypeGroupDTime(L t){
 }
 
 B isTypeGroupColumn(L t){
-    R (isTypeGroupReal(t) || H_Q==t || H_S==t || isTypeGroupDTime(t) || H_X==t);
+    R (isTypeGroupNumber(t) || H_Q==t || H_S==t || isTypeGroupDTime(t) || H_Y==t);
 }
 
 B isTypeGroupComparable(L t){
