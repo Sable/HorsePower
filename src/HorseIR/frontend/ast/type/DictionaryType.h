@@ -9,8 +9,8 @@ namespace ast
 
 class DictionaryType : public Type {
  public:
-  explicit DictionaryType (ASTNodeMemory &mem);
-  DictionaryType (ASTNodeMemory &mem, const CSTType *cst);
+  DictionaryType ();
+  explicit DictionaryType (const CSTType *cst);
   DictionaryType (DictionaryType &&dictionaryType) = default;
   DictionaryType (const DictionaryType &dictionaryType) = default;
   DictionaryType &operator= (DictionaryType &&dictionaryType) = delete;
@@ -32,12 +32,12 @@ class DictionaryType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const DictionaryType *type);
 };
 
-DictionaryType::DictionaryType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::DictionaryType, TypeClass::Dictionary)
+inline DictionaryType::DictionaryType ()
+    : Type (ASTNodeClass::DictionaryType, TypeClass::Dictionary)
 {}
 
-DictionaryType::DictionaryType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::DictionaryType, cst, TypeClass::Dictionary)
+inline DictionaryType::DictionaryType (const CSTType *cst)
+    : Type (ASTNodeClass::DictionaryType, cst, TypeClass::Dictionary)
 {}
 
 inline std::size_t DictionaryType::getNumNodesRecursively () const
@@ -60,7 +60,7 @@ inline std::vector<ASTNode *> DictionaryType::getChildren () const
 
 inline DictionaryType *DictionaryType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto dictionaryType = new DictionaryType (mem);
+  auto dictionaryType = mem.alloc<DictionaryType> ();
   dictionaryType->__duplicateDeep (mem, this);
   return dictionaryType;
 }
@@ -83,10 +83,16 @@ inline Type *DictionaryType::getValueType () const
 { return valueType; }
 
 inline void DictionaryType::setKeyType (Type *type)
-{ keyType = type; }
+{
+  if (type != nullptr) keyType->setParentASTNode (this);
+  keyType = type;
+}
 
 inline void DictionaryType::setValueType (Type *type)
-{ valueType = type; }
+{
+  if (type != nullptr) valueType->setParentASTNode (this);
+  valueType = type;
+}
 
 inline void
 DictionaryType::__duplicateDeep (ASTNodeMemory &mem, const DictionaryType *type)

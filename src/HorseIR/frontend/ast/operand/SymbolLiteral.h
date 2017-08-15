@@ -9,14 +9,14 @@ namespace ast
 
 class SymbolLiteral : public VectorLiteral<std::string> {
  public:
-  explicit SymbolLiteral (ASTNodeMemory &mem)
+  SymbolLiteral ()
       : VectorLiteral<std::string>
-            (mem, ASTNodeClass::SymbolLiteral, LiteralClass::Symbol)
+            (ASTNodeClass::SymbolLiteral, LiteralClass::Symbol)
   {}
 
-  SymbolLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit SymbolLiteral (const CSTType *cst)
       : VectorLiteral<std::string>
-            (mem, ASTNodeClass::SymbolLiteral, cst, LiteralClass::Symbol)
+            (ASTNodeClass::SymbolLiteral, cst, LiteralClass::Symbol)
   {}
 
   SymbolLiteral (SymbolLiteral &&literal) = default;
@@ -27,7 +27,7 @@ class SymbolLiteral : public VectorLiteral<std::string> {
 
   SymbolLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto symbolLiteral = new SymbolLiteral (mem);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     symbolLiteral->VectorLiteral<std::string>::__duplicateDeep (mem, this);
     return symbolLiteral;
   }

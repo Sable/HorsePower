@@ -9,8 +9,8 @@ namespace ast
 
 class ListType : public Type {
  public:
-  explicit ListType (ASTNodeMemory &mem);
-  ListType (ASTNodeMemory &mem, const CSTType *cst);
+  ListType ();
+  explicit ListType (const CSTType *cst);
   ListType (ListType &&externListType) = default;
   ListType (const ListType &externListType) = default;
   ListType &operator= (ListType &&externListType) = delete;
@@ -29,12 +29,12 @@ class ListType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const ListType *listType);
 };
 
-inline ListType::ListType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::ListType, TypeClass::List)
+inline ListType::ListType ()
+    : Type (ASTNodeClass::ListType, TypeClass::List)
 {}
 
-inline ListType::ListType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::ListType, cst, TypeClass::List)
+inline ListType::ListType (const CSTType *cst)
+    : Type (ASTNodeClass::ListType, cst, TypeClass::List)
 {}
 
 inline std::size_t ListType::getNumNodesRecursively () const
@@ -54,7 +54,7 @@ inline std::vector<ASTNode *> ListType::getChildren () const
 
 inline ListType *ListType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto listType = new ListType (mem);
+  auto listType = mem.alloc<ListType> ();
   listType->__duplicateDeep (mem, this);
   return listType;
 }
@@ -72,7 +72,10 @@ inline Type *ListType::getElementType () const
 { return elementType; }
 
 inline void ListType::setElementType (Type *type)
-{ elementType = type; }
+{
+  if (type != nullptr) type->setParentASTNode (this);
+  elementType = type;
+}
 
 inline void
 ListType::__duplicateDeep (ASTNodeMemory &mem, const ListType *listType)

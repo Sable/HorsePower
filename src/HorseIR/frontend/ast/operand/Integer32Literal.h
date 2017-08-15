@@ -9,14 +9,14 @@ namespace ast
 
 class Integer32Literal : public VectorLiteral<std::int32_t> {
  public:
-  explicit Integer32Literal (ASTNodeMemory &mem)
+  Integer32Literal ()
       : VectorLiteral<std::int32_t>
-            (mem, ASTNodeClass::Integer32Literal, LiteralClass::Integer16)
+            (ASTNodeClass::Integer32Literal, LiteralClass::Integer16)
   {}
 
-  Integer32Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit Integer32Literal (const CSTType *cst)
       : VectorLiteral<std::int32_t>
-            (mem, ASTNodeClass::Integer32Literal, cst, LiteralClass::Integer32)
+            (ASTNodeClass::Integer32Literal, cst, LiteralClass::Integer32)
   {}
 
   Integer32Literal (Integer32Literal &&literal) = default;
@@ -27,7 +27,7 @@ class Integer32Literal : public VectorLiteral<std::int32_t> {
 
   Integer32Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto integer32Literal = new Integer32Literal (mem);
+    auto integer32Literal = mem.alloc<Integer32Literal> ();
     integer32Literal->VectorLiteral<std::int32_t>::__duplicateDeep (mem, this);
     return integer32Literal;
   }

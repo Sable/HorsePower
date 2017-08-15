@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include "../AST.h"
 
 namespace horseIR
@@ -13,14 +14,14 @@ class Operand : public ASTNode {
     Identifier, Literal
   };
 
-  Operand (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-           const OperandClass &p_operandClass)
-      : ASTNode (mem, astNodeClass), operandClass (p_operandClass)
+  explicit Operand (const ASTNodeClass &astNodeClass,
+                    const OperandClass &p_operandClass)
+      : ASTNode (astNodeClass), operandClass (p_operandClass)
   {}
 
-  Operand (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
+  Operand (const ASTNodeClass &astNodeClass,
            const CSTType *parseTree, const OperandClass &p_operandClass)
-      : ASTNode (mem, astNodeClass, parseTree), operandClass (p_operandClass)
+      : ASTNode (astNodeClass, parseTree), operandClass (p_operandClass)
   {}
 
   Operand (Operand &&operand) = default;
@@ -41,6 +42,17 @@ class Operand : public ASTNode {
     ASTNode::__duplicateDeep (mem, operand);
   }
 };
+
+inline std::ostream &
+operator<< (std::ostream &stream, const Operand::OperandClass &operandClass)
+{
+  using OperandClass = Operand::OperandClass;
+  switch (operandClass)
+    {
+      case OperandClass::Literal: return stream << "Literal";
+      case OperandClass::Identifier: return stream << "Identifier";
+    }
+}
 
 }
 }

@@ -10,8 +10,8 @@ namespace ast
 
 class FunctionType : public Type {
  public:
-  explicit FunctionType (ASTNodeMemory &mem);
-  FunctionType (ASTNodeMemory &mem, const CSTType *cst);
+  FunctionType ();
+  explicit FunctionType (const CSTType *cst);
   FunctionType (FunctionType &&functionType) = default;
   FunctionType (const FunctionType &functionType) = default;
   FunctionType &operator= (FunctionType &&functionType) = delete;
@@ -40,12 +40,12 @@ class FunctionType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const FunctionType *type);
 };
 
-inline FunctionType::FunctionType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::FunctionType, TypeClass::Function)
+inline FunctionType::FunctionType ()
+    : Type (ASTNodeClass::FunctionType, TypeClass::Function)
 {}
 
-inline FunctionType::FunctionType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::FunctionType, cst, TypeClass::Function)
+inline FunctionType::FunctionType (const CSTType *cst)
+    : Type (ASTNodeClass::FunctionType, cst, TypeClass::Function)
 {}
 
 inline std::size_t FunctionType::getNumNodesRecursively () const
@@ -75,7 +75,7 @@ inline std::vector<ASTNode *> FunctionType::getChildren () const
 
 inline FunctionType *FunctionType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto functionType = new FunctionType (mem);
+  auto functionType = mem.alloc<FunctionType> ();
   functionType->__duplicateDeep (mem, this);
   return functionType;
 }
@@ -107,13 +107,19 @@ inline std::vector<Type *> FunctionType::getParameterTypes () const
 template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>
 FunctionType::setParameterTypes (T &&types)
-{ parameterTypes = std::forward<T> (types); }
+{
+  for (Type *&iter : types) iter->setParentASTNode (this);
+  parameterTypes = std::forward<T> (types);
+}
 
 inline Type *FunctionType::getReturnType () const
 { return returnType; }
 
 inline void FunctionType::setReturnType (Type *type)
-{ returnType = type; }
+{
+  if (type != nullptr) type->setParentASTNode (this);
+  returnType = type;
+}
 
 inline bool FunctionType::getIsFlexible () const
 { return isFlexible; }

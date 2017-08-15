@@ -9,8 +9,8 @@ namespace ast
 
 class EnumerationType : public Type {
  public:
-  explicit EnumerationType (ASTNodeMemory &mem);
-  EnumerationType (ASTNodeMemory &mem, const CSTType *cst);
+  EnumerationType ();
+  explicit EnumerationType (const CSTType *cst);
   EnumerationType (EnumerationType &&enumerationType) = default;
   EnumerationType (const EnumerationType &enumerationType) = default;
   EnumerationType &operator= (EnumerationType &&enumerationType) = delete;
@@ -29,12 +29,12 @@ class EnumerationType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const EnumerationType *t);
 };
 
-inline EnumerationType::EnumerationType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::EnumerationType, TypeClass::Enumeration)
+inline EnumerationType::EnumerationType ()
+    : Type (ASTNodeClass::EnumerationType, TypeClass::Enumeration)
 {}
 
-inline EnumerationType::EnumerationType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::EnumerationType, cst, TypeClass::Enumeration)
+inline EnumerationType::EnumerationType (const CSTType *cst)
+    : Type (ASTNodeClass::EnumerationType, cst, TypeClass::Enumeration)
 {}
 
 inline std::size_t EnumerationType::getNumNodesRecursively () const
@@ -55,7 +55,7 @@ inline std::vector<ASTNode *> EnumerationType::getChildren () const
 inline EnumerationType *
 EnumerationType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto enumerationType = new EnumerationType (mem);
+  auto enumerationType = mem.alloc<EnumerationType> ();
   enumerationType->__duplicateDeep (mem, this);
   return enumerationType;
 }
@@ -73,7 +73,10 @@ inline Type *EnumerationType::getElementType () const
 { return elementType; }
 
 inline void EnumerationType::setElementType (Type *type)
-{ elementType = type; }
+{
+  if (type != nullptr) type->setParentASTNode (this);
+  elementType = type;
+}
 
 inline void
 EnumerationType::__duplicateDeep (ASTNodeMemory &mem, const EnumerationType *t)

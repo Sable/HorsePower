@@ -9,14 +9,14 @@ namespace ast
 
 class StringLiteral : public VectorLiteral<std::vector<std::uint8_t>> {
  public:
-  explicit StringLiteral (ASTNodeMemory &mem)
+  StringLiteral ()
       : VectorLiteral<std::vector<std::uint8_t>>
-            (mem, ASTNodeClass::StringLiteral, LiteralClass::String)
+            (ASTNodeClass::StringLiteral, LiteralClass::String)
   {}
 
-  StringLiteral (ASTNodeMemory &mem, const CSTType *parseTree)
+  StringLiteral (const CSTType *parseTree)
       : VectorLiteral<std::vector<std::uint8_t>>
-            (mem, ASTNodeClass::StringLiteral, parseTree, LiteralClass::String)
+            (ASTNodeClass::StringLiteral, parseTree, LiteralClass::String)
   {}
 
   StringLiteral (StringLiteral &&stringLiteral) = default;
@@ -27,7 +27,7 @@ class StringLiteral : public VectorLiteral<std::vector<std::uint8_t>> {
 
   StringLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto stringLiteral = new StringLiteral (mem);
+    auto stringLiteral = mem.alloc<StringLiteral> ();
     stringLiteral->
         VectorLiteral<std::vector<std::uint8_t>>::__duplicateDeep (mem, this);
     return stringLiteral;

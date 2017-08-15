@@ -9,14 +9,14 @@ namespace ast
 
 class Integer64Literal : public VectorLiteral<std::int64_t> {
  public:
-  explicit Integer64Literal (ASTNodeMemory &mem)
+  Integer64Literal ()
       : VectorLiteral<std::int64_t>
-            (mem, ASTNodeClass::Integer64Literal, LiteralClass::Integer64)
+            (ASTNodeClass::Integer64Literal, LiteralClass::Integer64)
   {}
 
-  Integer64Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit Integer64Literal (const CSTType *cst)
       : VectorLiteral<std::int64_t>
-            (mem, ASTNodeClass::Integer64Literal, cst, LiteralClass::Integer64)
+            (ASTNodeClass::Integer64Literal, cst, LiteralClass::Integer64)
   {}
 
   Integer64Literal (Integer64Literal &&literal) = default;
@@ -27,7 +27,7 @@ class Integer64Literal : public VectorLiteral<std::int64_t> {
 
   Integer64Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto integer64Literal = new Integer64Literal (mem);
+    auto integer64Literal = mem.alloc<Integer64Literal> ();
     integer64Literal->VectorLiteral<std::int64_t>::__duplicateDeep (mem, this);
     return integer64Literal;
   }

@@ -33,16 +33,21 @@ class ASTNode {
     ASTNodeMemory &operator= (const ASTNodeMemory &astNodeMemory) = delete;
     ~ASTNodeMemory () = default;
 
-    void manage (const ast::ASTNode *managedPtr);
-    void release (const ast::ASTNode *releasedPtr);
+    template<class T, class ...Args>
+    std::enable_if_t<
+        std::is_base_of<ASTNode, T>::value &&
+        std::is_constructible<T, Args...>::value,
+        T *>
+    alloc (Args &&... args);
 
    protected:
     std::vector<std::unique_ptr<const ASTNode>> pool;
+    void manage (const ast::ASTNode *managedPtr);
+    void release (const ast::ASTNode *releasedPtr);
   };
 
-  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass);
-  ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
-           const CSTType *parseTree);
+  explicit ASTNode (const ASTNodeClass &p_astNodeClass);
+  ASTNode (const ASTNodeClass &p_astNodeClass, const CSTType *parseTree);
   ASTNode (ASTNode &&externASTNode) = default;
   ASTNode (const ASTNode &externASTNode) = default;
   ASTNode &operator= (ASTNode &&externASTNode) = delete;
@@ -74,6 +79,18 @@ class ASTNode {
   void __duplicateDeep (ASTNodeMemory &mem, const ASTNode *astNode);
 };
 
+template<class T, class ...Args>
+inline std::enable_if_t<
+    std::is_base_of<ASTNode, T>::value &&
+    std::is_constructible<T, Args...>::value,
+    T *>
+ASTNode::ASTNodeMemory::alloc (Args &&...args)
+{
+  T* allocatedNode = new T (std::forward<Args> (args)...);
+  manage (allocatedNode);
+  return allocatedNode;
+}
+
 inline void ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
 {
   const auto searchItr = std::find_if (
@@ -96,14 +113,14 @@ inline void ASTNode::ASTNodeMemory::release (const ast::ASTNode *releasedPtr)
   pool.erase (removeIter, pool.end ());
 }
 
-inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass)
+inline ASTNode::ASTNode (const ASTNodeClass &p_astNodeClass)
     : cst (nullptr), astNodeClass (p_astNodeClass), parent (nullptr)
-{ mem.manage (this); }
+{}
 
-inline ASTNode::ASTNode (ASTNodeMemory &mem, const ASTNodeClass &p_astNodeClass,
+inline ASTNode::ASTNode (const ASTNodeClass &p_astNodeClass,
                          const CSTType *parseTree)
     : cst (parseTree), astNodeClass (p_astNodeClass), parent (nullptr)
-{ mem.manage (this); }
+{}
 
 inline const ASTNode::CSTType *ASTNode::getCST () const
 { return cst; }

@@ -24,14 +24,14 @@ struct DateTime {
 
 class DateTimeLiteral : public VectorLiteral<storage::DateTime> {
  public:
-  explicit DateTimeLiteral (ASTNodeMemory &mem)
+  DateTimeLiteral ()
       : VectorLiteral<storage::DateTime>
-            (mem, ASTNodeClass::DateTimeLiteral, LiteralClass::DateTime)
+            (ASTNodeClass::DateTimeLiteral, LiteralClass::DateTime)
   {}
 
-  DateTimeLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit DateTimeLiteral (const CSTType *cst)
       : VectorLiteral<storage::DateTime>
-            (mem, ASTNodeClass::DateTimeLiteral, cst, LiteralClass::DateTime)
+            (ASTNodeClass::DateTimeLiteral, cst, LiteralClass::DateTime)
   {}
 
   DateTimeLiteral (DateTimeLiteral &&literal) = default;
@@ -42,7 +42,7 @@ class DateTimeLiteral : public VectorLiteral<storage::DateTime> {
 
   DateTimeLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto dateTimeLiteral = new DateTimeLiteral (mem);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> ();
     dateTimeLiteral->
         VectorLiteral<storage::DateTime>::__duplicateDeep (mem, this);
     return dateTimeLiteral;

@@ -9,14 +9,14 @@ namespace ast
 
 class FP64Literal : public VectorLiteral<double> {
  public:
-  explicit FP64Literal (ASTNodeMemory &mem)
+  FP64Literal ()
       : VectorLiteral<double>
-            (mem, ASTNodeClass::FP64Literal, LiteralClass::FP64)
+            (ASTNodeClass::FP64Literal, LiteralClass::FP64)
   {}
 
-  FP64Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit FP64Literal (const CSTType *cst)
       : VectorLiteral<double>
-            (mem, ASTNodeClass::FP64Literal, cst, LiteralClass::FP64)
+            (ASTNodeClass::FP64Literal, cst, LiteralClass::FP64)
   {}
 
   FP64Literal (FP64Literal &&literal) = default;
@@ -27,7 +27,7 @@ class FP64Literal : public VectorLiteral<double> {
 
   FP64Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto fp64Literal = new FP64Literal (mem);
+    auto fp64Literal = mem.alloc<FP64Literal> ();
     fp64Literal->VectorLiteral<double>::__duplicateDeep (mem, this);
     return fp64Literal;
   }

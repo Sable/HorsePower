@@ -14,14 +14,13 @@ class Type : public ASTNode {
     Primitive, Wildcard, List, Dictionary, Enumeration, Function
   };
 
-  Type (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-        const TypeClass &p_typeClass)
-      : ASTNode (mem, astNodeClass), typeClass (p_typeClass)
+  Type (const ASTNodeClass &astNodeClass, const TypeClass &p_typeClass)
+      : ASTNode (astNodeClass), typeClass (p_typeClass)
   {}
 
-  Type (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-        const CSTType *parseTree, const TypeClass &p_typeClass)
-      : ASTNode (mem, astNodeClass, parseTree), typeClass (p_typeClass)
+  Type (const ASTNodeClass &astNodeClass, const CSTType *parseTree,
+        const TypeClass &p_typeClass)
+      : ASTNode (astNodeClass, parseTree), typeClass (p_typeClass)
   {}
 
   Type (Type &&externType) = default;

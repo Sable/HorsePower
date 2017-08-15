@@ -9,14 +9,14 @@ namespace ast
 
 class CharLiteral : public VectorLiteral<std::uint8_t> {
  public:
-  explicit CharLiteral (ASTNodeMemory &mem)
+  CharLiteral ()
       : VectorLiteral<std::uint8_t>
-            (mem, ASTNodeClass::CharLiteral, LiteralClass::Character)
+            (ASTNodeClass::CharLiteral, LiteralClass::Character)
   {}
 
-  CharLiteral (ASTNodeMemory &mem, const CSTType *parseTree)
+  explicit CharLiteral (const CSTType *parseTree)
       : VectorLiteral<std::uint8_t>
-            (mem, ASTNodeClass::CharLiteral, parseTree, LiteralClass::Character)
+            (ASTNodeClass::CharLiteral, parseTree, LiteralClass::Character)
   {}
 
   CharLiteral (CharLiteral &&charLiteral) = default;
@@ -27,7 +27,7 @@ class CharLiteral : public VectorLiteral<std::uint8_t> {
 
   CharLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto charLiteral = new CharLiteral (mem);
+    auto charLiteral = mem.alloc<CharLiteral> ();
     charLiteral->VectorLiteral<std::uint8_t>::__duplicateDeep (mem, this);
     return charLiteral;
   }

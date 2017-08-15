@@ -19,14 +19,14 @@ struct Month {
 
 class MonthLiteral : public VectorLiteral<storage::Month> {
  public:
-  explicit MonthLiteral (ASTNodeMemory &mem)
+  MonthLiteral ()
       : VectorLiteral<storage::Month>
-            (mem, ASTNodeClass::MonthLiteral, LiteralClass::Month)
+            (ASTNodeClass::MonthLiteral, LiteralClass::Month)
   {}
 
-  MonthLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit MonthLiteral (const CSTType *cst)
       : VectorLiteral<storage::Month>
-            (mem, ASTNodeClass::MonthLiteral, cst, LiteralClass::Month)
+            (ASTNodeClass::MonthLiteral, cst, LiteralClass::Month)
   {}
 
   MonthLiteral (MonthLiteral &&literal) = default;
@@ -37,7 +37,7 @@ class MonthLiteral : public VectorLiteral<storage::Month> {
 
   MonthLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto monthLiteral = new MonthLiteral (mem);
+    auto monthLiteral = mem.alloc<MonthLiteral> ();
     monthLiteral->VectorLiteral<storage::Month>::__duplicateDeep (mem, this);
     return monthLiteral;
   }

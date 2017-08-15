@@ -15,8 +15,8 @@ class PrimitiveType : public Type {
     KeyTable
   };
 
-  explicit PrimitiveType (ASTNodeMemory &mem);
-  PrimitiveType (ASTNodeMemory &mem, const CSTType *cst);
+  explicit PrimitiveType ();
+  explicit PrimitiveType (const CSTType *cst);
   PrimitiveType (PrimitiveType &&externPrimitive) = default;
   PrimitiveType (const PrimitiveType &externPrimitive) = default;
   PrimitiveType &operator= (PrimitiveType &&externPrimitive) = delete;
@@ -36,13 +36,13 @@ class PrimitiveType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const PrimitiveType *type);
 };
 
-inline PrimitiveType::PrimitiveType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::PrimitiveType, TypeClass::Primitive),
+inline PrimitiveType::PrimitiveType ()
+    : Type (ASTNodeClass::PrimitiveType, TypeClass::Primitive),
       primitiveClass (PrimitiveClass::Bool)
 {}
 
-inline PrimitiveType::PrimitiveType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::PrimitiveType, cst, TypeClass::Primitive),
+inline PrimitiveType::PrimitiveType (const CSTType *cst)
+    : Type (ASTNodeClass::PrimitiveType, cst, TypeClass::Primitive),
       primitiveClass (PrimitiveClass::Bool)
 {}
 
@@ -58,7 +58,7 @@ inline std::vector<ASTNode *> PrimitiveType::getChildren () const
 
 inline PrimitiveType *PrimitiveType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  PrimitiveType *primitiveType = new PrimitiveType (mem);
+  PrimitiveType *primitiveType = mem.alloc<PrimitiveType> ();
   primitiveType->__duplicateDeep (mem, this);
   return primitiveType;
 }

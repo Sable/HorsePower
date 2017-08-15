@@ -20,14 +20,14 @@ struct Second {
 
 class SecondLiteral : public VectorLiteral<storage::Second> {
  public:
-  explicit SecondLiteral (ASTNodeMemory &mem)
+  SecondLiteral ()
       : VectorLiteral<storage::Second>
-            (mem, ASTNodeClass::SecondLiteral, LiteralClass::Second)
+            (ASTNodeClass::SecondLiteral, LiteralClass::Second)
   {}
 
-  SecondLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit SecondLiteral (const CSTType *cst)
       : VectorLiteral<storage::Second>
-            (mem, ASTNodeClass::SecondLiteral, cst, LiteralClass::Second)
+            (ASTNodeClass::SecondLiteral, cst, LiteralClass::Second)
   {}
 
   SecondLiteral (SecondLiteral &&literal) = default;
@@ -38,7 +38,7 @@ class SecondLiteral : public VectorLiteral<storage::Second> {
 
   SecondLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto secondLiteral = new SecondLiteral (mem);
+    auto secondLiteral = mem.alloc<SecondLiteral> ();
     secondLiteral->VectorLiteral<storage::Second>::__duplicateDeep (mem, this);
     return secondLiteral;
   }

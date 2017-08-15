@@ -9,8 +9,8 @@ namespace ast
 
 class Identifier : public Operand {
  public:
-  explicit Identifier (ASTNodeMemory &mem);
-  Identifier (ASTNodeMemory &mem, const CSTType *cst);
+  Identifier ();
+  explicit Identifier (const CSTType *cst);
   Identifier (Identifier &&identifier) = default;
   Identifier (const Identifier &identifier) = default;
   Identifier &operator= (Identifier &&identifier) = delete;
@@ -32,12 +32,12 @@ class Identifier : public Operand {
   void __duplicateDeep (ASTNodeMemory &mem, const Identifier *identifier);
 };
 
-inline Identifier::Identifier (ASTNodeMemory &mem)
-    : Operand (mem, ASTNodeClass::Identifier, OperandClass::Identifier)
+inline Identifier::Identifier ()
+    : Operand (ASTNodeClass::Identifier, OperandClass::Identifier)
 {}
 
-inline Identifier::Identifier (ASTNodeMemory &mem, const CSTType *cst)
-    : Operand (mem, ASTNodeClass::Identifier, cst, OperandClass::Identifier)
+inline Identifier::Identifier (const CSTType *cst)
+    : Operand (ASTNodeClass::Identifier, cst, OperandClass::Identifier)
 {}
 
 inline std::size_t Identifier::getNumNodesRecursively () const
@@ -48,7 +48,7 @@ inline std::vector<ASTNode *> Identifier::getChildren () const
 
 inline Identifier *Identifier::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto identifier = new Identifier (mem);
+  auto identifier = mem.alloc<Identifier> ();
   identifier->__duplicateDeep (mem, this);
   return identifier;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include "../AST.h"
 
 namespace horseIR
@@ -15,15 +16,14 @@ class Literal : public Operand {
     Function, List, Dictionary, Enumeration, Table, KeyTable
   };
 
-  Literal (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-           const LiteralClass &p_literalClass)
-      : Operand (mem, astNodeClass, OperandClass::Literal),
+  Literal (const ASTNodeClass &astNodeClass, const LiteralClass &p_literalClass)
+      : Operand (astNodeClass, OperandClass::Literal),
         literalClass (p_literalClass)
   {}
 
-  Literal (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-           const CSTType *parseTree, const LiteralClass &p_literalClass)
-      : Operand (mem, astNodeClass, parseTree, OperandClass::Literal),
+  Literal (const ASTNodeClass &astNodeClass, const CSTType *parseTree,
+           const LiteralClass &p_literalClass)
+      : Operand (astNodeClass, parseTree, OperandClass::Literal),
         literalClass (p_literalClass)
   {}
 
@@ -40,7 +40,10 @@ class Literal : public Operand {
   { return literalType; }
 
   void setLiteralType (Type *type)
-  { literalType = type; }
+  {
+    if (type != nullptr) type->setParentASTNode (this);
+    literalType = type;
+  }
 
  protected:
   const LiteralClass literalClass;
@@ -60,6 +63,38 @@ class Literal : public Operand {
     literalType = type;
   }
 };
+
+inline std::ostream &
+operator<< (std::ostream &stream, const Literal::LiteralClass &literalClass)
+{
+  using LiteralClass = Literal::LiteralClass;
+  switch (literalClass)
+    {
+      case LiteralClass::Bool: return stream << "Bool";
+      case LiteralClass::Character: return stream << "Character";
+      case LiteralClass::Integer8: return stream << "Integer8";
+      case LiteralClass::Integer16: return stream << "Integer16";
+      case LiteralClass::Integer32: return stream << "Integer32";
+      case LiteralClass::Integer64: return stream << "Integer64";
+      case LiteralClass::FP32: return stream << "FP32";
+      case LiteralClass::FP64: return stream << "FP64";
+      case LiteralClass::Complex: return stream << "Complex";
+      case LiteralClass::Symbol: return stream << "Symbol";
+      case LiteralClass::String: return stream << "String";
+      case LiteralClass::Date: return stream << "Date";
+      case LiteralClass::DateTime : return stream << "DateTime";
+      case LiteralClass::Minute: return stream << "Minute";
+      case LiteralClass::Month: return stream << "Month";
+      case LiteralClass::Second: return stream << "Second";
+      case LiteralClass::Time: return stream << "Time";
+      case LiteralClass::Function: return stream << "Function";
+      case LiteralClass::List:return stream << "List";
+      case LiteralClass::Dictionary: return stream << "Dictionary";
+      case LiteralClass::Enumeration: return stream << "Enumeration";
+      case LiteralClass::Table: return stream << "Table";
+      case LiteralClass::KeyTable: return stream << "KeyTable";
+    }
+}
 
 }
 }

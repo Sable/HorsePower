@@ -21,14 +21,14 @@ struct Time {
 
 class TimeLiteral : public VectorLiteral<storage::Time> {
  public:
-  explicit TimeLiteral (ASTNodeMemory &mem)
+  TimeLiteral ()
       : VectorLiteral<storage::Time>
-            (mem, ASTNodeClass::TimeLiteral, LiteralClass::Time)
+            (ASTNodeClass::TimeLiteral, LiteralClass::Time)
   {}
 
-  TimeLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit TimeLiteral (const CSTType *cst)
       : VectorLiteral<storage::Time>
-            (mem, ASTNodeClass::TimeLiteral, cst, LiteralClass::Time)
+            (ASTNodeClass::TimeLiteral, cst, LiteralClass::Time)
   {}
 
   TimeLiteral (TimeLiteral &&literal) = default;
@@ -39,7 +39,7 @@ class TimeLiteral : public VectorLiteral<storage::Time> {
 
   TimeLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto timeLiteral = new TimeLiteral (mem);
+    auto timeLiteral = mem.alloc<TimeLiteral> ();
     timeLiteral->VectorLiteral<storage::Time>::__duplicateDeep (mem, this);
     return timeLiteral;
   }

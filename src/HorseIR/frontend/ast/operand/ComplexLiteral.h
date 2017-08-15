@@ -10,14 +10,14 @@ namespace ast
 
 class ComplexLiteral : public VectorLiteral<std::complex<double>> {
  public:
-  explicit ComplexLiteral (ASTNodeMemory &mem)
+  ComplexLiteral ()
       : VectorLiteral<std::complex<double>>
-            (mem, ASTNodeClass::ComplexLiteral, LiteralClass::Complex)
+            (ASTNodeClass::ComplexLiteral, LiteralClass::Complex)
   {}
 
-  ComplexLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit ComplexLiteral (const CSTType *cst)
       : VectorLiteral<std::complex<double>>
-            (mem, ASTNodeClass::ComplexLiteral, cst, LiteralClass::Complex)
+            (ASTNodeClass::ComplexLiteral, cst, LiteralClass::Complex)
   {}
 
   ComplexLiteral (ComplexLiteral &&literal) = default;
@@ -28,7 +28,7 @@ class ComplexLiteral : public VectorLiteral<std::complex<double>> {
 
   ComplexLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto complexLiteral = new ComplexLiteral (mem);
+    auto complexLiteral = mem.alloc<ComplexLiteral> ();
     complexLiteral->
         VectorLiteral<std::complex<double>>::__duplicateDeep (mem, this);
     return complexLiteral;

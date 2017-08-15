@@ -19,14 +19,14 @@ struct Function {
 
 class FunctionLiteral : public VectorLiteral<storage::Function> {
  public:
-  explicit FunctionLiteral (ASTNodeMemory &mem)
+  FunctionLiteral ()
       : VectorLiteral<storage::Function>
-            (mem, ASTNodeClass::FunctionLiteral, LiteralClass::Function)
+            (ASTNodeClass::FunctionLiteral, LiteralClass::Function)
   {}
 
-  FunctionLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit FunctionLiteral (const CSTType *cst)
       : VectorLiteral<storage::Function>
-            (mem, ASTNodeClass::FunctionLiteral, cst, LiteralClass::Function)
+            (ASTNodeClass::FunctionLiteral, cst, LiteralClass::Function)
   {}
 
   FunctionLiteral (FunctionLiteral &&literal) = default;
@@ -37,7 +37,7 @@ class FunctionLiteral : public VectorLiteral<storage::Function> {
 
   FunctionLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto functionLiteral = new FunctionLiteral (mem);
+    auto functionLiteral = mem.alloc<FunctionLiteral> ();
     functionLiteral->
         VectorLiteral<storage::Function>::__duplicateDeep (mem, this);
     return functionLiteral;

@@ -19,14 +19,14 @@ struct Minute {
 
 class MinuteLiteral : public VectorLiteral<storage::Minute> {
  public:
-  explicit MinuteLiteral (ASTNodeMemory &mem)
+  MinuteLiteral ()
       : VectorLiteral<storage::Minute>
-            (mem, ASTNodeClass::MinuteLiteral, LiteralClass::Minute)
+            (ASTNodeClass::MinuteLiteral, LiteralClass::Minute)
   {}
 
-  MinuteLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit MinuteLiteral (const CSTType *cst)
       : VectorLiteral<storage::Minute>
-            (mem, ASTNodeClass::MinuteLiteral, cst, LiteralClass::Minute)
+            (ASTNodeClass::MinuteLiteral, cst, LiteralClass::Minute)
   {}
 
   MinuteLiteral (MinuteLiteral &&literal) = default;
@@ -37,7 +37,7 @@ class MinuteLiteral : public VectorLiteral<storage::Minute> {
 
   MinuteLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto minuteLiteral = new MinuteLiteral (mem);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> ();
     minuteLiteral->VectorLiteral<storage::Minute>::__duplicateDeep (mem, this);
     return minuteLiteral;
   }

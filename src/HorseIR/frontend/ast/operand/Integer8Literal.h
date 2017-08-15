@@ -9,14 +9,14 @@ namespace ast
 
 class Integer8Literal : public VectorLiteral<std::int8_t> {
  public:
-  explicit Integer8Literal (ASTNodeMemory &mem)
+  Integer8Literal ()
       : VectorLiteral<std::int8_t>
-            (mem, ASTNodeClass::Integer8Literal, LiteralClass::Integer8)
+            (ASTNodeClass::Integer8Literal, LiteralClass::Integer8)
   {}
 
-  Integer8Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit Integer8Literal (const CSTType *cst)
       : VectorLiteral<std::int8_t>
-            (mem, ASTNodeClass::Integer8Literal, cst, LiteralClass::Integer8)
+            ( ASTNodeClass::Integer8Literal, cst, LiteralClass::Integer8)
   {}
 
   Integer8Literal (Integer8Literal &&literal) = default;
@@ -27,7 +27,7 @@ class Integer8Literal : public VectorLiteral<std::int8_t> {
 
   Integer8Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto integer8Literal = new Integer8Literal (mem);
+    auto integer8Literal = mem.alloc<Integer8Literal> ();
     integer8Literal->
         VectorLiteral<std::int8_t>::__duplicateDeep (mem, this);
     return integer8Literal;

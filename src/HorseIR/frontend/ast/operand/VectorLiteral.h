@@ -38,14 +38,14 @@ class VectorLiteral : public Literal {
     bool nullElement;
   };
 
-  explicit VectorLiteral (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-                          const LiteralClass &literalClass)
-      : Literal (mem, astNodeClass, literalClass)
+  VectorLiteral (const ASTNodeClass &astNodeClass,
+                 const LiteralClass &literalClass)
+      : Literal (astNodeClass, literalClass)
   {}
 
-  VectorLiteral (ASTNodeMemory &mem, const ASTNodeClass &astNodeClass,
-                 const CSTType *cst, const LiteralClass &literalClass)
-      : Literal (mem, astNodeClass, cst, literalClass)
+  VectorLiteral (const ASTNodeClass &astNodeClass, const CSTType *cst,
+                 const LiteralClass &literalClass)
+      : Literal (astNodeClass, cst, literalClass)
   {}
 
   VectorLiteral (VectorLiteral &&vectorLiteral) noexcept = default;

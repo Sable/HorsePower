@@ -9,8 +9,8 @@ namespace ast
 
 class WildcardType : public Type {
  public:
-  explicit WildcardType (ASTNodeMemory &mem);
-  WildcardType (ASTNodeMemory &mem, const CSTType *cst);
+  WildcardType ();
+  explicit WildcardType (const CSTType *cst);
   WildcardType (WildcardType &&wildcardType) = default;
   WildcardType (const WildcardType &wildcardType) = default;
   WildcardType &operator= (WildcardType &&wildcardType) = delete;
@@ -26,12 +26,12 @@ class WildcardType : public Type {
   void __duplicateDeep (ASTNodeMemory &mem, const WildcardType *type);
 };
 
-inline WildcardType::WildcardType (ASTNodeMemory &mem)
-    : Type (mem, ASTNodeClass::WildcardType, TypeClass::Wildcard)
+inline WildcardType::WildcardType ()
+    : Type (ASTNodeClass::WildcardType, TypeClass::Wildcard)
 {}
 
-inline WildcardType::WildcardType (ASTNodeMemory &mem, const CSTType *cst)
-    : Type (mem, ASTNodeClass::WildcardType, cst, TypeClass::Wildcard)
+inline WildcardType::WildcardType (const CSTType *cst)
+    : Type (ASTNodeClass::WildcardType, cst, TypeClass::Wildcard)
 {}
 
 inline std::size_t WildcardType::getNumNodesRecursively () const
@@ -42,7 +42,7 @@ inline std::vector<ASTNode *> WildcardType::getChildren () const
 
 inline WildcardType *WildcardType::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto wildcardType = new WildcardType (mem);
+  auto wildcardType = mem.alloc<WildcardType> ();
   wildcardType->__duplicateDeep (mem, this);
   return wildcardType;
 }

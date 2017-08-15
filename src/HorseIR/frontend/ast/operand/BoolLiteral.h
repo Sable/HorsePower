@@ -9,14 +9,14 @@ namespace ast
 
 class BoolLiteral : public VectorLiteral<bool> {
  public:
-  explicit BoolLiteral (ASTNodeMemory &mem)
+  BoolLiteral ()
       : VectorLiteral<bool>
-            (mem, ASTNodeClass::BoolLiteral, LiteralClass::Bool)
+            (ASTNodeClass::BoolLiteral, LiteralClass::Bool)
   {}
 
-  BoolLiteral (ASTNodeMemory &mem, const CSTType *parseTree)
+  explicit BoolLiteral (const CSTType *parseTree)
       : VectorLiteral<bool>
-            (mem, ASTNodeClass::BoolLiteral, parseTree, LiteralClass::Bool)
+            (ASTNodeClass::BoolLiteral, parseTree, LiteralClass::Bool)
   {}
 
   BoolLiteral (BoolLiteral &&boolLiteral) = default;
@@ -27,7 +27,7 @@ class BoolLiteral : public VectorLiteral<bool> {
 
   BoolLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto boolLiter = new BoolLiteral (mem);
+    auto boolLiter = mem.alloc<BoolLiteral> ();
     boolLiter->VectorLiteral<bool>::__duplicateDeep (mem, this);
     return boolLiter;
   }

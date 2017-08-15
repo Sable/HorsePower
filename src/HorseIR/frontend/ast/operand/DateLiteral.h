@@ -20,14 +20,14 @@ struct Date {
 
 class DateLiteral : public VectorLiteral<storage::Date> {
  public:
-  explicit DateLiteral (ASTNodeMemory &mem)
+  DateLiteral ()
       : VectorLiteral<storage::Date>
-            (mem, ASTNodeClass::DateLiteral, LiteralClass::Date)
+            (ASTNodeClass::DateLiteral, LiteralClass::Date)
   {}
 
-  DateLiteral (ASTNodeMemory &mem, const CSTType *cst)
+  explicit DateLiteral (const CSTType *cst)
       : VectorLiteral<storage::Date>
-            (mem, ASTNodeClass::DateLiteral, cst, LiteralClass::Date)
+            (ASTNodeClass::DateLiteral, cst, LiteralClass::Date)
   {}
 
   DateLiteral (DateLiteral &&literal) = default;
@@ -38,7 +38,7 @@ class DateLiteral : public VectorLiteral<storage::Date> {
 
   DateLiteral *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto dateLiteral = new DateLiteral (mem);
+    auto dateLiteral = mem.alloc<DateLiteral> ();
     dateLiteral->VectorLiteral<storage::Date>::__duplicateDeep (mem, this);
     return dateLiteral;
   }

@@ -9,14 +9,14 @@ namespace ast
 
 class Integer16Literal : public VectorLiteral<std::int16_t> {
  public:
-  explicit Integer16Literal (ASTNodeMemory &mem)
+  Integer16Literal ()
       : VectorLiteral<std::int16_t>
-            (mem, ASTNodeClass::Integer16Literal, LiteralClass::Integer16)
+            (ASTNodeClass::Integer16Literal, LiteralClass::Integer16)
   {}
 
-  Integer16Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit Integer16Literal (const CSTType *cst)
       : VectorLiteral<std::int16_t>
-            (mem, ASTNodeClass::Integer16Literal, cst, LiteralClass::Integer16)
+            (ASTNodeClass::Integer16Literal, cst, LiteralClass::Integer16)
   {}
 
   Integer16Literal (Integer16Literal &&literal) = default;
@@ -27,7 +27,7 @@ class Integer16Literal : public VectorLiteral<std::int16_t> {
 
   Integer16Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto integer16Literal = new Integer16Literal (mem);
+    auto integer16Literal = mem.alloc<Integer16Literal> ();
     integer16Literal->VectorLiteral<std::int16_t>::__duplicateDeep (mem, this);
     return integer16Literal;
   }

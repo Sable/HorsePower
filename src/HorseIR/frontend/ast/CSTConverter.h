@@ -68,7 +68,7 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, TypeCaseWildcardContext *cst)
   {
     assert (cst != nullptr);
-    auto wildcardType = new WildcardType (mem, cst);
+    auto wildcardType = mem.alloc<WildcardType> (cst);
     return wildcardType;
   }
 
@@ -99,7 +99,7 @@ struct CSTConverter {
     auto iter = convertMap.find (cstText);
     assert (iter != convertMap.end ());
 
-    auto primitiveType = new PrimitiveType (mem, cst);
+    auto primitiveType = mem.alloc<PrimitiveType> (cst);
     primitiveType->setPrimitiveClass (iter->second);
 
     return (primitiveType);
@@ -109,10 +109,9 @@ struct CSTConverter {
   {
     assert (cst != nullptr);
     const auto elementTypeContext = cst->element;
-    auto listType = new ListType (mem, cst);
+    auto listType = mem.alloc<ListType> (cst);
 
     Type *elementType = convert (mem, elementTypeContext);
-    elementType->setParentASTNode (listType);
     listType->setElementType (elementType);
 
     return listType;
@@ -123,14 +122,12 @@ struct CSTConverter {
     assert (cst != nullptr);
     const auto keyTypeContext = cst->key;
     const auto valueTypeContext = cst->value;
-    auto dictionaryType = new DictionaryType (mem, cst);
+    auto dictionaryType = mem.alloc<DictionaryType> (cst);
 
     Type *keyType = convert (mem, keyTypeContext);
-    keyType->setParentASTNode (dictionaryType);
     dictionaryType->setKeyType (keyType);
 
     Type *valueType = convert (mem, valueTypeContext);
-    valueType->setParentASTNode (dictionaryType);
     dictionaryType->setValueType (valueType);
 
     return dictionaryType;
@@ -140,10 +137,9 @@ struct CSTConverter {
   {
     assert (cst != nullptr);
     const auto elementContext = cst->element;
-    auto enumerationType = new EnumerationType (mem, cst);
+    auto enumerationType = mem.alloc<EnumerationType> (cst);
 
     Type *elementType = convert (mem, elementContext);
-    elementType->setParentASTNode (enumerationType);
     enumerationType->setElementType (elementType);
 
     return enumerationType;
@@ -177,11 +173,10 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase0Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
+    auto functionType = mem.alloc<FunctionType> (cst);
     auto returnTypeContext = cst->type ();
 
     Type *returnType = convert (mem, returnTypeContext);
-    returnType->setParentASTNode (functionType);
     functionType->setReturnType (returnType);
 
     functionType->setIsFlexible (false);
@@ -191,11 +186,10 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase1Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
+    auto functionType = mem.alloc<FunctionType> (cst);
     auto returnTypeContext = cst->type ();
 
     Type *returnType = convert (mem, returnTypeContext);
-    returnType->setParentASTNode (functionType);
     functionType->setReturnType (returnType);
 
     functionType->setIsFlexible (true);
@@ -205,7 +199,7 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase2Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
+    auto functionType = mem.alloc<FunctionType> (cst);
 
     const auto types (cst->type ());
     std::vector<Type *> parameterTypes{};
@@ -215,13 +209,11 @@ struct CSTConverter {
         [&] (TypeContext *typeContext) -> Type *
         {
           Type *retType = convert (mem, typeContext);
-          retType->setParentASTNode (functionType);
           return retType;
         });
 
     TypeContext *returnContext = *(std::prev (types.cend ()));
     Type *returnType = convert (mem, returnContext);
-    returnType->setParentASTNode (functionType);
 
     functionType->setParameterTypes (std::move (parameterTypes));
     functionType->setReturnType (returnType);
@@ -232,7 +224,7 @@ struct CSTConverter {
   static FunctionType *convert (ASTNodeMemory &mem, TypeFuncCase3Context *cst)
   {
     assert (cst != nullptr);
-    auto functionType = new FunctionType (mem, cst);
+    auto functionType = mem.alloc<FunctionType> (cst);
 
     const auto types (cst->type ());
     std::vector<Type *> parameterTypes{};
@@ -242,13 +234,11 @@ struct CSTConverter {
         [&] (TypeContext *typeContext) -> Type *
         {
           Type *retType = convert (mem, typeContext);
-          retType->setParentASTNode (functionType);
           return retType;
         });
 
     TypeContext *returnContext = *(std::prev (types.cend ()));
     Type *returnType = convert (mem, returnContext);
-    returnType->setParentASTNode (functionType);
 
     functionType->setParameterTypes (std::move (parameterTypes));
     functionType->setReturnType (returnType);
@@ -348,9 +338,9 @@ struct CSTConverter {
       }
     else
       { valueVector.emplace_back (nullptr); }
-    auto boolLiteral = new BoolLiteral (mem, literalBool);
+    auto boolLiteral = mem.alloc<BoolLiteral> (literalBool);
     boolLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalBool);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalBool);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Bool);
     boolLiteral->setLiteralType (primitiveType);
     return boolLiteral;
@@ -381,9 +371,9 @@ struct CSTConverter {
           else
             { return ElementType (nullptr); }
         });
-    auto boolLiteral = new BoolLiteral (mem, literalBool);
+    auto boolLiteral = mem.alloc<BoolLiteral> (literalBool);
     boolLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalBool);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalBool);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Bool);
     boolLiteral->setLiteralType (primitiveType);
     return boolLiteral;
@@ -538,9 +528,9 @@ struct CSTConverter {
     std::vector<CharLiteral::ElementType> valueVector{};
     auto element = convertCharValue (literalCharContext->charValue ());
     valueVector.emplace_back (std::move (element));
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
     charLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -562,9 +552,9 @@ struct CSTConverter {
         std::back_inserter (valueVector),
         [] (const std::uint8_t value) -> CharLiteral::ElementType
         { return CharLiteral::ElementType (value); });
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
     charLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -574,8 +564,8 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralCharCase2Context *literalCharContext)
   {
     assert (literalCharContext != nullptr);
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -610,9 +600,9 @@ struct CSTConverter {
             { return convertCharValue (value); }
           return CharLiteral::ElementType (nullptr);
         });
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
     charLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -627,9 +617,9 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (nullptr); }
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
     charLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -641,9 +631,9 @@ struct CSTConverter {
     assert (literalCharContext != nullptr);
     std::vector<CharLiteral::ElementType> valueVector{};
     valueVector.emplace_back (nullptr);
-    auto charLiteral = new CharLiteral (mem, literalCharContext);
+    auto charLiteral = mem.alloc<CharLiteral> (literalCharContext);
     charLiteral->setValue (std::move (valueVector));
-    auto primitiveType = new PrimitiveType (mem, literalCharContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (literalCharContext);
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Character);
     charLiteral->setLiteralType (primitiveType);
     return charLiteral;
@@ -698,10 +688,10 @@ struct CSTConverter {
     std::vector<StringLiteral::ElementType> valueVector{};
     auto element = convertStringValue (stringContext->stringValue ());
     valueVector.emplace_back (element);
-    auto stringLiteral = new StringLiteral (mem, stringContext);
+    auto stringLiteral = mem.alloc<StringLiteral> (stringContext);
     stringLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, stringContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (stringContext);
     primitiveType->setPrimitiveClass (PrimitiveClass::String);
     stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
@@ -711,9 +701,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralStringCase1Context *stringContext)
   {
     assert (stringContext != nullptr);
-    auto stringLiteral = new StringLiteral (mem, stringContext);
+    auto stringLiteral = mem.alloc<StringLiteral> (stringContext);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, stringContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (stringContext);
     primitiveType->setPrimitiveClass (PrimitiveClass::String);
     stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
@@ -748,10 +738,10 @@ struct CSTConverter {
             { return convertStringValue (string); }
           return StringLiteral::ElementType (nullptr);
         });
-    auto stringLiteral = new StringLiteral (mem, stringContext);
+    auto stringLiteral = mem.alloc<StringLiteral> (stringContext);
     stringLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, stringContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (stringContext);
     primitiveType->setPrimitiveClass (PrimitiveClass::String);
     stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
@@ -766,10 +756,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (nullptr); }
-    auto stringLiteral = new StringLiteral (mem, stringContext);
+    auto stringLiteral = mem.alloc<StringLiteral> (stringContext);
     stringLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, stringContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (stringContext);
     primitiveType->setPrimitiveClass (PrimitiveClass::String);
     stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
@@ -781,10 +771,10 @@ struct CSTConverter {
     assert (stringContext != nullptr);
     std::vector<StringLiteral::ElementType> valueVector{};
     valueVector.emplace_back (nullptr);
-    auto stringLiteral = new StringLiteral (mem, stringContext);
+    auto stringLiteral = mem.alloc<StringLiteral> (stringContext);
     stringLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, stringContext);
+    auto primitiveType = mem.alloc<PrimitiveType> (stringContext);
     primitiveType->setPrimitiveClass (PrimitiveClass::String);
     stringLiteral->setLiteralType (primitiveType);
     return stringLiteral;
@@ -850,52 +840,52 @@ struct CSTConverter {
 
     if (typeString == "i8")
       {
-        auto integer8Literal = new Integer8Literal (mem, literal);
+        auto integer8Literal = mem.alloc<Integer8Literal> (literal);
         std::vector<Integer8Literal::ElementType> valueVector{};
         auto element = convertIntValueN<std::int8_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer8Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer8);
         integer8Literal->setLiteralType (primitiveType);
         return integer8Literal;
       }
     if (typeString == "i16")
       {
-        auto integer16Literal = new Integer16Literal (mem, literal);
+        auto integer16Literal = mem.alloc<Integer16Literal> (literal);
         std::vector<Integer16Literal::ElementType> valueVector{};
         auto element = convertIntValueN<std::int16_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer16Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer16);
         integer16Literal->setLiteralType (primitiveType);
         return integer16Literal;
       }
     if (typeString == "i32")
       {
-        auto integer32Literal = new Integer32Literal (mem, literal);
+        auto integer32Literal = mem.alloc<Integer32Literal> (literal);
         std::vector<Integer32Literal::ElementType> valueVector{};
         auto element = convertIntValueN<std::int32_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer32Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer32);
         integer32Literal->setLiteralType (primitiveType);
         return integer32Literal;
       }
     if (typeString == "i64")
       {
-        auto integer64Literal = new Integer64Literal (mem, literal);
+        auto integer64Literal = mem.alloc<Integer64Literal> (literal);
         std::vector<Integer64Literal::ElementType> valueVector{};
         auto element = convertIntValueN<std::int64_t> (literal->intValueN ());
         valueVector.emplace_back (std::move (element));
         integer64Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer64);
         integer64Literal->setLiteralType (primitiveType);
         return integer64Literal;
@@ -912,7 +902,7 @@ struct CSTConverter {
     const std::vector<IntValueNContext *> rawContexts = literal->intValueN ();
     if (typeString == "i8")
       {
-        auto integer8Literal = new Integer8Literal (mem, literal);
+        auto integer8Literal = mem.alloc<Integer8Literal> (literal);
         std::vector<Integer8Literal::ElementType> valueVector{};
         valueVector.reserve (rawContexts.size ());
         std::transform (
@@ -922,14 +912,14 @@ struct CSTConverter {
             { return convertIntValueN<std::int8_t> (context); });
         integer8Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer8);
         integer8Literal->setLiteralType (primitiveType);
         return integer8Literal;
       }
     if (typeString == "i16")
       {
-        auto integer16Literal = new Integer16Literal (mem, literal);
+        auto integer16Literal = mem.alloc<Integer16Literal> (literal);
         std::vector<Integer16Literal::ElementType> valueVector{};
         valueVector.reserve (rawContexts.size ());
         std::transform (
@@ -939,14 +929,14 @@ struct CSTConverter {
             { return convertIntValueN<std::int16_t> (context); });
         integer16Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer16);
         integer16Literal->setLiteralType (primitiveType);
         return integer16Literal;
       }
     if (typeString == "i32")
       {
-        auto integer32Literal = new Integer32Literal (mem, literal);
+        auto integer32Literal = mem.alloc<Integer32Literal> (literal);
         std::vector<Integer32Literal::ElementType> valueVector{};
         valueVector.reserve (rawContexts.size ());
         std::transform (
@@ -956,14 +946,14 @@ struct CSTConverter {
             { return convertIntValueN<std::int32_t> (context); });
         integer32Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer32);
         integer32Literal->setLiteralType (primitiveType);
         return integer32Literal;
       }
     if (typeString == "i64")
       {
-        auto integer64Literal = new Integer64Literal (mem, literal);
+        auto integer64Literal = mem.alloc<Integer64Literal> (literal);
         std::vector<Integer64Literal::ElementType> valueVector{};
         valueVector.reserve (rawContexts.size ());
         std::transform (
@@ -973,7 +963,7 @@ struct CSTConverter {
             { return convertIntValueN<std::int64_t> (context); });
         integer64Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::Integer64);
         integer64Literal->setLiteralType (primitiveType);
         return integer64Literal;
@@ -1036,28 +1026,28 @@ struct CSTConverter {
     if (typeString == "f32")
       {
 
-        auto fp32Literal = new FP32Literal (mem, literal);
+        auto fp32Literal = mem.alloc<FP32Literal> (literal);
         std::vector<FP32Literal::ElementType> valueVector{};
         auto element = convertFloatValueN<float> (literal->floatValueN (),
                                                   std::stof);
         valueVector.emplace_back (std::move (element));
         fp32Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::FP32);
         fp32Literal->setLiteralType (primitiveType);
         return fp32Literal;
       }
     if (typeString == "f64")
       {
-        auto fp64Literal = new FP64Literal (mem, literal);
+        auto fp64Literal = mem.alloc<FP64Literal> (literal);
         std::vector<FP64Literal::ElementType> valueVector{};
         auto element = convertFloatValueN<double> (literal->floatValueN (),
                                                    std::stod);
         valueVector.emplace_back (std::move (element));
         fp64Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::FP64);
         fp64Literal->setLiteralType (primitiveType);
         return fp64Literal;
@@ -1075,7 +1065,7 @@ struct CSTConverter {
         literal->floatValueN ();
     if (typeString == "f32")
       {
-        auto fp32Literal = new FP32Literal (mem, literal);
+        auto fp32Literal = mem.alloc<FP32Literal> (literal);
         std::vector<FP32Literal::ElementType> valueVector{};
         valueVector.reserve (valueContexts.size ());
         std::transform (
@@ -1085,14 +1075,14 @@ struct CSTConverter {
             { return convertFloatValueN<float> (context, std::stof); });
         fp32Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::FP32);
         fp32Literal->setLiteralType (primitiveType);
         return fp32Literal;
       }
     if (typeString == "f64")
       {
-        auto fp64Literal = new FP64Literal (mem, literal);
+        auto fp64Literal = mem.alloc<FP64Literal> (literal);
         std::vector<FP64Literal::ElementType> valueVector{};
         valueVector.reserve (valueContexts.size ());
         std::transform (
@@ -1102,7 +1092,7 @@ struct CSTConverter {
             { return convertFloatValueN<double> (context, std::stod); });
         fp64Literal->setValue (std::move (valueVector));
         using PrimitiveClass = PrimitiveType::PrimitiveClass;
-        auto primitiveType = new PrimitiveType (mem, literal);
+        auto primitiveType = mem.alloc<PrimitiveType> (literal);
         primitiveType->setPrimitiveClass (PrimitiveClass::FP64);
         fp64Literal->setLiteralType (primitiveType);
         return fp64Literal;
@@ -1284,13 +1274,13 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralComplexCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto complexLiteral = new ComplexLiteral (mem, literal);
+    auto complexLiteral = mem.alloc<ComplexLiteral> (literal);
     std::vector<ComplexLiteral::ElementType> valueVector{};
     auto element = convertComplexValueN (literal->complexValueN ());
     valueVector.emplace_back (std::move (element));
     complexLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Complex);
     complexLiteral->setLiteralType (primitiveType);
     return complexLiteral;
@@ -1300,7 +1290,7 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralComplexCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto complexLiteral = new ComplexLiteral (mem, literal);
+    auto complexLiteral = mem.alloc<ComplexLiteral> (literal);
     const auto valueContexts = literal->complexValueN ();
     std::vector<ComplexLiteral::ElementType> valueVector{};
     valueVector.reserve (valueContexts.size ());
@@ -1311,7 +1301,7 @@ struct CSTConverter {
         { return convertComplexValueN (context); });
     complexLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Complex);
     complexLiteral->setLiteralType (primitiveType);
     return complexLiteral;
@@ -1361,13 +1351,13 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralSymbolCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     std::vector<SymbolLiteral::ElementType> valueVector{};
     auto element = convertSymbolValue (literal->symbolValue ());
     valueVector.emplace_back (std::move (element));
     symbolLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> ();
     primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
     symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
@@ -1377,9 +1367,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralSymbolCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> ();
     primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
     symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
@@ -1413,10 +1403,10 @@ struct CSTConverter {
             { return convertSymbolValue (value); }
           return SymbolLiteral::ElementType (nullptr);
         });
-    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     symbolLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> ();
     primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
     symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
@@ -1431,10 +1421,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (SymbolLiteral::ElementType (nullptr)); }
-    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     symbolLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> ();
     primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
     symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
@@ -1444,12 +1434,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralSymbolCase4Context *literal)
   {
     assert (literal != nullptr);
-    auto symbolLiteral = new SymbolLiteral (mem, literal);
+    auto symbolLiteral = mem.alloc<SymbolLiteral> ();
     std::vector<SymbolLiteral::ElementType> valueVector{};
     valueVector.emplace_back (SymbolLiteral::ElementType (nullptr));
     symbolLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> ();
     primitiveType->setPrimitiveClass (PrimitiveClass::Symbol);
     symbolLiteral->setLiteralType (primitiveType);
     return symbolLiteral;
@@ -1519,12 +1509,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTMonthCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto monthLiteral = new MonthLiteral (mem, literal);
+    auto monthLiteral = mem.alloc<MonthLiteral> (literal);
     std::vector<MonthLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertMonthValueN (literal->tMonthValueN ()));
     monthLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Month);
     monthLiteral->setLiteralType (primitiveType);
     return monthLiteral;
@@ -1543,10 +1533,10 @@ struct CSTConverter {
         std::back_inserter (valueVector),
         [] (TMonthValueNContext *context) -> MonthLiteral::ElementType
         { return convertMonthValueN (context); });
-    auto monthLiteral = new MonthLiteral (mem, literal);
+    auto monthLiteral = mem.alloc<MonthLiteral> (literal);
     monthLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Month);
     monthLiteral->setLiteralType (primitiveType);
     return monthLiteral;
@@ -1656,12 +1646,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto dateLiteral = new DateLiteral (mem, literal);
+    auto dateLiteral = mem.alloc<DateLiteral> (literal);
     std::vector<DateLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertDateValue (literal->tDateValue ()));
     dateLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Date);
     dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
@@ -1671,9 +1661,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto dateLiteral = new DateLiteral (mem, literal);
+    auto dateLiteral = mem.alloc<DateLiteral> (literal);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Date);
     dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
@@ -1709,10 +1699,10 @@ struct CSTConverter {
             { return convertDateValue (value); }
           return DateLiteral::ElementType (nullptr);
         });
-    auto dateLiteral = new DateLiteral (mem, literal);
+    auto dateLiteral = mem.alloc<DateLiteral> (literal);
     dateLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Date);
     dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
@@ -1723,14 +1713,14 @@ struct CSTConverter {
   {
     assert (literal != nullptr);
     const auto nullTokens = literal->NULL_TOKEN ();
-    auto dateLiteral = new DateLiteral (mem, literal);
+    auto dateLiteral = mem.alloc<DateLiteral> (literal);
     std::vector<DateLiteral::ElementType> valueVector{};
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (DateLiteral::ElementType (nullptr)); }
     dateLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Date);
     dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
@@ -1740,12 +1730,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateCase4Context *literal)
   {
     assert (literal != nullptr);
-    auto dateLiteral = new DateLiteral (mem, literal);
+    auto dateLiteral = mem.alloc<DateLiteral> (literal);
     std::vector<DateLiteral::ElementType> dateValue{};
     dateValue.emplace_back (DateLiteral::ElementType (nullptr));
     dateLiteral->setValue (std::move (dateValue));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Date);
     dateLiteral->setLiteralType (primitiveType);
     return dateLiteral;
@@ -1885,13 +1875,13 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateTime0Context *literal)
   {
     assert (literal != nullptr);
-    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
     std::vector<DateTimeLiteral::ElementType> valueVector{};
     const auto dateTimeValueContext = literal->tDateTimeValue ();
     valueVector.emplace_back (convertDateTimeValue (dateTimeValueContext));
     dateTimeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
     dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
@@ -1901,9 +1891,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateTime1Context *literal)
   {
     assert (literal != nullptr);
-    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
     dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
@@ -1938,10 +1928,10 @@ struct CSTConverter {
             { return convertDateTimeValue (value); }
           return DateTimeLiteral::ElementType (nullptr);
         });
-    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
     dateTimeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
     dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
@@ -1956,10 +1946,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr)); }
-    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
     dateTimeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
     dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
@@ -1969,12 +1959,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTDateTime4Context *literal)
   {
     assert (literal != nullptr);
-    auto dateTimeLiteral = new DateTimeLiteral (mem, literal);
+    auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
     std::vector<DateTimeLiteral::ElementType> valueVector{};
     valueVector.emplace_back (DateTimeLiteral::ElementType (nullptr));
     dateTimeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::DateTime);
     dateTimeLiteral->setLiteralType (primitiveType);
     return dateTimeLiteral;
@@ -2054,12 +2044,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTMinuteCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
     std::vector<MinuteLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertMinuteValue (literal->tMinuteValue ()));
     minuteLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
     minuteLiteral->setLiteralType (primitiveType);
     return minuteLiteral;
@@ -2069,9 +2059,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTMinuteCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
     minuteLiteral->setLiteralType (primitiveType);
     return minuteLiteral;
@@ -2106,10 +2096,10 @@ struct CSTConverter {
             { return convertMinuteValue (value); }
           return MinuteLiteral::ElementType (nullptr);
         });
-    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
     minuteLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
     minuteLiteral->setLiteralType (primitiveType);
     return minuteLiteral;
@@ -2124,10 +2114,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (MinuteLiteral::ElementType (nullptr)); }
-    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
     minuteLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
     minuteLiteral->setLiteralType (primitiveType);
     return minuteLiteral;
@@ -2137,12 +2127,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTMinuteCase4Context *literal)
   {
     assert (literal != nullptr);
-    auto minuteLiteral = new MinuteLiteral (mem, literal);
+    auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
     std::vector<MinuteLiteral::ElementType> valueVector{};
     valueVector.emplace_back (MinuteLiteral::ElementType (nullptr));
     minuteLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Minute);
     minuteLiteral->setLiteralType (primitiveType);
     return minuteLiteral;
@@ -2230,12 +2220,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTSecondCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto secondLiteral = new SecondLiteral (mem, literal);
+    auto secondLiteral = mem.alloc<SecondLiteral> (literal);
     std::vector<SecondLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertSecondValue (literal->tSecondValue ()));
     secondLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Second);
     secondLiteral->setLiteralType (primitiveType);
     return secondLiteral;
@@ -2245,9 +2235,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTSecondCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto secondLiteral = new SecondLiteral (mem, literal);
+    auto secondLiteral = mem.alloc<SecondLiteral> (literal);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Second);
     secondLiteral->setLiteralType (primitiveType);
     return secondLiteral;
@@ -2282,10 +2272,10 @@ struct CSTConverter {
             { return convertSecondValue (value); }
           return SecondLiteral::ElementType (nullptr);
         });
-    auto secondLiteral = new SecondLiteral (mem, literal);
+    auto secondLiteral = mem.alloc<SecondLiteral> (literal);
     secondLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Second);
     secondLiteral->setLiteralType (primitiveType);
     return secondLiteral;
@@ -2300,10 +2290,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (SecondLiteral::ElementType (nullptr)); }
-    auto secondLiteral = new SecondLiteral (mem, literal);
+    auto secondLiteral = mem.alloc<SecondLiteral> (literal);
     secondLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Second);
     secondLiteral->setLiteralType (primitiveType);
     return secondLiteral;
@@ -2313,12 +2303,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTSecondCase4Context *literal)
   {
     assert (literal != nullptr);
-    auto secondLiteral = new SecondLiteral (mem, literal);
+    auto secondLiteral = mem.alloc<SecondLiteral> (literal);
     std::vector<SecondLiteral::ElementType> valueVector{};
     valueVector.emplace_back (SecondLiteral::ElementType (nullptr));
     secondLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Second);
     secondLiteral->setLiteralType (primitiveType);
     return secondLiteral;
@@ -2414,12 +2404,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTTimeCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto timeLiteral = new TimeLiteral (mem, literal);
+    auto timeLiteral = mem.alloc<TimeLiteral> (literal);
     std::vector<TimeLiteral::ElementType> valueVector{};
     valueVector.emplace_back (convertTimeValue (literal->tTimeValue ()));
     timeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Time);
     timeLiteral->setLiteralType (primitiveType);
     return timeLiteral;
@@ -2429,9 +2419,9 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTTimeCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto timeLiteral = new TimeLiteral (mem, literal);
+    auto timeLiteral = mem.alloc<TimeLiteral> (literal);
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Time);
     timeLiteral->setLiteralType (primitiveType);
     return timeLiteral;
@@ -2466,10 +2456,10 @@ struct CSTConverter {
             { return convertTimeValue (value); }
           return TimeLiteral::ElementType (nullptr);
         });
-    auto timeLiteral = new TimeLiteral (mem, literal);
+    auto timeLiteral = mem.alloc<TimeLiteral> (literal);
     timeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Time);
     timeLiteral->setLiteralType (primitiveType);
     return timeLiteral;
@@ -2484,10 +2474,10 @@ struct CSTConverter {
     valueVector.reserve (nullTokens.size ());
     for (std::size_t iter = 0; iter < nullTokens.size (); ++iter)
       { valueVector.emplace_back (TimeLiteral::ElementType (nullptr)); }
-    auto timeLiteral = new TimeLiteral (mem, literal);
+    auto timeLiteral = mem.alloc<TimeLiteral> (literal);
     timeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Time);
     timeLiteral->setLiteralType (primitiveType);
     return timeLiteral;
@@ -2497,12 +2487,12 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralTTimeCase4Context *literal)
   {
     assert (literal != nullptr);
-    auto timeLiteral = new TimeLiteral (mem, literal);
+    auto timeLiteral = mem.alloc<TimeLiteral> (literal);
     std::vector<TimeLiteral::ElementType> valueVector{};
     valueVector.emplace_back (TimeLiteral::ElementType (nullptr));
     timeLiteral->setValue (std::move (valueVector));
     using PrimitiveClass = PrimitiveType::PrimitiveClass;
-    auto primitiveType = new PrimitiveType (mem, literal);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
     primitiveType->setPrimitiveClass (PrimitiveClass::Time);
     timeLiteral->setLiteralType (primitiveType);
     return timeLiteral;
@@ -2561,7 +2551,7 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralFunction0Context *literal)
   {
     assert (literal != nullptr);
-    auto functionLiteral = new FunctionLiteral (mem, literal);
+    auto functionLiteral = mem.alloc<FunctionLiteral> (literal);
     std::vector<FunctionLiteral::ElementType> valueVector{};
     const auto functionValueContext = literal->functionValueN ();
     valueVector.emplace_back (convertFunctionValue (functionValueContext));
@@ -2575,7 +2565,7 @@ struct CSTConverter {
   {
     assert (literal != nullptr);
     using FunctionValueContext = HorseIRParser::FunctionValueNContext;
-    auto functionLiteral = new FunctionLiteral (mem, literal);
+    auto functionLiteral = mem.alloc<FunctionLiteral> (literal);
     const auto functionValueContexts = literal->functionValueN ();
     std::vector<FunctionLiteral::ElementType> valueVector{};
     valueVector.reserve (functionValueContexts.size ());
@@ -2615,7 +2605,7 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralListCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto listLiteral = new ListLiteral (mem, literal);
+    auto listLiteral = mem.alloc<ListLiteral> (literal);
     std::vector<Literal *> valueVector{};
     listLiteral->setValue (std::move (valueVector));
     listLiteral->setLiteralType (convert (mem, literal->typeList ()));
@@ -2626,7 +2616,7 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralListCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto listLiteral = new ListLiteral (mem, literal);
+    auto listLiteral = mem.alloc<ListLiteral> (literal);
     const auto literalContexts = literal->literal ();
     std::vector<Literal *> valueVector{};
     valueVector.reserve (literalContexts.size ());

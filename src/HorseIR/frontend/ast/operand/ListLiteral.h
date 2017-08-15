@@ -10,12 +10,12 @@ namespace ast
 
 class ListLiteral : public Literal {
  public:
-  explicit ListLiteral (ASTNodeMemory &mem)
-      : Literal (mem, ASTNodeClass::ListLiteral, LiteralClass::List)
+  ListLiteral ()
+      : Literal (ASTNodeClass::ListLiteral, LiteralClass::List)
   {}
 
-  ListLiteral (ASTNodeMemory &mem, const CSTType *cst)
-      : Literal (mem, ASTNodeClass::ListLiteral, cst, LiteralClass::List)
+  explicit ListLiteral (const CSTType *cst)
+      : Literal (ASTNodeClass::ListLiteral, cst, LiteralClass::List)
   {}
 
   ListLiteral (ListLiteral &&literal) = default;
@@ -59,7 +59,10 @@ inline std::vector<Literal *> ListLiteral::getValue ()
 template<class T>
 inline std::enable_if_t<std::is_constructible<std::vector<Literal *>, T>::value>
 ListLiteral::setValue (T &&valueContainer)
-{ value.reset (new std::vector<Literal *> (std::forward<T> (valueContainer))); }
+{
+  for (Literal *&iter : valueContainer) iter->setParentASTNode (this);
+  value.reset (new std::vector<Literal *> (std::forward<T> (valueContainer)));
+}
 
 inline std::size_t ListLiteral::getNumNodesRecursively () const
 {
@@ -84,7 +87,7 @@ inline std::vector<ASTNode *> ListLiteral::getChildren () const
 
 inline ListLiteral *ListLiteral::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto listLiteral = new ListLiteral (mem);
+  auto listLiteral = mem.alloc<ListLiteral> ();
   listLiteral->__duplicateDeep (mem, this);
   return listLiteral;
 }

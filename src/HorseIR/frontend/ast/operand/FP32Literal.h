@@ -9,14 +9,14 @@ namespace ast
 
 class FP32Literal : public VectorLiteral<float> {
  public:
-  explicit FP32Literal (ASTNodeMemory &mem)
+  FP32Literal ()
       : VectorLiteral<float>
-            (mem, ASTNodeClass::FP32Literal, LiteralClass::FP32)
+            (ASTNodeClass::FP32Literal, LiteralClass::FP32)
   {}
 
-  FP32Literal (ASTNodeMemory &mem, const CSTType *cst)
+  explicit FP32Literal (const CSTType *cst)
       : VectorLiteral<float>
-            (mem, ASTNodeClass::FP32Literal, cst, LiteralClass::FP32)
+            (ASTNodeClass::FP32Literal, cst, LiteralClass::FP32)
   {}
 
   FP32Literal (FP32Literal &&literal) = default;
@@ -27,7 +27,7 @@ class FP32Literal : public VectorLiteral<float> {
 
   FP32Literal *duplicateDeep (ASTNodeMemory &mem) const override
   {
-    auto fp32Literal = new FP32Literal (mem);
+    auto fp32Literal = mem.alloc<FP32Literal> ();
     fp32Literal->VectorLiteral<float>::__duplicateDeep (mem, this);
     return fp32Literal;
   }
