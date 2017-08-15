@@ -263,7 +263,14 @@ L printDict(V x){
 L printEnum(V x){
     FS("<");
     FS(getSymbolStr(getEnumName(x)));
+    FS(",");
     /* print enum */
+    if(xn==1) printBasicItem((V)getEnumTarget(x),vY(x,0));
+    else {
+        FS("(");
+        DOI(xn, {if(i>0)FS(","); printBasicItem((V)getEnumTarget(x),vY(x,i));})
+        FS(")");
+    }
     FS(">"); R 0;
 }
 

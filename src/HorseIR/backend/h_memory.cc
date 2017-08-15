@@ -75,6 +75,7 @@ L getTypeSize(L typ){
         case H_T  : r = sizeof(T);     break;
         case H_G  : r = sizeof(V0);    break;
         case H_N  : r = sizeof(V0);    break;
+        case H_Y  : r = sizeof(L);     break; /* integers */
         case H_A  : r = sizeof(V0);    break;
         case H_K  : r = sizeof(V0);    break;
         case H_V  : r = sizeof(V0);    break;

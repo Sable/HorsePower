@@ -83,6 +83,18 @@ void testG(){
     printV(listA);
 }
 
+void testY(){
+    P("\nTest enum:\n");
+    V a = allocNode();
+    V b = allocNode();
+    L ta[] = {-2,1,3,72,25};
+    L tb[] = {72,72,1};
+    initV(a, H_L, 5); DOI(5, vL(a,i)=ta[i])
+    initV(b, H_L, 3); DOI(3, vL(b,i)=tb[i])
+    V z = allocNode();
+    pfnEnum(z,a,b);
+    printV(z);
+}
 
 void testN(){
     P("\nTest dict:\n");
@@ -126,6 +138,7 @@ void testTypes(){
     testX();
     testS();
     testG();
+    testY();
     testN();
     testA(tableEmp);
     testA(tableDep);

@@ -16,7 +16,7 @@ typedef long long  L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
-typedef struct { Q name; I value; } Y;
+typedef struct { Q name; S target; } Y;  //target: V
 typedef struct { I row, col; } A;
 
 /* size: 3 * 8 + 8 = 32 */

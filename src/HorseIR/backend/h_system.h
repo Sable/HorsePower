@@ -8,9 +8,10 @@ extern "C" {
 
 #define copyColumnValue(z,x) copyV(z,x)
 
-#define getKTableKey(x) vV(x,0)
-#define getKTableVal(x) vV(x,1)
-#define getEnumName(x)  ((x)->y.name)
+#define getKTableKey(x)  vV(x,0)
+#define getKTableVal(x)  vV(x,1)
+#define getEnumName(x)   (vy(x).name)
+#define getEnumTarget(x) (vy(x).target)
 
 /* methods */
 
@@ -34,6 +35,7 @@ V getValueFromSymbol    (Q id);
 L getCommonType         (V x, L *typ, L *len);
 L fillRaze              (V z, L *n0, V x);
 L matchPair             (B *t, V x, V y);
+L getLikeFromString     (B *t, S src, S pat);
 
 L getEnumValue          (V z, V x);
 L getDictValue          (V z, V x);

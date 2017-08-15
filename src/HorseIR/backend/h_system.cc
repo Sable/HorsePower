@@ -256,6 +256,26 @@ L matchPair(B *t, V x, V y){
     else R 0;
 }
 
+/* pat = pattern */
+L getLikeFromString(B *t, S src, S pat){
+    S newString = genLikeString(pat,strlen(pat));
+    if(!newString) R E_NULL_VALUE;
+    L newLen = strlen(newString);
+    PCRE2_SPTR pattern = (PCRE2_SPTR)newString;
+    I errNum; PCRE2_SIZE errOff;
+    pcre2_code *re = pcre2_compile(pattern,newLen,0,&errNum,&errOff,NULL);
+    if(re){
+        pcre2_match_data *matchData = pcre2_match_data_create_from_pattern(re, NULL);
+        *t = pcre2_match(\
+            re,\
+            reinterpret_cast<unsigned char*>(src),\
+            strlen(src),0,0,matchData,NULL\
+            )<0?0:1;
+        R 0;
+    }
+    else R E_LIKE_PATTERN;
+}
+
 /* helper functions */
 
 L getEnumValue(V z, V x){

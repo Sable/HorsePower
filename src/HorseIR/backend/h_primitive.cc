@@ -1132,26 +1132,55 @@ L pfnAppend(V z, V x, V y){
  * y: string (done), symbol, list of string and symbol (pending)
  */
 L pfnLike(V z, V x, V y){
-    if(isChar(x) && isChar(y)){
-        S newString = genLikeString(sC(y),vn(y));
-        if(!newString) R E_NULL_VALUE;
-        L newLen = strlen(newString);
-        PCRE2_SPTR pattern = (PCRE2_SPTR)newString;
-        I errNum; PCRE2_SIZE errOff;
-        pcre2_code *re = pcre2_compile(pattern,newLen,0,&errNum,&errOff,NULL);
-        if(re){
-            pcre2_match_data *matchData = pcre2_match_data_create_from_pattern(re, NULL);
-            initV(z,H_B,1);
-            vB(z,0) = pcre2_match(\
-                re,\
-                reinterpret_cast<unsigned char*>sC(x),\
-                vn(x),0,0,matchData,NULL\
-                )<0?0:1;
+    if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
+        B t;
+        if(isChar(y) || isOne(y)){
+            B f=isChar(y);
+            #define getStrY() f?sC(y):vs(y)
+            switch(vp(x)){
+                caseC CHECKE(getLikeFromString(&t,sC(x),getStrY()))                  break;
+                caseQ DOI(vn(x), \
+                      CHECKE(getLikeFromString(&t,getSymbolStr(vL(x,i)),getStrY()))) break;
+                caseS DOI(vn(x), \
+                      CHECKE(getLikeFromString(&t,vS(x,i),getStrY())))               break;
+            }
+            initV(z,H_B,isChar(x)?1:vn(x));
+            switch(vp(x)){
+                caseC getLikeFromString(&t,sC(x),getStrY()); vB(z,0)=t;              break;
+                caseQ DOI(vn(x), \
+                      {getLikeFromString(&t,getSymbolStr(vL(x,i)),getStrY()); \
+                       vB(z,i)=t;})                                                  break;
+                caseS DOI(vn(x), \
+                      {getLikeFromString(&t,vS(x,i),getStrY()); \
+                       vB(z,i)=t;})                                                  break;
+            }
             R 0;
         }
-        else R E_LIKE_PATTERN;
+        else if(isChar(x) || isEqualLength(x,y)){  // y:string
+            switch(vp(x)){
+                caseC DOI(vn(y), \
+                      CHECKE(getLikeFromString(&t,sC(x),vS(y,i))))                   break;
+                caseQ DOI(vn(y), \
+                      CHECKE(getLikeFromString(&t,getSymbolStr(vL(x,i)),vS(y,i))))   break;
+                caseS DOI(vn(y), \
+                      CHECKE(getLikeFromString(&t,vS(x,i),vS(y,i))))                 break;
+            }
+            initV(z,H_B,vn(y));
+            switch(vp(x)){
+                caseC DOI(vn(y), \
+                      {getLikeFromString(&t,sC(x),vS(y,i)); vB(z,0)=t;})             break;
+                caseQ DOI(vn(y), \
+                      {getLikeFromString(&t,getSymbolStr(vL(x,i)),vS(y,i)); \
+                       vB(z,i)=t;})                                                  break;
+                caseS DOI(vn(y), \
+                      {getLikeFromString(&t,vS(x,i),vS(y,i)); \
+                       vB(z,i)=t;})                                                  break;
+            }
+            R 0;
+        }
+        else R E_LENGTH;
     }
-    R 0;
+    else R E_DOMAIN;
 }
 
 L pfnOrderBy(V z, V x, V y){
@@ -1273,20 +1302,33 @@ L pfnTable(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-
+/* pseudo version */
 L pfnEnum(V z, V x, V y){
-    if(isOneSymbol(x)){
-        V eKey = getValueFromSymbol(vq(x));
-        V eVal = allocNode();
-        L lenZ = vn(eVal);
-        CHECKE(pfnIndexOf(eVal,y,eKey));
-        DOI(lenZ, if(vL(eVal,i)>=lenZ)R E_ENUM_INDEX)
-        initV(z,H_Y,lenZ);
-        initEnum(z,vq(x),vg(eVal));
-        R 0;
-    }
-    else R E_DOMAIN;
+    V eKey = x;
+    V eVal = allocNode();
+    L sym  = 3;
+    CHECKE(pfnIndexOf(eVal,eKey,y));
+    L lenZ = vn(eVal);
+    DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
+    initV(z,H_Y,lenZ);
+    initEnum(z,sym,eKey,vg(eVal));
+    R 0;
 }
+
+/* right version */
+// L pfnEnum(V z, V x, V y){
+//     if(isOneSymbol(x)){
+//         V eKey = getValueFromSymbol(vq(x));
+//         V eVal = allocNode();
+//         CHECKE(pfnIndexOf(eVal,eKey,y));
+//         L lenZ = vn(eVal);
+//         DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
+//         initV(z,H_Y,lenZ);
+//         initEnum(z,vq(x),eKey,vg(eVal));
+//         R 0;
+//     }
+//     else R E_DOMAIN;
+// }
 
 L pfnKTable(V z, V x, V y){
     if(isTable(x) && isTable(y)){

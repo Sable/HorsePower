@@ -64,7 +64,7 @@
 #define vw(x)  x->w
 #define vt(x)  x->t
 #define vx(y)  y->x
-#define vy(x)  x->y.value
+#define vy(x)  x->y
 #define va(x)  x->a
 #define vg(x)  x->g
 
@@ -147,6 +147,4 @@
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)
-
-
 

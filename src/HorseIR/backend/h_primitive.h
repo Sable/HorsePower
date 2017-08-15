@@ -8,14 +8,14 @@ extern "C" {
 #define xImag(x) ((x).imag)
 #define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
 #define xEqual(x,y) (xReal(x)==xReal(y) && xImag(x)==xImag(y))
-#define initEnum(x,key,val) {vq(x)=key; vg(x)=(G)val;}
+#define initEnum(x,key,keyV,val) {getEnumName(x)=key; getEnumTarget(x)=(S)keyV; vg(x)=(G)val;}
 
 #define isBool(x)      (H_B==vp(x))
 #define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
 #define isComplex(x)   (H_X==vp(x))
 #define isChar(x)      (H_C==vp(x))
-#define isString(x)    (H_C==vp(x))
+#define isString(x)    (H_S==vp(x))
 #define isMonth(x)     (H_M==vp(x))
 #define isDate(x)      (H_D==vp(x))
 #define isDateTime(x)  (H_Z==vp(x))
