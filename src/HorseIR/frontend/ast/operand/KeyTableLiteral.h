@@ -11,24 +11,25 @@ namespace ast
 namespace storage
 {
 
-struct TableColumn {
-  std::string head;
+struct KeyTableColumn {
+  std::string head{};
   Literal *content = nullptr;
+  bool isKey = false;
 };
 
 }
 
-class TableLiteral : public Literal {
+class KeyTableLiteral : public Literal {
  public:
-  using ElementType = storage::TableColumn;
+  using ElementType = storage::KeyTableColumn;
 
-  TableLiteral ();
-  explicit TableLiteral (const CSTType *cst);
-  TableLiteral (TableLiteral &&literal) = default;
-  TableLiteral (const TableLiteral &literal);
-  TableLiteral &operator= (TableLiteral &&literal) = delete;
-  TableLiteral &operator= (const TableLiteral &literal) = delete;
-  ~TableLiteral () override = default;
+  KeyTableLiteral ();
+  explicit KeyTableLiteral (const CSTType *cst);
+  KeyTableLiteral (KeyTableLiteral &&literal) = default;
+  KeyTableLiteral (const KeyTableLiteral &literal);
+  KeyTableLiteral &operator= (KeyTableLiteral &&literal) = delete;
+  KeyTableLiteral &operator= (const KeyTableLiteral &literal) = delete;
+  ~KeyTableLiteral () override = default;
 
   bool isNull () const;
   std::vector<ElementType> getValue () const;
@@ -39,24 +40,24 @@ class TableLiteral : public Literal {
 
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
-  TableLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
+  KeyTableLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
   std::string toString () const override;
 
  protected:
   std::unique_ptr<std::vector<ElementType>> value = nullptr;
-  void __duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal);
+  void __duplicateDeep (ASTNodeMemory &mem, const KeyTableLiteral *literal);
   std::string elementToString (const ElementType &elementType) const;
 };
 
-inline TableLiteral::TableLiteral ()
-    : Literal (ASTNodeClass::TableLiteral, LiteralClass::Table)
+inline KeyTableLiteral::KeyTableLiteral ()
+    : Literal (ASTNodeClass::KeyTableLiteral, LiteralClass::KeyTable)
 {}
 
-inline TableLiteral::TableLiteral (const CSTType *cst)
-    : Literal (ASTNodeClass::TableLiteral, cst, LiteralClass::Table)
+inline KeyTableLiteral::KeyTableLiteral (const CSTType *cst)
+    : Literal (ASTNodeClass::KeyTableLiteral, cst, LiteralClass::KeyTable)
 {}
 
-inline TableLiteral::TableLiteral (const TableLiteral &literal)
+inline KeyTableLiteral::KeyTableLiteral (const KeyTableLiteral &literal)
     : Literal (literal)
 {
   if (literal.value == nullptr)
@@ -65,42 +66,43 @@ inline TableLiteral::TableLiteral (const TableLiteral &literal)
     { value.reset (new std::vector<ElementType> (*(literal.value))); }
 }
 
-inline bool TableLiteral::isNull () const
+inline bool KeyTableLiteral::isNull () const
 { return value == nullptr; }
 
-inline std::vector<TableLiteral::ElementType> TableLiteral::getValue () const
+inline std::vector<KeyTableLiteral::ElementType>
+KeyTableLiteral::getValue () const
 { return *value; }
 
 template<class T>
 inline std::enable_if_t<
-    std::is_constructible<std::vector<TableLiteral::ElementType>, T>::value
+    std::is_constructible<std::vector<KeyTableLiteral::ElementType>, T>::value
 >
-TableLiteral::setValue (T &&valueContainer)
+KeyTableLiteral::setValue (T &&valueContainer)
 {
   value.reset (new std::vector<ElementType> (std::forward<T> (valueContainer)));
-  for (const ElementType &element : *value)
+  for (const ElementType &element: *value)
     if (element.content != nullptr)
       { element.content->setParentASTNode (this); }
 }
 
-inline void TableLiteral::setValue (std::nullptr_t)
+inline void KeyTableLiteral::setValue (std::nullptr_t)
 { value.reset (nullptr); }
 
-inline std::size_t TableLiteral::getNumNodesRecursively () const
+inline std::size_t KeyTableLiteral::getNumNodesRecursively () const
 {
   std::size_t counter = 1;
   if (literalType != nullptr)
     { counter = counter + literalType->getNumNodesRecursively (); }
   if (value != nullptr)
     {
-      for (const ElementType &element : *value)
+      for (const ElementType &element: *value)
         if (element.content != nullptr)
           { counter = counter + element.content->getNumNodesRecursively (); }
     }
   return counter;
 }
 
-inline std::vector<ASTNode *> TableLiteral::getChildren () const
+inline std::vector<ASTNode *> KeyTableLiteral::getChildren () const
 {
   std::vector<ASTNode *> childrenNodes{};
   if (value != nullptr)
@@ -114,14 +116,15 @@ inline std::vector<ASTNode *> TableLiteral::getChildren () const
   return childrenNodes;
 }
 
-inline TableLiteral *TableLiteral::duplicateDeep (ASTNodeMemory &mem) const
+inline KeyTableLiteral *
+KeyTableLiteral::duplicateDeep (ASTNodeMemory &mem) const
 {
-  auto tableLiteral = mem.alloc<TableLiteral> ();
-  tableLiteral->__duplicateDeep (mem, this);
-  return tableLiteral;
+  auto keyTableLiteral = mem.alloc<KeyTableLiteral> ();
+  keyTableLiteral->__duplicateDeep (mem, this);
+  return keyTableLiteral;
 }
 
-inline std::string TableLiteral::toString () const
+inline std::string KeyTableLiteral::toString () const
 {
   std::ostringstream s;
   if (value == nullptr)
@@ -142,7 +145,8 @@ inline std::string TableLiteral::toString () const
 }
 
 inline void
-TableLiteral::__duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal)
+KeyTableLiteral::__duplicateDeep (ASTNodeMemory &mem,
+                                  const KeyTableLiteral *literal)
 {
   assert (literal != nullptr);
   Literal::__duplicateDeep (mem, literal);
@@ -159,6 +163,7 @@ TableLiteral::__duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal)
           {
             ElementType returnElement{};
             returnElement.head = element.head;
+            returnElement.isKey = element.isKey;
             if (element.content != nullptr)
               {
                 returnElement.content = dynamic_cast<Literal *>(
@@ -174,13 +179,15 @@ TableLiteral::__duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal)
 }
 
 inline std::string
-TableLiteral::elementToString (const ElementType &elementType) const
+KeyTableLiteral::elementToString (const ElementType &elementType) const
 {
   std::ostringstream stream;
-  stream << elementType.head
+  stream << ((elementType.isKey) ? "[" : "")
+         << elementType.head
          << " -> "
          << ((elementType.content == nullptr) ?
-             "nullptr" : elementType.content->toString ());
+             "nullptr" : elementType.content->toString ())
+         << ((elementType.isKey) ? "]" : "");
   return stream.str ();
 }
 

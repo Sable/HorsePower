@@ -54,7 +54,7 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"({`name -> ("a", "b"), age -> (1, 2):i32} : table)";
+  const std::string raw = R"({[`name -> ("a", "b")], age -> (1, 2):i32} : ktable)";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);

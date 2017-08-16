@@ -58,3 +58,4 @@
 #include "operand/ListLiteral.h"
 #include "operand/DictionaryLiteral.h"
 #include "operand/TableLiteral.h"
+#include "operand/KeyTableLiteral.h"

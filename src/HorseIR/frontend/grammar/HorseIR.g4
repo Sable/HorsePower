@@ -13,11 +13,11 @@ importModule     : 'import' COMPOUND_ID ';' ;
 statement        : '[' name ']'
                  | name ':' type '=' operand ';'
                  | name ':' type '=' '(' type ')' operand ';'
-                 | name ':' type '=' 'check_type' '(' operand ',' type ')' ';'
+                 | name ':' type '=' 'is_type' '(' operand ',' type ')' ';'
                  | name ':' type '=' 'check_cast' '(' operand ',' type ')' ';'
                  | name ':' type '=' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
                  | name ':' type '=' '(' type ')' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
-                 | name ':' type '=' 'check_type' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
+                 | name ':' type '=' 'is_type' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
                  | name ':' type '=' 'check_cast' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
                  | name ':' type '=' 'phi' '(' '[' name ']' name (',' '[' name ']' name)* ')' ';'
                  | 'return' name ';'
@@ -173,8 +173,8 @@ literalTable     : '{' '}' ':' 'table'                                          
                  | NULL_TOKEN ':' 'table'                                       #literalTableCase2
                  ;
 literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn)* '}' ':' 'ktable'
-                                                                                #literalKeyTableCase0
-                 | NULL_TOKEN ':' 'ktable'                                      #literalKeyTableCase1
+                                                                                #literalKTableCase0
+                 | NULL_TOKEN ':' 'ktable'                                      #literalKTableCase1
                  ;
 literalEnum      : '<' tableColumn '>' (':' typeEnum)?                          #literalEnumCase0
                  | NULL_TOKEN ':' typeEnum                                      #literalEnumCase1

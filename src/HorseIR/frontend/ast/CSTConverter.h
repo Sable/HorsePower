@@ -264,6 +264,7 @@ struct CSTConverter {
   using LiteralListContext = HorseIRParser::LiteralListContext;
   using LiteralDictContext = HorseIRParser::LiteralDictContext;
   using LiteralTableContext = HorseIRParser::LiteralTableContext;
+  using LiteralKeyTableContext = HorseIRParser::LiteralKTableContext;
 
   static Literal *
   convert (ASTNodeMemory &mem, LiteralContext *literal)
@@ -303,6 +304,8 @@ struct CSTConverter {
       { return convert (mem, literal->literalDict ()); }
     if (literal->literalTable () != nullptr)
       { return convert (mem, literal->literalTable ()); }
+    if (literal->literalKTable () != nullptr)
+      { return convert (mem, literal->literalKTable ()); }
 
     throw CSTConverterException (literal);
   }
@@ -2730,6 +2733,15 @@ struct CSTConverter {
     throw CSTConverterException (literal);
   }
 
+  static std::string
+  convertTableHead (HorseIRParser::TableHeaderContext *context)
+  {
+    assert (context != nullptr);
+    if (context->name () != nullptr) return context->name ()->id->getText ();
+    const std::string rawName = context->LITERAL_SYMBOL ()->getText ();
+    return rawName.substr (1, std::string::npos);
+  }
+
   static Literal *
   convert (ASTNodeMemory &mem, HorseIRParser::DbContentContext *context)
   {
@@ -2793,14 +2805,7 @@ struct CSTConverter {
         {
           auto headContext = element->tableHeader ();
           auto dbContentContext = element->dbContent ();
-          std::string columnName;
-          if (headContext->name () != nullptr)
-            { columnName = headContext->name ()->id->getText (); }
-          else
-            {
-              columnName = headContext->LITERAL_SYMBOL ()->getText ();
-              columnName = columnName.substr (1, std::string::npos);
-            }
+          std::string columnName = convertTableHead (headContext);
           Literal *content = convert (mem, dbContentContext);
           TableLiteral::ElementType returnElement{};
           returnElement.head = std::move (columnName);
@@ -2825,6 +2830,86 @@ struct CSTConverter {
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Table);
     tableLiteral->setLiteralType (primitiveType);
     return tableLiteral;
+  }
+
+  using LiteralKeyTableCase0Context = HorseIRParser::LiteralKTableCase0Context;
+  using LiteralKeyTableCase1Context = HorseIRParser::LiteralKTableCase1Context;
+
+  static KeyTableLiteral *
+  convert (ASTNodeMemory &mem, LiteralKeyTableContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralKeyTableCase0Context *case0 = nullptr;
+    LiteralKeyTableCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static KeyTableLiteral *
+  convert (ASTNodeMemory &mem, LiteralKeyTableCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    using TableKeyedColumnContext = HorseIRParser::TableKeyedColumnContext;
+    using TableColumnContext = HorseIRParser::TableColumnContext;
+    const auto keyedColumns = literal->tableKeyedColumn ();
+    const auto normalColumns = literal->tableColumn ();
+    std::vector<KeyTableLiteral::ElementType> valueVector{};
+    valueVector.reserve (keyedColumns.size () + normalColumns.size ());
+
+    std::transform (
+        keyedColumns.cbegin (), keyedColumns.cend (),
+        std::back_inserter (valueVector),
+        [&] (TableKeyedColumnContext *context) -> KeyTableLiteral::ElementType
+        {
+          const auto tableHeaderContext = context->tableHeader ();
+          const auto dbContentContext = context->dbContent ();
+          std::string tableHead = convertTableHead (tableHeaderContext);
+          Literal *dbContent = convert (mem, dbContentContext);
+          KeyTableLiteral::ElementType element{};
+          element.head = std::move (tableHead);
+          element.content = dbContent;
+          element.isKey = true;
+          return element;
+        });
+    std::transform (
+        normalColumns.cbegin (), normalColumns.cend (),
+        std::back_inserter (valueVector),
+        [&] (TableColumnContext *context) -> KeyTableLiteral::ElementType
+        {
+          const auto tableHeaderContext = context->tableHeader ();
+          const auto dbContentContext = context->dbContent ();
+          std::string tableHead = convertTableHead (tableHeaderContext);
+          Literal *dbContent = convert (mem, dbContentContext);
+          KeyTableLiteral::ElementType element{};
+          element.head = std::move (tableHead);
+          element.content = dbContent;
+          element.isKey = false;
+          return element;
+        });
+
+    auto keyTableLiteral = mem.alloc<KeyTableLiteral> (literal);
+    keyTableLiteral->setValue (std::move (valueVector));
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::KeyTable);
+    keyTableLiteral->setLiteralType (primitiveType);
+    return keyTableLiteral;
+  }
+
+  static KeyTableLiteral *
+  convert (ASTNodeMemory &mem, LiteralKeyTableCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto keyTableLiteral = mem.alloc<KeyTableLiteral> (literal);
+    keyTableLiteral->setValue (nullptr);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::KeyTable);
+    keyTableLiteral->setLiteralType (primitiveType);
+    return keyTableLiteral;
   }
 };
 

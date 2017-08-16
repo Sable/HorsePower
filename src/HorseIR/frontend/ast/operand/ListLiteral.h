@@ -147,7 +147,7 @@ ListLiteral::__duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal)
           [&] (const ElementType &element) -> ElementType
           {
             if (element == nullptr) return nullptr;
-            auto duplicateElement = static_cast<ElementType>(
+            auto duplicateElement = dynamic_cast<ElementType>(
                 element->duplicateDeep (mem)
             );
             duplicateElement->setParentASTNode (this);
