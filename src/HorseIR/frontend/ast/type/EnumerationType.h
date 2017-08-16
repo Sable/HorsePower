@@ -74,8 +74,8 @@ inline Type *EnumerationType::getElementType () const
 
 inline void EnumerationType::setElementType (Type *type)
 {
-  if (type != nullptr) type->setParentASTNode (this);
   elementType = type;
+  if (elementType != nullptr) elementType->setParentASTNode (this);
 }
 
 inline void

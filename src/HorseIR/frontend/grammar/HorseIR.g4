@@ -168,14 +168,16 @@ dbContent        : literalBool    | literalChar    | literalInteger | literalFlo
 
 tableColumn      : (tableHeader) '->' dbContent ;
 tableKeyedColumn : '[' (tableHeader) '->' dbContent ']' ;
-literalTable     : '{' '}' ':' 'table'
-                 | '{' tableColumn (',' tableColumn)* '}' ':' 'table'
-                 | NULL_TOKEN ':' 'table'
+literalTable     : '{' '}' ':' 'table'                                          #literalTableCase0
+                 | '{' tableColumn (',' tableColumn)* '}' ':' 'table'           #literalTableCase1
+                 | NULL_TOKEN ':' 'table'                                       #literalTableCase2
                  ;
 literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn)* '}' ':' 'ktable'
-                 | NULL_TOKEN ':' 'ktable' ;
-literalEnum      : '<' tableColumn '>' (':' typeEnum)?
-                 | NULL_TOKEN ':' typeEnum
+                                                                                #literalKeyTableCase0
+                 | NULL_TOKEN ':' 'ktable'                                      #literalKeyTableCase1
+                 ;
+literalEnum      : '<' tableColumn '>' (':' typeEnum)?                          #literalEnumCase0
+                 | NULL_TOKEN ':' typeEnum                                      #literalEnumCase1
                  ;
 
 

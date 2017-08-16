@@ -262,6 +262,8 @@ struct CSTConverter {
   using LiteralTTimeContext = HorseIRParser::LiteralTTimeContext;
   using LiteralFunctionContext = HorseIRParser::LiteralFunctionContext;
   using LiteralListContext = HorseIRParser::LiteralListContext;
+  using LiteralDictContext = HorseIRParser::LiteralDictContext;
+  using LiteralTableContext = HorseIRParser::LiteralTableContext;
 
   static Literal *
   convert (ASTNodeMemory &mem, LiteralContext *literal)
@@ -297,6 +299,10 @@ struct CSTConverter {
       { return convert (mem, literal->literalFunction ()); }
     if (literal->literalList () != nullptr)
       { return convert (mem, literal->literalList ()); }
+    if (literal->literalDict () != nullptr)
+      { return convert (mem, literal->literalDict ()); }
+    if (literal->literalTable () != nullptr)
+      { return convert (mem, literal->literalTable ()); }
 
     throw CSTConverterException (literal);
   }
@@ -2605,8 +2611,8 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralListCase0Context *literal)
   {
     assert (literal != nullptr);
-    auto listLiteral = mem.alloc<ListLiteral> (literal);
-    std::vector<Literal *> valueVector{};
+    auto listLiteral = mem.alloc<ListLiteral> ();
+    std::vector<ListLiteral::ElementType> valueVector{};
     listLiteral->setValue (std::move (valueVector));
     listLiteral->setLiteralType (convert (mem, literal->typeList ()));
     return listLiteral;
@@ -2616,18 +2622,209 @@ struct CSTConverter {
   convert (ASTNodeMemory &mem, LiteralListCase1Context *literal)
   {
     assert (literal != nullptr);
-    auto listLiteral = mem.alloc<ListLiteral> (literal);
-    const auto literalContexts = literal->literal ();
-    std::vector<Literal *> valueVector{};
-    valueVector.reserve (literalContexts.size ());
+    const auto literals = literal->literal ();
+    std::vector<ListLiteral::ElementType> valueVector{};
     std::transform (
-        literalContexts.cbegin (), literalContexts.cend (),
-        std::back_inserter (valueVector),
-        [&] (HorseIRParser::LiteralContext *context) -> Literal *
+        literals.cbegin (), literals.cend (), std::back_inserter (valueVector),
+        [&] (LiteralContext *context) -> ListLiteral::ElementType
         { return convert (mem, context); });
+    auto listLiteral = mem.alloc<ListLiteral> ();
     listLiteral->setValue (std::move (valueVector));
     listLiteral->setLiteralType (convert (mem, literal->typeList ()));
     return listLiteral;
+  }
+
+  static ListLiteral *
+  convert (ASTNodeMemory &mem, LiteralListCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    auto listLiteral = mem.alloc<ListLiteral> ();
+    listLiteral->setValue (nullptr);
+    listLiteral->setLiteralType (convert (mem, literal->typeList ()));
+    return listLiteral;
+  }
+
+  using LiteralDictCase0Context = HorseIRParser::LiteralDictCase0Context;
+  using LiteralDictCase1Context = HorseIRParser::LiteralDictCase1Context;
+  using LiteralDictCase2Context = HorseIRParser::LiteralDictCase2Context;
+
+  static DictionaryLiteral *
+  convert (ASTNodeMemory &mem, LiteralDictContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralDictCase0Context *case0 = nullptr;
+    LiteralDictCase1Context *case1 = nullptr;
+    LiteralDictCase2Context *case2 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static DictionaryLiteral *
+  convert (ASTNodeMemory &mem, LiteralDictCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dictionaryLiteral = mem.alloc<DictionaryLiteral> ();
+    std::vector<DictionaryLiteral::ElementType> valueVector{};
+    dictionaryLiteral->setValue (std::move (valueVector));
+    dictionaryLiteral->setLiteralType (convert (mem, literal->typeDict ()));
+    return dictionaryLiteral;
+  }
+
+  static DictionaryLiteral *
+  convert (ASTNodeMemory &mem, LiteralDictCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    const auto literals = literal->literal ();
+    assert (literals.size () % 2 == 0);
+    std::vector<DictionaryLiteral::ElementType> valueVector{};
+    for (auto iter = literals.cbegin (); iter != literals.cend (); ++iter)
+      {
+        DictionaryLiteral::ElementType element{};
+        element.key = convert (mem, *iter);
+        std::advance (iter, 1);
+        element.value = convert (mem, *iter);
+        valueVector.emplace_back (element);
+      }
+    auto dictionaryLiteral = mem.alloc<DictionaryLiteral> ();
+    dictionaryLiteral->setValue (std::move (valueVector));
+    dictionaryLiteral->setLiteralType (convert (mem, literal->typeDict ()));
+    return dictionaryLiteral;
+  }
+
+  static DictionaryLiteral *
+  convert (ASTNodeMemory &mem, LiteralDictCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    auto dictionaryLiteral = mem.alloc<DictionaryLiteral> ();
+    dictionaryLiteral->setValue (nullptr);
+    dictionaryLiteral->setLiteralType (convert (mem, literal->typeDict ()));
+    return dictionaryLiteral;
+  }
+
+  using LiteralTableCase0Context = HorseIRParser::LiteralTableCase0Context;
+  using LiteralTableCase1Context = HorseIRParser::LiteralTableCase1Context;
+  using LiteralTableCase2Context = HorseIRParser::LiteralTableCase2Context;
+
+  static TableLiteral *
+  convert (ASTNodeMemory &mem, LiteralTableContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralTableCase0Context *case0 = nullptr;
+    LiteralTableCase1Context *case1 = nullptr;
+    LiteralTableCase2Context *case2 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(literal)) != nullptr)
+      { return convert (mem, case2); }
+
+    throw CSTConverterException (literal);
+  }
+
+  static Literal *
+  convert (ASTNodeMemory &mem, HorseIRParser::DbContentContext *context)
+  {
+    assert (context != nullptr);
+
+    if (context->literalBool () != nullptr)
+      { return convert (mem, context->literalBool ()); }
+    else if (context->literalChar () != nullptr)
+      { return convert (mem, context->literalChar ()); }
+    else if (context->literalInteger () != nullptr)
+      { return convert (mem, context->literalInteger ()); }
+    else if (context->literalFloat () != nullptr)
+      { return convert (mem, context->literalFloat ()); }
+    else if (context->literalComplex () != nullptr)
+      { return convert (mem, context->literalComplex ()); }
+    else if (context->literalSymbol () != nullptr)
+      { return convert (mem, context->literalSymbol ()); }
+    else if (context->literalTTime () != nullptr)
+      { return convert (mem, context->literalTTime ()); }
+    else if (context->literalTSecond () != nullptr)
+      { return convert (mem, context->literalTSecond ()); }
+    else if (context->literalTMonth () != nullptr)
+      { return convert (mem, context->literalTMonth ()); }
+    else if (context->literalTMinute () != nullptr)
+      { return convert (mem, context->literalTMinute ()); }
+    else if (context->literalTDate () != nullptr)
+      { return convert (mem, context->literalTDate ()); }
+    else if (context->literalTDateTime () != nullptr)
+      { return convert (mem, context->literalTDateTime ()); }
+    else if (context->literalString () != nullptr)
+      { return convert (mem, context->literalString ()); }
+
+    throw CSTConverterException (context);
+  }
+
+  static TableLiteral *
+  convert (ASTNodeMemory &mem, LiteralTableCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    auto tableLiteral = mem.alloc<TableLiteral> (literal);
+    std::vector<TableLiteral::ElementType> valueVector{};
+    tableLiteral->setValue (std::move (valueVector));
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Table);
+    tableLiteral->setLiteralType (primitiveType);
+    return tableLiteral;
+  }
+
+  static TableLiteral *
+  convert (ASTNodeMemory &mem, LiteralTableCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    using TableColumnContext = HorseIRParser::TableColumnContext;
+    const auto tableColumns = literal->tableColumn ();
+    std::vector<TableLiteral::ElementType> valueVector{};
+    valueVector.reserve (tableColumns.size ());
+    std::transform (
+        tableColumns.cbegin (), tableColumns.cend (),
+        std::back_inserter (valueVector),
+        [&] (TableColumnContext *element) -> TableLiteral::ElementType
+        {
+          auto headContext = element->tableHeader ();
+          auto dbContentContext = element->dbContent ();
+          std::string columnName;
+          if (headContext->name () != nullptr)
+            { columnName = headContext->name ()->id->getText (); }
+          else
+            {
+              columnName = headContext->LITERAL_SYMBOL ()->getText ();
+              columnName = columnName.substr (1, std::string::npos);
+            }
+          Literal *content = convert (mem, dbContentContext);
+          TableLiteral::ElementType returnElement{};
+          returnElement.head = std::move (columnName);
+          returnElement.content = content;
+          return returnElement;
+        });
+    auto tableLiteral = mem.alloc<TableLiteral> (literal);
+    tableLiteral->setValue (std::move (valueVector));
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Table);
+    tableLiteral->setLiteralType (primitiveType);
+    return tableLiteral;
+  }
+
+  static TableLiteral *
+  convert (ASTNodeMemory &mem, LiteralTableCase2Context *literal)
+  {
+    assert (literal != nullptr);
+    auto tableLiteral = mem.alloc<TableLiteral> (literal);
+    tableLiteral->setValue (nullptr);
+    auto primitiveType = mem.alloc<PrimitiveType> (literal);
+    primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::Table);
+    tableLiteral->setLiteralType (primitiveType);
+    return tableLiteral;
   }
 };
 

@@ -84,14 +84,14 @@ inline Type *DictionaryType::getValueType () const
 
 inline void DictionaryType::setKeyType (Type *type)
 {
-  if (type != nullptr) keyType->setParentASTNode (this);
   keyType = type;
+  if (keyType != nullptr) keyType->setParentASTNode (this);
 }
 
 inline void DictionaryType::setValueType (Type *type)
 {
-  if (type != nullptr) valueType->setParentASTNode (this);
   valueType = type;
+  if (valueType != nullptr) valueType->setParentASTNode (this);
 }
 
 inline void

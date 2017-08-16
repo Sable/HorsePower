@@ -54,7 +54,7 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"([`a, "asdb", 'abcd'] :list<?> )";
+  const std::string raw = R"({`name -> ("a", "b"), age -> (1, 2):i32} : table)";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
@@ -64,11 +64,10 @@ int main (int argc, const char *argv[])
 
   ast::ASTNode::ASTNodeMemory mem;
 
-  auto astNode = static_cast<ast::ListLiteral *>(ast::CSTConverter::convert (mem, context));
-  ast::ListLiteral copyLiter (*astNode);
+  auto astNode = ast::CSTConverter::convert (mem, context);
   astNode->setEnclosingFilename ("stdin");
   std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
-  std::cout << copyLiter.toString () << std::endl;
+  std::cout << astNode->getNumNodesRecursively () << std::endl;
 
 }

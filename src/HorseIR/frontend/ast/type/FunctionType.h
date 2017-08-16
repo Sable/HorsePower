@@ -108,8 +108,8 @@ template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>
 FunctionType::setParameterTypes (T &&types)
 {
-  for (Type *&iter : types) iter->setParentASTNode (this);
   parameterTypes = std::forward<T> (types);
+  for (Type *&iter : parameterTypes) iter->setParentASTNode (this);
 }
 
 inline Type *FunctionType::getReturnType () const
@@ -117,8 +117,8 @@ inline Type *FunctionType::getReturnType () const
 
 inline void FunctionType::setReturnType (Type *type)
 {
-  if (type != nullptr) type->setParentASTNode (this);
   returnType = type;
+  if (returnType != nullptr) returnType->setParentASTNode (this);
 }
 
 inline bool FunctionType::getIsFlexible () const

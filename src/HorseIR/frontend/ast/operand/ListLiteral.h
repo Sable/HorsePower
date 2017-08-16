@@ -10,34 +10,22 @@ namespace ast
 
 class ListLiteral : public Literal {
  public:
-  ListLiteral ()
-      : Literal (ASTNodeClass::ListLiteral, LiteralClass::List)
-  {}
+  using ElementType = Literal *;
 
-  explicit ListLiteral (const CSTType *cst)
-      : Literal (ASTNodeClass::ListLiteral, cst, LiteralClass::List)
-  {}
-
+  ListLiteral ();
+  explicit ListLiteral (const CSTType *cst);
   ListLiteral (ListLiteral &&literal) = default;
-
-  ListLiteral (const ListLiteral &literal)
-      : Literal (literal)
-  {
-    if (literal.value.get () == nullptr)
-      { value.reset (nullptr); }
-    else
-      { value.reset (new std::vector<Literal *> (*(literal.value))); }
-  }
-
+  ListLiteral (const ListLiteral &literal);
   ListLiteral &operator= (ListLiteral &&literal) = delete;
   ListLiteral &operator= (const ListLiteral &literal) = delete;
   ~ListLiteral () override = default;
 
   bool isNull () const;
-  std::vector<Literal *> getValue ();
+  std::vector<ElementType> getValue () const;
   template<class T>
-  std::enable_if_t<std::is_constructible<std::vector<Literal *>, T>::value>
+  std::enable_if_t<std::is_constructible<std::vector<ElementType>, T>::value>
   setValue (T &&valueContainer);
+  void setValue (std::nullptr_t);
 
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
@@ -45,43 +33,73 @@ class ListLiteral : public Literal {
   std::string toString () const override;
 
  protected:
-  std::unique_ptr<std::vector<Literal *>> value = nullptr;
-  void
-  __duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal);
+  std::unique_ptr<std::vector<ElementType>> value = nullptr;
+  void __duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal);
+  std::string elementToString (const ElementType &elementType) const;
 };
 
-inline bool ListLiteral::isNull () const
-{ return value.get () == nullptr; }
+inline ListLiteral::ListLiteral ()
+    : Literal (ASTNodeClass::ListLiteral, LiteralClass::List)
+{}
 
-inline std::vector<Literal *> ListLiteral::getValue ()
+inline ListLiteral::ListLiteral (const CSTType *cst)
+    : Literal (ASTNodeClass::ListLiteral, cst, LiteralClass::List)
+{}
+
+inline ListLiteral::ListLiteral (const ListLiteral &literal)
+    : Literal (literal)
+{
+  if (literal.value == nullptr)
+    { value.reset (nullptr); }
+  else
+    { value.reset (new std::vector<ElementType> (*(literal.value))); }
+}
+
+inline bool ListLiteral::isNull () const
+{ return value == nullptr; }
+
+inline std::vector<ListLiteral::ElementType> ListLiteral::getValue () const
 { return *value; }
 
 template<class T>
-inline std::enable_if_t<std::is_constructible<std::vector<Literal *>, T>::value>
+inline std::enable_if_t<
+    std::is_constructible<std::vector<ListLiteral::ElementType>, T>::value
+>
 ListLiteral::setValue (T &&valueContainer)
 {
-  for (Literal *&iter : valueContainer) iter->setParentASTNode (this);
-  value.reset (new std::vector<Literal *> (std::forward<T> (valueContainer)));
+  value.reset (new std::vector<ElementType> (std::forward<T> (valueContainer)));
+  for (const ElementType &element : *value)
+    { if (element != nullptr) element->setParentASTNode (this); }
 }
+
+inline void ListLiteral::setValue (std::nullptr_t)
+{ value.reset (nullptr); }
 
 inline std::size_t ListLiteral::getNumNodesRecursively () const
 {
-  if (value.get () == nullptr) return 1;
   std::size_t counter = 1;
-  for (const Literal *literal : *value)
-    { counter = counter + literal->getNumNodesRecursively (); }
+  if (literalType != nullptr)
+    { counter = counter + literalType->getNumNodesRecursively (); }
+  if (value != nullptr)
+    {
+      for (const ElementType &element : *value)
+        if (element != nullptr)
+          { counter = counter + element->getNumNodesRecursively (); }
+    }
   return counter;
 }
 
 inline std::vector<ASTNode *> ListLiteral::getChildren () const
 {
-  if (value.get () == nullptr) return std::vector<ASTNode *> {};
   std::vector<ASTNode *> childrenNodes{};
-  childrenNodes.reserve (value->size ());
-  std::transform (
-      value->cbegin (), value->cend (), std::back_inserter (childrenNodes),
-      [] (Literal *literal) -> ASTNode *
-      { return static_cast<ASTNode *>(literal); });
+  if (value != nullptr)
+    {
+      for (const ElementType &element : *value)
+        if (element != nullptr)
+          { childrenNodes.push_back (static_cast<ASTNode *>(element)); }
+    }
+  if (literalType != nullptr)
+    { childrenNodes.push_back (static_cast<ASTNode *>(literalType)); }
   return childrenNodes;
 }
 
@@ -95,22 +113,20 @@ inline ListLiteral *ListLiteral::duplicateDeep (ASTNodeMemory &mem) const
 inline std::string ListLiteral::toString () const
 {
   std::ostringstream s;
-  if (value.get () == nullptr)
+  if (value == nullptr)
     {
-      s << "[] :"
+      s << "null :"
         << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
+      return s.str ();
     }
-  else
-    {
-      s << '[';
-      std::transform (
-          value->cbegin (), value->cend (),
-          misc::InfixOStreamIterator<std::string> (s, ", "),
-          [] (Literal *literal) -> std::string
-          { return literal->toString (); });
-      s << "] :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-    }
+  s << '[';
+  std::transform (
+      value->cbegin (), value->cend (),
+      misc::InfixOStreamIterator<std::string> (s, ", "),
+      [&] (const ElementType &element) -> std::string
+      { return elementToString (element); });
+  s << "] :"
+    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
   return s.str ();
 }
 
@@ -119,19 +135,32 @@ ListLiteral::__duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal)
 {
   assert (literal != nullptr);
   Literal::__duplicateDeep (mem, literal);
-  if (literal->value.get () == nullptr)
+  if (literal->value == nullptr)
     { value.reset (nullptr); }
   else
     {
-      value.reset (new std::vector<Literal *>{});
+      value.reset (new std::vector<ElementType> ());
       value->reserve (literal->value->size ());
       std::transform (
           literal->value->cbegin (), literal->value->cend (),
-          std::back_inserter ((*value)),
-          [&] (Literal *paramLiteral) -> Literal *
-          { return static_cast<Literal *>(paramLiteral->duplicateDeep (mem)); }
-      );
+          std::back_inserter (*value),
+          [&] (const ElementType &element) -> ElementType
+          {
+            if (element == nullptr) return nullptr;
+            auto duplicateElement = static_cast<ElementType>(
+                element->duplicateDeep (mem)
+            );
+            duplicateElement->setParentASTNode (this);
+            return duplicateElement;
+          });
     }
+}
+
+inline std::string
+ListLiteral::elementToString (const ElementType &elementType) const
+{
+  if (elementType == nullptr) return "nullptr";
+  return elementType->toString ();
 }
 
 }

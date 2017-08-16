@@ -41,8 +41,8 @@ class Literal : public Operand {
 
   void setLiteralType (Type *type)
   {
-    if (type != nullptr) type->setParentASTNode (this);
     literalType = type;
+    if (literalType != nullptr) literalType->setParentASTNode (this);
   }
 
  protected:

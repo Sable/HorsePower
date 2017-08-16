@@ -73,8 +73,8 @@ inline Type *ListType::getElementType () const
 
 inline void ListType::setElementType (Type *type)
 {
-  if (type != nullptr) type->setParentASTNode (this);
   elementType = type;
+  if (elementType != nullptr) elementType->setParentASTNode (this);
 }
 
 inline void
