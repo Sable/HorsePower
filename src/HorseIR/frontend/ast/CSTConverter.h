@@ -265,6 +265,7 @@ struct CSTConverter {
   using LiteralDictContext = HorseIRParser::LiteralDictContext;
   using LiteralTableContext = HorseIRParser::LiteralTableContext;
   using LiteralKeyTableContext = HorseIRParser::LiteralKTableContext;
+  using LiteralEnumContext = HorseIRParser::LiteralEnumContext;
 
   static Literal *
   convert (ASTNodeMemory &mem, LiteralContext *literal)
@@ -306,6 +307,8 @@ struct CSTConverter {
       { return convert (mem, literal->literalTable ()); }
     if (literal->literalKTable () != nullptr)
       { return convert (mem, literal->literalKTable ()); }
+    if (literal->literalEnum () != nullptr)
+      { return convert (mem, literal->literalEnum ()); }
 
     throw CSTConverterException (literal);
   }
@@ -2910,6 +2913,411 @@ struct CSTConverter {
     primitiveType->setPrimitiveClass (PrimitiveType::PrimitiveClass::KeyTable);
     keyTableLiteral->setLiteralType (primitiveType);
     return keyTableLiteral;
+  }
+
+  using LiteralEnumCase0Context = HorseIRParser::LiteralEnumCase0Context;
+  using LiteralEnumCase1Context = HorseIRParser::LiteralEnumCase1Context;
+
+  static EnumerationLiteral *
+  convert (ASTNodeMemory &mem, LiteralEnumContext *literal)
+  {
+    assert (literal != nullptr);
+    LiteralEnumCase0Context *case0 = nullptr;
+    LiteralEnumCase1Context *case1 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(literal)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(literal)) != nullptr)
+      { return convert (mem, case1); }
+
+    throw CSTConverterException (nullptr);
+  }
+
+  static EnumerationLiteral *
+  convert (ASTNodeMemory &mem, LiteralEnumCase0Context *literal)
+  {
+    assert (literal != nullptr);
+    const auto tableColumnContext = literal->tableColumn ();
+    const auto typeEnumContext = literal->typeEnum ();
+
+    const auto tableHeaderCotnext = tableColumnContext->tableHeader ();
+    const auto dbContentContext = tableColumnContext->dbContent ();
+    std::string tableHead = convertTableHead (tableHeaderCotnext);
+    Literal *dbContent = convert (mem, dbContentContext);
+    EnumerationLiteral::ElementType element{};
+    element.head = std::move (tableHead);
+    element.content = dbContent;
+
+    auto enumerationLiteral = mem.alloc<EnumerationLiteral> (literal);
+    enumerationLiteral->setValue (std::move (element));
+    if (typeEnumContext != nullptr)
+      { enumerationLiteral->setLiteralType (convert (mem, typeEnumContext)); }
+    else
+      {
+        Type *duplicateType = static_cast<Type *>(
+            dbContent->getLiteralType ()->duplicateDeep (mem)
+        );
+        auto enumerationType = mem.alloc<EnumerationType> (literal);
+        enumerationType->setElementType (duplicateType);
+        enumerationLiteral->setLiteralType (enumerationType);
+      }
+    return enumerationLiteral;
+  }
+
+  static EnumerationLiteral *
+  convert (ASTNodeMemory &mem, LiteralEnumCase1Context *literal)
+  {
+    assert (literal != nullptr);
+    auto enumerationLiteral = mem.alloc<EnumerationLiteral> (literal);
+    enumerationLiteral->setValue (nullptr);
+    enumerationLiteral->setLiteralType (convert (mem, literal->typeEnum ()));
+    return enumerationLiteral;
+  }
+
+  using NameContext = HorseIRParser::NameContext;
+
+  static Identifier *convert (ASTNodeMemory &mem, NameContext *context)
+  {
+    assert (context != nullptr);
+    std::string nameString = context->id->getText ();
+    auto identifier = mem.alloc<Identifier> (context);
+    identifier->setName (std::move (nameString));
+    return identifier;
+  }
+
+  using OperandContext = HorseIRParser::OperandContext;
+
+  static Operand *convert (ASTNodeMemory &mem, OperandContext *context)
+  {
+    assert (context != nullptr);
+    if (context->name () != nullptr)
+      { return convert (mem, context->name ()); }
+    if (context->literal () != nullptr)
+      { return convert (mem, context->literal ()); }
+    throw CSTConverterException (context);
+  }
+
+  using StatementContext = HorseIRParser::StatementContext;
+  using StatementCase0Context = HorseIRParser::StatementCase0Context;
+  using StatementCase1Context = HorseIRParser::StatementCase1Context;
+  using StatementCase2Context = HorseIRParser::StatementCase2Context;
+  using StatementCase3Context = HorseIRParser::StatementCase3Context;
+  using StatementCase4Context = HorseIRParser::StatementCase4Context;
+  using StatementCase5Context = HorseIRParser::StatementCase5Context;
+  using StatementCase6Context = HorseIRParser::StatementCase6Context;
+  using StatementCase7Context = HorseIRParser::StatementCase7Context;
+  using StatementCase8Context = HorseIRParser::StatementCase8Context;
+  using StatementCase9Context = HorseIRParser::StatementCase9Context;
+  using StatementCase10Context = HorseIRParser::StatementCase10Context;
+  using StatementCase11Context = HorseIRParser::StatementCase11Context;
+
+  static Statement *convert (ASTNodeMemory &mem, StatementContext *statement)
+  {
+    assert (statement != nullptr);
+    StatementCase0Context *case0 = nullptr;
+    StatementCase1Context *case1 = nullptr;
+    StatementCase2Context *case2 = nullptr;
+    StatementCase3Context *case3 = nullptr;
+    StatementCase4Context *case4 = nullptr;
+    StatementCase5Context *case5 = nullptr;
+    StatementCase6Context *case6 = nullptr;
+    StatementCase7Context *case7 = nullptr;
+    StatementCase8Context *case8 = nullptr;
+    StatementCase9Context *case9 = nullptr;
+    StatementCase10Context *case10 = nullptr;
+    StatementCase11Context *case11 = nullptr;
+
+    if ((case0 = dynamic_cast<decltype (case0)>(statement)) != nullptr)
+      { return convert (mem, case0); }
+    if ((case1 = dynamic_cast<decltype (case1)>(statement)) != nullptr)
+      { return convert (mem, case1); }
+    if ((case2 = dynamic_cast<decltype (case2)>(statement)) != nullptr)
+      { return convert (mem, case2); }
+    if ((case3 = dynamic_cast<decltype (case3)>(statement)) != nullptr)
+      { return convert (mem, case3); }
+    if ((case4 = dynamic_cast<decltype (case4)>(statement)) != nullptr)
+      { return convert (mem, case4); }
+    if ((case5 = dynamic_cast<decltype (case5)>(statement)) != nullptr)
+      { return convert (mem, case5); }
+    if ((case6 = dynamic_cast<decltype (case6)>(statement)) != nullptr)
+      { return convert (mem, case6); }
+    if ((case7 = dynamic_cast<decltype (case7)>(statement)) != nullptr)
+      { return convert (mem, case7); }
+    if ((case8 = dynamic_cast<decltype (case8)>(statement)) != nullptr)
+      { return convert (mem, case8); }
+    if ((case9 = dynamic_cast<decltype (case9)>(statement)) != nullptr)
+      { return convert (mem, case9); }
+    if ((case10 = dynamic_cast<decltype (case10)>(statement)) != nullptr)
+      { return convert (mem, case10); }
+    if ((case11 = dynamic_cast<decltype (case11)>(statement)) != nullptr)
+      { return convert (mem, case11); }
+
+    throw CSTConverterException (statement);
+  }
+
+  static LabelStatement *
+  convert (ASTNodeMemory &mem, StatementCase0Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    auto labelName = statementContext->name ();
+    std::string labelNameString = labelName->getText ();
+    auto labelStatement = mem.alloc<LabelStatement> (statementContext);
+    labelStatement->setValue (std::move (labelNameString));
+    return labelStatement;
+  }
+
+  static AssignStatement *
+  convert (ASTNodeMemory &mem, StatementCase1Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type ());
+    Operand *rhsOperand = convert (mem, statementContext->operand ());
+    Type *rhsType = nullptr;
+    auto assignStatement = mem.alloc<AssignStatement> (statementContext);
+    assignStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::Direct);
+    assignStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    assignStatement->setRHSInfo (std::make_pair (rhsOperand, rhsType));
+    return assignStatement;
+  }
+
+  static AssignStatement *
+  convert (ASTNodeMemory &mem, StatementCase2Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    Operand *rhsOperand = convert (mem, statementContext->operand ());
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto assignStatement = mem.alloc<AssignStatement> (statementContext);
+    assignStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::Cast);
+    assignStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    assignStatement->setRHSInfo (std::make_pair (rhsOperand, rhsType));
+    return assignStatement;
+  }
+
+  static AssignStatement *
+  convert (ASTNodeMemory &mem, StatementCase3Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    Operand *rhsOperand = convert (mem, statementContext->operand ());
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto assignStatement = mem.alloc<AssignStatement> (statementContext);
+    assignStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::IsType);
+    assignStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    assignStatement->setRHSInfo (std::make_pair (rhsOperand, rhsType));
+    return assignStatement;
+  }
+
+  static AssignStatement *
+  convert (ASTNodeMemory &mem, StatementCase4Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    Operand *rhsOperand = convert (mem, statementContext->operand ());
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto assignStatement = mem.alloc<AssignStatement> (statementContext);
+    assignStatement->setReturnTypePolicy (
+        Statement::ReturnTypePolicy::CheckCast
+    );
+    assignStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    assignStatement->setRHSInfo (std::make_pair (rhsOperand, rhsType));
+    return assignStatement;
+  }
+
+  static std::pair<std::string, std::string>
+  convertFunctionName (const std::string &rawTokenString)
+  {
+    std::string trimedString = rawTokenString.substr (1, std::string::npos);
+    const auto commaPos = std::find (
+        trimedString.cbegin (), trimedString.cend (), '.'
+    );
+    std::string moduleName{};
+    std::string methodName{};
+    if (commaPos == trimedString.cend ())
+      {
+        moduleName = "";
+        methodName = trimedString;
+      }
+    else
+      {
+        std::copy (trimedString.cbegin (), commaPos,
+                   std::back_inserter (moduleName));
+        std::copy (std::next (commaPos), trimedString.cend (),
+                   std::back_inserter (methodName));
+      }
+    return std::make_pair (std::move (moduleName), std::move (methodName));
+  };
+
+  static InvokeStatement *
+  convert (ASTNodeMemory &mem, StatementCase5Context *statementContext)
+  {
+    assert (statementContext);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type ());
+    const auto operandContexts = statementContext->operand ();
+    std::vector<Operand *> rhsOperands{};
+    rhsOperands.reserve (operandContexts.size ());
+    std::transform (
+        operandContexts.cbegin (), operandContexts.cend (),
+        std::back_inserter (rhsOperands),
+        [&] (OperandContext *context) -> Operand *
+        { return convert (mem, context); });
+    Type *rhsType = nullptr;
+    auto target = convertFunctionName (
+        statementContext->LITERAL_FUNCTION ()->getText ()
+    );
+    auto invokeStatement = mem.alloc<InvokeStatement> (statementContext);
+    invokeStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::Direct);
+    invokeStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    invokeStatement->setRHSInfo (
+        std::make_pair (std::move (rhsOperands), rhsType)
+    );
+    invokeStatement->setTargetModuleName (std::move (target.first));
+    invokeStatement->setTargetMethodName (std::move (target.second));
+    return invokeStatement;
+  }
+
+  static InvokeStatement *
+  convert (ASTNodeMemory &mem, StatementCase6Context *statementContext)
+  {
+    assert (statementContext);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    const auto operandContexts = statementContext->operand ();
+    std::vector<Operand *> rhsOperands{};
+    rhsOperands.reserve (operandContexts.size ());
+    std::transform (
+        operandContexts.cbegin (), operandContexts.cend (),
+        std::back_inserter (rhsOperands),
+        [&] (OperandContext *context) -> Operand *
+        { return convert (mem, context); });
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto target = convertFunctionName (
+        statementContext->LITERAL_FUNCTION ()->getText ()
+    );
+    auto invokeStatement = mem.alloc<InvokeStatement> (statementContext);
+    invokeStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::Cast);
+    invokeStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    invokeStatement->setRHSInfo (
+        std::make_pair (std::move (rhsOperands), rhsType)
+    );
+    invokeStatement->setTargetModuleName (std::move (target.first));
+    invokeStatement->setTargetMethodName (std::move (target.second));
+    return invokeStatement;
+  }
+
+  static InvokeStatement *
+  convert (ASTNodeMemory &mem, StatementCase7Context *statementContext)
+  {
+    assert (statementContext);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    const auto operandContexts = statementContext->operand ();
+    std::vector<Operand *> rhsOperands{};
+    rhsOperands.reserve (operandContexts.size ());
+    std::transform (
+        operandContexts.cbegin (), operandContexts.cend (),
+        std::back_inserter (rhsOperands),
+        [&] (OperandContext *context) -> Operand *
+        { return convert (mem, context); });
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto target = convertFunctionName (
+        statementContext->LITERAL_FUNCTION ()->getText ()
+    );
+    auto invokeStatement = mem.alloc<InvokeStatement> (statementContext);
+    invokeStatement->setReturnTypePolicy (Statement::ReturnTypePolicy::IsType);
+    invokeStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    invokeStatement->setRHSInfo (
+        std::make_pair (std::move (rhsOperands), rhsType)
+    );
+    invokeStatement->setTargetModuleName (std::move (target.first));
+    invokeStatement->setTargetMethodName (std::move (target.second));
+    return invokeStatement;
+  }
+
+  static InvokeStatement *
+  convert (ASTNodeMemory &mem, StatementCase8Context *statementContext)
+  {
+    assert (statementContext);
+    Identifier *lhsName = convert (mem, statementContext->name ());
+    Type *lhsType = convert (mem, statementContext->type (0));
+    const auto operandContexts = statementContext->operand ();
+    std::vector<Operand *> rhsOperands{};
+    rhsOperands.reserve (operandContexts.size ());
+    std::transform (
+        operandContexts.cbegin (), operandContexts.cend (),
+        std::back_inserter (rhsOperands),
+        [&] (OperandContext *context) -> Operand *
+        { return convert (mem, context); });
+    Type *rhsType = convert (mem, statementContext->type (1));
+    auto target = convertFunctionName (
+        statementContext->LITERAL_FUNCTION ()->getText ()
+    );
+    auto invokeStatement = mem.alloc<InvokeStatement> (statementContext);
+    invokeStatement->setReturnTypePolicy (
+        Statement::ReturnTypePolicy::CheckCast
+    );
+    invokeStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    invokeStatement->setRHSInfo (
+        std::make_pair (std::move (rhsOperands), rhsType)
+    );
+    invokeStatement->setTargetModuleName (std::move (target.first));
+    invokeStatement->setTargetMethodName (std::move (target.second));
+    return invokeStatement;
+  }
+
+  static PhiStatement *
+  convert (ASTNodeMemory &mem, StatementCase9Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    const auto nameContexts = statementContext->name ();
+    const auto operandContexts = statementContext->operand ();
+    Identifier *lhsName = convert (mem, nameContexts[0]);
+    Type *lhsType = convert (mem, statementContext->type ());
+    std::map<std::string, Operand *> phiMap{};
+    for (std::size_t iter = 0; iter < operandContexts.size (); ++iter)
+      {
+        auto labelNameContext = nameContexts[iter + 1];
+        auto operandContext = operandContexts[iter];
+        std::string labelName = labelNameContext->id->getText ();
+        Operand *operand = convert (mem, operandContext);
+        auto result = phiMap.insert (
+            std::make_pair (std::move (labelName), operand)
+        );
+        if (!result.second) throw CSTConverterException (statementContext);
+      }
+    auto phiStatement = mem.alloc<PhiStatement> (statementContext);
+    phiStatement->setLHSInfo (std::make_pair (lhsName, lhsType));
+    phiStatement->setRHSMap (std::move (phiMap));
+    return phiStatement;
+  }
+
+  static ReturnStatement *
+  convert (ASTNodeMemory &mem, StatementCase10Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Operand *operand = convert (mem, statementContext->operand ());
+    auto returnStatement = mem.alloc<ReturnStatement> (statementContext);
+    returnStatement->setOperand (operand);
+    return returnStatement;
+  }
+
+  static BranchStatement *
+  convert (ASTNodeMemory &mem, StatementCase11Context *statementContext)
+  {
+    assert (statementContext != nullptr);
+    Operand *operand = nullptr;
+    if (statementContext->operand () != nullptr)
+      { operand = convert (mem, statementContext->operand ()); }
+    std::string labelString = statementContext->name ()->id->getText ();
+    auto branchStatement = mem.alloc<BranchStatement> (statementContext);
+    branchStatement->setTargetLabelName (std::move (labelString));
+    branchStatement->setOperand (operand);
+    return branchStatement;
   }
 };
 

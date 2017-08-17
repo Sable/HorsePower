@@ -10,18 +10,23 @@ method           : 'def' name '(' ( | (name ':' type (',' name ':' type)*)) ')' 
 globalVar        : 'def' name ':' type ';' ;
 importModule     : 'import' COMPOUND_ID ';' ;
 
-statement        : '[' name ']'
-                 | name ':' type '=' operand ';'
-                 | name ':' type '=' '(' type ')' operand ';'
-                 | name ':' type '=' 'is_type' '(' operand ',' type ')' ';'
-                 | name ':' type '=' 'check_cast' '(' operand ',' type ')' ';'
+statement        : '[' name ']'                                                 #statementCase0
+                 | name ':' type '=' operand ';'                                #statementCase1
+                 | name ':' type '=' '(' type ')' operand ';'                   #statementCase2
+                 | name ':' type '=' 'is_type' '(' operand ',' type ')' ';'     #statementCase3
+                 | name ':' type '=' 'check_cast' '(' operand ',' type ')' ';'  #statementCase4
                  | name ':' type '=' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
+                                                                                #statementCase5
                  | name ':' type '=' '(' type ')' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ';'
+                                                                                #statementCase6
                  | name ':' type '=' 'is_type' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
+                                                                                #statementCase7
                  | name ':' type '=' 'check_cast' '(' LITERAL_FUNCTION '(' ( | operand (',' operand)*) ')' ',' type ')' ';'
-                 | name ':' type '=' 'phi' '(' '[' name ']' name (',' '[' name ']' name)* ')' ';'
-                 | 'return' name ';'
-                 | 'goto' '[' name ']' (name)? ';'
+                                                                                #statementCase8
+                 | name ':' type '=' 'phi' '(' '[' name ']' operand (',' '[' name ']' operand)* ')' ';'
+                                                                                #statementCase9
+                 | 'return' operand ';'                                         #statementCase10
+                 | 'goto' '[' name ']' (operand)? ';'                           #statementCase11
                  ;
 
 operand          : name
@@ -176,7 +181,7 @@ literalKTable    : '{' tableKeyedColumn (',' tableKeyedColumn)* (',' tableColumn
                                                                                 #literalKTableCase0
                  | NULL_TOKEN ':' 'ktable'                                      #literalKTableCase1
                  ;
-literalEnum      : '<' tableColumn '>' (':' typeEnum)?                          #literalEnumCase0
+literalEnum      : '<' tableColumn '>' ':' (typeEnum)?                          #literalEnumCase0
                  | NULL_TOKEN ':' typeEnum                                      #literalEnumCase1
                  ;
 

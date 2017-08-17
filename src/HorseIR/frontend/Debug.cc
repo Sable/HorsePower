@@ -54,20 +54,23 @@ const char *rawProgram = ""
 
 int main (int argc, const char *argv[])
 {
-  const std::string raw = R"({[`name -> ("a", "b")], age -> (1, 2):i32} : ktable)";
+  const std::string raw = R"(goto [entry] (1, 1, 0):bool ; )";
 
   antlr4::ANTLRInputStream stream (raw);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.literal ();
+  auto context = parser.statement ();
 
   ast::ASTNode::ASTNodeMemory mem;
 
   auto astNode = ast::CSTConverter::convert (mem, context);
+  auto duplicateASTNode = astNode->duplicateDeep (mem);
+
   astNode->setEnclosingFilename ("stdin");
   std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
   std::cout << astNode->getNumNodesRecursively () << std::endl;
+  std::cout << duplicateASTNode->toString () << std::endl;
 
 }

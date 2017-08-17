@@ -59,3 +59,12 @@
 #include "operand/DictionaryLiteral.h"
 #include "operand/TableLiteral.h"
 #include "operand/KeyTableLiteral.h"
+#include "operand/EnumerationLiteral.h"
+
+#include "statement/Statement.h"
+#include "statement/LabelStatement.h"
+#include "statement/AssignStatement.h"
+#include "statement/InvokeStatement.h"
+#include "statement/PhiStatement.h"
+#include "statement/ReturnStatement.h"
+#include "statement/BranchStatement.h"
