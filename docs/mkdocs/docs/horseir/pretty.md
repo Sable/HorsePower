@@ -21,7 +21,7 @@ We propose a couple of pretty printing modes as follows.
 #### Short
 
 ```no-highlight
-(10,20):short
+(10,20):i16
 ```
 
 #### Int
@@ -130,11 +130,11 @@ Input literal:
 Output:
 
 ```no-highlight
-| col1 | col2 |
----------------
-| a    | 1    |
-| b    | 2    |
-| c    | 3    |
+col1 col2
+---------
+a    1   
+b    2   
+c    3   
 ```
 
 #### Keyed table
@@ -148,11 +148,11 @@ Input literal:
 Output:
 
 ```no-highlight
-| col1 | col2 |
----------------
-| a    | 1    |
-| b    | 2    |
-| c    | 3    |
+col1 | col2
+-----------
+a    | 1   
+b    | 2   
+c    | 3   
 ```
 
 

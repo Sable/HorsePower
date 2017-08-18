@@ -8,38 +8,37 @@ type system.
 
 **Basic types**
 
-|  Name     |  Type     | Byte   |  Description                  |
-| :---------| :---------| :------| :-----------------------------|
-| boolean   | bool      | 1\*    | `0` (false) and `1` (true)    |
-| byte      | i8        | 1      | Basic unit                    |
-| string    | str       | 2      | Unicode                       |
-| short     | i16       | 2      | Short integer                 |
-| int       | i32       | 4      | Integer                       |
-| long      | i64       | 8      | Long integer (default, x64)   |
-| float     | f32       | 4      | Single precision              |
-| double    | f64       | 8      | Double precision              |
-| complex   | complex   | 16     | Complex number                |
-| symbol    | sym       | 8      | Symbol, but stored in integer |
-| string    | str       | 8      | String                        |
-| function  | func      | 8      | Function literal              |
-| month     | m         | 4      | Month (YYYY.MM)               |
-| date      | d         | 4      | Date (YYYY.MM.DD)             |
-| date time | z         | 8      | Date time                     |
-| minute    | u         | 4      | Minute (hh:mm)                |
-| second    | v         | 4      | Second (hh:mm:ss)             |
-| time      | t         | 4      | Time (hh:mm:ss.ll)            |
+| Name      | Alias    | Short | Byte   | Description                   |
+| :---------| :--------| :-----| :------| :-----------------------------|
+| boolean   | bool     | B     | 1\*    | `0` (false) and `1` (true)    |
+| char      | i8       | C     | 1      | Basic unit                    |
+| short     | i16      | H     | 2      | Short integer                 |
+| int       | i32      | I     | 4      | Integer                       |
+| long      | i64      | L     | 8      | Long integer (default, x64)   |
+| float     | f32      | F     | 4      | Single precision              |
+| double    | f64      | E     | 8      | Double precision              |
+| complex   | complex  | X     | 16     | Complex number                |
+| symbol    | sym      | Q     | 8      | Symbol, but stored in integer |
+| string    | str      | S     | 8      | String                        |
+| month     | m        | M     | 4      | Month (YYYY.MM)               |
+| date      | d        | D     | 4      | Date (YYYY.MM.DD)             |
+| date time | z        | Z     | 8      | Date time                     |
+| minute    | u        | U     | 4      | Minute (hh:mm)                |
+| second    | v        | V     | 4      | Second (hh:mm:ss)             |
+| time      | t        | T     | 4      | Time (hh:mm:ss.ll)            |
+| function  | func     |       | 8      | Function literal              |
 
 <small>\* In future, 1-bit bool will be supported.</small>
 
 **Compound types**
 
-|  Name      |  Type     |  Description                  |
-| :----------| :---------| :-----------------------------|
-| list       | list      | Collection of items           |
-| dictionary | dict      | Key to value                  |
-| enumeration| enum      | Mapping                       |
-| table      | table     | Collection of columns         |
-| keyed table| ktable    | Two normal tables             |
+| Name       | Alias     | Short | Description                   |
+| :----------| :---------| :-----| :-----------------------------|
+| list       | list      | G     | Collection of items           |
+| dictionary | dict      | N     | Key to value                  |
+| enumeration| enum      | Y     | Mapping                       |
+| table      | table     | A     | Collection of columns         |
+| keyed table| ktable    | K     | Two normal tables             |
 
 See more about [type examples](type_examples.md).
 

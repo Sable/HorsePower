@@ -28,3 +28,7 @@ At current stage, we focus on the research ideas as follows.
 - Auto tool      : ANTLR4
 - Parallelism    : OpenMP/Pthread/CUDA/OpenCL
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
+
+### Experiments
+
+- [Configurations](eval/settings.md)

@@ -2,14 +2,10 @@
 
 ## Rules
 
-There are a couple of senarios we may need different names.
+There are a couple of naming rules we need to consider: 1) *module names*, 2)
+*method names*, 3) *variable names*, and 4) *type names*.
 
-1. [Module names](#module)
-1. [Method names](#method)
-1. [Variable names](#variable)
-1. [Type names](#type)
-
-### <p id="module">Module names</p>
+### 1. Module names
 
 A module name consists of a standard name: starting with a letter; following
 with letters, numbers, hyphens and underscores; ending with a letter or a
@@ -32,7 +28,7 @@ module default{
 **Note:** any method declared without a module around it, is considered as a
 member of the default module.
 
-### <p id="method">Method names</p>
+### 2. Method names
 
 A method name is the same as the module name in the method definition.
 However, when it is invoked from a method outside the current module, a
@@ -46,7 +42,7 @@ A compound name is concatenated by a dot (".").
 compound_name = name "." name
 ```
 
-### <p id="variable">Variable names</p>
+### 3. Variable names
 
 A variable name should follow the same definition of a module name.  In fact, it usually comes with an associated type in a variable assignment.
 
@@ -54,7 +50,7 @@ A variable name should follow the same definition of a module name.  In fact, it
 statement = name type assign expression
 ```
 
-### <p id="type">Type names</p>
+### 4. Type names
 
 There are kinds of types as follows
 

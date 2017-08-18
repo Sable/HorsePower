@@ -1,6 +1,6 @@
 # HorsePower
 
-In order to explore a new way for improving the performance of database
+In order to explore a new method to improve the performance of database
 queries, we conduct the research in combining array programming languages and
 database systems.   Our project, *HorsePower*, aims at optimizing standard SQL
 queries at a level of an array-based intermediate representative (IR).  An
