@@ -49,6 +49,9 @@ V getTableCol           (V x, L k);
 L getTableRowNumber     (V x);
 L getTableColNumber     (V x);
 
+I getDatetimeOp         (Q id);
+D calcDate              (D x, L v, I op);
+
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);
 B isTypeGroupReal       (L t);

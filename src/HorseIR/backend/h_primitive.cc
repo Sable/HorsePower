@@ -88,7 +88,10 @@ L pfnMatch(V z, V x, V y){
     R 0;
 }
 
-L pfnMeta(V z, V x);
+L pfnMeta(V z, V x){
+    R 0;
+}
+
 L pfnKeys(V z, V x){
     if(isTable(x) || isDict(x)){
         L lenZ = vn(x);
@@ -492,6 +495,23 @@ L pfnWhere(V z, V x){
         DOI(vn(x), lenZ+=vB(x,i))
         initV(z,typZ,lenZ);
         DOI(vn(x), if(vB(x,i))vL(z,c++)=i)
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnSum(V z, V x){
+    if(isTypeGroupReal(vp(x))){
+        L typZ = H_F==vp(x)?H_F:H_E;
+        initV(z,H_E,1);
+        switch(vp(x)){
+            caseB {E t=0; DOI(vn(x), t+=vB(x,i)) ve(z)=t;} break;
+            caseH {E t=0; DOI(vn(x), t+=vH(x,i)) ve(z)=t;} break;
+            caseI {E t=0; DOI(vn(x), t+=vI(x,i)) ve(z)=t;} break;
+            caseL {E t=0; DOI(vn(x), t+=vL(x,i)) ve(z)=t;} break;
+            caseF {F t=0; DOI(vn(x), t+=vF(x,i)) vf(z)=t;} break;
+            caseE {E t=0; DOI(vn(x), t+=vE(x,i)) ve(z)=t;} break;
+        }
         R 0;
     }
     else R E_DOMAIN;
@@ -1414,5 +1434,52 @@ L pfnMember(V z, V x, V y){
     else R E_DOMAIN;
     R 0;
 }
+
+/*
+ * datetime_add(d, 1:64, `year)
+ */
+L pfnDatetimeAdd(V z, V x, V y, V m){
+    if(isTypeGroupDate(vp(x)) && isTypeGroupInt(vp(y)) && isOneSymbol(m)){
+        I op = getDatetimeOp(vq(m));
+        if(isOne(x)){
+            L typZ = vp(x);
+            L lenZ = vn(y);
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempY, y, H_L));
+            initV(z,typZ,lenZ);
+            switch(vp(x)){
+                caseD DOI(lenZ, vD(z,i)=calcDate(vd(x),vL(tempY,i),op)) break;
+                default: R E_NOT_IMPL;  /* caseM, caseZ */
+            }
+        }
+        else if(isOne(y)){
+            L typZ = vp(x);
+            L lenZ = vn(x);
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempY, y, H_L));
+            initV(z,typZ,lenZ);
+            switch(vp(x)){
+                caseD DOI(lenZ, vD(z,i)=calcDate(vD(x,i),vl(tempY),op)) break;
+                default: R E_NOT_IMPL;  /* caseM, caseZ */
+            }
+        }
+        else if(isEqualLength(x,y)){
+            L typZ = vp(x);
+            L lenZ = vn(x);
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempY, y, H_L));
+            initV(z,typZ,lenZ);
+            switch(vp(x)){
+                caseD DOI(lenZ, vD(z,i)=calcDate(vD(x,i),vL(tempY,i),op)) break;
+                default: R E_NOT_IMPL;  /* caseM, caseZ */
+            }
+        }
+        else R E_LENGTH;
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
+
 
 

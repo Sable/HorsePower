@@ -92,6 +92,7 @@ L pfnFact          (V z, V x);
 L pfnReverse       (V z, V x);
 L pfnUnique        (V z, V x);
 L pfnWhere         (V z, V x);
+L pfnSum           (V z, V x);
 
 L pfnReduce        (V z, V x, L op);
 L pfnMin           (V z, V x);
@@ -157,6 +158,8 @@ L pfnEnum          (V z, V x, V y);
 L pfnKTable        (V z, V x, V y);
 
 L pfnMember        (V z, V x, V y);
+
+L pfnDatetimeAdd   (V z, V x, V y, V m);
 
 #ifdef	__cplusplus
 }

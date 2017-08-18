@@ -91,7 +91,10 @@ void loadItem(V x, L k, L typ, S s){
         caseB xB(k) = atoi(s); break;
         caseI xI(k) = atoi(s); break;
         caseL xL(k) = atol(s); break;
-        caseQ xQ(k) = insertSym(createSymbol(s)); break;
+        caseF xF(k) = atof(s); break;
+        caseE xE(k) = atof(s); break;
+        caseQ xQ(k) = getSymbol(s); break;
+        caseD {I a,b,c; sscanf(s,"%d-%d-%d",&a,&b,&c); xD(k) = a*10000+b*100+c;} break;
     }
 }
 
@@ -113,7 +116,7 @@ S trimRight(S s){
     if(STRING_NONEMPTY(s)){
         t = s + strlen(s) - 1;
         while(t!=s && SKIP_SET(*t)) t--;
-        *(t+(t!=s))=0;
+        *(t+(!SKIP_SET(*t)))=0;
     }
     R s;
 }
@@ -140,7 +143,7 @@ L getTypeStr(L x, S buff){
     L c = 0;
     switch(x){
         caseB c=SP(buff, "bool");    break;
-        caseH c=SP(buff, "short");   break;
+        caseH c=SP(buff, "i16");     break;
         caseI c=SP(buff, "i32");     break;
         caseL c=SP(buff, "i64");     break;
         caseF c=SP(buff, "f32");     break;
@@ -154,7 +157,7 @@ L getTypeStr(L x, S buff){
         caseU c=SP(buff, "u");       break;
         caseW c=SP(buff, "w");       break;
         caseT c=SP(buff, "t");       break;
-        caseG c=SP(buff, "List");    break;
+        caseG c=SP(buff, "list");    break;
         caseN c=SP(buff, "dict");    break;
         caseY c=SP(buff, "enum");    break;
         caseA c=SP(buff, "table");   break;
@@ -188,12 +191,12 @@ L getComplexStr(X x, S buff){
 L getBasicItemStr(V x, L k, S buff, B hasTick){
     L c = 0;
     switch(xp){
-        caseB c=SP(buff, "%d"  , xB(k));   break;
-        caseH c=SP(buff, "%d"  , xH(k));   break;
-        caseI c=SP(buff, "%d"  , xI(k));   break;
-        caseL c=SP(buff, "%lld", xL(k));   break;
-        caseF c=SP(buff, "%f"  , xF(k));   break;
-        caseE c=SP(buff, "%lf" , xE(k));   break;
+        caseB c=SP(buff, "%d"   , xB(k));   break;
+        caseH c=SP(buff, "%d"   , xH(k));   break;
+        caseI c=SP(buff, "%d"   , xI(k));   break;
+        caseL c=SP(buff, "%lld" , xL(k));   break;
+        caseF c=SP(buff, "%g"   , xF(k));   break;
+        caseE c=SP(buff, "%.2lf", xE(k));   break;
         caseX c=getComplexStr(xX(k),buff); break;
         caseQ c=hasTick? \
                 printSymTick(xQ(k), buff): \

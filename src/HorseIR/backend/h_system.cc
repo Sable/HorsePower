@@ -330,6 +330,26 @@ L getTableColNumber(V x){
 }
 
 
+I getDatetimeOp(Q id){
+    S str = getSymbolStr(id);
+    if(!strcmp(str, "year")) R 0;
+    else if(!strcmp(str, "month")) R 1;
+    else if(!strcmp(str, "day")) R 2;
+    else R -1;
+}
+
+D calcDate(D x, L v, I op){
+    I year  = x/10000;
+    I month = x/100%100;
+    I day   = x%100;
+    switch(op){
+        case 0: year += v; break;
+        case 1: month+= v; break;
+        case 2: day  += v; break;
+    }
+    R year*10000+month*100+day;
+}
+
 /* Checking types */
 
 /* 1-level */

@@ -137,7 +137,7 @@ void testTypes(){
     testL();
     testX();
     testS();
-    testG();
+    // testG();
     testY();
     testN();
     testA(tableEmp);
