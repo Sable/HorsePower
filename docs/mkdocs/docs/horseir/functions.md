@@ -143,8 +143,8 @@ Status
 | 17 | nor(x,y)             | NOR                         | (B;B)                       | B                             | [link](builtin/logic.md#nor) |&#10004;|
 | 18 | xor(x,y)             | XOR                         | (B;B)                       | B                             | [link](builtin/logic.md#xor) |&#10004;|
 | 19 | datetime_diff(x,y)\* | Datetime diff               | Pending                     | Pending                       | [link](date.md#datetime-diff)| |
-| 20 | datetime_add(x,y)    | Datetime add                | Pending                     | Pending                       | [link](date.md#datetime-add) | |
-| 21 | datetime_sub(x,y)    | Datetime sub                | Pending                     | Pending                       | [link](date.md#datetime-sub) | |
+| 20 | datetime_add(x,y,m)  | Datetime add                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-add) |&#10004;|
+| 21 | datetime_sub(x,y,m)  | Datetime sub                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-sub) | |
 
 \* [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp) | 
 \*\* CP: Comparable
