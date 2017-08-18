@@ -3319,6 +3319,100 @@ struct CSTConverter {
     branchStatement->setOperand (operand);
     return branchStatement;
   }
+
+  using MethodContext = HorseIRParser::MethodContext;
+
+  static Method *convert (ASTNodeMemory &mem, MethodContext *context)
+  {
+    assert (context != nullptr);
+    const auto nameContexts = context->name ();
+    const auto typeContexts = context->type ();
+    const auto statementContexts = context->statement ();
+
+    std::string methodName = nameContexts[0]->id->getText ();
+    const std::size_t numParameter = nameContexts.size () - 1;
+    std::vector<std::pair<Identifier *, Type *>> parameters{};
+    parameters.reserve (numParameter);
+    for (std::size_t iter = 0; iter < numParameter; ++iter)
+      {
+        const auto paramNameContext = nameContexts[iter + 1];
+        const auto paramTypeContext = typeContexts[iter];
+        Identifier *identifier = convert (mem, paramNameContext);
+        Type *type = convert (mem, paramTypeContext);
+        parameters.emplace_back (std::make_pair (identifier, type));
+      }
+    const auto retTypeContext = typeContexts[numParameter];
+    Type *retType = convert (mem, retTypeContext);
+    std::vector<Statement *> statements{};
+    statements.reserve (statementContexts.size ());
+    std::transform (
+        statementContexts.cbegin (), statementContexts.cend (),
+        std::back_inserter (statements),
+        [&] (StatementContext *statementContext) -> Statement *
+        { return convert (mem, statementContext); });
+
+    auto method = mem.alloc<Method> (context);
+    method->setMethodName (std::move (methodName));
+    method->setParameters (std::move (parameters));
+    method->setReturnType (retType);
+    method->setStatements (std::move (statements));
+
+    return method;
+  }
+
+  using ModuleContext = HorseIRParser::ModuleContext;
+
+  static Module *convert (ASTNodeMemory &mem, ModuleContext *context)
+  {
+    assert (context != nullptr);
+    std::string moduleName{};
+    std::vector<Module::GlobalVariableEntryType> globalVaraibles{};
+    std::vector<Module::ImportedModuleEntryType> importedModules{};
+    std::vector<Method *> methods{};
+
+    moduleName = context->name ()->getText ();
+    const auto moduleContentContexts = context->moduleContent ();
+    for (const auto cst : moduleContentContexts)
+      {
+        HorseIRParser::MethodContext *method = nullptr;
+        HorseIRParser::GlobalVarContext *gVar = nullptr;
+        HorseIRParser::ImportModuleContext *iModule = nullptr;
+
+        if ((method = cst->method ()) != nullptr)
+          { methods.push_back (convert (mem, method)); }
+        else if ((gVar = cst->globalVar ()) != nullptr)
+          {
+            Identifier *id = convert (mem, gVar->name ());
+            Type *type = convert (mem, gVar->type ());
+            globalVaraibles.push_back (std::make_pair (id, type));
+          }
+        else if ((iModule = cst->importModule ()) != nullptr)
+          {
+            const std::string rawString = iModule->COMPOUND_ID ()->getText ();
+            std::string first{};
+            std::string second{};
+            const auto dotPos = std::find (
+                rawString.cbegin (), rawString.cend (), '.'
+            );
+            if (dotPos == rawString.cend ())
+              throw CSTConverterException (context);
+            std::copy (rawString.cbegin (), dotPos,
+                       std::back_inserter (first));
+            std::copy (std::next (dotPos), rawString.cend (),
+                       std::back_inserter (second));
+            importedModules.push_back (
+                std::make_pair (std::move (first), std::move (second))
+            );
+          }
+      }
+
+    auto module = mem.alloc<Module> (context);
+    module->setModuleName (std::move (moduleName));
+    module->setMethods (std::move (methods));
+    module->setGlobalVariables (std::move (globalVaraibles));
+    module->setImportedModules (std::move (importedModules));
+    return module;
+  }
 };
 
 }

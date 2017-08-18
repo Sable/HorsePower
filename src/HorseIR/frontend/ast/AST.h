@@ -1,5 +1,8 @@
 #pragma once
 
+#define HORSEIR_AST_PRETTY_PRINT_INDENT     "  "
+#define HORSEIR_AST_PRETTY_PRINT_LINE_BREAK "\n"
+
 #include <vector>
 #include <string>
 #include <cassert>
@@ -68,3 +71,6 @@
 #include "statement/PhiStatement.h"
 #include "statement/ReturnStatement.h"
 #include "statement/BranchStatement.h"
+
+#include "Method.h"
+#include "Module.h"

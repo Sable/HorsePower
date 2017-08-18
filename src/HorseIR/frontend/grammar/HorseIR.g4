@@ -1,6 +1,6 @@
 grammar HorseIR;
-program          : (moudle | moduleContent)* ;
-moudle           : 'module' name '{' moduleContent* '}' ;
+program          : (module | moduleContent)* ;
+module           : 'module' name '{' moduleContent* '}' ;
 moduleContent    : method
                  | globalVar
                  | importModule
