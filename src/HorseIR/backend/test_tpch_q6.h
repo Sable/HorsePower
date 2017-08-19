@@ -75,21 +75,19 @@ L simulateQ6(){
     e = pfnAnd(t13,t4,t6);                                            CHECK(e,16);
     e = pfnAnd(t14,t13,t9);                                           CHECK(e,17);
     e = pfnAnd(t15,t14,t12);                                          CHECK(e,18);
-    printV(t15);
+    // printV(t15);
 
     e = pfnCompress(t16,t15,t0);                                      CHECK(e,19);
     e = pfnCompress(t17,t15,t1);                                      CHECK(e,20);
     e = pfnMul(t18,t16,t17);                                          CHECK(e,21);
-    printV(t18);
     e = pfnSum(t19,t18);                                              CHECK(e,22);
-    printV(t19);
 
     e = pfnTolist(t20,literalSym((S)"revenue"));                      CHECK(e,23);
     e = pfnEnlist(t21,t19);                                           CHECK(e,24);
     e = pfnTable(t22,t20,t21);                                        CHECK(e,25);
 
     P("Result of the Query 6:\n\n");
-    printTablePretty(t22, -1);
+    printV(t22);
     R 0;
 }
 

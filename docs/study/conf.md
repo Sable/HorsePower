@@ -6,6 +6,17 @@
     + PACM: one-column
     + SIGPLAN: two-column
 
+## Previous years
+
+Data Management on New Hardware
+
+- https://link.springer.com/book/10.1007/978-3-319-56111-0
+
+IMDM (In-Memory Data Management and analytics)
+
+- http://imdm.ws/
+- Organized jointly both ADMS and IMDM
+
 ## Year 2018
 
 SIGMOD 2018
@@ -30,6 +41,5 @@ PLDI 2018
 - http://conf.researchr.org/home/pldi-2018
 - Important dates
     + Conference date: Mon 18 - Fri 22 June 2018
-
 
 
