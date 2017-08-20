@@ -12,6 +12,7 @@ pages:
     - Naming       : 'horseir/naming.md'
     - Types        : 'horseir/types.md'
     - Functions    : 'horseir/functions.md'
+    - Memory       : 'horseir/memory.md'
     - Database     : 'horseir/database.md'
     - Pretty print : 'horseir/pretty.md'
 #- HorseSQL: []
