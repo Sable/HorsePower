@@ -22,10 +22,21 @@ deallocate dead blocks and allocate available memory.
 
 ## Buddy system
 
-### Allocation
+**Initialization**
 
-### Deallocation
+A initial block is created for initializing systems, including a symbol pool.
 
+**Allocation**
+
+When a request is received, our system tries to find a "just fit" block for it.
+It may result in allocating a big memory chunk for a relatively small request
+(e.g. request 33, and return 64).
+
+**Deallocation**
+
+When a block should be deallocated, our system checks its adjacent block.  If
+both are free, they could be coalesced in a larger block.  This operation could
+do recursively until one side is occupied.
 
 ## Copy-on-write
 
@@ -37,6 +48,22 @@ important for avoiding unncessary copies.
 
 ### Technical details
 
+**Reference count**
+
+A leading slot in the allocated memory stores a counter to get the reference
+count of the memory block.
+
+Here is a simple example to explain how reference count works.
+
+```no-highlight
+1. A -> M0, ref 1   // allocate M0 to A, initialize reference count to 1
+2. B -> A , ref 2   // B points to A, ref(M0) = 2
+3. <Update B>       // replicate M0 to M1
+4. <Update ref>     // update ref(M0) = 1, ref(M1) = 1
+```
+
+When a reference count goes to zero, it means that the corresponding memory
+block is not used anymore and it should be freed in some way.
 
 ## Data compression
 
@@ -47,7 +74,17 @@ Two kinds of data compression
 
 ### Bit-vector
 
-/* write docs here */
+In a boolean type, there are only two states: true and false.  Since byte is
+the smallest unit for resource allocation, it is convenient to use one byte to
+represent the boolean type.  On the other hand, one byte consists of 8 bits.
+One bit is sufficient to store the boolean information: 0 (false) and 1 (true).
+It is obvious that using bits could save the required space. Moreover, it is
+much faster in using bit-based operations than normal operators.
+
+However, implementing bit-vector may significantly increase the complexity of
+the system.  It is necessary to perform bit fetching and updating before the
+real bit values are manipulated.
+
 
 ### Encoding
 
@@ -58,7 +95,7 @@ techniques, we consider data transformation to make a dense vector.
 **Steps**
 
 1. Calculate selectivity in the first operation on a table column
-2. If the selectivity is lower than a threshold (e.g. 0.02), goto **step 4**
+2. If the selectivity is lower than a threshold (e.g. 1/64), goto **step 4**
 3. Perform normal operations, goto **step 5**
 4. Encode vectors and pass encoding types
 5. Get the result of computation
@@ -78,5 +115,34 @@ probably a need to convert an encoding type to a normal type.  In a table, if
 system memory is sufficient, the column with the encoding type should be
 expanded to a regular column so that the performance of queries can be
 improved.
+
+**Compressed format**
+
+From the bit-vector section, we know that bits could save at most 8x space.
+When many zeros are found, we intend to store non-zero elements.
+A basic approach is to remember the location of non-zero elements, such as:
+
+```no-highlight
+  0 0 1 0 0 1 0 ... 0  // only 2 non-zeros
+> 2 5                  // store indices
+```
+
+We think 0.015625 (or 1/64) is a reasonable threshold for saving indices
+instead of using bit vectors.  One index needs 8 bytes and one byte has 8 bits.
+Therefore, at least 64 bits for one non-zero element are necessary for using
+the compressed format.
+
+More intuitively, we can see the example below.
+
+```no-highlight
+  x:bool = @gt(salary, 100000);
+```
+
+We try to find all recores whose salary is greater than 100K.  Presumably,
+there are 1 thousand records.  If there are less than 16 records satisfy the
+selection criteria, we would like to change the value of `x` to a compressed
+format.
+
+
 
 
