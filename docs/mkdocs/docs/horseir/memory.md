@@ -17,8 +17,8 @@ We design an efficient memory system with a flexible scheme to allocate and
 deallocate memory for HorseIR runtime execution. We implement a classic buddy
 system which is grabage collector free.  For instance, if a request with 25
 bytes is received, the system will allocate 32 bytes instead of exact 25 bytes.
-Moreover, the coalescing nature of the buddy system could efficiently
-deallocate dead blocks and allocate available memory.
+Moreover, the coalescing nature of the buddy system could allocate and
+deallocate memory efficiently.
 
 ## Buddy system
 

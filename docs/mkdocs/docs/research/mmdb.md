@@ -6,9 +6,9 @@ Refer to Faerber et al. **Main Memory Database System**.
 
 | ID           | Authors             | Title (link to download)                                                               | Year | Read?   | Print?  |
 | :----------- | :------------------ | :--------------------------------------------------------------------------------------|:---- | :------ | :------ |
-| [84](#p84)   | Leis        et al.  | [How good are query optimizers, really?](http://bit.ly/2vQjEE4)                        | 2015 |         | &#10004;|
+| [84](#p84)   | Leis        et al.  | [How good are query optimizers, really?](http://bit.ly/2vQjEE4)                        | 2015 | &#10004;| &#10004;|
 | [98](#p98)   | May         et al.  | [SAP HANA](http://bit.ly/2fTrPeZ)                                                      | 2015 |         |         |
-| [47](#p47)   | Freedman    et al.  | [Compilation in the Microsoft SQL server Hekaton engine](http://bit.ly/2woScQh)        | 2014 |         | &#10004;|
+| [47](#p47)   | Freedman    et al.  | [Compilation in the Microsoft SQL server Hekaton engine](http://bit.ly/2woScQh)        | 2014 | &#10004;| &#10004;|
 | [107](#p107) | Muller      et al.  | [Adaptive string dictionary compression in IMDB](http://bit.ly/2whBROe)                | 2014 |         |         |
 | [132](#p132) | Rodiger     et al.  | [Locality-sensitive operators for parallel MMDB clusters](http://bit.ly/2whEtLH)       | 2014 |         |         |
 | [159](#p159) | Zheng       et al.  | [Fast databases with fast durability and recovery through ...](http://bit.ly/2waqebi)  | 2014 |         |         |
@@ -51,6 +51,57 @@ Refer to Faerber et al. **Main Memory Database System**.
 
 ## Content of papers
 
-### <p id="p4">Column-Stores vs. Row-Stores: How Different are they really?</p>
+### <p id="p4">P4: Column-Stores vs. Row-Stores: How Different are they really?</p>
+
+### <p id="p47">P47: Compilation in the Microsoft SQL Server Hekaton Engine</p>
+
+This paper introduces a query engine, Hekaton, developed at Microsoft for
+improving the throughput of OLTP.  The goal of Hekaton is to achieve 10-100x
+speedup.  It compiles T-SQL (an extension of SQL) into C code and later
+compiled to machine code using the Microsoft Visual C/C++ compiler.  On the
+other hand, it only handles stored procedures with several restrictions (see
+section 3.3).
+
+Hekaton has a distinct data structures for compiling SQL.  Thus, the system has
+to distinguish Hekaton tables and regular tables, as well as compiled stored
+procedures and interpreted stored procedures. It considers optimizing indexes
+and reducing unnecessary operations.
+
+After all, Hekaton requires users to decide which tables and stored procedures
+to be compiled and injected. Moreover, the generated C code is translated from
+an abstract syntax tree directly without using any optimizations (see Figure
+1).
+
+
+### <p id="p84">P84: How good are query optimizers, really?</p>
+
+This paper has the following contributions.
+
+1. Introduce the Join Order Benchmark (JOB);
+2. Show that estimates are not always effective;
+3. Explore how cardinality estimate impacts the query performance.
+
+There are a couple of views we could summarize.
+
+- The paper cares the join order before generating optimal execution plans (See Figure 1)
+- Provide a IMDB (a benchmark which contains a movie database)
+
+
+### <p id="p143">P143: The VoltDB main memory DBMS</p>
+
+This paper is an introductory article for a new main-memory database, VoltDB.
+There is no much technical details about VoltDB.  Instead, it gives the
+overview of VoltDB and describes the current development status of the project.
+
+Features of VoltDB
+
+- ModernTP: modern transactional processing
+- Complete in-memory operation (no use of virtual memory)
+- Cluster based (major LAN)
+- Single-thread solution for concurrent transaction control
+- High-thoughput in an experiment (The Volter system)
+
+**Suggestions**: It is better if we could find formal technical papers about
+VoltDB for further readings.
 
 
