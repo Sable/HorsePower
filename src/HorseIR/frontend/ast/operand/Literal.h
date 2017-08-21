@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ostream>
 #include "../AST.h"
 
 namespace horseIR

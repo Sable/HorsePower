@@ -32,10 +32,6 @@ class Integer8Literal : public VectorLiteral<std::int8_t> {
         VectorLiteral<std::int8_t>::__duplicateDeep (mem, this);
     return integer8Literal;
   }
-
- protected:
-  std::string elementToString (const std::int8_t &elementType) const override
-  { return std::to_string (elementType); }
 };
 
 }

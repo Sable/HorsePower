@@ -29,7 +29,6 @@ class BranchStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   BranchStatement *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::string targetLabelName{};
@@ -83,16 +82,6 @@ BranchStatement::duplicateDeep (ASTNodeMemory &mem) const
   auto branchStatement = mem.alloc<BranchStatement> ();
   branchStatement->__duplicateDeep (mem, this);
   return branchStatement;
-}
-
-inline std::string BranchStatement::toString () const
-{
-  std::ostringstream stream;
-  stream << "goto [ " << targetLabelName << " ]";
-  if (operand != nullptr)
-    { stream << ' ' << operand->toString (); }
-  stream << ';';
-  return stream.str ();
 }
 
 inline void

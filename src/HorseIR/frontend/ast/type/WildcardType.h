@@ -20,7 +20,6 @@ class WildcardType : public Type {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   WildcardType *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   void __duplicateDeep (ASTNodeMemory &mem, const WildcardType *type);
@@ -46,9 +45,6 @@ inline WildcardType *WildcardType::duplicateDeep (ASTNodeMemory &mem) const
   wildcardType->__duplicateDeep (mem, this);
   return wildcardType;
 }
-
-inline std::string WildcardType::toString () const
-{ return "?"; }
 
 inline void
 WildcardType::__duplicateDeep (ASTNodeMemory &mem, const WildcardType *type)

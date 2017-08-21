@@ -20,7 +20,6 @@ class Identifier : public Operand {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   Identifier *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
   std::string getName () const;
   template<class T>
@@ -52,9 +51,6 @@ inline Identifier *Identifier::duplicateDeep (ASTNodeMemory &mem) const
   identifier->__duplicateDeep (mem, this);
   return identifier;
 }
-
-inline std::string Identifier::toString () const
-{ return name; }
 
 inline std::string Identifier::getName () const
 { return name; }

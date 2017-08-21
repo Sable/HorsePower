@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -10,6 +9,9 @@ namespace ast
 
 class PhiStatement : public Statement {
  public:
+  using RHSMapIterator = std::map<std::string, Operand *>::iterator;
+  using RHSMapConstIterator = std::map<std::string, Operand *>::const_iterator;
+
   PhiStatement ();
   explicit PhiStatement (const CSTType *cst);
   PhiStatement (PhiStatement &&statement) = default;
@@ -30,6 +32,10 @@ class PhiStatement : public Statement {
   void setLHSType (Type *type);
 
   std::map<std::string, Operand *> getRHSMap () const;
+  RHSMapIterator rhsMapBegin ();
+  RHSMapIterator rhsMapEnd ();
+  RHSMapConstIterator rhsMapConstBegin () const;
+  RHSMapConstIterator rhsMapConstEnd () const;
   template<class T>
   std::enable_if_t<
       std::is_assignable<std::map<std::string, Operand *>, T>::value
@@ -39,7 +45,6 @@ class PhiStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   PhiStatement *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::pair<Identifier *, Type *> lhs;
@@ -95,6 +100,18 @@ inline void PhiStatement::setLHSType (Type *type)
 inline std::map<std::string, Operand *> PhiStatement::getRHSMap () const
 { return rhs; }
 
+inline PhiStatement::RHSMapIterator PhiStatement::rhsMapBegin ()
+{ return rhs.begin (); }
+
+inline PhiStatement::RHSMapIterator PhiStatement::rhsMapEnd ()
+{ return rhs.end (); }
+
+inline PhiStatement::RHSMapConstIterator PhiStatement::rhsMapConstBegin () const
+{ return rhs.cbegin (); }
+
+inline PhiStatement::RHSMapConstIterator PhiStatement::rhsMapConstEnd () const
+{ return rhs.cend (); }
+
 template<class T>
 inline std::enable_if_t<
     std::is_assignable<std::map<std::string, Operand *>, T>::value
@@ -138,28 +155,6 @@ inline PhiStatement *PhiStatement::duplicateDeep (ASTNodeMemory &mem) const
   auto phiStatement = mem.alloc<PhiStatement> ();
   phiStatement->__duplicateDeep (mem, this);
   return phiStatement;
-}
-
-inline std::string PhiStatement::toString () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = phi (";
-  std::transform (
-      rhs.cbegin (), rhs.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (const std::pair<std::string, Operand *> &entryPair) -> std::string
-      {
-        std::ostringstream s;
-        s << "[ " << entryPair.first << " ] "
-          << ((entryPair.second == nullptr) ? "nullptr"
-                                            : entryPair.second->toString ());
-        return s.str ();
-      });
-  stream << ");";
-  return stream.str ();
 }
 
 inline void

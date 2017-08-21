@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -21,6 +20,8 @@ struct DictionaryEntry {
 class DictionaryLiteral : public Literal {
  public:
   using ElementType = storage::DictionaryEntry;
+  using ElementIterator = std::vector<ElementType>::iterator;
+  using ElementConstIterator = std::vector<ElementType>::const_iterator;
 
   DictionaryLiteral ();
   explicit DictionaryLiteral (const CSTType *cst);
@@ -32,6 +33,10 @@ class DictionaryLiteral : public Literal {
 
   bool isNull () const;
   std::vector<ElementType> getValue () const;
+  ElementIterator valueBegin ();
+  ElementIterator valueEnd ();
+  ElementConstIterator valueConstBegin () const;
+  ElementConstIterator valueConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_constructible<std::vector<ElementType>, T>::value>
   setValue (T &&valueContainer);
@@ -40,12 +45,10 @@ class DictionaryLiteral : public Literal {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   DictionaryLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::unique_ptr<std::vector<ElementType>> value = nullptr;
   void __duplicateDeep (ASTNodeMemory &mem, const DictionaryLiteral *literal);
-  std::string elementToString (const ElementType &elementType) const;
 };
 
 inline DictionaryLiteral::DictionaryLiteral ()
@@ -71,6 +74,20 @@ inline bool DictionaryLiteral::isNull () const
 inline std::vector<DictionaryLiteral::ElementType>
 DictionaryLiteral::getValue () const
 { return *value; }
+
+inline DictionaryLiteral::ElementIterator DictionaryLiteral::valueBegin ()
+{ return value->begin (); }
+
+inline DictionaryLiteral::ElementIterator DictionaryLiteral::valueEnd ()
+{ return value->end (); }
+
+inline DictionaryLiteral::ElementConstIterator
+DictionaryLiteral::valueConstBegin () const
+{ return value->cbegin (); }
+
+inline DictionaryLiteral::ElementConstIterator
+DictionaryLiteral::valueConstEnd () const
+{ return value->cend (); }
 
 template<class T>
 inline std::enable_if_t<
@@ -133,26 +150,6 @@ DictionaryLiteral::duplicateDeep (ASTNodeMemory &mem) const
   return dictionaryLiteral;
 }
 
-inline std::string DictionaryLiteral::toString () const
-{
-  std::ostringstream s;
-  if (value == nullptr)
-    {
-      s << "null :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-      return s.str ();
-    }
-  s << '{';
-  std::transform (
-      value->cbegin (), value->cend (),
-      misc::InfixOStreamIterator<std::string> (s, ", "),
-      [&] (const ElementType &element) -> std::string
-      { return elementToString (element); });
-  s << "} :"
-    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-  return s.str ();
-}
-
 inline void
 DictionaryLiteral::__duplicateDeep (ASTNodeMemory &mem,
                                     const DictionaryLiteral *literal)
@@ -190,22 +187,6 @@ DictionaryLiteral::__duplicateDeep (ASTNodeMemory &mem,
             return returnElement;
           });
     }
-}
-
-inline std::string
-DictionaryLiteral::elementToString (const ElementType &elementType) const
-{
-  std::ostringstream stream;
-  if (elementType.key != nullptr)
-    { stream << elementType.key->toString (); }
-  else
-    { stream << "nullptr"; }
-  stream << " -> ";
-  if (elementType.value != nullptr)
-    { stream << elementType.value->toString (); }
-  else
-    { stream << "nullptr"; }
-  return stream.str ();
 }
 
 }

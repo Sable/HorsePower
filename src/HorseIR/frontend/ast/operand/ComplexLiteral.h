@@ -33,18 +33,6 @@ class ComplexLiteral : public VectorLiteral<std::complex<double>> {
         VectorLiteral<std::complex<double>>::__duplicateDeep (mem, this);
     return complexLiteral;
   }
-
- protected:
-  std::string
-  elementToString (const std::complex<double> &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << elementType.real ()
-           << ((elementType.imag () >= 0) ? "+" : "")
-           << elementType.imag ()
-           << "i";
-    return stream.str ();
-  }
 };
 
 }

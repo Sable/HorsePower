@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -38,6 +37,11 @@ class VectorLiteral : public Literal {
     bool nullElement;
   };
 
+  using ElementIterator = typename std::vector<ElementType>::iterator;
+  using ElementConstIterator = typename std::vector<
+      ElementType
+  >::const_iterator;
+
   VectorLiteral (const ASTNodeClass &astNodeClass,
                  const LiteralClass &literalClass)
       : Literal (astNodeClass, literalClass)
@@ -57,6 +61,21 @@ class VectorLiteral : public Literal {
   std::vector<ElementType> getValue () const
   { return value; }
 
+  ElementIterator valueBegin ()
+  { return value.begin (); }
+
+  ElementIterator valueEnd ()
+  { return value.end (); }
+
+  ElementConstIterator valueConstBegin () const
+  { return value.cbegin (); }
+
+  ElementConstIterator valueConstEnd () const
+  { return value.cend (); }
+
+  typename std::vector<ElementType>::size_type size () const
+  { return value.size (); }
+
   template<class V>
   std::enable_if_t<std::is_assignable<std::vector<ElementType>, V>::value>
   setValue (V &&valueContainer)
@@ -74,27 +93,8 @@ class VectorLiteral : public Literal {
     return std::vector<ASTNode *>{static_cast<ASTNode *>(literalType)};
   }
 
-  std::string toString () const override
-  {
-    std::ostringstream stream;
-    stream << '(';
-    std::transform (
-        value.cbegin (), value.cend (),
-        misc::InfixOStreamIterator<std::string> (stream, ", "),
-        [=] (const ElementType &elementType) -> std::string
-        {
-          if (elementType.isNull ()) return "null";
-          return elementToString (elementType.getValue ());
-        });
-    stream << ") :"
-           << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-    return stream.str ();
-  }
-
  protected:
   std::vector<ElementType> value = {};
-  virtual std::string
-  elementToString (const T &elementType) const = 0;
 
   void __duplicateDeep (ASTNodeMemory &mem, const VectorLiteral *literal)
   {

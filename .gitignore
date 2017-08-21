@@ -2,3 +2,4 @@
 .DS_Store
 src/HorseIR/frontend/build/
 src/HorseIR/frontend/project_cloc.sh
+docs/slides/UCORE/acmart\.cls

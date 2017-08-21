@@ -31,10 +31,6 @@ class BoolLiteral : public VectorLiteral<bool> {
     boolLiter->VectorLiteral<bool>::__duplicateDeep (mem, this);
     return boolLiter;
   }
-
- protected:
-  std::string elementToString (const bool &elementType) const override
-  { return (elementType) ? "1" : "0"; }
 };
 
 }

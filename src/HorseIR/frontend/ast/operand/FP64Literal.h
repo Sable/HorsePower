@@ -31,14 +31,6 @@ class FP64Literal : public VectorLiteral<double> {
     fp64Literal->VectorLiteral<double>::__duplicateDeep (mem, this);
     return fp64Literal;
   }
-
- protected:
-  std::string elementToString (const double &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << std::scientific << elementType;
-    return stream.str ();
-  }
 };
 
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -40,12 +39,10 @@ class TableLiteral : public Literal {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   TableLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::unique_ptr<std::vector<ElementType>> value = nullptr;
   void __duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal);
-  std::string elementToString (const ElementType &elementType) const;
 };
 
 inline TableLiteral::TableLiteral ()
@@ -121,26 +118,6 @@ inline TableLiteral *TableLiteral::duplicateDeep (ASTNodeMemory &mem) const
   return tableLiteral;
 }
 
-inline std::string TableLiteral::toString () const
-{
-  std::ostringstream s;
-  if (value == nullptr)
-    {
-      s << "null :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-      return s.str ();
-    }
-  s << '{';
-  std::transform (
-      value->cbegin (), value->cend (),
-      misc::InfixOStreamIterator<std::string> (s, ", "),
-      [&] (const ElementType &element) -> std::string
-      { return elementToString (element); });
-  s << "} :"
-    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-  return s.str ();
-}
-
 inline void
 TableLiteral::__duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal)
 {
@@ -171,17 +148,6 @@ TableLiteral::__duplicateDeep (ASTNodeMemory &mem, const TableLiteral *literal)
             return returnElement;
           });
     }
-}
-
-inline std::string
-TableLiteral::elementToString (const ElementType &elementType) const
-{
-  std::ostringstream stream;
-  stream << elementType.head
-         << " -> "
-         << ((elementType.content == nullptr) ?
-             "nullptr" : elementType.content->toString ());
-  return stream.str ();
 }
 
 }

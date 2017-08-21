@@ -42,16 +42,6 @@ class DateLiteral : public VectorLiteral<storage::Date> {
     dateLiteral->VectorLiteral<storage::Date>::__duplicateDeep (mem, this);
     return dateLiteral;
   }
-
- protected:
-  std::string elementToString (const storage::Date &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << elementType.year << '.'
-           << unsigned(elementType.month) << '.'
-           << unsigned(elementType.day);
-    return stream.str ();
-  }
 };
 
 }

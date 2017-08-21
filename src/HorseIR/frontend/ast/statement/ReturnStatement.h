@@ -23,7 +23,6 @@ class ReturnStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   ReturnStatement *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   Operand *operand = nullptr;
@@ -65,15 +64,6 @@ ReturnStatement::duplicateDeep (ASTNodeMemory &mem) const
   auto returnStatement = mem.alloc<ReturnStatement> ();
   returnStatement->__duplicateDeep (mem, this);
   return returnStatement;
-}
-
-inline std::string ReturnStatement::toString () const
-{
-  std::ostringstream stream;
-  stream << "return "
-         << ((operand == nullptr) ? "nullptr" : operand->toString ())
-         << ";";
-  return stream.str ();
 }
 
 inline void

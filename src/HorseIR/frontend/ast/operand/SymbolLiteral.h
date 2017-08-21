@@ -31,11 +31,6 @@ class SymbolLiteral : public VectorLiteral<std::string> {
     symbolLiteral->VectorLiteral<std::string>::__duplicateDeep (mem, this);
     return symbolLiteral;
   }
-
- protected:
-  std::string
-  elementToString (const std::string &elementType) const override
-  { return "`" + elementType; }
 };
 
 }

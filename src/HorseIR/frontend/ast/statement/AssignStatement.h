@@ -43,7 +43,6 @@ class AssignStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   AssignStatement *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   ReturnTypePolicy returnTypePolicy;
@@ -51,10 +50,6 @@ class AssignStatement : public Statement {
   std::pair<Operand *, Type *> rhs;
 
   void __duplicateDeep (ASTNodeMemory &mem, const AssignStatement *stmt);
-  std::string __toStringDirect () const;
-  std::string __toStringCast () const;
-  std::string __toStringIsType () const;
-  std::string __toStringCheckCast () const;
 };
 
 inline AssignStatement::AssignStatement ()
@@ -178,17 +173,6 @@ AssignStatement::duplicateDeep (ASTNodeMemory &mem) const
   return assignStatement;
 }
 
-inline std::string AssignStatement::toString () const
-{
-  switch (returnTypePolicy)
-    {
-      case ReturnTypePolicy::Direct: return __toStringDirect ();
-      case ReturnTypePolicy::Cast: return __toStringCast ();
-      case ReturnTypePolicy::IsType: return __toStringIsType ();
-      case ReturnTypePolicy::CheckCast: return __toStringCheckCast ();
-    }
-}
-
 inline void
 AssignStatement::__duplicateDeep (ASTNodeMemory &mem,
                                   const AssignStatement *stmt)
@@ -224,60 +208,6 @@ AssignStatement::__duplicateDeep (ASTNodeMemory &mem,
   returnTypePolicy = stmt->returnTypePolicy;
   lhs = std::make_pair (lhsIdentifier, lhsType);
   rhs = std::make_pair (rhsOperand, rhsType);
-}
-
-inline std::string AssignStatement::__toStringDirect () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = "
-         << ((rhs.first == nullptr) ? "nullptr" : rhs.first->toString ())
-         << ';';
-  return stream.str ();
-}
-
-inline std::string AssignStatement::__toStringCast () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = ("
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ") "
-         << ((rhs.first == nullptr) ? "nullptr" : rhs.first->toString ())
-         << ';';
-  return stream.str ();
-}
-
-inline std::string AssignStatement::__toStringIsType () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = is_type ("
-         << ((rhs.first == nullptr) ? "nullptr" : rhs.first->toString ())
-         << ", "
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ");";
-  return stream.str ();
-}
-
-inline std::string AssignStatement::__toStringCheckCast () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = check_type ("
-         << ((rhs.first == nullptr) ? "nullptr" : rhs.first->toString ())
-         << ", "
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ");";
-  return stream.str ();
 }
 
 }

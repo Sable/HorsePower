@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../AST.h"
-#include "../../misc/InfixOStreamIterator.h"
 
 namespace horseIR
 {
@@ -21,7 +20,6 @@ class FunctionType : public Type {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   FunctionType *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
   std::vector<Type *> getParameterTypes () const;
   template<class T>
@@ -78,27 +76,6 @@ inline FunctionType *FunctionType::duplicateDeep (ASTNodeMemory &mem) const
   auto functionType = mem.alloc<FunctionType> ();
   functionType->__duplicateDeep (mem, this);
   return functionType;
-}
-
-inline std::string FunctionType::toString () const
-{
-  std::vector<std::string> paramSegments{};
-  std::transform (
-      parameterTypes.cbegin (), parameterTypes.cend (),
-      std::back_inserter (paramSegments),
-      [] (const Type *type) -> std::string
-      {
-        return (type == nullptr) ? "nullptr" : type->toString ();
-      }
-  );
-  if (isFlexible) paramSegments.emplace_back ("...");
-  auto retSeg = (returnType == nullptr) ? "nullptr" : returnType->toString ();
-  std::ostringstream stream;
-  stream << "func<";
-  std::copy (paramSegments.cbegin (), paramSegments.cend (),
-             horseIR::misc::InfixOStreamIterator<std::string> (stream, ", "));
-  stream << " :" << retSeg << ">";
-  return stream.str ();
 }
 
 inline std::vector<Type *> FunctionType::getParameterTypes () const

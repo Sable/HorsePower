@@ -31,10 +31,6 @@ class Integer32Literal : public VectorLiteral<std::int32_t> {
     integer32Literal->VectorLiteral<std::int32_t>::__duplicateDeep (mem, this);
     return integer32Literal;
   }
-
- protected:
-  std::string elementToString (const std::int32_t &elementType) const override
-  { return std::to_string (elementType); }
 };
 
 }

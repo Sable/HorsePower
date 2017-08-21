@@ -20,7 +20,6 @@ class ListType : public Type {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   ListType *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
   Type *getElementType () const;
   void setElementType (Type *type);
@@ -57,15 +56,6 @@ inline ListType *ListType::duplicateDeep (ASTNodeMemory &mem) const
   auto listType = mem.alloc<ListType> ();
   listType->__duplicateDeep (mem, this);
   return listType;
-}
-
-inline std::string ListType::toString () const
-{
-  std::ostringstream stream;
-  stream << "list<"
-         << ((elementType == nullptr) ? "nullptr" : elementType->toString ())
-         << '>';
-  return stream.str ();
 }
 
 inline Type *ListType::getElementType () const

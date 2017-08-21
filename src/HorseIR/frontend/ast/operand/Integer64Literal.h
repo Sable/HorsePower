@@ -31,10 +31,6 @@ class Integer64Literal : public VectorLiteral<std::int64_t> {
     integer64Literal->VectorLiteral<std::int64_t>::__duplicateDeep (mem, this);
     return integer64Literal;
   }
-
- protected:
-  std::string elementToString (const std::int64_t &elementType) const override
-  { return std::to_string (elementType); }
 };
 
 }

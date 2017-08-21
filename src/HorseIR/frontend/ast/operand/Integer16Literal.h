@@ -31,10 +31,6 @@ class Integer16Literal : public VectorLiteral<std::int16_t> {
     integer16Literal->VectorLiteral<std::int16_t>::__duplicateDeep (mem, this);
     return integer16Literal;
   }
-
- protected:
-  std::string elementToString (const std::int16_t &elementType) const override
-  { return std::to_string (elementType); }
 };
 
 }

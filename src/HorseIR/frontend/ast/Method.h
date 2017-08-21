@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../misc/InfixOStreamIterator.h"
 #include "AST.h"
 
 namespace horseIR
@@ -10,6 +9,15 @@ namespace ast
 
 class Method : public ASTNode {
  public:
+  using ParameterIterator = std::vector<
+      std::pair<Identifier *, Type *>
+  >::iterator;
+  using ParameterConstIterator = std::vector<
+      std::pair<Identifier *, Type *>
+  >::const_iterator;
+  using StatementIterator = std::vector<Statement *>::iterator;
+  using StatementConstIterator = std::vector<Statement *>::const_iterator;
+
   Method ();
   explicit Method (const CSTType *cst);
   Method (Method &&method) = default;
@@ -24,6 +32,10 @@ class Method : public ASTNode {
   setMethodName (T &&newMethodName);
 
   std::vector<std::pair<Identifier *, Type *>> getParameters () const;
+  ParameterIterator parametersBegin ();
+  ParameterIterator parametersEnd ();
+  ParameterConstIterator parametersConstBegin () const;
+  ParameterConstIterator parametersConstEnd () const;
   template<class T>
   std::enable_if_t<
       std::is_assignable<std::vector<std::pair<Identifier *, Type *>>, T>::value
@@ -34,6 +46,10 @@ class Method : public ASTNode {
   void setReturnType (Type *type);
 
   std::vector<Statement *> getStatements () const;
+  StatementIterator statementsBegin ();
+  StatementIterator statementsEnd ();
+  StatementConstIterator statementsConstBegin () const;
+  StatementConstIterator statementsConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_assignable<std::vector<Statement *>, T>::value>
   setStatements (T &&newStatements);
@@ -41,7 +57,6 @@ class Method : public ASTNode {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   Method *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::string methodName{};
@@ -72,6 +87,18 @@ inline std::vector<std::pair<Identifier *, Type *>>
 Method::getParameters () const
 { return parameters; }
 
+inline Method::ParameterIterator Method::parametersBegin ()
+{ return parameters.begin (); }
+
+inline Method::ParameterIterator Method::parametersEnd ()
+{ return parameters.end (); }
+
+inline Method::ParameterConstIterator Method::parametersConstBegin () const
+{ return parameters.cbegin (); }
+
+inline Method::ParameterConstIterator Method::parametersConstEnd () const
+{ return parameters.cend (); }
+
 template<class T>
 inline std::enable_if_t<
     std::is_assignable<std::vector<std::pair<Identifier *, Type *>>, T>::value
@@ -99,6 +126,18 @@ inline void Method::setReturnType (Type *type)
 
 inline std::vector<Statement *> Method::getStatements () const
 { return statements; }
+
+inline Method::StatementIterator Method::statementsBegin ()
+{ return statements.begin (); }
+
+inline Method::StatementIterator Method::statementsEnd ()
+{ return statements.end (); }
+
+inline Method::StatementConstIterator Method::statementsConstBegin () const
+{ return statements.cbegin (); }
+
+inline Method::StatementConstIterator Method::statementsConstEnd () const
+{ return statements.cend (); }
 
 template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Statement *>, T>::value>
@@ -152,43 +191,6 @@ inline Method *Method::duplicateDeep (ASTNodeMemory &mem) const
   return method;
 }
 
-inline std::string Method::toString () const
-{
-  std::ostringstream stream;
-  stream << "def " << methodName << "(";
-  std::transform (
-      parameters.cbegin (), parameters.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (const auto &parameter) -> std::string
-      {
-        std::ostringstream s;
-        s << ((parameter.first == nullptr) ?
-              "nullptr" : parameter.first->toString ())
-          << " :"
-          << ((parameter.second == nullptr) ?
-              "nullptr" : parameter.second->toString ());
-        return s.str ();
-      });
-  stream << ") :"
-         << ((returnType == nullptr) ? "nullptr" : returnType->toString ())
-         << " {"
-         << HORSEIR_AST_PRETTY_PRINT_LINE_BREAK;
-  std::transform (
-      statements.cbegin (), statements.cend (),
-      misc::InfixOStreamIterator<std::string> (
-          stream, HORSEIR_AST_PRETTY_PRINT_LINE_BREAK
-      ),
-      [] (Statement *statement) -> std::string
-      {
-        std::ostringstream s;
-        s << HORSEIR_AST_PRETTY_PRINT_INDENT
-          << ((statement == nullptr) ? "nullptr" : statement->toString ());
-        return s.str ();
-      });
-  stream << HORSEIR_AST_PRETTY_PRINT_LINE_BREAK << '}';
-  return stream.str ();
-}
-
 inline void Method::__duplicateDeep (ASTNodeMemory &mem, const Method *method)
 {
   assert (method != nullptr);
@@ -228,7 +230,7 @@ inline void Method::__duplicateDeep (ASTNodeMemory &mem, const Method *method)
     }
   returnType = duplicateRetType;
   std::vector<Statement *> duplicateStatements{};
-  duplicateParameters.reserve (method->statements.size ());
+  duplicateStatements.reserve (method->statements.size ());
   std::transform (
       method->statements.cbegin (), method->statements.cend (),
       std::back_inserter (duplicateStatements),

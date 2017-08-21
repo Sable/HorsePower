@@ -50,8 +50,12 @@ module default {
 
         return z;
     }
-
 }
+
+    def foo() : i32 {
+      return null : i32;
+    }
+
 )PROGRAM";
 
 #include <chrono>
@@ -63,7 +67,7 @@ int main (int argc, const char *argv[])
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   HorseIRParser parser (&tokenStream);
-  auto context = parser.module ();
+  auto context = parser.program ();
 
   ast::ASTNode::ASTNodeMemory mem;
 
@@ -73,7 +77,6 @@ int main (int argc, const char *argv[])
   std::cout << "Time :" << duration.count () / 1000000.0 << " ms" << std::endl;
 
   astNode->setEnclosingFilename ("stdin");
-  std::cout << astNode->toString () << std::endl;
   std::cout << astNode->getASTNodeClass () << std::endl;
   std::cout << astNode->getNumNodesRecursively () << std::endl;
 

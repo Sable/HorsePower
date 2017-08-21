@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -30,12 +29,10 @@ class ListLiteral : public Literal {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   ListLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::unique_ptr<std::vector<ElementType>> value = nullptr;
   void __duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal);
-  std::string elementToString (const ElementType &elementType) const;
 };
 
 inline ListLiteral::ListLiteral ()
@@ -110,26 +107,6 @@ inline ListLiteral *ListLiteral::duplicateDeep (ASTNodeMemory &mem) const
   return listLiteral;
 }
 
-inline std::string ListLiteral::toString () const
-{
-  std::ostringstream s;
-  if (value == nullptr)
-    {
-      s << "null :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-      return s.str ();
-    }
-  s << '[';
-  std::transform (
-      value->cbegin (), value->cend (),
-      misc::InfixOStreamIterator<std::string> (s, ", "),
-      [&] (const ElementType &element) -> std::string
-      { return elementToString (element); });
-  s << "] :"
-    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-  return s.str ();
-}
-
 inline void
 ListLiteral::__duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal)
 {
@@ -154,13 +131,6 @@ ListLiteral::__duplicateDeep (ASTNodeMemory &mem, const ListLiteral *literal)
             return duplicateElement;
           });
     }
-}
-
-inline std::string
-ListLiteral::elementToString (const ElementType &elementType) const
-{
-  if (elementType == nullptr) return "nullptr";
-  return elementType->toString ();
 }
 
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../misc/InfixOStreamIterator.h"
 #include "AST.h"
 
 namespace horseIR
@@ -12,6 +11,17 @@ class Module : public ASTNode {
  public:
   using GlobalVariableEntryType = std::pair<Identifier *, Type *>;
   using ImportedModuleEntryType = std::pair<std::string, std::string>;
+
+  using MethodIterator = std::vector<Method *>::iterator;
+  using MethodConstIterator = std::vector<Method *>::const_iterator;
+  using GlobalVariableIterator = std::vector<GlobalVariableEntryType>::iterator;
+  using GlobalVariableConstIterator = std::vector<
+      GlobalVariableEntryType
+  >::const_iterator;
+  using ImportedModuleIterator = std::vector<ImportedModuleEntryType>::iterator;
+  using ImportedModuleConstIterator = std::vector<
+      ImportedModuleEntryType
+  >::const_iterator;
 
   Module ();
   explicit Module (const CSTType *cst);
@@ -27,11 +37,19 @@ class Module : public ASTNode {
   setModuleName (T &&newModuleName);
 
   std::vector<Method *> getMethods () const;
+  MethodIterator methodsBegin ();
+  MethodIterator methodsEnd ();
+  MethodConstIterator methodsConstBegin () const;
+  MethodConstIterator methodsConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_assignable<std::vector<Method *>, T>::value>
   setMethods (T &&newMethods);
 
   std::vector<GlobalVariableEntryType> getGlobalVariables () const;
+  GlobalVariableIterator globalVariablesBegin ();
+  GlobalVariableIterator globalVariablesEnd ();
+  GlobalVariableConstIterator globalVariablesConstBegin () const;
+  GlobalVariableConstIterator globalVariablesConstEnd () const;
   template<class T>
   std::enable_if_t<
       std::is_assignable<std::vector<GlobalVariableEntryType>, T>::value
@@ -39,16 +57,21 @@ class Module : public ASTNode {
   setGlobalVariables (T &&newGlobalVariables);
 
   std::vector<ImportedModuleEntryType> getImportedModules () const;
+  ImportedModuleIterator importedModulesBegin ();
+  ImportedModuleIterator importedModulesEnd ();
+  ImportedModuleConstIterator importedModulesConstBegin () const;
+  ImportedModuleConstIterator importedModulesConstEnd () const;
   template<class T>
   std::enable_if_t<
       std::is_assignable<std::vector<ImportedModuleEntryType>, T>::value
   >
   setImportedModules (T &&newImportedModules);
 
+  void merge (Module &&module);
+
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   Module *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::string moduleName{};
@@ -78,6 +101,18 @@ Module::setModuleName (T &&newModuleName)
 inline std::vector<Method *> Module::getMethods () const
 { return methods; }
 
+inline Module::MethodIterator Module::methodsBegin ()
+{ return methods.begin (); }
+
+inline Module::MethodIterator Module::methodsEnd ()
+{ return methods.end (); }
+
+inline Module::MethodConstIterator Module::methodsConstBegin () const
+{ return methods.cbegin (); }
+
+inline Module::MethodConstIterator Module::methodsConstEnd () const
+{ return methods.cend (); }
+
 template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Method *>, T>::value>
 Module::setMethods (T &&newMethods)
@@ -90,6 +125,20 @@ Module::setMethods (T &&newMethods)
 inline std::vector<Module::GlobalVariableEntryType>
 Module::getGlobalVariables () const
 { return globalVariables; }
+
+inline Module::GlobalVariableIterator Module::globalVariablesBegin ()
+{ return globalVariables.begin (); }
+
+inline Module::GlobalVariableIterator Module::globalVariablesEnd ()
+{ return globalVariables.end (); }
+
+inline Module::GlobalVariableConstIterator
+Module::globalVariablesConstBegin () const
+{ return globalVariables.cbegin (); }
+
+inline Module::GlobalVariableConstIterator
+Module::globalVariablesConstEnd () const
+{ return globalVariables.cend (); }
 
 template<class T>
 inline std::enable_if_t<
@@ -111,12 +160,40 @@ inline std::vector<Module::ImportedModuleEntryType>
 Module::getImportedModules () const
 { return importedModules; }
 
+inline Module::ImportedModuleIterator Module::importedModulesBegin ()
+{ return importedModules.begin (); }
+
+inline Module::ImportedModuleIterator Module::importedModulesEnd ()
+{ return importedModules.end (); }
+
+inline Module::ImportedModuleConstIterator
+Module::importedModulesConstBegin () const
+{ return importedModules.cbegin (); }
+
+inline Module::ImportedModuleConstIterator
+Module::importedModulesConstEnd () const
+{ return importedModules.cend (); }
+
 template<class T>
 inline std::enable_if_t<
     std::is_assignable<std::vector<Module::ImportedModuleEntryType>, T>::value
 >
 Module::setImportedModules (T &&newImportedModues)
 { importedModules = std::forward<T> (newImportedModues); }
+
+void Module::merge (Module &&module)
+{
+  if (module.moduleName != moduleName) return;
+  for (const auto &method : module.methods)
+    { methods.push_back (method); }
+  for (auto &globalVariable : module.globalVariables)
+    { globalVariables.emplace_back (std::move (globalVariable)); }
+  for (auto &importedModule : module.importedModules)
+    { importedModules.emplace_back (std::move (importedModule)); }
+  module.methods.clear ();
+  module.globalVariables.clear ();
+  module.importedModules.clear ();
+}
 
 inline std::size_t Module::getNumNodesRecursively () const
 {
@@ -154,65 +231,6 @@ inline Module *Module::duplicateDeep (ASTNode::ASTNodeMemory &mem) const
   auto module = mem.alloc<Module> ();
   module->__duplicateDeep (mem, this);
   return module;
-}
-
-inline std::string Module::toString () const
-{
-  std::ostringstream stream;
-  stream << "module "
-         << moduleName << " {" << HORSEIR_AST_PRETTY_PRINT_LINE_BREAK;
-  std::transform (
-      importedModules.cbegin (), importedModules.cend (),
-      std::ostream_iterator<std::string> (
-          stream, HORSEIR_AST_PRETTY_PRINT_LINE_BREAK
-      ),
-      [] (const ImportedModuleEntryType &importedModule) -> std::string
-      {
-        std::ostringstream s;
-        s << HORSEIR_AST_PRETTY_PRINT_INDENT << "import "
-          << importedModule.first << '.' << importedModule.second << ';';
-        return s.str ();
-      });
-  std::transform (
-      globalVariables.cbegin (), globalVariables.cend (),
-      std::ostream_iterator<std::string> (
-          stream, HORSEIR_AST_PRETTY_PRINT_LINE_BREAK
-      ),
-      [] (const GlobalVariableEntryType &globalVariable) -> std::string
-      {
-        Identifier *const id = globalVariable.first;
-        Type *const type = globalVariable.second;
-        std::ostringstream s;
-        s << HORSEIR_AST_PRETTY_PRINT_INDENT << "def "
-          << ((id == nullptr) ? "nullptr" : id->toString ())
-          << " :"
-          << ((type == nullptr) ? "nullptr" : type->toString ())
-          << ';';
-        return s.str ();
-      });
-  std::transform (
-      methods.cbegin (), methods.cend (),
-      std::ostream_iterator<std::string> (stream),
-      [] (Method *method) -> std::string
-      {
-        std::ostringstream s;
-        if (method == nullptr)
-          {
-            s << HORSEIR_AST_PRETTY_PRINT_INDENT << "nullptr";
-            return s.str ();
-          }
-        std::string buffer;
-        std::istringstream iStream (method->toString ());
-        while (std::getline (iStream, buffer, '\n'))
-          {
-            s << HORSEIR_AST_PRETTY_PRINT_INDENT
-              << buffer
-              << HORSEIR_AST_PRETTY_PRINT_LINE_BREAK;
-          }
-        return s.str ();
-      });
-  stream << '}';
-  return stream.str ();
 }
 
 inline void Module::__duplicateDeep (ASTNodeMemory &mem, const Module *module)

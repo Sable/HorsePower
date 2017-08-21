@@ -41,15 +41,6 @@ class MonthLiteral : public VectorLiteral<storage::Month> {
     monthLiteral->VectorLiteral<storage::Month>::__duplicateDeep (mem, this);
     return monthLiteral;
   }
-
- protected:
-  std::string elementToString (const storage::Month &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << elementType.year << '.'
-           << unsigned(elementType.month);
-    return stream.str ();
-  }
 };
 
 }

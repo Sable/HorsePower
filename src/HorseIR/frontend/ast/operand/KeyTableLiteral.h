@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -22,6 +21,8 @@ struct KeyTableColumn {
 class KeyTableLiteral : public Literal {
  public:
   using ElementType = storage::KeyTableColumn;
+  using ValueIterator = std::vector<ElementType>::iterator;
+  using ValueConstIterator = std::vector<ElementType>::const_iterator;
 
   KeyTableLiteral ();
   explicit KeyTableLiteral (const CSTType *cst);
@@ -33,6 +34,10 @@ class KeyTableLiteral : public Literal {
 
   bool isNull () const;
   std::vector<ElementType> getValue () const;
+  ValueIterator valueBegin ();
+  ValueIterator valueEnd ();
+  ValueConstIterator valueConstBegin () const;
+  ValueConstIterator valueConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_constructible<std::vector<ElementType>, T>::value>
   setValue (T &&valueContainer);
@@ -41,7 +46,6 @@ class KeyTableLiteral : public Literal {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   KeyTableLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::unique_ptr<std::vector<ElementType>> value = nullptr;
@@ -72,6 +76,20 @@ inline bool KeyTableLiteral::isNull () const
 inline std::vector<KeyTableLiteral::ElementType>
 KeyTableLiteral::getValue () const
 { return *value; }
+
+inline KeyTableLiteral::ValueIterator KeyTableLiteral::valueBegin ()
+{ return value->begin (); }
+
+inline KeyTableLiteral::ValueIterator KeyTableLiteral::valueEnd ()
+{ return value->end (); }
+
+inline KeyTableLiteral::ValueConstIterator
+KeyTableLiteral::valueConstBegin () const
+{ return value->cbegin (); }
+
+inline KeyTableLiteral::ValueConstIterator
+KeyTableLiteral::valueConstEnd () const
+{ return value->cend (); }
 
 template<class T>
 inline std::enable_if_t<
@@ -124,26 +142,6 @@ KeyTableLiteral::duplicateDeep (ASTNodeMemory &mem) const
   return keyTableLiteral;
 }
 
-inline std::string KeyTableLiteral::toString () const
-{
-  std::ostringstream s;
-  if (value == nullptr)
-    {
-      s << "null :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-      return s.str ();
-    }
-  s << '{';
-  std::transform (
-      value->cbegin (), value->cend (),
-      misc::InfixOStreamIterator<std::string> (s, ", "),
-      [&] (const ElementType &element) -> std::string
-      { return elementToString (element); });
-  s << "} :"
-    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-  return s.str ();
-}
-
 inline void
 KeyTableLiteral::__duplicateDeep (ASTNodeMemory &mem,
                                   const KeyTableLiteral *literal)
@@ -176,19 +174,6 @@ KeyTableLiteral::__duplicateDeep (ASTNodeMemory &mem,
             return returnElement;
           });
     }
-}
-
-inline std::string
-KeyTableLiteral::elementToString (const ElementType &elementType) const
-{
-  std::ostringstream stream;
-  stream << ((elementType.isKey) ? "[" : "")
-         << elementType.head
-         << " -> "
-         << ((elementType.content == nullptr) ?
-             "nullptr" : elementType.content->toString ())
-         << ((elementType.isKey) ? "]" : "");
-  return stream.str ();
 }
 
 }

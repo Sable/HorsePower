@@ -42,18 +42,6 @@ class FunctionLiteral : public VectorLiteral<storage::Function> {
         VectorLiteral<storage::Function>::__duplicateDeep (mem, this);
     return functionLiteral;
   }
-
- protected:
-  std::string
-  elementToString (const storage::Function &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << '@'
-           << elementType.moduleName
-           << (elementType.moduleName.empty () ? "" : ".")
-           << elementType.methodName;
-    return stream.str ();
-  }
 };
 
 }

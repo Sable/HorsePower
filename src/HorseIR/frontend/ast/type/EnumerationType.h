@@ -20,7 +20,6 @@ class EnumerationType : public Type {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   EnumerationType *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
   Type *getElementType () const;
   void setElementType (Type *type);
@@ -58,15 +57,6 @@ EnumerationType::duplicateDeep (ASTNodeMemory &mem) const
   auto enumerationType = mem.alloc<EnumerationType> ();
   enumerationType->__duplicateDeep (mem, this);
   return enumerationType;
-}
-
-inline std::string EnumerationType::toString () const
-{
-  std::ostringstream stream;
-  stream << "enum<"
-         << ((elementType == nullptr) ? "nullptr" : elementType->toString ())
-         << '>';
-  return stream.str ();
 }
 
 inline Type *EnumerationType::getElementType () const

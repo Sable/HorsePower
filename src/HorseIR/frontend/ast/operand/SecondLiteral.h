@@ -42,17 +42,6 @@ class SecondLiteral : public VectorLiteral<storage::Second> {
     secondLiteral->VectorLiteral<storage::Second>::__duplicateDeep (mem, this);
     return secondLiteral;
   }
-
- protected:
-  std::string
-  elementToString (const storage::Second &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << unsigned (elementType.hour) << ':'
-           << unsigned (elementType.minute) << ':'
-           << unsigned (elementType.second);
-    return stream.str ();
-  }
 };
 
 }

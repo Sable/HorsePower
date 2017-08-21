@@ -43,17 +43,6 @@ class TimeLiteral : public VectorLiteral<storage::Time> {
     timeLiteral->VectorLiteral<storage::Time>::__duplicateDeep (mem, this);
     return timeLiteral;
   }
-
- protected:
-  std::string elementToString (const storage::Time &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << unsigned (elementType.hour) << ':'
-           << unsigned (elementType.minute) << ':'
-           << unsigned (elementType.second) << '.'
-           << elementType.millisecond;
-    return stream.str ();
-  }
 };
 
 }

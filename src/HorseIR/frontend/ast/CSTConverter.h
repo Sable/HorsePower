@@ -4,6 +4,7 @@
 #include <limits>
 #include <stdexcept>
 #include <regex>
+#include <unordered_set>
 #include "AST.h"
 
 namespace horseIR
@@ -3371,8 +3372,10 @@ struct CSTConverter {
     std::vector<Method *> methods{};
 
     moduleName = context->name ()->getText ();
+    if (moduleName == HORSEIR_AST_DEFAULT_MODULE_NAME)
+      { throw CSTConverterException (context); }
     const auto moduleContentContexts = context->moduleContent ();
-    for (const auto cst : moduleContentContexts)
+    for (const auto &cst : moduleContentContexts)
       {
         HorseIRParser::MethodContext *method = nullptr;
         HorseIRParser::GlobalVarContext *gVar = nullptr;
@@ -3395,7 +3398,7 @@ struct CSTConverter {
                 rawString.cbegin (), rawString.cend (), '.'
             );
             if (dotPos == rawString.cend ())
-              throw CSTConverterException (context);
+              { throw CSTConverterException (context); }
             std::copy (rawString.cbegin (), dotPos,
                        std::back_inserter (first));
             std::copy (std::next (dotPos), rawString.cend (),
@@ -3412,6 +3415,96 @@ struct CSTConverter {
     module->setGlobalVariables (std::move (globalVaraibles));
     module->setImportedModules (std::move (importedModules));
     return module;
+  }
+
+  using ProgramContext = HorseIRParser::ProgramContext;
+
+  static CompilationUnit *convert (ASTNodeMemory &mem, ProgramContext *context)
+  {
+    assert (context != nullptr);
+    const auto moduleContexts = context->module ();
+    const auto externContexts = context->moduleContent ();
+    std::vector<Module *> modules{};
+    std::vector<Module *> uniqueModules{};
+    std::transform (
+        moduleContexts.cbegin (), moduleContexts.cend (),
+        std::back_inserter (modules),
+        [&] (HorseIRParser::ModuleContext *moduleContext) -> Module *
+        { return convert (mem, moduleContext); }
+    );
+    std::unordered_set<std::string> moduleNames{};
+    for (const auto &module : modules)
+      { moduleNames.emplace (module->getModuleName ()); }
+    for (const auto &moduleName : moduleNames)
+      {
+        std::vector<Module *> namedModules{};
+        std::copy_if (
+            modules.cbegin (), modules.cend (),
+            std::back_inserter (namedModules),
+            [&] (Module *module) -> bool
+            { return module->getModuleName () == moduleName; }
+        );
+        assert (!namedModules.empty ());
+        Module *module = namedModules.at (0);
+        for (auto iter = std::next (namedModules.cbegin ());
+             iter != namedModules.cend (); ++iter)
+          {
+            module->merge (std::move (**iter));
+            mem.free (*iter);
+          }
+        uniqueModules.push_back (module);
+      }
+
+    if (!externContexts.empty ())
+      {
+        std::vector<Method *> methods{};
+        std::vector<Module::GlobalVariableEntryType> globalVariables{};
+        std::vector<Module::ImportedModuleEntryType> importedModules{};
+        for (const auto &cst : externContexts)
+          {
+            HorseIRParser::MethodContext *method = nullptr;
+            HorseIRParser::GlobalVarContext *gVar = nullptr;
+            HorseIRParser::ImportModuleContext *module = nullptr;
+
+            if ((method = cst->method ()) != nullptr)
+              { methods.push_back (convert (mem, method)); }
+            else if ((gVar = cst->globalVar ()) != nullptr)
+              {
+                Identifier *id = convert (mem, gVar->name ());
+                Type *type = convert (mem, gVar->type ());
+                globalVariables.push_back (std::make_pair (id, type));
+              }
+            else if ((module = cst->importModule ()) != nullptr)
+              {
+                const std::string rawString =
+                    module->COMPOUND_ID ()->getText ();
+                std::string first{};
+                std::string second{};
+                const auto dotPos = std::find (
+                    rawString.cbegin (), rawString.cend (), '.'
+                );
+                if (dotPos == rawString.cend ())
+                  { throw CSTConverterException (context); }
+                std::copy (rawString.cbegin (), dotPos,
+                           std::back_inserter (first));
+                std::copy (std::next (dotPos), rawString.cend (),
+                           std::back_inserter (second));
+                importedModules.push_back (
+                    std::make_pair (std::move (first), std::move (second))
+                );
+              }
+          }
+        auto module = mem.alloc<Module> (context);
+        module->setModuleName (HORSEIR_AST_DEFAULT_MODULE_NAME);
+        module->setMethods (std::move (methods));
+        module->setGlobalVariables (std::move (globalVariables));
+        module->setImportedModules (std::move (importedModules));
+        uniqueModules.push_back (module);
+      }
+
+    auto compilationUnit = mem.alloc<CompilationUnit> (context);
+    compilationUnit->setModules (std::move (uniqueModules));
+    return compilationUnit;
   }
 };
 

@@ -20,7 +20,6 @@ class DictionaryType : public Type {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   DictionaryType *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
   Type *getKeyType () const;
   Type *getValueType () const;
@@ -63,17 +62,6 @@ inline DictionaryType *DictionaryType::duplicateDeep (ASTNodeMemory &mem) const
   auto dictionaryType = mem.alloc<DictionaryType> ();
   dictionaryType->__duplicateDeep (mem, this);
   return dictionaryType;
-}
-
-inline std::string DictionaryType::toString () const
-{
-  std::ostringstream stream;
-  stream << "dict<"
-         << ((keyType == nullptr) ? "nullptr" : keyType->toString ())
-         << ", "
-         << ((valueType == nullptr) ? "nullptr" : valueType->toString ())
-         << '>';
-  return stream.str ();
 }
 
 inline Type *DictionaryType::getKeyType () const

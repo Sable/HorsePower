@@ -1,7 +1,6 @@
 #pragma once
 
-#define HORSEIR_AST_PRETTY_PRINT_INDENT     "  "
-#define HORSEIR_AST_PRETTY_PRINT_LINE_BREAK "\n"
+#define HORSEIR_AST_DEFAULT_MODULE_NAME     "__DEFAULT"
 
 #include <vector>
 #include <string>
@@ -13,7 +12,6 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-#include <locale>
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
@@ -74,3 +72,4 @@
 
 #include "Method.h"
 #include "Module.h"
+#include "CompilationUnit.h"

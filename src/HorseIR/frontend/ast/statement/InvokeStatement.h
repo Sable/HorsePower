@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../misc/InfixOStreamIterator.h"
 #include "../AST.h"
 
 namespace horseIR
@@ -10,6 +9,9 @@ namespace ast
 
 class InvokeStatement : public Statement {
  public:
+  using OperandIterator = std::vector<Operand *>::iterator;
+  using OperandConstIterator = std::vector<Operand *>::const_iterator;
+
   InvokeStatement ();
   explicit InvokeStatement (const CSTType *cst);
   InvokeStatement (InvokeStatement &&statement) = default;
@@ -49,6 +51,10 @@ class InvokeStatement : public Statement {
   >
   setRHSInfo (T &&newRHSInfo);
   std::vector<Operand *> getRHSOperands () const;
+  OperandIterator rhsOperandsBegin ();
+  OperandIterator rhsOperandsEnd ();
+  OperandConstIterator rhsOperandsConstBegin () const;
+  OperandConstIterator rhsOperandsConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_assignable<std::vector<Operand *>, T>::value>
   setRHSOperands (T &&newOperands);
@@ -58,7 +64,6 @@ class InvokeStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   InvokeStatement *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   ReturnTypePolicy returnTypePolicy;
@@ -68,10 +73,6 @@ class InvokeStatement : public Statement {
   std::pair<std::vector<Operand *>, Type *> rhs;
 
   void __duplicateDeep (ASTNodeMemory &mem, const InvokeStatement *stmt);
-  std::string __toStringDirect () const;
-  std::string __toStringCast () const;
-  std::string __toStringIsType () const;
-  std::string __toStringCheckCast () const;
 };
 
 inline InvokeStatement::InvokeStatement ()
@@ -165,6 +166,20 @@ InvokeStatement::setRHSInfo (T &&newRHSInfo)
 inline std::vector<Operand *> InvokeStatement::getRHSOperands () const
 { return rhs.first; }
 
+inline InvokeStatement::OperandIterator InvokeStatement::rhsOperandsBegin ()
+{ return rhs.first.begin (); }
+
+inline InvokeStatement::OperandIterator InvokeStatement::rhsOperandsEnd ()
+{ return rhs.first.end (); }
+
+inline InvokeStatement::OperandConstIterator
+InvokeStatement::rhsOperandsConstBegin () const
+{ return rhs.first.cbegin (); }
+
+inline InvokeStatement::OperandConstIterator
+InvokeStatement::rhsOperandsConstEnd () const
+{ return rhs.first.cend (); }
+
 template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Operand *>, T>::value>
 InvokeStatement::setRHSOperands (T &&newOperands)
@@ -223,17 +238,6 @@ InvokeStatement::duplicateDeep (ASTNodeMemory &mem) const
   return invokeStatement;
 }
 
-inline std::string InvokeStatement::toString () const
-{
-  switch (returnTypePolicy)
-    {
-      case ReturnTypePolicy::Direct: return __toStringDirect ();
-      case ReturnTypePolicy::Cast: return __toStringCast ();
-      case ReturnTypePolicy::IsType: return __toStringIsType ();
-      case ReturnTypePolicy::CheckCast: return __toStringCheckCast ();
-    }
-}
-
 inline void
 InvokeStatement::__duplicateDeep (ASTNodeMemory &mem,
                                   const InvokeStatement *stmt)
@@ -276,96 +280,6 @@ InvokeStatement::__duplicateDeep (ASTNodeMemory &mem,
   methodName = stmt->methodName;
   lhs = std::make_pair (lhsIdentifier, lhsType);
   rhs = std::make_pair (std::move (invokeOperands), rhsType);
-}
-
-inline std::string InvokeStatement::__toStringDirect () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = ";
-  if (moduleName.empty ())
-    { stream << '@' << methodName; }
-  else
-    { stream << "@" << moduleName << '.' << methodName; }
-  stream << " (";
-  std::transform (
-      rhs.first.cbegin (), rhs.first.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (Operand *operand) -> std::string
-      { return (operand == nullptr) ? "nullptr" : operand->toString (); });
-  stream << ");";
-  return stream.str ();
-}
-
-inline std::string InvokeStatement::__toStringCast () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = ("
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ") ";
-  if (moduleName.empty ())
-    { stream << '@' << methodName; }
-  else
-    { stream << '@' << moduleName << '.' << methodName; }
-  stream << " (";
-  std::transform (
-      rhs.first.cbegin (), rhs.first.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (Operand *operand) -> std::string
-      { return (operand == nullptr) ? "nullptr" : operand->toString (); });
-  stream << ");";
-  return stream.str ();
-}
-
-inline std::string InvokeStatement::__toStringIsType () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = is_type (";
-  if (moduleName.empty ())
-    { stream << '@' << methodName; }
-  else
-    { stream << '@' << moduleName << '.' << methodName; }
-  stream << " (";
-  std::transform (
-      rhs.first.cbegin (), rhs.first.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (Operand *operand) -> std::string
-      { return (operand == nullptr) ? "nullptr" : operand->toString (); });
-  stream << "), "
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ");";
-  return stream.str ();
-}
-
-inline std::string InvokeStatement::__toStringCheckCast () const
-{
-  std::ostringstream stream;
-  stream << ((lhs.first == nullptr) ? "nullptr" : lhs.first->toString ())
-         << " :"
-         << ((lhs.second == nullptr) ? "nullptr" : lhs.second->toString ())
-         << " = check_cast (";
-  if (moduleName.empty ())
-    { stream << '@' << methodName; }
-  else
-    { stream << '@' << moduleName << '.' << methodName; }
-  stream << " (";
-  std::transform (
-      rhs.first.cbegin (), rhs.first.cend (),
-      misc::InfixOStreamIterator<std::string> (stream, ", "),
-      [] (Operand *operand) -> std::string
-      { return (operand == nullptr) ? "nullptr" : operand->toString (); });
-  stream << "), "
-         << ((rhs.second == nullptr) ? "nullptr" : rhs.second->toString ())
-         << ");";
-  return stream.str ();
 }
 
 }

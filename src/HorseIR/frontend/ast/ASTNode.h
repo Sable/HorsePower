@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ostream>
+#include <exception>
 #include "AST.h"
 
 namespace horseIR
@@ -13,7 +14,7 @@ class ASTNode {
   typedef antlr4::tree::ParseTree CSTType;
 
   enum class ASTNodeClass {
-    NilLiteral, ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
+    ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
     Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,
     FP64Literal, SymbolLiteral, StringLiteral, MonthLiteral, SecondLiteral,
     TimeLiteral, DateLiteral, DateTimeLiteral, MinuteLiteral,
@@ -39,6 +40,8 @@ class ASTNode {
         std::is_constructible<T, Args...>::value,
         T *>
     alloc (Args &&... args);
+
+    void free (const ast::ASTNode *managedPtr);
 
    protected:
     std::vector<std::unique_ptr<const ASTNode>> pool;
@@ -68,7 +71,6 @@ class ASTNode {
   virtual std::size_t getNumNodesRecursively () const = 0;
   virtual std::vector<ASTNode *> getChildren () const = 0;
   virtual ASTNode *duplicateDeep (ASTNode::ASTNodeMemory &mem) const = 0;
-  virtual std::string toString () const = 0;
 
  protected:
   const CSTType *cst;
@@ -86,10 +88,13 @@ inline std::enable_if_t<
     T *>
 ASTNode::ASTNodeMemory::alloc (Args &&...args)
 {
-  T* allocatedNode = new T (std::forward<Args> (args)...);
+  auto allocatedNode = new T (std::forward<Args> (args)...);
   manage (allocatedNode);
   return allocatedNode;
 }
+
+inline void ASTNode::ASTNodeMemory::free (const ast::ASTNode *managedPtr)
+{ release (managedPtr); }
 
 inline void ASTNode::ASTNodeMemory::manage (const ast::ASTNode *managedPtr)
 {
@@ -160,7 +165,6 @@ operator<< (std::ostream &stream, const ASTNode::ASTNodeClass &astNodeClass)
   using ASTNodeClass = ASTNode::ASTNodeClass;
   switch (astNodeClass)
     {
-      case ASTNodeClass::NilLiteral: return stream << "NilLiteral";
       case ASTNodeClass::ComplexLiteral: return stream << "ComplexLiteral";
       case ASTNodeClass::BoolLiteral: return stream << "BoolLiteral";
       case ASTNodeClass::CharLiteral: return stream << "CharLiteral";

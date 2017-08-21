@@ -25,7 +25,6 @@ class LabelStatement : public Statement {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   LabelStatement *duplicateDeep (ASTNode::ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::string labelName{};
@@ -60,13 +59,6 @@ LabelStatement::duplicateDeep (ASTNode::ASTNodeMemory &mem) const
   auto labelStatement = mem.alloc<LabelStatement> ();
   labelStatement->__duplicateDeep (mem, this);
   return labelStatement;
-}
-
-std::string LabelStatement::toString () const
-{
-  std::ostringstream stream;
-  stream << '[' << ' ' << labelName << ' ' << ']';
-  return stream.str ();
 }
 
 void

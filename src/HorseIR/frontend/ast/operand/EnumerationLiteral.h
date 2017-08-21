@@ -45,7 +45,6 @@ class EnumerationLiteral : public Literal {
   std::size_t getNumNodesRecursively () const override;
   std::vector<ASTNode *> getChildren () const override;
   EnumerationLiteral *duplicateDeep (ASTNodeMemory &mem) const override;
-  std::string toString () const override;
 
  protected:
   std::unique_ptr<ElementType> value = nullptr;
@@ -116,24 +115,6 @@ EnumerationLiteral *EnumerationLiteral::duplicateDeep (ASTNodeMemory &mem) const
   auto enumerationLiteral = mem.alloc<EnumerationLiteral> ();
   enumerationLiteral->__duplicateDeep (mem, this);
   return enumerationLiteral;
-}
-
-inline std::string EnumerationLiteral::toString () const
-{
-  std::ostringstream s;
-  if (value == nullptr)
-    {
-      s << "null :"
-        << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-      return s.str ();
-    }
-  s << '<'
-    << value->head
-    << " -> "
-    << ((value->content == nullptr) ? "nullptr" : value->content->toString ())
-    << "> :"
-    << ((literalType == nullptr) ? "nullptr" : literalType->toString ());
-  return s.str ();
 }
 
 inline void

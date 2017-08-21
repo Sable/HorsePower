@@ -31,14 +31,6 @@ class FP32Literal : public VectorLiteral<float> {
     fp32Literal->VectorLiteral<float>::__duplicateDeep (mem, this);
     return fp32Literal;
   }
-
- protected:
-  std::string elementToString (const float &elementType) const override
-  {
-    std::ostringstream stream;
-    stream << std::scientific << elementType;
-    return stream.str ();
-  }
 };
 
 }
