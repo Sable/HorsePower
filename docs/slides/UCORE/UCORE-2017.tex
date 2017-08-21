@@ -17,24 +17,6 @@
 }
 \email{hongji.chen@mail.mcgill.ca}
 
-\author{Hanfeng Chen}
-\affiliation{
-    \institution{McGill University}
-    \city{Montreal}
-    \state{Quebec}
-    \country{Canada}
-}
-\email{hanfeng.chen@mail.mcgill.ca}
-
-\author{Laurie Hendren}
-\affiliation{
-    \institution{McGill University}
-    \city{Montreal}
-    \state{Quebec}
-    \country{Canada}
-}
-\email{hendren@cs.mcgill.ca}
-
 \maketitle
 
 \section{Problem and Motivation}
@@ -52,10 +34,10 @@ information propagated to the backend and render the optimizer less effective.
 
 In this project, we purpose an array-based IR, named HorseIR, which explores the
 details of query fully and connects to user-defined functions transparently. By
-replacing SQL and user-defined functions with built-in array-based primitives, HorseIR will
-enable the optimizer in back-end to employ techniques developed in programming language
-research field such as data-flow analysis, in the hope of handling more
-flexible queries efficiently. 
+replacing SQL and user-defined functions with built-in array-based primitives,
+HorseIR will enable the optimizer in back-end to employ techniques developed in
+programming language research field such as data-flow analysis, in the hope of
+handling more flexible queries efficiently. 
 
 \section{Background and Related Work}
 
@@ -74,6 +56,7 @@ adopt the idea of array programming; hence they can be easily parallelized
 using SIMD or MIMD during execution \cite{HowFastCanAPLBe}. 
 
 
+
 \section{Approach and Uniqueness}
 
 The state of the art architecture of MonetDB kernel inspires the design of
@@ -82,21 +65,16 @@ handle the complexity of SQL query interpretation.  However, unlike MonetDB,
 the syntax and primitives follow the array programming style. HorseIR is a
 static single assigned (SSA) statically typed array programming language. It
 implements most of the primitives in array programming and database-specific
-data types introduced in K and Q programming languages.
-
-\section{Results and Contributions}
-
-During the summer we have implemented both the front-end and back-end of
-HorseIR. Comparing with the traditional approaches  SQL queries, HorseIR has
-the following advantages,
+data types introduced in K and Q programming languages. Comparing with the
+traditional approaches to SQL queries, HorseIR has the following advantages,
 
 \paragraph{Array-based IR with Rich Set of Built-in Primitives}
 In MonetDB, each primitive captures the operation in relational algebra.
 Although this simplifies the design of the execution engine, it hides the
 details from the optimizer. Thus in HorseIR, we expose such information to the
 back-end by introducing an array-based IR. The primitives in HorseIR are basic
-array-based arithmetic (e.g. factorial) or database-specific operations (e.g. table loading).
-Thus we can replace each relational operation with one or more
+array-based arithmetic (e.g. factorial) or database-specific operations (e.g.
+table loading). Thus we can replace each relational operation with one or more
 array-based primitives. 
 
 \paragraph{Programming Language Optimization for Database}
@@ -117,30 +95,71 @@ UDF are implemented using hand-written MAL \cite{MALUDF}) or require external
 linkage \cite{ExternUDF}. Our solution is to compile the UDF written in an
 arbitrary language into HorseIR and later compile the generated intermediate
 code with the SQL queries. HorseIR allows flexible UDF implementation and
-efficient code generation. Further, we can apply compiler optimization techniques to optimize
-the UDF, such as function inlining.
+efficient code generation. Further, we can apply compiler optimization
+techniques to optimize the UDF, such as function inlining.
 
 \paragraph{Efficient Parallel Code Generation}
 Recent research attempted to introduce parallel computation into database
-queries using both CPU\cite{DBLP:conf/sigmod/PolychroniouRR15, DBLP:conf/sigmod/ZhouR02} and GPU \cite{DBLP:conf/ica3pp/CremerBMM16}.
+queries using both CPU\cite{DBLP:conf/sigmod/PolychroniouRR15,
+DBLP:conf/sigmod/ZhouR02} and GPU \cite{DBLP:conf/ica3pp/CremerBMM16}.
 These research shows that the performance of database query is improved
 significantly using the parallel physical architecture. As HorseIR is an
-array-based programming language, it is easy to parallelize array-based primitives
-\cite{DBLP:conf/pldi/ImamSLK14}.
+array-based programming language, it is easy to parallelize array-based
+primitives \cite{DBLP:conf/pldi/ImamSLK14}.
+
+
+\section{Results and Contributions}
+\subsection*{Language Design}
+Hanfeng sketches the general structure and back-end built-in primitives of
+HorseIR. I later add the type system to the language. The type system allows
+static type checking and function overloading. These features enhance the
+performance and the flexibility of HorseIR. The type system classifies the
+variables into four unique classes: primitives, dictionaries, lists, and
+enumerations.  Similar to MonetDB which uses "any" keyword to declare
+polymorphic user-defined functions \cite{MonetDBPolymorphism}, HorseIR system
+allows polymorphic built-in and user-defined function declarations by
+introducing a particular data type called wildcard type. Multiple primitive
+built-in function implementations are allowed in HorseIR. The overloading
+provided by the type system allows the interpreter to select the most efficient
+implementation. Unlike MonetDB which defers the type checking and function
+dispatching to runtime, HorseIR will resolve these during compile time, to
+minimize runtime overhead and improve the performance.
+
+\subsection*{Front-end and Interpreter Implementation}
+In the summer, I have finished the implementation of the front-end of HorseIR.
+The front-end provides a lexer and a parser for HorseIR. Both the lexer and the
+parser are implemented using ANTLR4\cite{ANTLRHome} , which provides an
+user-friendly interface generating robust LL parser. After the parsing, the
+front-end will transform the parse tree into a customized abstract syntax tree.
+The abstract syntax tree later serves as a foundation for program analysis and
+transformation. From the abstract syntax tree, the front-end can generate the
+control-flow graph and static call graph. An execution engine can later use
+this information to interpret the program efficiently. The last component of
+the front-end is the interpreter. Connected to Hanfeng's backend, the
+interpreter traverses across the abstract syntax tree, and interpret statements
+individually.
 
 \section{Conclusion and Future Work}
 
 In this project, we purpose a new intermediate representation on SQL database
 queries. The IR provide the queries with high-performance implementation and
 flexible extension. The new system would enable high-performance in-memory data
-access, that is essential to many software applications. The project also provides
-a new aspect in database query optimization research by employing programming
-language techniques. 
+access, that is essential to many software applications. The project also
+provides a new aspect in database query optimization research by employing
+programming language techniques. 
 
-Currently, we have completed the implementation of front-end and back-end. In
-the future, we will integrate static analyses and an optimization framework into
-the front-end, and add parallel implementation to the back-end, which will
-further improve the performance of the current system. 
+By the end of the summer, I have finished the implementation of the
+interpreter, and a subset of the analysis framework. In the future, I would
+like to enhance the analysis framework to support more complex data-flow
+analysis. Currently, all SQL queries are translated into HorseIR manually; we
+will continuously work on this project to implement an automatic translation
+unit which conducts this process automatically.
+
+\section*{Acknowledgements}
+This project was done as a summer research project for me. I would like to
+thank Hanfeng Chen for his guidance in the array-programming and database
+research field, and Prof. Laurie Hendren for her encouragement throughout the
+summer. 
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{UCORE-2017}
