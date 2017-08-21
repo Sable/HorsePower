@@ -22,22 +22,23 @@
 \section{Problem and Motivation}
 
 Modern software services, such as financial analysis, operate on a vast amount
-of data. To address the challenge of data querying, the design of the database
-systems and query languages continuously evolve during the past decade.
-Database systems, such as MonetDB\cite{MonetDBHome}, utilize the
-IR-based analysis and optimization techniques to meet performance
-challenges and introduce user-defined functions (UDFs) to extend the
-flexibility of the SQL standard.  However, the conventional IR design hides the
-details of database querying steps (such as joining) or separates the IR with
-user-defined functions. These drawbacks significantly limit the context
-information propagated to the backend and render the optimizer less effective. 
+of data. To address the challenge of querying data, the design of the database
+systems and query languages has continuously evolved during the past decade.
+Database systems, such as MonetDB\cite{MonetDBHome}, utilize an IR-based
+analysis and optimization techniques to meet performance challenges and
+introduce user-defined functions (UDFs) to extend the flexibility of the SQL
+standard.  However, the conventional IR design hides the details of database
+querying steps (such as joining) or separates the IR from the user-defined
+functions. These drawbacks significantly limit the context information
+propagated to the back-end and render the optimizer less effective.
 
-In this project, we purpose an array-based IR, named HorseIR, which explores the
-details of query fully and connects to user-defined functions transparently. By
-replacing SQL and user-defined functions with built-in array-based primitives,
-HorseIR enables the optimizer in back-end to employ techniques developed in
-programming language research field such as data-flow analysis, in the hope of
-handling more queries efficiently. 
+In this project, we purpose an array-based IR, named HorseIR, which explores
+the details of query fully and connects to user-defined functions
+transparently. By replacing SQL and user-defined functions with built-in
+array-based primitives, HorseIR will enable the back-end optimizer to employ
+techniques developed in the programming language research field such as
+data-flow analysis, in the hope of handling more flexible queries efficiently.
+
 
 \section{Background and Related Work}
 
@@ -56,110 +57,107 @@ adopt the idea of array programming; hence they can be easily parallelized
 using SIMD or MIMD during execution \cite{HowFastCanAPLBe}. 
 
 
-
 \section{Approach and Uniqueness}
 
-The state of the art architecture of MonetDB kernel inspires the design of
+The state of the art architecture of MonetDB kernel inspired our design of
 HorseIR. Similar to MonetDB, we introduce an intermediate representation, to
 handle the complexity of SQL query interpretation.  However, unlike MonetDB,
-the syntax and primitives of HorseIR follow the array programming style. HorseIR is a
-static single assigned (SSA) statically typed array programming language. It
-implements most of the primitives in array programming and database-specific
-data types introduced in K and Q programming languages. Comparing with the
-traditional approaches to SQL queries, HorseIR has the following advantages:
+the syntax and primitives follow the array programming style. HorseIR is a
+static single assignment (SSA), statically-typed, array programming language.
+It implements most of the primitives in array programming and
+database-specific data types introduced in K and Q programming languages.
+Compared with the traditional approaches to SQL queries, HorseIR has the
+following advantages:
 
-\paragraph{Array-based IR with Rich Set of Built-in Primitives}
-In MonetDB, each primitive captures the operation in relational algebra.
-Although this simplifies the design of the execution engine, it hides the
-details from the optimizer. Thus, in HorseIR, we expose such information to the
-back-end by introducing an array-based IR. The primitives in HorseIR are basic
-array-based (e.g. factorial) or database-specific (e.g.
-table loading) operations. Thus we can replace each relational operation with
-one or more array-based primitives. 
+\paragraph{Array-based IR with a Rich Set of Built-in Primitives} In MonetDB,
+each primitive captures the operation in relational algebra. Although this
+simplifies the design of the execution engine, it hides the details from the
+optimizer. Thus in HorseIR, we expose such information to the back-end by
+introducing an array-based IR. The primitives in HorseIR are basic array-based
+arithmetic (e.g. factorial) or database-specific operations (e.g. table
+loading). Thus we can replace each relational operation with one or more
+array-based primitives. 
 
-\paragraph{Programming Language Optimization for Database}
-In the traditional approach, the optimizations for database queries focused
-on relational algebra and execution plan level. Thus, in MonetDB and many other
-database systems, minimal optimizations are applied on the intermediate
-representation level. By introducing array-based HorseIR, we introduce the
-techniques developed in programming language research field to the database
-query processing.
+\paragraph{Programming Language Optimization for Database} In the traditional
+approach, the optimizations for database queries focused on relational algebra
+and execution plan level. Thus, in MonetDB and many other database systems,
+minimal optimizations are applied on the intermediate representation level. By
+introducing array-based HorseIR, we enable techniques developed in programming
+language research field to be applied to database query processing. 
 
-\paragraph{Extensible Framework for User-defined Functions (UDF)}
-There is no specification for user-defined functions in SQL standard. However,
-to improve the flexibility of the SQL queries, many database systems have
-introduced UDF as a language extension. However, the implementation and
-optimization for UDF introduce complexity in system design. The traditional
-approach UDF is either reduce the language flexibility (used in MonetDB, all
-UDF are implemented using hand-written MAL \cite{MALUDF}) or require external
-linkage \cite{ExternUDF}. Our solution is to compile the UDF written in an
-arbitrary language into HorseIR and later compile the generated intermediate
-code with the SQL queries. HorseIR allows flexible UDF implementation and
-efficient code generation. Further, we can apply compiler optimization
-techniques to optimize the UDF, such as function inlining.
+\paragraph{Extensible Framework for User-defined Functions (UDF)} There is no
+specification for user-defined functions in SQL standard. However, to improve
+the flexibility of SQL queries, many database systems have introduced UDF as a
+language extension. However, the implementation and optimization for UDF
+introduce complexity in system design. The traditional approach to handling UDF
+is to either reduce the language flexibility (used in MonetDB, all UDF are
+implemented using hand-written MAL \cite{MALUDF}) or require external linkage
+\cite{ExternUDF}. Our solution is to compile the UDF written in an arbitrary
+language into HorseIR and later compile the generated intermediate code with
+the SQL queries. HorseIR allows flexible UDF implementation and efficient code
+generation. Further, we can apply compiler optimization techniques to optimize
+the UDF, such as function inlining.
 
 \paragraph{Efficient Parallel Code Generation}
 Recent research attempted to introduce parallel computation into database
 queries using both CPU\cite{DBLP:conf/sigmod/PolychroniouRR15,
-DBLP:conf/sigmod/ZhouR02} and GPU \cite{DBLP:conf/ica3pp/CremerBMM16}.
-These research shows that the performance of database query is improved
-significantly using the parallel physical architecture. As HorseIR is an
-array-based programming language, it is easy to parallelize array-based
+DBLP:conf/sigmod/ZhouR02} and GPU \cite{DBLP:conf/ica3pp/CremerBMM16}
+parallelism. These research shows that the performance of database query is
+improved significantly using the parallel physical architecture. As HorseIR is
+an array-based programming language, it is easy to parallelize array-based
 primitives \cite{DBLP:conf/pldi/ImamSLK14}.
-
 
 \section{Results and Contributions}
 \subsection*{Language Design}
-Hanfeng sketched the general structure and back-end built-in primitives of
-HorseIR. I was assigned to add a type system to the language. The type system allows
-static type checking and function overloading. These features enhance the
-performance and the flexibility of HorseIR. The type system classifies the
-variables into four unique classes: *primitives*, *dictionaries*, *lists*, and
-*enumerations*.  Similar to MonetDB, which uses "any" keyword to declare
-polymorphic user-defined functions \cite{MonetDBPolymorphism}, HorseIR system
-allows polymorphic built-in and user-defined function declarations by
-introducing a particular data type called wildcard type. Multiple primitive
-built-in function implementations are allowed in HorseIR. The information of overloading
-provided by the type system allows the interpreter to select the optimal
-implementation. Unlike MonetDB which defers the type checking and function
-dispatching to runtime, HorseIR is able to resolve these during compile time, to
-minimize runtime overhead and improve the performance.
+Hanfeng Chen (Ph.D. mentor) sketched the general structure and back-end
+built-in primitives of HorseIR. I refined the IR and defined the type system.
+The type system allows static type checking and function overloading. These
+features enhance the performance and the flexibility of HorseIR. The type
+system classifies the variables into four unique classes: primitives,
+dictionaries, lists, and enumerations. Similar to MonetDB, which uses
+"any" keyword to declare polymorphic user-defined functions
+\cite{MonetDBPolymorphism}, HorseIR system allows polymorphic built-in and
+user-defined function declarations by introducing a particular data type called
+the wildcard type. Multiple primitive built-in function implementations are
+allowed in HorseIR. The overloading provided by the type system allows the
+interpreter to select the most efficient implementation. Unlike MonetDB which
+defers the type checking and function dispatching to runtime, HorseIR
+will resolve these during compile time, to minimize runtime overhead and
+improve the performance.
 
 \subsection*{Front-end and Interpreter Implementation}
-In the summer, I have completed the implementation of the front-end of HorseIR.
-The front-end consists of a lexer and a parser for HorseIR. Both are
-implemented by using ANTLR4\cite{ANTLRHome} , which provides an
-user-friendly interface for generating a robust LL parser. After the parsing, the
+During the summer, I have designed and implemented a complete front-end for
+HorseIR. The front-end provides a lexer and a parser for HorseIR. Both the
+lexer and parser are implemented using ANTLR4\cite{ANTLRHome} , which provides
+an user-friendly interface generating robust LL parser. After the parsing, the
 front-end transforms the parse tree into a customized abstract syntax tree.
 The abstract syntax tree later serves as a foundation for program analysis and
 code transformation. From the abstract syntax tree, the front-end can generate
-control-flow graphs and static call graphs. This information help an
-execution engine to interpret the program efficiently.
-The last component of the front-end is the interpreter. Connected to the
-HorseIR backend, the interpreter traverses the abstract syntax tree, and
-interpret statements individually.
+a control-flow graph and a static call graph. An execution engine can later
+use this information to interpret the program efficiently. The last component
+of the front-end is the interpreter. Connected to Hanfeng's backend, the
+interpreter traverses across the abstract syntax tree, and interpret statements
+individually.
 
 \section{Conclusion and Future Work}
 
 In this project, we purpose a new intermediate representation for SQL database
-queries. The IR design is influenced by array programming and targets to
-in-memory databases. The new system could enable high-performance in-memory
-data access, that is essential to performance-critical software applications.
-Moreover, the project provides a new aspect in database query optimization
-research by employing programming language techniques. 
+queries. The IR provides the queries with a high-performance implementation
+and flexible extension. The new system enables high-performance in-memory data
+access, that is essential to many software applications. Moreover, the project
+provides a new aspect in database query optimization research by employing
+programming language techniques. 
 
-By the end of the summer, I have completed the implementation of the
-interpreter, and a subset of the analysis framework. In the future, I would
-like to enhance the analysis framework to support complex data-flow
-analysis. Currently, all SQL queries are translated into HorseIR manually; we
-will continuously work on this project to implement a translator
-which conducts this process automatically.
+By the end of the summer, I have finished the implementation of the front-end,
+the interpreter, and a core of the analysis framework. In the future, I would
+like to enhance the analysis framework to support more complex data-flow
+analysis. 
 
 \section*{Acknowledgements}
-This project was done as a summer research project for me. I would like to
-thank Hanfeng Chen for his guidance in the fields of array programming and
-in-memory database research, and Professor Laurie Hendren for her encouragement
-throughout the summer. 
+This project was done as a summer research project. I would like to
+thank Hanfeng Chen for his guidance in the array programming and in-memory
+database research fields, Professor Laurie Hendren for her encouragement
+throughout the summer, and NSERC for financial support.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{UCORE-2017}
