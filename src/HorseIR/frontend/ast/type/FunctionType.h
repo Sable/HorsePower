@@ -9,6 +9,9 @@ namespace ast
 
 class FunctionType : public Type {
  public:
+  using ParameterTypeIterator = std::vector<Type *>::iterator;
+  using ParameterTypeConstIterator = std::vector<Type *>::const_iterator;
+
   FunctionType ();
   explicit FunctionType (const CSTType *cst);
   FunctionType (FunctionType &&functionType) = default;
@@ -22,6 +25,10 @@ class FunctionType : public Type {
   FunctionType *duplicateDeep (ASTNodeMemory &mem) const override;
 
   std::vector<Type *> getParameterTypes () const;
+  ParameterTypeIterator parameterTypesBegin ();
+  ParameterTypeIterator parameterTypesEnd ();
+  ParameterTypeConstIterator parameterTypesConstBegin () const;
+  ParameterTypeConstIterator parameterTypesConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>
   setParameterTypes (T &&types);
@@ -80,6 +87,20 @@ inline FunctionType *FunctionType::duplicateDeep (ASTNodeMemory &mem) const
 
 inline std::vector<Type *> FunctionType::getParameterTypes () const
 { return parameterTypes; }
+
+inline FunctionType::ParameterTypeIterator FunctionType::parameterTypesBegin ()
+{ return parameterTypes.begin (); }
+
+inline FunctionType::ParameterTypeIterator FunctionType::parameterTypesEnd ()
+{ return parameterTypes.end (); }
+
+inline FunctionType::ParameterTypeConstIterator
+FunctionType::parameterTypesConstBegin () const
+{ return parameterTypes.cbegin (); }
+
+inline FunctionType::ParameterTypeConstIterator
+FunctionType::parameterTypesConstEnd () const
+{ return parameterTypes.cend (); }
 
 template<class T>
 inline std::enable_if_t<std::is_assignable<std::vector<Type *>, T>::value>

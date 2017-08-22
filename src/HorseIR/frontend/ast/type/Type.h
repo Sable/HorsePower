@@ -41,7 +41,7 @@ class Type : public ASTNode {
   }
 };
 
-std::ostream &
+inline std::ostream &
 operator<< (std::ostream &stream, const Type::TypeClass &typeClass)
 {
   using TypeClass = Type::TypeClass;

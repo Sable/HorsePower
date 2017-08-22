@@ -110,7 +110,8 @@ inline std::vector<ASTNode *> EnumerationLiteral::getChildren () const
   return childrenNodes;
 }
 
-EnumerationLiteral *EnumerationLiteral::duplicateDeep (ASTNodeMemory &mem) const
+inline EnumerationLiteral *
+EnumerationLiteral::duplicateDeep (ASTNodeMemory &mem) const
 {
   auto enumerationLiteral = mem.alloc<EnumerationLiteral> ();
   enumerationLiteral->__duplicateDeep (mem, this);

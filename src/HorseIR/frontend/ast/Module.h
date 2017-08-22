@@ -181,7 +181,7 @@ inline std::enable_if_t<
 Module::setImportedModules (T &&newImportedModues)
 { importedModules = std::forward<T> (newImportedModues); }
 
-void Module::merge (Module &&module)
+inline void Module::merge (Module &&module)
 {
   if (module.moduleName != moduleName) return;
   for (const auto &method : module.methods)

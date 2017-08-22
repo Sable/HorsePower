@@ -25,6 +25,10 @@ class CompilationUnit : public ASTNode {
   ModuleIterator modulesEnd ();
   ModuleConstIterator modulesConstBegin () const;
   ModuleConstIterator modulesConstEnd () const;
+  ModuleIterator begin ();
+  ModuleIterator end ();
+  ModuleConstIterator cbegin () const;
+  ModuleConstIterator cend () const;
 
   template<class T>
   std::enable_if_t<std::is_assignable<std::vector<Module *>, T>::value>
@@ -63,6 +67,18 @@ CompilationUnit::modulesConstBegin () const
 
 inline CompilationUnit::ModuleConstIterator
 CompilationUnit::modulesConstEnd () const
+{ return modules.cend (); }
+
+inline CompilationUnit::ModuleIterator CompilationUnit::begin ()
+{ return modules.begin (); }
+
+inline CompilationUnit::ModuleIterator CompilationUnit::end ()
+{ return modules.end (); }
+
+inline CompilationUnit::ModuleConstIterator CompilationUnit::cbegin () const
+{ return modules.cbegin (); }
+
+inline CompilationUnit::ModuleConstIterator CompilationUnit::cend () const
 { return modules.cend (); }
 
 template<class T>

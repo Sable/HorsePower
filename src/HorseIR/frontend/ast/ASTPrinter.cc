@@ -116,7 +116,7 @@ ASTPrinter::caseCompilationUnit (const CompilationUnit *unit, size_t indent)
       unit->modulesConstBegin (), unit->modulesConstEnd (),
       [&] (const Module *module) -> void
       {
-        print (module, indent + 1);
+        print (module, indent);
         stream << LINE_BREAK;
       });
 }
@@ -131,7 +131,7 @@ void ASTPrinter::caseModule (const Module *module, size_t indent)
       module->importedModulesConstEnd (),
       [&] (const Module::ImportedModuleConstIterator::value_type &value) -> void
       {
-        for (std::size_t iter = 0; iter < indent; ++iter) stream << INDENT;
+        for (std::size_t iter = 0; iter < indent + 1; ++iter) stream << INDENT;
         stream << "def "
                << value.first << '.'
                << value.second << ';' << LINE_BREAK;
@@ -141,7 +141,7 @@ void ASTPrinter::caseModule (const Module *module, size_t indent)
       module->globalVariablesConstEnd (),
       [&] (const Module::GlobalVariableConstIterator::value_type &value) -> void
       {
-        for (std::size_t iter = 0; iter < indent; ++iter) stream << INDENT;
+        for (std::size_t iter = 0; iter < indent + 1; ++iter) stream << INDENT;
         stream << "def "
                << value.first << " :";
         print (value.second, 0);
@@ -184,6 +184,7 @@ void ASTPrinter::caseMethod (const Method *method, size_t indent)
         print (value, indent + 1);
         stream << LINE_BREAK;
       });
+  for (std::size_t iter = 0; iter < indent; ++iter) stream << INDENT;
   stream << '}';
 }
 
@@ -380,7 +381,11 @@ void ASTPrinter::caseDateLiteral (const DateLiteral *dateLiteral)
   caseVectorLiteral (
       dateLiteral,
       [&] (const ValueType &value) -> void
-      { stream << value.year << '.' << value.month << '.' << value.day; });
+      {
+        stream << std::to_string (value.year) << '.'
+               << std::to_string (value.month) << '.'
+               << std::to_string (value.day);
+      });
 }
 
 void ASTPrinter::caseDateTimeLiteral (const DateTimeLiteral *dateTimeLiteral)
@@ -391,9 +396,13 @@ void ASTPrinter::caseDateTimeLiteral (const DateTimeLiteral *dateTimeLiteral)
       dateTimeLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << value.year << '.' << value.month << '.' << value.day << 'T'
-               << value.hour << ':' << value.minute << ':'
-               << value.second << '.' << value.millisecond;
+        stream << std::to_string (value.year) << '.'
+               << std::to_string (value.month) << '.'
+               << std::to_string (value.day) << 'T'
+               << std::to_string (value.hour) << ':'
+               << std::to_string (value.minute) << ':'
+               << std::to_string (value.second) << '.'
+               << std::to_string (value.millisecond);
       });
 }
 
@@ -597,4 +606,211 @@ void ASTPrinter::printCharWithEscape (std::uint8_t value)
       auto lowBits = static_cast<std::size_t>(value & 0x0f);
       stream << digits.at (highBits) << digits.at (lowBits);
     }
+}
+
+void ASTPrinter::caseListLiteral (const ListLiteral *listLiteral)
+{
+  assert (listLiteral != nullptr);
+  stream << '[';
+  for (auto valueIter = listLiteral->valueConstBegin ();
+       valueIter != listLiteral->valueConstEnd (); ++valueIter)
+    {
+      print (*valueIter, 0);
+      if (std::next (valueIter) != listLiteral->valueConstEnd ())
+        { stream << ", "; }
+    }
+  stream << "] :";
+  print (listLiteral->getLiteralType (), 0);
+}
+
+void ASTPrinter::caseMinuteLiteral (const MinuteLiteral *minuteLiteral)
+{
+  assert (minuteLiteral != nullptr);
+  using ValueType = MinuteLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      minuteLiteral,
+      [&] (const ValueType &value) -> void
+      {
+        stream << std::to_string (value.hour) << ':'
+               << std::to_string (value.minute);
+      });
+}
+
+void ASTPrinter::caseMonthLiteral (const MonthLiteral *monthLiteral)
+{
+  assert (monthLiteral != nullptr);
+  using ValueType = MonthLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      monthLiteral,
+      [&] (const ValueType &value) -> void
+      {
+        stream << std::to_string (value.year) << '.'
+               << std::to_string (value.month);
+      });
+}
+
+void ASTPrinter::caseSecondLiteral (const SecondLiteral *secondLiteral)
+{
+  assert (secondLiteral != nullptr);
+  using ValueType = SecondLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      secondLiteral,
+      [&] (const ValueType &value) -> void
+      { stream << value.hour << ':' << value.minute << ':' << value.second; });
+}
+
+void ASTPrinter::caseStringLiteral (const StringLiteral *stringLiteral)
+{
+  assert (stringLiteral != nullptr);
+  using ValueType = StringLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      stringLiteral,
+      [&] (const ValueType &value) -> void
+      {
+        stream << '\"';
+        for (const auto &character : value) printCharWithEscape (character);
+        stream << '\"';
+      });
+}
+
+void ASTPrinter::caseSymbolLiteral (const SymbolLiteral *symbolLiteral)
+{
+  assert (symbolLiteral != nullptr);
+  using ValueType = SymbolLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      symbolLiteral,
+      [&] (const ValueType &value) -> void
+      { stream << '`' << value; });
+}
+
+void ASTPrinter::caseTableLiteral (const TableLiteral *tableLiteral)
+{
+  assert (tableLiteral != nullptr);
+  stream << '{';
+  for (auto columnIter = tableLiteral->valueConstBegin ();
+       columnIter != tableLiteral->valueConstEnd (); ++columnIter)
+    {
+      stream << columnIter->head << " -> ";
+      print (columnIter->content, 0);
+      if (std::next (columnIter) != tableLiteral->valueConstEnd ())
+        { stream << ", "; }
+    }
+  stream << "} :";
+  print (tableLiteral->getLiteralType (), 0);
+}
+
+void ASTPrinter::caseTimeLiteral (const TimeLiteral *timeLiteral)
+{
+  assert (timeLiteral != nullptr);
+  using ValueType = TimeLiteral::ElementType::ValueType;
+  caseVectorLiteral (
+      timeLiteral,
+      [&] (const ValueType &value) -> void
+      {
+        stream << std::to_string (value.hour) << ':'
+               << std::to_string (value.minute) << ':'
+               << std::to_string (value.second) << '.'
+               << std::to_string (value.millisecond);
+      });
+}
+
+void ASTPrinter::caseDictionaryType (const DictionaryType *dictionaryType)
+{
+  assert (dictionaryType != nullptr);
+  stream << "dict<";
+  print (dictionaryType->getKeyType ());
+  stream << ", ";
+  print (dictionaryType->getValueType ());
+  stream << '>';
+}
+
+void ASTPrinter::caseEnumerationType (const EnumerationType *enumerationType)
+{
+  assert (enumerationType != nullptr);
+  stream << "enum<";
+  print (enumerationType->getElementType ());
+  stream << '>';
+}
+
+void ASTPrinter::caseFunctionType (const FunctionType *functionType)
+{
+  assert (functionType != nullptr);
+  stream << "func<";
+  for (auto iterator = functionType->parameterTypesConstBegin ();
+       iterator != functionType->parameterTypesConstEnd (); ++iterator)
+    {
+      print (*iterator, 0);
+      if (std::next (iterator) != functionType->parameterTypesConstEnd () ||
+          functionType->getIsFlexible ())
+        { stream << ", "; }
+    }
+  if (functionType->getIsFlexible ()) stream << "...";
+  stream << " :";
+  print (functionType->getReturnType (), 0);
+  stream << '>';
+}
+
+void ASTPrinter::caseListType (const ListType *listType)
+{
+  assert (listType != nullptr);
+  stream << "list<";
+  print (listType->getElementType (), 0);
+  stream << '>';
+}
+
+void ASTPrinter::casePrimitiveType (const PrimitiveType *primitiveType)
+{
+  assert (primitiveType != nullptr);
+  const auto primitiveClass = primitiveType->getPrimitiveClass ();
+  using PrimitiveClass = PrimitiveType::PrimitiveClass;
+  if (primitiveClass == PrimitiveClass::Bool)
+    { stream << "bool"; }
+  else if (primitiveClass == PrimitiveClass::Character)
+    { stream << "char"; }
+  else if (primitiveClass == PrimitiveClass::Integer8)
+    { stream << "i8"; }
+  else if (primitiveClass == PrimitiveClass::Integer16)
+    { stream << "i16"; }
+  else if (primitiveClass == PrimitiveClass::Integer32)
+    { stream << "i32"; }
+  else if (primitiveClass == PrimitiveClass::Integer64)
+    { stream << "i64"; }
+  else if (primitiveClass == PrimitiveClass::FP32)
+    { stream << "f32"; }
+  else if (primitiveClass == PrimitiveClass::FP64)
+    { stream << "f64"; }
+  else if (primitiveClass == PrimitiveClass::Complex)
+    { stream << "complex"; }
+  else if (primitiveClass == PrimitiveClass::Symbol)
+    { stream << "sym"; }
+  else if (primitiveClass == PrimitiveClass::String)
+    { stream << "str"; }
+  else if (primitiveClass == PrimitiveClass::Month)
+    { stream << 'm'; }
+  else if (primitiveClass == PrimitiveClass::Date)
+    { stream << 'd'; }
+  else if (primitiveClass == PrimitiveClass::DateTime)
+    { stream << 'z'; }
+  else if (primitiveClass == PrimitiveClass::Minute)
+    { stream << 'u'; }
+  else if (primitiveClass == PrimitiveClass::Second)
+    { stream << 'v'; }
+  else if (primitiveClass == PrimitiveClass::Time)
+    { stream << 't'; }
+  else if (primitiveClass == PrimitiveClass::Table)
+    { stream << "table"; }
+  else if (primitiveClass == PrimitiveClass::KeyTable)
+    { stream << "ktable"; }
+}
+
+void ASTPrinter::caseWildcardType (const WildcardType *wildcardType)
+{
+  assert (wildcardType != nullptr);
+  stream << '?';
+}
+
+void ASTPrinter::caseIdentifier (const Identifier *identifier)
+{
+  assert (identifier != nullptr);
+  stream << identifier->getName ();
 }

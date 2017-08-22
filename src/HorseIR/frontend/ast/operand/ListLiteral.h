@@ -10,6 +10,8 @@ namespace ast
 class ListLiteral : public Literal {
  public:
   using ElementType = Literal *;
+  using ElementIterator = std::vector<ElementType>::iterator;
+  using ElementConstIterator = std::vector<ElementType>::const_iterator;
 
   ListLiteral ();
   explicit ListLiteral (const CSTType *cst);
@@ -21,6 +23,10 @@ class ListLiteral : public Literal {
 
   bool isNull () const;
   std::vector<ElementType> getValue () const;
+  ElementIterator valueBegin ();
+  ElementIterator valueEnd ();
+  ElementConstIterator valueConstBegin () const;
+  ElementConstIterator valueConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_constructible<std::vector<ElementType>, T>::value>
   setValue (T &&valueContainer);
@@ -57,6 +63,18 @@ inline bool ListLiteral::isNull () const
 
 inline std::vector<ListLiteral::ElementType> ListLiteral::getValue () const
 { return *value; }
+
+inline ListLiteral::ElementIterator ListLiteral::valueBegin ()
+{ return value->begin (); }
+
+inline ListLiteral::ElementIterator ListLiteral::valueEnd ()
+{ return value->end (); }
+
+inline ListLiteral::ElementConstIterator ListLiteral::valueConstBegin () const
+{ return value->cbegin (); }
+
+inline ListLiteral::ElementConstIterator ListLiteral::valueConstEnd () const
+{ return value->cend (); }
 
 template<class T>
 inline std::enable_if_t<

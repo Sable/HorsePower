@@ -31,29 +31,29 @@ class LabelStatement : public Statement {
   void __duplicateDeep (ASTNodeMemory &mem, const LabelStatement *stmt);
 };
 
-LabelStatement::LabelStatement ()
+inline LabelStatement::LabelStatement ()
     : Statement (ASTNodeClass::LabelStatement, StatementClass::Label)
 {}
 
-LabelStatement::LabelStatement (const CSTType *cst)
+inline LabelStatement::LabelStatement (const CSTType *cst)
     : Statement (ASTNodeClass::LabelStatement, cst, StatementClass::Label)
 {}
 
-std::string LabelStatement::getLabelName () const
+inline std::string LabelStatement::getLabelName () const
 { return labelName; }
 
 template<class T>
-std::enable_if_t<std::is_assignable<std::string, T>::value>
+inline std::enable_if_t<std::is_assignable<std::string, T>::value>
 LabelStatement::setValue (T &&newLabelName)
 { labelName = std::forward<T> (newLabelName); }
 
-std::size_t LabelStatement::getNumNodesRecursively () const
+inline std::size_t LabelStatement::getNumNodesRecursively () const
 { return 1; }
 
-std::vector<ASTNode *> LabelStatement::getChildren () const
+inline std::vector<ASTNode *> LabelStatement::getChildren () const
 { return std::vector<ASTNode *>{}; }
 
-LabelStatement *
+inline LabelStatement *
 LabelStatement::duplicateDeep (ASTNode::ASTNodeMemory &mem) const
 {
   auto labelStatement = mem.alloc<LabelStatement> ();
@@ -61,7 +61,7 @@ LabelStatement::duplicateDeep (ASTNode::ASTNodeMemory &mem) const
   return labelStatement;
 }
 
-void
+inline void
 LabelStatement::__duplicateDeep (ASTNodeMemory &mem, const LabelStatement *stmt)
 {
   assert (stmt != nullptr);

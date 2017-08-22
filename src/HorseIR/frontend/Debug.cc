@@ -12,6 +12,12 @@ const char *rawProgram = R"PROGRAM(
  */
 module default {
     import Builtin.*;
+    def loop() :i32 {
+        [ entry ]
+        i :? = (1, 2, 3):i32;
+        goto [entry] i;
+    }
+
     def find_valid_index(colVal:i64, indexBool:i64) : i64 {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
@@ -51,14 +57,12 @@ module default {
         return z;
     }
 }
-
-    def foo() : i32 {
-      return null : i32;
-    }
-
 )PROGRAM";
 
 #include <chrono>
+#include <thread>
+#include "ast/ASTPrinter.h"
+#include "interpreter/StatementFlow.h"
 
 int main (int argc, const char *argv[])
 {
@@ -79,6 +83,23 @@ int main (int argc, const char *argv[])
   astNode->setEnclosingFilename ("stdin");
   std::cout << astNode->getASTNodeClass () << std::endl;
   std::cout << astNode->getNumNodesRecursively () << std::endl;
+
+  ast::ASTPrinter printer (std::cout);
+  printer.print (astNode);
+  std::cout << std::endl;
+
+  auto flow = interpreter::StatementFlow::construct (astNode);
+  ast::Module *module = *(astNode->modulesConstBegin ());
+  ast::Method *method = *(module->methodsConstBegin ());
+  const ast::Statement *statement = *(method->statementsConstBegin ());
+  while (statement != nullptr)
+    {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for (1s);
+      printer.print (statement);
+      std::cout << std::endl;
+      statement = flow.getOutwardFlowOnTrue (statement);
+    }
 
   return 0;
 }

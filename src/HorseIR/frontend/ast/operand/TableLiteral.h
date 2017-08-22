@@ -20,6 +20,8 @@ struct TableColumn {
 class TableLiteral : public Literal {
  public:
   using ElementType = storage::TableColumn;
+  using ElementIterator = std::vector<ElementType>::iterator;
+  using ElementConstIterator = std::vector<ElementType>::const_iterator;
 
   TableLiteral ();
   explicit TableLiteral (const CSTType *cst);
@@ -31,6 +33,10 @@ class TableLiteral : public Literal {
 
   bool isNull () const;
   std::vector<ElementType> getValue () const;
+  ElementIterator valueBegin ();
+  ElementIterator valueEnd ();
+  ElementConstIterator valueConstBegin () const;
+  ElementConstIterator valueConstEnd () const;
   template<class T>
   std::enable_if_t<std::is_constructible<std::vector<ElementType>, T>::value>
   setValue (T &&valueContainer);
@@ -67,6 +73,18 @@ inline bool TableLiteral::isNull () const
 
 inline std::vector<TableLiteral::ElementType> TableLiteral::getValue () const
 { return *value; }
+
+inline TableLiteral::ElementIterator TableLiteral::valueBegin ()
+{ return value->begin (); }
+
+inline TableLiteral::ElementIterator TableLiteral::valueEnd ()
+{ return value->end (); }
+
+inline TableLiteral::ElementConstIterator TableLiteral::valueConstBegin () const
+{ return value->cbegin (); }
+
+inline TableLiteral::ElementConstIterator TableLiteral::valueConstEnd () const
+{ return value->cend (); }
 
 template<class T>
 inline std::enable_if_t<
