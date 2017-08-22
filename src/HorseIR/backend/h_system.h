@@ -73,6 +73,8 @@ L inferRecip            (L t);
 L inferSignum           (L t);
 L inferPi               (L t);
 
+void printErrMsg        (L eid);
+
 /* error messages */
 #define E_DOMAIN          1
 #define E_GENERAL         2

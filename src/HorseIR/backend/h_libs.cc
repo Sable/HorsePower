@@ -1,105 +1,272 @@
 #include "h_global.h"
 
-const L HASH_A = 1223106847L;
-const L HASH_M = (1L << 32)-5;
+const I HASH_A = 1223106847L;
+const I HASH_M = (1L << 32)-5;
 
 typedef struct hash_node {
-    L h_value, h_index;
+    I h_index;
+    union {
+        /* no boolean or char */
+        H h_h;
+        I h_i;
+        L h_l;
+        F h_f;
+        E h_e;
+        X h_x;
+        S h_s;
+    };
+    struct hash_node *next;
 }HN0,*HN;
+
+#define hH(x) x->h_h
+#define hI(x) x->h_i
+#define hL(x) x->h_l
+#define hF(x) x->h_f
+#define hE(x) x->h_e
+#define hX(x) x->h_x
+#define hS(x) x->h_s
+
+#define hD(x) x->h_index
+#define hN(x) x->next
+#define hV(x,k) ((x)+(k))
+
+#define hash_B /* empty */
+#define hash_H hash_i32
+#define hash_I hash_i32
+#define hash_L hash_i64
+#define hash_F hash_f32
+#define hash_E hash_f64
+#define hash_X hash_clex
+#define hash_S hash_djb2
+#define hash_S_n hash_djb2_n
+#define init_H(x) {hI(x)=-1;hN(x)=NULL;}
+
+#define toB(v) (*(B*)(v))
+#define toH(v) (*(H*)(v))
+#define toI(v) (*(I*)(v))
+#define toL(v) (*(L*)(v))
+#define toF(v) (*(F*)(v))
+#define toE(v) (*(E*)(v))
+#define toX(v) (*(X*)(v))
+#define toS(v) (*(S*)(v))
 
 /*
  * A method name starts with "lib" and ends with a specific type
  * e.g. libIndexOf_I
  */
 
-
-// L lib_index_of_i32(L *indx, L *src, L slen, L *targ, L tlen){
-//  R 0;
-// }
-
-
-// L libIndexOf_I(L *targ, I *src, L src_len, I *val, L val_len){
-//  HN hashT = createHashTable(src, src_len);
-//  targ = (L*)malloc(sizeof(L)*val_len);
-//  DOI(val_len, {L x=hashCode[val[i]]; B z=false;\
-//               while(!(z=(hashT[x].h_value==x && val[i]==src[hashT[x].h_index])))\
-//                  {x=(x+1)%val_len;}\
-//               targ[i]=z?hashT[x].h_index:val_len;})
-//  free(hashT);
-//  R 0;
-// }
-
 /*
  * Hash tables
  * http://stackoverflow.com/questions/9624963/java-simplest-integer-hash
  */
-L quickMod(L x){
+
+UI quickMod(L x){
     L j = x >> 32;
     L k = x & 0xffffffffL;
     return j*5+k;
 }
 
-L hashCode(I n){
-    L h = HASH_A*(n&0xffffffffL);
-    L h2 = quickMod(quickMod(h));
-    L rtn =  (L) (h2 >= HASH_M ? (h2-HASH_M) : h2);
-    return rtn < 0 ? -rtn : rtn;
+UI hash_i32(I n){
+    I  h = HASH_A*(n&0xffffffffL);
+    I  h2 = quickMod(quickMod(h));
+    UI rtn =  (UI) (h2 >= HASH_M ? (h2-HASH_M) : h2);
+    return rtn;
 }
 
-
-L calcSizeExp(L x){
-    L n = 64;
-    while(x > n) { n<<=1; }
-    R n;
+UI hash_i64(L n){
+    I high = (I)(0x00000000ffffffffLL & (n>>32));
+    I low  = (I)(0x00000000ffffffffLL & n);
+    R hash_i32(high) + hash_i32(low);
 }
 
-L calcHashSize(L x) {
-    R (x<16?32:calcSizeExp(x));
+UI hash_djb2(S str){
+    UI h = 5381; I c;
+    while(0!=(c=*str++))
+        h=((h<<5)+h)+(*str++);
+    R h;
 }
 
-HN createHashTable(I *src, L src_len){
-    L hashLen = calcHashSize(src_len);
-    HN hashT  = (HN) malloc(sizeof(HN0) * hashLen);
-    memset(hashT, -1, sizeof(HN0)*hashLen);
-    DOI(src_len, {L x=hashCode(src[i]);while(hashT[x].h_index!=-1){x=(x+1)%hashLen;}\
-        hashT[x].h_value=x; hashT[x].h_index=i;})
-    R hashT;
+UI hash_djb2_n(S str, L n){
+    UI h = 5381;
+    DOI(n, h=((h<<5)+h)+(*str++)) /* h * 33 + c */
+    R h;
 }
+
+UI hash_sdbm(S str, L n){
+    UI h = 0;
+    DOI(n, h=(*str++)+(h<<6)+(h<<6)-h)
+    return h;
+}
+
+UI hash_lose(S str, L n){
+    UI h = 0;
+    DOI(n, h+=(*str++))
+    R h;
+}
+
+UI hash_f32(F n){
+    R hash_S_n((S)(&n),sizeof(F));
+}
+
+UI hash_f64(E n){
+    R hash_S_n((S)(&n),sizeof(E));
+}
+
+UI hash_clex(X n){
+    R hash_S_n((S)(&n),sizeof(X));
+}
+
+UI getHashTableSize(L x){
+    R (x<16?32:(x<<1));
+}
+
+UI getHashValue(void* val, L typ){
+    switch(typ){
+        caseH R hash_H(toH(val));
+        caseI R hash_I(toI(val));
+        caseL R hash_L(toL(val));
+        caseF R hash_F(toF(val));
+        caseE R hash_E(toE(val));
+        caseX R hash_X(toX(val));
+        caseS R hash_S(toS(val));
+    }
+    R 0;
+}
+
+L createHash(HN *hashT, L hashLen){
+    *hashT = (HN) malloc(sizeof(HN0) * hashLen);
+    memset(*hashT, 0, sizeof(HN0)*hashLen);
+    R 0;
+}
+
+/* free a hash table */
+L freeHash(HN hashT){
+    R 0;
+}
+
+HN newHashNode(){
+    HN x = (HN) malloc(sizeof(HN0)); init_H(x);
+    R x;
+}
+
+/* further, consider search by list tuples */
+L find_or_insert_hash(HN ht, L htSize, void* val, L index, L typ, B op){
+    L hashKey = getHashValue(val,typ) % htSize;
+    HN t = hV(ht,hashKey);
+    while(hN(t)) {
+        t = hN(t);
+        switch(typ){
+            caseH if(hH(t)==toH(val)) R hD(t); break;
+            caseI if(hI(t)==toI(val)) R hD(t); break;
+            caseL if(hL(t)==toL(val)) R hD(t); break;
+            caseF if(hF(t)==toF(val)) R hD(t); break;
+            caseE if(hE(t)==toE(val)) R hD(t); break;
+            caseX if(xEqual(hX(t),toX(val)))  R hD(t); break;
+            caseS if(!strcmp(hS(t),toS(val))) R hD(t); break;
+        }
+    }
+    if(op){ /* insert */
+        HN x = newHashNode();
+        hD(x) = index;
+        switch(typ){
+            caseH hH(x)=toH(val); break;
+            caseI hI(x)=toI(val); break;
+            caseL hL(x)=toL(val); break;
+            caseF hF(x)=toF(val); break;
+            caseE hE(x)=toE(val); break;
+            caseX hX(x)=toX(val); break;
+            caseS hS(x)=toS(val); break;
+        }
+        hN(t) = x;
+        R index;
+    }
+    R -1; /* not found */
+}
+
+L findHash(HN ht, L htSize, void* val, L typ){
+    R find_or_insert_hash(ht,htSize,val,-1,typ,0);
+}
+
+L insertHash(HN ht, L htSize, void* val, L index, L typ){
+    R find_or_insert_hash(ht,htSize,val,index,typ,1);
+}
+
+L profileHash(HN ht, L htSize){
+    L minValue=99999, maxValue=-1, nonZero=0;
+    P("\n> Hash table size: %lld\n",htSize);
+    DOI(htSize, {L c=0; HN t=hV(ht,i); while(hN(t)){c++;t=hN(t);} \
+        if(c!=0) nonZero++; \
+        if(c<minValue) minValue=c; \
+        if(c>maxValue) maxValue=c; })
+    P("> Sparsity (%lld/%lld) = %g%%\n",nonZero,htSize, nonZero*100.0/htSize);
+    P("> min = %lld, max = %lld\n\n",minValue,maxValue);
+    R 0;
+}
+
 
 /* functions exposed as libraries */
 
-void lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
+#define lib_index_template(typ) \
+    HN hashT; \
+    L hashLen = getHashTableSize(sLen); \
+    CHECKE(createHash(&hashT,hashLen)); \
+    DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
+    DOI(vLen, {L t=findHash(hashT,hashLen,&val[i],typ);targ[i]=t<0?sLen:t;})
+
+L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
+    L flag[2]={-1}; I c=0;
+    DOI(sLen, if(c<2 && -1==flag[src[i]]){flag[src[i]]=i;c++;if(2==c)break;})
+    DOI(vLen, {L t=flag[val[i]]; targ[i]=t<0?sLen:t;})
+    R 0;
 }
 
-void lib_index_of_H(L* targ, H* src, L sLen, H* val, L vLen){
+L lib_index_of_H(L* targ, H* src, L sLen, H* val, L vLen){
+    lib_index_template(H_H);
+    R 0;
 }
 
-void lib_index_of_I(L* targ, I* src, L sLen, I* val, L vLen){
+L lib_index_of_I(L* targ, I* src, L sLen, I* val, L vLen){
+    lib_index_template(H_I);
+    R 0;
 }
 
-void lib_index_of_L(L* targ, L* src, L sLen, L* val, L vLen){
-    DOI(vLen, {B f=1;\
-        DOJ(sLen, if(val[i]==src[j]){targ[i]=j;f=0;break;})\
-        if(f)targ[i]=sLen;})
+L lib_index_of_L(L* targ, L* src, L sLen, L* val, L vLen){
+    lib_index_template(H_L);
+    R 0;
 }
 
-void lib_index_of_F(L* targ, F* src, L sLen, F* val, L vLen){
+// void lib_index_of_L(L* targ, L* src, L sLen, L* val, L vLen){
+//     DOI(vLen, {B f=1;\
+//         DOJ(sLen, if(val[i]==src[j]){targ[i]=j;f=0;break;})\
+//         if(f)targ[i]=sLen;})
+// }
+
+L lib_index_of_F(L* targ, F* src, L sLen, F* val, L vLen){
+    lib_index_template(H_F);
+    R 0;
 }
 
-void lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen){
+L lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen){
+    lib_index_template(H_E);
+    R 0;
 }
 
-void lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen){
+L lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen){
     L buff[256];
     memset(buff,-1,256*sizeof(L));
     DOI(sLen, if(buff[src[i]]==-1) buff[src[i]]=i)
     DOI(vLen, {L t=buff[val[i]]; targ[i]=-1==t?sLen:t;})
+    R 0;
 }
 
-void lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
+L lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen){
+    lib_index_template(H_X);
+    R 0;
 }
 
-void lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen){
+L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
+    lib_index_template(H_S);
+    R 0;
 }
 
 
@@ -146,35 +313,61 @@ void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
     lib_quicksort(targ, val, 0, tLen-1, isUp);
 }
 
+#define lib_member_template(typ)\
+    HN hashT; \
+    L hashLen = getHashTableSize(sLen); \
+    CHECKE(createHash(&hashT,hashLen)); \
+    DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
+    DOI(vLen, targ[i]=(0<=findHash(hashT,hashLen,&val[i],typ))) \
+    profileHash(hashT,hashLen);
 
-void lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
+L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
     B flag[2]={0};
     DOI(sLen, flag[src[i]]=1)
     DOI(vLen, targ[i]=flag[val[i]])
+    R 0;
 }
 
-void lib_member_H(B* targ, H* src, L sLen, H* val, L vLen){
+L lib_member_H(B* targ, H* src, L sLen, H* val, L vLen){
+    R 0;
 }
 
-void lib_member_I(B* targ, I* src, L sLen, I* val, L vLen){
+L lib_member_I(B* targ, I* src, L sLen, I* val, L vLen){
+    lib_member_template(H_I);
+    R 0;
 }
 
-void lib_member_L(B* targ, L* src, L sLen, L* val, L vLen){
+L lib_member_L(B* targ, L* src, L sLen, L* val, L vLen){
+    lib_member_template(H_L);
+    R 0;
 }
 
-void lib_member_F(B* targ, F* src, L sLen, F* val, L vLen){
+L lib_member_F(B* targ, F* src, L sLen, F* val, L vLen){
+    lib_member_template(H_F);
+    R 0;
 }
 
-void lib_member_E(B* targ, E* src, L sLen, E* val, L vLen){
+L lib_member_E(B* targ, E* src, L sLen, E* val, L vLen){
+    lib_member_template(H_E);
+    R 0;
 }
 
-void lib_member_C(B* targ, C* src, L sLen, C* val, L vLen){
+L lib_member_C(B* targ, C* src, L sLen, C* val, L vLen){
+    B buff[256];
+    memset(buff,0,256*sizeof(B));
+    DOI(sLen, if(!buff[src[i]]) buff[src[i]]=1)
+    DOI(vLen, targ[i]=buff[val[i]];)
+    R 0;
 }
 
-void lib_member_X(B* targ, X* src, L sLen, X* val, L vLen){
+L lib_member_X(B* targ, X* src, L sLen, X* val, L vLen){
+    lib_member_template(H_X);
+    R 0;
 }
 
-void lib_member_S(B* targ, S* src, L sLen, S* val, L vLen){
+L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen){
+    lib_member_template(H_S);
+    R 0;
 }
 
 

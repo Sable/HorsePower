@@ -1053,7 +1053,6 @@ L pfnCompress(V z, V x, V y){
 }
 
 #define INDEXOF(p,z,x,y) lib_index_of_##p(sL(z),s##p(x),vn(x),s##p(y),vn(y))
-
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L typMax = max(vp(x), vp(y));
@@ -1398,7 +1397,7 @@ L pfnKTable(V z, V x, V y){
 }
 
 
-#define MEMBER(t,z,x,y) case##t lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y)); break
+#define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
 L pfnMember(V z, V x, V y){
     if(isTypeGroupReal(vp(x))){
         V tempX = allocNode();

@@ -292,13 +292,14 @@ void testOrderBy(){
 
 #include "test_types.h"
 #include "test_tpch_q6.h"
+#include "test_pfns.h"
 
 L testMain(){
     initMain();  // memory
     initSym();   // symbol
     initSys();
     initTable(); // table
-    L op = 4;
+    L op = 5;
     if(1==op){
         P("Reading table Employee\n");
         V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
@@ -318,6 +319,9 @@ L testMain(){
     }
     else if(4==op){
         testTPCHQ6();
+    }
+    else if(5==op){
+        testPfns();
     }
     else {
         /* .... */

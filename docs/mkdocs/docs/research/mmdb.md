@@ -90,8 +90,8 @@ There are a couple of views we could summarize.
 ### <p id="p143">P143: The VoltDB main memory DBMS</p>
 
 This paper is an introductory article for a new main-memory database, VoltDB.
-There is no much technical details about VoltDB.  Instead, it gives the
-overview of VoltDB and describes the current development status of the project.
+There is no much technical detail about VoltDB.  Instead, it describes the
+overview of the VoltDB and the current development status of the system.
 
 Features of VoltDB
 

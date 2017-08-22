@@ -19,6 +19,10 @@ typedef struct { F real,imag; } X;
 typedef struct { Q name; S target; } Y;  //target: V
 typedef struct { I row, col; } A;
 
+/* unsigned types */
+typedef unsigned long long UL;
+typedef unsigned int       UI;
+
 /* size: 3 * 8 + 8 = 32 */
 typedef struct node_value{
 	L typ,len; G g;
