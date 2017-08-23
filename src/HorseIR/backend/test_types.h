@@ -61,6 +61,18 @@ void testX(){
     printV(a);
 }
 
+void testZ(){
+    P("\nTest datetime:\n");
+    V a = allocNode();
+    initV(a, H_Z, 1);
+    L d = 20170823LL;
+    L t[] = {20,2,34,001};
+    L v = (t[0]*3600+t[1]*60+t[2])*1000+t[3];
+    vz(a) = (d*216000000LL+v);
+    /* output: 2017.08.23T20:02:34.001:z */
+    printV(a);
+}
+
 void testS(){
     P("\nTest string:\n");
     V a = allocNode();
@@ -143,5 +155,6 @@ void testTypes(){
     testA(tableEmp);
     testA(tableDep);
     testK(tableEmp, tableDep);
+    testZ();
 }
 

@@ -299,7 +299,7 @@ L testMain(){
     initSym();   // symbol
     initSys();
     initTable(); // table
-    L op = 5;
+    L op = 2;
     if(1==op){
         P("Reading table Employee\n");
         V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);

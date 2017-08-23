@@ -562,7 +562,6 @@ L pfnMax(V z, V x){
 }
 
 /* Date & Time */
-#define CHOPZ(op,z,x) {L t=Z2D(x); z=CHOPD(op,t);}
 L pfnChopDate(V z, V x, L op){
     if(isTypeGroupDate(vp(x))){
         initV(z,H_L,vn(x));
@@ -599,8 +598,6 @@ L pfnDate(V z, V x){
 }
 
 
-#define CHOPZT(op,z,x){L t=Z2T(x); CHOPT(op,z,t)}
-#define T2W(x) ((x)/1E3)
 L pfnChopTime(V z, V x, L op){
     if(isTypeGroupTime(vp(x))){
         initV(z,H_L,vn(x));

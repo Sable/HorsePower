@@ -209,9 +209,9 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
                c=SP(buff, "%d.%02d.%02d", \
                    CHOPD(0,d),CHOPD(1,d),CHOPD(2,d)); } break;
         caseZ {L d=Z2D(xZ(k)),t=Z2T(xZ(k)), ll=t%1000, w=t/1000;
-               c=SP(buff, "%lld.%02lld.%02lldT\
-                   %02lld:%02lld:%02lld.%03lld",\
-                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d),
+               c=SP(buff, "%lld.%02lld.%02lldT"\
+                   "%02lld:%02lld:%02lld.%03lld",\
+                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d),\
                    CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
         caseU {I u=xU(k);
                c=SP(buff,"%02d:%02d", \
