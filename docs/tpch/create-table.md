@@ -6,6 +6,9 @@
 - [region](#region)
 - [part](#part)
 - [supplier](#supplier)
+- [partsupp](#partsupp)
+- [customer](#customer)
+- [orders](#orders)
 - [lineitem](#lineitem)
 
 ## Details of tables
@@ -19,6 +22,8 @@
                          N_COMMENT    VARCHAR(152));
 ``` 
 
+- N_NATIONKEY
+
 ### region
 
 ```sql
@@ -26,6 +31,8 @@
                          R_NAME       CHAR(25) NOT NULL,
                          R_COMMENT    VARCHAR(152));
 ```
+
+- R_REGIONKEY
 
 ### part
 
@@ -41,6 +48,8 @@
                        P_COMMENT     VARCHAR(23) NOT NULL );
 ```
 
+- P_PARTKEY
+
 ### supplier
 
 ```sql
@@ -53,6 +62,8 @@
                           S_COMMENT     VARCHAR(101) NOT NULL);
 ```
 
+- S_SUPPKEY
+
 ### partsupp
 
 ```sql
@@ -62,6 +73,9 @@
                           PS_SUPPLYCOST  DECIMAL(15,2)  NOT NULL,
                           PS_COMMENT     VARCHAR(199) NOT NULL );
 ```
+
+- PS_PARTKEY
+- PS_SUPPKEY
 
 ### customer
 
@@ -76,6 +90,8 @@
                           C_COMMENT     VARCHAR(117) NOT NULL);
 ```
 
+- C_CUSTKEY
+
 ### orders
 
 ```sql
@@ -89,6 +105,8 @@
                          O_SHIPPRIORITY   INTEGER NOT NULL,
                          O_COMMENT        VARCHAR(79) NOT NULL);
 ```
+
+- O_ORDERKEY
 
 ### lineitem
 
@@ -111,4 +129,6 @@
                           L_COMMENT         VARCHAR(44) NOT NULL);
 ```
 
+- L_ORDERKEY
+- L_LINENUMBER
 
