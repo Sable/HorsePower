@@ -140,29 +140,29 @@ void errorMsg(S msg){
 #define FS(x)   FT("%s",x)
 
 L getTypeStr(L x, S buff){
-    L c = 0;
+    L c = 0; B op = true;
     switch(x){
-        caseB c=SP(buff, "bool");    break;
-        caseH c=SP(buff, "i16");     break;
-        caseI c=SP(buff, "i32");     break;
-        caseL c=SP(buff, "i64");     break;
-        caseF c=SP(buff, "f32");     break;
-        caseE c=SP(buff, "f64");     break;
-        caseQ c=SP(buff, "sym");     break;
-        caseS c=SP(buff, "str");     break;
-        caseX c=SP(buff, "complex"); break;
-        caseM c=SP(buff, "m");       break;
-        caseD c=SP(buff, "d");       break;
-        caseZ c=SP(buff, "z");       break;
-        caseU c=SP(buff, "u");       break;
-        caseW c=SP(buff, "w");       break;
-        caseT c=SP(buff, "t");       break;
-        caseG c=SP(buff, "list");    break;
-        caseN c=SP(buff, "dict");    break;
-        caseY c=SP(buff, "enum");    break;
-        caseA c=SP(buff, "table");   break;
-        caseK c=SP(buff, "ktable");  break;
-        caseV c=SP(buff, "item");    break;
+        caseB c=SP(buff, "bool");          break;
+        caseH c=SP(buff, "i16");           break;
+        caseI c=SP(buff, "i32");           break;
+        caseL c=SP(buff, op?"":"i64");     break;
+        caseF c=SP(buff, "f32");           break;
+        caseE c=SP(buff, op?"":"f64");     break;
+        caseQ c=SP(buff, op?"":"sym");     break;
+        caseS c=SP(buff, "str");           break;
+        caseX c=SP(buff, op?"":"complex"); break;
+        caseM c=SP(buff, "m");             break;
+        caseD c=SP(buff, "d");             break;
+        caseZ c=SP(buff, "z");             break;
+        caseU c=SP(buff, "u");             break;
+        caseW c=SP(buff, "w");             break;
+        caseT c=SP(buff, "t");             break;
+        caseG c=SP(buff, "list");          break;
+        caseN c=SP(buff, "dict");          break;
+        caseY c=SP(buff, "enum");          break;
+        caseA c=SP(buff, "table");         break;
+        caseK c=SP(buff, "ktable");        break;
+        caseV c=SP(buff, "item");          break;
         default: c=SP(buff, "<unknown::%lld>",x); break;
     }
     R c;

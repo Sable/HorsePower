@@ -293,7 +293,7 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp){
 #define cmp_switch(x) (x?-1:1):(x?1:-1)
 
 L lib_quicksort_cmp(V val, L a, L b, B *isUp){
-    DOI(vn(val), {V t=vV(val,i); B f = isUp[i]; \
+    DOI(vn(val), {V t=vV(val,i); B f = isUp?isUp[i]:1; \
         switch(vp(t)){ \
         caseB if(vB(t,a)!=vB(t,b)) R vB(t,a)<vB(t,b)?cmp_switch(f); break; \
         caseH if(vH(t,a)!=vH(t,b)) R vH(t,a)<vH(t,b)?cmp_switch(f); break; \
@@ -311,6 +311,31 @@ L lib_quicksort_cmp(V val, L a, L b, B *isUp){
 void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
     DOI(tLen, targ[i]=i)
     lib_quicksort(targ, val, 0, tLen-1, isUp);
+}
+
+
+L lib_get_group_by(V z, V val, L* index, L iLen){
+    L k, c; V t;
+    /* 1. get the total number of cells: lenZ */
+    L lenZ=iLen>0?1:0;
+    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL))lenZ++)
+    /* 2. allocate list and get the info of each cell */
+    initV(z, H_G, lenZ);
+    c=iLen>0?1:0;
+    k=0;
+    t=vV(z,k++);
+    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL)){ \
+                 initV(t,H_L,c); t=vV(z,k++); c=1; } \
+               else c++;)
+    if(c>0) initV(t,H_L,c);
+    /* 3. fill indices into each cell */
+    k=0, c=0;
+    t= vV(z,k++);
+    if(iLen>0) vL(t,c++)=index[0];
+    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL)){ \
+                  t=vV(z,k++); vL(t,0)=index[i]; c=1; } \
+               else vL(t,c++)=index[i])
+    R 0;
 }
 
 #define lib_member_template(typ)\

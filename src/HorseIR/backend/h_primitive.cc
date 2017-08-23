@@ -693,6 +693,27 @@ L pfnTolist(V z, V x){
     else R E_DOMAIN;
 }
 
+L pfnGroup(V z, V x){
+    V0 y0,t0; V y = &y0, t = &t0;
+    L lenZ = isList(x)?vn(x):1;
+    initV(y,H_B,lenZ);
+    DOI(vn(x),vB(y,i)=1)
+    CHECKE(pfnOrderBy(t,x,y));
+
+    if(isList(x)){
+        L numRow= 0==vn(x)?0:vn(vV(x,0));
+        CHECKE(lib_get_group_by(z,x,sL(t),numRow));
+    }
+    else if(isTypeGroupBasic(xp)){
+        V0 t1; V tx=&t1;
+        L numRow= vn(x);
+        CHECKE(pfnEnlist(tx,x));
+        CHECKE(lib_get_group_by(z,tx,sL(t),numRow));
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
 /* Binary */
 
 #define COMP(op,x,y) (2>op?COMPLESS(op,x,y):4>op?COMPMORE(op,x,y):6>op?COMPEQ(op,x,y):0)
@@ -955,7 +976,6 @@ L pfnXor(V z, V x, V y){
 }
 
 #define POWERLOG(op,x,y) (op==0?POWER(x,y):LOG(x,y))
-
 L pfnPowerLog(V z, V x, V y, L op){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;

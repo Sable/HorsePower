@@ -114,6 +114,7 @@ L pfnTime          (V z, V x);
 L pfnEnlist        (V z, V x);
 L pfnRaze          (V z, V x);
 L pfnTolist        (V z, V x);
+L pfnGroup         (V z, V x);
 
 L pfnCompare       (V z, V x, V y, L op);
 L pfnLt            (V z, V x, V y);
