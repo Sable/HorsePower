@@ -40,7 +40,7 @@ type system.
 | table      | table     | A     | Collection of columns         |
 | keyed table| ktable    | K     | Two normal tables             |
 
-See more about [type examples](type_examples.md).
+See more about [type examples](#examples).
 
 
 ### Type casting

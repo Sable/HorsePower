@@ -39,6 +39,8 @@ pages:
     - "___": horseir/builtin/geq.md
     - "___": horseir/builtin/group.md
     - "___": horseir/builtin/gt.md
+    - "___": horseir/builtin/hyper.md
+    - "___": horseir/builtin/indexing.md
     - "___": horseir/builtin/indexof.md
     - "___": horseir/builtin/len.md
     - "___": horseir/builtin/leq.md

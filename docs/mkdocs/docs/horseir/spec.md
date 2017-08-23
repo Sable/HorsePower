@@ -358,7 +358,7 @@ Grammar
 
 Basics
 
-- [Names](names.md)
+- [Names](naming.md)
 - [Types](types.md)
 - [Date time](date.md)
 - [Built-in functions](functions.md)
