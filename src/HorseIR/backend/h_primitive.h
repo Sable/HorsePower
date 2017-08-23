@@ -37,6 +37,19 @@ extern "C" {
 #define isValidLength(x,y) (isOne(x) || isOne(y) || isEqualLength(x,y))
 #define isValidType(x,y)   ((isTypeGroupReal(vp(x))&&isTypeGroupReal(vp(y))) || vp(x)==vp(y))
 
+#define Z2D(x) ((x)/216000000LL)
+#define Z2T(x) ((x)%216000000LL) //60x60x60x10000
+#define CHOPM(op,x) (0==op?(x/100):(x%100))
+#define CHOPD(op,x) (0==op?(x/10000):1==op?(x/100%100):(x%100))
+#define CHOPZ(op,z,x) {L t=Z2D(x); z=CHOPD(op,t);}
+
+#define CHOPU(op,x) (0==op?(x/60):(x%60))
+#define CHOPW(op,x) (0==op?(x/3600):1==op?(x/60%60):(x%60))
+#define CHOPT(op,z,x) {L t=T2W(x); z=4>op?CHOPW(op,t):x%1000;}
+#define CHOPZT(op,z,x){L t=Z2T(x); CHOPT(op,z,t)}
+#define T2W(x) ((x)/1E3)
+
+
 /* keyed table */
 #define isKeySingle(x) (1==getTableColNumber(getKTableKey(x)))
 

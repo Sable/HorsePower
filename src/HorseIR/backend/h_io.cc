@@ -202,14 +202,26 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
                 printSymTick(xQ(k), buff): \
                 printSymbol(xQ(k), buff);  break;
         /* date time */
-        caseM c=SP(buff, "%d.%02d", \
-                   xM(k)/100, \
-                   xM(k)%100);             break;
-        caseD c=SP(buff, "%d.%02d.%02d", \
-                   xD(k)/10000, \
-                   xD(k)/100%100, \
-                   xD(k)%100);             break;
-        // caseZ c=SP(buff, "%d.%02d.%02dT%02d:%02d:%02d.%03d")
+        caseM {I m=xM(k);
+               c=SP(buff, "%d.%02d", \
+                    CHOPM(0,m),CHOPM(1,m)); } break;
+        caseD {I d=xD(k);
+               c=SP(buff, "%d.%02d.%02d", \
+                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d)); } break;
+        caseZ {L d=Z2D(xZ(k)),t=Z2T(xZ(k)), ll=t%1000, w=t/1000;
+               c=SP(buff, "%lld.%02lld.%02lldT\
+                   %02lld:%02lld:%02lld.%03lld",\
+                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d),
+                   CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
+        caseU {I u=xU(k);
+               c=SP(buff,"%02d:%02d", \
+                   CHOPU(0,u),CHOPU(1,u)); } break;
+        caseW {I w=xW(k);
+               c=SP(buff,"%02d:%02d:%02d", \
+                   CHOPW(0,w),CHOPW(1,w),CHOPW(2,w));} break;
+        caseT {I t=xT(k),ll=t%1000, w=t/1000;
+               c=SP(buff,"%02d:%02d:%02d.%03d", \
+                   CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
     }
     R c;
 }
