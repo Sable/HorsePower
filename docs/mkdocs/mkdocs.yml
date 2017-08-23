@@ -7,6 +7,7 @@ theme: readthedocs
 pages:
 - Home    : 'index.md'
 - Overview: 'overview.md'
+- SQL2IR  : 'sql2ir.md'
 - HorseIR : 
     - IR overview  : 'horseir/spec.md'
     - Naming       : 'horseir/naming.md'
@@ -36,6 +37,7 @@ pages:
     - "___": horseir/builtin/fact.md
     - "___": horseir/builtin/floor.md
     - "___": horseir/builtin/geq.md
+    - "___": horseir/builtin/group.md
     - "___": horseir/builtin/gt.md
     - "___": horseir/builtin/indexof.md
     - "___": horseir/builtin/len.md

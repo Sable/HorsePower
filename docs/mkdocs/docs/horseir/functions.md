@@ -165,6 +165,7 @@ Status
 | 8  | flip(x)              | Transform a dict to a table and vice versa | Dict, Table  | Table or Dict                 | link                          | |
 | 9  | reverse(x)           | Reverse                     | Basic                       | Same as argument              | [link](builtin/reverse.md)    |&#10004;|
 | 10 | where(x)             | Find all trues              | B                           | L                             | [link](builtin/where.md)      |&#10004;|
+| 11 | group(x)             | Group items                 | Basic                       | List<i64>                     | [link](builtin/group.md)      |&#10004;|
 
 
 ### 3.2 Binary
