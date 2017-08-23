@@ -3,3 +3,5 @@
 src/HorseIR/frontend/build/
 src/HorseIR/frontend/project_cloc.sh
 docs/slides/UCORE/acmart\.cls
+
+src/HorseIR/backend/libBackend\.a

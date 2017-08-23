@@ -13,6 +13,15 @@ backend: $(C_FILES) $(H_FILES)
 	cc $(FLAGS) -c h_primitive.cc -Wno-attributes
 	cc $(FLAGS) -c test.cc -Wno-attributes
 
+lib: $(C_FILES) $(H_FILES)
+	cc $(FLAGS) -c h_io.cc -Wno-attributes
+	cc $(FLAGS) -c h_memory.cc -Wno-attributes
+	cc $(FLAGS) -c h_libs.cc -Wno-attributes
+	cc $(FLAGS) -c h_symbol.cc -Wno-attributes
+	cc $(FLAGS) -c h_system.cc -Wno-attributes
+	cc $(FLAGS) -c h_primitive.cc -Wno-attributes
+	ar rcs libBackend.a *.o
+
 .PHONY: clean
 clean:
 	rm -f *.o
