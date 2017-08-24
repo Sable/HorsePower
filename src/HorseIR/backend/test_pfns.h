@@ -39,7 +39,7 @@ L testMember(){
 }
 
 L testPfns(){
-	// testMember();
+	testMember();
     testGroupBy();
 	R 0;
 }

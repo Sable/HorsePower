@@ -28,6 +28,7 @@ L getColWidth         (V x);
 L getStrPretty        (S str, L maxSize);
 
 L printType           (L x);
+L printTag            (L x);
 L printBasicItem      (V x, L k);
 L printInfo           (V x);
 L printBasicValue     (V x, B hasTag);

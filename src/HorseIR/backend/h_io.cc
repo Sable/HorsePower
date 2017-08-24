@@ -2,7 +2,7 @@
 
 const L LINE_MAX_CHAR = 1024;
 const C LINE_SEP      = '|';
-const L BUFF_SIZE     = 128;
+const L BUFF_SIZE     = 256;
 
 /*
  * 1: csv
@@ -30,7 +30,7 @@ V readCSV(S fileName, L numCols, L *types, L *symList){
     if(H_DEBUG) P("** Done with initialization **\n");
     rewind(fp);
     loadCSV(fp, true, x, numCols, types);
-    if(H_DEBUG) {printTable(x); P("\n");}
+    if(H_DEBUG) {printTablePretty(x,20); P("\n");}
     fclose(fp);
     R x;
 }
@@ -94,6 +94,7 @@ void loadItem(V x, L k, L typ, S s){
         caseF xF(k) = atof(s); break;
         caseE xE(k) = atof(s); break;
         caseQ xQ(k) = getSymbol(s); break;
+        caseS {S t=allocStrMem(strlen(s)); strcpy(t,s); xS(k)=t;} break;
         caseD {I a,b,c; sscanf(s,"%d-%d-%d",&a,&b,&c); xD(k) = a*10000+b*100+c;} break;
     }
 }
@@ -136,21 +137,19 @@ void errorMsg(S msg){
 
 /* output */
 
-#define FT(s,x) FP(stdout,s,x)
-#define FS(x)   FT("%s",x)
-
 L getTypeStr(L x, S buff){
-    L c = 0; B op = true;
+    L c = 0;
     switch(x){
         caseB c=SP(buff, "bool");          break;
         caseH c=SP(buff, "i16");           break;
         caseI c=SP(buff, "i32");           break;
-        caseL c=SP(buff, op?"":"i64");     break;
+        caseL c=SP(buff, "i64");           break;
         caseF c=SP(buff, "f32");           break;
-        caseE c=SP(buff, op?"":"f64");     break;
-        caseQ c=SP(buff, op?"":"sym");     break;
+        caseE c=SP(buff, "f64");           break;
+        caseQ c=SP(buff, "sym");           break;
+        caseC c=SP(buff, "char");          break;
         caseS c=SP(buff, "str");           break;
-        caseX c=SP(buff, op?"":"complex"); break;
+        caseX c=SP(buff, "complex");       break;
         caseM c=SP(buff, "m");             break;
         caseD c=SP(buff, "d");             break;
         caseZ c=SP(buff, "z");             break;
@@ -173,6 +172,19 @@ L printType(L x){
     getTypeStr(x, buff);
     R FS(buff);
 }
+
+L printTag(L x){
+    C buff[BUFF_SIZE];
+    switch(x){
+        caseL caseE caseQ caseX
+            buff[0]=0; break;
+        default:
+            buff[0]=':';
+            getTypeStr(x, buff+1); break;
+    }
+    R FS(buff);
+}
+
 
 L getComplexStr(X x, S buff){
     L c0=SP(buff, "%g",xReal(x)),c1;
@@ -197,17 +209,22 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
         caseL c=SP(buff, "%lld" , xL(k));   break;
         caseF c=SP(buff, "%g"   , xF(k));   break;
         caseE c=SP(buff, "%.2lf", xE(k));   break;
-        caseX c=getComplexStr(xX(k),buff); break;
+        caseX c=getComplexStr(xX(k),buff);  break;
+        /* deal with caseC and caseS carefully */
         caseQ c=hasTick? \
                 printSymTick(xQ(k), buff): \
-                printSymbol(xQ(k), buff);  break;
+                printSymbol(xQ(k), buff);   break;
+        caseS {S t=xS(k); c=strlen(t); \
+               if(BUFF_SIZE<=c) { P("Buff exceeds\n"); exit(10); }\
+               strcpy(buff,t); }            break;
+        caseC c=SP(buff, "%c", xC(k));      break;
         /* date time */
         caseM {I m=xM(k);
                c=SP(buff, "%d.%02d", \
-                    CHOPM(0,m),CHOPM(1,m)); } break;
+                    CHOPM(0,m),CHOPM(1,m)); }              break;
         caseD {I d=xD(k);
                c=SP(buff, "%d.%02d.%02d", \
-                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d)); } break;
+                   CHOPD(0,d),CHOPD(1,d),CHOPD(2,d)); }    break;
         caseZ {L d=Z2D(xZ(k)),t=Z2T(xZ(k)), ll=t%1000, w=t/1000;
                c=SP(buff, "%lld.%02lld.%02lldT"\
                    "%02lld:%02lld:%02lld.%03lld",\
@@ -215,10 +232,10 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
                    CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
         caseU {I u=xU(k);
                c=SP(buff,"%02d:%02d", \
-                   CHOPU(0,u),CHOPU(1,u)); } break;
+                   CHOPU(0,u),CHOPU(1,u)); }               break;
         caseW {I w=xW(k);
                c=SP(buff,"%02d:%02d:%02d", \
-                   CHOPW(0,w),CHOPW(1,w),CHOPW(2,w));} break;
+                   CHOPW(0,w),CHOPW(1,w),CHOPW(2,w));}     break;
         caseT {I t=xT(k),ll=t%1000, w=t/1000;
                c=SP(buff,"%02d:%02d:%02d.%03d", \
                    CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
@@ -247,7 +264,7 @@ L printBasicValue(V x, B hasTag){
         FS("("); DOI(xn, {if(i>0)FS(","); printBasicItem(x,i);}); FS(")");
     }
     if(hasTag) {
-        FS(":"); printType(xp);
+        printTag(xp);
     }
     R 0;
 }
@@ -340,7 +357,7 @@ L printTablePretty(V x, L rowLimit){
         /* print body */
         L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
         DOI(rowPrint,  { \
-            DOJ(vn(x), {if(j>0) FS(" "); V val = getColVal(getTableCol(x,j)); \
+            DOJ(vn(x), {if(j>0) FS(" "); V val = getColVal(getTableCol(x,j));\
                 getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s",buff);}) \
             FS("\n"); \
             })

@@ -136,6 +136,7 @@
 #define xF(k) vF(x,k)
 #define xE(k) vE(x,k)
 #define xQ(k) vQ(x,k)
+#define xC(k) vC(x,k)
 #define xS(k) vS(x,k)
 #define xM(k) vM(x,k)
 #define xD(k) vD(x,k)

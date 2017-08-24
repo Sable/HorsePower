@@ -1,46 +1,76 @@
 #include "h_global.h"
 
-const L INIT_HEAP_SIZE  = 65536; //64MB
-const L INIT_CACHE_SIZE = 65536; //64MB
+const L INIT_HEAP_SIZE  = 67108864; //64MB, 64*1024*1024
+
+typedef struct buddy_node { /* size 48 */
+    L size, level; G value;
+    struct buddy_node *left, *right, *parent;
+}BN0,*BN;
+
+#define bn(x) x->size
+#define bv(x) x->level
+#define ba(x) x->value
+#define bx(x) x->left
+#define by(x) x->right
+#define bp(x) x->parent
 
 /* global vars */
 
-G gHeap = NULL; L gHeapCur;  //global heap and cursor
-G gCache= NULL; L gCacheCur; //global cache and cursor
+#define USE_NAIVE
+// #define USE_BUDDY
+
+L whichSystme = 0;           // naive (0) or buddy (1)
+G gHeap = NULL; L gHeapCur;  // naive: global heap and its cursor
+BN gRoot = NULL;             // buddy: global heap
+L numBlocks = 0;
 
 
 /* methods */
 
 void initMain(){
+    #ifdef USE_NAIVE
+        useNaiveSystem();
+    #endif
+
+    #ifdef USE_BUDDY
+        useBuddySystem();
+    #endif
+}
+
+void useNaiveSystem(){
     gHeap = (G)malloc(INIT_HEAP_SIZE);
-    gCache= (G)malloc(INIT_CACHE_SIZE);
-    gHeapCur = gCacheCur = 0;
+    gHeapCur = 0;
     if(H_DEBUG)
         P("-> [Info heap] Successfully initialized\n");
 }
 
 G getHeapMem(L typ, L len){
-    return allocMem(gHeap, &gHeapCur, INIT_HEAP_SIZE, typ, len);
+    #ifdef USE_NAIVE
+        R allocMem(gHeap, &gHeapCur, INIT_HEAP_SIZE, typ, len);
+    #endif
+
+    #ifdef USE_BUDDY
+        R allocBlock(typ, len);
+    #endif
 }
 
-G getCacheMem(L typ, L len){
-    return allocMem(gCache, &gCacheCur, INIT_CACHE_SIZE, typ, len);
+G allocHeap(L size){
+    G g = (G)malloc(size);
+    if(!g) {
+        FP(stderr, "No sufficient memory!\n");
+        exit(99);
+    }
+    R g;
 }
 
-void printHeapInfo(){
-    if(H_DEBUG)
-        P("-> [Info heap] Init. %lld, used %lld (%lf%%)\n", \
-            INIT_HEAP_SIZE, \
-            gHeapCur, \
-            gHeapCur*100.0/INIT_HEAP_SIZE);
-}
+/* Naive system */
 
 G allocMem(G heap, L *cur, L top, L typ, L len){
-    L size = getTypeSize(typ) * len;
+    L size = getTypeSize(typ, len);
     G g = NULL;
     if((*cur)+size < top){
         if(H_DEBUG){
-            P("-> [Info heap] Allocated %lld for info (", size);
+            P("-> [Info heap] Allocated %3lld for info (", size);
             printType(typ);
             P(", %2lld)\n",len);
         }
@@ -54,11 +84,11 @@ G allocMem(G heap, L *cur, L top, L typ, L len){
     R g;
 }
 
-L getTypeSize(L typ){
-    L r = -1;
+L getTypeSize(L typ, L len){
+    L r = -1, k = 0;
     switch(typ){
         case H_B  : r = sizeof(B);     break;
-        case H_C  : r = sizeof(C) + 1; break;
+        case H_C  : r = sizeof(C); k=1;break;
         case H_H  : r = sizeof(H);     break;
         case H_I  : r = sizeof(I);     break;
         case H_L  : r = sizeof(L);     break;
@@ -80,7 +110,7 @@ L getTypeSize(L typ){
         case H_K  : r = sizeof(V0);    break;
         case H_V  : r = sizeof(V0);    break;
     }
-    return r;
+    return r * len + k;
 }
 
 
@@ -110,6 +140,11 @@ V allocTable(L numCols){
 
 V allocKTable(){
     R allocV(H_K, 2);
+}
+
+/* may move to a string pool */
+G allocStrMem(L n){
+    R (n>=0)?getHeapMem(H_C,n):NULL;
 }
 
 /* initialization */
@@ -156,4 +191,184 @@ S insertString(S str){
     L len = strlen(str);
     R (S)memcpy(getHeapMem(H_C, len), str, len+1);
 }
+
+
+/* memory management: buddy system */
+
+BN newBlock(L n, BN p, G ptr){
+    BN x = (BN)malloc(sizeof(BN0));
+    bx(x) = NULL;
+    by(x) = NULL;
+    bp(x) = p;
+    bn(x) = n;
+    bv(x) = n;
+    ba(x) = ptr;
+    numBlocks++; //debug
+    R x;
+}
+
+void useBuddySystem(){
+    gRoot = newBlock(INIT_HEAP_SIZE, NULL, allocHeap(INIT_HEAP_SIZE));
+}
+
+void updateBlock(BN rt){
+    if(rt && bp(rt)){
+        BN parent  = bp(rt);
+        bn(parent) = bn(bx(parent)) + bn(by(parent));
+        updateBlock(parent);
+    }
+}
+
+BN addBlock(BN rt, L n){
+    if(H_DEBUG)
+        printf("n = %lld, size = %lld\n",n, rt->size);
+    if(n <= bn(rt)){
+        if(bx(rt) == NULL && by(rt) == NULL){
+            if((n<<1) <= bn(rt) && bn(rt)>256){
+                L half = bn(rt)>>1;
+                G hptr = ba(rt);
+                bx(rt) = newBlock(half,rt,hptr);
+                by(rt) = newBlock(half,rt,hptr+half);
+                R addBlock(bx(rt), n);
+            }
+            else {
+                bn(rt) = 0;
+                updateBlock(rt);
+                R rt;
+            }
+        }
+        else if(bn(bx(rt)) < n){
+            R addBlock(by(rt), n);
+        }
+        else if(bn(by(rt)) < n){
+            R addBlock(bx(rt), n);
+        }
+        else if(bn(bx(rt)) < bn(by(rt))){
+            R addBlock(bx(rt), n);
+        }
+        else {
+            R addBlock(by(rt), n);
+        }
+    }
+    else {
+        FS("full ...\n");
+        exit(99);
+    }
+    R NULL; 
+}
+
+void releaseBlock(BN rt){
+    if(rt){
+        bn(rt) = bv(rt);
+        ba(rt) = NULL;
+        updateBlock(rt);
+    }
+}
+
+void freeBlock(BN rt){
+    if(rt){
+        freeBlock(bx(rt));
+        freeBlock(by(rt));
+        free(rt);
+    }
+}
+
+void printTree(BN rt){
+    FS("(");
+    if(rt){
+        if(ba(rt))
+            FT("%ld", ba(rt)-ba(gRoot));
+        else
+            FS("NULL");
+        if(rt->left){
+            printTree(bx(rt));
+            printTree(by(rt));
+        }
+    }
+    FS(")");
+}
+
+void printRoot(BN rt){
+    printTree(rt);
+    FS("\n");
+}
+
+G allocBlock(L typ, L len){
+    const L refNum = sizeof(L);
+    L size = refNum + getTypeSize(typ, len);
+    BN t = addBlock(gRoot, size);
+    R ba(t)+refNum;
+}
+
+/*
+ * Initial: 1GB (minimal block size 64 bytes)
+ * Worst case: 2^20/2^6 = 2^14 blocks (about 2^14 * 48 = 768MB)
+ * Worse case percent: sizeof(BN0)/minBlockSize * 100%
+ */
+L testMemory(){
+    printf("Test memory: buddy system\n");
+    // BN root   = newBlock(512, NULL, allocHeap(512));
+    BN root = gRoot;
+    BN work_a = addBlock(root, 70); //add(A, 70)
+    printRoot(root);
+    BN work_b = addBlock(root, 35); //add(B, 35)
+    printRoot(root);
+    BN work_c = addBlock(root, 80); //add(C, 80)
+    printRoot(root);
+    P("> end (A, 70)\n");
+    releaseBlock(work_a);            //end A
+    printRoot(root);
+    BN work_d = addBlock(root, 60); //add(D, 80)
+    printRoot(root);
+    P("> end (B, 35)\n");
+    releaseBlock(work_b);            //end B
+    printRoot(root);
+    P("> end (D, 80)\n");
+    releaseBlock(work_d);            //end D
+    printRoot(root);
+    P("> end (C, 80)\n");
+    releaseBlock(work_c);            //end C
+    printRoot(root);
+    freeBlock(root);
+    P("numBlocks = %lld, total mem = %lld out of %lld (%g%%)\n", \
+        numBlocks, \
+        numBlocks*sizeof(BN0), \
+        INIT_HEAP_SIZE, \
+        numBlocks*sizeof(BN0)*100.0/INIT_HEAP_SIZE \
+        );
+    return 0;
+}
+
+#define getRefPtr(x) (L*)(x-sizeof(BN0))
+
+L getRefCount(G x){
+    R *(getRefPtr(x));
+}
+
+L updateRefCount(G x){
+    L *n = getRefPtr(x);
+    R ++(*n);
+}
+
+void printHeapInfo(){
+    #ifdef USE_NAIVE
+    // if(H_DEBUG)
+        P("-> [Info heap] Init. %lld, used %lld (%lf%%)\n", \
+            INIT_HEAP_SIZE, \
+            gHeapCur, \
+            gHeapCur*100.0/INIT_HEAP_SIZE);
+    #endif
+
+    #ifdef USE_BUDDY
+        P("-> [Buddy heap] Init. %lld, used %lld/%lld, extra %lld (%g%%)\n", \
+            INIT_HEAP_SIZE, \
+            gRoot->size,    \
+            gRoot->level,   \
+            numBlocks*sizeof(BN0), \
+            numBlocks*sizeof(BN0)*100.0/INIT_HEAP_SIZE \
+            );
+        P("-> [Buddy heap] "); printRoot(gRoot);
+    #endif
+}
+
 

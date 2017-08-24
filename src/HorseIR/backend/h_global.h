@@ -67,6 +67,9 @@ typedef struct list_table{
 #define FP fprintf
 #define SP sprintf
 
+#define FT(s,x) FP(stdout,s,x)
+#define FS(x)   FT("%s",x)
+
 #define DOI(n, x) {for(L i=0,i2=n;i<i2;i++)x;}
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;}
@@ -88,7 +91,7 @@ typedef struct list_table{
 
 #define ERROR_CODE 99
 #define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
-#define H_DEBUG false
+#define H_DEBUG true
 
 /* extern */
 

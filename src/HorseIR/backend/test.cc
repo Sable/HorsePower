@@ -293,38 +293,33 @@ void testOrderBy(){
 #include "test_types.h"
 #include "test_tpch_q6.h"
 #include "test_pfns.h"
+#include "test_read_tpch.h"
 
 L testMain(){
     initMain();  // memory
     initSym();   // symbol
     initSys();
     initTable(); // table
-    L op = 2;
-    if(1==op){
-        P("Reading table Employee\n");
-        V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
-        registerTable((S)"Employee", tableEmp);
-        P("Reading table Department\n");
-        V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
-        registerTable((S)"Department", tableDep);
-        /* Simulation */
-        // simulateSimple();
-        simulateSimpleRaw();
-    }
-    else if(2==op){
-        testTypes();
-    }
-    else if(3==op){
-        testOrderBy();
-    }
-    else if(4==op){
-        testTPCHQ6();
-    }
-    else if(5==op){
-        testPfns();
-    }
-    else {
-        /* .... */
+    L op = 7;
+    switch(op){
+        case 1: {
+            P("Reading table Employee\n");
+            V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);
+            registerTable((S)"Employee", tableEmp);
+            P("Reading table Department\n");
+            V tableDep = readCSV(CSV_DEP, NUM_COL_DEP, TYPE_DEP, SYM_LIST_DEP);
+            registerTable((S)"Department", tableDep);
+            /* Simulation */
+            // simulateSimple();
+            simulateSimpleRaw();
+        } break;
+        case 2: testTypes();      break;
+        case 3: testOrderBy();    break;
+        case 4: testTPCHQ6();     break;
+        case 5: testPfns();       break;
+        case 6: testMemory();     break;
+        case 7: readTpchTables(); break;
+        default: break;
     }
     /* Print info */
     printSymInfo();
