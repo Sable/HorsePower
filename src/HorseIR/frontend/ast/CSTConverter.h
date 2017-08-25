@@ -830,7 +830,6 @@ struct CSTConverter {
       {
         std::size_t pos = 0;
         signed long long rawValue = std::stoll (valueString, &pos, 10);
-        if (pos != valueString.length ()) throw CSTConverterException (context);
         if (rawValue < std::numeric_limits<T>::min ())
           { throw CSTConverterException (context); }
         if (rawValue > std::numeric_limits<T>::max ())
@@ -1021,8 +1020,6 @@ struct CSTConverter {
         const std::string streamStream = stream.str ();
         size_t pos = 0;
         T converted = func (streamStream, &pos);
-        if (pos != streamStream.length ())
-          { throw CSTConverterException (context); }
         return ElementType (converted);
       }
     catch (const std::invalid_argument &exception)
@@ -1177,8 +1174,6 @@ struct CSTConverter {
         std::size_t pos = 0;
         const std::string realString = valueContext->real->getText ();
         double realValue = std::stod (realString, &pos);
-        if (pos != realString.length ())
-          { throw CSTConverterException (valueContext); }
         std::complex<double> element (sign * realValue, 0.0);
         return ComplexLiteral::ElementType (element);
       }
@@ -1204,8 +1199,6 @@ struct CSTConverter {
         std::size_t pos = 0;
         const std::string imString = valueContext->im->getText ();
         double imValue = std::stod (imString, &pos);
-        if (pos != imString.length ())
-          { throw CSTConverterException (valueContext); }
         std::complex<double> element (0.0, sign * imValue);
         return ComplexLiteral::ElementType (element);
       }
@@ -1236,8 +1229,6 @@ struct CSTConverter {
         std::size_t pos = 0;
         const std::string realValueString = valueContext->real->getText ();
         realValue = std::stod (realValueString, &pos);
-        if (pos != realValueString.length ())
-          { throw CSTConverterException (valueContext); }
       }
     catch (const std::invalid_argument &exception)
       { throw CSTConverterException (valueContext); }
@@ -1250,8 +1241,6 @@ struct CSTConverter {
             std::size_t pos = 0;
             const std::string imValueString = valueContext->im->getText ();
             imValue = std::stod (imValueString, &pos);
-            if (pos != imValueString.length ())
-              { throw CSTConverterException (valueContext); }
           }
         catch (const std::invalid_argument &exception)
           { throw CSTConverterException (valueContext); }
@@ -1495,15 +1484,11 @@ struct CSTConverter {
       {
         std::size_t pos = 0;
         unsigned long yearConverted = std::stoul (yearString, &pos, 10);
-        if (pos != yearString.length ())
-          { throw CSTConverterException (valueContext); }
         if (yearConverted < 1900) throw CSTConverterException (valueContext);
         if (yearConverted > 2100) throw CSTConverterException (valueContext);
         yearValue = static_cast<decltype (yearValue)>(yearConverted);
 
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
-        if (pos != monthString.length ())
-          { throw CSTConverterException (valueContext); }
         if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
         monthValue = static_cast<decltype (monthValue)>(monthConverted);
@@ -1607,22 +1592,16 @@ struct CSTConverter {
       {
         std::size_t pos = 0;
         unsigned long yearConverted = std::stoul (yearString, &pos, 10);
-        if (pos != yearString.length ())
-          { throw CSTConverterException (valueContext); }
         if (yearConverted < 1900) throw CSTConverterException (valueContext);
         if (yearConverted > 2100) throw CSTConverterException (valueContext);
         yearValue = static_cast<decltype (yearValue)>(yearConverted);
 
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
-        if (pos != monthString.length ())
-          { throw CSTConverterException (valueContext); }
         if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
         monthValue = static_cast<decltype (monthValue)>(monthConverted);
 
         unsigned long dayConverted = std::stoul (dayString, &pos, 10);
-        if (pos != monthString.length ())
-          { throw CSTConverterException (valueContext); }
 
         bool isLeapYear;
         if (yearValue % 4 != 0)
@@ -1811,22 +1790,16 @@ struct CSTConverter {
       {
         std::size_t pos = 0;
         unsigned long yearConverted = std::stoul (yearString, &pos, 10);
-        if (pos != yearString.length ())
-          { throw CSTConverterException (valueContext); }
         if (yearConverted < 1900) throw CSTConverterException (valueContext);
         if (yearConverted > 2100) throw CSTConverterException (valueContext);
         yearValue = static_cast<decltype (yearValue)>(yearConverted);
 
         unsigned long monthConverted = std::stoul (monthString, &pos, 10);
-        if (pos != monthString.length ())
-          { throw CSTConverterException (valueContext); }
         if (monthConverted == 0) throw CSTConverterException (valueContext);
         if (monthConverted > 12) throw CSTConverterException (valueContext);
         monthValue = static_cast<decltype (monthValue)>(monthConverted);
 
         unsigned long dayConverted = std::stoul (dayString, &pos, 10);
-        if (pos != dayString.length ())
-          { throw CSTConverterException (valueContext); }
         bool isLeapYear;
         if (yearValue % 4 != 0)
           { isLeapYear = false; }
@@ -1847,26 +1820,18 @@ struct CSTConverter {
         dayValue = static_cast<decltype (dayValue)>(dayConverted);
 
         unsigned long hourConverted = std::stoul (hourString, &pos, 10);
-        if (pos != hourString.length ())
-          { throw CSTConverterException (valueContext); }
         if (hourConverted >= 24) throw CSTConverterException (valueContext);
         hourValue = static_cast<decltype (hourValue)>(hourConverted);
 
         unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
-        if (pos != minuteString.length ())
-          { throw CSTConverterException (valueContext); }
         if (minuteConverted >= 60) throw CSTConverterException (valueContext);
         minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
 
         unsigned long secondConverted = std::stoul (secondString, &pos, 10);
-        if (pos != secondString.length ())
-          { throw CSTConverterException (valueContext); }
         if (secondConverted >= 60) throw CSTConverterException (valueContext);
         secondValue = static_cast<decltype (secondValue)>(secondConverted);
 
         unsigned long msConverted = std::stoul (msString, &pos, 10);
-        if (pos != msString.length ())
-          { throw CSTConverterException (valueContext); }
         msValue = static_cast<decltype (msValue)>(msConverted);
       }
     catch (const std::invalid_argument &exception)
@@ -2032,14 +1997,10 @@ struct CSTConverter {
       {
         std::size_t pos;
         unsigned long hourConverted = std::stoul (hourString, &pos, 10);
-        if (pos != hourString.length ())
-          { throw CSTConverterException (valueContext); }
         if (hourConverted >= 24) throw CSTConverterException (valueContext);
         hourValue = static_cast<decltype (hourValue)>(hourConverted);
 
         unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
-        if (pos != minuteString.length ())
-          { throw CSTConverterException (valueContext); }
         if (minuteConverted >= 60) throw CSTConverterException (valueContext);
         minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
       }
@@ -2201,20 +2162,14 @@ struct CSTConverter {
       {
         std::size_t pos;
         unsigned long hourConverted = std::stoul (hourString, &pos, 10);
-        if (pos != hourString.length ())
-          { throw CSTConverterException (valueContext); }
         if (hourConverted >= 24) throw CSTConverterException (valueContext);
         hourValue = static_cast<decltype (hourValue)>(hourConverted);
 
         unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
-        if (pos != minuteString.length ())
-          { throw CSTConverterException (valueContext); }
         if (minuteConverted >= 60) throw CSTConverterException (valueContext);
         minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
 
         unsigned long secondConverted = std::stoul (secondString, &pos, 10);
-        if (pos != secondString.length ())
-          { throw CSTConverterException (valueContext); }
         if (secondConverted >= 60) throw CSTConverterException (valueContext);
         secondValue = static_cast<decltype (secondValue)>(secondConverted);
       }
@@ -2379,26 +2334,18 @@ struct CSTConverter {
       {
         std::size_t pos;
         unsigned long hourConverted = std::stoul (hourString, &pos, 10);
-        if (pos != hourString.length ())
-          { throw CSTConverterException (valueContext); }
         if (hourConverted >= 24) throw CSTConverterException (valueContext);
         hourValue = static_cast<decltype (hourValue)>(hourConverted);
 
         unsigned long minuteConverted = std::stoul (minuteString, &pos, 10);
-        if (pos != minuteString.length ())
-          { throw CSTConverterException (valueContext); }
         if (minuteConverted >= 60) throw CSTConverterException (valueContext);
         minuteValue = static_cast<decltype (minuteValue)>(minuteConverted);
 
         unsigned long secondConverted = std::stoul (secondString, &pos, 10);
-        if (pos != secondString.length ())
-          { throw CSTConverterException (valueContext); }
         if (secondConverted >= 60) throw CSTConverterException (valueContext);
         secondValue = static_cast<decltype (secondValue)>(secondConverted);
 
         unsigned long msConverted = std::stoul (msString, &pos, 10);
-        if (pos != msString.length ())
-          { throw CSTConverterException (valueContext); }
         msValue = static_cast<decltype (msValue)>(msConverted);
       }
     catch (const std::invalid_argument &exception)

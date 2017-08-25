@@ -63,10 +63,13 @@ module default {
 #include <thread>
 #include "ast/ASTPrinter.h"
 #include "interpreter/StatementFlow.h"
+#include "interpreter/LiteralConverter.h"
+#include "../backend/h_io.h"
+#include "interpreter/Dispatcher.h"
+#include "interpreter/Interpreter.h"
 
 int main (int argc, const char *argv[])
 {
-  auto start = std::chrono::steady_clock::now ();
   antlr4::ANTLRInputStream stream (rawProgram);
   HorseIRLexer lexer (&stream);
   antlr4::CommonTokenStream tokenStream (&lexer);
@@ -76,30 +79,22 @@ int main (int argc, const char *argv[])
   ast::ASTNode::ASTNodeMemory mem;
 
   auto astNode = ast::CSTConverter::convert (mem, context);
-  auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>
-      (std::chrono::steady_clock::now () - start);
-  std::cout << "Time :" << duration.count () / 1000000.0 << " ms" << std::endl;
-
-  astNode->setEnclosingFilename ("stdin");
-  std::cout << astNode->getASTNodeClass () << std::endl;
-  std::cout << astNode->getNumNodesRecursively () << std::endl;
 
   ast::ASTPrinter printer (std::cout);
   printer.print (astNode);
   std::cout << std::endl;
 
-  auto flow = interpreter::StatementFlow::construct (astNode);
-  ast::Module *module = *(astNode->modulesConstBegin ());
-  ast::Method *method = *(module->methodsConstBegin ());
-  const ast::Statement *statement = *(method->statementsConstBegin ());
-  while (statement != nullptr)
-    {
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for (1s);
-      printer.print (statement);
-      std::cout << std::endl;
-      statement = flow.getOutwardFlowOnTrue (statement);
-    }
+  initMain ();
+  initSym ();
+
+  interpreter::Interpreter i;
+  i.createIdentifierNumbering (astNode);
+
+  interpreter::Interpreter::IdentifierNumberingPrinter p (
+      std::cout, i.idNumberingMap
+  );
+  p.print (astNode);
+
 
   return 0;
 }
