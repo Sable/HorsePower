@@ -69,17 +69,9 @@ Dispatcher::getMethodMETA (const ast::FunctionLiteral *literal) const
 
 void Dispatcher::registerExternalMethods ()
 {
-  addExternalMethodMETA ("Builtin", "len", nullptr);
-  addExternalMethodMETA ("Builtin", "lt", nullptr);
-  addExternalMethodMETA ("Builtin", "range", nullptr);
-  addExternalMethodMETA ("Builtin", "compress", nullptr);
-  addExternalMethodMETA ("Builtin", "load_table", nullptr);
-  addExternalMethodMETA ("Builtin", "column_value", nullptr);
-  addExternalMethodMETA ("Builtin", "index_of", nullptr);
-  addExternalMethodMETA ("Builtin", "index", nullptr);
-  addExternalMethodMETA ("Builtin", "tolist", nullptr);
-  addExternalMethodMETA ("Builtin", "list", nullptr);
-  addExternalMethodMETA ("Builtin", "table", nullptr);
+  addExternalMethodMETA ("Builtin", "plus",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnPlus (ret, argv[0], argv[1]); });
 }
 
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)

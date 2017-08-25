@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "../ast/AST.h"
 #include "../../backend/h_global.h"
+#include "../../backend/h_primitive.h"
 #ifndef NDEBUG
 #include "../misc/InfixOStreamIterator.h"
 #include "../ast/ASTPrinter.h"

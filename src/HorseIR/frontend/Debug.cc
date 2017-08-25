@@ -11,44 +11,16 @@ const char *rawProgram = R"PROGRAM(
  * int         -> i64
  */
 module default {
-    import Builtin.*;
-    def find_valid_index(colVal:i64, indexBool:i64) : i64 {
-        colSize   :? = @len(colVal);
-        validBool :? = @lt(indexBool,colSize);
-        indexSize :? = @len(indexBool);
-        indexRange:? = @range(indexSize);
-        validIndex:? = @compress(validBool, indexRange);
-        return validIndex;
+    import Builtin.plus;
+    def inc_by_one(num :i32) :i32 {
+        ret :? = @plus(num, 1 :i32);
+        return ret;
     }
-    def find_valid_item(colVal:i64, indexBool:i64)  : i64 {
-        colSize   :? = @len(colVal);
-        validBool :? = @lt(indexBool,colSize);
-        validItem :? = @compress(validBool, indexBool);
-        return validItem;
-    }
+
     def main() : table {
-        a0:table = @load_table(`Employee);
-        a1:table = @load_table(`Department);
-
-        s0:sym = check_cast(@column_value(a0, `LastName)      , sym);
-        s1:i64 = check_cast(@column_value(a0, `DepartmentID)  , i64);
-        s2:i64 = check_cast(@column_value(a1, `DepartmentID)  , i64);
-        s3:sym = check_cast(@column_value(a1, `DepartmentName), sym);
-
-        t0:i64 = @index_of       (s2,s1);
-        t1:i64 = @find_valid_index(s2,t0);
-        t2:i64 = @find_valid_item (s2,t0);
-
-        r0:sym = @index(s0,t1);
-        r1:i64 = @index(s1,t1);
-        r2:sym = @index(s3,t2);
-
-        k0:sym       = (`LastName,`DepartmentID,`DepartmentName);
-        k1:list<sym> = @tolist(k0);
-        k2:list<?>   = @list(r0,r1,r2);
-        z:table      = @table(k1,k2);
-
-        return z;
+        v1:? = 1 :i32;
+        v2:? = @inc_by_one(v1);
+        return v2;
     }
 }
 )PROGRAM";
@@ -56,9 +28,7 @@ module default {
 #include <chrono>
 #include <thread>
 #include "ast/ASTPrinter.h"
-#include "interpreter/StatementFlow.h"
-#include "interpreter/LiteralConverter.h"
-#include "interpreter/Dispatcher.h"
+#include "interpreter/Interpreter.h"
 #include "../backend/h_io.h"
 
 int main (int argc, const char *argv[])
@@ -78,11 +48,11 @@ int main (int argc, const char *argv[])
   std::cout << std::endl;
 
   initMain ();
-  initSym ();
+  initSys ();
 
   using namespace horseIR::interpreter;
-  Dispatcher dispatcher (astNode);
-  dispatcher.getPrinter (std::cout).print ();
+  Interpreter interpreter (astNode);
+  printV (interpreter.interpret ("default", "main"));
 
   return 0;
 }
