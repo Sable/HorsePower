@@ -14,7 +14,7 @@ class StringLiteral : public VectorLiteral<std::vector<std::uint8_t>> {
             (ASTNodeClass::StringLiteral, LiteralClass::String)
   {}
 
-  StringLiteral (const CSTType *parseTree)
+  explicit StringLiteral (const CSTType *parseTree)
       : VectorLiteral<std::vector<std::uint8_t>>
             (ASTNodeClass::StringLiteral, parseTree, LiteralClass::String)
   {}

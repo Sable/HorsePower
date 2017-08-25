@@ -178,8 +178,8 @@ template<class T>
 inline std::enable_if_t<
     std::is_assignable<std::vector<Module::ImportedModuleEntryType>, T>::value
 >
-Module::setImportedModules (T &&newImportedModues)
-{ importedModules = std::forward<T> (newImportedModues); }
+Module::setImportedModules (T &&newImportedModules)
+{ importedModules = std::forward<T> (newImportedModules); }
 
 inline void Module::merge (Module &&module)
 {

@@ -17,7 +17,7 @@ class ASTPrinter {
   ASTPrinter (const ASTPrinter &printer) = default;
   ASTPrinter &operator= (ASTPrinter &&printer) = delete;
   ASTPrinter &operator= (const ASTPrinter &printer) = delete;
-  ~ASTPrinter () = default;
+  virtual ~ASTPrinter () = default;
 
   void print (const ASTNode *astNode, size_t indent = 0);
 
@@ -40,7 +40,8 @@ class ASTPrinter {
   virtual void caseComplexLiteral (const ComplexLiteral *complexLiteral);
   virtual void caseDateLiteral (const DateLiteral *dateLiteral);
   virtual void caseDateTimeLiteral (const DateTimeLiteral *dateTimeLiteral);
-  virtual void caseDictionaryLiteral (const DictionaryLiteral *dictionaryLiteral);
+  virtual void
+  caseDictionaryLiteral (const DictionaryLiteral *dictionaryLiteral);
   virtual void caseEnumerationLiteral (const EnumerationLiteral *enumLiteral);
   virtual void caseFP32Literal (const FP32Literal *fp32Literal);
   virtual void caseFP64Literal (const FP64Literal *fp64Literal);
@@ -68,7 +69,10 @@ class ASTPrinter {
 
   virtual void caseIdentifier (const Identifier *identifier);
 
- private:
+ protected:
+  const std::string INDENT = "  ";
+  const std::string LINE_BREAK = "\n";
+
   template<class VectorLiteralType, class ElementPrintFunc>
   void caseVectorLiteral (VectorLiteralType literal, ElementPrintFunc func)
   {

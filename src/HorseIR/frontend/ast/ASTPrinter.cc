@@ -1,7 +1,5 @@
 #include "ASTPrinter.h"
 
-#define INDENT     "  "
-#define LINE_BREAK "\n"
 #define APPLY(func, x, T, indent)                       \
   func(dynamic_cast<const T *>(x), indent);             \
   return

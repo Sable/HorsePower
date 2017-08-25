@@ -12,12 +12,6 @@ const char *rawProgram = R"PROGRAM(
  */
 module default {
     import Builtin.*;
-    def loop() :i32 {
-        [ entry ]
-        i :? = (1, 2, 3):i32;
-        goto [entry] i;
-    }
-
     def find_valid_index(colVal:i64, indexBool:i64) : i64 {
         colSize   :? = @len(colVal);
         validBool :? = @lt(indexBool,colSize);
@@ -65,8 +59,6 @@ module default {
 #include "interpreter/StatementFlow.h"
 #include "interpreter/LiteralConverter.h"
 #include "../backend/h_io.h"
-#include "interpreter/Dispatcher.h"
-#include "interpreter/Interpreter.h"
 
 int main (int argc, const char *argv[])
 {
@@ -87,14 +79,9 @@ int main (int argc, const char *argv[])
   initMain ();
   initSym ();
 
-  interpreter::Interpreter i;
-  i.createIdentifierNumbering (astNode);
-
-  interpreter::Interpreter::IdentifierNumberingPrinter p (
-      std::cout, i.idNumberingMap
-  );
-  p.print (astNode);
-
+  using namespace horseIR::interpreter;
+  StatementFlow statementFlow (astNode);
+  statementFlow.getPrinter (std::cout).print ();
 
   return 0;
 }

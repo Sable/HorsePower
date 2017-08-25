@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdexcept>
-
+#include <unordered_map>
 #include "../ast/AST.h"
 #include "../../backend/h_global.h"
 
@@ -14,10 +13,17 @@ class Dispatcher {
  public:
   class MethodMETA {
    public:
+    MethodMETA () = default;
+    MethodMETA (MethodMETA &&methodMETA) = default;
+    MethodMETA (const MethodMETA &methodMETA) = default;
+    MethodMETA &operator= (MethodMETA &&methodMETA) = default;
+    MethodMETA &operator= (const MethodMETA &methodMETA) = default;
+    virtual ~MethodMETA () = default;
     enum class MethodMETAClass { Internal, External };
+
     virtual MethodMETAClass getMethodMETAClass () const = 0;
 
-    std::string getModuleName () const
+    std::string getMoudleName () const
     { return moduleName; }
 
     template<class T>
@@ -40,69 +46,102 @@ class Dispatcher {
 
   class InternalMethodMETA : public MethodMETA {
    public:
+    InternalMethodMETA () = default;
+    InternalMethodMETA (InternalMethodMETA &&) = default;
+    InternalMethodMETA (const InternalMethodMETA &) = default;
+    InternalMethodMETA &operator= (InternalMethodMETA &&) = default;
+    InternalMethodMETA &operator= (const InternalMethodMETA &) = default;
+    ~InternalMethodMETA () override = default;
+
     MethodMETAClass getMethodMETAClass () const override
     { return MethodMETAClass::Internal; }
 
     const ast::Method *getMethodAST () const
-    { return target; }
+    { return methodAST; }
 
-    void setMethodAST (const ast::Method *targetMethod)
-    { target = targetMethod; }
+    void setMethodAST (const ast::Method *newMethodAST)
+    { methodAST = newMethodAST; }
 
    protected:
-    const ast::Method *target = nullptr;
+    const ast::Method *methodAST = nullptr;
   };
 
   class ExternalMethodMETA : public MethodMETA {
    public:
+    ExternalMethodMETA () = default;
+    ExternalMethodMETA (ExternalMethodMETA &&) = default;
+    ExternalMethodMETA (const ExternalMethodMETA &) = default;
+    ExternalMethodMETA &operator= (ExternalMethodMETA &&) = default;
+    ExternalMethodMETA &operator= (const ExternalMethodMETA &) = default;
+    ~ExternalMethodMETA () override = default;
+
     MethodMETAClass getMethodMETAClass () const override
     { return MethodMETAClass::External; }
 
-    virtual V invoke (std::size_t argc, V argv[]) = 0;
+    virtual void invoke (V ret, std::size_t argc, V argv[]) const = 0;
   };
 
   class __ExternalMethodMETA : public ExternalMethodMETA {
    public:
-    explicit __ExternalMethodMETA (V(*pInvokeFunction) (std::size_t, V[]))
-        : invokeFunction (pInvokeFunction)
-    {}
+    __ExternalMethodMETA () = default;
+    __ExternalMethodMETA (__ExternalMethodMETA &&) = default;
+    __ExternalMethodMETA (const __ExternalMethodMETA &) = default;
+    __ExternalMethodMETA &operator= (__ExternalMethodMETA &&) = default;
+    __ExternalMethodMETA &operator= (const __ExternalMethodMETA &) = default;
+    ~__ExternalMethodMETA () override = default;
+    using BindingFunctionType = void (*) (V, std::size_t, V[]);
 
-    V invoke (std::size_t argc, V argv[]) override
-    { return invokeFunction (argc, argv); }
+    void invoke (V ret, std::size_t argc, V argv[]) const override
+    { invokePtr (ret, argc, argv); }
+
+    BindingFunctionType getInvokeTarget () const
+    { return invokePtr; }
+
+    void setInvokeTarget (BindingFunctionType newInvokePtr)
+    { invokePtr = newInvokePtr; }
 
    protected:
-    V (*invokeFunction) (std::size_t, V[]) = nullptr;
+    BindingFunctionType invokePtr = nullptr;
   };
 
-  void addExternalMethod (const std::string &moudleName,
-                          const std::string &methodName,
-                          V(*invokeFunction) (std::size_t, V[]));
+  explicit Dispatcher (const ast::CompilationUnit *compilationUnit);
+  Dispatcher (Dispatcher &&) = default;
+  Dispatcher (const Dispatcher &dispatcher) = default;
+  Dispatcher &operator= (Dispatcher &&) = default;
+  Dispatcher &operator= (const Dispatcher &) = default;
+  ~Dispatcher () = default;
 
-  //protected:
-  std::vector<MethodMETA *> collectVisibleMethods (ast::Module *module);
-  void addInternalMethod (ast::Module *module, ast::Method *method);
+ protected:
+  std::vector<std::unique_ptr<MethodMETA>> methodMETAs;
+  std::unordered_map<const ast::InvokeStatement *,
+                     MethodMETA *> invokeStatementMap;
+  std::unordered_map<const ast::FunctionLiteral *,
+                     std::vector<MethodMETA *>> functionLiteralMap;
 
-  void analysis (ast::CompilationUnit *unit);
-  void analysis (ast::Module *module);
-  void analysis (ast::Method *method,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::InvokeStatement *invokeStatement,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::AssignStatement *assignStatement,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::BranchStatement *branchStatement,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::ReturnStatement *returnStatement,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::PhiStatement *phiStatement,
-                 const std::vector<MethodMETA *> &candidates);
-  void analysis (ast::FunctionLiteral *functionLiteral,
-                 const std::vector<MethodMETA *> &candidates);
+  void registerExternalMethods ();
+  void addMethodMETA (MethodMETA *methodMETA);
 
-  std::vector<std::unique_ptr<MethodMETA>> candidateMethods;
-  std::map<ast::InvokeStatement *, MethodMETA *> invokeStatementMap;
-  std::map<ast::FunctionLiteral *,
-           std::vector<MethodMETA *>> functionLiteralMap;
+  void collectInternalMethods (const ast::CompilationUnit *compilationUnit);
+  void collectInternalMethods (const ast::Module *module);
+  void analysis (const ast::CompilationUnit *compilationUnit);
+  void analysis (const ast::Module *module);
+  void analysis (const ast::Method *method,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::AssignStatement *assignStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::BranchStatement *branchStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::InvokeStatement *invokeStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::LabelStatement *labelStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::PhiStatement *phiStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::ReturnStatement *returnStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+
+  std::vector<MethodMETA *>
+  getVisibleMethodMETAs (const ast::Module *module) const;
 };
 
 }
