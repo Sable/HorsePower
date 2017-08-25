@@ -1,6 +1,6 @@
 
-C CSV_LINE[] = "data/test-tables/lineitem.csv";
-L TYPE_LINE[]  = {H_E, H_E, H_E, H_D};
+C CSV_LINE[]  = "data/test-tables/lineitem.csv";
+L TYPE_LINE[] = {H_E, H_E, H_E, H_D};
 const L NUM_COL_LINE = 4;
 L SYM_LIST_LINE[4];
 
@@ -41,11 +41,12 @@ L simulateQ6(){
     V t4 = allocNode();  V t9 = allocNode();  V t14 = allocNode();  V t19 = allocNode();
 
     V t20 = allocNode(); V t21 = allocNode(); V t22 = allocNode();  V a0 = allocNode();
+    V d0  = allocNode(); V d1 = allocNode();  V d2  = allocNode();
     P("** Start simulation for TPC-H Query 6\n");
     e = pfnLoadTable(a0, \
-          initSymbol(allocNode(),getSymbol((S)"Lineitem")));          CHECK(e,1);
+          initSymbol(allocNode(),getSymbol((S)"lineitem")));          CHECK(e,1);
 
-    P("Loaded table\n"); printV(a0);
+    // P("Loaded table\n"); printV(a0);
 
     e = pfnColumnValue(t0, \
           a0, \
@@ -66,20 +67,27 @@ L simulateQ6(){
     e = pfnLt(t6,t2,t5);                                              CHECK(e,9);
     e = pfnMinus(t7,literalF64(0.06),literalF64(0.01));               CHECK(e,10);
     e = pfnPlus(t8,literalF64(0.06),literalF64(0.01));                CHECK(e,11);
+    printV(t8);
 
-    e = pfnGt(t9,t1,t7);                                              CHECK(e,12);
-    e = pfnLt(t10,t1,t8);                                             CHECK(e,13);
+    e = pfnGeq(t9,t1,literalF64(0.05));                               CHECK(e,12);
+    e = pfnLeq(t10,t1,literalF64(0.07));                              CHECK(e,13);
     e = pfnAnd(t11,t9,t10);                                           CHECK(e,14);
+    pfnCompress(d2,t11,t0);
+    P("between step: %lld\n", vn(d2));
     e = pfnLt(t12,t3,literalI64(24));                                 CHECK(e,15);
+    pfnCompress(d1,t12,t0);
+    P("<24: %lld\n", vn(d1));
 
     e = pfnAnd(t13,t4,t6);                                            CHECK(e,16);
     e = pfnAnd(t14,t13,t9);                                           CHECK(e,17);
     e = pfnAnd(t15,t14,t12);                                          CHECK(e,18);
-    // printV(t15);
+    pfnCompress(d0,t15,t0);
+    P("3 ands: %lld\n", vn(d0));
 
     e = pfnCompress(t16,t15,t0);                                      CHECK(e,19);
     e = pfnCompress(t17,t15,t1);                                      CHECK(e,20);
     e = pfnMul(t18,t16,t17);                                          CHECK(e,21);
+    P("len = %lld\n",vn(t16));
     e = pfnSum(t19,t18);                                              CHECK(e,22);
 
     e = pfnTolist(t20,literalSym((S)"revenue"));                      CHECK(e,23);
@@ -105,7 +113,7 @@ L testTPCHQ6(){
     initTableLineitem();
     P("Reading table Lineitem\n");
     V tableLine = readCSV(CSV_LINE, NUM_COL_LINE, TYPE_LINE, SYM_LIST_LINE);
-    registerTable((S)"Lineitem", tableLine);
+    registerTable((S)"lineitem", tableLine);
     /* test */
     simulateQ6();
     R 0;

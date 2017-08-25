@@ -9,7 +9,8 @@ L testGroupBy(){
     L tb[] = {56,34,32,45,78,23};
     initV(a, H_E, 6); DOI(6, vE(a,i)=ta[i])
     initV(b, H_E, 6); DOI(6, vE(b,i)=tb[i])
-    pfnList(c,2,a,b);
+    V rn[] = {a,b};
+    pfnList(c,2,rn);
     P("input a: \n"); printV(a);
     L e = pfnGroup(z,a);
     if(e!=0) printErrMsg(e);

@@ -24,12 +24,9 @@ L pfnLoadTable(V z, V x){
 }
 
 /* copy alias */
-L pfnList(V z, L n, ...){
-    va_list args;
+L pfnList(V z, L n, V* x){
     initList(z, n);
-    va_start(args, n);
-    DOI(n, {V x=va_arg(args,V);*(sV(z)+i)=*x;})
-    va_end  (args);
+    DOI(n, *vV(z,i)=*x[i])
     R 0;
 }
 
@@ -138,6 +135,21 @@ L pfnColumnValue(V z, V x, V y){
         else R E_COL_NOT_FOUND;
     }
     else R E_DOMAIN;
+}
+
+L pfnIsJump(V z, V x){
+    B t = 0;
+    initV(z, H_B, 1);
+    if(isOne(x)){
+        switch(xp){
+            caseB t = xb; break;
+            caseI t = 0!=xi; break;
+            caseL t = 0!=xl; break;
+            caseF t = 0!=xf; break; // precision ?
+            caseE t = 0!=xe; break; // precision ?
+        }
+    }
+    vb(z) = t;
 }
 
 /* Implement in order */
@@ -708,9 +720,9 @@ L pfnGroup(V z, V x){
 /* Binary */
 
 #define COMP(op,x,y) (2>op?COMPLESS(op,x,y):4>op?COMPMORE(op,x,y):6>op?COMPEQ(op,x,y):0)
-#define COMPLESS(op,x,y) (0==op?(x<y):x<=y)
-#define COMPMORE(op,x,y) (2==op?(x>y):x>=y)
-#define COMPEQ(op,x,y) (4==op?(x==y):x!=y)
+#define COMPLESS(op,x,y) (0==op?(x<y):(x)<=(y))
+#define COMPMORE(op,x,y) (2==op?(x>y):(x)>=(y))
+#define COMPEQ(op,x,y) (4==op?(x==y):(x!=y))
 
 #define COMPFN(op,x,y,fn) (2>op?COMPLESSFN(op,x,y,fn):4>op?COMPMOREFN(op,x,y,fn):6>op?COMPEQFN(op,x,y,fn):0)
 #define COMPLESSFN(op,x,y,fn) (0==op?fn(x,y)<0:fn(x,y)<=0)
@@ -728,6 +740,7 @@ L pfnCompare(V z, V x, V y, L op){
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,typZ,lenZ);
+            P("op = %lld\n",op);
             if(isOne(x)) {
                 switch(typMax){
                     caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
@@ -739,6 +752,12 @@ L pfnCompare(V z, V x, V y, L op){
                 }
             }
             else if(isOne(y)) {
+                if(op==1){
+                    DOI(10, {P("Left: %.20lf, Right %.20lf, Result %d (%d,%d) \n", \
+                        vE(tempX,i),vE(tempY,0),(vE(tempX,i))==(vE(tempY,0)),\
+                        vE(tempX,i)==0.07,vE(tempY,0)==0.07); \
+                        printFloat(vE(tempX,i)); printFloat(vE(tempY,0));});
+                }
                 switch(typMax){
                     caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
                     caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
@@ -860,6 +879,9 @@ L pfnArith(V z, V x, V y, L op){
                 caseF DOI(lenZ, vF(z,i)=ARITH2(op,vF(tempX,0),vF(tempY,i))) break;
                 caseE DOI(lenZ, vE(z,i)=ARITH2(op,vE(tempX,0),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
+            }
+            if(lenZ == 1){
+                P("result (%lld) = %.15lf, %d (%d)\n",op,vE(z,0),vE(z,0)==0.07,(0.06+0.01)==0.07);
             }
         }
         else if(isOne(y)) {

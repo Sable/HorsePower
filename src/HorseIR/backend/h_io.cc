@@ -93,9 +93,11 @@ void loadItem(V x, L k, L typ, S s){
         caseL xL(k) = atol(s); break;
         caseF xF(k) = atof(s); break;
         caseE xE(k) = atof(s); break;
+        caseC xC(k) = s[0];    break;
         caseQ xQ(k) = getSymbol(s); break;
         caseS {S t=allocStrMem(strlen(s)); strcpy(t,s); xS(k)=t;} break;
         caseD {I a,b,c; sscanf(s,"%d-%d-%d",&a,&b,&c); xD(k) = a*10000+b*100+c;} break;
+        default: P("Loaditem type exception.\n"); break;
     }
 }
 
@@ -343,9 +345,11 @@ L printKTable(V x){
 L printTablePretty(V x, L rowLimit){
     C buff[BUFF_SIZE];
     if(isTable(x)){
+        P("\nTable: row = %d, col = %d\n", tableRow(x),tableCol(x));
         L totSize = 0;
         L *colWidth = (L*)malloc(sizeof(L) * vn(x));
-        DOI(vn(x), colWidth[i]=getColWidth(getTableCol(x,i)))
+        L rows=tableRow(x), rowPrint = rowLimit<0?rows:rowLimit>rows?rows:rowLimit;
+        DOI(vn(x), colWidth[i]=getColWidth(getTableCol(x,i),rowPrint))
         DOI(vn(x), totSize+=colWidth[i]); totSize += vn(x);
         // DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
         /* print head */
@@ -355,7 +359,6 @@ L printTablePretty(V x, L rowLimit){
         DOI(totSize-1, FS("-"));
         FS("\n");
         /* print body */
-        L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
         DOI(rowPrint,  { \
             DOJ(vn(x), {if(j>0) FS(" "); V val = getColVal(getTableCol(x,j));\
                 getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s",buff);}) \
@@ -365,14 +368,16 @@ L printTablePretty(V x, L rowLimit){
         free(colWidth);
     }
     else if(isKTable(x)){
+        P("\n KTable: row = %d, col = %d\n", tableRow(x),tableCol(x));
         V key = getKTableKey(x);
         V val = getKTableVal(x);
         L *colWidthKey = (L*)malloc(sizeof(L) * vn(key));
         L *colWidthVal = (L*)malloc(sizeof(L) * vn(val));
+        L rows=tableRow(x), rowPrint = rowLimit<0?rows:rowLimit>rows?rows:rowLimit;
         L totSize1 = 0, totSize2 = 0;
-        DOI(vn(key), colWidthKey[i]=getColWidth(getTableCol(key,i)))
+        DOI(vn(key), colWidthKey[i]=getColWidth(getTableCol(key,i),rowPrint))
         DOI(vn(key), totSize1+=colWidthKey[i]); totSize1 += vn(key);
-        DOI(vn(val), colWidthVal[i]=getColWidth(getTableCol(val,i)))
+        DOI(vn(val), colWidthVal[i]=getColWidth(getTableCol(val,i),rowPrint))
         DOI(vn(val), totSize2+=colWidthVal[i]); totSize2 += vn(val);
         /* print head */
         DOI(vn(key),{if(i>0) FS(" "); V t=getColKey(getTableCol(key,i)); \
@@ -386,7 +391,6 @@ L printTablePretty(V x, L rowLimit){
         DOI(totSize2-1, FS("-"));
         FS("\n");
         /* print body */
-        L rowPrint = rowLimit<0?getTableRowNumber(x):rowLimit;
         DOI(rowPrint, {\
              DOJ(vn(key), {if(j>0) FS(" "); V t=getColVal(getTableCol(key,j)); \
                  getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthKey[j]); FT("%s",buff);}) \
@@ -405,22 +409,30 @@ L printTablePretty(V x, L rowLimit){
     R 0;
 }
 
-L getColWidth(V x){
+#define TABLE_CELL_MAX 30
+#define TABLE_CELL_DOT 3   //...
+
+L getColWidth(V x, L rowLimit){
     V key = getColKey(x);
     V val = getColVal(x);
     C buff[BUFF_SIZE];
     L maxSize = getSymbolSize(vq(key));
-    DOI(vn(val), {L t=getBasicItemStr(val,i,buff,0); if(t>maxSize)maxSize=t;})
-    R maxSize;
+    DOI(rowLimit, {L t=getBasicItemStr(val,i,buff,0); if(t>maxSize)maxSize=t;})
+    R maxSize>TABLE_CELL_MAX?TABLE_CELL_MAX:maxSize;
 }
 
 L getStrPretty(S str, L maxSize){
     L len = strlen(str);
-    while(len < maxSize) {
-        str[len++] = ' ';
+    L maxLen = TABLE_CELL_MAX - TABLE_CELL_DOT;
+    if(len <= maxLen){
+        while(len < maxSize) {
+            str[len++] = ' ';
+        }
+        str[maxSize] = 0;
     }
-    if(len == maxSize) {
-        str[len] = 0;
+    else {
+        DOI(TABLE_CELL_DOT, str[maxLen+i]='.')
+        str[maxSize]=0;
     }
     R 0;
 }

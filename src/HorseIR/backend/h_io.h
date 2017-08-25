@@ -24,7 +24,7 @@ L getTypeStr          (L x, S buff);
 L getComplexStr       (X x, S buff);
 L getBasicItemStr     (V x, L k, S buff, B hasTick);
 L getStringItemStr    (V x, L k);
-L getColWidth         (V x);
+L getColWidth         (V x, L rowLimit);
 L getStrPretty        (S str, L maxSize);
 
 L printType           (L x);

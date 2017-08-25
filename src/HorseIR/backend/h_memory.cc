@@ -1,6 +1,6 @@
 #include "h_global.h"
 
-const L INIT_HEAP_SIZE  = 67108864; //64MB, 64*1024*1024
+const L INIT_HEAP_SIZE  = 1073741824LL; //64MB, 64*1024*1024
 
 typedef struct buddy_node { /* size 48 */
     L size, level; G value;
@@ -70,9 +70,9 @@ G allocMem(G heap, L *cur, L top, L typ, L len){
     G g = NULL;
     if((*cur)+size < top){
         if(H_DEBUG){
-            P("-> [Info heap] Allocated %3lld for info (", size);
-            printType(typ);
-            P(", %2lld)\n",len);
+            // P("-> [Info heap] Allocated %3lld for info (", size);
+            // printType(typ);
+            // P(", %2lld)\n",len);
         }
         g = heap + (*cur);
         *cur = (*cur) + size;

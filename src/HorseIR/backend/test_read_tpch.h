@@ -38,7 +38,7 @@ L readTableNation(){
 
 L readTableCustomer(){
 	C CSV_LINE[] = "data/tpch/customer.tbl";
-	L TYPE_LINE[]  = {H_L, H_Q, H_S, H_L, H_S, H_E, H_Q, H_S};
+	L TYPE_LINE[]  = {H_L, H_S, H_S, H_L, H_S, H_E, H_Q, H_S};
 	const L NUM_COL_LINE = 8;
 	L SYM_LIST_LINE[NUM_COL_LINE];
 	const C* PRE_DEFINED[] = {
@@ -91,7 +91,7 @@ L readTableLineitem(){
 
 L readTablePart(){
 	C CSV_LINE[] = "data/tpch/part.tbl";
-	L TYPE_LINE[]  = {H_L, H_Q, H_S, H_Q, \
+	L TYPE_LINE[]  = {H_L, H_S, H_S, H_Q, \
 		              H_Q, H_L, H_Q, H_E, H_S };
 	const L NUM_COL_LINE = 9;
 	L SYM_LIST_LINE[NUM_COL_LINE];
@@ -108,7 +108,7 @@ L readTablePart(){
 
 L readTableSupplier(){
 	C CSV_LINE[] = "data/tpch/supplier.tbl";
-	L TYPE_LINE[]  = {H_L, H_Q, H_S, H_L, \
+	L TYPE_LINE[]  = {H_L, H_S, H_S, H_L, \
 		              H_S, H_E, H_S };
 	const L NUM_COL_LINE = 7;
 	L SYM_LIST_LINE[NUM_COL_LINE];
@@ -155,7 +155,16 @@ L readTpchTables(){
 	// readTableCustomer();
 	// P("reading table orders\n");
 	// readTableOrders();
-	DOI(0, {P("Loading table %s\n",tpchName[i]); (*tpchDB[i])();})
+	P("reading table lineitem\n");
+	readTableLineitem();
+	// P("reading table part\n");
+	// readTablePart();
+	// P("reading table supplier\n");	
+	// readTableSupplier();
+	// P("reading table partsupp\n");
+	// readTablePartsupp();
+	DOI(0, if(i==4){P("Loading table %s\n",tpchName[i]); (*tpchDB[i])();})
+	simulateQ6();
 	R 0;
 }
 

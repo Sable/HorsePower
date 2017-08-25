@@ -350,6 +350,11 @@ D calcDate(D x, L v, I op){
     R year*10000+month*100+day;
 }
 
+void printFloat(E x){
+    S s = (S)&x;
+    DOI(8, {P("%d ",s[i]);}) P("\n");
+}
+
 /* Checking types */
 
 /* 1-level */

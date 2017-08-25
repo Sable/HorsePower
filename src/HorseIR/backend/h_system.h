@@ -15,6 +15,8 @@ extern "C" {
 
 /* methods */
 
+void printFloat(E x);
+
 void initSys();
 void deleteSys();
 
