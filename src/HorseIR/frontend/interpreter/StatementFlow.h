@@ -48,8 +48,8 @@ class StatementFlow {
     StatementFlowPrinter (std::ostream &stream, const StatementFlow &flow);
     StatementFlowPrinter (StatementFlowPrinter &&p) = default;
     StatementFlowPrinter (const StatementFlowPrinter &p) = default;
-    StatementFlowPrinter &operator= (StatementFlowPrinter &&p) = default;
-    StatementFlowPrinter &operator= (const StatementFlowPrinter &p) = default;
+    StatementFlowPrinter &operator= (StatementFlowPrinter &&p) = delete;
+    StatementFlowPrinter &operator= (const StatementFlowPrinter &p) = delete;
     ~StatementFlowPrinter () override = default;
 
     void print ();

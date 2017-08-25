@@ -2,12 +2,104 @@
 
 using namespace horseIR::interpreter;
 
+Dispatcher::Dispatcher (const ast::CompilationUnit *pCompilationUnit)
+    : compilationUnit (pCompilationUnit)
+{
+  assert (pCompilationUnit != nullptr);
+  registerExternalMethods ();
+  collectInternalMethods (compilationUnit);
+  analysis (compilationUnit);
+}
+
+#ifndef NDEBUG
+
+void Dispatcher::DispatcherPrinter::print ()
+{ ast::ASTPrinter::print (dispatcher.compilationUnit); }
+
+void Dispatcher::DispatcherPrinter
+::caseInvokeStatement (InvokeStmtPtr stmt, std::size_t indent)
+{
+  assert (stmt != nullptr);
+  ast::ASTPrinter astPrinter (this->stream);
+  astPrinter.print (stmt, indent);
+  this->stream << this->INDENT << "// =>"
+               << dispatcher.invokeStatementMap.at (stmt)->getMoudleName ()
+               << '.'
+               << dispatcher.invokeStatementMap.at (stmt)->getMethodName ();
+}
+
+void Dispatcher::DispatcherPrinter
+::caseFunctionLiteral (FunctionLiteralPtr literal)
+{
+  assert (literal != nullptr);
+  ast::ASTPrinter astPrinter (this->stream);
+  astPrinter.print (literal);
+  const auto dispatchVector = dispatcher.functionLiteralMap.at (literal);
+  this->stream << "/* => (";
+  std::transform (
+      dispatchVector.cbegin (), dispatchVector.cend (),
+      misc::InfixOStreamIterator<std::string> (this->stream, ", "),
+      [] (const MethodMETA *methodMETA) -> std::string
+      {
+        return methodMETA->getMoudleName () + "."
+               + methodMETA->getMethodName ();
+      });
+  this->stream << ") */";
+}
+
+Dispatcher::DispatcherPrinter
+Dispatcher::getPrinter (std::ostream &stream) const
+{ return DispatcherPrinter (stream, *this); }
+
+#endif
+
+Dispatcher::MethodMETA *
+Dispatcher::getMethodMETA (const ast::InvokeStatement *statement) const
+{
+  assert (statement != nullptr);
+  return invokeStatementMap.at (statement);
+}
+
+std::vector<Dispatcher::MethodMETA *>
+Dispatcher::getMethodMETA (const ast::FunctionLiteral *literal) const
+{
+  assert (literal != nullptr);
+  return functionLiteralMap.at (literal);
+}
+
+void Dispatcher::registerExternalMethods ()
+{
+  addExternalMethodMETA ("Builtin", "len", nullptr);
+  addExternalMethodMETA ("Builtin", "lt", nullptr);
+  addExternalMethodMETA ("Builtin", "range", nullptr);
+  addExternalMethodMETA ("Builtin", "compress", nullptr);
+  addExternalMethodMETA ("Builtin", "load_table", nullptr);
+  addExternalMethodMETA ("Builtin", "column_value", nullptr);
+  addExternalMethodMETA ("Builtin", "index_of", nullptr);
+  addExternalMethodMETA ("Builtin", "index", nullptr);
+  addExternalMethodMETA ("Builtin", "tolist", nullptr);
+  addExternalMethodMETA ("Builtin", "list", nullptr);
+  addExternalMethodMETA ("Builtin", "table", nullptr);
+}
+
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)
 {
   assert (methodMETA != nullptr);
   using MethodMETAClass = MethodMETA::MethodMETAClass;
   // TODO: add ambiguity check here
   methodMETAs.emplace_back (methodMETA);
+}
+
+void Dispatcher::addExternalMethodMETA (
+    const std::string &moduleName, const std::string &methodName,
+    void (*funcPtr) (V, size_t, V *)
+)
+{
+  auto methodMETA = new __ExternalMethodMETA ();
+  methodMETA->setModuleName (moduleName);
+  methodMETA->setMethodName (methodName);
+  methodMETA->setInvokeTarget (funcPtr);
+  addMethodMETA (methodMETA);
 }
 
 void
@@ -61,7 +153,7 @@ void Dispatcher::analysis (const ast::Module *module)
       { analysis (method, visibleMethodMETA); });
 }
 
-#define CAST_APPLY(T, x, y) return analysis(dynamic_cast<const T*>(x), y)
+#define CAST_APPLY(T, x, y) analysis(dynamic_cast<const T*>(x), y)
 
 void Dispatcher::analysis (const ast::Method *method,
                            const std::vector<MethodMETA *> &visibleMethodMETAs)
@@ -92,4 +184,179 @@ void Dispatcher::analysis (const ast::AssignStatement *assignStatement,
                            const std::vector<MethodMETA *> &visibleMethodMETAs)
 {
   assert (assignStatement != nullptr);
+  const ast::Operand *operand = assignStatement->getRHSOperand ();
+  analysis (operand, visibleMethodMETAs);
+}
+
+void Dispatcher::analysis (const ast::BranchStatement *branchStatement,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (branchStatement != nullptr);
+  if (!branchStatement->isConditional ()) return;
+  const ast::Operand *operand = branchStatement->getOperand ();
+  analysis (operand, visibleMethodMETAs);
+}
+
+void Dispatcher::analysis (const ast::InvokeStatement *invokeStatement,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (invokeStatement != nullptr);
+  const std::string moduleName = invokeStatement->getTargetModuleName ();
+  const std::string methodName = invokeStatement->getTargetMethodName ();
+  MethodMETA *methodMETA = nullptr;
+  if (moduleName.empty ())
+    {
+      const auto pos = std::find_if (
+          visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
+          [&methodName] (MethodMETA *searchMethodMETA) -> bool
+          { return searchMethodMETA->getMethodName () == methodName; });
+      assert (pos != visibleMethodMETAs.cend ());
+#ifndef NDEBUG
+      const auto alterPos = std::find_if (
+          std::next (pos), visibleMethodMETAs.cend (),
+          [&methodName] (MethodMETA *searchMethodMETA) -> bool
+          { return searchMethodMETA->getMethodName () == methodName; });
+#endif
+      assert (alterPos == visibleMethodMETAs.cend ());
+      methodMETA = *pos;
+    }
+  else
+    {
+      const auto pos = std::find_if (
+          visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
+          [&moduleName, &methodName] (MethodMETA *searchMethodMETA) -> bool
+          {
+            return searchMethodMETA->getMoudleName () == moduleName &&
+                   searchMethodMETA->getMethodName () == methodName;
+          });
+      assert (pos != visibleMethodMETAs.cend ());
+      methodMETA = *pos;
+    }
+  invokeStatementMap.emplace (std::make_pair (invokeStatement, methodMETA));
+  std::for_each (
+      invokeStatement->rhsOperandsConstBegin (),
+      invokeStatement->rhsOperandsConstEnd (),
+      [this, &visibleMethodMETAs] (const ast::Operand *operand) -> void
+      { analysis (operand, visibleMethodMETAs); });
+}
+
+void Dispatcher::analysis (const ast::LabelStatement *labelStatement,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (labelStatement != nullptr);
+  /* NO-OP */
+}
+
+void Dispatcher::analysis (const ast::PhiStatement *phiStatement,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (phiStatement != nullptr);
+  using ValueType = ast::PhiStatement::RHSMapConstIterator::value_type;
+  std::for_each (
+      phiStatement->rhsMapConstBegin (), phiStatement->rhsMapConstEnd (),
+      [this, &visibleMethodMETAs] (const ValueType &value) -> void
+      { analysis (value.second, visibleMethodMETAs); });
+}
+
+void Dispatcher::analysis (const ast::ReturnStatement *returnStatement,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (returnStatement != nullptr);
+  analysis (returnStatement->getOperand (), visibleMethodMETAs);
+}
+
+void Dispatcher::analysis (const ast::Operand *operand,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (operand != nullptr);
+  using OperandClass = ast::Operand::OperandClass;
+  using LiteralClass = ast::Literal::LiteralClass;
+  if (operand->getOperandClass () != OperandClass::Literal) /* NO-OP */ return;
+  auto literal = dynamic_cast<const ast::Literal *>(operand);
+  if (literal->getLiteralClass () != LiteralClass::Function) /* NO-OP */ return;
+  auto functionLiteral = dynamic_cast<const ast::FunctionLiteral *>(literal);
+  analysis (functionLiteral, visibleMethodMETAs);
+}
+
+void Dispatcher::analysis (const ast::FunctionLiteral *functionLiteral,
+                           const std::vector<MethodMETA *> &visibleMethodMETAs)
+{
+  assert (functionLiteral != nullptr);
+  std::vector<MethodMETA *> dispatchMap;
+  for (auto elementIter = functionLiteral->valueConstBegin ();
+       elementIter != functionLiteral->valueConstEnd (); ++elementIter)
+    {
+      if (elementIter->isNull ())
+        { dispatchMap.push_back (nullptr); }
+      else
+        {
+          const std::string moduleName = elementIter->getValue ().moduleName;
+          const std::string methodName = elementIter->getValue ().methodName;
+          MethodMETA *methodMETA = nullptr;
+          if (moduleName.empty ())
+            {
+              const auto pos = std::find_if (
+                  visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
+                  [&methodName] (MethodMETA *searchMethodMETA) -> bool
+                  { return searchMethodMETA->getMethodName () == methodName; });
+              assert (pos != visibleMethodMETAs.cend ());
+#ifndef NDEBUG
+              const auto alterPos = std::find_if (
+                  std::next (pos), visibleMethodMETAs.cend (),
+                  [&methodName] (MethodMETA *searchMethodMETA) -> bool
+                  { return searchMethodMETA->getMethodName () == methodName; });
+#endif
+              assert (alterPos == visibleMethodMETAs.cend ());
+              methodMETA = *pos;
+            }
+          else
+            {
+              const auto pos = std::find_if (
+                  visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
+                  [&moduleName, &methodName] (MethodMETA *searchMethodMETA)
+                  {
+                    return searchMethodMETA->getMoudleName () == moduleName &&
+                           searchMethodMETA->getMethodName () == methodName;
+                  });
+              assert (pos != visibleMethodMETAs.cend ());
+              methodMETA = *pos;
+            }
+          dispatchMap.push_back (methodMETA);
+        }
+    }
+  functionLiteralMap.emplace (
+      std::make_pair (functionLiteral, std::move (dispatchMap))
+  );
+}
+
+std::vector<Dispatcher::MethodMETA *>
+Dispatcher::getVisibleMethodMETAs (const ast::Module *module) const
+{
+  assert (module != nullptr);
+  const std::string moduleName = module->getModuleName ();
+  std::vector<MethodMETA *> visibleMethodMETAs;
+  for (const auto &methodMETA : methodMETAs)
+    {
+      if (methodMETA->getMoudleName () == moduleName)
+        { visibleMethodMETAs.push_back (methodMETA.get ()); }
+      else
+        {
+          using VType = ast::Module::ImportedModuleConstIterator::value_type;
+          const bool visible = std::any_of (
+              module->importedModulesConstBegin (),
+              module->importedModulesConstEnd (),
+              [&methodMETA] (const VType &importedEntry) -> bool
+              {
+                MethodMETA *candidateMETA = methodMETA.get ();
+                if (importedEntry.first == candidateMETA->getMoudleName () &&
+                    importedEntry.second == "*")
+                  { return true; }
+                return importedEntry.first == candidateMETA->getMoudleName () &&
+                       importedEntry.second == candidateMETA->getMethodName ();
+              });
+          if (visible)
+            { visibleMethodMETAs.push_back (methodMETA.get ()); }
+        }
+    }
+  return visibleMethodMETAs;
 }

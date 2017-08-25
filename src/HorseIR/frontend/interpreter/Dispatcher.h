@@ -3,6 +3,11 @@
 #include <unordered_map>
 #include "../ast/AST.h"
 #include "../../backend/h_global.h"
+#ifndef NDEBUG
+#include "../misc/InfixOStreamIterator.h"
+#include "../ast/ASTPrinter.h"
+#include "StatementFlow.h"
+#endif
 
 namespace horseIR
 {
@@ -83,13 +88,13 @@ class Dispatcher {
 
   class __ExternalMethodMETA : public ExternalMethodMETA {
    public:
+    using BindingFunctionType = void (*) (V, std::size_t, V[]);
     __ExternalMethodMETA () = default;
     __ExternalMethodMETA (__ExternalMethodMETA &&) = default;
     __ExternalMethodMETA (const __ExternalMethodMETA &) = default;
     __ExternalMethodMETA &operator= (__ExternalMethodMETA &&) = default;
     __ExternalMethodMETA &operator= (const __ExternalMethodMETA &) = default;
     ~__ExternalMethodMETA () override = default;
-    using BindingFunctionType = void (*) (V, std::size_t, V[]);
 
     void invoke (V ret, std::size_t argc, V argv[]) const override
     { invokePtr (ret, argc, argv); }
@@ -104,14 +109,45 @@ class Dispatcher {
     BindingFunctionType invokePtr = nullptr;
   };
 
-  explicit Dispatcher (const ast::CompilationUnit *compilationUnit);
+  explicit Dispatcher (const ast::CompilationUnit *pCompilationUnit);
   Dispatcher (Dispatcher &&) = default;
   Dispatcher (const Dispatcher &dispatcher) = default;
   Dispatcher &operator= (Dispatcher &&) = default;
   Dispatcher &operator= (const Dispatcher &) = default;
   ~Dispatcher () = default;
 
+#ifndef NDEBUG
+  class DispatcherPrinter : public ast::ASTPrinter {
+   public:
+    DispatcherPrinter (std::ostream &stream, const Dispatcher &pDispatcher)
+        : ast::ASTPrinter (stream), dispatcher (pDispatcher)
+    {}
+
+    DispatcherPrinter (DispatcherPrinter &&) = default;
+    DispatcherPrinter (const DispatcherPrinter &) = default;
+    DispatcherPrinter &operator= (DispatcherPrinter &&) = delete;
+    DispatcherPrinter &operator= (const DispatcherPrinter &) = delete;
+    ~DispatcherPrinter () override = default;
+
+    void print ();
+   protected:
+    using InvokeStmtPtr = const ast::InvokeStatement *;
+    using FunctionLiteralPtr = const ast::FunctionLiteral *;
+
+    void caseInvokeStatement (InvokeStmtPtr stmt, std::size_t indent) override;
+    void caseFunctionLiteral (FunctionLiteralPtr literal) override;
+
+    const Dispatcher &dispatcher;
+  };
+  DispatcherPrinter getPrinter (std::ostream &stream) const;
+#endif
+
+  MethodMETA *getMethodMETA (const ast::InvokeStatement *statement) const;
+  std::vector<MethodMETA *>
+  getMethodMETA (const ast::FunctionLiteral *literal) const;
+
  protected:
+  const ast::CompilationUnit *compilationUnit;
   std::vector<std::unique_ptr<MethodMETA>> methodMETAs;
   std::unordered_map<const ast::InvokeStatement *,
                      MethodMETA *> invokeStatementMap;
@@ -120,6 +156,10 @@ class Dispatcher {
 
   void registerExternalMethods ();
   void addMethodMETA (MethodMETA *methodMETA);
+  void addExternalMethodMETA (
+      const std::string &moduleName, const std::string &methodName,
+      void (*funcPtr) (V, std::size_t, V[])
+  );
 
   void collectInternalMethods (const ast::CompilationUnit *compilationUnit);
   void collectInternalMethods (const ast::Module *module);
@@ -138,6 +178,10 @@ class Dispatcher {
   void analysis (const ast::PhiStatement *phiStatement,
                  const std::vector<MethodMETA *> &visibleMethodMETAs);
   void analysis (const ast::ReturnStatement *returnStatement,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::Operand *operand,
+                 const std::vector<MethodMETA *> &visibleMethodMETAs);
+  void analysis (const ast::FunctionLiteral *functionLiteral,
                  const std::vector<MethodMETA *> &visibleMethodMETAs);
 
   std::vector<MethodMETA *>

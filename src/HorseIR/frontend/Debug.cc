@@ -58,6 +58,7 @@ module default {
 #include "ast/ASTPrinter.h"
 #include "interpreter/StatementFlow.h"
 #include "interpreter/LiteralConverter.h"
+#include "interpreter/Dispatcher.h"
 #include "../backend/h_io.h"
 
 int main (int argc, const char *argv[])
@@ -80,8 +81,8 @@ int main (int argc, const char *argv[])
   initSym ();
 
   using namespace horseIR::interpreter;
-  StatementFlow statementFlow (astNode);
-  statementFlow.getPrinter (std::cout).print ();
+  Dispatcher dispatcher (astNode);
+  dispatcher.getPrinter (std::cout).print ();
 
   return 0;
 }
