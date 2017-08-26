@@ -137,7 +137,7 @@ L pfnColumnValue(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-L pfnIsJump(V z, V x){
+L pfnIsValidBranch(V z, V x){
     B t = 0;
     initV(z, H_B, 1);
     if(isOne(x)){

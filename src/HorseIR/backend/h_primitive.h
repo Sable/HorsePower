@@ -69,7 +69,7 @@ L pfnMeta          (V z, V x);
 L pfnKeys          (V z, V x);
 L pfnValues        (V z, V x);
 L pfnColumnValue   (V z, V x, V y);
-L pfnIsJump        (V z, V x);
+L pfnIsValidBranch (V z, V x);
 
 /* Implement in order */
 
