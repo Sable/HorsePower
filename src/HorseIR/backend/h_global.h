@@ -91,11 +91,12 @@ typedef struct list_table{
 
 #define ERROR_CODE 99
 #define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
-#define H_DEBUG true
+#define H_DEBUG false
 
 /* extern */
 
 extern G H_heap;
+extern E H_EPSILON;
 
 #ifdef	__cplusplus
 }

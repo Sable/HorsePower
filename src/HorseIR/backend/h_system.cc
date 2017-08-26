@@ -5,6 +5,7 @@
 #include "h_global.h"
 
 const L NUM_LIST_TABLE = 100;
+E H_EPSILON = 1E-13;
 
 ListT listTable;
 L listTableCur;

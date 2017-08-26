@@ -39,8 +39,23 @@ L testMember(){
     R 0;
 }
 
+L testSpecial(){
+    P("\nTest special:\n");
+    V a = allocNode();
+    V b = allocNode();
+    pfnPlus(a,literalF64(0.06),literalF64(0.01)); 
+    pfnLeq(b,a,literalF64(0.07));
+    printV(b);
+    pfnEq(b,a,literalF64(0.07));
+    printV(b);
+    pfnGeq(b,a,literalF64(0.07));
+    printV(b);
+    R 0;
+}
+
 L testPfns(){
-	testMember();
-    testGroupBy();
+    // testMember();
+    // testGroupBy();
+    testSpecial();
 	R 0;
 }
