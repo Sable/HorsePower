@@ -61,7 +61,7 @@ extern "C" {
 #define tableCol(x) (va(x).col)
 
 L pfnLoadTable     (V z, V x);
-L pfnList          (V z, L n, V* x);
+L pfnList          (V z, L n, V x[]);
 L pfnIndex         (V z, V x, V y);
 L pfnFlip          (V z, V x);
 L pfnMatch         (V z, V x, V y);

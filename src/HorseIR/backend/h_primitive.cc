@@ -24,7 +24,7 @@ L pfnLoadTable(V z, V x){
 }
 
 /* copy alias */
-L pfnList(V z, L n, V* x){
+L pfnList(V z, L n, V x[]){
     initList(z, n);
     DOI(n, *vV(z,i)=*x[i])
     R 0;

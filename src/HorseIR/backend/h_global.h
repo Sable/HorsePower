@@ -5,14 +5,15 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* all types */
 
 typedef bool       B;
 typedef char       C,*S,*G;
-typedef short      H;
-typedef int        I,M,D,U,W,T;
-typedef long long  L,Q,Z;
+typedef int16_t    H;
+typedef int32_t    I,M,D,U,W,T;
+typedef int64_t    L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
@@ -20,8 +21,8 @@ typedef struct { Q name; S target; } Y;  //target: V
 typedef struct { I row, col; } A;
 
 /* unsigned types */
-typedef unsigned long long UL;
-typedef unsigned int       UI;
+typedef uint64_t UL;
+typedef uint32_t UI;
 
 /* size: 3 * 8 + 8 = 32 */
 typedef struct node_value{

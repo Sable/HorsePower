@@ -1,7 +1,7 @@
 #include "h_global.h"
 
-const I HASH_A = 1223106847L;
-const I HASH_M = (1L << 32)-5;
+const I HASH_A = 1223106847;
+const I HASH_M = (1LL << 32)-5;
 
 typedef struct hash_node {
     I h_index;
