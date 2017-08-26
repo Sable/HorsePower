@@ -85,7 +85,7 @@ Status
 ### 2.1 Unary
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- | :------|
+| :-:| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------: | :------|
 | 1  | abs(x)               | Absolute value of x         | Real                        | Same as argument              | [link](builtin/abs.md)       |&#10004;|
 | 2  | neg(x)               | Negative value of x         | Real                        | Same as argument              | [link](builtin/neg.md)       |&#10004;|
 | 3  | ceil(x)              | Ceiling value of x          | Real                        | Various                       | [link](builtin/ceil.md)      |&#10004;|
@@ -123,7 +123,7 @@ Status
 ### 2.2 Binary
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :--------------------------: | :----- |
 | 1  | lt(x,y)              | x < y                       | (CP\*\*;CP)                 | B                             | [link](builtin/lt.md)        |&#10004;|
 | 2  | gt(x,y)              | x > y                       | (CP;CP)                     | B                             | [link](builtin/gt.md)        |&#10004;|
 | 3  | leq(x,y)             | x <= y                      | (CP;CP)                     | B                             | [link](builtin/leq.md)       |&#10004;|
@@ -154,7 +154,7 @@ Status
 ### 3.1 Unary
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                       | Status |
-| :--| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :---------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :---------------------------| :---------------------------- | :---------------------------: | :----- |
 | 1  | unique(x)            | Unique values               | Basic                       | L                             | [link](builtin/unique.md)     |&#10004;|
 | 2  | str(x)               | Format                      | Any                         | C                             | [link](builtin/str.md)        |P|
 | 3  | len(x)               | Length                      | Any                         | L                             | [link](builtin/len.md)        |&#10004;|
@@ -171,7 +171,7 @@ Status
 ### 3.2 Binary
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------: | :----- |
 | 1  | append(x,y)          | Append to a list            | (Basic, List; Basic, List)  | Basic or List                 | [link](builtin/append.md)    |&#10004;|
 | 2  | like(x,y)            | Patten x matches y          | (String; String)            | B                             | [link](builtin/like.md)      |P|
 | 3  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |&#10004;|
@@ -185,7 +185,7 @@ Status
 ### 3.3 Reduction
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------: | :----- |
 | 1  | count(x)             | Alias of @len               | See @len                    | See @len                      | [link](builtin/len.md)       |&#10004;|
 | 2  | sum(x)               | Sum of items in x           | Real                        | Same as argument              | link                         |&#10004;|
 | 3  | avg(x)               | sum(x) / len(x)             | Real                        | Same as argument              | N/A                          |&#10004;|
@@ -195,7 +195,7 @@ Status
 ### 3.4 List
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                           | Status |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :-------------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :-------------------------------: | :----- |
 | 1  | raze(x)              | Raze a nested list          | List, Basic                 | Basic                | [link](builtin/list.md#raze)      |&#10004;|
 | 2  | enlist(x)            | Return a list               | Any                         | List                 | [link](builtin/list.md#enlist)    |&#10004;|
 | 7  | tolist(x)            | Vector to list              | Basic                       | List                 | [link](builtin/list.md#tolist)    |&#10004;|
@@ -208,7 +208,7 @@ Status
 ## 4. Database related
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :---------------------------| :------------------- | :--------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :---------------------------| :------------------- | :--------------------------: | :----- |
 | 1  | enum                 | enum(variable, values)      | (Symol;Any)                 | Enum                 | [link](builtin/liter.md#enum)|&#10004;|
 | 2  | dict                 | dict(keys, values)          | (Any;Any)                   | Dict                 | link                         |&#10004;|
 | 3  | table                | table(col_names, values)    | (List;Column)               | Table                | link                         |&#10004;|
@@ -222,14 +222,14 @@ Status
 ## 5. Indexing
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                            | Status |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :--------------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :--------------------------------: | :----- |
 | 1  | index(x,y)           | List indexing (x[y])        | Various                     | Various              | [link](builtin/indexing.md#index)  |P|
 | 2  | index_a              | List indexing assignment    | Pending                     | Pending              | link                               | |
 
 ## 6. Others
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
-| :--| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------- | :----- |
+| :-:| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------: | :----- |
 | 1  | load_csv             | Load a csv file             | String                      | Table                         | link                         |&#10004;|
 | 2  | print                | Output                      | Any                         | Long (exit code)              | link                         | |
 | 3  | format(x)            | Format output (print(str(x))| Any                         | String                        | link                         | |

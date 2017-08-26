@@ -38,6 +38,12 @@ When a block should be deallocated, our system checks its adjacent block.  If
 both are free, they could be coalesced in a larger block.  This operation could
 do recursively until one side is occupied.
 
+### An example
+
+**Buddy system demo**
+
+![](../images/buddy-demo.jpeg)
+
 ## Copy-on-write
 
 When passing parameters to a UDF (User-Defined Functions) in HorseIR, it
