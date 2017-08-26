@@ -45,7 +45,7 @@ inline BranchStatement::BranchStatement (const CSTType *cst)
 {}
 
 inline bool BranchStatement::isConditional () const
-{ return operand == nullptr; }
+{ return operand != nullptr; }
 
 inline Operand *BranchStatement::getOperand () const
 { return operand; }

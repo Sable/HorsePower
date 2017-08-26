@@ -594,7 +594,7 @@ void ASTPrinter::printCharWithEscape (std::uint8_t value)
     { stream << '\'' << static_cast<char>(value) << '\''; }
   else
     {
-      stream << R"STR(\x)STR";
+      stream << '\'' << R"STR(\x)STR";
       if (value <= 0x0F) stream << '0';
       static std::array<char, 16> digits = {
           '0', '1', '2', '3', '4', '5', '6', '7',
@@ -602,7 +602,7 @@ void ASTPrinter::printCharWithEscape (std::uint8_t value)
       };
       auto highBits = static_cast<std::size_t>(((value & 0xf0) >> 4) & 0x0f);
       auto lowBits = static_cast<std::size_t>(value & 0x0f);
-      stream << digits.at (highBits) << digits.at (lowBits);
+      stream << digits.at (highBits) << digits.at (lowBits) << '\'';
     }
 }
 

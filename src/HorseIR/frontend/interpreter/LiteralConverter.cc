@@ -300,7 +300,18 @@ V LiteralConverter::caseKeyTableLiteral (const KeyTableLiteral *literal)
 V LiteralConverter::caseListLiteral (const ListLiteral *literal)
 {
   assert (literal != nullptr);
-  throw /* TODO: */ NOT_YET_IMPLEMENTED;
+  std::vector<V> convertedElements;
+  std::transform (
+      literal->valueConstBegin (), literal->valueConstEnd (),
+      std::back_inserter (convertedElements),
+      [] (const ast::Literal *element) -> V
+      { return LiteralConverter::convert (element); });
+  V backendNode = nullptr;
+  ALLOC_NODE (backendNode);
+  initList (backendNode, static_cast<L>(convertedElements.size ()));
+  for (std::size_t pos = 0; pos < convertedElements.size (); ++pos)
+    { *vV (backendNode, pos) = *convertedElements[pos]; }
+  return backendNode;
 }
 
 V LiteralConverter::caseMinuteLiteral (const MinuteLiteral *literal)

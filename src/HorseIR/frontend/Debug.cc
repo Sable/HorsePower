@@ -11,16 +11,31 @@ const char *rawProgram = R"PROGRAM(
  * int         -> i64
  */
 module default {
-    import Builtin.plus;
-    def inc_by_one(num :i32) :i32 {
-        ret :? = @plus(num, 1 :i32);
+    import Builtin.*;
+    def calculate (x :i32) :i32 {
+        equal_0 :bool = @eq(x, 0:i32);
+        equal_1 :bool = @eq(x, 1:i32);
+        equal_2 :bool = @eq(x, 2:i32);
+
+        goto [ret] equal_1;
+        goto [ret] equal_2;
+
+        prev :i32 = @minus(x, 1:i32);
+        prev2 :i32 = @minus(x, 2:i32);
+
+        t0 :i32 = @calculate(prev);
+        t1 :i32 = @calculate(prev2);
+
+        ret :i32 = @plus(t0, t1);
         return ret;
+
+        [ret]
+        return 1:i32;
     }
 
-    def main() : table {
-        v1:? = 1 :i32;
-        v2:? = @inc_by_one(v1);
-        return v2;
+    def main() :i32 {
+        v :i32 = @calculate(10 :i32);
+        return v ;
     }
 }
 )PROGRAM";

@@ -103,7 +103,19 @@ void Interpreter::interpret (const ast::ReturnStatement *s, InterpretContext &c)
 void Interpreter::interpret (const ast::BranchStatement *s, InterpretContext &c)
 {
   assert (s != nullptr);
-  throw NOT_YET_IMPLEMENTED;
+  if (s->isConditional ())
+    {
+      V operandValue = fetchOperand (s->getOperand (), c);
+      V testResult = nullptr;
+      ALLOC_NODE (testResult);
+      (void) pfnIsValidBranch (testResult, operandValue);
+      if (vb (testResult))
+        { c.pc = statementFlow.getOutwardFlowOnTrue (s); }
+      else
+        { c.pc = statementFlow.getOutwardFlowOnFalse (s); }
+    }
+  else
+    { c.pc = statementFlow.getOutwardFlowOnTrue (s); }
 }
 
 void Interpreter::interpret (const ast::InvokeStatement *s, InterpretContext &c)

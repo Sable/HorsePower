@@ -69,9 +69,18 @@ Dispatcher::getMethodMETA (const ast::FunctionLiteral *literal) const
 
 void Dispatcher::registerExternalMethods ()
 {
-  addExternalMethodMETA ("Builtin", "plus",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnPlus (ret, argv[0], argv[1]); });
+  addExternalMethodMETA (
+      "Builtin", "eq",
+      [] (V ret, std::size_t argc, V argv[])
+      { pfnEq (ret, argv[0], argv[1]); });
+  addExternalMethodMETA (
+      "Builtin", "minus",
+      [] (V ret, std::size_t argc, V argv[])
+      { pfnMinus (ret, argv[0], argv[1]); });
+  addExternalMethodMETA (
+      "Builtin", "plus",
+      [] (V ret, std::size_t argc, V argv[])
+      { pfnPlus (ret, argv[0], argv[1]); });
 }
 
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)
