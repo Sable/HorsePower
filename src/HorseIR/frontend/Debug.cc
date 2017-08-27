@@ -37,7 +37,7 @@ module default {
         s2:i64 = check_cast(@column_value(a1, `DepartmentID)  , i64);
         s3:sym = check_cast(@column_value(a1, `DepartmentName), sym);
 
-        t0:i64 = @index_of       (s2,s1);
+        t0:i64 = @index_of        (s2,s1);
         t1:i64 = @find_valid_index(s2,t0);
         t2:i64 = @find_valid_item (s2,t0);
 

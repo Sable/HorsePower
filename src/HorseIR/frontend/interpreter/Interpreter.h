@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 #include "../ast/AST.h"
-#include "../../backend/h_global.h"
-#include "../../backend/h_primitive.h"
+#include "h_global.h"
+#include "h_primitive.h"
 #include "Dispatcher.h"
 #include "LiteralConverter.h"
 #include "StatementFlow.h"

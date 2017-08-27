@@ -1,7 +1,7 @@
 #include <stdexcept>
 
 #include "LiteralConverter.h"
-#include "../../backend/h_global.h"
+#include "h_global.h"
 
 #define NOT_YET_IMPLEMENTED std::runtime_error("not yet implemented")
 #define ALLOC_NODE(x) {                                  \

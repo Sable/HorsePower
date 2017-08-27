@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ast/AST.h"
-#include "../../backend/h_global.h"
+#include "h_global.h"
 
 namespace horseIR
 {
