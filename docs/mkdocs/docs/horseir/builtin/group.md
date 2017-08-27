@@ -33,5 +33,5 @@ _    -> domain error
 
 ```no-highlight
 group((-1,3,2,3))
-> ((0),(2),(1,3)):list<i64>
+> [(0),(2),(1,3)]:list
 ```

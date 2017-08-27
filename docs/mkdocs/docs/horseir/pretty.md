@@ -79,13 +79,13 @@ We propose a couple of pretty printing modes as follows.
 Input literal:
 
 ```no-highlight
-((1,2,3):i32, (2,0.5):f32)
+[(1,2,3):i32, (2,0.5):f32]
 ```
 
 Output:
 
 ```no-highlight
-((1,2,3):i32, (2,0.5):f32)
+[(1,2,3):i32, (2,0.5):f32]
 ```
 
 #### Dictionary
@@ -110,13 +110,13 @@ Output:
 Input literal:
 
 ```no-highlight
-<`u, (`a,`b,`c)>
+<`u, (`a,`b,`c):sym>
 ```
 
 Output:
 
 ```no-highlight
-<`u, (`a,`b,`c):sym>
+<`u, (`a,`b,`c)>
 ```
 
 #### Table

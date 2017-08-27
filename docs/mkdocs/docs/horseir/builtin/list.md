@@ -39,7 +39,7 @@ _      -> domain error
 
 ```no-highlight
 enlist((-1,2,3))
-> ((-1,2,3)):list<i64>
+> [(-1,2,3)]:list
 ```
 
 ## raze
