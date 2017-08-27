@@ -69,18 +69,39 @@ Dispatcher::getMethodMETA (const ast::FunctionLiteral *literal) const
 
 void Dispatcher::registerExternalMethods ()
 {
-  addExternalMethodMETA (
-      "Builtin", "eq",
-      [] (V ret, std::size_t argc, V argv[])
-      { pfnEq (ret, argv[0], argv[1]); });
-  addExternalMethodMETA (
-      "Builtin", "minus",
-      [] (V ret, std::size_t argc, V argv[])
-      { pfnMinus (ret, argv[0], argv[1]); });
-  addExternalMethodMETA (
-      "Builtin", "plus",
-      [] (V ret, std::size_t argc, V argv[])
-      { pfnPlus (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "len",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnLen (ret, argv[0]); });
+  addExternalMethodMETA ("Builtin", "lt",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnLt (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "range",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnRange (ret, argv[0]); });
+  addExternalMethodMETA ("Builtin", "compress",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnCompress (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "load_table",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnLoadTable (ret, argv[0]); });
+  addExternalMethodMETA ("Builtin", "column_value",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnColumnValue (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "index_of",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnIndexOf (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "index",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnIndex (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "tolist",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnTolist (ret, argv[0]); });
+  addExternalMethodMETA ("Builtin", "list",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnList (ret, static_cast<L>(argc), argv); });
+  addExternalMethodMETA ("Builtin", "table",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnTable (ret, argv[0], argv[1]); });
 }
 
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)

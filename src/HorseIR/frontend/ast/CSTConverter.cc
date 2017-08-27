@@ -2511,29 +2511,29 @@ Literal *CSTConverter::convert (ASTNodeMemory &mem,
 
   if (context->literalBool () != nullptr)
     { return convert (mem, context->literalBool ()); }
-  else if (context->literalChar () != nullptr)
+  if (context->literalChar () != nullptr)
     { return convert (mem, context->literalChar ()); }
-  else if (context->literalInteger () != nullptr)
+  if (context->literalInteger () != nullptr)
     { return convert (mem, context->literalInteger ()); }
-  else if (context->literalFloat () != nullptr)
+  if (context->literalFloat () != nullptr)
     { return convert (mem, context->literalFloat ()); }
-  else if (context->literalComplex () != nullptr)
+  if (context->literalComplex () != nullptr)
     { return convert (mem, context->literalComplex ()); }
-  else if (context->literalSymbol () != nullptr)
+  if (context->literalSymbol () != nullptr)
     { return convert (mem, context->literalSymbol ()); }
-  else if (context->literalTTime () != nullptr)
+  if (context->literalTTime () != nullptr)
     { return convert (mem, context->literalTTime ()); }
-  else if (context->literalTSecond () != nullptr)
+  if (context->literalTSecond () != nullptr)
     { return convert (mem, context->literalTSecond ()); }
-  else if (context->literalTMonth () != nullptr)
+  if (context->literalTMonth () != nullptr)
     { return convert (mem, context->literalTMonth ()); }
-  else if (context->literalTMinute () != nullptr)
+  if (context->literalTMinute () != nullptr)
     { return convert (mem, context->literalTMinute ()); }
-  else if (context->literalTDate () != nullptr)
+  if (context->literalTDate () != nullptr)
     { return convert (mem, context->literalTDate ()); }
-  else if (context->literalTDateTime () != nullptr)
+  if (context->literalTDateTime () != nullptr)
     { return convert (mem, context->literalTDateTime ()); }
-  else if (context->literalString () != nullptr)
+  if (context->literalString () != nullptr)
     { return convert (mem, context->literalString ()); }
 
   throw CSTConverterException (context);
@@ -2707,7 +2707,7 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralEnumCase0Context *literal)
     { enumerationLiteral->setLiteralType (convert (mem, typeEnumContext)); }
   else
     {
-      Type *duplicateType = static_cast<Type *>(
+      auto duplicateType = static_cast<Type *>(
           dbContent->getLiteralType ()->duplicateDeep (mem)
       );
       auto enumerationType = mem.alloc<EnumerationType> (literal);
