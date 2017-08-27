@@ -8,28 +8,26 @@ Query profile
 | :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: | :---------------------------: |
 | [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     | Pass                          |
 | [2][q2]  |             |       |      |       |       |       |        |                               |
-| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      |                               |
+| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      | Working                       |
 | [4][q4]  |             |       |      |       |       |       |        |                               |
 | [5][q5]  | C,O,L,S,N,R | 9     | 6    | 1     | 1     | 1     | 2      |                               |
 | [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | Pass                          |
 | [7][q7]  |             |       |      |       |       |       |        |                               |
 | [8][q8]  |             |       |      |       |       |       |        |                               |
 | [9][q9]  |             |       |      |       |       |       |        |                               |
-| [10][q10]|             |       |      |       |       |       |        |                               |
+| [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |                               |
 | [11][q11]|             |       |      |       |       |       |        |                               |
-| [12][q12]|             |       |      |       |       |       |        |                               |
-| [13][q13]|             |       |      |       |       |       |        |                               |
-| [14][q14]|             |       |      |       |       |       |        |                               |
-| [15][q15]|             |       |      |       |       |       |        |                               |
-| [16][q16]|             |       |      |       |       |       |        |                               |
-| [17][q17]|             |       |      |       |       |       |        |                               |
-| [18][q18]|             |       |      |       |       |       |        |                               |
+| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | Working                       |
+| [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | (Nested)                      |
+| [14][q14]| L,P         | 3     | 2    | 1     | 0     | 0     | 1      | Working                       |
+| [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
+| [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      |                               |
+| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      |                               |
+| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      |                               |
 | [19][q19]|             |       |      |       |       |       |        |                               |
 | [20][q20]|             |       |      |       |       |       |        |                               |
 | [21][q21]|             |       |      |       |       |       |        |                               |
 | [22][q22]|             |       |      |       |       |       |        |                               |
-| [23][q23]|             |       |      |       |       |       |        |                               |
-| [24][q24]|             |       |      |       |       |       |        |                               |
 
 
 List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md))
@@ -66,5 +64,3 @@ List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs
 [q20]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q20.md
 [q21]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q21.md
 [q22]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q22.md
-[q23]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q23.md
-[q24]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q24.md
