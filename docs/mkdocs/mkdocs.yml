@@ -3,6 +3,8 @@ theme: readthedocs
 #theme: cosmo
 #theme: null
 #theme_dir: 'custom_theme'
+extra_css: 
+    - mycss/extra.css
 
 pages:
 - Home    : 'index.md'
