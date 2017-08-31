@@ -27,6 +27,7 @@ In HorsePower, we focus on the following parts.
     |
 - Implementation: 
     [Details](docs/implementation)
+    | [Project libraries](libs/)
     |
 - Paper:
     [Related](docs/study)
@@ -75,6 +76,33 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 - Parallelism    : OpenMP/Pthread/CUDA/OpenCL
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
+
+### Project libraries
+
+Installation script
+
+    (cd libs && sh deploy_linux.sh)
+
+Installation time (On Sable-Intel)  **about 13 mins**
+
+    > time (cd libs && sh deploy_linux.sh)
+    
+    real     13m0.499s
+    user     11m8.760s
+    sys      1m13.444s
+
+New folders created
+
+    libs/include
+    libs/lib
+    libs/antlr4
+    libs/pcre2
+
+### Front-end and back-end
+
+Build front-end
+
+    (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make)
 
 ### External links
 

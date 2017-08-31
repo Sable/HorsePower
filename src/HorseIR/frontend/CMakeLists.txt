@@ -15,6 +15,11 @@ endif ()
 include_directories(${ANTLR4CPP_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/../backend/)
 
+include(FindPCRE2)
+if (NOT PCRE2_FOUND)
+    message(FATAL_ERROR "require pcre2")
+endif ()
+
 include(CollectSource)
 
 find_package(Boost COMPONENTS program_options)
@@ -25,7 +30,7 @@ if(Boost_FOUND)
         ${CMAKE_SOURCE_DIR}/interpreter/Main.cc)
     target_link_libraries(HorseIRInterpreter ${ANTLR4CPP_LIBRARIES})
     target_link_libraries(HorseIRInterpreter ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
-    target_link_libraries(HorseIRInterpreter pcre2-8)
+    target_link_libraries(HorseIRInterpreter ${PCRE2_LIBRARIES})
     target_link_libraries(HorseIRInterpreter ${Boost_LIBRARIES})
 endif()
 
@@ -35,4 +40,4 @@ add_executable(HorseIRDebug
         ${CMAKE_SOURCE_DIR}/Debug.cc)
 target_link_libraries(HorseIRDebug ${ANTLR4CPP_LIBRARIES})
 target_link_libraries(HorseIRDebug ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
-target_link_libraries(HorseIRDebug pcre2-8)
+target_link_libraries(HorseIRDebug ${PCRE2_LIBRARIES})

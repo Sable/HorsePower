@@ -46,8 +46,8 @@ L TYPE_EMP[]  = {H_Q, H_L};
 L TYPE_DEP[]  = {H_L, H_Q};
 const L NUM_COL_EMP = 2;
 const L NUM_COL_DEP = 2;
-L SYM_LIST_EMP[2];
-L SYM_LIST_DEP[2];
+Q SYM_LIST_EMP[2];
+Q SYM_LIST_DEP[2];
 
 L testInputFile(S filePath){
     if(!filePath){
@@ -85,27 +85,29 @@ L getNiceNumber(L n){
 
 V handleLiteral(horseIR::ast::Literal* literal)
 {
-    using Literal = horseIR::ast::Literal ;
-    using SymbolLiteral = horseIR::ast::SymbolLiteral ;
-    switch (literal->getLiteralClass()) {
-    case Literal::LiteralClass::SymbolLiteral :
-        R initSymbol(allocNode(), getSymbol((S) static_cast<SymbolLiteral*>(literal)->getValue().c_str())) ;
-    default:
-        assert(false) ;
-        return nullptr ;
-    }
+    // using Literal = horseIR::ast::Literal ;
+    // using SymbolLiteral = horseIR::ast::SymbolLiteral ;
+    // switch (literal->getLiteralClass()) {
+    // case Literal::LiteralClass::SymbolLiteral :
+    //     R initSymbol(allocNode(), getSymbol((S) static_cast<SymbolLiteral*>(literal)->getValue().c_str())) ;
+    // default:
+    //     assert(false) ;
+    //     return nullptr ;
+    // }
+    R NULL;
 }
 
 V handleParameter(horseIR::ast::Operand* operand, std::map<std::string, V>& env)
 {
-    using Literal = horseIR::ast::Literal ;
-    using Identifier = horseIR::ast::Identifier ;
-    switch (operand->getOperandClass()) {
-    case horseIR::ast::Operand::OperandClass::Identifier:
-        return env[static_cast<Identifier*>(operand)->getFullName()] ;
-    case horseIR::ast::Operand::OperandClass::Literal:
-        return handleLiteral(static_cast<Literal*>(operand)) ;
-    }
+    // using Literal = horseIR::ast::Literal ;
+    // using Identifier = horseIR::ast::Identifier ;
+    // switch (operand->getOperandClass()) {
+    // case horseIR::ast::Operand::OperandClass::Identifier:
+    //     return env[static_cast<Identifier*>(operand)->getFullName()] ;
+    // case horseIR::ast::Operand::OperandClass::Literal:
+    //     return handleLiteral(static_cast<Literal*>(operand)) ;
+    // }
+    R NULL;
 }
         
 
