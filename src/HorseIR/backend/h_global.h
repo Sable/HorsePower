@@ -13,7 +13,7 @@ typedef bool       B;
 typedef char       C,*S,*G;
 typedef int16_t    H;
 typedef int32_t    I,M,D,U,W,T;
-typedef int64_t    L,Q,Z;
+typedef long long  L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;

@@ -104,6 +104,10 @@ Build front-end
 
     (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make)
 
+Build back-end
+
+    (cd src/HorseIR && make && ./horse)
+
 ### External links
 
 Software

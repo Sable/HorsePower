@@ -6,11 +6,6 @@
 #include <iostream>
 
 #include "antlr4-runtime.h"
-#include "grammar/HorseIRLexer.h"
-#include "grammar/HorseIRParser.h"
-#include "grammar/HorseIRBaseVisitor.h" 
-
-// #include "util/CSTPrettyPrinter.h"
 
 using antlr4::tree::ParseTree;
 using antlr4::tree::ParseTreeWalker;
@@ -45,26 +40,6 @@ int main(int argc, char *argv[]){
         printf("...Testing...\n");
         // testInputFile(inputPath);
         testMain();
-    }
-    else if(inputPath!=NULL){
-        antlr4::ANTLRFileStream fileStream(inputPath);
-        HorseIRLexer lexer( &fileStream ) ; 
-        antlr4::CommonTokenStream tokenStream( &lexer ) ;
-        HorseIRParser parser( &tokenStream ) ;
-
-        try{
-            printf("entering\n");
-            antlr4::tree::ParseTree* tree =  parser.program();
-            std::ostream outStream(std::cout.rdbuf());
-            // horseIR::util::CSTPrettyPrinter printer(outStream);
-            // printer.prettyPrint(tree);
-            // printer.visit(tree);
-        }
-        catch (antlr4::ParseCancellationException &exception){
-            std::cerr<<"Exception captured"<<std::endl;
-            return 1;
-        }
-        printf("successfully done.\n");
     }
     else {
         usage();
