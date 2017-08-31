@@ -1,16 +1,12 @@
 find_path(ANTLR4CPP_INCLUDE_DIR
   NAMES antlr4-runtime.h
-  PATHS
-  /usr
-  PATH_SUFFIXES
-  include/antlr4-runtime)
+  PATHS ../../../libs
+  PATH_SUFFIXES include/antlr4-runtime)
 
 find_library(ANTLR4CPP_LIBRARY
   NAMES antlr4-runtime
-  PATHS
-  /usr
-  PATH_SUFFIXES
-  lib)
+  PATHS ../../../libs
+  PATH_SUFFIXES lib)
 
 if (ANTLR4CPP_INCLUDE_DIR AND ANTLR4CPP_LIBRARY)
   message(STATUS "found antlr4-runtime headers at ${ANTLR4CPP_INCLUDE_DIR}")
