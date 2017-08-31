@@ -102,6 +102,38 @@ void Dispatcher::registerExternalMethods ()
   addExternalMethodMETA ("Builtin", "table",
                          [] (V ret, std::size_t argc, V argv[])
                          { pfnTable (ret, argv[0], argv[1]); });
+
+  addExternalMethodMETA ("Builtin", "eq",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnEq (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "minus",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnMinus (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "plus",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnPlus (ret, argv[0], argv[1]); });
+
+  addExternalMethodMETA ("Builtin", "datetime_add",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnDatetimeAdd (ret, argv[0], argv[1], argv[2]); });
+  addExternalMethodMETA ("Builtin", "geq",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnGeq (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "gt",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnGt (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "and",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnAnd (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "mul",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnMul (ret, argv[0], argv[1]); });
+  addExternalMethodMETA ("Builtin", "sum",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnSum (ret, argv[0]); });
+  addExternalMethodMETA ("Builtin", "enlist",
+                         [] (V ret, std::size_t argc, V argv[])
+                         { pfnEnlist (ret, argv[0]); });
 }
 
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)
@@ -360,6 +392,8 @@ Dispatcher::getVisibleMethodMETAs (const ast::Module *module) const
   for (const auto &methodMETA : methodMETAs)
     {
       if (methodMETA->getMoudleName () == moduleName)
+        { visibleMethodMETAs.push_back (methodMETA.get ()); }
+      else if (!methodMETA->getMoudleName ().empty ())
         { visibleMethodMETAs.push_back (methodMETA.get ()); }
       else
         {

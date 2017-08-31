@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(HorseIR)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfatal-errors -Werror -g")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 set(ANTLR4CPP_JAR_LOCATION "${PROJECT_SOURCE_DIR}/jar/antlr-4.7-complete.jar")
@@ -21,18 +21,6 @@ if (NOT PCRE2_FOUND)
 endif ()
 
 include(CollectSource)
-
-find_package(Boost COMPONENTS program_options)
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    add_executable(HorseIRInterpreter
-        ${HORSE_IR_FRONTEND_SRC}
-        ${CMAKE_SOURCE_DIR}/interpreter/Main.cc)
-    target_link_libraries(HorseIRInterpreter ${ANTLR4CPP_LIBRARIES})
-    target_link_libraries(HorseIRInterpreter ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
-    target_link_libraries(HorseIRInterpreter ${PCRE2_LIBRARIES})
-    target_link_libraries(HorseIRInterpreter ${Boost_LIBRARIES})
-endif()
 
 # == debug ==
 add_executable(HorseIRDebug
