@@ -19,6 +19,7 @@ include(FindPCRE2)
 if (NOT PCRE2_FOUND)
     message(FATAL_ERROR "require pcre2")
 endif ()
+include_directories(${PCRE2_INCLUDE_DIRS})
 
 include(CollectSource)
 

@@ -77,9 +77,9 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
-### Project libraries
+### Deployment
 
-Installation script
+### Step 1. Download libraries
 
     (cd libs && sh deploy_linux.sh)
 
@@ -98,13 +98,11 @@ New folders created
     libs/antlr4
     libs/pcre2
 
-### Front-end and back-end
+#### Step 2. Build front-end
 
-Build front-end
+    (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make lib -C ../../backend && make)
 
-    (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make)
-
-Build back-end
+#### Step 3. Build back-end
 
     (cd src/HorseIR && make && ./horse)
 
