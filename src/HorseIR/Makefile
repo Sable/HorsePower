@@ -5,8 +5,7 @@ INCLUDE_PCRE2="../../libs/include"
 LIB_GRAMMAR=./grammar
 LIB_ANTLR4=../../libs/lib
 LIB_PCRE2=../../libs/lib
-LD_LIBRARY_PATH=${LIB_PCRE2}
-LINK_LIBS=-lm -lstdc++ -L${LIB_ANTLR4} -lantlr4-runtime -lpcre2-8
+LINK_LIBS=-lm -lstdc++ -L${LIB_ANTLR4} -lantlr4-runtime -Wl,-rpath,${LIB_PCRE2} -lpcre2-8
 all: ${EXE}
 
 ${EXE}: *.cc backend

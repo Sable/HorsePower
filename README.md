@@ -79,7 +79,12 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 
 ### Deployment
 
-### Step 1. Download libraries
+Requirements (suggest)
+
+- gcc 5.4 or higher
+- uuid-dev library
+
+#### Step 1. Download libraries
 
     (cd libs && sh deploy_linux.sh)
 
