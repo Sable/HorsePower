@@ -181,6 +181,7 @@ Status
 | 7  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         | |
 | 8  | order(x,y)           | Sort x based on y           | (Real;B)                    | L                             | [link](builtin/order.md)     |&#10004;|
 | 9  | member(x)            | Member                      | (Basic;Basic)               | B                             | [link](builtin/member.md)    |&#10004;|
+| 10 | vector(x,y)          | Init a vector               | (L, Basic)             | Vector                        | [link](builtin/vector.md)    ||
 
 ### 3.3 Reduction
 
