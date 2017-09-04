@@ -20,6 +20,7 @@ bool flagVersion = false;
 bool flagUsage   = false;
 bool flagTest    = false;
 char *inputPath  = NULL;
+int  queryId     = -1;
 
 void usage();
 int getOption(int argc, char *argv[]);
@@ -39,7 +40,7 @@ int main(int argc, char *argv[]){
     else if(flagTest){
         printf("...Testing...\n");
         // testInputFile(inputPath);
-        testMain();
+        testMain(queryId);
     }
     else {
         usage();
@@ -50,12 +51,13 @@ int main(int argc, char *argv[]){
 
 int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvp:t")) != -1){
+    while((c = getopt(argc, argv, "hvp:t:")) != -1){
         switch(c){
             case 'h': flagUsage   = true; break;
             case 'v': flagVersion = true; break;
             case 'p': inputPath = optarg; break;
-            case 't': flagTest    = true; break;
+            case 't': flagTest    = true; \
+                      queryId     = atoi(optarg); break;
             default : return 1;
         }
     }
@@ -67,6 +69,6 @@ void usage(){
     std::cout << "  -h           Print this information" << std::endl;
     std::cout << "  -p <path>    Set an input file"      << std::endl;
     std::cout << "  -v           Print HorseIR version"  << std::endl;
-    std::cout << "  -t           For test only"          << std::endl;
+    std::cout << "  -t <qid>     For test only"          << std::endl;
 }
 

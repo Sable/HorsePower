@@ -135,16 +135,16 @@ Status
 | 9  | mul(x,y)             | Multiplication              | (Real;Real)                 | Various                       | [link](builtin/mul.md)       |P|
 | 10 | div(x,y)             | Division                    | (Real;Real)                 | Various                       | [link](builtin/div.md)       |P|
 | 11 | power(x,y)           | Power x of y                | (Real;Real)                 | Various                       | [link](builtin/power.md)     |P|
-| 12 | log(x,y)             | log_x(y)                    | (Real;Real)                 | Various                       | [link](builtin/log.md)       |P|
+| 12 | log(x,y)             | log\_x(y)                   | (Real;Real)                 | Various                       | [link](builtin/log.md)       |P|
 | 13 | mod(x,y)             | x mod y                     | (Real;Real)                 | Various                       | [link](builtin/mod.md)       |&#10004;|
 | 14 | and(x,y)             | And                         | (B;B)                       | B                             | [link](builtin/logic.md#and) |&#10004;|
 | 15 | or(x,y)              | Or                          | (B;B)                       | B                             | [link](builtin/logic.md#or)  |&#10004;|
 | 16 | nand(x,y)            | NAND                        | (B;B)                       | B                             | [link](builtin/logic.md#nand)|&#10004;|
 | 17 | nor(x,y)             | NOR                         | (B;B)                       | B                             | [link](builtin/logic.md#nor) |&#10004;|
 | 18 | xor(x,y)             | XOR                         | (B;B)                       | B                             | [link](builtin/logic.md#xor) |&#10004;|
-| 19 | datetime_diff(x,y)\* | Datetime diff               | Pending                     | Pending                       | [link](date.md#datetime-diff)| |
-| 20 | datetime_add(x,y,m)  | Datetime add                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-add) |&#10004;|
-| 21 | datetime_sub(x,y,m)  | Datetime sub                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-sub) | |
+| 19 | datetime\_diff(x,y)\*| Datetime diff               | Pending                     | Pending                       | [link](date.md#datetime-diff)| |
+| 20 | datetime\_add(x,y,m) | Datetime add                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-add) |&#10004;|
+| 21 | datetime\_sub(x,y,m) | Datetime sub                | (Date;Int;Sym)              | Date                          | [link](date.md#datetime-sub) | |
 
 \* [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp) | 
 \*\* CP: Comparable
@@ -176,11 +176,12 @@ Status
 | 2  | like(x,y)            | Patten x matches y          | (String; String)            | B                             | [link](builtin/like.md)      |P|
 | 3  | compress(x,y)        | Compression on y based on x | (B;Basic)                   | Same as the 2nd argument      | [link](builtin/compress.md)  |&#10004;|
 | 4  | randk(x,k)           | rand(x) in k times          | Pending                     | Pending                       | link                         | |
-| 5  | index_of(x,y)        | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |&#10004;|
+| 5  | index\_of(x,y)       | index of y in x             | (Basic;Basic)               | L                             | [link](builtin/indexof.md)   |&#10004;|
 | 6  | take(k,x)            | Take first/last k elem. of y| Pending                     | Pending                       | link                         | |
 | 7  | drop(k,x)            | Drop first/last k elem. of y| Pending                     | Pending                       | link                         | |
 | 8  | order(x,y)           | Sort x based on y           | (Real;B)                    | L                             | [link](builtin/order.md)     |&#10004;|
 | 9  | member(x)            | Member                      | (Basic;Basic)               | B                             | [link](builtin/member.md)    |&#10004;|
+| 10 | vector(x,y)          | Init a vector               | (L, Basic)                  | Vector                        | [link](builtin/vector.md)    ||
 
 ### 3.3 Reduction
 
@@ -199,10 +200,10 @@ Status
 | 1  | raze(x)              | Raze a nested list          | List, Basic                 | Basic                | [link](builtin/list.md#raze)      |&#10004;|
 | 2  | enlist(x)            | Return a list               | Any                         | List                 | [link](builtin/list.md#enlist)    |&#10004;|
 | 7  | tolist(x)            | Vector to list              | Basic                       | List                 | [link](builtin/list.md#tolist)    |&#10004;|
-| 3  | each_item(fn,x)      | Each on x with func `fn`    | (Func; List)                | List                 | [link](builtin/list.md#each_item) |&#10004;|
+| 3  | each\_item(fn,x)     | Each on x with func `fn`    | (Func; List)                | List                 | [link](builtin/list.md#each_item) |&#10004;|
 | 4  | each(fn,x,y)         | Each on both sides          | (Func; List; List)          | List                 | [link](builtin/list.md#each)      |&#10004;|
-| 5  | each_left(fn,x,y)    | Each on left side           | (Func; List; List)          | List                 | [link](builtin/list.md#each_left) |&#10004;|
-| 6  | each_right(fn,x,y)   | Each on Right side          | (Func; List; List)          | List                 | [link](builtin/list.md#each_right)|&#10004;|
+| 5  | each\_left(fn,x,y)   | Each on left side           | (Func; List; List)          | List                 | [link](builtin/list.md#each_left) |&#10004;|
+| 6  | each\_right(fn,x,y)  | Each on Right side          | (Func; List; List)          | List                 | [link](builtin/list.md#each_right)|&#10004;|
 | 7  | match(x,y)           | Check if both match         | (Any; Any)                  | Bool                 | link                              |&#10004;|
 
 ## 4. Database related
@@ -211,26 +212,26 @@ Status
 | :-:| :------------------- | :-------------------------- | :---------------------------| :------------------- | :--------------------------: | :----- |
 | 1  | enum                 | enum(variable, values)      | (Symol;Any)                 | Enum                 | [link](builtin/liter.md#enum)|&#10004;|
 | 2  | dict                 | dict(keys, values)          | (Any;Any)                   | Dict                 | link                         |&#10004;|
-| 3  | table                | table(col_names, values)    | (List;Column)               | Table                | link                         |&#10004;|
+| 3  | table                | table(col\_names, values)   | (List;Column)               | Table                | link                         |&#10004;|
 | 4  | ktable               | ktable(table1, table2)      | (Table;Table)               | KTable               | link                         |&#10004;|
 | 5  | keys                 | Return keys                 | Table, KTable, Dict         | List                 | link                         |&#10004;|
 | 6  | values               |                             | Pending                     | Pending              | link                         | |
 | 7  | meta                 |                             | Pending                     | Pending              | link                         | |
-| 8  | column_value         |                             | Table, KTable               | Various              | link                         |&#10004;|
-| 9  | load_table           | Load a table                | Symbol                      | Table, KTable        | link                         |&#10004;|
+| 8  | column\_value        |                             | Table, KTable               | Various              | link                         |&#10004;|
+| 9  | load\_table          | Load a table                | Symbol                      | Table, KTable        | link                         |&#10004;|
 
 ## 5. Indexing
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value        | Details                            | Status |
 | :-:| :------------------- | :-------------------------- | :-------------------------- | :------------------- | :--------------------------------: | :----- |
 | 1  | index(x,y)           | List indexing (x[y])        | Various                     | Various              | [link](builtin/indexing.md#index)  |P|
-| 2  | index_a              | List indexing assignment    | Pending                     | Pending              | link                               | |
+| 2  | index\_a             | List indexing assignment    | Pending                     | Pending              | link                               | |
 
 ## 6. Others
 
 | No.| Function             | Description                 | Type of Arg(s)\*            | Type of Value                 | Details                      | Status |
 | :-:| :------------------- | :-------------------------- | :-------------------------- | :---------------------------- | :--------------------------: | :----- |
-| 1  | load_csv             | Load a csv file             | String                      | Table                         | link                         |&#10004;|
+| 1  | load\_csv            | Load a csv file             | String                      | Table                         | link                         |&#10004;|
 | 2  | print                | Output                      | Any                         | Long (exit code)              | link                         | |
 | 3  | format(x)            | Format output (print(str(x))| Any                         | String                        | link                         | |
 
