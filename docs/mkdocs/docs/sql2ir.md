@@ -39,6 +39,24 @@ Query profile (<u>Total 22</u>: **Pass** 2; <blue>Testing</blue>: 2; <red>Workin
 
 ## Manual translation
 
+The translation from SQL to HorseIR can be done in the following steps.
+
+```no-highlight
+module default{
+    import Bultin.*;
+    def main() : table{
+        // step 0: load table
+        // step 1: where clause
+        // step 2: group by
+        // step 3: select
+        // step 4: order by
+        // step 5: materialization
+        return z;
+   }
+}
+```
+
+
 ## Formal methods
 
 

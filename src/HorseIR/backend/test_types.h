@@ -135,7 +135,6 @@ void testK(V t1, V t2){
     printV(z);
 }
 
-
 void testTypes(){
     P("Reading table Employee\n");
     V tableEmp = readCSV(CSV_EMP, NUM_COL_EMP, TYPE_EMP, SYM_LIST_EMP);

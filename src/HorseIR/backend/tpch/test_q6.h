@@ -1,37 +1,4 @@
 
-C CSV_LINE[]  = "data/test-tables/lineitem.csv";
-L TYPE_LINE[] = {H_E, H_E, H_E, H_D};
-const L NUM_COL_LINE = 4;
-L SYM_LIST_LINE[4];
-
-V literalDate(L x){
-    V z = allocNode();
-    initV(z,H_D,1);
-    vd(z) = x;
-    R z;
-}
-
-V literalI64(L x){
-    V z = allocNode();
-    initV(z,H_L,1);
-    vl(z) = x;
-    R z;
-}
-
-V literalSym(S str){
-    V z = allocNode();
-    initV(z,H_Q,1);
-    vq(z) = getSymbol(str);
-    R z;
-}
-
-V literalF64(E x){
-    V z = allocNode();
-    initV(z,H_E,1);
-    ve(z) = x;
-    R z;
-}
-
 L simulateQ6(){
     L e;
     V t0 = allocNode();  V t5 = allocNode();  V t10 = allocNode();  V t15 = allocNode();
@@ -41,11 +8,10 @@ L simulateQ6(){
     V t4 = allocNode();  V t9 = allocNode();  V t14 = allocNode();  V t19 = allocNode();
 
     V t20 = allocNode(); V t21 = allocNode(); V t22 = allocNode();  V a0 = allocNode();
-    P("** Start simulation for TPC-H Query 6\n");
+    struct timeval tv0, tv1;
+    gettimeofday(&tv0, NULL);
     e = pfnLoadTable(a0, \
           initSymbol(allocNode(),getSymbol((S)"lineitem")));          CHECK(e,1);
-
-    // P("Loaded table\n"); printV(a0);
 
     e = pfnColumnValue(t0, \
           a0, \
@@ -84,29 +50,18 @@ L simulateQ6(){
     e = pfnTolist(t20,literalSym((S)"revenue"));                      CHECK(e,23);
     e = pfnEnlist(t21,t19);                                           CHECK(e,24);
     e = pfnTable(t22,t20,t21);                                        CHECK(e,25);
+    gettimeofday(&tv1, NULL);
 
-    P("Result of the Query 6:\n\n");
+    P("Result of the Query 6: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     printV(t22);
     R 0;
 }
 
-L initTableLineitem(){
-    const C* PRE_DEFINED[] = {
-        "l_quantity", "l_extendedprice", "l_discount", "l_shipdate"
-    };
-    DOI(4, insertSym(createSymbol((S)PRE_DEFINED[i])));
-    // printAllSymol();
-    DOI(4, SYM_LIST_LINE[i]= getSymbol((S)PRE_DEFINED[i]));
-    R 0;
-}
-
 L testTPCHQ6(){
-    initTableLineitem();
-    P("Reading table Lineitem\n");
-    V tableLine = readCSV(CSV_LINE, NUM_COL_LINE, TYPE_LINE, SYM_LIST_LINE);
-    registerTable((S)"lineitem", tableLine);
-    /* test */
+    P("** Start simulation for TPC-H Query 6\n");
+    initTableByName((S)"lineitem");
     simulateQ6();
+    P("** End Query 6\n");
     R 0;
 }
 
