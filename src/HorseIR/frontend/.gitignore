@@ -2,3 +2,4 @@ cmake-build-debug/
 .idea/
 project_cloc.sh
 callgrind.out.*
+compile_commands.json

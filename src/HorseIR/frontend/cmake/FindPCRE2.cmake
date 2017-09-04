@@ -1,11 +1,13 @@
 find_path(PCRE2_INCLUDE_DIR
   NAMES pcre2.h
   PATHS ../../../libs
+        /usr
   PATH_SUFFIXES include)
 
 find_library(PCRE2_LIBRARY
   NAMES pcre2-8
   PATHS ../../../libs
+        /usr
   PATH_SUFFIXES lib)
 
 

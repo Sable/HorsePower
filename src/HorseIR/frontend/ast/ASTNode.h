@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ostream>
-#include <exception>
 #include "AST.h"
 
 namespace horseIR
@@ -12,7 +11,7 @@ namespace ast
 class ASTNode {
  public:
   typedef antlr4::tree::ParseTree CSTType;
-
+  
   enum class ASTNodeClass {
     ComplexLiteral, BoolLiteral, CharLiteral, Integer8Literal,
     Integer16Literal, Integer32Literal, Integer64Literal, FP32Literal,

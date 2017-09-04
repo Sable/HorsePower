@@ -22,6 +22,18 @@ endif ()
 
 include(CollectSource)
 
+find_package(Boost COMPONENTS program_options)
+if (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    add_executable(HorseIRInterpreter
+            ${HORSE_IR_FRONTEND_SRC}
+            ${CMAKE_SOURCE_DIR}/interpreter/Main.cc)
+    target_link_libraries(HorseIRInterpreter ${ANTLR4CPP_LIBRARIES})
+    target_link_libraries(HorseIRInterpreter ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
+    target_link_libraries(HorseIRInterpreter ${PCRE2_LIBRARIES})
+    target_link_libraries(HorseIRInterpreter ${Boost_LIBRARIES})
+endif ()
+
 # == debug ==
 add_executable(HorseIRDebug
         ${HORSE_IR_FRONTEND_SRC}
