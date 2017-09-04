@@ -74,5 +74,6 @@ pages:
     - "___": horseir/builtin/str.md
     - "___": horseir/builtin/trig.md
     - "___": horseir/builtin/unique.md
+    - "___": horseir/builtin/vector.md
     - "___": horseir/builtin/where.md
 
