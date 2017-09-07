@@ -1,6 +1,6 @@
 EXE=horse
 CC=gcc-5
-CXXFLAGS=-std=c++11 -g
+CXXFLAGS=-std=c++11 -fopenmp -g
 INCLUDE_ANTLR4="../../libs/include/antlr4-runtime"
 INCLUDE_PCRE2="../../libs/include"
 LIB_GRAMMAR=./grammar

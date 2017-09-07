@@ -28,6 +28,8 @@ extern "C" {
 #define isKTable(x)    (H_K==vp(x))
 #define isDict(x)      (H_N==vp(x))
 #define isTable2(x)    (isTable(x) || isKTable(x))
+
+#define isOneInt(x) (isTypeGroupInt(vp(x)) && 1==vn(x))
 #define isOneSymbol(x) (isSymbol(x) && 1==vn(x))
 
 #define isOne(x) (1==vn(x))
@@ -154,6 +156,7 @@ L pfnXor           (V z, V x, V y);
 L pfnPowerLog      (V z, V x, V y, L op);
 L pfnPower         (V z, V x, V y);
 L pfnLog           (V z, V x, V y);
+L pfnMod           (V z, V x, V y);
 L pfnCompress      (V z, V x, V y);
 
 L pfnIndexOf       (V z, V x, V y);
@@ -173,6 +176,7 @@ L pfnEnum          (V z, V x, V y);
 L pfnKTable        (V z, V x, V y);
 
 L pfnMember        (V z, V x, V y);
+L pfnVector        (V z, V x, V y);
 
 L pfnDatetimeAdd   (V z, V x, V y, V m);
 

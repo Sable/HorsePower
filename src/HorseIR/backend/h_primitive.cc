@@ -168,6 +168,8 @@ const E PI = acos(-1);
 #define NOT(x) (~x)
 #define POWER(x,y) pow(x,y)
 #define LOG(x,y) (log(y)/log(x))
+#define MODI(x,y) ((x)%(y))
+#define MODF(x,y) fmod(x,y)
 #define FACT(n) calcFact(n)
 
 /* abs */
@@ -518,12 +520,12 @@ L pfnSum(V z, V x){
         L typZ = H_F==vp(x)?H_F:H_E;
         initV(z,H_E,1);
         switch(vp(x)){
-            caseB {E t=0; DOI(vn(x), t+=vB(x,i)) ve(z)=t;} break;
-            caseH {E t=0; DOI(vn(x), t+=vH(x,i)) ve(z)=t;} break;
-            caseI {E t=0; DOI(vn(x), t+=vI(x,i)) ve(z)=t;} break;
-            caseL {E t=0; DOI(vn(x), t+=vL(x,i)) ve(z)=t;} break;
-            caseF {F t=0; DOI(vn(x), t+=vF(x,i)) vf(z)=t;} break;
-            caseE {E t=0; DOI(vn(x), t+=vE(x,i)) ve(z)=t;} break;
+            caseB {E t=0; DOP(vn(x), t+=vB(x,i), reduction(+:t)) ve(z)=t;} break;
+            caseH {E t=0; DOP(vn(x), t+=vH(x,i), reduction(+:t)) ve(z)=t;} break;
+            caseI {E t=0; DOP(vn(x), t+=vI(x,i), reduction(+:t)) ve(z)=t;} break;
+            caseL {E t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) ve(z)=t;} break;
+            caseF {F t=0; DOP(vn(x), t+=vF(x,i), reduction(+:t)) vf(z)=t;} break;
+            caseE {E t=0; DOP(vn(x), t+=vE(x,i), reduction(+:t)) ve(z)=t;} break;
         }
         R 0;
     }
@@ -745,32 +747,32 @@ L pfnCompare(V z, V x, V y, L op){
             initV(z,typZ,lenZ);
             if(isOne(x)) {
                 switch(typMax){
-                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
-                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
-                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
-                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
-                    caseF DOI(lenZ, vB(z,i)=COMPFN(op,vF(tempX,0),vF(tempY,i),compareFloat)) break;
-                    caseE DOI(lenZ, vB(z,i)=COMPFN(op,vE(tempX,0),vE(tempY,i),compareFloat)) break;
+                    caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
+                    caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
+                    caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
+                    caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
+                    caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,0),vF(tempY,i),compareFloat)) break;
+                    caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,0),vE(tempY,i),compareFloat)) break;
                 }
             }
             else if(isOne(y)) {
                 switch(typMax){
-                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
-                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
-                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
-                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
-                    caseF DOI(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,0),compareFloat)) break;
-                    caseE DOI(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,0),compareFloat)) break;
+                    caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
+                    caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
+                    caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
+                    caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
+                    caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,0),compareFloat)) break;
+                    caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,0),compareFloat)) break;
                 }
             }
             else {
                 switch(typMax){
-                    caseB DOI(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
-                    caseH DOI(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
-                    caseI DOI(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
-                    caseL DOI(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
-                    caseF DOI(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,i),compareFloat)) break;
-                    caseE DOI(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,i),compareFloat)) break;
+                    caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
+                    caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
+                    caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
+                    caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
+                    caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,i),compareFloat)) break;
+                    caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,i),compareFloat)) break;
                 }
             }
         }
@@ -778,41 +780,41 @@ L pfnCompare(V z, V x, V y, L op){
             initV(z,typZ,lenZ);
             if(isOne(x)) {
                 switch(vp(x)){
-                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
-                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,0),vS(y,i),strcmp))        break;
-                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
-                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
-                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
-                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,0),vZ(y,i))) break;
-                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,0),vU(y,i))) break;
-                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,0),vV(y,i))) break;
-                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,0),vT(y,i))) break;
+                    caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
+                    caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,0),vS(y,i),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
+                    caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
+                    caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
+                    caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,0),vZ(y,i))) break;
+                    caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,0),vU(y,i))) break;
+                    caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,0),vV(y,i))) break;
+                    caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,0),vT(y,i))) break;
                 }
             }
             else if(isOne(y)) {
                 switch(vp(x)){
-                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
-                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,0),strcmp))        break;
-                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
-                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
-                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
-                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,0))) break;
-                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,0))) break;
-                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,0))) break;
-                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,0))) break;
+                    caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
+                    caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,0),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
+                    caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
+                    caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
+                    caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,0))) break;
+                    caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,0))) break;
+                    caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,0))) break;
+                    caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,0))) break;
                 }
             }
             else {
                 switch(vp(x)){
-                    caseQ DOI(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
-                    caseS DOI(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,i),strcmp))        break;
-                    caseC DOI(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
-                    caseM DOI(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
-                    caseD DOI(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
-                    caseZ DOI(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,i))) break;
-                    caseU DOI(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,i))) break;
-                    caseV DOI(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,i))) break;
-                    caseT DOI(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,i))) break;
+                    caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
+                    caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,i),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
+                    caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
+                    caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
+                    caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,i))) break;
+                    caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,i))) break;
+                    caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,i))) break;
+                    caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,i))) break;
                 }
             }
         }
@@ -868,34 +870,34 @@ L pfnArith(V z, V x, V y, L op){
         initV(z,typZ,lenZ);
         if(isOne(x)) {
             switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=ARITH2(op,vB(tempX,0),vB(tempY,i))) break;
-                caseH DOI(lenZ, vH(z,i)=ARITH2(op,vH(tempX,0),vH(tempY,i))) break;
-                caseI DOI(lenZ, vI(z,i)=ARITH2(op,vI(tempX,0),vI(tempY,i))) break;
-                caseL DOI(lenZ, vL(z,i)=ARITH2(op,vL(tempX,0),vL(tempY,i))) break;
-                caseF DOI(lenZ, vF(z,i)=ARITH2(op,vF(tempX,0),vF(tempY,i))) break;
-                caseE DOI(lenZ, vE(z,i)=ARITH2(op,vE(tempX,0),vE(tempY,i))) break;
+                caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,0),vB(tempY,i))) break;
+                caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,0),vH(tempY,i))) break;
+                caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,0),vI(tempY,i))) break;
+                caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,0),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=ARITH2(op,vF(tempX,0),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=ARITH2(op,vE(tempX,0),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else if(isOne(y)) {
             switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,0))) break;
-                caseH DOI(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,0))) break;
-                caseI DOI(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,0))) break;
-                caseL DOI(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,0))) break;
-                caseF DOI(lenZ, vF(z,i)=ARITH2(op,vF(tempX,i),vF(tempY,0))) break;
-                caseE DOI(lenZ, vE(z,i)=ARITH2(op,vE(tempX,i),vE(tempY,0))) break;
+                caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,0))) break;
+                caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,0))) break;
+                caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,0))) break;
+                caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,0))) break;
+                caseF DOP(lenZ, vF(z,i)=ARITH2(op,vF(tempX,i),vF(tempY,0))) break;
+                caseE DOP(lenZ, vE(z,i)=ARITH2(op,vE(tempX,i),vE(tempY,0))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else {
             switch(typMax){
-                caseB DOI(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,i))) break;
-                caseH DOI(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,i))) break;
-                caseI DOI(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,i))) break;
-                caseL DOI(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,i))) break;
-                caseF DOI(lenZ, vF(z,i)=ARITH2(op,vF(tempX,i),vF(tempY,i))) break;
-                caseE DOI(lenZ, vE(z,i)=ARITH2(op,vE(tempX,i),vE(tempY,i))) break;
+                caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,i))) break;
+                caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,i))) break;
+                caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,i))) break;
+                caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=ARITH2(op,vF(tempX,i),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=ARITH2(op,vE(tempX,i),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
@@ -943,13 +945,13 @@ L pfnLogic(V z, V x, V y, L op){
         L lenZ = isOne(x)?vn(y):vn(x), typZ = H_B;
         initV(z,typZ,lenZ);
         if(isOne(x)) {
-            DOI(lenZ, vB(z,i)=LOGIC(op,vB(x,0),vB(y,i)))
+            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,0),vB(y,i)))
         }
         else if(isOne(y)) {
-            DOI(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,0)))
+            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,0)))
         }
         else {
-            DOI(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,i)))
+            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,i)))
         }
         R 0;
     }
@@ -981,7 +983,7 @@ L pfnXor(V z, V x, V y){
     R pfnLogic(z,x,y,4);
 }
 
-#define POWERLOG(op,x,y) (op==0?POWER(x,y):LOG(x,y))
+#define POWERLOG(op,x,y) (0==op?POWER(x,y):LOG(x,y))
 L pfnPowerLog(V z, V x, V y, L op){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;
@@ -994,34 +996,34 @@ L pfnPowerLog(V z, V x, V y, L op){
         initV(z,typZ,lenZ);
         if(isOne(x)){
             switch(typMax){
-                caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,0),vB(tempY,i))) break;
-                caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,0),vH(tempY,i))) break;
-                caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,0),vI(tempY,i))) break;
-                caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,0),vL(tempY,i))) break;
-                caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,0),vF(tempY,i))) break;
-                caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,0),vE(tempY,i))) break;
+                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,0),vB(tempY,i))) break;
+                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,0),vH(tempY,i))) break;
+                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,0),vI(tempY,i))) break;
+                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,0),vL(tempY,i))) break;
+                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,0),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,0),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else if(isOne(y)){
             switch(typMax){
-                caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,0))) break;
-                caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,0))) break;
-                caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,0))) break;
-                caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,0))) break;
-                caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,0))) break;
-                caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,0))) break;
+                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,0))) break;
+                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,0))) break;
+                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,0))) break;
+                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,0))) break;
+                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,0))) break;
+                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,0))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else {
             switch(typMax){
-                caseB DOI(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,i))) break;
-                caseH DOI(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,i))) break;
-                caseI DOI(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,i))) break;
-                caseL DOI(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,i))) break;
-                caseF DOI(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,i))) break;
-                caseE DOI(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,i))) break;
+                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,i))) break;
+                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,i))) break;
+                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,i))) break;
+                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,i))) break;
+                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
@@ -1041,6 +1043,55 @@ L pfnPower(V z, V x, V y){
 
 L pfnLog(V z, V x, V y){
     R pfnPowerLog(z,x,y,1);
+}
+
+/*
+ * if fmod(x,0), return nan
+ */
+L pfnMod(V z, V x, V y){
+    if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+        if(!isValidLength(x,y)) R E_LENGTH;
+        L lenZ   = isOne(x)?vn(y):vn(x);
+        L typMax = max(vp(x),vp(y));
+        L typZ   = H_B==typMax?H_L:typMax;
+        V tempX = allocNode();
+        V tempY = allocNode();
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
+        initV(z,typZ,lenZ);
+        if(isOne(x)){
+            switch(typMax){
+                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,0),vB(tempY,i))) break;
+                caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,0),vH(tempY,i))) break;
+                caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,0),vI(tempY,i))) break;
+                caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,0),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,0),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,0),vE(tempY,i))) break;
+            }
+        }
+        else if(isOne(y)){
+            switch(typMax){
+                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,i),vB(tempY,0))) break;
+                caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,0))) break;
+                caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,0))) break;
+                caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,0))) break;
+                caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,i),vF(tempY,0))) break;
+                caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,i),vE(tempY,0))) break;
+            }
+        }
+        else {
+            switch(typMax){
+                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,i),vB(tempY,i))) break;
+                caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,i))) break;
+                caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,i))) break;
+                caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,i),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,i),vE(tempY,i))) break;
+            }
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
 }
 
 L pfnCompress(V z, V x, V y){
@@ -1461,6 +1512,34 @@ L pfnMember(V z, V x, V y){
 }
 
 /*
+ * rho
+ */
+#define RHO(t) case##t DOI(lenZ, v##t(z,i)=v##t(y,i%lenY)) break;
+#define RHO_LIST(t) case##t DOI(lenZ, CHECKE(copyV(vV(z,i), vV(y,i%lenY)))) break;
+L pfnVector(V z, V x, V y){
+    if(isOneInt(x) && (isTypeGroupBasic(vp(y)) || isList(y))){
+        L typZ = vp(y), lenZ = 0, lenY = vn(y);
+        switch(vp(x)){
+            caseB lenZ=xb; break;
+            caseH lenZ=xh; break;
+            caseI lenZ=xi; break;
+            caseL lenZ=xl; break;
+        }
+        initV(z,typZ,lenZ);
+        switch(typZ){
+            RHO(B); RHO(H); RHO(I); RHO(L);
+            RHO(F); RHO(E); RHO(X);
+            RHO(S); RHO(Q); RHO(C);
+            RHO(M); RHO(D); RHO(Z); RHO(U); RHO(W); RHO(T);
+            RHO_LIST(G);
+            default: R E_NOT_IMPL; break;
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+/*
  * datetime_add(d, 1:64, `year)
  */
 L pfnDatetimeAdd(V z, V x, V y, V m){
@@ -1473,7 +1552,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOI(lenZ, vD(z,i)=calcDate(vd(x),vL(tempY,i),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vd(x),vL(tempY,i),op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }
@@ -1484,7 +1563,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOI(lenZ, vD(z,i)=calcDate(vD(x,i),vl(tempY),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vl(tempY),op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }
@@ -1495,7 +1574,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOI(lenZ, vD(z,i)=calcDate(vD(x,i),vL(tempY,i),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vL(tempY,i),op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }

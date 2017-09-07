@@ -77,6 +77,12 @@ typedef struct list_table{
 
 #define DOIa(n, x) {for(L i=1,i2=n;i<i2;i++)x;}
 
+/* parallel DOI */
+#define STRINGIFY(x) #x
+#define DOP(n, x, ...) {L i2=n; \
+	_Pragma(STRINGIFY(omp parallel for simd __VA_ARGS__)) \
+	for(L i=0;i<i2;i++) x;}
+
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
@@ -110,6 +116,7 @@ extern E H_EPSILON;
 #include <errno.h>
 #include <stdarg.h>
 #include <pcre2.h>
+#include <omp.h>
 #include "h_memory.h"
 #include "h_symbol.h"
 #include "h_libs.h"

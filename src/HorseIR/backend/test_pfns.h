@@ -72,9 +72,41 @@ L testSpecial(){
     R 0;
 }
 
+L testCompare(){
+    P("\nTest < <= == >= >\n");
+    V a = allocNode();
+    V b = allocNode();
+    V z = allocNode();
+    L ta[] = {-2,1,3,72,25};
+    L tb[] = {20,20,20,20,20};
+    initV(a, H_E, 5); DOI(5, vE(a,i)=ta[i])
+    initV(b, H_E, 5); DOI(5, vE(b,i)=tb[i])
+    printV(a);
+    printV(b);
+    L e = pfnLt(z,a,b); /* less than */
+    P("e = %lld\n",e);
+    printV(z);
+    R e;
+}
+
+L testSum(){
+    P("\nTest sum\n");
+    V a = allocNode();
+    V z = allocNode();
+    L ta[] = {-2,1,3,72,25};
+    initV(a, H_L, 5); DOI(5, vL(a,i)=ta[i])
+    printV(a);
+    L e = pfnSum(z,a); /* less than */
+    P("e = %lld\n",e);
+    printV(z);
+    R e;
+}
+
 L testPfns(){
     // testMember();
     // testGroupBy();
-    testSpecial();
+    // testSpecial();
+    // testCompare();
+    testSum();
 	R 0;
 }
