@@ -211,12 +211,12 @@ L profileHash(HN ht, L htSize){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
-    DOI(vLen, {L t=findHash(hashT,hashLen,&val[i],typ);targ[i]=t<0?sLen:t;})
+    DOP(vLen, {L t=findHash(hashT,hashLen,&val[i],typ);targ[i]=t<0?sLen:t;})
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     L flag[2]={-1}; I c=0;
     DOI(sLen, if(c<2 && -1==flag[src[i]]){flag[src[i]]=i;c++;if(2==c)break;})
-    DOI(vLen, {L t=flag[val[i]]; targ[i]=t<0?sLen:t;})
+    DOP(vLen, {L t=flag[val[i]]; targ[i]=t<0?sLen:t;})
     R 0;
 }
 
