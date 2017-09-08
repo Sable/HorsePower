@@ -87,47 +87,47 @@ L promoteValue(V z, V x, L typMax){
         switch(vp(z)){
             caseH {
                 switch(vp(x)){
-                    caseB DOI(xn, vH(z,i)=vB(x,i)) break;
+                    caseB DOP(xn, vH(z,i)=vB(x,i)) break;
                 }
             } break;
             caseI {
                 switch(vp(x)){
-                    caseB DOI(xn, vI(z,i)=vB(x,i)) break;
-                    caseH DOI(xn, vI(z,i)=vH(x,i)) break;
+                    caseB DOP(xn, vI(z,i)=vB(x,i)) break;
+                    caseH DOP(xn, vI(z,i)=vH(x,i)) break;
                 }
             } break;
             caseL {
                 switch(vp(x)){
-                    caseB DOI(xn, vL(z,i)=vB(x,i)) break;
-                    caseH DOI(xn, vL(z,i)=vH(x,i)) break;
-                    caseI DOI(xn, vL(z,i)=vI(x,i)) break;
+                    caseB DOP(xn, vL(z,i)=vB(x,i)) break;
+                    caseH DOP(xn, vL(z,i)=vH(x,i)) break;
+                    caseI DOP(xn, vL(z,i)=vI(x,i)) break;
                 }
             } break;
             caseF {
                 switch(vp(x)){
-                    caseB DOI(xn, vF(z,i)=(F)vB(x,i)) break;
-                    caseH DOI(xn, vF(z,i)=(F)vH(x,i)) break;
-                    caseI DOI(xn, vF(z,i)=(F)vI(x,i)) break;
-                    caseL DOI(xn, vF(z,i)=(F)vL(x,i)) break;
+                    caseB DOP(xn, vF(z,i)=(F)vB(x,i)) break;
+                    caseH DOP(xn, vF(z,i)=(F)vH(x,i)) break;
+                    caseI DOP(xn, vF(z,i)=(F)vI(x,i)) break;
+                    caseL DOP(xn, vF(z,i)=(F)vL(x,i)) break;
                 }
             } break;
             caseE {
                 switch(vp(x)){
-                    caseB DOI(xn, vE(z,i)=(E)vB(x,i)) break;
-                    caseH DOI(xn, vE(z,i)=(E)vH(x,i)) break;
-                    caseI DOI(xn, vE(z,i)=(E)vI(x,i)) break;
-                    caseL DOI(xn, vE(z,i)=(E)vL(x,i)) break;
-                    caseF DOI(xn, vE(z,i)=(E)vF(x,i)) break;
+                    caseB DOP(xn, vE(z,i)=(E)vB(x,i)) break;
+                    caseH DOP(xn, vE(z,i)=(E)vH(x,i)) break;
+                    caseI DOP(xn, vE(z,i)=(E)vI(x,i)) break;
+                    caseL DOP(xn, vE(z,i)=(E)vL(x,i)) break;
+                    caseF DOP(xn, vE(z,i)=(E)vF(x,i)) break;
                 }
             } break;
             caseX {
                 switch(vp(x)){
-                    caseB DOI(xn, xCopy(vX(z,i),vB(x,i),0)) break;
-                    caseH DOI(xn, xCopy(vX(z,i),vH(x,i),0)) break;
-                    caseI DOI(xn, xCopy(vX(z,i),vI(x,i),0)) break;
-                    caseL DOI(xn, xCopy(vX(z,i),vL(x,i),0)) break;
-                    caseF DOI(xn, xCopy(vX(z,i),vF(x,i),0)) break;
-                    caseE DOI(xn, xCopy(vX(z,i),vE(x,i),0)) break;
+                    caseB DOP(xn, xCopy(vX(z,i),vB(x,i),0)) break;
+                    caseH DOP(xn, xCopy(vX(z,i),vH(x,i),0)) break;
+                    caseI DOP(xn, xCopy(vX(z,i),vI(x,i),0)) break;
+                    caseL DOP(xn, xCopy(vX(z,i),vL(x,i),0)) break;
+                    caseF DOP(xn, xCopy(vX(z,i),vF(x,i),0)) break;
+                    caseE DOP(xn, xCopy(vX(z,i),vE(x,i),0)) break;
                 }
             } break;
             default: R E_DOMAIN;
@@ -355,6 +355,11 @@ void printFloat(E x){
     S s = (S)&x;
     DOI(8, {P("%d ",s[i]);}) P("\n");
 }
+
+L calcInterval(struct timeval t0, struct timeval t1){
+    R (t1.tv_sec-t0.tv_sec)*1000000 + t1.tv_usec-t0.tv_usec;
+}
+
 
 /* Checking types */
 

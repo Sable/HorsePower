@@ -53,6 +53,7 @@ L getTableColNumber     (V x);
 
 I getDatetimeOp         (Q id);
 D calcDate              (D x, L v, I op);
+L calcInterval          (struct timeval t0, struct timeval t1);
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);

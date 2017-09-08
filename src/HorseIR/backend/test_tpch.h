@@ -1,6 +1,4 @@
 
-
-#include "tpch/test_helper.h"
 #include "tpch/load_db.h"
 #include "tpch/test_q6.h"
 

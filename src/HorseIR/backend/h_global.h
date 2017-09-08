@@ -116,6 +116,7 @@ extern E H_EPSILON;
 #include <errno.h>
 #include <stdarg.h>
 #include <pcre2.h>
+#include <sys/time.h>
 #include <omp.h>
 #include "h_memory.h"
 #include "h_symbol.h"

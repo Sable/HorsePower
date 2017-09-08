@@ -1,6 +1,5 @@
 
 #include "h_global.h"
-#include <sys/time.h>
 
 L testInputFile(S filePath){
     if(!filePath){
