@@ -10,6 +10,7 @@
 
 ```no-highlight
 Int, Basic -> Basic
+Int, List  -> List
 _  , _     -> domain error
 ```
 

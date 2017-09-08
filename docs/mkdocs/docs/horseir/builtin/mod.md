@@ -9,7 +9,7 @@ Modulo
 ### Type rules
 
 ```no-highlight
-Real, Real -> maxType
+Real, Real -> maxType (Except: Bool, Bool -> L)
 _          -> domain error
 ```
 
