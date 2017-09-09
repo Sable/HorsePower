@@ -74,7 +74,7 @@
 
 See [type specifications](types.md).
 
-# 2. Basics
+## 2. Basics
 
 Status
 
@@ -84,9 +84,50 @@ Status
 
 ### 2.1 Unary
 
+<!--
+Credit: https://www.w3schools.com/css/css_tooltip.asp
+-->
+<style type="text/css">
+    /*a:hover {color: black;background-color: yellow;}*/
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 150px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    top: -5px;
+    left: 105%;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+.tooltip:hover {
+    cursor: help;
+}
+</style>
+
 <script>
     function hgFunc(funcName, funcDesc){
-        document.write('<div title="' + funcDesc + '"><a>' + funcName + '</a></div>');
+        document.write('<div class="tooltip">'
+                       + funcName.trim()
+                       + '<span class="tooltiptext">'
+                       + funcDesc.trim()
+                       + '</span>'
+                       + '</div>')
+        //document.write('<div title="' + funcDesc.trim() + '"><a>' + funcName.trim() + '</a></div>');
     }
 </script>
 
