@@ -309,7 +309,7 @@ L lib_quicksort_cmp(V val, L a, L b, B *isUp){
 }
 
 void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
-    DOI(tLen, targ[i]=i)
+    DOP(tLen, targ[i]=i)
     lib_quicksort(targ, val, 0, tLen-1, isUp);
 }
 
@@ -343,13 +343,13 @@ L lib_get_group_by(V z, V val, L* index, L iLen){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
-    DOI(vLen, targ[i]=(0<=findHash(hashT,hashLen,&val[i],typ))) \
+    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,&val[i],typ))) \
     profileHash(hashT,hashLen);
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
     B flag[2]={0};
     DOI(sLen, flag[src[i]]=1)
-    DOI(vLen, targ[i]=flag[val[i]])
+    DOP(vLen, targ[i]=flag[val[i]])
     R 0;
 }
 
@@ -381,7 +381,7 @@ L lib_member_C(B* targ, C* src, L sLen, C* val, L vLen){
     B buff[256];
     memset(buff,0,256*sizeof(B));
     DOI(sLen, if(!buff[src[i]]) buff[src[i]]=1)
-    DOI(vLen, targ[i]=buff[val[i]];)
+    DOP(vLen, targ[i]=buff[val[i]];)
     R 0;
 }
 

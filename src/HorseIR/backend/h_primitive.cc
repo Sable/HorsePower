@@ -1097,8 +1097,11 @@ L pfnCompress(V z, V x, V y){
         if(!isEqualLength(x,y)) R E_LENGTH;
         L lenX = vn(x);
         L typZ = vp(y);
-        L lenZ = getNumOfNonZero(x);
         L k    = 0;
+        L lenZ = 0, parZ[H_CORE]={0}, offset[H_CORE]={0};
+        CHECKE(getNumOfNonZero(x,parZ));
+        DOI(H_CORE, lenZ += parZ[i])
+        DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
         initV(z,typZ,lenZ);
         if(k == lenZ){ // copy all of items
             switch(typZ){
@@ -1115,12 +1118,12 @@ L pfnCompress(V z, V x, V y){
             struct timeval tv0, tv1;
             gettimeofday(&tv0, NULL);
             switch(typZ){
-                caseB DOI(lenX, if(vB(x,i))vB(z,k++)=vB(y,i)) break;
-                caseH DOI(lenX, if(vB(x,i))vH(z,k++)=vH(y,i)) break;
-                caseI DOI(lenX, if(vB(x,i))vI(z,k++)=vI(y,i)) break;
-                caseL DOI(lenX, if(vB(x,i))vL(z,k++)=vL(y,i)) break;
-                caseF DOI(lenX, if(vB(x,i))vF(z,k++)=vF(y,i)) break;
-                caseE DOI(lenX, if(vB(x,i))vE(z,k++)=vE(y,i)) break;
+                caseB DOT(lenX, if(vB(x,i))vB(z,offset[tid]++)=vB(y,i)) break;
+                caseH DOT(lenX, if(vB(x,i))vH(z,offset[tid]++)=vH(y,i)) break;
+                caseI DOT(lenX, if(vB(x,i))vI(z,offset[tid]++)=vI(y,i)) break;
+                caseL DOT(lenX, if(vB(x,i))vL(z,offset[tid]++)=vL(y,i)) break;
+                caseF DOT(lenX, if(vB(x,i))vF(z,offset[tid]++)=vF(y,i)) break;
+                caseE DOT(lenX, if(vB(x,i))vE(z,offset[tid]++)=vE(y,i)) break;
                 default: R E_NOT_IMPL;
             }
             gettimeofday(&tv1, NULL);

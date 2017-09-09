@@ -1,6 +1,7 @@
 EXE=horse
 CC=gcc-5
-CXXFLAGS=-std=c++11 -fopenmp -g
+D_FLAGS=-std=c++11 -fopenmp -g
+R_FLAGS=-std=c++11 -fopenmp -O3
 INCLUDE_ANTLR4="../../libs/include/antlr4-runtime"
 INCLUDE_PCRE2="../../libs/include"
 LIB_GRAMMAR=./grammar
@@ -8,9 +9,13 @@ LIB_PCRE2=../../libs/lib
 LINK_LIBS=-lm -lstdc++ ${LIB_PCRE2}/libpcre2-8.a
 all: ${EXE}
 
-${EXE}: *.cc backend
-	${CC} ${CXXFLAGS} -c -I${INCLUDE_ANTLR4} -I${INCLUDE_PCRE2} main.cc
-	${CC} *.o backend/*.o ${CXXFLAGS} ${LINK_LIBS} -o $@
+${EXE}: *.cc backend_debug
+	${CC} ${D_FLAGS} -c -I${INCLUDE_ANTLR4} -I${INCLUDE_PCRE2} main.cc
+	${CC} *.o backend/*.o ${D_FLAGS} ${LINK_LIBS} -o $@
+
+release: *.cc backend_release
+	${CC} ${R_FLAGS} -c -I${INCLUDE_ANTLR4} -I${INCLUDE_PCRE2} main.cc
+	${CC} *.o backend/*.o ${R_FLAGS} ${LINK_LIBS} -o $@
 
 .PHONY: grammar tests clean util backend
 grammar:
@@ -26,6 +31,9 @@ clean:
 util:
 	make -C util/
 
-backend:
+backend_debug:
 	make -C backend/
+
+backend_release:
+	make release -C backend/
 

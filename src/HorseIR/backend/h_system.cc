@@ -10,9 +10,22 @@ E H_EPSILON = 1E-13;
 ListT listTable;
 L listTableCur;
 
+L H_CORE = 1;
+
 void initSys(){
     listTable = (ListT)malloc(sizeof(ListT0) * NUM_LIST_TABLE);
     listTableCur = 0;
+    getNumberOfCore();
+}
+
+void getNumberOfCore(){
+    #pragma omp parallel
+    {
+        L tid = omp_get_thread_num();
+        if(0==tid)
+            H_CORE = omp_get_num_threads();
+    }
+    P("# of cores: %lld\n", H_CORE);
 }
 
 void deleteSys(){
@@ -166,11 +179,12 @@ L calcFact(L n){
     else R -1;
 }
 
-L getNumOfNonZero(V x){
+L getNumOfNonZero(V x, L *z){
     if(H_B==xp){
-        L z = 0; DOI(xn, z+=vB(x,i)) R z;
+        DOT(xn, if(vB(x,i))z[tid]++)
+        R 0;
     }
-    R -1;
+    else R E_DOMAIN;
 }
 
 L appendList(V z, V x, V y){R E_NOT_IMPL;}

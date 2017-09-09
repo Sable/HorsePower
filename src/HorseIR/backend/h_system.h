@@ -19,6 +19,7 @@ void printFloat(E x);
 
 void initSys();
 void deleteSys();
+void getNumberOfCore();
 
 L registerTable         (S tableName, V tablePtr);
 V findTableByName       (L sid);
@@ -32,7 +33,7 @@ B checkZero             (V x);
 B checkMatch            (V x);
 L getSingleIntValue     (V x);
 L calcFact              (L n);
-L getNumOfNonZero       (V x);
+L getNumOfNonZero       (V x, L *z);
 L appendList            (V z, V x, V y);
 L appendEnum            (V z, V x, V y);
 S genLikeString         (S inStr, L inLen);

@@ -83,6 +83,15 @@ typedef struct list_table{
 	_Pragma(STRINGIFY(omp parallel for simd __VA_ARGS__)) \
 	for(L i=0;i<i2;i++) x;}
 
+#define DOT(n, x, ...) {L seg=(n)/H_CORE; \
+	_Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
+	{ \
+		L tid = omp_get_thread_num(); \
+		for(L i=tid*seg,i2=i+seg;i<i2;i++) x; \
+	} \
+}
+
+
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
@@ -104,6 +113,7 @@ typedef struct list_table{
 
 extern G H_heap;
 extern E H_EPSILON;
+extern L H_CORE;
 
 #ifdef	__cplusplus
 }

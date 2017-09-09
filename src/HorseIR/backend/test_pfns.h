@@ -102,11 +102,29 @@ L testSum(){
     R e;
 }
 
+L testCompress(){
+    P("\nTest compress\n");
+    V a = allocNode();
+    V b = allocNode();
+    V z = allocNode();
+    L ta[] = {0,0,0,1,1,0,1,1};
+    L tb[] = {1,2,3,4,5,6,7,8};
+    initV(a, H_B, 8); DOI(8, vB(a,i)=1==ta[i])
+    initV(b, H_L, 8); DOI(8, vL(b,i)=tb[i])
+    printV(a);
+    printV(b);
+    L e = pfnCompress(z,a,b); /* less than */
+    P("e = %lld\n",e);
+    printV(z);
+    R e;
+}
+
 L testPfns(){
     // testMember();
     // testGroupBy();
     // testSpecial();
     // testCompare();
-    testSum();
+    // testSum();
+    testCompress();
 	R 0;
 }
