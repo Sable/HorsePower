@@ -1,4 +1,8 @@
 
+#define PROFILE(n,x) { struct timeval p0, p1; \
+        gettimeofday(&p0, NULL); e = x; CHECK(e,n); gettimeofday(&p1, NULL); \
+        P("[Profiling Q6] Line %lld: %g ms\n", n,calcInterval(p0,p1)/1000.0); }
+
 L simulateQ6(){
     L e;
     V t0 = allocNode();  V t5 = allocNode();  V t10 = allocNode();  V t15 = allocNode();
@@ -10,46 +14,42 @@ L simulateQ6(){
     V t20 = allocNode(); V t21 = allocNode(); V t22 = allocNode();  V a0 = allocNode();
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
-    e = pfnLoadTable(a0, \
-          initSymbol(allocNode(),getSymbol((S)"lineitem")));          CHECK(e,1);
 
-    e = pfnColumnValue(t0, \
-          a0, \
-          initSymbol(allocNode(),getSymbol((S)"l_extendedprice")));   CHECK(e,3);
-    e = pfnColumnValue(t1, \
-          a0, \
-          initSymbol(allocNode(),getSymbol((S)"l_discount")));        CHECK(e,4);
-    e = pfnColumnValue(t2, \
-          a0, \
-          initSymbol(allocNode(),getSymbol((S)"l_shipdate")));        CHECK(e,5);
-    e = pfnColumnValue(t3, \
-          a0, \
-          initSymbol(allocNode(),getSymbol((S)"l_quantity")));        CHECK(e,6);
+    PROFILE(1,pfnLoadTable(a0, \
+        initSymbol(allocNode(),getSymbol((S)"lineitem"))));
+    PROFILE(2,pfnColumnValue(t0, a0, \
+        initSymbol(allocNode(),getSymbol((S)"l_extendedprice"))));
+    PROFILE(3,pfnColumnValue(t1, a0, \
+        initSymbol(allocNode(),getSymbol((S)"l_discount"))));
+    PROFILE(4,pfnColumnValue(t2, a0, \
+        initSymbol(allocNode(),getSymbol((S)"l_shipdate"))));
+    PROFILE(5,pfnColumnValue(t3, a0, \
+        initSymbol(allocNode(),getSymbol((S)"l_quantity"))));
 
-    e = pfnGeq(t4, t2, literalDate(19940101));                        CHECK(e,7);
-    e = pfnDatetimeAdd(t5,\
-          literalDate(19940101),literalI64(1),literalSym((S)"year")); CHECK(e,8);
-    e = pfnLt(t6,t2,t5);                                              CHECK(e,9);
-    e = pfnMinus(t7,literalF64(0.06),literalF64(0.01));               CHECK(e,10);
-    e = pfnPlus(t8,literalF64(0.06),literalF64(0.01));                CHECK(e,11);
+    PROFILE(6,pfnGeq(t4, t2, literalDate(19940101)));
+    PROFILE(7,pfnDatetimeAdd(t5,literalDate(19940101),literalI64(1),literalSym((S)"year")));
+    PROFILE(8,pfnLt(t6,t2,t5));
+    PROFILE(9,pfnMinus(t7,literalF64(0.06),literalF64(0.01)));
+    PROFILE(10,pfnPlus(t8,literalF64(0.06),literalF64(0.01)));
 
-    e = pfnGeq(t9,t1,t7);                                             CHECK(e,12);
-    e = pfnLeq(t10,t1,t8);                                            CHECK(e,13);
-    e = pfnAnd(t11,t9,t10);                                           CHECK(e,14);
-    e = pfnLt(t12,t3,literalI64(24));                                 CHECK(e,15);
+    PROFILE(11,pfnGeq(t9,t1,t7));
+    PROFILE(12,pfnLeq(t10,t1,t8));
+    PROFILE(13,pfnAnd(t11,t9,t10));
+    PROFILE(14,pfnLt(t12,t3,literalI64(24)));
 
-    e = pfnAnd(t13,t4,t6);                                            CHECK(e,16);
-    e = pfnAnd(t14,t13,t11);                                           CHECK(e,17);
-    e = pfnAnd(t15,t14,t12);                                          CHECK(e,18);
+    PROFILE(15,pfnAnd(t13,t4,t6));
+    PROFILE(16,pfnAnd(t14,t13,t11));
+    PROFILE(17,pfnAnd(t15,t14,t12));
 
-    e = pfnCompress(t16,t15,t0);                                      CHECK(e,19);
-    e = pfnCompress(t17,t15,t1);                                      CHECK(e,20);
-    e = pfnMul(t18,t16,t17);                                          CHECK(e,21);
-    e = pfnSum(t19,t18);                                              CHECK(e,22);
+    PROFILE(18,pfnCompress(t16,t15,t0));
+    PROFILE(19,pfnCompress(t17,t15,t1));
+    PROFILE(20,pfnMul(t18,t16,t17));
+    PROFILE(21,pfnSum(t19,t18));
 
-    e = pfnTolist(t20,literalSym((S)"revenue"));                      CHECK(e,23);
-    e = pfnEnlist(t21,t19);                                           CHECK(e,24);
-    e = pfnTable(t22,t20,t21);                                        CHECK(e,25);
+    PROFILE(22,pfnTolist(t20,literalSym((S)"revenue")));
+    PROFILE(23,pfnEnlist(t21,t19));
+    PROFILE(24,pfnTable(t22,t20,t21));
+
     gettimeofday(&tv1, NULL);
 
     P("Result of the Query 6: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);

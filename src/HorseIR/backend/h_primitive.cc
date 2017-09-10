@@ -1115,8 +1115,6 @@ L pfnCompress(V z, V x, V y){
             }
         }
         else{
-            struct timeval tv0, tv1;
-            gettimeofday(&tv0, NULL);
             switch(typZ){
                 caseB DOT(lenX, if(vB(x,i))vB(z,offset[tid]++)=vB(y,i)) break;
                 caseH DOT(lenX, if(vB(x,i))vH(z,offset[tid]++)=vH(y,i)) break;
@@ -1126,8 +1124,6 @@ L pfnCompress(V z, V x, V y){
                 caseE DOT(lenX, if(vB(x,i))vE(z,offset[tid]++)=vE(y,i)) break;
                 default: R E_NOT_IMPL;
             }
-            gettimeofday(&tv1, NULL);
-            P("pfnCompress: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
         }
         R 0;
     }
