@@ -25,4 +25,14 @@ Configurations on sable-intel
 - TPC-H: /mnt/local/tpch_2_17_0
 ```
 
+### OpenMP
+
+OpenMP affinity ([link](http://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html))
+
+```no-highlight
+OMP_PLACES=cores
+OMP_PROC_BIND=spread
+// or
+GOMP_CPU_AFFINITY="0-37:4 1-38:4 2-39:4 3-40:4"
+```
 

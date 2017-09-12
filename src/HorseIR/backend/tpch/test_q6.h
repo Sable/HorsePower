@@ -1,7 +1,7 @@
 
 #define PROFILE(n,x) { struct timeval p0, p1; \
         gettimeofday(&p0, NULL); e = x; CHECK(e,n); gettimeofday(&p1, NULL); \
-        P("[Profiling Q6] Line %lld: %g ms\n", n,calcInterval(p0,p1)/1000.0); }
+        P("[Profiling Q6] Line %d: %g ms\n", n,calcInterval(p0,p1)/1000.0); }
 
 L simulateQ6(){
     L e;
