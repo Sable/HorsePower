@@ -852,6 +852,30 @@ L pfnNeq(V z, V x, V y){
     R pfnCompare(z,x,y,5);
 }
 
+#define BETWEEN(x,p,q,fn) (compareFloat(x,p)>=0 && compareFloat(x,q)<=0)
+L pfnBetween(V z, V x, V p, V q){
+    if(isTypeGroupComparable(vp(x)) && \
+        isTypeGroupComparable(vp(p)) && \
+        isTypeGroupComparable(vp(q))){
+        if(isOne(p) && isOne(q)){
+            L lenZ = vn(x), typZ = H_B;
+            if(isTypeGroupReal(vp(x)) && isTypeGroupFloat(vp(p)) && isTypeGroupFloat(vp(q))){
+                E valP = isFloat(p)?vf(p):ve(p);
+                E valQ = isFloat(q)?vf(q):ve(q);
+                initV(z,typZ,lenZ);
+                switch(vp(x)){
+                    caseF DOP(vn(x), vB(z,i)=BETWEEN(vF(x,i),valP,valQ,compareBetween)) break;
+                    caseE DOP(vn(x), vB(z,i)=BETWEEN(vE(x,i),valP,valQ,compareBetween)) break;
+                }
+                R 0;
+            }
+            else R E_DOMAIN;
+        }
+        else R E_LENGTH;
+    }
+    else R E_DOMAIN;
+}
+
 #define ARITH2(op,x,y) (0==op?(x+y):1==op?(x-y):2==op?(x*y):3==op?(x/y):0)
 
 L pfnArith(V z, V x, V y, L op){

@@ -32,9 +32,10 @@ L simulateQ6(){
     PROFILE(9,pfnMinus(t7,literalF64(0.06),literalF64(0.01)));
     PROFILE(10,pfnPlus(t8,literalF64(0.06),literalF64(0.01)));
 
-    PROFILE(11,pfnGeq(t9,t1,t7));
-    PROFILE(12,pfnLeq(t10,t1,t8));
-    PROFILE(13,pfnAnd(t11,t9,t10));
+    // PROFILE(11,pfnGeq(t9,t1,t7));
+    // PROFILE(12,pfnLeq(t10,t1,t8));
+    // PROFILE(13,pfnAnd(t11,t9,t10));
+    PROFILE(13,pfnBetween(t11,t1,t7,t8));
     PROFILE(14,pfnLt(t12,t3,literalI64(24)));
 
     PROFILE(15,pfnAnd(t13,t4,t6));

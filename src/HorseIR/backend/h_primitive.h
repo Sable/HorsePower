@@ -13,6 +13,8 @@ extern "C" {
 #define isBool(x)      (H_B==vp(x))
 #define isSymbol(x)    (H_Q==vp(x))
 #define isInteger(x)   (H_L==vp(x))
+#define isFloat(x)     (H_F==vp(x))
+#define isDouble(x)    (H_E==vp(x))
 #define isComplex(x)   (H_X==vp(x))
 #define isChar(x)      (H_C==vp(x))
 #define isString(x)    (H_S==vp(x))
@@ -179,6 +181,7 @@ L pfnMember        (V z, V x, V y);
 L pfnVector        (V z, V x, V y);
 
 L pfnDatetimeAdd   (V z, V x, V y, V m);
+L pfnBetween       (V z, V x, V p, V q);
 
 #ifdef	__cplusplus
 }
