@@ -25,6 +25,15 @@ Configurations on sable-intel
 - TPC-H: /mnt/local/tpch_2_17_0
 ```
 
+Query timing
+
+```no-highlight
+call sys.querylog_enable();
+\<../tpch_2_17_0/chf/myqueries/6.sql
+call sys.querylog_disable();
+select id, query, avg(run) as run_time from sys.querylog_history group by id,query;
+```
+
 ### OpenMP
 
 OpenMP affinity ([link](http://pages.tacc.utexas.edu/~eijkhout/pcse/html/omp-affinity.html))

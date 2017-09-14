@@ -188,7 +188,7 @@ L initTableByName(S tableName){
         	readTableSupplier();
         else if(!strcmp(tableName, "partsupp"))
         	readTablePartsupp();
-        else P("Table %s NOT FOUND\n",tableName);
+        else P("Table %s NOT FOUND\n",tableName), R 1;
     }
     else {
         P("Table %s has been loaded\n",tableName);
