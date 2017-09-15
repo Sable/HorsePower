@@ -38,3 +38,46 @@ T  (Int|List<Int>) -> (E|List<T>)
 index((-1,2,3),(2,1))
 > (3,2):i64
 ```
+
+## IndexA
+
+`indexa(x,k,m)`
+
+- is equivalent to `x[k]=m`
+- returns the same type of m
+
+### Type rules
+
+Basic types (x,k,m -> m)
+
+```no-highlight
+B, Int , B
+H, Int , (B|H)
+I, Int , (B|H|I)
+L, Int , (B|H|I|L)
+F, Int , (B|H|I|L|F)
+E, Int , (B|H|I|L|F|E)
+X, Int , (B|H|I|L|F|E|X)
+C, Int , C
+Q, Int , Q
+S, Int , S
+M, Int , M
+D, Int , D
+Z, Int , Z
+U, Int , U
+W, Int , W
+T, Int , T
+```
+
+**Note:** Think about indexing with *lists*.
+
+### Examples
+
+```no-highlight
+    x = (-1,2,3)
+    indexa(x,(2,1),(0))
+> (0)
+    x
+> (-1,0,0)
+```
+

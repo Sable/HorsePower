@@ -97,7 +97,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 150px;
+    width: 200px;
     background-color: black;
     color: #fff;
     text-align: center;
@@ -269,10 +269,10 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 ## 5. Indexing
 
-| No.| Function                                                            | Type of Arg(s)\*   | Type of Value        | Details                            | Status | Parallel |
-| :-:| :------------------------------------------------------------------ | :----------------- | :------------------- | :--------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('index(x,y) ','List indexing (x[y])    ');</script>  | Various            | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
-| 2  | <script>hgFunc('index\_a   ','List indexing assignment');</script>  | Pending            | Pending              | link                               |        |          |
+| No.| Function                                                                | Type of Arg(s)\*   | Type of Value        | Details                            | Status | Parallel |
+| :-:| :---------------------------------------------------------------------- | :----------------- | :------------------- | :--------------------------------: | :----- | :------: |
+| 1  | <script>hgFunc('index(x,y)     ','List indexing (x[y])    ');</script>  | Various            | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
+| 2  | <script>hgFunc('index\_a(x,y,m)','List indexing assignment');</script>  | BasicA[Int]=BasicB | BasicB               | [link](builtin/indexing.md#indexa) | P      |          |
 
 ## 6. Others
 

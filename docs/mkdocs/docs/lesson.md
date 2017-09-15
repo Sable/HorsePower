@@ -25,4 +25,8 @@ Description
 - Precision in floating number comparison
 - Check results by printing `P("%.20lf",x)`
 
+## Related systems
+
+- [Pig Latin Reference Manual 2](https://pig.apache.org/docs/r0.7.0/piglatin_ref2.html)
+
 
