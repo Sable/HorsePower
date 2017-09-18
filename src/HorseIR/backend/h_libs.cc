@@ -314,45 +314,27 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
 }
 
 void lib_list_order_by(L *targ, L tLen, V val, B *isUp, FUNC_CMP(cmp)){
-    L ps;
-    printHeapInfo();
-    P("by 1: tLen = %lld\n",tLen);
-    P("targ = 0x%016x\n", targ);
-    P("targ0= 0x%016x (%lld)\n", targ+tLen,tLen);
-    P("&tLen= 0x%016x\n", &tLen);
-    P("&ps  = 0x%016x\n", &ps);
-    DOI(1, P("&i  = 0x%016x\n", &i))
-    DOI(tLen, targ[i]=i)
-    P("by 2\n");
+    DOP(tLen, targ[i]=i)
     lib_quicksort(targ, val, 0, tLen-1, isUp, cmp);
-    P("by 3\n");
 }
 
 L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L k, c; V d,t;
     /* 1. get the total number of cells: lenZ */
     L lenZ=iLen>0?1:0;
-    P("1\n");
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    P("2\n");
     initV(z, H_N, lenZ);
-    P("3\n");
     c=iLen>0?1:0;
     k=0;
-    P("4\n");
     d=vV(z,k++); initV(d, H_G, 2);
-    P("5\n");
     if(iLen>0) CHECKE(copyByIndex(vV(d,0),val,index[0]))
-    P("6\n");
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
                  V tt1=vV(d,1); initV(tt1,H_L,c); \
                  d=vV(z,k++); initV(d, H_G, 2); c=1;\
                  V tt0=vV(d,0); CHECKE(copyByIndex(tt0,val,index[i])) } \
                else c++;)
-    P("7\n");
     if(c>0) initV(vV(d,1),H_L,c);
-    P("8\n");
     /* 3. fill indices into each cell */
     k=0, c=0;
     d=vV(z,k++); t=vV(d,1);

@@ -769,13 +769,9 @@ L pfnGroup(V z, V x){
     V y = allocNode();
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
-    P("10\n");
     initV(y,H_B,lenZ);
-    P("11\n");
     DOP(lenZ,vB(y,i)=1)
-    P("12\n");
     CHECKE(pfnOrderBy(t,x,y));
-    P("13\n");
 
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
@@ -1375,7 +1371,6 @@ L pfnLike(V z, V x, V y){
 }
 
 L pfnOrderBy(V z, V x, V y){
-    P("z = 0x%016x, x = 0x%016x, y = 0x%016x\n", &z,&x,&y);
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
         DOI(vn(x), if(!isTypeGroupReal(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
@@ -1385,13 +1380,8 @@ L pfnOrderBy(V z, V x, V y){
         R 0;
     }
     else if((isTypeGroupReal(vp(x)) || isSymbol(x)) && isBool(y) && 1==vn(y)){
-        P("order 1: vn(x) = %lld\n",vn(x));
-        printHeapInfo();
         initV(z,H_L,vn(x));
-        printHeapInfo();
-        P("order 2\n");
         lib_list_order_by(sL(z), vn(x), x, sB(y), lib_quicksort_cmp_item);
-        P("order 3\n");
         R 0;
     }
     else R E_DOMAIN;

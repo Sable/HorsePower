@@ -72,6 +72,9 @@ G allocHeap(L size){
 
 G allocMem(G heap, L *cur, L top, L typ, L len){
     L size = getTypeSize(typ, len);
+    if(size % 16 !=0) {
+        size = (size/16+1)*16;
+    }
     G g = NULL;
     if((*cur)+size < top){
         if(H_DEBUG){

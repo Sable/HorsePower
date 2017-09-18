@@ -67,7 +67,6 @@ L simulateQ4(){
     PROFILE(14,pfnEach  (s2, s1, pfnLen));
     PROFILE(15,pfnRaze  (s3, s2));
     PROFILE(16,pfnRaze  (s4, s0));
-    printV(s4);
 
     // step 4: order by
     PROFILE(17,pfnOrderBy(r0, s4, literalBool(1)));
