@@ -28,5 +28,6 @@ Description
 ## Related systems
 
 - [Pig Latin Reference Manual 2](https://pig.apache.org/docs/r0.7.0/piglatin_ref2.html)
+- [Apache Ignite](https://ignite.apache.org/use-cases/database/in-memory-database.html)
 
 

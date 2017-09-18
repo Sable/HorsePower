@@ -69,7 +69,10 @@ W, Int , W
 T, Int , T
 ```
 
-**Note:** Think about indexing with *lists*.
+**Note:**
+
+- Think about indexing with *lists*.
+- IndexA can't be parallelized because of the duplicated values of the array indices
 
 ### Examples
 

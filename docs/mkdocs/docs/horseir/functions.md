@@ -272,7 +272,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | No.| Function                                                                | Type of Arg(s)\*   | Type of Value        | Details                            | Status | Parallel |
 | :-:| :---------------------------------------------------------------------- | :----------------- | :------------------- | :--------------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('index(x,y)     ','List indexing (x[y])    ');</script>  | Various            | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
-| 2  | <script>hgFunc('index\_a(x,y,m)','List indexing assignment');</script>  | BasicA[Int]=BasicB | BasicB               | [link](builtin/indexing.md#indexa) | P      |          |
+| 2  | <script>hgFunc('index\_a(x,y,m)','List indexing assignment');</script>  | BasicA[Int]=BasicB | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
 
 ## 6. Others
 
