@@ -12,7 +12,7 @@ L testInputFile(S filePath){
 }
 
 #define CHECK(e, x) { \
-    if(e!=0) { P("Error at line %d, (err=%lld)\n",x,e); exit(99); } \
+    if(e!=0) { P("Error at line %d, (err=%lld)\n",x,e); printErrMsg(e); exit(99); } \
     if(H_DEBUG)P("Pass line %d\n",x); }
 
 
@@ -20,6 +20,13 @@ V literalDate(L x){
     V z = allocNode();
     initV(z,H_D,1);
     vd(z) = x;
+    R z;
+}
+
+V literalBool(L x){
+    V z = allocNode();
+    initV(z,H_B,1);
+    vb(z) = x;
     R z;
 }
 
@@ -41,6 +48,13 @@ V literalF64(E x){
     V z = allocNode();
     initV(z,H_E,1);
     ve(z) = x;
+    R z;
+}
+
+V literalSymVector(L n, S strs[]){
+    V z = allocNode();
+    initV(z,H_Q,n);
+    DOI(n, vQ(z,i)=getSymbol(strs[i]))
     R z;
 }
 

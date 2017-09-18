@@ -290,7 +290,8 @@ L printList(V x){
 
 L printDict(V x){
     FS("{");
-    DOI(xn, {printValue(vV(xV(i),0)); FS(" -> "); printValue(vV(xV(i),1));})
+    DOI(xn, {if(i>0)FS(",\n"); \
+        printValue(vV(xV(i),0)); FS(" -> "); printValue(vV(xV(i),1));})
     FS("}"); R 0;
 }
 

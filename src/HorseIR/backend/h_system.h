@@ -24,6 +24,7 @@ void getNumberOfCore();
 L registerTable         (S tableName, V tablePtr);
 V findTableByName       (L sid);
 L copyV                 (V z, V x);
+L copyByIndex           (V z, V x, L k);
 
 L findColFromTable2     (V *z, V x, L cId);
 L findColFromTable      (V x, L cId);
@@ -55,6 +56,7 @@ L getTableColNumber     (V x);
 I getDatetimeOp         (Q id);
 D calcDate              (D x, L v, I op);
 L calcInterval          (struct timeval t0, struct timeval t1);
+B isAssignableType      (L x, L y);
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);

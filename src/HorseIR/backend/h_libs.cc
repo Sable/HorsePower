@@ -270,19 +270,19 @@ L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
 }
 
 
-void lib_quicksort(L *rtn, V val, L low, L high, B *isUp){
+void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
-        L pos = lib_partition(rtn, val, low, high, isUp);
-        lib_quicksort(rtn, val, low, pos-1, isUp);
-        lib_quicksort(rtn, val, pos+1, high,isUp);
+        L pos = lib_partition(rtn, val, low, high, isUp, cmp);
+        lib_quicksort(rtn, val, low, pos-1, isUp, cmp);
+        lib_quicksort(rtn, val, pos+1, high,isUp, cmp);
     }
 }
 
-L lib_partition(L *rtn, V val, L low, L high, B *isUp){
+L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     L pivot = low, i = low, j = high+1, t;
     while(true){
-        do{++i;} while(lib_quicksort_cmp(val,rtn[i],rtn[pivot],isUp) <=0 && i < high);
-        do{--j;} while(lib_quicksort_cmp(val,rtn[j],rtn[pivot],isUp) > 0);
+        do{++i;} while((*cmp)(val,rtn[i],rtn[pivot],isUp) <=0 && i < high);
+        do{--j;} while((*cmp)(val,rtn[j],rtn[pivot],isUp) > 0);
         if(i>=j) break;
         t = rtn[i]; rtn[i] = rtn[j]; rtn[j] = t;
     }
@@ -293,8 +293,14 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp){
 #define cmp_switch(x) (x?-1:1):(x?1:-1)
 
 L lib_quicksort_cmp(V val, L a, L b, B *isUp){
-    DOI(vn(val), {V t=vV(val,i); B f = isUp?isUp[i]:1; \
-        switch(vp(t)){ \
+    DOI(vn(val), {V t=vV(val,i); B f=isUp?isUp[i]:1; \
+                  L x=lib_quicksort_cmp_item(t,a,b,&f); if(x!=0)R x;})
+    R 0;
+}
+
+L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
+    B f = isUp?*isUp:1;
+    switch(vp(t)){ \
         caseB if(vB(t,a)!=vB(t,b)) R vB(t,a)<vB(t,b)?cmp_switch(f); break; \
         caseH if(vH(t,a)!=vH(t,b)) R vH(t,a)<vH(t,b)?cmp_switch(f); break; \
         caseI if(vI(t,a)!=vI(t,b)) R vI(t,a)<vI(t,b)?cmp_switch(f); break; \
@@ -302,38 +308,57 @@ L lib_quicksort_cmp(V val, L a, L b, B *isUp){
         caseF if(vF(t,a)!=vF(t,b)) R vF(t,a)<vF(t,b)?cmp_switch(f); break; \
         caseE if(vE(t,a)!=vE(t,b)) R vE(t,a)<vE(t,b)?cmp_switch(f); break; \
         caseQ if(vQ(t,a)!=vQ(t,b)) R compareSymbol(vQ(t,a),vQ(t,b))<0?cmp_switch(f); break; \
-        /* Pending: caseC */ \
-        } \
-    })
+        /* Pending: caseC */
+    } 
     R 0;
 }
 
-void lib_list_order_by(L *targ, L tLen, V val, B *isUp){
-    DOP(tLen, targ[i]=i)
-    lib_quicksort(targ, val, 0, tLen-1, isUp);
+void lib_list_order_by(L *targ, L tLen, V val, B *isUp, FUNC_CMP(cmp)){
+    L ps;
+    printHeapInfo();
+    P("by 1: tLen = %lld\n",tLen);
+    P("targ = 0x%016x\n", targ);
+    P("targ0= 0x%016x (%lld)\n", targ+tLen,tLen);
+    P("&tLen= 0x%016x\n", &tLen);
+    P("&ps  = 0x%016x\n", &ps);
+    DOI(1, P("&i  = 0x%016x\n", &i))
+    DOI(tLen, targ[i]=i)
+    P("by 2\n");
+    lib_quicksort(targ, val, 0, tLen-1, isUp, cmp);
+    P("by 3\n");
 }
 
-
-L lib_get_group_by(V z, V val, L* index, L iLen){
-    L k, c; V t;
+L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+    L k, c; V d,t;
     /* 1. get the total number of cells: lenZ */
     L lenZ=iLen>0?1:0;
-    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL))lenZ++)
+    P("1\n");
+    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    initV(z, H_G, lenZ);
+    P("2\n");
+    initV(z, H_N, lenZ);
+    P("3\n");
     c=iLen>0?1:0;
     k=0;
-    t=vV(z,k++);
-    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL)){ \
-                 initV(t,H_L,c); t=vV(z,k++); c=1; } \
+    P("4\n");
+    d=vV(z,k++); initV(d, H_G, 2);
+    P("5\n");
+    if(iLen>0) CHECKE(copyByIndex(vV(d,0),val,index[0]))
+    P("6\n");
+    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
+                 V tt1=vV(d,1); initV(tt1,H_L,c); \
+                 d=vV(z,k++); initV(d, H_G, 2); c=1;\
+                 V tt0=vV(d,0); CHECKE(copyByIndex(tt0,val,index[i])) } \
                else c++;)
-    if(c>0) initV(t,H_L,c);
+    P("7\n");
+    if(c>0) initV(vV(d,1),H_L,c);
+    P("8\n");
     /* 3. fill indices into each cell */
     k=0, c=0;
-    t= vV(z,k++);
+    d=vV(z,k++); t=vV(d,1);
     if(iLen>0) vL(t,c++)=index[0];
-    DOIa(iLen, if(0!=lib_quicksort_cmp(val,index[i-1],index[i],NULL)){ \
-                  t=vV(z,k++); vL(t,0)=index[i]; c=1; } \
+    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
+                  d=vV(z,k++); t=vV(d,1); vL(t,0)=index[i]; c=1; } \
                else vL(t,c++)=index[i])
     R 0;
 }

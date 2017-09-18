@@ -1,12 +1,14 @@
 
 #include "tpch/load_db.h"
-#include "tpch/test_q6.h"
-
-#define TEST_QUERY(n) case n: testTPCHQ##n(); break
 
 #define PROFILE(n,x) { struct timeval p0, p1; \
         gettimeofday(&p0, NULL); e = x; CHECK(e,n); gettimeofday(&p1, NULL); \
-        P("[Profiling Q6] Line %d: %g ms\n", n,calcInterval(p0,p1)/1000.0); }
+        P("[Profiling] Line %d: %g ms\n", n,calcInterval(p0,p1)/1000.0); }
+
+#define TEST_QUERY(n) case n: testTPCHQ##n(); break
+
+#include "tpch/test_q4.h"
+#include "tpch/test_q6.h"
 
 void testTPCH(L x){
 	switch(x){

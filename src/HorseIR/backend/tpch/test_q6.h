@@ -43,7 +43,7 @@ L simulateQ6(){
     PROFILE(20,pfnMul(t18,t16,t17));
     PROFILE(21,pfnSum(t19,t18));
 
-    PROFILE(22,pfnTolist(t20,literalSym((S)"revenue")));
+    PROFILE(22,pfnToList(t20,literalSym((S)"revenue")));
     PROFILE(23,pfnEnlist(t21,t19));
     PROFILE(24,pfnTable(t22,t20,t21));
 

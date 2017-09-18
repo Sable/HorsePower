@@ -81,7 +81,7 @@ L readTableLineitem(){
         "l_orderkey",   "l_partkey",       "l_suppkey",  "l_linenumber",
         "l_quantity",   "l_extendedprice", "l_discount", "l_tax",
         "l_returnflag", "l_linestatus",    "l_shipdate", "l_commitdate",
-        "l_receipdate", "l_shipinstruct",  "l_shipmode", "l_comment"
+        "l_receiptdate","l_shipinstruct",  "l_shipmode", "l_comment"
     };
 
 	initTable(NUM_COL_LINE, PRE_DEFINED, SYM_LIST_LINE);
@@ -178,7 +178,7 @@ L initTableByName(S tableName){
         	readTableNation();
         else if(!strcmp(tableName, "customer"))
         	readTableCustomer();
-        else if(!strcmp(tableName, "order"))
+        else if(!strcmp(tableName, "orders"))
         	readTableOrders();
         else if(!strcmp(tableName, "lineitem"))
         	readTableLineitem();
@@ -188,7 +188,7 @@ L initTableByName(S tableName){
         	readTableSupplier();
         else if(!strcmp(tableName, "partsupp"))
         	readTablePartsupp();
-        else P("Table %s NOT FOUND\n",tableName), R 1;
+        else P("Table %s NOT FOUND\n",tableName);
     }
     else {
         P("Table %s has been loaded\n",tableName);

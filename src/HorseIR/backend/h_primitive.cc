@@ -53,10 +53,63 @@ L pfnIndex(V z, V x, V y){
                 caseX DOP(lenZ, vX(z,i)=vX(x,vL(y,i))) break;
                 caseQ DOP(lenZ, vQ(z,i)=vQ(x,vL(y,i))) break;
                 caseS DOP(lenZ, vS(z,i)=vS(x,vL(y,i))) break;
+                default: R E_NOT_IMPL; /* date time */
             }
             R 0;
         }
         else R E_NOT_IMPL;
+    }
+    else R E_DOMAIN;
+}
+
+/*
+ * indexing assignment: x[y] = m
+ * no return
+ */
+L pfnIndexA(V x, V y, V m){
+    if(isTypeGroupInt(vp(y))){
+        if(isAssignableType(vp(x),vp(m))){
+            if(isTypeGroupBasic(vp(x))){
+                if(isEqualLength(y,m) || isOne(m)){
+                    V tempY = allocNode();
+                    V tempM = allocNode();
+                    CHECKE(promoteValue(tempY,y,H_L));
+                    CHECKE(promoteValue(tempM,m,vp(x)));
+                    if(isEqualLength(y,m)){
+                        switch(vp(x)){
+                            caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,i)) break;
+                            caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,i)) break;
+                            caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,i)) break;
+                            caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,i)) break;
+                            caseF DOI(vn(y), vF(x,vL(tempY,i))=vF(tempM,i)) break;
+                            caseE DOI(vn(y), vE(x,vL(tempY,i))=vE(tempM,i)) break;
+                            caseX DOI(vn(y), vX(x,vL(tempY,i))=vX(tempM,i)) break;
+                            caseQ DOI(vn(y), vQ(x,vL(tempY,i))=vQ(tempM,i)) break;
+                            caseS DOI(vn(y), vS(x,vL(tempY,i))=vS(tempM,i)) break;
+                            default: R E_NOT_IMPL; /* date time */
+                        }
+                    }
+                    else{
+                        switch(vp(x)){
+                            caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,0)) break;
+                            caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,0)) break;
+                            caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,0)) break;
+                            caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,0)) break;
+                            caseF DOI(vn(y), vF(x,vL(tempY,i))=vF(tempM,0)) break;
+                            caseE DOI(vn(y), vE(x,vL(tempY,i))=vE(tempM,0)) break;
+                            caseX DOI(vn(y), vX(x,vL(tempY,i))=vX(tempM,0)) break;
+                            caseQ DOI(vn(y), vQ(x,vL(tempY,i))=vQ(tempM,0)) break;
+                            caseS DOI(vn(y), vS(x,vL(tempY,i))=vS(tempM,0)) break;
+                            default: R E_NOT_IMPL; /* date time */
+                        }
+                    }
+                    R 0;
+                }
+                else R E_LENGTH;
+            }
+            else R E_NOT_IMPL;
+        }
+        else R E_TYPE;
     }
     else R E_DOMAIN;
 }
@@ -90,7 +143,11 @@ L pfnMeta(V z, V x){
 }
 
 L pfnKeys(V z, V x){
-    if(isTable(x) || isDict(x)){
+    if(isEnum(x)){
+        *z = *((V)getEnumTarget(x)); /* copy keys */
+        R 0;
+    }
+    else if(isTable(x) || isDict(x)){
         L lenZ = vn(x);
         initV(z,H_G,lenZ);
         DOI(lenZ, CHECKE(copyV(vV(z,i),getColKey(vV(x,i)))))
@@ -664,7 +721,7 @@ L pfnEnlist(V z, V x){
 
 L pfnRaze(V z, V x){
     if(isList(x)){
-        L typZ, lenZ, n;
+        L typZ=-1, lenZ=0, n=0;
         CHECKE(getCommonType(x, &typZ, &lenZ));
         initV(z,typZ,lenZ);
         CHECKE(fillRaze(z,&n,x));
@@ -677,7 +734,7 @@ L pfnRaze(V z, V x){
     else R E_DOMAIN;
 }
 
-L pfnTolist(V z, V x){
+L pfnToList(V z, V x){
     if(isTypeGroupBasic(xp)){
         initV(z,H_G,xn);
         switch(xp){
@@ -697,22 +754,38 @@ L pfnTolist(V z, V x){
     else R E_DOMAIN;
 }
 
+L pfnToIndex(V z, V x){
+    if(isEnum(x)){
+        vp(z) = H_L;
+        vn(z) = vn(x);
+        vg(z) = vg(x); /* alias copy */
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
 L pfnGroup(V z, V x){
-    V0 y0,t0; V y = &y0, t = &t0;
+    // V0 y0,t0; V y = &y0, t = &t0;
+    V y = allocNode();
+    V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
+    P("10\n");
     initV(y,H_B,lenZ);
-    DOP(vn(x),vB(y,i)=1)
+    P("11\n");
+    DOP(lenZ,vB(y,i)=1)
+    P("12\n");
     CHECKE(pfnOrderBy(t,x,y));
+    P("13\n");
 
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
-        CHECKE(lib_get_group_by(z,x,sL(t),numRow));
+        CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp));
     }
     else if(isTypeGroupBasic(xp)){
-        V0 t1; V tx=&t1;
+        // V0 t1; V tx=&t1;
         L numRow= vn(x);
-        CHECKE(pfnEnlist(tx,x));
-        CHECKE(lib_get_group_by(z,tx,sL(t),numRow));
+        // CHECKE(pfnEnlist(tx,x));
+        CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
     R 0;
@@ -1127,18 +1200,7 @@ L pfnCompress(V z, V x, V y){
         DOI(H_CORE, lenZ += parZ[i])
         DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
         initV(z,typZ,lenZ);
-        if(k == lenZ){ // copy all of items
-            switch(typZ){
-                caseB DOI(lenX, vB(z,i)=vB(y,i)) break;
-                caseH DOI(lenX, vH(z,i)=vH(y,i)) break;
-                caseI DOI(lenX, vI(z,i)=vI(y,i)) break;
-                caseL DOI(lenX, vL(z,i)=vL(y,i)) break;
-                caseF DOI(lenX, vF(z,i)=vF(y,i)) break;
-                caseE DOI(lenX, vE(z,i)=vE(y,i)) break;
-                default: R E_NOT_IMPL;
-            }
-        }
-        else{
+        if(k != lenZ){
             switch(typZ){
                 caseB DOT(lenX, if(vB(x,i))vB(z,offset[tid]++)=vB(y,i)) break;
                 caseH DOT(lenX, if(vB(x,i))vH(z,offset[tid]++)=vH(y,i)) break;
@@ -1146,8 +1208,16 @@ L pfnCompress(V z, V x, V y){
                 caseL DOT(lenX, if(vB(x,i))vL(z,offset[tid]++)=vL(y,i)) break;
                 caseF DOT(lenX, if(vB(x,i))vF(z,offset[tid]++)=vF(y,i)) break;
                 caseE DOT(lenX, if(vB(x,i))vE(z,offset[tid]++)=vE(y,i)) break;
+                caseQ DOT(lenX, if(vB(x,i))vQ(z,offset[tid]++)=vQ(y,i)) break;
+                caseC DOT(lenX, if(vB(x,i))vC(z,offset[tid]++)=vC(y,i)) break;
+                caseS DOT(lenX, if(vB(x,i))vS(z,offset[tid]++)=vS(y,i)) break;
+                caseY {vy(z) = vy(y);\
+                      DOT(lenX, if(vB(x,i))vY(z,offset[tid]++)=vY(y,i)) break;}
                 default: R E_NOT_IMPL;
             }
+        }
+        else { // copy all of items
+            CHECKE(copyV(z,y));
         }
         R 0;
     }
@@ -1305,19 +1375,23 @@ L pfnLike(V z, V x, V y){
 }
 
 L pfnOrderBy(V z, V x, V y){
+    P("z = 0x%016x, x = 0x%016x, y = 0x%016x\n", &z,&x,&y);
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
         DOI(vn(x), if(!isTypeGroupReal(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
         L lenZ= 0==vn(x)?0:vn(vV(x,0));
         initV(z,H_L,lenZ);
-        lib_list_order_by(sL(z), lenZ, x, sB(y));
+        lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
         R 0;
     }
-    else if(isTypeGroupReal(vp(x)) && isBool(y) && 1==vn(y)){
-        V0 t0; V t= &t0;
-        vp(t)= H_G; vn(t)= 1; vg(t)= (G)x;
+    else if((isTypeGroupReal(vp(x)) || isSymbol(x)) && isBool(y) && 1==vn(y)){
+        P("order 1: vn(x) = %lld\n",vn(x));
+        printHeapInfo();
         initV(z,H_L,vn(x));
-        lib_list_order_by(sL(z), vn(x), t, sB(y));
+        printHeapInfo();
+        P("order 2\n");
+        lib_list_order_by(sL(z), vn(x), x, sB(y), lib_quicksort_cmp_item);
+        P("order 3\n");
         R 0;
     }
     else R E_DOMAIN;
@@ -1325,6 +1399,7 @@ L pfnOrderBy(V z, V x, V y){
 
 L pfnEach(V z, V x, FUNC1(foo)){
     if(isList(x)){
+        initV(z,H_G,vn(x));
         DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
         R 0;
     }

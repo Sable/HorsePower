@@ -88,7 +88,7 @@ L simulateSimpleRaw(){
     vQ(k0,1)=getSymbol((S)"DepartmentID");
     vQ(k0,2)=getSymbol((S)"DepartmentName");
 
-    e = pfnTolist(k1, k0);          CHECK(e,14);
+    e = pfnToList(k1, k0);          CHECK(e,14);
     V rn[] = {r0,r1,r2};
     e = pfnList(k2, 3, rn);         CHECK(e,15);
     e = pfnTable(z, k1, k2);        CHECK(e,16);

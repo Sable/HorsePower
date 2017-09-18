@@ -67,6 +67,7 @@ extern "C" {
 L pfnLoadTable     (V z, V x);
 L pfnList          (V z, L n, V x[]);
 L pfnIndex         (V z, V x, V y);
+L pfnIndexA        (V x, V y, V m);
 L pfnFlip          (V z, V x);
 L pfnMatch         (V z, V x, V y);
 L pfnMeta          (V z, V x);
@@ -131,7 +132,8 @@ L pfnTime          (V z, V x);
 
 L pfnEnlist        (V z, V x);
 L pfnRaze          (V z, V x);
-L pfnTolist        (V z, V x);
+L pfnToList        (V z, V x);
+L pfnToIndex       (V z, V x);
 L pfnGroup         (V z, V x);
 
 L pfnCompare       (V z, V x, V y, L op);

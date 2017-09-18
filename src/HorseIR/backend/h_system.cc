@@ -49,6 +49,26 @@ L copyV(V z, V x){
     *z = *x;
     R 0;
 }
+
+L copyByIndex(V z, V x, L k){
+    if(isList(x)){
+        CHECKE(copyV(z,vV(x,k)));
+    }
+    else if(isTypeGroupBasic(vp(x))) {
+        initV(z,vp(x),1);
+        switch(vp(x)){
+            caseB vb(z) = vB(x,k); break;
+            caseH vh(z) = vH(x,k); break;
+            caseI vi(z) = vI(x,k); break;
+            caseL vl(z) = vL(x,k); break;
+            caseQ vq(z) = vQ(x,k); break;
+            caseC vc(z) = vC(x,k); break;
+            caseS vs(z) = vS(x,k); break;
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
+}
 // L copyV(V z, V x){
 //     initV(z,xp,xn);
 //     if(isTypeGroupNumber(xp)){
@@ -143,7 +163,7 @@ L promoteValue(V z, V x, L typMax){
                     caseE DOP(xn, xCopy(vX(z,i),vE(x,i),0)) break;
                 }
             } break;
-            default: R E_DOMAIN;
+            default: P("Error: PromoteValue error\n"); R E_DOMAIN;
         }
         R 0;
     }
@@ -320,12 +340,15 @@ L getLikeFromString(B *t, S src, S pat){
 /* helper functions */
 
 L getEnumValue(V z, V x){
-    R 0;
+    R E_NOT_IMPL;
 }
 L getDictValue(V z, V x){
-    R 0;
+    R getColumnValue(z,x);
 }
 L getColumnValue(V z, V x){
+    L lenZ = vn(x);
+    initV(z,H_G,lenZ);
+    DOI(lenZ, CHECKE(copyV(vV(z,i),getColVal(vV(x,i)))))
     R 0;
 }
 
@@ -372,6 +395,18 @@ void printFloat(E x){
 
 L calcInterval(struct timeval t0, struct timeval t1){
     R (t1.tv_sec-t0.tv_sec)*1000000 + t1.tv_usec-t0.tv_usec;
+}
+
+B isAssignableType(L x, L y){
+    switch(x){
+        caseH R (H_B==y||H_H==y);
+        caseI R (H_B==y||H_H==y||H_I==y);
+        caseL R (H_B==y||H_H==y||H_I==y||H_L==y);
+        caseF R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y);
+        caseE R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y);
+        caseX R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y||H_X==y);
+        default: R x==y;
+    }
 }
 
 

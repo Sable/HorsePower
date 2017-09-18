@@ -23,11 +23,13 @@ L lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen);
 #define lib_index_of_T lib_index_of_I
 
 /* quick sort section */
-void lib_quicksort     (L *rtn, V val, L low, L high, B *isUp);
-L    lib_partition     (L *rtn, V val, L low, L high, B *isUp);
-L    lib_quicksort_cmp (V val, L a, L b, B *isUp);
-void lib_list_order_by (L *targ, L tLen, V val, B *isUp);
-L    lib_get_group_by  (V z, V val, L* index, L iLen);
+#define FUNC_CMP(x) L (*x)(V,L,L,B*)
+void lib_quicksort          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+L    lib_partition          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+L    lib_quicksort_cmp      (V val, L a, L b, B *isUp);
+L    lib_quicksort_cmp_item (V t, L a, L b, B *isUp);
+void lib_list_order_by      (L *targ, L tLen, V val, B *isUp, FUNC_CMP(cmp));
+L    lib_get_group_by       (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen);
 L lib_member_H(B* targ, H* src, L sLen, H* val, L vLen);

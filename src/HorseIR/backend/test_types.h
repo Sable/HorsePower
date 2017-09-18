@@ -91,7 +91,7 @@ void testG(){
     L t[] = {-2,1,3,72,25};
     DOI(5, vL(a,i)=t[i])
     V listA = allocNode();
-    pfnTolist(listA,a);
+    pfnToList(listA,a);
     printV(listA);
 }
 
@@ -117,8 +117,8 @@ void testN(){
     V listA = allocNode();
     V listB = allocNode();
     V z     = allocNode();
-    pfnTolist(listA,a);
-    pfnTolist(listB,b);
+    pfnToList(listA,a);
+    pfnToList(listB,b);
     pfnDict(z,listA,listB);
     printV(z);
 }

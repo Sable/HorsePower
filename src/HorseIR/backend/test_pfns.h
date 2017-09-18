@@ -119,12 +119,32 @@ L testCompress(){
     R e;
 }
 
+L testIndexA(){
+    P("\nTest index assignment\n");
+    V a = allocNode();
+    V b = allocNode();
+    V c = allocNode();
+    L ta[] = {1,2,3,4,5,6,7,8};
+    L tb[] = {3,3,5};
+    L tc[] = {0,0,0};
+    initV(a, H_L, 8); DOI(8, vL(a,i)=ta[i])
+    initV(b, H_L, 3); DOI(3, vL(b,i)=tb[i])
+    initV(c, H_L, 3); DOI(3, vL(c,i)=tc[i])
+    printV(a);
+    L e = pfnIndexA(a,b,c); /* less than */
+    P("e = %lld\n",e);
+    printV(a);
+    R e;
+}
+
+
 L testPfns(){
     // testMember();
     // testGroupBy();
     // testSpecial();
     // testCompare();
     // testSum();
-    testCompress();
+    // testCompress();
+    testIndexA();
 	R 0;
 }
