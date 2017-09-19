@@ -1,7 +1,7 @@
 EXE=horse
-CC=gcc-5
-D_FLAGS=-std=c++11 -fopenmp -g
-R_FLAGS=-std=c++11 -fopenmp -O3
+CC=gcc-7
+D_FLAGS=-std=c++14 -fopenmp -g
+R_FLAGS=-std=c++14 -fopenmp -O3
 INCLUDE_ANTLR4="../../libs/include/antlr4-runtime"
 INCLUDE_PCRE2="../../libs/include"
 LIB_GRAMMAR=./grammar

@@ -272,16 +272,23 @@ L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
-        L pos = lib_partition(rtn, val, low, high, isUp, cmp);
-        lib_quicksort(rtn, val, low, pos-1, isUp, cmp);
-        lib_quicksort(rtn, val, pos+1, high,isUp, cmp);
+        B leftSame=true;
+        L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
+        if(!leftSame)
+            lib_quicksort(rtn, val, low, pos-1, isUp, cmp);
+        if(pos<high)
+            lib_quicksort(rtn, val, pos+1, high,isUp, cmp);
     }
 }
 
-L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
+L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSame){
     L pivot = low, i = low, j = high+1, t;
     while(true){
-        do{++i;} while((*cmp)(val,rtn[i],rtn[pivot],isUp) <=0 && i < high);
+        while(++i && i<high){
+            L temp = (*cmp)(val,rtn[i],rtn[pivot],isUp);
+            if(temp < 0) *leftSame = false;
+            else if(temp > 0) break;
+        }
         do{--j;} while((*cmp)(val,rtn[j],rtn[pivot],isUp) > 0);
         if(i>=j) break;
         t = rtn[i]; rtn[i] = rtn[j]; rtn[j] = t;

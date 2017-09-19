@@ -235,10 +235,11 @@ V getValueFromSymbol(Q id){
     R NULL;
 }
 
+
 /* error code -2 */
 L decideType(L x, L y){
     if(isTypeGroupNumber(x) && isTypeGroupNumber(y)){
-        R max(x,y);
+        R MAX(x,y);
     }
     else if(x == y){
         R x;

@@ -592,7 +592,7 @@ L pfnSum(V z, V x){
 #define REDUCELONG(op) (0==op?LLONG_MAX:LLONG_MIN)
 #define REDUCEFLT(op)  (0==op?FLT_MAX:FLT_MIN)
 #define REDUCEDBL(op)  (0==op?DBL_MAX:DBL_MIN)
-#define REDUCE(op,t,x) (0==op?min(t,x):1==op?max(t,x):-1)
+#define REDUCE(op,t,x) (0==op?MIN(t,x):1==op?MAX(t,x):-1)
 #define REDUCELINE(p,op,x) {p t=v##p(x,0); DOI(vn(x), t=REDUCE(op,t,v##p(x,i)))}
 
 L pfnReduce(V z, V x, L op){
@@ -806,7 +806,7 @@ L pfnCompare(V z, V x, V y, L op){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ = isOne(x)?vn(y):vn(x), typZ = H_B;
         if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-            L typMax = max(vp(x),vp(y));
+            L typMax = MAX(vp(x),vp(y));
             V tempX = allocNode();
             V tempY = allocNode();
             CHECKE(promoteValue(tempX, x, typMax));
@@ -952,7 +952,7 @@ L pfnArith(V z, V x, V y, L op){
         if(!isValidLength(x,y))   R E_LENGTH;
         if(3==op && checkZero(y)) R E_DIV_ZERO;
         L lenZ   = isOne(x)?vn(y):vn(x);
-        L typMax = max(vp(x),vp(y));
+        L typMax = MAX(vp(x),vp(y));
         L typZ   = typMax;
         V tempX = allocNode();
         V tempY = allocNode();
@@ -1079,7 +1079,7 @@ L pfnPowerLog(V z, V x, V y, L op){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ  = isOne(x)?vn(y):vn(x), typZ = H_E; // default: E
-        L typMax= max(vp(x),vp(y));
+        L typMax= MAX(vp(x),vp(y));
         V tempX = allocNode();
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
@@ -1143,7 +1143,7 @@ L pfnMod(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ   = isOne(x)?vn(y):vn(x);
-        L typMax = max(vp(x),vp(y));
+        L typMax = MAX(vp(x),vp(y));
         L typZ   = H_B==typMax?H_L:typMax;
         V tempX = allocNode();
         V tempY = allocNode();
@@ -1223,7 +1223,7 @@ L pfnCompress(V z, V x, V y){
 #define INDEXOF(p,z,x,y) lib_index_of_##p(sL(z),s##p(x),vn(x),s##p(y),vn(y))
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-        L typMax = max(vp(x), vp(y));
+        L typMax = MAX(vp(x), vp(y));
         L lenZ   = vn(y);
         V tempX = allocNode();
         V tempY = allocNode();
@@ -1263,7 +1263,7 @@ L pfnIndexOf(V z, V x, V y){
 L pfnAppend(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L lenZ   = vn(x) + vn(y), c = vn(x);
-        L typMax = max(vp(x),vp(y));
+        L typMax = MAX(vp(x),vp(y));
         V tempX = allocNode();
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
@@ -1569,7 +1569,7 @@ L pfnMember(V z, V x, V y){
     if(isTypeGroupReal(vp(x))){
         V tempX = allocNode();
         V tempY = allocNode();
-        L typMax = max(vp(x),vp(y));
+        L typMax = MAX(vp(x),vp(y));
         CHECKE(promoteValue(tempX,x,typMax));
         CHECKE(promoteValue(tempY,y,typMax));
         initV(z,H_B,vn(y));
