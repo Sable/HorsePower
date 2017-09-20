@@ -9,11 +9,13 @@
 
 #include "tpch/test_q4.h"
 #include "tpch/test_q6.h"
+#include "tpch/test_q12.h"
 
 void testTPCH(L x){
 	switch(x){
 		TEST_QUERY(4);
 		TEST_QUERY(6);
+		TEST_QUERY(12);
 		default: P("No such test for query %lld yet\n",x); break;
 	}
 }

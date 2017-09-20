@@ -49,7 +49,7 @@ L simulateQ4(){
     PROFILE( 3,pfnColumnValue(t1, a0, literalSym((S)"o_orderpriority")));
 
     // step 1: where clause
-    PROFILE( 4 ,pfnGeq(w0, t0, literalDate(19930701)));
+    PROFILE( 4,pfnGeq(w0, t0, literalDate(19930701)));
     PROFILE( 5,pfnDatetimeAdd(w1, literalDate(19930701), literalI64(3), literalSym((S)"month")));
     PROFILE( 6,pfnLt(w2, t0, w1));
     PROFILE( 7,pfnAnd(w3, w0, w2));
