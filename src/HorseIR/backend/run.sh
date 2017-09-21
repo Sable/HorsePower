@@ -11,5 +11,5 @@ echo Starting ...
 #export OMP_PLACES=cores
 #export OMP_PROC_BIND=spread
 #export OMP_NUM_THREADS=40
-(cd ../ && make release && time ./horse -t 4)
+(cd ../ && make release && time ./horse -t 12)
 echo Done.

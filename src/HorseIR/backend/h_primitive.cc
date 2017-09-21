@@ -574,13 +574,13 @@ L pfnWhere(V z, V x){
 
 L pfnSum(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = H_F==vp(x)?H_F:H_E;
-        initV(z,H_E,1);
+        L typZ = isFloat(x)?H_F:isDouble(x)?H_F:H_L;
+        initV(z,typZ,1);
         switch(vp(x)){
-            caseB {E t=0; DOP(vn(x), t+=vB(x,i), reduction(+:t)) ve(z)=t;} break;
-            caseH {E t=0; DOP(vn(x), t+=vH(x,i), reduction(+:t)) ve(z)=t;} break;
-            caseI {E t=0; DOP(vn(x), t+=vI(x,i), reduction(+:t)) ve(z)=t;} break;
-            caseL {E t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) ve(z)=t;} break;
+            caseB {L t=0; DOP(vn(x), t+=vB(x,i), reduction(+:t)) vl(z)=t;} break;
+            caseH {L t=0; DOP(vn(x), t+=vH(x,i), reduction(+:t)) vl(z)=t;} break;
+            caseI {L t=0; DOP(vn(x), t+=vI(x,i), reduction(+:t)) vl(z)=t;} break;
+            caseL {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vl(z)=t;} break;
             caseF {F t=0; DOP(vn(x), t+=vF(x,i), reduction(+:t)) vf(z)=t;} break;
             caseE {E t=0; DOP(vn(x), t+=vE(x,i), reduction(+:t)) ve(z)=t;} break;
         }
@@ -1028,7 +1028,7 @@ L pfnDiv(V z, V x, V y){
 
 #define LOGIC(op,x,y) (2>op?LOGICAND(op,x,y):4>op?LOGICOR(op,x,y):(x^y))
 #define LOGICAND(op,x,y) (0==op?(x&y):~(x&y))
-#define LOGICOR(op,x,y)  (3==op?(x|y):~(x|y))
+#define LOGICOR(op,x,y)  (2==op?(x|y):~(x|y))
 
 L pfnLogic(V z, V x, V y, L op){
     if(isBool(x) && isBool(y)){
@@ -1372,14 +1372,14 @@ L pfnLike(V z, V x, V y){
 
 L pfnOrderBy(V z, V x, V y){
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
-        DOI(vn(x), if(!isTypeGroupReal(vp(vV(x,i))))R E_DOMAIN)
+        DOI(vn(x), if(!isTypeGroupBasic(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
         L lenZ= 0==vn(x)?0:vn(vV(x,0));
         initV(z,H_L,lenZ);
         lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
         R 0;
     }
-    else if((isTypeGroupReal(vp(x)) || isSymbol(x)) && isBool(y) && 1==vn(y)){
+    else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){
         initV(z,H_L,vn(x));
         lib_list_order_by(sL(z), vn(x), x, sB(y), lib_quicksort_cmp_item);
         R 0;

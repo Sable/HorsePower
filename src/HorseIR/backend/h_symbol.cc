@@ -239,6 +239,6 @@ S getSymbolStr(L x){
 }
 
 L compareSymbol(L x, L y){
-    R strcmp(getSymbolStr(x), getSymbolStr(y));
+    R (x==y)?0:strcmp(getSymbolStr(x), getSymbolStr(y));
 }
 

@@ -315,6 +315,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         caseF if(vF(t,a)!=vF(t,b)) R vF(t,a)<vF(t,b)?cmp_switch(f); break; \
         caseE if(vE(t,a)!=vE(t,b)) R vE(t,a)<vE(t,b)?cmp_switch(f); break; \
         caseQ if(vQ(t,a)!=vQ(t,b)) R compareSymbol(vQ(t,a),vQ(t,b))<0?cmp_switch(f); break; \
+        default: P("No impl. for type %lld\n",vp(t)); exit(99); break; \
         /* Pending: caseC */
     } 
     R 0;

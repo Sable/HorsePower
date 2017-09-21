@@ -377,6 +377,7 @@ I getDatetimeOp(Q id){
     else R -1;
 }
 
+/* not right when month + v > 12 */
 D calcDate(D x, L v, I op){
     I year  = x/10000;
     I month = x/100%100;
