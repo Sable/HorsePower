@@ -17,7 +17,7 @@ Query profile (<u>Total 22</u>: **Pass** 2; <blue>Testing</blue>: 2; <red>Workin
 | [9][q9]  |P,S,L,PS,O,N | 7     | 6    | 1     | 2     | 2     | 6      | Next event                    |
 | [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |                               |
 | [11][q11]| PS,S,N      | 6     | 4    | 2     | 1(big)| 1     | 3      |                               |
-| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | <blue>Testing</blue>          |
+| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | **Pass**                      |
 | [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | (Nested)                      |
 | [14][q14]| L,P         | 3     | 2    | 1     | 0     | 0     | 1      | <red>Working</red>            |
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
