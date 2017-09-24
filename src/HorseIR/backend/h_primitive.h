@@ -55,7 +55,7 @@ extern "C" {
 
 
 /* keyed table */
-#define isKeySingle(x) (1==getTableColNumber(getKTableKey(x)))
+#define isKeySingle(x) (1==tableCol(getKTableKey(x)))
 
 #define FUNC1(x) L (*x)(V,V)
 #define FUNC2(x) L (*x)(V,V,V)
@@ -63,6 +63,7 @@ extern "C" {
 
 #define tableRow(x) (va(x).row)
 #define tableCol(x) (va(x).col)
+#define dictNum(x)  tableCol(x)  // # of key-value pairs
 
 L pfnLoadTable     (V z, V x);
 L pfnList          (V z, L n, V x[]);

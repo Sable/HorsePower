@@ -18,15 +18,12 @@ const L BUFF_SIZE     = 256;
 //  R status;
 // }
 
-V readCSV(S fileName, L numCols, L *types, L *symList){
+V readCSV(S fileName, L numCols, L *types, Q *symList){
     FILE *fp = openFile(fileName);
     L numRow = loadCSV(fp, false, NULL, numCols, NULL);
     V x = allocTable(numCols);
-    DOI(numCols, {V cell=xV(i); \
-        initList(cell,2); \
-        initSymbol(vV(cell,0), symList[i]); \
-        initValue (vV(cell,1), types[i], numRow);})
-
+    DOI(numCols, {V key=getTableKeys(x); vQ(key,i)=symList[i]; \
+        V val=getTableVals(x); initValue(getTableCol(val,i), types[i], numRow);})    
     if(H_DEBUG) P("** Done with initialization **\n");
     rewind(fp);
     loadCSV(fp, true, x, numCols, types);
@@ -53,11 +50,11 @@ L loadCSV(FILE *fp, B isLoading, V table, L numCols, L *types){
         exit(ERROR_CODE);
     }
     if(!isLoading){
-        P(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
+        FT(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
     }
     else {
-        va(table).row = rowSize;
-        va(table).col = numCols;
+        tableRow(table) = rowSize;
+        tableCol(table) = numCols;
     }
     R rowSize;
 }
@@ -66,11 +63,12 @@ L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
     C tmp[LINE_MAX_CHAR];
     S lineT = trim(line);
     L cnt = 0, numCols = 0, strLen = strlen(lineT);
+    V val = getTableVals(x);
     // P("line[%lld] = %s", rowID,lineT); printType(xp); P("\n");
     DOI(strLen, {\
         if(sp==lineT[i]){\
             tmp[cnt]=0; trimSelf(tmp); \
-            loadItem(getColVal(getTableCol(x,numCols)),rowID,types[numCols],tmp);\
+            loadItem(getTableCol(val,numCols),rowID,types[numCols],tmp);\
             cnt=0;numCols++;}\
         else{tmp[cnt++]=lineT[i];}})
     R numCols;
@@ -260,10 +258,16 @@ L printInfo(V x){
     FS("{["); printType(xp); FT("*%lld*",xn); FS("]}"); R 0;
 }
 
-L printBasicValue(V x, B hasTag){
-    if(xn==1) printBasicItem(x,0);
+L printBasicValue(V x, L k, B hasTag){
+    if(0>k){
+        if(xn==1) printBasicItem(x,0);
+        else {
+            FS("("); DOI(xn, {if(i>0)FS(","); printBasicItem(x,i);}); FS(")");
+        }
+    }
     else {
-        FS("("); DOI(xn, {if(i>0)FS(","); printBasicItem(x,i);}); FS(")");
+        if(k<xn) printBasicItem(x,k);
+        else R E_INDEX;
     }
     if(hasTag) {
         printTag(xp);
@@ -275,50 +279,60 @@ L getStringItemStr(V x, L k){
     R FT("'%s'",xS(k));
 }
 
-L printStr(V x){
+L printStrItem(V x, L k){
     getStringItemStr(x,0);
     FS("(");
-    DOI(xn, {if(i>0)FS(","); getStringItemStr(x,i);})
+    if(k<0) { DOI(xn, {if(i>0)FS(","); getStringItemStr(x,i);}) }
+    else { getStringItemStr(x,k); }
     FS("):str"); R 0;
 }
 
-L printList(V x){
+L printListItem(V x, L k){
     FS("(");
-    DOI(xn, {if(i>0)FS(","); printValue(xV(i));})
+    if(k<0) { DOI(xn, {if(i>0)FS(","); printValue(xV(i));}) }
+    else { printValue(xV(k)); }
     FS("):list"); R 0;
 }
 
-L printDict(V x){
+L printDictItem(V x, L k){
     FS("{");
-    DOI(xn, {if(i>0)FS(",\n"); \
-        printValue(vV(xV(i),0)); FS(" -> "); printValue(vV(xV(i),1));})
+    V key = getDictKeys(x), val = getDictVals(x);
+    if(k<0) { DOI(dictNum(x), {if(i>0)FS(",\n"); printValueItem(key,i); FS(" -> "); printValueItem(val,i);})}
+    else if(k<dictNum(x)){ printValueItem(key,k); FS(" -> "); printValueItem(val,k); }
+    else R E_INDEX;
     FS("}"); R 0;
 }
 
-L printEnum(V x){
+L printEnumItem(V x, L k){
     FS("<");
     FS(getSymbolStr(getEnumName(x)));
     FS(",");
     /* print enum */
-    if(xn==1) printBasicItem((V)getEnumTarget(x),vY(x,0));
+    if(k<0){
+        if(xn==1) printBasicItem((V)getEnumTarget(x),vY(x,0));
+        else {
+            FS("(");
+            DOI(xn, {if(i>0)FS(","); printBasicItem((V)getEnumTarget(x),vY(x,i));})
+            FS(")");
+        }
+    }
     else {
-        FS("(");
-        DOI(xn, {if(i>0)FS(","); printBasicItem((V)getEnumTarget(x),vY(x,i));})
-        FS(")");
+        if(k<xn) printBasicItem((V)getEnumTarget(x),vY(x,k));
+        else R E_INDEX;
     }
     FS(">"); R 0;
 }
 
-L printValue(V x){
+L printValueItem(V x, L k){
     if(H_DEBUG) printInfo(x);
     if(isTypeGroupBasic(xp)){
-        printBasicValue(x, true);
+        printBasicValue(x, k, true);
     }
     else {
         switch(xp){
-            caseG printList(x);   break;
-            caseN printDict(x);   break;
-            caseY printEnum(x);   break;
+            caseG printListItem(x,k);   break;
+            caseN printDictItem(x,k);   break;
+            caseY printEnumItem(x,k);   break;
             caseA printTable(x);  break;
             caseK printKTable(x); break;
             default: R E_DOMAIN;
@@ -348,20 +362,20 @@ L printTablePretty(V x, L rowLimit){
     if(isTable(x)){
         P("\nTable: row = %d, col = %d\n", tableRow(x),tableCol(x));
         L totSize = 0;
-        L *colWidth = (L*)malloc(sizeof(L) * vn(x));
+        L *colWidth = (L*)malloc(sizeof(L) * tableCol(x));
         L rows=tableRow(x), rowPrint = rowLimit<0?rows:rowLimit>rows?rows:rowLimit;
-        DOI(vn(x), colWidth[i]=getColWidth(getTableCol(x,i),rowPrint))
-        DOI(vn(x), totSize+=colWidth[i]); totSize += vn(x);
+        DOI(tableCol(x), colWidth[i]=getColWidth(x,i,rowPrint))
+        DOI(tableCol(x), totSize+=colWidth[i]); totSize += tableCol(x);
         // DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
         /* print head */
-        DOI(vn(x), {if(i>0) FS(" "); V key = getColKey(getTableCol(x,i)); \
-            printSymbol(vq(key),buff); getStrPretty(buff,colWidth[i]); FT("%s",buff); })
+        DOI(tableCol(x), {if(i>0) FS(" "); V key = getTableKeys(x);; \
+            printSymbol(vQ(key,i),buff); getStrPretty(buff,colWidth[i]); FT("%s",buff); })
         FS("\n");
         DOI(totSize-1, FS("-"));
         FS("\n");
         /* print body */
         DOI(rowPrint,  { \
-            DOJ(vn(x), {if(j>0) FS(" "); V val = getColVal(getTableCol(x,j));\
+            DOJ(tableCol(x), {if(j>0) FS(" "); V val = getTableCol(getTableVals(x),j); \
                 getBasicItemStr(val,i,buff,0); getStrPretty(buff,colWidth[j]); FT("%s",buff);}) \
             FS("\n"); \
             })
@@ -372,20 +386,20 @@ L printTablePretty(V x, L rowLimit){
         P("\n KTable: row = %d, col = %d\n", tableRow(x),tableCol(x));
         V key = getKTableKey(x);
         V val = getKTableVal(x);
-        L *colWidthKey = (L*)malloc(sizeof(L) * vn(key));
-        L *colWidthVal = (L*)malloc(sizeof(L) * vn(val));
+        L *colWidthKey = (L*)malloc(sizeof(L) * tableCol(key));
+        L *colWidthVal = (L*)malloc(sizeof(L) * tableCol(val));
         L rows=tableRow(x), rowPrint = rowLimit<0?rows:rowLimit>rows?rows:rowLimit;
         L totSize1 = 0, totSize2 = 0;
-        DOI(vn(key), colWidthKey[i]=getColWidth(getTableCol(key,i),rowPrint))
-        DOI(vn(key), totSize1+=colWidthKey[i]); totSize1 += vn(key);
-        DOI(vn(val), colWidthVal[i]=getColWidth(getTableCol(val,i),rowPrint))
-        DOI(vn(val), totSize2+=colWidthVal[i]); totSize2 += vn(val);
+        DOI(tableCol(key), colWidthKey[i]=getColWidth(key,i,rowPrint))
+        DOI(tableCol(key), totSize1+=colWidthKey[i]); totSize1 += tableCol(key);
+        DOI(tableCol(val), colWidthVal[i]=getColWidth(val,i,rowPrint))
+        DOI(tableCol(val), totSize2+=colWidthVal[i]); totSize2 += tableCol(val);
         /* print head */
-        DOI(vn(key),{if(i>0) FS(" "); V t=getColKey(getTableCol(key,i)); \
-            printSymbol(vq(t),buff); getStrPretty(buff,colWidthKey[i]); FT("%s",buff); })
+        DOI(tableCol(key),{if(i>0) FS(" "); V t=getTableKeys(key); \
+            printSymbol(vQ(t,i),buff); getStrPretty(buff,colWidthKey[i]); FT("%s",buff); })
         FS("|");
-        DOI(vn(val),{V t=getColKey(getTableCol(val,i)); \
-            printSymbol(vq(t),buff); getStrPretty(buff,colWidthVal[i]); FT(" %s",buff); })
+        DOI(tableCol(val),{V t=getTableKeys(val); \
+            printSymbol(vQ(t,i),buff); getStrPretty(buff,colWidthVal[i]); FT(" %s",buff); })
         FS("\n");
         DOI(totSize1-1, FS("-"));
         FS("| ");
@@ -393,10 +407,10 @@ L printTablePretty(V x, L rowLimit){
         FS("\n");
         /* print body */
         DOI(rowPrint, {\
-             DOJ(vn(key), {if(j>0) FS(" "); V t=getColVal(getTableCol(key,j)); \
+             DOJ(tableCol(key), {if(j>0) FS(" "); V t=getTableCol(getTableVals(key),j); \
                  getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthKey[j]); FT("%s",buff);}) \
              FS("|"); \
-             DOJ(vn(val), {V t=getColVal(getTableCol(val,j)); \
+             DOJ(tableCol(val), {V t=getTableCol(getTableVals(val),j); \
                  getBasicItemStr(t,i,buff,0); getStrPretty(buff,colWidthVal[j]); FT(" %s",buff);}) \
              FS("\n"); \
             })
@@ -413,11 +427,16 @@ L printTablePretty(V x, L rowLimit){
 #define TABLE_CELL_MAX 30
 #define TABLE_CELL_DOT 3   //...
 
-L getColWidth(V x, L rowLimit){
-    V key = getColKey(x);
-    V val = getColVal(x);
+/*
+ * x: table
+ * k: index
+ * rowLimit: limit row
+ */
+L getColWidth(V x, L k, L rowLimit){
+    V key = getTableKeys(x);
+    V val = getTableVals(x);
     C buff[BUFF_SIZE];
-    L maxSize = getSymbolSize(vq(key));
+    L maxSize = getSymbolSize(vQ(key,k));
     DOI(rowLimit, {L t=getBasicItemStr(val,i,buff,0); if(t>maxSize)maxSize=t;})
     R maxSize>TABLE_CELL_MAX?TABLE_CELL_MAX:maxSize;
 }

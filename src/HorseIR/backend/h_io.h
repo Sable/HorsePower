@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 // L readFile(S fileName, L op);
-V    readCSV          (S fileName, L numCols, L *types, L *symList);
+V    readCSV          (S fileName, L numCols, L *types, Q *symList);
 L    loadCSV          (FILE *fp, B isLoading, V table, L numCols, L *types);
 L    getField         (S line, C sp, V x, L rowID, L *types, L *errCode);
 FILE*openFile         (S s);
@@ -24,19 +24,27 @@ L getTypeStr          (L x, S buff);
 L getComplexStr       (X x, S buff);
 L getBasicItemStr     (V x, L k, S buff, B hasTick);
 L getStringItemStr    (V x, L k);
-L getColWidth         (V x, L rowLimit);
+L getColWidth         (V x, L k, L rowLimit);
 L getStrPretty        (S str, L maxSize);
+
+
+#define ALL -1
+#define printValue(x) printValueItem(x,ALL)
+#define printList(x)  printListItem(x,ALL)
+#define printStr(x)   printStrItem(x,ALL)
+#define printDict(x)  printDictItem(x,ALL)
+#define printEnum(x)  printEnumItem(x,ALL)
 
 L printType           (L x);
 L printTag            (L x);
 L printBasicItem      (V x, L k);
 L printInfo           (V x);
 L printBasicValue     (V x, B hasTag);
-L printStr            (V x);
-L printList           (V x);
-L printDict           (V x);
-L printEnum           (V x);
-L printValue          (V x);
+L printStrItem        (V x, L k);
+L printListItem       (V x, L k);
+L printDictItem       (V x, L k);
+L printEnumItem       (V x, L k);
+L printValueItem      (V x, L k);
 L printV              (V x);
 L printTable          (V x);
 L printKTable         (V x);

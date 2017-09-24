@@ -149,19 +149,11 @@ L pfnKeys(V z, V x){
     }
     else if(isTable(x) || isDict(x)){
         L lenZ = vn(x);
-        initV(z,H_G,lenZ);
-        DOI(lenZ, CHECKE(copyV(vV(z,i),getColKey(vV(x,i)))))
+        CHECKE(copyV(z,getTableKeys(x)));
         R 0;
     }
     else if(isKTable(x)){
-        V keyTable = getKTableKey(x);
-        V valTable = getKTableVal(x);
-        L lenKey = vn(keyTable);
-        L lenVal = vn(valTable);
-        L lenZ = lenKey + lenVal, c = 0;
-        initV(z,H_G,lenZ);
-        DOI(lenKey, CHECKE(copyV(vV(z,i       ),getColKey(vV(x,i)))))
-        DOI(lenVal, CHECKE(copyV(vV(z,i+lenKey),getColKey(vV(x,i)))))
+        CHECKE(copyV(z,getKTableKey(x)));
         R 0;
     }
     else R E_DOMAIN;
@@ -187,7 +179,7 @@ L pfnColumnValue(V z, V x, V y){
         L colId = vq(y);
         L colIndex = findColFromTable(x,colId);
         if(colIndex >= 0){
-            R copyColumnValue(z, getColVal(getTableCol(x,colIndex)));
+            R copyColumnValue(z, getTableCol(getTableVals(x),colIndex));
         }
         else R E_COL_NOT_FOUND;
     }
@@ -496,7 +488,7 @@ L pfnNot(V z, V x){
 
 L pfnLen(V z, V x){
     initV(z,H_L,1);
-    vl(z)= isTable(x)?getTableRowNumber(x):vn(x);
+    vl(z)= isTable(x)?tableRow(x):vn(x);
     R 0;
 }
 
@@ -1458,13 +1450,11 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
 L pfnDictTable(V z, V x, V y, L op){
     if(isList(x) && isList(y)){
         if(isEqualLength(x,y)){
-            L lenZ = vn(x);
+            L lenZ = 2;
             L typZ = 0==op?H_N:H_A;
             initV(z,typZ,lenZ);
-            DOI(lenZ, {V t=vV(z,i); \
-                initList(t,2); \
-                CHECKE(copyV(vV(t,0),vV(x,i))) \
-                CHECKE(copyV(vV(t,1),vV(y,i))) }) /* no need DOP? */
+            CHECKE(copyV(getTableKeys(z),x));
+            CHECKE(copyV(getTableVals(z),y));
             R 0;
         }
         else R E_LENGTH;
@@ -1473,7 +1463,9 @@ L pfnDictTable(V z, V x, V y, L op){
 }
 
 L pfnDict(V z, V x, V y){
-    R pfnDictTable(z,x,y,0);
+    CHECKE(pfnDictTable(z,x,y,0));
+    dictNum(z) = vn(x);
+    R 0;
 }
 
 L pfnTable(V z, V x, V y){
@@ -1481,8 +1473,8 @@ L pfnTable(V z, V x, V y){
         DOI(vn(x), if(!isSymbol(vV(x,i)))R E_DOMAIN)
         DOI(vn(y), if(!isTypeGroupColumn(vp(vV(x,i))))R E_DOMAIN)
         CHECKE(pfnDictTable(z,x,y,1));
-        va(z).row = (0>=vn(z))?0:vn(getColVal(getTableCol(z,0)));
-        va(z).col = vn(x);
+        tableRow(z) = (0>=vn(z))?0:vn(getTableCol(getTableVals(z),0));
+        tableCol(z) = vn(x);
         R 0;
     }
     else R E_DOMAIN;
@@ -1552,10 +1544,10 @@ L pfnKTable(V z, V x, V y){
         /* Todo: check key table */
         if(tableRow(x) == tableRow(y)){
             initKTable(z);
-            CHECKE(copyV(vV(z,0),x));
-            CHECKE(copyV(vV(z,1),y));
-            va(z).row = tableRow(x);
-            va(z).col = tableCol(x)+tableCol(y);
+            CHECKE(copyV(getKTableKey(z),x));
+            CHECKE(copyV(getKTableVal(z),y));
+            tableRow(z) = tableRow(x);
+            tableCol(z) = tableCol(x)+tableCol(y);
             R 0;
         }
         else R E_MATCH;

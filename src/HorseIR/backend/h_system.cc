@@ -109,7 +109,8 @@ L findColFromTable2(V *z, V x, L cId){
 }
 
 L findColFromTable(V x, L cId){
-    DOI(vn(x), if(cId == vq(getColKey(getTableCol(x,i))))R i)
+    V key = getTableKeys(x);
+    DOI(vn(x), if(cId == vQ(key,i))R i)
     R -1;
 }
 
@@ -347,25 +348,8 @@ L getDictValue(V z, V x){
     R getColumnValue(z,x);
 }
 L getColumnValue(V z, V x){
-    L lenZ = vn(x);
-    initV(z,H_G,lenZ);
-    DOI(lenZ, CHECKE(copyV(vV(z,i),getColVal(vV(x,i)))))
+    CHECKE(copyV(z,getTableVals(x)));
     R 0;
-}
-
-V getColKey(V x) { R xV(0); }
-
-V getColVal(V x) { R xV(1); }
-
-V getTableCol(V x, L k) { R xV(k); }
-
-L getTableRowNumber(V x){
-    R va(x).row;
-    // R (vn(x)>0?vn(getColVal(getTableCol(x,0))):0);
-}
-
-L getTableColNumber(V x){
-    R va(x).col;
 }
 
 

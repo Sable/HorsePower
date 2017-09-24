@@ -68,8 +68,8 @@ typedef struct list_table{
 #define FP fprintf
 #define SP sprintf
 
-#define FT(s,x) FP(stdout,s,x)
-#define FS(x)   FT("%s",x)
+#define FT(s,...) FP(stdout,s,__VA_ARGS__)
+#define FS(x)     FT("%s",x)
 
 #define DOI(n, x) {for(L i=0,i2=n;i<i2;i++)x;}
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}

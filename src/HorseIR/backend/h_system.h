@@ -8,8 +8,6 @@ extern "C" {
 
 #define copyColumnValue(z,x) copyV(z,x)
 
-#define getKTableKey(x)  vV(x,0)
-#define getKTableVal(x)  vV(x,1)
 #define getEnumName(x)   (vy(x).name)
 #define getEnumTarget(x) (vy(x).target)
 
@@ -47,11 +45,6 @@ L getLikeFromString     (B *t, S src, S pat);
 L getEnumValue          (V z, V x);
 L getDictValue          (V z, V x);
 L getColumnValue        (V z, V x);
-V getColKey             (V x);
-V getColVal             (V x);
-V getTableCol           (V x, L k);
-L getTableRowNumber     (V x);
-L getTableColNumber     (V x);
 
 I getDatetimeOp         (Q id);
 D calcDate              (D x, L v, I op);

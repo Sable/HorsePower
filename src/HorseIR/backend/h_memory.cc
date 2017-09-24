@@ -124,30 +124,14 @@ L getTypeSize(L typ, L len){
 
 /* allocate */
 
-V allocV(L typ, L len){
-    V x = allocNode();
-    initV(x, typ, len);
-    R x;
-}
-
 V allocNode(){
     R (V)getHeapMem(H_V, 1); //malloc(sizeof(V0));
 }
 
-V allocDict(){
-    R allocV(H_N, 2);
-}
-
-V allocList(L numItems){
-    R allocV(H_G, numItems);
-}
-
 V allocTable(L numCols){
-    R allocV(H_A, numCols);
-}
-
-V allocKTable(){
-    R allocV(H_K, 2);
+    V x = allocNode();
+    initV(x, H_A, 2);
+    R initTableDict(x,H_A,numCols);
 }
 
 /* may move to a string pool */
@@ -169,10 +153,6 @@ V initV(V x, L typ, L len){
     R x; 
 }
 
-V initDict(V x){
-    R initV(x, H_N, 2);
-}
-
 V initSymbol(V x, L val){
     initV(x, H_Q, 1);
     xq = val;
@@ -188,11 +168,23 @@ V initValue(V x, L typ, L len){
 }
 
 V initTable(V x, L numCols){
-    R initV(x, H_A, numCols);
+    initV(x, H_A, 2);
+    R initTableDict(x,H_A,numCols);
+}
+
+V initDict(V x, L numCols){
+    initV(x, H_N, 2);
+    R initTableDict(x,H_N,numCols);
 }
 
 V initKTable(V x){
     R initV(x, H_K, 2);
+}
+
+V initTableDict(V x, L typ, L numCols){
+    initV(getTableKeys(x),H_Q,numCols);
+    initV(getTableVals(x),H_G,numCols);
+    R x;
 }
 
 S insertString(S str){
