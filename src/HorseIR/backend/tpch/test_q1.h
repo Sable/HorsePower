@@ -18,7 +18,7 @@ L simulateQ1(){
     V m0 = allocNode();  V m1 = allocNode();  V m2 = allocNode();  V m3 = allocNode();
     V m4 = allocNode();  V m5 = allocNode();  V m6 = allocNode();  V m7 = allocNode();
     V m8 = allocNode();  V m9 = allocNode();
-    V z0 = allocNode();  V z1 = allocNode();  V z2 = allocNode();  V z  = allocNode();
+    V z0 = allocNode();  V z1 = allocNode();  V z  = allocNode();
 
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);

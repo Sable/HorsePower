@@ -38,8 +38,7 @@ L simulateQ4(){
     V s0 = allocNode(); V s1 = allocNode(); V s2 = allocNode(); V s3 = allocNode();
     V s4 = allocNode();
     V r0 = allocNode();
-    V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode();
-    V m3 = allocNode(); V m4 = allocNode();
+    V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode(); V m3 = allocNode();
     V z  = allocNode();
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -75,14 +74,14 @@ L simulateQ4(){
     S literStr[] = {(S)"o_orderpriority", (S)"order_count"};
     V liter2 = literalSymVector(2, literStr);
     PROFILE(18, copyV(m0,liter2));
-    PROFILE(19,pfnToList(m1, m0));
-    PROFILE(20,pfnIndex(m2, s4, r0));
-    PROFILE(21,pfnIndex(m3, s3, r0));
-    V rn[] = {m2,m3};
-    PROFILE(22,pfnList(m4, 2, rn));
+    // PROFILE(19,pfnToList(m1, m0));
+    PROFILE(20,pfnIndex(m1, s4, r0));
+    PROFILE(21,pfnIndex(m2, s3, r0));
+    V rn[] = {m1,m2};
+    PROFILE(22,pfnList(m3, 2, rn));
 
     // finally, return the table
-    PROFILE(23,pfnTable(z, m1, m4));
+    PROFILE(23,pfnTable(z, m0, m3));
 
     gettimeofday(&tv1, NULL);
     P("Result of the Query 4: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
