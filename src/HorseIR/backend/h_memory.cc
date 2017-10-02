@@ -5,7 +5,7 @@
  * 1.5 G = 1610612736
  * 2   G = 2147483648
  */
-const L INIT_HEAP_SIZE  = 1610612736LL; //64MB, 64*1024*1024
+const L INIT_HEAP_SIZE  = 2147483648LL; //64MB, 64*1024*1024
 
 typedef struct buddy_node { /* size 48 */
     L size, level; G value;
@@ -357,7 +357,7 @@ void printHeapInfo(){
             INIT_HEAP_SIZE, \
             gHeapCur, \
             gHeapCur*100.0/INIT_HEAP_SIZE);
-        P("gHeap = 0x%016x, gHeapCur = %lld\n",gHeap,gHeapCur);
+        // P("gHeap = 0x%016x, gHeapCur = %lld\n",gHeap,gHeapCur);
     #endif
 
     #ifdef USE_BUDDY

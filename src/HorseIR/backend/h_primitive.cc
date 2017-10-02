@@ -53,9 +53,24 @@ L pfnIndex(V z, V x, V y){
                 caseX DOP(lenZ, vX(z,i)=vX(x,vL(y,i))) break;
                 caseQ DOP(lenZ, vQ(z,i)=vQ(x,vL(y,i))) break;
                 caseS DOP(lenZ, vS(z,i)=vS(x,vL(y,i))) break;
+                caseC DOP(lenZ, vC(z,i)=vC(x,vL(y,i))) break;
                 default: R E_NOT_IMPL; /* date time */
             }
             R 0;
+        }
+        else if(isList(x)){
+            if(isOneInt(y)){
+                L k = 0;
+                switch(vp(y)){
+                    caseB k = vb(y); break;
+                    caseH k = vh(y); break;
+                    caseI k = vi(y); break;
+                    caseL k = vl(y); break;
+                }
+                CHECKE(copyV(z, vV(x,k)));
+                R 0;
+            }
+            else R E_NOT_IMPL;
         }
         else R E_NOT_IMPL;
     }
@@ -566,7 +581,7 @@ L pfnWhere(V z, V x){
 
 L pfnSum(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = isFloat(x)?H_F:isDouble(x)?H_F:H_L;
+        L typZ = isFloat(x)?H_F:isDouble(x)?H_E:H_L;
         initV(z,typZ,1);
         switch(vp(x)){
             caseB {L t=0; DOP(vn(x), t+=vB(x,i), reduction(+:t)) vl(z)=t;} break;
@@ -579,6 +594,19 @@ L pfnSum(V z, V x){
         R 0;
     }
     else R E_DOMAIN;
+}
+
+L pfnAvg(V z, V x){
+    V t = allocNode();
+    CHECKE(pfnSum(t,x));
+    L typZ = isFloat(t)?H_F:H_E;
+    initV(z,typZ,1);
+    switch(vp(t)){
+        caseL ve(z) = vl(t)*1.0/vn(x); break;
+        caseF vf(z) = vf(t)    /vn(x); break;
+        caseE ve(z) = ve(t)    /vn(x); break;
+    }
+    R 0;
 }
 
 #define REDUCELONG(op) (0==op?LLONG_MAX:LLONG_MIN)
@@ -762,8 +790,16 @@ L pfnGroup(V z, V x){
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
     initV(y,H_B,lenZ);
+    // struct timeval tv0, tv1;
+    // gettimeofday(&tv0, NULL);
     DOP(lenZ,vB(y,i)=1)
+    // gettimeofday(&tv1, NULL);
+    // P("1. (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     CHECKE(pfnOrderBy(t,x,y));
+    // gettimeofday(&tv1, NULL);
+    // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // P("t = \n");
+    // printV(t);
 
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
@@ -1213,6 +1249,7 @@ L pfnCompress(V z, V x, V y){
 }
 
 #define INDEXOF(p,z,x,y) lib_index_of_##p(sL(z),s##p(x),vn(x),s##p(y),vn(y))
+#define INDEXOFG(z,x,lenX,y,lenY) lib_index_of_G(sL(z),sG(x),lenX,sG(y),lenY)
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         L typMax = MAX(vp(x), vp(y));
@@ -1234,20 +1271,32 @@ L pfnIndexOf(V z, V x, V y){
         R 0;
     }
     else if(isSameType(x,y)) {
-        switch(xp){
-            caseX INDEXOF(X, z, x, y); break;
-            caseC INDEXOF(C, z, x, y); break;
-            caseQ INDEXOF(Q, z, x, y); break;
-            caseS INDEXOF(S, z, x, y); break;
-            caseM INDEXOF(M, z, x, y); break;
-            caseD INDEXOF(D, z, x, y); break;
-            caseZ INDEXOF(Z, z, x, y); break;
-            caseU INDEXOF(U, z, x, y); break;
-            caseW INDEXOF(W, z, x, y); break;
-            caseT INDEXOF(T, z, x, y); break;
-            default: R E_DOMAIN;
+        if(isTypeGroupBasic(vp(x))){
+            L lenZ = vn(y);
+            initV(z,H_L,lenZ);
+            switch(xp){
+                caseX INDEXOF(X, z, x, y); break;
+                caseC INDEXOF(C, z, x, y); break;
+                caseQ INDEXOF(Q, z, x, y); break;
+                caseS INDEXOF(S, z, x, y); break;
+                caseM INDEXOF(M, z, x, y); break;
+                caseD INDEXOF(D, z, x, y); break;
+                caseZ INDEXOF(Z, z, x, y); break;
+                caseU INDEXOF(U, z, x, y); break;
+                caseW INDEXOF(W, z, x, y); break;
+                caseT INDEXOF(T, z, x, y); break;
+                caseG INDEXOF(G, z, x, y); break;
+            }
+            R 0;
         }
-        R 0;
+        else if(isList(x)){
+            L lenX = 0, lenY = 0;
+            CHECKE(isListIndexOf(x,y,&lenX,&lenY));
+            initV(z,H_L,lenY);
+            INDEXOFG(z, x, lenX, y, lenY);
+            R 0;
+        }
+        else R E_DOMAIN;
     }
     else R E_TYPE;
 }
@@ -1368,7 +1417,12 @@ L pfnOrderBy(V z, V x, V y){
         if(!checkMatch(x)) R E_MATCH;
         L lenZ= 0==vn(x)?0:vn(vV(x,0));
         initV(z,H_L,lenZ);
+        P("lenZ = %lld, item = %lld\n",lenZ,vn(x));
+        struct timeval tv0, tv1;        
+        gettimeofday(&tv0, NULL);
         lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
+        gettimeofday(&tv1, NULL);
+        P("Order By (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
         R 0;
     }
     else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){
@@ -1448,7 +1502,7 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
 /* Literals */
 
 L pfnDictTable(V z, V x, V y, L op){
-    if(isList(x) && isList(y)){
+    if(isSymbol(x) && isList(y)){
         if(isEqualLength(x,y)){
             L lenZ = 2;
             L typZ = 0==op?H_N:H_A;
@@ -1469,9 +1523,9 @@ L pfnDict(V z, V x, V y){
 }
 
 L pfnTable(V z, V x, V y){
-    if(isList(x) && isList(y)){
-        DOI(vn(x), if(!isSymbol(vV(x,i)))R E_DOMAIN)
-        DOI(vn(y), if(!isTypeGroupColumn(vp(vV(x,i))))R E_DOMAIN)
+    if(isSymbol(x) && isList(y)){
+        // DOI(vn(x), if(!isSymbol(vV(x,i)))R E_DOMAIN)
+        DOI(vn(y), if(!isTypeGroupColumn(vp(vV(y,i))))R E_DOMAIN)
         CHECKE(pfnDictTable(z,x,y,1));
         tableRow(z) = (0>=vn(z))?0:vn(getTableCol(getTableVals(z),0));
         tableCol(z) = vn(x);
@@ -1480,16 +1534,33 @@ L pfnTable(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-/* pseudo version */
+/*
+ * pseudo version
+ * x: basic type / list
+ */
 L pfnEnum(V z, V x, V y){
-    V eKey = x;
-    V eVal = allocNode();
-    L sym  = 3;
-    CHECKE(pfnIndexOf(eVal,eKey,y));
-    L lenZ = vn(eVal);
-    DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
-    initV(z,H_Y,lenZ);
-    initEnum(z,sym,eKey,vg(eVal));
+    if(isTypeGroupBasic(vp(x))){
+        V eKey = x;
+        V eVal = allocNode();
+        CHECKE(pfnIndexOf(eVal,eKey,y));
+        L lenZ = vn(eVal);
+        DOI(lenZ, if(vL(eVal,i)>=vn(eKey))R E_ENUM_INDEX)
+        initV(z,H_Y,lenZ);
+        initEnum(z,-1,eKey,vg(eVal));
+    }
+    else if(isList(x) && isList(y) && isEqualLength(x,y)){
+        CHECKE(checkLength(x));
+        CHECKE(checkLength(y)); /* same length */
+        V eKey = x;
+        V eVal = allocNode();
+        CHECKE(pfnIndexOf(eVal,eKey,y));
+        L lenZ = vn(eVal);
+        L lenX = vn(x)>0?vn(vV(x,0)):0;
+        DOI(lenZ, if(vL(eVal,i)>=lenX)R E_ENUM_INDEX)
+        initV(z,H_Y,lenZ);
+        initEnum(z,-1,eKey,vg(eVal));
+    }
+    else R E_DOMAIN;
     R 0;
 }
 
@@ -1517,7 +1588,7 @@ L pfnEnum(V z, V x, V y){
 //                 initEnum(z,vq(x),keyCol,vg(eVal));
 //                 R 0;
 //             }
-//             else R E_DOMAIN;
+//             else R E_NOT_IMPL;
 //         }
 //         else R E_DOMAIN;
 //     }
@@ -1624,9 +1695,9 @@ L pfnVector(V z, V x, V y){
 /*
  * datetime_add(d, 1:64, `year)
  */
-L pfnDatetimeAdd(V z, V x, V y, V m){
+L pfnDatetime(V z, V x, V y, V m, L op){
     if(isTypeGroupDate(vp(x)) && isTypeGroupInt(vp(y)) && isOneSymbol(m)){
-        I op = getDatetimeOp(vq(m));
+        I dop = getDatetimeOp(vq(m));
         if(isOne(x)){
             L typZ = vp(x);
             L lenZ = vn(y);
@@ -1634,7 +1705,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOP(lenZ, vD(z,i)=calcDate(vd(x),vL(tempY,i),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vd(x),vL(tempY,i),dop,op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }
@@ -1645,7 +1716,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vl(tempY),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vl(tempY),dop,op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }
@@ -1656,7 +1727,7 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
             CHECKE(promoteValue(tempY, y, H_L));
             initV(z,typZ,lenZ);
             switch(vp(x)){
-                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vL(tempY,i),op)) break;
+                caseD DOP(lenZ, vD(z,i)=calcDate(vD(x,i),vL(tempY,i),dop,op)) break;
                 default: R E_NOT_IMPL;  /* caseM, caseZ */
             }
         }
@@ -1666,4 +1737,26 @@ L pfnDatetimeAdd(V z, V x, V y, V m){
     R 0;
 }
 
+L pfnDatetimeAdd(V z, V x, V y, V m){
+    R pfnDatetime(z,x,y,m,0);
+}
+
+L pfnDatetimeSub(V z, V x, V y, V m){
+    R pfnDatetime(z,x,y,m,1);
+}
+
+
+L pfnAddFKey(V x, V xKey, V y, V yKey){
+    V tableX = allocNode();
+    V tableY = allocNode();
+    CHECKE(pfnLoadTable(tableX, x));
+    CHECKE(pfnLoadTable(tableY, y));
+    if(isSymbol(x) && isSameType(x,y) && isEqualLength(x,y)){
+        if(isOne(x)){
+            /* */
+        }
+        else R E_NOT_IMPL;
+    }
+    else R E_DOMAIN;
+}
 

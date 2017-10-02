@@ -87,7 +87,7 @@ typedef struct list_table{
 	_Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
 	{ \
 		L tid = omp_get_thread_num(); \
-		for(L i=tid*seg,i2=i+seg;i<i2;i++) x; \
+		for(L i=tid*seg,i2=(tid!=H_CORE-1?(i+seg):(n));i<i2;i++) x; \
 	} \
 }
 

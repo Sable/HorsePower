@@ -1,4 +1,10 @@
 #include "h_global.h"
+#include <fcntl.h>     /* open, mmap */
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 
 const L LINE_MAX_CHAR = 1024;
 const C LINE_SEP      = '|';
@@ -18,25 +24,74 @@ const L BUFF_SIZE     = 256;
 //  R status;
 // }
 
+void* openMMapFile(S s){
+    L fd;
+    void* data;
+    struct stat sbuf;
+    if((fd=open(s, O_RDONLY))==-1){
+        fprintf(stderr, "Can't find file %s\n", s);
+        exit(ERROR_CODE);
+    }
+    if(stat(s,&sbuf)==-1){
+        fprintf(stderr, "File %s state not available\n", s);
+        exit(ERROR_CODE);
+    }
+    data = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    if(data == MAP_FAILED){
+        fprintf(stderr, "mmap error\n");
+        exit(ERROR_CODE);
+    }
+    R data;
+}
+
 V readCSV(S fileName, L numCols, L *types, Q *symList){
+#ifdef USE_MMAP
+    S fp = (S)openMMapFile(fileName);
+#else
     FILE *fp = openFile(fileName);
+#endif
     L numRow = loadCSV(fp, false, NULL, numCols, NULL);
     V x = allocTable(numCols);
     DOI(numCols, {V key=getTableKeys(x); vQ(key,i)=symList[i]; \
         V val=getTableVals(x); initValue(getTableCol(val,i), types[i], numRow);})    
     if(H_DEBUG) P("** Done with initialization **\n");
+#ifndef USE_MMAP
     rewind(fp);
+#endif
     loadCSV(fp, true, x, numCols, types);
     if(H_DEBUG) {printTablePretty(x,20); P("\n");}
+#ifndef USE_MMAP
     fclose(fp);
+#endif
     R x;
 }
 
-L loadCSV(FILE *fp, B isLoading, V table, L numCols, L *types){
+L mgets(S line, L maxSize, S data){
+    S temp = data;
+    while(*temp!='\n' && *temp!='\0') temp++;
+    L k = temp - data;
+    if(k>=maxSize) {
+        fprintf(stderr, "A line should no longer than %lld.\n", maxSize);
+        exit(ERROR_CODE);
+    }
+    memcpy(line,data,k);
+    line[k]=0;
+    R k;
+}
+
+L loadCSV(void *fp, B isLoading, V table, L numCols, L *types){
     C line[LINE_MAX_CHAR];
     L rowSize = 0, rowID = 0;
     L errCode = 0;
-    while(fgets(line, LINE_MAX_CHAR, fp)){
+#ifdef USE_MMAP
+    L lineSize=0;
+    S fp_data = (S)fp;
+    while(lineSize=mgets(line, LINE_MAX_CHAR, fp_data)){
+        fp_data += lineSize;
+        while(*fp_data == '\r' || *fp_data == '\n') fp_data++;
+#else
+    while(fgets(line, LINE_MAX_CHAR, (FILE*)fp)){
+#endif
         if(STRING_NONEMPTY(line)){
             if(isLoading){
                 getField(line, LINE_SEP, table, rowSize, types, &errCode);
@@ -208,7 +263,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
         caseI c=SP(buff, "%d"   , xI(k));   break;
         caseL c=SP(buff, "%lld" , xL(k));   break;
         caseF c=SP(buff, "%g"   , xF(k));   break;
-        caseE c=SP(buff, "%.2lf", xE(k));   break;
+        caseE c=SP(buff, "%lf"  , xE(k));   break;
         caseX c=getComplexStr(xX(k),buff);  break;
         /* deal with caseC and caseS carefully */
         caseQ c=hasTick? \
@@ -239,6 +294,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
         caseT {I t=xT(k),ll=t%1000, w=t/1000;
                c=SP(buff,"%02d:%02d:%02d.%03d", \
                    CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
+        caseG c=SP(buff, "%lldL", k);                      break;
     }
     R c;
 }
@@ -305,7 +361,8 @@ L printDictItem(V x, L k){
 
 L printEnumItem(V x, L k){
     FS("<");
-    FS(getSymbolStr(getEnumName(x)));
+    if(getEnumName(x)<0) FS("<Enum>");
+    else FS(getSymbolStr(getEnumName(x)));
     FS(",");
     /* print enum */
     if(k<0){
@@ -435,9 +492,10 @@ L printTablePretty(V x, L rowLimit){
 L getColWidth(V x, L k, L rowLimit){
     V key = getTableKeys(x);
     V val = getTableVals(x);
+    V valK= vV(val,k);
     C buff[BUFF_SIZE];
     L maxSize = getSymbolSize(vQ(key,k));
-    DOI(rowLimit, {L t=getBasicItemStr(val,i,buff,0); if(t>maxSize)maxSize=t;})
+    DOI(rowLimit, {L t=getBasicItemStr(valK,i,buff,0); if(t>maxSize)maxSize=t;})
     R maxSize>TABLE_CELL_MAX?TABLE_CELL_MAX:maxSize;
 }
 

@@ -6,7 +6,7 @@ extern "C" {
 
 // L readFile(S fileName, L op);
 V    readCSV          (S fileName, L numCols, L *types, Q *symList);
-L    loadCSV          (FILE *fp, B isLoading, V table, L numCols, L *types);
+L    loadCSV          (void *fp, B isLoading, V table, L numCols, L *types);
 L    getField         (S line, C sp, V x, L rowID, L *types, L *errCode);
 FILE*openFile         (S s);
 void loadItem         (V x, L k, L typ, S s);

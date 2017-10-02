@@ -22,7 +22,9 @@ void getNumberOfCore();
 L registerTable         (S tableName, V tablePtr);
 V findTableByName       (L sid);
 L copyV                 (V z, V x);
-L copyByIndex           (V z, V x, L k);
+L initListCopy          (V z, V x, L len);
+L copyByIndex           (V z, L p, V x, L q);
+L copyByIndexSimple     (V z, L p, V x, L q);
 
 L findColFromTable2     (V *z, V x, L cId);
 L findColFromTable      (V x, L cId);
@@ -37,6 +39,7 @@ L appendList            (V z, V x, V y);
 L appendEnum            (V z, V x, V y);
 S genLikeString         (S inStr, L inLen);
 V getValueFromSymbol    (Q id);
+L checkLength           (V x);
 L getCommonType         (V x, L *typ, L *len);
 L fillRaze              (V z, L *n0, V x);
 L matchPair             (B *t, V x, V y);
@@ -47,9 +50,11 @@ L getDictValue          (V z, V x);
 L getColumnValue        (V z, V x);
 
 I getDatetimeOp         (Q id);
-D calcDate              (D x, L v, I op);
+D calcDate              (D x, L v, I dop, L op);
 L calcInterval          (struct timeval t0, struct timeval t1);
 B isAssignableType      (L x, L y);
+B compareTuple          (V x, L ax, V y, L ay);
+L isListIndexOf         (V x, V y, L *sizeX, L *sizeY);
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);

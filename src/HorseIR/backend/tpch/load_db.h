@@ -54,6 +54,7 @@ L readTableCustomer(){
 
 L readTableOrders(){
 	C CSV_LINE[] = "data/tpch/orders.tbl";
+	// C CSV_LINE[] = "data/test-tables/orders-small.tbl";
 	L TYPE_LINE[]  = {H_L, H_L, H_C, H_E,\
 	                  H_D, H_Q, H_S, H_L, H_S};
 	const L NUM_COL_LINE = 9;
@@ -71,6 +72,7 @@ L readTableOrders(){
 
 L readTableLineitem(){
 	C CSV_LINE[] = "data/tpch/lineitem.tbl";
+	// C CSV_LINE[] = "data/test-tables/lineitem-small.tbl";
 	L TYPE_LINE[]  = {H_L, H_L, H_L, H_L, \
 		              H_E, H_E, H_E, H_E, \
 		              H_C, H_C, H_D, H_D, \

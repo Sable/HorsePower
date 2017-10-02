@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 echo Starting ...
 #export OMP_NUM_THREADS=20;
 #export GOMP_CPU_AFFINITY="0-17:4 1-18:4 2-19:4 3-20:4"
@@ -11,5 +11,10 @@ echo Starting ...
 #export OMP_PLACES=cores
 #export OMP_PROC_BIND=spread
 #export OMP_NUM_THREADS=40
-(cd ../ && make release && time ./horse -t 12)
+id=12
+if [ "make" == "$1" ]; then
+    (cd ../ && make debug && time ./horse -t $id)
+else
+    (cd ../ && time ./horse -t $id)
+fi
 echo Done.

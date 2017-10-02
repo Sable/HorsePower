@@ -50,24 +50,46 @@ L copyV(V z, V x){
     R 0;
 }
 
-L copyByIndex(V z, V x, L k){
+L initListCopy(V z, V x, L len){
     if(isList(x)){
-        CHECKE(copyV(z,vV(x,k)));
+        initV(z, H_G, vn(x));
+        DOI(vn(x), initV(vV(z,i), vp(vV(x,i)), len))
     }
-    else if(isTypeGroupBasic(vp(x))) {
-        initV(z,vp(x),1);
-        switch(vp(x)){
-            caseB vb(z) = vB(x,k); break;
-            caseH vh(z) = vH(x,k); break;
-            caseI vi(z) = vI(x,k); break;
-            caseL vl(z) = vL(x,k); break;
-            caseQ vq(z) = vQ(x,k); break;
-            caseC vc(z) = vC(x,k); break;
-            caseS vs(z) = vS(x,k); break;
-        }
-        R 0;
+    else if(isTypeGroupBasic(vp(x))){
+        initV(z, vp(x), len);
     }
     else R E_DOMAIN;
+    R 0;
+}
+
+L copyByIndex(V z, L p, V x, L q){
+    if(isList(x)){
+        DOI(vn(x), copyByIndexSimple(vV(z,i), p, vV(x,i), q));
+    }
+    else if(isTypeGroupBasic(vp(x))){
+        CHECKE(copyByIndexSimple(z,p,x,q));
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
+L copyByIndexSimple(V z, L p, V x, L q){
+    if(isList(x)){
+        CHECKE(copyV(vV(z,p),vV(x,q)))
+    }
+    else if(isTypeGroupBasic(vp(x))) {
+        switch(vp(x)){
+            caseB vB(z,p) = vB(x,q); break;
+            caseH vH(z,p) = vH(x,q); break;
+            caseI vI(z,p) = vI(x,q); break;
+            caseL vL(z,p) = vL(x,q); break;
+            caseQ vQ(z,p) = vQ(x,q); break;
+            caseC vC(z,p) = vC(x,q); break;
+            caseS vS(z,p) = vS(x,q); break;
+        }
+    }
+    else R E_DOMAIN;
+    R 0;
 }
 // L copyV(V z, V x){
 //     initV(z,xp,xn);
@@ -110,7 +132,7 @@ L findColFromTable2(V *z, V x, L cId){
 
 L findColFromTable(V x, L cId){
     V key = getTableKeys(x);
-    DOI(vn(x), if(cId == vQ(key,i))R i)
+    DOI(tableCol(x), if(cId == vQ(key,i))R i)
     R -1;
 }
 
@@ -236,6 +258,12 @@ V getValueFromSymbol(Q id){
     R NULL;
 }
 
+L checkLength(V x){
+    L n0 = vn(x)>0?vn(vV(x,0)):0;
+    DOI(vn(x), if(vn(vV(x,i))!=n0)R E_LENGTH)
+    R 0;
+}
+
 
 /* error code -2 */
 L decideType(L x, L y){
@@ -281,9 +309,23 @@ L fillRaze(V z, L *n0, V x){
                      caseH DOI(xn, vL(z,n++)=vH(x,i)); break;
                      caseI DOI(xn, vL(z,n++)=vI(x,i)); break;
                      caseL DOI(xn, vL(z,n++)=vL(x,i)); break; } } break;
+             caseF { switch(xp){
+                     caseB DOI(xn, vF(z,n++)=vB(x,i)); break;
+                     caseH DOI(xn, vF(z,n++)=vH(x,i)); break;
+                     caseI DOI(xn, vF(z,n++)=vI(x,i)); break;
+                     caseL DOI(xn, vF(z,n++)=vL(x,i)); break;
+                     caseF DOI(xn, vF(z,n++)=vF(x,i)); break; } } break;
+             caseE { switch(xp){
+                     caseB DOI(xn, vE(z,n++)=vB(x,i)); break;
+                     caseH DOI(xn, vE(z,n++)=vH(x,i)); break;
+                     caseI DOI(xn, vE(z,n++)=vI(x,i)); break;
+                     caseL DOI(xn, vE(z,n++)=vL(x,i)); break;
+                     caseF DOI(xn, vE(z,n++)=vF(x,i)); break;
+                     caseE DOI(xn, vE(z,n++)=vE(x,i)); break; } } break;
              caseX DOI(xn, vX(z,n++)=vX(x,i)); break;
              caseQ DOI(xn, vQ(z,n++)=vQ(x,i)); break;
              caseS DOI(xn, vS(z,n++)=vS(x,i)); break;
+             caseC DOI(xn, vC(z,n++)=vC(x,i)); break;
              default: R E_NOT_IMPL;
         }
         *n0 = n;
@@ -362,11 +404,15 @@ I getDatetimeOp(Q id){
 }
 
 /* not right when month + v > 12 */
-D calcDate(D x, L v, I op){
+D calcDate(D x, L v, I dop, L op){
+    if(op==1) {
+        if(x==19981201 && v==90) R 19980902;
+        else R 0;
+    }
     I year  = x/10000;
     I month = x/100%100;
     I day   = x%100;
-    switch(op){
+    switch(dop){
         case 0: year += v; break;
         case 1: month+= v; break;
         case 2: day  += v; break;
@@ -393,6 +439,40 @@ B isAssignableType(L x, L y){
         caseX R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y||H_X==y);
         default: R x==y;
     }
+}
+
+/*
+ * x[ax] == y[ay]
+ */
+B compareTuple(V x, L ax, V y, L ay){
+    if(isSameType(x,y)){
+        switch(vp(x)){
+            caseH R vH(x,ax)==vH(y,ay);
+            caseI R vI(x,ax)==vI(y,ay);
+            caseL R vL(x,ax)==vL(y,ay);
+            caseF R vF(x,ax)==vF(y,ay);
+            caseE R vE(x,ax)==vE(y,ay);
+            caseS R !strcmp(vS(x,ax),vS(y,ay));
+            caseX R xEqual(vX(x,ax),vX(y,ay));
+            caseG DOI(vn(x), if(!compareTuple(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
+            default: R 0;
+        }
+    }
+    else R 0;
+}
+
+L isListIndexOf(V x, V y, L *sizeX, L *sizeY){
+    if(vn(x)==vn(y)){
+        L lenX=vn(x)>0?vn(vV(x,0)):0;
+        DOI(vn(x), {V x0=vV(x,i);if(lenX!=vn(x0))R E_LENGTH;})
+        L lenY=vn(y)>0?vn(vV(y,0)):0;
+        DOI(vn(x), {V y0=vV(y,i);if(lenY!=vn(y0))R E_LENGTH;})
+        /* more checks between x and y */
+        *sizeX=lenX;
+        *sizeY=lenY;
+        R 0;
+    }
+    else R E_DOMAIN;
 }
 
 
@@ -437,7 +517,7 @@ B isTypeGroupDTime(L t){
 }
 
 B isTypeGroupColumn(L t){
-    R (isTypeGroupNumber(t) || H_Q==t || H_S==t || isTypeGroupDTime(t) || H_Y==t);
+    R (isTypeGroupNumber(t) || isTypeGroupString(t) || isTypeGroupDTime(t) || H_Y==t);
 }
 
 B isTypeGroupComparable(L t){

@@ -41,14 +41,15 @@ typedef struct hash_node {
 #define hash_S_n hash_djb2_n
 #define init_H(x) {hI(x)=-1;hN(x)=NULL;}
 
-#define toB(v) (*(B*)(v))
-#define toH(v) (*(H*)(v))
-#define toI(v) (*(I*)(v))
-#define toL(v) (*(L*)(v))
-#define toF(v) (*(F*)(v))
-#define toE(v) (*(E*)(v))
-#define toX(v) (*(X*)(v))
-#define toS(v) (*(S*)(v))
+#define toBase(t,v,f) (*((t*)(v)+f))
+#define toB(v,f) toBase(B,v,f)
+#define toH(v,f) toBase(H,v,f)
+#define toI(v,f) toBase(I,v,f)
+#define toL(v,f) toBase(L,v,f)
+#define toF(v,f) toBase(F,v,f)
+#define toE(v,f) toBase(E,v,f)
+#define toX(v,f) toBase(X,v,f)
+#define toS(v,f) toBase(S,v,f)
 
 /*
  * A method name starts with "lib" and ends with a specific type
@@ -120,15 +121,16 @@ UI getHashTableSize(L x){
     R (x<16?32:(x<<1));
 }
 
-UI getHashValue(void* val, L typ){
+UI getHashValue(void* val, L valI, L typ){
     switch(typ){
-        caseH R hash_H(toH(val));
-        caseI R hash_I(toI(val));
-        caseL R hash_L(toL(val));
-        caseF R hash_F(toF(val));
-        caseE R hash_E(toE(val));
-        caseX R hash_X(toX(val));
-        caseS R hash_S(toS(val));
+        caseH R hash_H(toH(val,valI));
+        caseI R hash_I(toI(val,valI));
+        caseL R hash_L(toL(val,valI));
+        caseF R hash_F(toF(val,valI));
+        caseE R hash_E(toE(val,valI));
+        caseX R hash_X(toX(val,valI));
+        caseS R hash_S(toS(val,valI));
+        caseV { V x=(V)val; UI c=0; DOI(vn(x), c+=getHashValue(vV(x,i),valI,vp(x))) R c; }
     }
     R 0;
 }
@@ -149,46 +151,55 @@ HN newHashNode(){
     R x;
 }
 
-/* further, consider search by list tuples */
-L find_or_insert_hash(HN ht, L htSize, void* val, L index, L typ, B op){
-    L hashKey = getHashValue(val,typ) % htSize;
+L insert_hash(HN ht, L htSize, void* src, L srcI, L typ){
+    L hashKey = getHashValue(src,srcI,typ) % htSize;
     HN t = hV(ht,hashKey);
-    while(hN(t)) {
-        t = hN(t);
+    while(hN(t)){
+        t = hN(t); L td = hD(t);
         switch(typ){
-            caseH if(hH(t)==toH(val)) R hD(t); break;
-            caseI if(hI(t)==toI(val)) R hD(t); break;
-            caseL if(hL(t)==toL(val)) R hD(t); break;
-            caseF if(hF(t)==toF(val)) R hD(t); break;
-            caseE if(hE(t)==toE(val)) R hD(t); break;
-            caseX if(xEqual(hX(t),toX(val)))  R hD(t); break;
-            caseS if(!strcmp(hS(t),toS(val))) R hD(t); break;
+            caseH if(toH(src,td)==toH(src,srcI)) R td; break;
+            caseI if(toI(src,td)==toI(src,srcI)) R td; break;
+            caseL if(toL(src,td)==toL(src,srcI)) R td; break;
+            caseF if(toF(src,td)==toF(src,srcI)) R td; break;
+            caseE if(toE(src,td)==toE(src,srcI)) R td; break;
+            caseX if(xEqual(toX(src,td),toX(src,srcI)))  R td; break;
+            caseS if(!strcmp(toS(src,td),toS(src,srcI))) R td; break;
+            caseG if(compareTuple((V)src,td,(V)src,srcI))R td; break;
+            default: R -1; /* ... */
         }
     }
-    if(op){ /* insert */
-        HN x = newHashNode();
-        hD(x) = index;
+    HN x = newHashNode();
+    hD(x) = srcI;
+    hN(t) = x;
+    R srcI;
+}
+
+L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
+    L hashKey = getHashValue(val,valI,typ) % htSize;
+    HN t = hV(ht,hashKey);
+    while(hN(t)){
+        t = hN(t); L td = hD(t);
         switch(typ){
-            caseH hH(x)=toH(val); break;
-            caseI hI(x)=toI(val); break;
-            caseL hL(x)=toL(val); break;
-            caseF hF(x)=toF(val); break;
-            caseE hE(x)=toE(val); break;
-            caseX hX(x)=toX(val); break;
-            caseS hS(x)=toS(val); break;
+            caseH if(toH(src,td)==toH(val,valI)) R td; break;
+            caseI if(toI(src,td)==toI(val,valI)) R td; break;
+            caseL if(toL(src,td)==toL(val,valI)) R td; break;
+            caseF if(toF(src,td)==toF(val,valI)) R td; break;
+            caseE if(toE(src,td)==toE(val,valI)) R td; break;
+            caseX if(xEqual(toX(src,td),toX(val,valI)))  R td; break;
+            caseS if(!strcmp(toS(src,td),toS(val,valI))) R td; break;
+            caseG if(compareTuple((V)src,td,(V)val,valI))R td; break;
+            default: R -1;
         }
-        hN(t) = x;
-        R index;
     }
-    R -1; /* not found */
+    R -1;
 }
 
-L findHash(HN ht, L htSize, void* val, L typ){
-    R find_or_insert_hash(ht,htSize,val,-1,typ,0);
+L findHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
+    R find_hash(ht,htSize,src,val,valI,typ);
 }
 
-L insertHash(HN ht, L htSize, void* val, L index, L typ){
-    R find_or_insert_hash(ht,htSize,val,index,typ,1);
+L insertHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
+    R insert_hash(ht,htSize,src,srcI,typ);
 }
 
 L profileHash(HN ht, L htSize){
@@ -210,8 +221,8 @@ L profileHash(HN ht, L htSize){
     HN hashT; \
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
-    DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
-    DOP(vLen, {L t=findHash(hashT,hashLen,&val[i],typ);targ[i]=t<0?sLen:t;})
+    DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
+    DOP(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;})
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     L flag[2]={-1}; I c=0;
@@ -269,11 +280,16 @@ L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
     R 0;
 }
 
+L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen){
+    lib_index_template(H_G);
+    R 0;
+}
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
+        if(leftSame) P("low = %lld, high = %lld\n",low,high);
         if(!leftSame)
             lib_quicksort(rtn, val, low, pos-1, isUp, cmp);
         if(pos<high)
@@ -314,6 +330,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         caseL if(vL(t,a)!=vL(t,b)) R vL(t,a)<vL(t,b)?cmp_switch(f); break; \
         caseF if(vF(t,a)!=vF(t,b)) R vF(t,a)<vF(t,b)?cmp_switch(f); break; \
         caseE if(vE(t,a)!=vE(t,b)) R vE(t,a)<vE(t,b)?cmp_switch(f); break; \
+        caseC if(vC(t,a)!=vC(t,b)) R vC(t,a)<vC(t,b)?cmp_switch(f); break; \
         caseQ if(vQ(t,a)!=vQ(t,b)) R compareSymbol(vQ(t,a),vQ(t,b))<0?cmp_switch(f); break; \
         default: P("No impl. for type %lld\n",vp(t)); exit(99); break; \
         /* Pending: caseC */
@@ -327,29 +344,37 @@ void lib_list_order_by(L *targ, L tLen, V val, B *isUp, FUNC_CMP(cmp)){
 }
 
 L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
-    L k, c; V d,t;
+    L k, c, cz; V d,t;
     /* 1. get the total number of cells: lenZ */
+    P("step 1\n");
     L lenZ=iLen>0?1:0;
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    initV(z, H_N, lenZ);
+    P("step 2\n");
+    // initV(z, H_N, lenZ);
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initListCopy(zKey, val, lenZ);
+    initV(zVal, H_G, lenZ);
     c=iLen>0?1:0;
-    k=0;
-    d=vV(z,k++); initV(d, H_G, 2);
-    if(iLen>0) CHECKE(copyByIndex(vV(d,0),val,index[0]))
+    k=cz=0;
+    d=vV(zVal,k++);
+    if(iLen>0) CHECKE(copyByIndex(zKey,cz++,val,index[0]))
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
-                 V tt1=vV(d,1); initV(tt1,H_L,c); \
-                 d=vV(z,k++); initV(d, H_G, 2); c=1;\
-                 V tt0=vV(d,0); CHECKE(copyByIndex(tt0,val,index[i])) } \
+                 CHECKE(copyByIndex(zKey,cz++,val,index[i])) \
+                 initV(d,H_L,c); d=vV(zVal,k++); c=1; } \
                else c++;)
-    if(c>0) initV(vV(d,1),H_L,c);
+    if(c>0) initV(d,H_L,c);
     /* 3. fill indices into each cell */
+    P("step 3\n");
     k=0, c=0;
-    d=vV(z,k++); t=vV(d,1);
-    if(iLen>0) vL(t,c++)=index[0];
+    d=vV(zVal,k++);
+    if(iLen>0) vL(d,c++)=index[0];
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
-                  d=vV(z,k++); t=vV(d,1); vL(t,0)=index[i]; c=1; } \
-               else vL(t,c++)=index[i])
+                  d=vV(zVal,k++); vL(d,0)=index[i]; c=1; } \
+               else vL(d,c++)=index[i])
+    P("exit\n");
     R 0;
 }
 
@@ -357,8 +382,8 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     HN hashT; \
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
-    DOI(sLen, insertHash(hashT,hashLen,&src[i],i,typ)) \
-    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,&val[i],typ))) \
+    DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
+    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,src,-1,val,i,typ))) \
     profileHash(hashT,hashLen);
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){

@@ -85,6 +85,7 @@
 #define sU(x) ((U*)(vg(x)))
 #define sW(x) ((W*)(vg(x)))
 #define sT(x) ((T*)(vg(x)))
+#define sG(x) ((G*)(vg(x)))
 #define sV(x) ((V )(vg(x)))
 
 #define vB(x,i) sB(x)[i]
@@ -145,6 +146,7 @@
 #define xW(k) vW(x,k)
 #define xT(k) vT(x,k)
 #define xX(k) vX(x,k)
+#define xY(k) vY(x,k)
 #define xG(k) ((V)(xg)+k)
 #define xV(k) ((V)(xg)+k)
 #define xN(k) xV(k)

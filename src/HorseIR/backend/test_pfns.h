@@ -137,6 +137,35 @@ L testIndexA(){
     R e;
 }
 
+L testEnum(){
+    P("\nTest complex enum\n");
+    V a1 = allocNode(); V a2 = allocNode();
+    V b1 = allocNode(); V b2 = allocNode();
+    V a = allocNode(); V b = allocNode(); V c = allocNode();
+    L ta1[] = {1,2,3,4,5,6,7,8};
+    L ta2[] = {8,7,6,5,4,3,2,1};
+    L tb1[] = {1,2,3,4,5,6,2};
+    L tb2[] = {8,7,6,5,4,3,7};
+    initV(a1, H_L, 8); DOI(8, vL(a1,i)=ta1[i])
+    initV(a2, H_L, 8); DOI(8, vL(a2,i)=ta2[i])
+    initV(b1, H_L, 7); DOI(7, vL(b1,i)=tb1[i])
+    initV(b2, H_L, 7); DOI(7, vL(b2,i)=tb2[i])
+    V ka[] = {a1,a2};
+    V kb[] = {b1,b2};
+    pfnList(a,2,ka);
+    pfnList(b,2,kb);
+    P("a = \n"); printV(a);
+    P("b = \n"); printV(b);
+    L e = pfnEnum(c,a,b);
+    P("e1 = %lld\n",e);
+    printV(c);
+    e = pfnEnum(c,a1,b1);
+    P("e2 = %lld\n",e);
+    printV(c);
+    R e;
+}
+
+
 
 L testPfns(){
     // testMember();
@@ -145,6 +174,7 @@ L testPfns(){
     // testCompare();
     // testSum();
     // testCompress();
-    testIndexA();
+    // testIndexA();
+    testEnum();
 	R 0;
 }

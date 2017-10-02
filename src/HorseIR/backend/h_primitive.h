@@ -113,6 +113,7 @@ L pfnReverse       (V z, V x);
 L pfnUnique        (V z, V x);
 L pfnWhere         (V z, V x);
 L pfnSum           (V z, V x);
+L pfnAvg           (V z, V x);
 
 L pfnReduce        (V z, V x, L op);
 L pfnMin           (V z, V x);
@@ -184,7 +185,9 @@ L pfnMember        (V z, V x, V y);
 L pfnVector        (V z, V x, V y);
 
 L pfnDatetimeAdd   (V z, V x, V y, V m);
+L pfnDatetimeSub   (V z, V x, V y, V m);
 L pfnBetween       (V z, V x, V p, V q);
+L pfnAddFKey       (V x, V xKey, V y, V yKey);
 
 #ifdef	__cplusplus
 }

@@ -37,6 +37,15 @@ V literalI64(L x){
     R z;
 }
 
+V literalString(S s){
+    V z = allocNode();
+    initV(z,H_S,1);
+    S t = allocStrMem(strlen(s));
+    strcpy(t,s);
+    vs(z) = t;
+    R z;
+}
+
 V literalSym(S str){
     V z = allocNode();
     initV(z,H_Q,1);
@@ -57,6 +66,7 @@ V literalSymVector(L n, S strs[]){
     DOI(n, vQ(z,i)=getSymbol(strs[i]))
     R z;
 }
+
 
 #include "test_simple.h"
 #include "test_types.h"
