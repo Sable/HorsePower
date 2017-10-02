@@ -16,7 +16,7 @@ L simulateQ12(){
 	V s12= allocNode(); V s13= allocNode(); V s14= allocNode();
 	V r0 = allocNode(); V r1 = allocNode();
 	V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode();
-	V z0 = allocNode(); V z1 = allocNode(); V z2 = allocNode(); V z = allocNode();
+	V z0 = allocNode(); V z1 = allocNode(); V z = allocNode();
 	struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
 
@@ -82,10 +82,9 @@ L simulateQ12(){
     S literStr2[] = {(S)"l_shipmode", (S)"high_line_count", (S)"low_line_count"};
     V liter2 = literalSymVector(3, literStr2);
     PROFILE(51,copyV(z0,liter2));
-    PROFILE(52,pfnToList(z1,z0));
     V rn[] = {m0,m1,m2};
-    PROFILE(53,pfnList(z2,3,rn));
-    PROFILE(54,pfnTable(z,z1,z2));
+    PROFILE(53,pfnList(z1,3,rn));
+    PROFILE(54,pfnTable(z,z0,z1));
 
     gettimeofday(&tv1, NULL);
     P("Result of the Query 12: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
