@@ -189,6 +189,9 @@ L pfnDatetimeSub   (V z, V x, V y, V m);
 L pfnBetween       (V z, V x, V p, V q);
 L pfnAddFKey       (V x, V xKey, V y, V yKey);
 
+L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3);
+L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1);
+
 #ifdef	__cplusplus
 }
 #endif

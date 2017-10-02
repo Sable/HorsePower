@@ -1760,3 +1760,25 @@ L pfnAddFKey(V x, V xKey, V y, V yKey){
     else R E_DOMAIN;
 }
 
+/* handcraft loop fusion optimization */
+
+/* status: on */
+L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)=((vE(t1,i)>=0.05&&vE(t1,i)<=0.07)\
+        &&(vD(t2,i)>=19940101&&vD(t2,i)<19950101)\
+        &&(vE(t3,i)<24)))
+    R 0;
+}
+
+/* status: off */
+L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1){
+    V temp = allocNode();
+    initV(temp,H_E,r0);
+    // memset(vS(temp),0,sizeof(E)*r0);
+    DOP(r0, vE(temp,i)=vE(t0,i)*vE(t1,i))
+    CHECKE(pfnCompress(z,t15,temp));
+    R 0;
+}
+
+

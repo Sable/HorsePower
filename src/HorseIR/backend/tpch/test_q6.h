@@ -22,25 +22,29 @@ L simulateQ6(){
     PROFILE(5,pfnColumnValue(t3, a0, \
         initSymbol(allocNode(),getSymbol((S)"l_quantity"))));
 
-    PROFILE(6,pfnGeq(t4, t2, literalDate(19940101)));
-    PROFILE(7,pfnDatetimeAdd(t5,literalDate(19940101),literalI64(1),literalSym((S)"year")));
-    PROFILE(8,pfnLt(t6,t2,t5));
-    PROFILE(9,pfnMinus(t7,literalF64(0.06),literalF64(0.01)));
-    PROFILE(10,pfnPlus(t8,literalF64(0.06),literalF64(0.01)));
+    // PROFILE(6,pfnGeq(t4, t2, literalDate(19940101)));
+    // PROFILE(7,pfnDatetimeAdd(t5,literalDate(19940101),literalI64(1),literalSym((S)"year")));
+    // PROFILE(8,pfnLt(t6,t2,t5));
+    // PROFILE(9,pfnMinus(t7,literalF64(0.06),literalF64(0.01)));
+    // PROFILE(10,pfnPlus(t8,literalF64(0.06),literalF64(0.01)));
 
-    PROFILE(11,pfnGeq(t9,t1,t7));
-    PROFILE(12,pfnLeq(t10,t1,t8));
-    PROFILE(13,pfnAnd(t11,t9,t10));
-    // PROFILE(13,pfnBetween(t11,t1,t7,t8));
-    PROFILE(14,pfnLt(t12,t3,literalI64(24)));
+    // PROFILE(11,pfnGeq(t9,t1,t7));
+    // PROFILE(12,pfnLeq(t10,t1,t8));
+    // PROFILE(13,pfnAnd(t11,t9,t10));
+    // // PROFILE(13,pfnBetween(t11,t1,t7,t8));
+    // PROFILE(14,pfnLt(t12,t3,literalI64(24)));
 
-    PROFILE(15,pfnAnd(t13,t4,t6));
-    PROFILE(16,pfnAnd(t14,t13,t11));
-    PROFILE(17,pfnAnd(t15,t14,t12));
+    // PROFILE(15,pfnAnd(t13,t4,t6));
+    // PROFILE(16,pfnAnd(t14,t13,t11));
+    // PROFILE(17,pfnAnd(t15,t14,t12));
+    PROFILE(91, optLoopFusionQ6_1(t15,tableRow(a0),t1,t2,t3));
 
     PROFILE(18,pfnCompress(t16,t15,t0));
     PROFILE(19,pfnCompress(t17,t15,t1));
     PROFILE(20,pfnMul(t18,t16,t17));
+    // P("before %lld, after %lld\n", vn(t0),vn(t16));
+    // before 6001215, after 114160  -->  selectivity 1.9%
+    // PROFILE(92, optLoopFusionQ6_2(t18,tableRow(a0),t15,t0,t1));
     PROFILE(21,pfnSum(t19,t18));
 
     PROFILE(22,copyV(t20,literalSym((S)"revenue")));
