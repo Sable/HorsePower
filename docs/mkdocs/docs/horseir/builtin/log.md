@@ -2,6 +2,22 @@
 
 ### Description
 
+Natural logarithm
+
+- `log(e, number)`
+
+### Type rules
+
+```no-highlight
+Real -> f32 / f64 / Complex
+_    -> domain error
+```
+
+
+## log2
+
+### Description
+
 Logarithm
 
 - `log(base, number)`
