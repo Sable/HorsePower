@@ -21,13 +21,13 @@ Query profile (<u>Total 22</u>: **Pass** 5; <blue>Testing</blue>: 0; <red>Workin
 | [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | (Nested)                      |
 | [14][q14]| L,P         | 3     | 2    | 1     | 0     | 0     | 1      | <red>Working</red>            |
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
-| [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      |                               |
-| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      |                               |
-| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      |                               |
-| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      |                               |
+| [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      | <red>Working</red>            |
+| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | <red>Working</red>            |
+| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | <red>Working</red>            |
+| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | <red>Working</red>            |
 | [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
 | [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |
-| [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      |                               |
+| [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      | <red>Working</red>            |
 
 
 \* List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md))
