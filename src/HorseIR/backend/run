@@ -8,10 +8,10 @@ echo Starting ...
 #export GOMP_CPU_AFFINITY="0-57:4 1-58:4 2-59:4 3-60:4"
 #export OMP_NUM_THREADS=80;
 #export GOMP_CPU_AFFINITY="0-77:4 1-78:4 2-79:4 3-80:4"
-export OMP_PLACES=cores
-export OMP_PROC_BIND=spread
-export OMP_NUM_THREADS=4
-id=6
+#export OMP_PLACES=cores
+#export OMP_PROC_BIND=spread
+#export OMP_NUM_THREADS=4
+id=3
 if [ "debug" == "$1" ]; then
     (cd ../ && make debug && time ./horse -t $id)
 elif [ "release" == "$1" ]; then

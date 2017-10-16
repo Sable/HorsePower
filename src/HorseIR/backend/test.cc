@@ -60,6 +60,13 @@ V literalF64(E x){
     R z;
 }
 
+V literalChar(C x){
+    V z = allocNode();
+    initV(z,H_C,1);
+    vc(z) = x;
+    R z;
+}
+
 V literalSymVector(L n, S strs[]){
     V z = allocNode();
     initV(z,H_Q,n);
@@ -67,11 +74,24 @@ V literalSymVector(L n, S strs[]){
     R z;
 }
 
+V literalBoolVector(L n, B b[]){
+    V z = allocNode();
+    initV(z,H_B,n);
+    DOI(n, vB(z,i)=b[i])
+    R z;
+}
+
+// #define PROFILE(n,x) x
+#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
+        gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
+        P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
+
 
 #include "test_simple.h"
 #include "test_types.h"
 #include "test_pfns.h"
 #include "test_tpch.h"
+#include "test_pl.h"
 
 L testMain(I qid){
     initMain();  // memory
@@ -83,9 +103,10 @@ L testMain(I qid){
         case 2: testTypes();      break;
         case 3: testOrderBy();    break;
         case 4: testTPCH(qid);    break;
-        case 5: testPfns();       break;
-        case 6: testMemory();     break;
-        case 7: readTpchTables(); break;
+        case 5: testPL(0);        break;
+        case 6: testPfns();       break;
+        case 7: testMemory();     break;
+        case 8: readTpchTables(); break;
         default: break;
     }
     /* Print info */

@@ -36,6 +36,7 @@ L pfnList(V z, L n, V x[]){
  */
 L pfnIndex(V z, V x, V y){
     if(H_DEBUG) P("-> Entering index\n");
+    // P("info x y: (%lld, %lld) (%lld, %lld)\n",vp(x),vn(x),vp(y),vn(y));
     if(isTypeGroupInt(vp(y))){
         L typZ = vp(x), lenZ = vn(y), lenX = vn(x);
         V tempY = allocNode();
@@ -43,17 +44,24 @@ L pfnIndex(V z, V x, V y){
         DOI(lenZ, if(lenX <= vL(tempY,i))R E_INDEX)
         if(isTypeGroupBasic(vp(x))){
             initV(z, typZ, lenZ);
+            #define INDEX_BASIC(p) case##p DOP(lenZ, v##p(z,i)=v##p(x,vL(y,i))) break
             switch(vp(x)){
-                caseB DOP(lenZ, vB(z,i)=vB(x,vL(y,i))) break;
-                caseH DOP(lenZ, vH(z,i)=vH(x,vL(y,i))) break;
-                caseI DOP(lenZ, vI(z,i)=vI(x,vL(y,i))) break;
-                caseL DOP(lenZ, vL(z,i)=vL(x,vL(y,i))) break;
-                caseF DOP(lenZ, vF(z,i)=vF(x,vL(y,i))) break;
-                caseE DOP(lenZ, vE(z,i)=vE(x,vL(y,i))) break;
-                caseX DOP(lenZ, vX(z,i)=vX(x,vL(y,i))) break;
-                caseQ DOP(lenZ, vQ(z,i)=vQ(x,vL(y,i))) break;
-                caseS DOP(lenZ, vS(z,i)=vS(x,vL(y,i))) break;
-                caseC DOP(lenZ, vC(z,i)=vC(x,vL(y,i))) break;
+                INDEX_BASIC(B);
+                INDEX_BASIC(H);
+                INDEX_BASIC(I);
+                INDEX_BASIC(L);
+                INDEX_BASIC(F);
+                INDEX_BASIC(E);
+                INDEX_BASIC(X);
+                INDEX_BASIC(Q);
+                INDEX_BASIC(S);
+                INDEX_BASIC(C);
+                INDEX_BASIC(M);
+                INDEX_BASIC(D);
+                INDEX_BASIC(Z);
+                INDEX_BASIC(U);
+                INDEX_BASIC(W);
+                INDEX_BASIC(T);
                 default: R E_NOT_IMPL; /* date time */
             }
             R 0;
@@ -159,17 +167,14 @@ L pfnMeta(V z, V x){
 
 L pfnKeys(V z, V x){
     if(isEnum(x)){
-        *z = *((V)getEnumTarget(x)); /* copy keys */
-        R 0;
+        R copyV(z, (V)getEnumTarget(x));
     }
     else if(isTable(x) || isDict(x)){
         L lenZ = vn(x);
-        CHECKE(copyV(z,getTableKeys(x)));
-        R 0;
+        R copyV(z, getTableKeys(x));
     }
     else if(isKTable(x)){
-        CHECKE(copyV(z,getKTableKey(x)));
-        R 0;
+        R copyV(z, getKTableKey(x));
     }
     else R E_DOMAIN;
 }
@@ -186,6 +191,30 @@ L pfnValues(V z, V x){
     }
     else R E_DOMAIN;
     R 0;
+}
+
+L pfnFetch(V z, V x){
+    if(isEnum(x)){
+        V targ = (V)getEnumTarget(x);
+        L typZ = vp(targ);
+        L lenZ = vn(x);
+        initV(z, typZ, lenZ);
+        switch(typZ){
+            caseB DOP(lenZ, vB(z,i)=vB(targ,vY(x,i))) break;
+            caseH DOP(lenZ, vH(z,i)=vH(targ,vY(x,i))) break;
+            caseI DOP(lenZ, vI(z,i)=vI(targ,vY(x,i))) break;
+            caseL DOP(lenZ, vL(z,i)=vL(targ,vY(x,i))) break;
+            caseF DOP(lenZ, vF(z,i)=vF(targ,vY(x,i))) break;
+            caseE DOP(lenZ, vE(z,i)=vE(targ,vY(x,i))) break;
+            caseX DOP(lenZ, vX(z,i)=vX(targ,vY(x,i))) break;
+            caseS DOP(lenZ, vS(z,i)=vS(targ,vY(x,i))) break;
+            caseQ DOP(lenZ, vQ(z,i)=vQ(targ,vY(x,i))) break;
+            caseC DOP(lenZ, vC(z,i)=vC(targ,vY(x,i))) break;
+            default: R E_NOT_IMPL;
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
 }
 
 L pfnColumnValue(V z, V x, V y){
@@ -229,7 +258,9 @@ const E PI = acos(-1);
 #define DIVDE(x,t) (x/t)
 #define SIGNUM(x) (0<(x)?1:0>(x)?-1:0)
 #define PIMUL(x) (PI*x)
-#define NOT(x) (~x)
+#define NOT(x) (!x)
+#define EXP(x) exp(x)
+#define LOGN(x) log(x)
 #define POWER(x,y) pow(x,y)
 #define LOG(x,y) (log(y)/log(x))
 #define MODI(x,y) ((x)%(y))
@@ -499,6 +530,32 @@ L pfnNot(V z, V x){
         R 0;
     }
     else R E_DOMAIN;
+}
+
+#define EXPLOG(op, x) (0==op?EXP(x):LOGN(x))
+L pfnExpLog(V z, V x, L op){
+    if(isTypeGroupReal(xp)){
+        L typZ = isFloat(x)?H_F:H_E;
+        initV(z, typZ, vn(x));
+        switch(xp){
+            caseB DOP(xn, vE(z,i)=EXPLOG(op,vB(x,i))) break;
+            caseH DOP(xn, vE(z,i)=EXPLOG(op,vH(x,i))) break;
+            caseI DOP(xn, vE(z,i)=EXPLOG(op,vI(x,i))) break;
+            caseL DOP(xn, vE(z,i)=EXPLOG(op,vL(x,i))) break;
+            caseF DOP(xn, vF(z,i)=EXPLOG(op,vF(x,i))) break;
+            caseE DOP(xn, vE(z,i)=EXPLOG(op,vE(x,i))) break;
+            default: R E_NOT_IMPL;
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+L pfnExp(V z, V x){
+    R pfnExpLog(z,x,0);
+}
+L pfnLog(V z, V x){
+    R pfnExpLog(z,x,1);
 }
 
 L pfnLen(V z, V x){
@@ -1160,7 +1217,7 @@ L pfnPower(V z, V x, V y){
     R pfnPowerLog(z,x,y,0);
 }
 
-L pfnLog(V z, V x, V y){
+L pfnLog2(V z, V x, V y){
     R pfnPowerLog(z,x,y,1);
 }
 
@@ -1363,24 +1420,17 @@ L pfnLike(V z, V x, V y){
     if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
         B t;
         if(isChar(y) || isOne(y)){
-            B f=isChar(y);
-            #define getStrY() f?sC(y):vs(y)
+            L lenZ = isChar(x)?1:vn(x);
+            S strY = isChar(y)?sC(y):vs(y);
+            pcre2_code *re = getLikePatten(strY);
+            pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
+            if(re==NULL) R E_NULL_VALUE;
+            initV(z,H_B,lenZ);
+            P("entering\n");
             switch(vp(x)){
-                caseC CHECKE(getLikeFromString(&t,sC(x),getStrY()))                  break;
-                caseQ DOI(vn(x), \
-                      CHECKE(getLikeFromString(&t,getSymbolStr(vL(x,i)),getStrY()))) break;
-                caseS DOI(vn(x), \
-                      CHECKE(getLikeFromString(&t,vS(x,i),getStrY())))               break;
-            }
-            initV(z,H_B,isChar(x)?1:vn(x));
-            switch(vp(x)){
-                caseC getLikeFromString(&t,sC(x),getStrY()); vB(z,0)=t;              break;
-                caseQ DOI(vn(x), \
-                      {getLikeFromString(&t,getSymbolStr(vL(x,i)),getStrY()); \
-                       vB(z,i)=t;})                                                  break;
-                caseS DOI(vn(x), \
-                      {getLikeFromString(&t,vS(x,i),getStrY()); \
-                       vB(z,i)=t;})                                                  break;
+                caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
+                caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
+                caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
             }
             R 0;
         }
@@ -1417,17 +1467,15 @@ L pfnOrderBy(V z, V x, V y){
         if(!checkMatch(x)) R E_MATCH;
         L lenZ= 0==vn(x)?0:vn(vV(x,0));
         initV(z,H_L,lenZ);
-        P("lenZ = %lld, item = %lld\n",lenZ,vn(x));
-        struct timeval tv0, tv1;        
-        gettimeofday(&tv0, NULL);
-        lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
-        gettimeofday(&tv1, NULL);
-        P("Order By (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+        // P("lenZ = %lld, item = %lld\n",lenZ,vn(x));
+        // lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
+        lib_order_by_list(sL(z), x, sB(y), lenZ, 0, lib_quicksort_cmp_item);
         R 0;
     }
     else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){
         initV(z,H_L,vn(x));
-        lib_list_order_by(sL(z), vn(x), x, sB(y), lib_quicksort_cmp_item);
+        // lib_list_order_by(sL(z), vn(x), x, sB(y), lib_quicksort_cmp_item);
+        lib_order_by_vector(sL(z), x, sB(y), vn(x), lib_quicksort_cmp_item);
         R 0;
     }
     else R E_DOMAIN;
@@ -1490,14 +1538,14 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
     if(isList(y)){
         L lenZ = vn(y);
         initV(z,H_G,lenZ);
-        DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))
+        P("pfnEachRight: size(z) = %lld\n", lenZ);
+        DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))  // seg fault after DOI -> DOP
     }
     else {
         CHECKE((*foo)(z,x,y));
     }
     R 0;
 }
-
 
 /* Literals */
 
@@ -1746,18 +1794,30 @@ L pfnDatetimeSub(V z, V x, V y, V m){
 }
 
 
+/*
+ * xKey: primary key
+ * yKey: foreign key
+ */
 L pfnAddFKey(V x, V xKey, V y, V yKey){
-    V tableX = allocNode();
-    V tableY = allocNode();
+    V tableX = allocNode();  V xCol = allocNode();
+    V tableY = allocNode();  V yCol = allocNode();
+    V fKey   = allocNode();
     CHECKE(pfnLoadTable(tableX, x));
     CHECKE(pfnLoadTable(tableY, y));
     if(isSymbol(x) && isSameType(x,y) && isEqualLength(x,y)){
         if(isOne(x)){
-            /* */
+            CHECKE(pfnColumnValue(xCol, tableX, xKey));
+            CHECKE(pfnColumnValue(yCol, tableY, yKey));
+            CHECKE(pfnEnum(fKey, xCol, yCol));
+            CHECKE(setFKey(tableY, yKey, fKey));
+            P("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
+                getSymbolStr(vq(x)), getSymbolStr(vq(xKey)),\
+                getSymbolStr(vq(y)), getSymbolStr(vq(yKey)));
         }
         else R E_NOT_IMPL;
     }
     else R E_DOMAIN;
+    R 0;
 }
 
 /* handcraft loop fusion optimization */
@@ -1781,4 +1841,17 @@ L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1){
     R 0;
 }
 
+/* status: on */
+L optLoopFusionBS_1(V z, L r0, V volatility, V time){
+    initV(z,H_E,r0);
+    DOP(r0, vE(z,i)=vE(volatility,i)*sqrt(vE(time,i)))
+    R 0;
+}
+
+L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility){
+    initV(z,H_E,r0);
+    DOP(r0, vE(z,i)=log(vE(sptprice,i)/vE(strike,i)) \
+        + vE(time,i)*(vE(rate,i) + vE(volatility,i)*vE(volatility,i)*0.5))
+    R 0;
+}
 

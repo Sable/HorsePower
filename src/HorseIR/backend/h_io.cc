@@ -295,6 +295,9 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
                c=SP(buff,"%02d:%02d:%02d.%03d", \
                    CHOPW(0,w),CHOPW(1,w),CHOPW(2,w),ll); } break;
         caseG c=SP(buff, "%lldL", k);                      break;
+        caseY c=getBasicItemStr(\
+                   (V)getEnumTarget(x),vY(x,k),buff,0);    break;
+        default: P("--> unexpected type %lld <--\n", xp);  break;
     }
     R c;
 }
@@ -430,6 +433,8 @@ L printTablePretty(V x, L rowLimit){
         FS("\n");
         DOI(totSize-1, FS("-"));
         FS("\n");
+        // test the type of each column
+        // DOI(tableCol(x), {V val = getTableCol(getTableVals(x),i); P("type[%lld] = %lld\n",i,vp(val));})
         /* print body */
         DOI(rowPrint,  { \
             DOJ(tableCol(x), {if(j>0) FS(" "); V val = getTableCol(getTableVals(x),j); \

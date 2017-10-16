@@ -1,7 +1,7 @@
-// C CSV_EMP[] = "data/simple-join/employee.csv";
-// C CSV_DEP[] = "data/simple-join/department.csv";
-C CSV_EMP[] = "data/test-tables/employee.csv";
-C CSV_DEP[] = "data/test-tables/department.csv";
+C CSV_EMP[] = "data/simple-join/employee.csv";
+C CSV_DEP[] = "data/simple-join/department.csv";
+// C CSV_EMP[] = "data/test-tables/employee.csv";
+// C CSV_DEP[] = "data/test-tables/department.csv";
 L TYPE_EMP[]  = {H_Q, H_L};
 L TYPE_DEP[]  = {H_L, H_Q};
 const L NUM_COL_EMP = 2;
@@ -103,6 +103,21 @@ void fillItem(V a, L *values, L len){
     DOI(len, vL(a,i)=values[i])
 }
 
+L simulateFKey(){
+    V a0 = allocNode();  V t0 = allocNode();  V w0 = allocNode();  V w1 = allocNode();
+    PROFILE(1, pfnAddFKey(literalSym((S)"Department"),literalSym((S)"DepartmentID"),\
+                          literalSym((S)"Employee"),  literalSym((S)"DepartmentID")));
+    PROFILE(2, pfnLoadTable(a0, literalSym((S)"Employee")));
+    PROFILE(3, pfnColumnValue(t0, a0, literalSym((S)"DepartmentID")));
+    PROFILE(4, pfnValues(w0, t0));   //values
+    PROFILE(5, pfnKeys(w1, t0));     //keys
+    printV(a0);
+    printV(t0);
+    P("value(t0): "); printV(w0);
+    P("key  (t0): "); printV(w1);
+    R 0;
+}
+
 void testSimple(){
 	initTable(); // table
 	P("Reading table Employee\n");
@@ -113,6 +128,7 @@ void testSimple(){
     registerTable((S)"Department", tableDep);
     /* Simulation */
     // simulateSimple();
-    simulateSimpleRaw();
+    // simulateSimpleRaw();
+    simulateFKey();
 }
 

@@ -193,15 +193,17 @@ L promoteValue(V z, V x, L typMax){
 }
 
 B checkZero(V x){
+    #define FOUND 1
+    #define NOTFOUND 0
     switch(xp){
-        caseB DOI(xn, if(0==xB(i)) R 0); break;
-        caseH DOI(xn, if(0==xH(i)) R 0); break;
-        caseI DOI(xn, if(0==xI(i)) R 0); break;
-        caseL DOI(xn, if(0==xL(i)) R 0); break;
-        caseF DOI(xn, if(0==xF(i)) R 0); break;
-        caseE DOI(xn, if(0==xE(i)) R 0); break;
+        caseB DOI(xn, if(0==xB(i)) R FOUND); break;
+        caseH DOI(xn, if(0==xH(i)) R FOUND); break;
+        caseI DOI(xn, if(0==xI(i)) R FOUND); break;
+        caseL DOI(xn, if(0==xL(i)) R FOUND); break;
+        caseF DOI(xn, if(0==xF(i)) R FOUND); break;
+        caseE DOI(xn, if(0==xE(i)) R FOUND); break;
     }
-    R 1;
+    R NOTFOUND;
 }
 
 B checkMatch(V x){
@@ -381,10 +383,33 @@ L getLikeFromString(B *t, S src, S pat){
     else R E_LIKE_PATTERN;
 }
 
+pcre2_code* getLikePatten(S pat){
+    S newString = genLikeString(pat,strlen(pat));
+    if(!newString) R NULL;
+    L newLen = strlen(newString);
+    PCRE2_SPTR pattern = (PCRE2_SPTR)newString;
+    I errNum; PCRE2_SIZE errOff;
+    pcre2_code *re = pcre2_compile(pattern,newLen,PCRE2_NO_UTF_CHECK,&errNum,&errOff,NULL);
+    if(!re) R NULL;
+    R re;
+}
+
+B getLikeMatch(S src, pcre2_code *re, pcre2_match_data *matchData){
+    R pcre2_match(\
+        re,\
+        reinterpret_cast<unsigned char*>(src),\
+        strlen(src),0,PCRE2_ANCHORED|PCRE2_NO_UTF_CHECK,matchData,NULL\
+        )<0?0:1;
+}
+
 /* helper functions */
 
+/* set alias */
 L getEnumValue(V z, V x){
-    R E_NOT_IMPL;
+    initV(z, H_L, 0);
+    vn(z) = vn(x);
+    vg(z) = vg(x);
+    R 0;
 }
 L getDictValue(V z, V x){
     R getColumnValue(z,x);
@@ -470,6 +495,19 @@ L isListIndexOf(V x, V y, L *sizeX, L *sizeY){
         /* more checks between x and y */
         *sizeX=lenX;
         *sizeY=lenY;
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+/*
+ * x: a table
+ * colName: column name (symbol)
+ */
+L setFKey(V x, V colName, V fKey){
+    L fid = findColFromTable(x,vq(colName));
+    if(fid>=0){
+        *getTableCol(getTableVals(x),fid) = *fKey;
         R 0;
     }
     else R E_DOMAIN;

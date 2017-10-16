@@ -8,7 +8,7 @@ extern "C" {
 #define xImag(x) ((x).imag)
 #define xCopy(x,a,b) { xReal(x)=a; xImag(x)=b; }
 #define xEqual(x,y) (xReal(x)==xReal(y) && xImag(x)==xImag(y))
-#define initEnum(x,key,keyV,val) {getEnumName(x)=key; getEnumTarget(x)=(S)keyV; vg(x)=(G)val;}
+#define initEnum(x,keyN,keyV,val) {getEnumName(x)=keyN; getEnumTarget(x)=(S)keyV; vg(x)=(G)val;}
 
 #define isBool(x)      (H_B==vp(x))
 #define isSymbol(x)    (H_Q==vp(x))
@@ -74,6 +74,7 @@ L pfnMatch         (V z, V x, V y);
 L pfnMeta          (V z, V x);
 L pfnKeys          (V z, V x);
 L pfnValues        (V z, V x);
+L pfnFetch         (V z, V x);
 L pfnColumnValue   (V z, V x, V y);
 L pfnIsValidBranch (V z, V x);
 
@@ -106,6 +107,9 @@ L pfnRecip         (V z, V x);
 L pfnSignum        (V z, V x);
 L pfnPi            (V z, V x);
 L pfnNot           (V z, V x);
+L pfnExpLog        (V z, V x, L op);
+L pfnExp           (V z, V x);
+L pfnLog           (V z, V x);
 L pfnLen           (V z, V x);
 L pfnRange         (V z, V x);
 L pfnFact          (V z, V x);
@@ -161,7 +165,7 @@ L pfnXor           (V z, V x, V y);
 
 L pfnPowerLog      (V z, V x, V y, L op);
 L pfnPower         (V z, V x, V y);
-L pfnLog           (V z, V x, V y);
+L pfnLog2          (V z, V x, V y);
 L pfnMod           (V z, V x, V y);
 L pfnCompress      (V z, V x, V y);
 
@@ -191,6 +195,8 @@ L pfnAddFKey       (V x, V xKey, V y, V yKey);
 
 L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3);
 L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1);
+L optLoopFusionBS_1(V z, L r0, V volatility, V time);
+L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
 
 #ifdef	__cplusplus
 }

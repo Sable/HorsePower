@@ -44,6 +44,8 @@ L getCommonType         (V x, L *typ, L *len);
 L fillRaze              (V z, L *n0, V x);
 L matchPair             (B *t, V x, V y);
 L getLikeFromString     (B *t, S src, S pat);
+pcre2_code* getLikePatten(S pat);
+B getLikeMatch          (S src, pcre2_code *re, pcre2_match_data *matchData);
 
 L getEnumValue          (V z, V x);
 L getDictValue          (V z, V x);
@@ -55,6 +57,7 @@ L calcInterval          (struct timeval t0, struct timeval t1);
 B isAssignableType      (L x, L y);
 B compareTuple          (V x, L ax, V y, L ay);
 L isListIndexOf         (V x, V y, L *sizeX, L *sizeY);
+L setFKey               (V x, V colName, V fKey);
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);
