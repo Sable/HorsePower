@@ -10,6 +10,7 @@
 #include "tpch/test_q9.h"
 #include "tpch/test_q12.h"
 #include "tpch/test_q14.h"
+#include "tpch/test_q17.h"
 #include "tpch/test_q99.h"
 
 void testTPCH(L x){
@@ -21,6 +22,7 @@ void testTPCH(L x){
 		TEST_QUERY(9);  /* testing */
 		TEST_QUERY(12);
 		TEST_QUERY(14);
+		TEST_QUERY(17);
 		TEST_QUERY(99); /* experiments */
 		default: P("No such test for query %lld yet\n",x); break;
 	}

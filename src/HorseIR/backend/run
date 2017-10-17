@@ -11,7 +11,7 @@ echo Starting ...
 #export OMP_PLACES=cores
 #export OMP_PROC_BIND=spread
 #export OMP_NUM_THREADS=4
-id=14
+id=17
 if [ "debug" == "$1" ]; then
     (cd ../ && make debug && time ./horse -t $id)
 elif [ "release" == "$1" ]; then
