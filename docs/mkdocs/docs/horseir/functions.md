@@ -268,6 +268,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 7  | <script>hgFunc('meta          ','                         ');</script>  | Pending                     | Pending              | link                         |        |         |
 | 8  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various              | link                         |&#10004;| N        |
 | 9  | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable        | link                         |&#10004;| N        |
+| 10 | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various              | link                         |&#10004;| Y        |
 
 ## 5. Indexing
 
