@@ -9,7 +9,6 @@ L simulateQ17(){
 	V w12= allocNode();  V w13= allocNode();  V w14= allocNode();  V w15= allocNode(); /* Not use: w5 and w14 */
 	V p0 = allocNode();  V p1 = allocNode();
 	V z0 = allocNode();  V z1 = allocNode();  V z  = allocNode();
-	V f0 = allocNode();  V f1 = allocNode();
 
 	struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
@@ -42,7 +41,7 @@ L simulateQ17(){
 
 	PROFILE(20, pfnColumnValue(t5, a0, literalSym((S)"l_extendedprice")));
 	PROFILE(21,  pfnCompress(w13, w10, t5));
-	PROFILE(22,  pfnCompress(w15, w12, f1));
+	PROFILE(22,  pfnCompress(w15, w12, w13));
 	P("size of w15: %lld\n", vn(w15));
 
 	// project 
