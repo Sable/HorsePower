@@ -1462,14 +1462,30 @@ L pfnLike(V z, V x, V y){
 }
 
 L pfnOrderBy(V z, V x, V y){
+    P("value y:\n");
+    printV(y);
+    getchar();
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
         DOI(vn(x), if(!isTypeGroupBasic(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
         L lenZ= 0==vn(x)?0:vn(vV(x,0));
         initV(z,H_L,lenZ);
         // P("lenZ = %lld, item = %lld\n",lenZ,vn(x));
+        // P("before\n");
+        // DOI(10, P("%s, %s, %lld\n", \
+        //     getSymbolStr(vQ(vV(x,0),i)), getSymbolStr(vQ(vV(x,1),i)),vL(vV(x,2),i)))
         // lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
         lib_order_by_list(sL(z), x, sB(y), lenZ, 0, lib_quicksort_cmp_item);
+        // P("after\n");
+        // DOI(lenZ, if(!strcmp(getSymbolStr(vQ(vV(x,0),vL(z,i))), "Brand#54") && \
+        //     !strcmp(getSymbolStr(vQ(vV(x,1),vL(z,i))), "STANDARD BRUSHED COPPER")) \
+        //     P("[%5lld] %s, %s, %lld\n", i, \
+        //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
+        // getchar();
+        // P("----\n");
+        // DOI(20, P("[%3lld] %s, %s, %lld\n", i, \
+        //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
+        // getchar();
         R 0;
     }
     else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){

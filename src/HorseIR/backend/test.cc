@@ -81,6 +81,13 @@ V literalBoolVector(L n, B b[]){
     R z;
 }
 
+V literalI64Vector(L n, L b[]){
+    V z = allocNode();
+    initV(z,H_L,n);
+    DOI(n, vL(z,i)=b[i])
+    R z;
+}
+
 // #define PROFILE(n,x) x
 #define PROFILE(n,x) { struct timeval tt_0, tt_1; \
         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \

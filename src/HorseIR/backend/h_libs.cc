@@ -303,7 +303,7 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSam
     while(true){
         while(++i && i<high){
             L temp = (*cmp)(val,rtn[i],rtn[pivot],isUp);
-            *leftSame = (temp == 0);
+            if(temp != 0) *leftSame = false;
             if(temp > 0) break;
         }
         do{--j;} while((*cmp)(val,rtn[j],rtn[pivot],isUp) > 0);
@@ -367,20 +367,37 @@ void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
 }
 
 void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CMP(cmp)){
+    #define DOId(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
     if(colId >= vn(val)) R;
     V curV = vV(val,colId);
     B* curB = isUp+colId;
+    if(*curB == 0)
+        { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
     if(lib_order_by_sorted(curV,curB,low,high,cmp)){
-        P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
+        // if(colId == 0){
+        //     P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
+        // }
     }
-    else 
+    else {
         lib_quicksort(targ, curV, low, high, isUp, cmp);
+    }
     {
         L start = low, end = start + 1;
         while(end < high){
             // P("start = %lld, end = %lld, colId = %lld\n",start,end,colId);
-            if(0==(*cmp)(curV,end-1,end,curB)) end++;
+            if(0==(*cmp)(curV,targ[end-1],targ[end],curB)) end++;
             else {
+                if(colId == 0){
+                    // P("start = %lld, end = %lld, colId = %lld\n",start,end,colId);
+                    // P("type of curV : %lld\n", vp   (curV));
+                    // // DOId(0, 21, P("[%3lld] %lld\n", targ[i], vL(curV,targ[i])))
+                    // // P("++++\n");
+                    // DOId(0, 21, \
+                    //     P("[%3lld] %s, %s, %lld\n", i, \
+                    //        getSymbolStr(vQ(vV(val,0),targ[i])), \
+                    //        getSymbolStr(vQ(vV(val,1),targ[i])), vL(vV(val,2),targ[i])))
+                    // getchar();
+                }
                 lib_quicksort_list(targ, val, isUp, start, end, colId+1, cmp);
                 start = end; end = end + 1;
             }
