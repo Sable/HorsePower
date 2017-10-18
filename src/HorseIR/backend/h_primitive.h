@@ -198,6 +198,8 @@ L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1);
 L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
 
+L pfnGroupBucket   (V z, V x);
+
 #ifdef	__cplusplus
 }
 #endif

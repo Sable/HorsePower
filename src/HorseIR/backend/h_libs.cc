@@ -290,7 +290,7 @@ void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
         // if(leftSame) P("low = %lld, high = %lld\n",low,high);
-        // P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos); getchar();
+        P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
         if(!leftSame)
             lib_quicksort(rtn, val, low, pos, isUp, cmp);
         if(pos<high)
@@ -410,7 +410,9 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i)
+    P("tLen = %lld\n", tLen);
     lib_quicksort(targ, val, 0, tLen, isUp, cmp);
+    P("done.\n");
 }
 
 L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){

@@ -670,7 +670,7 @@ L pfnAvg(V z, V x){
 #define REDUCEFLT(op)  (0==op?FLT_MAX:FLT_MIN)
 #define REDUCEDBL(op)  (0==op?DBL_MAX:DBL_MIN)
 #define REDUCE(op,t,x) (0==op?MIN(t,x):1==op?MAX(t,x):-1)
-#define REDUCELINE(p,op,x) {p t=v##p(x,0); DOI(vn(x), t=REDUCE(op,t,v##p(x,i)))}
+#define REDUCELINE(p,op,x) {p t=v##p(x,0); DOI(vn(x), t=REDUCE(op,t,v##p(x,i))) v##p(z,0)=t;}
 
 L pfnReduce(V z, V x, L op){
     if(isTypeGroupReal(vp(x))){
@@ -682,6 +682,7 @@ L pfnReduce(V z, V x, L op){
                 caseL vl(z) = REDUCELONG(op); break;
                 caseF vf(z) = REDUCEFLT(op);  break;
                 caseE ve(z) = REDUCEDBL(op);  break;
+                default: R E_NOT_IMPL;
             }
         }
         else{
@@ -695,6 +696,7 @@ L pfnReduce(V z, V x, L op){
                 caseL REDUCELINE(L,op,x); break;
                 caseF REDUCELINE(F,op,x); break;
                 caseE REDUCELINE(E,op,x); break;
+                default: R E_NOT_IMPL;
             }
         }
         R 0;
@@ -847,14 +849,14 @@ L pfnGroup(V z, V x){
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
     initV(y,H_B,lenZ);
-    // struct timeval tv0, tv1;
+    struct timeval tv0, tv1;
     // gettimeofday(&tv0, NULL);
     DOP(lenZ,vB(y,i)=1)
-    // gettimeofday(&tv1, NULL);
+    gettimeofday(&tv1, NULL);
     // P("1. (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     CHECKE(pfnOrderBy(t,x,y));
-    // gettimeofday(&tv1, NULL);
-    // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    gettimeofday(&tv1, NULL);
+    P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // P("t = \n");
     // printV(t);
 
@@ -1462,9 +1464,6 @@ L pfnLike(V z, V x, V y){
 }
 
 L pfnOrderBy(V z, V x, V y){
-    P("value y:\n");
-    printV(y);
-    getchar();
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
         DOI(vn(x), if(!isTypeGroupBasic(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
@@ -1870,4 +1869,35 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
         + vE(time,i)*(vE(rate,i) + vE(volatility,i)*vE(volatility,i)*0.5))
     R 0;
 }
+
+/* q18: bucket group by */
+
+L pfnGroupBucket(V z, V x){
+    if(isInteger(x)){
+        L lenX = -1;
+        DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
+        L *temp  = (L*)malloc(sizeof(L)*lenX);
+        L *count = (L*)malloc(sizeof(L)*lenX);
+        L *maps  = (L*)malloc(sizeof(L)*lenX);
+        memset(temp , 0, sizeof(L)*lenX);
+        memset(count, 0, sizeof(L)*lenX);
+        memset(maps ,-1, sizeof(L)*lenX);
+        DOI(vn(x), temp[vL(x,i)]++)
+        L cnt = 0;
+        DOI(lenX, cnt+= temp[i]!=0)
+        initV(z, H_N, 2);
+        V keys = getDictKeys(z);
+        V vals = getDictVals(z);
+        initV(keys, H_L, cnt); cnt = 0;
+        DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
+        initV(vals, H_G, cnt);
+        DOI(vn(x), {L k=vL(x,i); V v0=vV(vals,maps[k]); if(count[k]==0) initV(v0,H_L,temp[k]); vL(v0,count[k]++)=i; })
+        free(temp);
+        free(count);
+        free(maps);
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
 
