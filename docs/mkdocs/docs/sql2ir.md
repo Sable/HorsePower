@@ -2,7 +2,7 @@
 
 ## TPC-H benchmarks
 
-Query profile (<u>Total 22</u>: **Pass** 7; <blue>Testing</blue>: 0; <red>Working</red>: 4)
+Query profile (<u>Total 22</u>: **Pass** 8; <blue>Testing</blue>: 1; <red>Working</red>: 2)
 
 | ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return | Comment                       |
 | :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: | :---------------------------: |
@@ -23,7 +23,7 @@ Query profile (<u>Total 22</u>: **Pass** 7; <blue>Testing</blue>: 0; <red>Workin
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
 | [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      | **Pass.**                     |
 | [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | **Pass**                      |
-| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | <red>Working</red>            |
+| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | **Pass**                      |
 | [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | <red>Working</red>            |
 | [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
 | [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |

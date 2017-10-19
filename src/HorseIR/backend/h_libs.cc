@@ -290,7 +290,7 @@ void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
         // if(leftSame) P("low = %lld, high = %lld\n",low,high);
-        P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
+        // P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
         if(!leftSame)
             lib_quicksort(rtn, val, low, pos, isUp, cmp);
         if(pos<high)
@@ -371,8 +371,8 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     if(colId >= vn(val)) R;
     V curV = vV(val,colId);
     B* curB = isUp+colId;
-    if(*curB == 0)
-        { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
+    // if(*curB == 0)
+    //     { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
     if(lib_order_by_sorted(curV,curB,low,high,cmp)){
         // if(colId == 0){
         //     P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
