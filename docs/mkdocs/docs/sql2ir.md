@@ -2,7 +2,7 @@
 
 ## TPC-H benchmarks
 
-Query profile (<u>Total 22</u>: **Pass** 8; <blue>Testing</blue>: 1; <red>Working</red>: 2)
+Query profile (<u>Total 22</u>: **Pass** 10; <blue>Testing</blue>: 0; <red>Working</red>: 1)
 
 | ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return | Comment                       |
 | :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: | :---------------------------: |
@@ -17,14 +17,14 @@ Query profile (<u>Total 22</u>: **Pass** 8; <blue>Testing</blue>: 1; <red>Workin
 | [9][q9]  |P,S,L,PS,O,N | 7     | 6    | 1     | 2     | 2     | 6      | **Pass**                      |
 | [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |                               |
 | [11][q11]| PS,S,N      | 6     | 4    | 2     | 1(big)| 1     | 3      |                               |
-| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | **Pass**                      |
+| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      |                               |
 | [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | (Nested)                      |
 | [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      | **Pass**                      |
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
 | [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      | **Pass.**                     |
 | [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | **Pass**                      |
 | [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | **Pass**                      |
-| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | <red>Working</red>            |
+| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | **Pass**                      |
 | [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
 | [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |
 | [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      | <red>Working</red>            |

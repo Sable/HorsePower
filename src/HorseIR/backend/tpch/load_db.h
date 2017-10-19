@@ -76,7 +76,7 @@ L readTableLineitem(){
     L TYPE_LINE[]  = {H_L, H_L, H_L, H_L, \
                       H_E, H_E, H_E, H_E, \
                       H_C, H_C, H_D, H_D, \
-                      H_D, H_S, H_Q, H_S };
+                      H_D, H_Q, H_Q, H_S };
     const L NUM_COL_LINE = 16;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {

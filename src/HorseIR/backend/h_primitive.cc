@@ -1115,7 +1115,7 @@ L pfnDiv(V z, V x, V y){
 
 #define LOGIC(op,x,y) (2>op?LOGICAND(op,x,y):4>op?LOGICOR(op,x,y):(x^y))
 #define LOGICAND(op,x,y) (0==op?(x&y):~(x&y))
-#define LOGICOR(op,x,y)  (2==op?(x|y):~(x|y))
+#define LOGICOR(op,x,y)  (2==op?(x||y):~(x|y))
 
 L pfnLogic(V z, V x, V y, L op){
     if(isBool(x) && isBool(y)){
