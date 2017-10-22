@@ -26,6 +26,8 @@ L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen);
 /* quick sort section */
 #define FUNC_CMP(x) L (*x)(V,L,L,B*)
 void lib_quicksort          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+void lib_quicksort_char     (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+void lib_quicksort_other    (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
 L    lib_partition          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSame);
 L    lib_quicksort_cmp      (V val, L a, L b, B *isUp);
 L    lib_quicksort_cmp_item (V t, L a, L b, B *isUp);

@@ -850,16 +850,16 @@ L pfnGroup(V z, V x){
     L lenZ = isList(x)?vn(x):1;
     initV(y,H_B,lenZ);
     struct timeval tv0, tv1;
-    // gettimeofday(&tv0, NULL);
+    gettimeofday(&tv0, NULL);
     DOP(lenZ,vB(y,i)=1)
     gettimeofday(&tv1, NULL);
-    // P("1. (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     CHECKE(pfnOrderBy(t,x,y));
     gettimeofday(&tv1, NULL);
-    P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // P("t = \n");
     // printV(t);
 
+    gettimeofday(&tv0, NULL);
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp));
@@ -871,6 +871,8 @@ L pfnGroup(V z, V x){
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
+    gettimeofday(&tv1, NULL);
+    P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     R 0;
 }
 
@@ -1855,6 +1857,58 @@ L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1){
     CHECKE(pfnCompress(z,t15,temp));
     R 0;
 }
+
+L optLoopFusionQ14_1(V z, L r0, V t0){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)=(vD(t0,i)>=19950901 && vD(t0,i)<19951001))
+    R 0;
+}
+
+L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5){
+    initV(z,H_E,r0);
+    DOP(r0, vE(z,i)=vB(p4,i)?vE(p2,i)*vE(p5,i):0)
+    R 0;
+}
+
+L optLoopFusionQ17_1(V z, L r0, V t2, V c2, V t3, V c3){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)=(vQ(t2,i)==vq(c2) && vQ(t3,i)==vq(c3)))
+    R 0;
+}
+
+L optLoopFusionQ19_1(V z, L r0, V t3, V w0, V w1){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)=vB(w0,i)&&vB(w1,i)&&(vL(t3,i)>=1)&&(vL(t3,i)<=15))
+    R 0;
+}
+
+L optLoopFusionQ19_2(V z, L r0, V d9, V c9, V d11, V d12, V r1){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
+                     && vB(r1,i) \
+                     &&vE(d12,i)>=1&&vE(d12,i)<=11 \
+                     &&vL(d11,i)>=1&&vL(d11,i)<=5 ))
+    R 0;
+}
+
+L optLoopFusionQ19_3(V z, L r0, V d9, V c9, V d11, V d12, V k1){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
+                     && vB(k1,i) \
+                     &&vE(d12,i)>=10&&vE(d12,i)<=20 \
+                     &&vL(d11,i)>=1&&vL(d11,i)<=10 ))
+    R 0;
+}
+
+L optLoopFusionQ19_4(V z, L r0, V d9, V c9, V d11, V d12, V h1){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
+                     && vB(h1,i) \
+                     &&vE(d12,i)>=20&&vE(d12,i)<=30 \
+                     &&vL(d11,i)>=1&&vL(d11,i)<=15 ))
+    R 0;
+}
+
 
 /* status: on */
 L optLoopFusionBS_1(V z, L r0, V volatility, V time){

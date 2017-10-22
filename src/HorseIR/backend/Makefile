@@ -7,22 +7,22 @@ R_FLAGS=-std=c++14 -DUSE_MMAP -fopenmp -I"../../../libs/include/" -O3
 all: backend
 
 backend: $(C_FILES) $(H_FILES) tpch/*.h
-	$(CC) $(D_FLAGS) -c h_io.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c h_memory.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c h_libs.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c h_symbol.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c h_system.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c h_primitive.cc -Wno-attributes
-	$(CC) $(D_FLAGS) -c test.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_io.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_memory.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_libs.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_symbol.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_system.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c h_primitive.cc -Wno-attributes
+	$(CC) $(D_FLAGS) $(TPCH) -c test.cc -Wno-attributes
 
 release: $(C_FILES) $(H_FILES) tpch/*.h
-	$(CC) $(R_FLAGS) -c h_io.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c h_memory.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c h_libs.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c h_symbol.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c h_system.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c h_primitive.cc -Wno-attributes
-	$(CC) $(R_FLAGS) -c test.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_io.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_memory.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_libs.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_symbol.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_system.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c h_primitive.cc -Wno-attributes
+	$(CC) $(R_FLAGS) $(TPCH) -c test.cc -Wno-attributes
 
 lib: $(C_FILES) $(H_FILES)
 	$(CC) $(FLAGS) -c h_io.cc -Wno-attributes

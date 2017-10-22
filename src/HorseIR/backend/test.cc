@@ -93,6 +93,7 @@ V literalI64Vector(L n, L b[]){
         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
+B isOptimized = true;
 
 #include "test_simple.h"
 #include "test_types.h"

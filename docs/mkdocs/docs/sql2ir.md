@@ -56,6 +56,35 @@ module default{
 }
 ```
 
+## Performance issues
+
+### Q1
+
+```no-highlight
+PROFILE(15, pfnGroup(g3,g2));
+...
+PROFILE(17, pfnEachRight(s0, t3, g7, pfnIndex)); //l_quantity
+... other Each functions
+```
+
+
+### Q3
+
+```no-highlight
+PROFILE(35, pfnEachRight(g5, p8, g3, pfnIndex));  // <--- slow
+PROFILE(36, pfnEach(g6, g5, pfnSum));             // <--- slow
+```
+
+### Q6
+
+Loop fusion
+
+- Place 1: line [6, 17] return t15 (good)
+- Place 2: line [18,20] return t18 (optional)
+
+### Q1
+### Q1
+
 
 ## Formal methods
 

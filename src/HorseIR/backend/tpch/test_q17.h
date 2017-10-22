@@ -25,9 +25,17 @@ L simulateQ17(){
 	PROFILE(4, pfnColumnValue(t1, a1, literalSym((S)"p_partkey")));
 	PROFILE(5, pfnColumnValue(t2, a1, literalSym((S)"p_brand")));
 	PROFILE(6, pfnColumnValue(t3, a1, literalSym((S)"p_container")));
-	PROFILE(7, pfnEq(w0, t2, literalSym((S)"Brand#23")));
-	PROFILE(8, pfnEq(w1, t3, literalSym((S)"MED BOX")));
-	PROFILE(9, pfnAnd(w2, w0, w1));
+
+	if(!isOptimized){
+		PROFILE(7, pfnEq(w0, t2, literalSym((S)"Brand#23")));
+		PROFILE(8, pfnEq(w1, t3, literalSym((S)"MED BOX")));
+		PROFILE(9, pfnAnd(w2, w0, w1));
+	}
+	else {
+		PROFILE(7, optLoopFusionQ17_1(w2, vn(t2), \
+			       t2, literalSym((S)"Brand#23"), \
+			       t3, literalSym((S)"MED BOX")));
+	}
 	PROFILE(10, pfnCompress(w3, w2, t1));  // small p_partkey
 	// P("len of w3: %lld\n", vn(w3));
 	PROFILE(11, pfnMember(w4, w3, t0));    // find l_partkey in small p_partkey
@@ -63,7 +71,7 @@ L simulateQ17(){
 	PROFILE(33, pfnTable(z, z0, z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
 	printV(z);
 	R 0;
 

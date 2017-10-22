@@ -19,15 +19,21 @@ L simulateQ14(){
 
 	// select 1
 	PROFILE(3, pfnColumnValue(t0, a0, literalSym((S)"l_shipdate")));
-	PROFILE(4, pfnGeq(w0, t0, literalDate(19950901)));
-	PROFILE(5, pfnDatetimeAdd(w1, literalDate(19950901),literalI64(1),literalSym((S)"month")));
-	PROFILE(6, pfnLt(w2, t0, w1));
-	PROFILE(7, pfnAnd(w3, w0, w2));
+	if(!isOptimized){
+		PROFILE(4, pfnGeq(w0, t0, literalDate(19950901)));
+		PROFILE(5, pfnDatetimeAdd(w1, literalDate(19950901),literalI64(1),literalSym((S)"month")));
+		PROFILE(6, pfnLt(w2, t0, w1));
+		PROFILE(7, pfnAnd(w3, w0, w2));
+	}
+	else {
+		PROFILE(99, optLoopFusionQ14_1(w3, vn(t0), t0));
+	}
 
 	// join 1
 	PROFILE(8, pfnColumnValue(t1, a0, literalSym((S)"l_partkey")));
 	PROFILE(9, pfnColumnValue(t2, a1, literalSym((S)"p_partkey")));
 	PROFILE(10, pfnCompress(w4, w3, t1));
+	// P("size of w4: %lld\n", vn(w4));// 76K
 	PROFILE(11, pfnEnum(w5, t2, w4));  // optimize?
 
 	// project 1
@@ -41,12 +47,24 @@ L simulateQ14(){
 	PROFILE(19, pfnLike(p4, p1, literalString((S)"PROMO%")));
 	
 	PROFILE(20, pfnMinus(p5,literalF64(1), p3));
-	PROFILE(21, pfnMul(p6, p2, p5));
-	PROFILE(22, pfnMul(p7, p4, p6));  // case
+	if(!isOptimized){
+		PROFILE(21, pfnMul(p6, p2, p5));
+		PROFILE(22, pfnMul(p7, p4, p6));  // case
+	}
+	else {
+		PROFILE(21, optLoopFusionQ14_2(p7, vn(p4), p2, p4, p5));
+	}
 	PROFILE(23, pfnSum(p8, p7));      // sum 1
 	PROFILE(24, pfnMul(p9, literalF64(100), p8));
-	PROFILE(24, pfnMinus(p10,literalF64(1), p3));
-	PROFILE(25, pfnMul(p11, p2, p10));
+
+	if(!isOptimized){
+		PROFILE(24, pfnMinus(p10,literalF64(1), p3));
+		PROFILE(25, pfnMul(p11, p2, p10));
+	}
+	else {
+		PROFILE(25, pfnMul(p11, p2, p5));  // p10 -> p5
+	}
+
 	PROFILE(26, pfnSum(p12, p11));    // sum 2
 	PROFILE(27, pfnDiv(p13, p9, p12));
 
@@ -56,7 +74,7 @@ L simulateQ14(){
 	PROFILE(30, pfnTable(z, z0, z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
 	printV(z);
 	R 0;
 }

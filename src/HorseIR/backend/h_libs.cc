@@ -50,6 +50,7 @@ typedef struct hash_node {
 #define toE(v,f) toBase(E,v,f)
 #define toX(v,f) toBase(X,v,f)
 #define toS(v,f) toBase(S,v,f)
+#define toC(v,f) toBase(C,v,f)
 
 /*
  * A method name starts with "lib" and ends with a specific type
@@ -286,15 +287,42 @@ L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen){
 }
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
+    if(isChar(val)) lib_quicksort_char(rtn, val, low, high, isUp, cmp);
+    else lib_quicksort_other(rtn, val, low, high, isUp, cmp);
+}
+
+#define DOI3(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
+#define DOJ3(m, n, x) {for(L j=m,j2=n;j<j2;j++)x;}
+void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
+    S str = sC(val);  L len = high-low;  B f0 = isUp?1:*isUp;
+    if(len < 10){
+        DOI3(low, high, DOJ3(low, high, if(str[rtn[i]] > str[rtn[j]]) { L t=rtn[i]; rtn[i]=rtn[j]; rtn[j]=t; } ))
+    }
+    else {
+        P("entering large char sort: len = %lld\n", len);
+        L cnt[256]={0}, step[256]={0}, cursor=0; L *temp = (L*)malloc(sizeof(L)*len);
+        DOI3(low, high, cnt[str[rtn[i]]]++);
+        DOI(256, {if(cnt[i]!=0) step[i] = cursor; cursor += cnt[i]; })
+        DOI(256, if(step[i]!=0)P("step[%lld] = %lld\n",i,step[i]))
+        DOI3(low, high, temp[step[str[rtn[i]]]++]=rtn[i])
+        memcpy(rtn+low, temp, sizeof(L)*len);
+        free(temp);
+    }
+    if(!f0){ // desc order
+        DOI3(low, (low+high)/2, { L t=rtn[i]; rtn[i]=rtn[high-i+1]; rtn[high-i+1]=t; })
+    }
+}
+
+void lib_quicksort_other(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
         // if(leftSame) P("low = %lld, high = %lld\n",low,high);
         // P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
         if(!leftSame)
-            lib_quicksort(rtn, val, low, pos, isUp, cmp);
+            lib_quicksort_other(rtn, val, low, pos, isUp, cmp);
         if(pos<high)
-            lib_quicksort(rtn, val, pos+1, high,isUp, cmp);
+            lib_quicksort_other(rtn, val, pos+1, high,isUp, cmp);
     }
 }
 
@@ -373,6 +401,9 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     B* curB = isUp+colId;
     // if(*curB == 0)
     //     { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
+    // P("low = %lld, high = %lld, colId = %lld\n", low, high, colId); // getchar();
+    // struct timeval tv0, tv1;
+    // gettimeofday(&tv0, NULL);
     if(lib_order_by_sorted(curV,curB,low,high,cmp)){
         // if(colId == 0){
         //     P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
@@ -381,31 +412,49 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     else {
         lib_quicksort(targ, curV, low, high, isUp, cmp);
     }
+    // gettimeofday(&tv1, NULL);
+    // P("1. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // gettimeofday(&tv0, NULL);
     {
-        L start = low, end = start + 1;
-        while(end < high){
-            // P("start = %lld, end = %lld, colId = %lld\n",start,end,colId);
-            if(0==(*cmp)(curV,targ[end-1],targ[end],curB)) end++;
-            else {
-                if(colId == 0){
-                    // P("start = %lld, end = %lld, colId = %lld\n",start,end,colId);
-                    // P("type of curV : %lld\n", vp   (curV));
-                    // // DOId(0, 21, P("[%3lld] %lld\n", targ[i], vL(curV,targ[i])))
-                    // // P("++++\n");
-                    // DOId(0, 21, \
-                    //     P("[%3lld] %s, %s, %lld\n", i, \
-                    //        getSymbolStr(vQ(vV(val,0),targ[i])), \
-                    //        getSymbolStr(vQ(vV(val,1),targ[i])), vL(vV(val,2),targ[i])))
-                    // getchar();
-                }
-                lib_quicksort_list(targ, val, isUp, start, end, colId+1, cmp);
-                start = end; end = end + 1;
+        int pos = low;
+        do{
+            // find next
+            L start = pos, end = high;
+            L hend = start + 5, hpos = -1; // heuristic end/pos
+            if(hend>high) hend=high;
+            // P("type of curV: %lld\n", vp(curV));
+            DOI3(start+1, hend, { if(0!=(*cmp)(curV,targ[i-1],targ[i],curB)){ hpos=i; break; } })
+            if(hpos >= 0){
+                lib_quicksort_list(targ, val, isUp, start, hpos, colId+1, cmp);
+                pos = hpos;
             }
-        }
-        // P("--end--\n");
-        if(start == 0 && end == high) ; // do nothing
-        else lib_quicksort_list(targ, val, isUp, start, end, colId+1, cmp);
+            else if(hend == high){
+                lib_quicksort_list(targ, val, isUp, start, high, colId+1, cmp);
+                pos = high;
+            }
+            else {
+                // if(colId == 0)
+                //     P("start = %lld, end = %lld, len = %lld\n", start, end, end - start);
+                L pivot = start;
+                // P("pivot char: %c\n", vC(curV, targ[pivot]));
+                do{
+                    if(0 != (*cmp)(curV,targ[pivot],targ[end-1],curB)) {
+                        L mid = (start + end) >> 1;
+                        if(0 != (*cmp)(curV,targ[pivot],targ[mid],curB)) end = mid;
+                        else start = mid+1;
+                    }
+                    else break;
+                }while(start < end);
+                // if(end < high)
+                //     P("pivot char: %c | %c\n", vC(curV, targ[pivot]), vC(curV, targ[end]));
+                lib_quicksort_list(targ, val, isUp, pivot, end, colId+1, cmp);
+                pos = end;
+            }
+        }while(pos < high);
     }
+    // gettimeofday(&tv1, NULL);
+    // P("2. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // P("low = %lld, high = %lld, colId = %lld\n", low, high, colId); // getchar();
 }
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
@@ -415,7 +464,45 @@ void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
     P("done.\n");
 }
 
-L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+L lib_bs_find_same(V val, L* index, L iLen, L (*cmp)(V,L,L,B*), B opt, L* seg){
+    L start = 0, len = 0;
+    while(start < iLen){
+        L pivot = start, end = iLen;
+        do{
+            if(0 != (*cmp)(val,index[pivot],index[end-1],NULL)) {
+                L mid = (start + end) >> 1;
+                if(0 != (*cmp)(val,index[pivot],index[mid],NULL)) end = mid;
+                else start = mid+1;
+            }
+            else start = end;
+        }while(start < end);
+        if(opt) seg[len++] = pivot;
+        else len++;
+    }
+    R len;
+}
+
+L lib_get_group_by_q1(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+    L  lenZ = lib_bs_find_same(val, index, iLen, cmp, false, NULL);
+    L* segZ = (L*)malloc(sizeof(L) * lenZ);
+    lib_bs_find_same(val, index, iLen, cmp, true, segZ);
+    // P("Result:\n");
+    // DOI(lenZ, P("segZ[%lld] = %lld\n", i,segZ[i]))
+    /* dict */
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initV(zKey, H_L, lenZ);
+    initV(zVal, H_G, lenZ);
+    DOI(lenZ, vL(zKey,i)=index[segZ[i]])
+    DOI(lenZ, { L start=segZ[i]; L end=(i+1<lenZ)?segZ[i+1]:iLen; \
+        L size= end-start; V d=vV(zVal, i); initV(d, H_L, size); \
+        L k=0; DOI3(start, end, vL(d,k++)=index[i]) })
+    free(segZ);
+    R 0;
+}
+
+L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L k, c, cz; V d,t;
     /* 1. get the total number of cells: lenZ */
     P("step 1\n");
@@ -448,6 +535,14 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
                else vL(d,c++)=index[i])
     P("exit\n");
     R 0;
+}
+
+L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+    #ifdef OPT_Q1
+        R lib_get_group_by_q1(z, val, index, iLen, cmp);
+    #else
+        R lib_get_group_by_other(z, val, index, iLen, cmp);
+    #endif
 }
 
 // L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
@@ -485,13 +580,64 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
 //     R 0;
 // }
 
+#define LIB_MEMBER_F1(p) case##p R to##p(val,valI)==to##p(src,0)
+#define LIB_MEMBER_F1F(p,foo) case##p R foo(to##p(val,valI),to##p(src,0))
+
+B lib_member_fast1(void* src, void* val, L valI, L typ){
+    switch(typ){
+        LIB_MEMBER_F1(B);
+        LIB_MEMBER_F1(H);
+        LIB_MEMBER_F1(I);
+        LIB_MEMBER_F1(L);
+        LIB_MEMBER_F1(F);
+        LIB_MEMBER_F1(E);
+        LIB_MEMBER_F1F(X, xEqual);
+        LIB_MEMBER_F1(C);
+        LIB_MEMBER_F1F(S, !strcmp);
+        default: { P("Not impl. for type %lld\n", typ); exit(99); }
+    }
+    R 0;
+}
+
+
+#define LIB_MEMBER_F2(p) case##p R to##p(val,valI)==to##p(src,0) || to##p(val,valI)==to##p(src,1)
+#define LIB_MEMBER_F2F(p,foo) case##p R foo(to##p(val,valI),to##p(src,0)) || foo(to##p(val,valI),to##p(src,1))
+
+B lib_member_fast2(void* src, void* val, L valI, L typ){
+    // P("match %lld (%s), %lld (%s), %lld (%s) == %d\n", toL(val,valI), getSymbolStr(toL(val,valI))\
+    //                                                  , toL(src,0),    getSymbolStr(toL(src,0)) \
+    //                                                  , toL(src,1),    getSymbolStr(toL(src,1))\
+    //                                                  , toL(val,valI)==toL(src,0) || toL(val,valI)==toL(src,1));
+    // getchar();
+    switch(typ){
+        LIB_MEMBER_F2(B);
+        LIB_MEMBER_F2(H);
+        LIB_MEMBER_F2(I);
+        LIB_MEMBER_F2(L);
+        LIB_MEMBER_F2(F);
+        LIB_MEMBER_F2(E);
+        LIB_MEMBER_F2F(X, xEqual);
+        LIB_MEMBER_F2(C);
+        LIB_MEMBER_F2F(S, !strcmp);
+        default: { P("Not impl. for type %lld\n", typ); exit(99); }
+    }
+    R 0;
+}
+
 #define lib_member_template(typ)\
+    if(sLen > 2) { lib_member_template_normal(typ) }\
+    else if(sLen == 2) { DOP(vLen, targ[i]=lib_member_fast2(src,val,i,typ)) }\
+    else { DOP(vLen, targ[i]=lib_member_fast1(src,val,i,typ)) }
+    // { L k=0; DOI(vLen, k+=targ[i]) P("total sum = %lld\n", k); }
+
+#define lib_member_template_normal(typ)\
     HN hashT; \
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
     DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,src,-1,val,i,typ))) \
     profileHash(hashT,hashLen);
+
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
     B flag[2]={0};
@@ -501,6 +647,7 @@ L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){
 }
 
 L lib_member_H(B* targ, H* src, L sLen, H* val, L vLen){
+    lib_member_template(H_H);
     R 0;
 }
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ "$#" -ne 2 ]; then
+    echo "Usage: ./run [debug|release] [id]"
+    exit 1
+fi
 echo Starting ...
 #export OMP_NUM_THREADS=20;
 #export GOMP_CPU_AFFINITY="0-17:4 1-18:4 2-19:4 3-20:4"
@@ -11,11 +15,11 @@ echo Starting ...
 #export OMP_PLACES=cores
 #export OMP_PROC_BIND=spread
 #export OMP_NUM_THREADS=4
-id=19
+id=$2
 if [ "debug" == "$1" ]; then
-    (cd ../ && make debug && time ./horse -t $id)
+    (cd ../ && make TPCH="-DOPT_Q$id" debug && time ./horse -t $id)
 elif [ "release" == "$1" ]; then
-    (cd ../ && make release && time ./horse -t $id)
+    (cd ../ && make TPCH="-DOPT_Q$id" release && time ./horse -t $id)
 else
     (cd ../ && time ./horse -t $id)
 fi
