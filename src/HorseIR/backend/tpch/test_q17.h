@@ -40,7 +40,7 @@ L simulateQ17(){
 	// P("len of w3: %lld\n", vn(w3));
 	PROFILE(11, pfnMember(w4, w3, t0));    // find l_partkey in small p_partkey
 	PROFILE(12, pfnColumnValue(t4, a0, literalSym((S)"l_quantity")));
-	PROFILE(13, pfnCompress(w6, w4, t4)); P("size of w6: %lld\n", vn(w6));
+	PROFILE(13, pfnCompress(w6, w4, t4)); //P("size of w6: %lld\n", vn(w6));
 
 	/* sub query */
 	PROFILE(14, pfnCompress(f0, w4, t0));
@@ -49,7 +49,7 @@ L simulateQ17(){
 	PROFILE(17, pfnIndex(f3, f0, f2));
 	PROFILE(18, pfnIndexOf(f4, f3, f0));          // index
 	PROFILE(19, pfnValues(f5, f1));
-	PROFILE(20, pfnEachRight(f12, w6, f5, pfnIndex))
+	PROFILE(20, pfnEachRight(f12, w6, f5, pfnIndex));
 	PROFILE(21, pfnEach(f6, f12, pfnAvg));
 	PROFILE(22, pfnRaze(f7, f6));
 	PROFILE(23, pfnMul(f8, f7, literalF64(0.2))); // * 0.2
@@ -59,7 +59,7 @@ L simulateQ17(){
 	PROFILE(26, pfnColumnValue(t5, a0, literalSym((S)"l_extendedprice")));
 	PROFILE(27, pfnCompress(w13, w4, t5));
 	PROFILE(28, pfnCompress(w15, f10, w13));
-	P("size of w15: %lld\n", vn(w15));
+	// P("size of w15: %lld\n", vn(w15));
 
 	// project 
 	PROFILE(29, pfnSum(p0, w15));

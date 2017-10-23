@@ -8,14 +8,25 @@ V simulateQ18_sub(){
 	PROFILE(1, pfnLoadTable(a0, literalSym((S)"lineitem")));
 	PROFILE(2, pfnColumnValue(t0, a0, literalSym((S)"l_orderkey"))); // fkey range [1, 6000000]
 	PROFILE(3, pfnColumnValue(t1, a0, literalSym((S)"l_quantity")));
-	PROFILE(99, pfnFetch(f0, t0));
-	PROFILE(4, pfnGroupBucket(w0, f0));
-	PROFILE(5, pfnValues(w1, w0)); // size range [1, 7]
-	PROFILE(6, pfnKeys(w2, w0));
-	// P("type: %lld, len: %lld\n", vp(w2), vn(w2)); DOI(200, P(" %lld", vL(w2,i))) P("\n");
-	PROFILE(7, pfnEachRight(w3, t1, w1, pfnIndex));
-	PROFILE(8, pfnEach(w4, w3, pfnSum));
-	PROFILE(9, pfnRaze(w5, w4));
+	if(!isOptimized){
+		PROFILE(99, pfnFetch(f0, t0));
+		PROFILE(4, pfnGroupBucket(w0, f0));
+		PROFILE(5, pfnValues(w1, w0));      // size range [1, 7]
+		PROFILE(6, pfnKeys(w2, w0));
+		PROFILE(7, pfnEachRight(w3, t1, w1, pfnIndex));  // <-- slow
+		PROFILE(8, pfnEach(w4, w3, pfnSum));             // <-- slow
+		PROFILE(9, pfnRaze(w5, w4));
+	}
+	else {
+		V f1 = allocNode();  V f2 = allocNode();
+		PROFILE(99, pfnValues(f0, t0));
+		PROFILE( 7, optLoopFusionQ18_1(w0, f0, t1));  // avoid a large group with small cells
+		PROFILE( 8, pfnKeys           (f1, w0));
+		PROFILE( 9, pfnValues         (w5, w0));
+		PROFILE(10, pfnKeys           (f2, t0));
+		PROFILE(11, pfnIndex          (w2, f2, f1));
+		// P("keys w2."); DOI(20, P(" %lld",vL(w2,i)))   P("\n");
+	}
 	PROFILE(10, pfnGt(w6, w5, literalF64(300)));
 	PROFILE(11, pfnCompress(w7, w6, w2));
 	R w7;
@@ -113,7 +124,7 @@ L simulateQ18(){
     PROFILE(48, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
     printTablePretty(z, 10);  // limit 10
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
 	R 0;

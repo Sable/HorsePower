@@ -12,18 +12,18 @@ V udfExists() {
     PROFILE( 2,pfnLoadTable(a1, literalSym((S)"lineitem")));
 
     PROFILE( 3,pfnColumnValue(t0, a0, literalSym((S)"o_orderkey")));
-    PROFILE( 4,pfnColumnValue(t1, a1, literalSym((S)"l_orderkey")));
+    PROFILE( 4,pfnColumnValue(t1, a1, literalSym((S)"l_orderkey")));    //fkey
     PROFILE( 5,pfnColumnValue(t2, a1, literalSym((S)"l_commitdate")));
     PROFILE( 6,pfnColumnValue(t3, a1, literalSym((S)"l_receiptdate")));
 
-    PROFILE( 7,pfnEnum(j0, t0, t1));
-    PROFILE( 8,pfnLt(w0, t2, t3));
-    PROFILE( 9,pfnCompress(w1, w0, j0));
-    PROFILE(10,pfnToIndex(w2, w1));
-    PROFILE(11,pfnKeys(w3, w1));
-    PROFILE(12,pfnLen(w4, w3));
-    PROFILE(13,pfnVector(w5, w4, literalBool(0)));
-    PROFILE(14,pfnIndexA(w5, w2, literalBool(1)));
+    // PROFILE( 7,pfnEnum(j0, t0, t1));     // <--- slow
+    PROFILE( 8,pfnLt      (w0, t2, t3));
+    PROFILE( 9,pfnCompress(w1, w0, t1));
+    PROFILE(10,pfnValues  (w2, w1));
+    PROFILE(11,pfnKeys    (w3, w1));
+    PROFILE(12,pfnLen     (w4, w3));
+    PROFILE(13,pfnVector  (w5, w4, literalBool(0)));
+    PROFILE(14,pfnIndexA  (w5, w2, literalBool(1)));
     FS("Leaving: udfExists\n");
     R w5;
 }
@@ -85,7 +85,7 @@ L simulateQ4(){
     PROFILE(23,pfnTable(z, m0, m3));
 
     gettimeofday(&tv1, NULL);
-    P("Result of the Query 4: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
     printV(z);
     R 0;
 }
@@ -94,6 +94,8 @@ L testTPCHQ4(){
     P("** Start simulation for TPC-H Query 4\n");
     initTableByName((S)"orders");
     initTableByName((S)"lineitem");
+    PROFILE(91, pfnAddFKey(literalSym((S)"orders"),   literalSym((S)"o_orderkey"),\
+                           literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
     simulateQ4();
     P("** End Query 4\n");
     R 0;

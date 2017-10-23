@@ -193,11 +193,22 @@ L pfnDatetimeSub   (V z, V x, V y, V m);
 L pfnBetween       (V z, V x, V p, V q);
 L pfnAddFKey       (V x, V xKey, V y, V yKey);
 
+/* optimizations */
+
+L optLoopFusionQ1_1 (V z, L r0, V t3, V g7);
+L optLoopFusionQ1_2 (V z, L r0, V g7);
+L optLoopFusionQ1_3 (V z, L r0, V t3, V g7);
+L optLoopFusionQ1_4 (V z0, V z1, L r0, V t0, V t1, V t6, V g7);
+
+L optLoopFusionQ3_1 (V z, L r0, V p8, V g3);
+
 L optLoopFusionQ6_1 (V z, L r0, V t1, V t2, V t3);
 L optLoopFusionQ6_2 (V z, L r0, V t15, V t0, V t1);
+
 L optLoopFusionQ14_1(V z, L r0, V t0);
 L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5);
 L optLoopFusionQ17_1(V z, L r0, V t2, V c2, V t3, V c3);
+L optLoopFusionQ18_1(V z, V x, V t1);
 
 L optLoopFusionQ19_1(V z, L r0, V t3, V w0, V w1);
 L optLoopFusionQ19_2(V z, L r0, V d9, V c9, V d11, V d12, V r1);
@@ -208,6 +219,7 @@ L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
 
 L pfnGroupBucket   (V z, V x);
+L pfnGroupTrie     (V z, V x);
 
 #ifdef	__cplusplus
 }

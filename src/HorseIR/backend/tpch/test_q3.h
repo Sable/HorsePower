@@ -64,7 +64,7 @@ L simulateQ3(){
 	PROFILE(28, pfnIndex(p6, t11, w10)); // l_discount
 	PROFILE(29, pfnMinus(p7, literalF64(1.0), p6));
 	PROFILE(30, pfnMul(p8, p5, p7));     // revenue
-	P("done: project 1\n");
+	// P("done: project 1\n");
 
 	// group by
 	V group1[] = {p2, p3, p4};
@@ -72,12 +72,25 @@ L simulateQ3(){
 	PROFILE(32, pfnGroup(g2, g1));                    // <--- slow, fixed
 	PROFILE(33, pfnValues(g3, g2)); // values (index)
 	PROFILE(34, pfnKeys(g4, g2));   // keys   (index)
-	PROFILE(35, pfnEachRight(g5, p8, g3, pfnIndex));  // <--- slow
-	PROFILE(36, pfnEach(g6, g5, pfnSum));             // <--- slow
+	if(!isOptimized){
+		PROFILE(35, pfnEachRight(g5, p8, g3, pfnIndex));  // <--- slow
+		PROFILE(36, pfnEach(g6, g5, pfnSum));             // <--- slow
+		PROFILE(40, pfnRaze(g10, g6));        // revenue
+	}
+	else {
+		PROFILE(35, optLoopFusionQ3_1(g10, vn(g3), p8, g3));
+	}
+
+	// PROFILE(-1, pfnEach(g7, g3, pfnLen));
+	// PROFILE(-1, pfnRaze(g8, g7));
+	// PROFILE(-1, pfnMin(g9, g8));
+	// PROFILE(-1, pfnMax(g10, g8));
+	// P("min = %lld, max = %lld\n", vl(g9), vl(g10));
+
 	PROFILE(37, pfnIndex(g7, p2, g4));    // l_orderkey
 	PROFILE(38, pfnIndex(g8, p3, g4));    // o_orderdate
 	PROFILE(39, pfnIndex(g9, p4, g4));    // o_shippriority
-	PROFILE(40, pfnRaze(g10, g6));        // revenue
+	// PROFILE(40, pfnRaze(g10, g6));        // revenue
 
 	// order
 	V group2[] = {g10, g7};
@@ -99,7 +112,7 @@ L simulateQ3(){
     PROFILE(52, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
     printTablePretty(z, 10);  // limit 10
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
     R 0;

@@ -459,9 +459,9 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i)
-    P("tLen = %lld\n", tLen);
+    // P("tLen = %lld\n", tLen);
     lib_quicksort(targ, val, 0, tLen, isUp, cmp);
-    P("done.\n");
+    // P("done.\n");
 }
 
 L lib_bs_find_same(V val, L* index, L iLen, L (*cmp)(V,L,L,B*), B opt, L* seg){
@@ -505,11 +505,11 @@ L lib_get_group_by_q1(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
 L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L k, c, cz; V d,t;
     /* 1. get the total number of cells: lenZ */
-    P("step 1\n");
+    // P("step 1\n");
     L lenZ=iLen>0?1:0;
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    P("step 2\n");
+    // P("step 2\n");
     // initV(z, H_N, lenZ);
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
@@ -526,23 +526,23 @@ L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
                else c++;)
     if(c>0) initV(d,H_L,c);
     /* 3. fill indices into each cell */
-    P("step 3\n");
+    // P("step 3\n");
     k=0, c=0;
     d=vV(zVal,k++);
     if(iLen>0) vL(d,c++)=index[0];
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
                   d=vV(zVal,k++); vL(d,0)=index[i]; c=1; } \
                else vL(d,c++)=index[i])
-    P("exit\n");
+    // P("exit\n");
     R 0;
 }
 
 L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
-    #ifdef OPT_Q1
-        R lib_get_group_by_q1(z, val, index, iLen, cmp);
-    #else
+    // #ifdef OPT_Q1
+    //     R lib_get_group_by_q1(z, val, index, iLen, cmp);
+    // #else
         R lib_get_group_by_other(z, val, index, iLen, cmp);
-    #endif
+    // #endif
 }
 
 // L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
@@ -635,8 +635,8 @@ B lib_member_fast2(void* src, void* val, L valI, L typ){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,src,-1,val,i,typ))) \
-    profileHash(hashT,hashLen);
+    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,src,-1,val,i,typ)))
+    // profileHash(hashT,hashLen);
 
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen){

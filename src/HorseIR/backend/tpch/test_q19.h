@@ -75,7 +75,7 @@ L simulateQ19(){
 		PROFILE(26, pfnAnd(w10, w9, w8));
 	}
 	else {
-		PROFILE(22, optLoopFusionQ19_1(w10, vn(t3), t3, w0, w1))
+		PROFILE(22, optLoopFusionQ19_1(w10, vn(t3), t3, w0, w1));
 	}
 
 	// select 2 - lineitem - p
@@ -133,7 +133,7 @@ L simulateQ19(){
 	// where 2 - k
 	// PROFILE(71, pfnEq(k0, d9, literalSym((S)"Brand#23")));
 	S group5[] = {(S)"MED BAG", (S)"MED BOX", (S)"MED PKG", (S)"MED PACK"};
-	PROFILE(72, pfnMember(k1, literalSymVector(4, group5), d10))
+	PROFILE(72, pfnMember(k1, literalSymVector(4, group5), d10));
 	if(isOptimized){
 		PROFILE(71, pfnEq(k0, d9, literalSym((S)"Brand#23")));
 		PROFILE(73, pfnGeq(k2, d12, literalI64(10))); 
@@ -184,7 +184,7 @@ L simulateQ19(){
     PROFILE(102, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
     printV(z);
     R 0;
 }

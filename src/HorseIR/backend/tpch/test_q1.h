@@ -42,46 +42,62 @@ L simulateQ1(){
     PROFILE(13, pfnCompress(g1,w2,t5));
     V group1[] = {g0,g1};
 
-    P("len of g0: %lld, type: %lld\n", vn(g0), vp(g0));
-    P("len of g1: %lld, type: %lld\n", vn(g1), vp(g1));
+    // P("len of g0: %lld, type: %lld\n", vn(g0), vp(g0));
+    // P("len of g1: %lld, type: %lld\n", vn(g1), vp(g1));
     PROFILE(14, pfnList(g2,2,group1));
-    PROFILE(15, pfnGroup(g3,g2));
+    PROFILE(15, pfnGroupTrie(g3,g2));
     PROFILE(16, pfnKeys(g4,g3));
     // P("number of groups: %lld\n", vn(g4));  getchar();
     PROFILE(16, pfnValues(g5,g3));
     PROFILE(991, pfnWhere(g6,w2));
     PROFILE(992, pfnEachRight(g7,g6,g5,pfnIndex));
     // select
-    PROFILE(17, pfnEachRight(s0, t3, g7, pfnIndex)); //l_quantity
-    PROFILE(18, pfnEachRight(s1, t0, g7, pfnIndex)); //l_extendedprice
-    PROFILE(19, pfnEachRight(s2, t1, g7, pfnIndex)); //l_discount
-    PROFILE(20, pfnEachRight(s3, t6, g7, pfnIndex)); //l_tax
-    PROFILE(21, pfnEach(s4, s0, pfnSum));            //sum_qty
-    PROFILE(22, pfnEach(s5, s1, pfnSum));            //sum_base_price
-    PROFILE(23, pfnEachItem(s6, literalF64(1), s2, pfnMinus));
-    PROFILE(24, pfnEachItem(s7, s1, s6, pfnMul));
-    PROFILE(25, pfnEach(s8, s7, pfnSum));            //sum_disc_price
+    if(!isOptimized){
+        PROFILE(17, pfnEachRight(s0, t3, g7, pfnIndex)); //l_quantity
+        PROFILE(18, pfnEachRight(s1, t0, g7, pfnIndex)); //l_extendedprice
+        PROFILE(19, pfnEachRight(s2, t1, g7, pfnIndex)); //l_discount
+        PROFILE(20, pfnEachRight(s3, t6, g7, pfnIndex)); //l_tax
+        PROFILE(21, pfnEach(s4, s0, pfnSum));            //sum_qty
+        PROFILE(22, pfnEach(s5, s1, pfnSum));            //sum_base_price
+        PROFILE(23, pfnEachItem(s6, literalF64(1), s2, pfnMinus));
+        PROFILE(24, pfnEachItem(s7, s1, s6, pfnMul));
+        PROFILE(25, pfnEach(s8, s7, pfnSum));            //sum_disc_price
 
-    PROFILE(26, pfnEachItem(s9, literalF64(1), s2, pfnMinus));
-    PROFILE(27, pfnEachItem(s10, s1, s9, pfnMul));
-    PROFILE(28, pfnEachItem(s11, literalF64(1), s3, pfnPlus));
-    PROFILE(29, pfnEachItem(s12, s10, s11, pfnMul)); // sum_charge
-    PROFILE(99, pfnEach(f0, s12, pfnSum));
+        PROFILE(26, pfnEachItem(s9, literalF64(1), s2, pfnMinus));
+        PROFILE(27, pfnEachItem(s10, s1, s9, pfnMul));
+        PROFILE(28, pfnEachItem(s11, literalF64(1), s3, pfnPlus));
+        PROFILE(29, pfnEachItem(s12, s10, s11, pfnMul)); // sum_charge
+        PROFILE(99, pfnEach(f0, s12, pfnSum));
 
-    PROFILE(30, pfnEach(s13, s0, pfnAvg));           //avg_qty
-    PROFILE(31, pfnEach(s14, s1, pfnAvg));           //avg_price
-    PROFILE(32, pfnEach(s15, s2, pfnAvg));           //avg_disc
-    PROFILE(33, pfnEach(s16, g7, pfnLen));           //count_order
-    PROFILE(34, pfnIndex(s17,g0, g4));               //l_returnflag
-    PROFILE(35, pfnIndex(s18,g1, g4));               //l_linestatus
-    PROFILE(36, pfnRaze(s19,s4));
-    PROFILE(37, pfnRaze(s20,s5));
-    PROFILE(38, pfnRaze(s21,s8));
-    PROFILE(39, pfnRaze(s22,f0));
-    PROFILE(40, pfnRaze(s23,s13));
-    PROFILE(41, pfnRaze(s24,s14));
-    PROFILE(42, pfnRaze(s25,s15));
-    PROFILE(43, pfnRaze(s26,s16));
+        PROFILE(30, pfnEach(s13, s0, pfnAvg));           //avg_qty
+        PROFILE(31, pfnEach(s14, s1, pfnAvg));           //avg_price
+        PROFILE(32, pfnEach(s15, s2, pfnAvg));           //avg_disc
+        PROFILE(33, pfnEach(s16, g7, pfnLen));           //count_order
+        PROFILE(34, pfnIndex(s17,g0, g4));               //l_returnflag
+        PROFILE(35, pfnIndex(s18,g1, g4));               //l_linestatus
+        PROFILE(36, pfnRaze(s19,s4));
+        PROFILE(37, pfnRaze(s20,s5));
+        PROFILE(38, pfnRaze(s21,s8));
+        PROFILE(39, pfnRaze(s22,f0));
+        PROFILE(40, pfnRaze(s23,s13));
+        PROFILE(41, pfnRaze(s24,s14));
+        PROFILE(42, pfnRaze(s25,s15));
+        PROFILE(43, pfnRaze(s26,s16));
+    }
+    else {
+        PROFILE(17, optLoopFusionQ1_1(s23, vn(g7), t3, g7));
+        PROFILE(18, optLoopFusionQ1_1(s24, vn(g7), t0, g7));
+        PROFILE(19, optLoopFusionQ1_1(s25, vn(g7), t1, g7));
+        PROFILE(19, optLoopFusionQ1_2(s26, vn(g7), g7));
+
+        PROFILE(20, optLoopFusionQ1_3(s19, vn(g7), t3, g7));
+        PROFILE(21, optLoopFusionQ1_3(s20, vn(g7), t0, g7));
+        PROFILE(22, optLoopFusionQ1_4(s21, s22, vn(g7), t0, t1, t6, g7));
+
+        PROFILE(34, pfnIndex(s17,g0, g4));               //l_returnflag
+        PROFILE(35, pfnIndex(s18,g1, g4));               //l_linestatus
+    }
+
     // order by
     // PROFILE(44, (initV(b0,H_B,2),vB(b0,0)=1,vB(b0,1)=1,0));
     // PROFILE(45, pfnOrderBy(r0,g4,b0));
@@ -128,7 +144,7 @@ L simulateQ1(){
     PROFILE(59, pfnTable(z,z0,z1));
 
     gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
     printV(z);
     R 0;
 }

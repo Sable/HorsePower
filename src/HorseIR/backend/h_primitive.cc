@@ -199,6 +199,8 @@ L pfnFetch(V z, V x){
         L typZ = vp(targ);
         L lenZ = vn(x);
         initV(z, typZ, lenZ);
+        // P("1."); DOI(20, P(" %lld",vY(x,i)))           P("\n");
+        // P("2."); DOI(20, P(" %lld",vL(targ, vY(x,i)))) P("\n"); getchar();
         switch(typZ){
             caseB DOP(lenZ, vB(z,i)=vB(targ,vY(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=vH(targ,vY(x,i))) break;
@@ -849,17 +851,16 @@ L pfnGroup(V z, V x){
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
     initV(y,H_B,lenZ);
-    struct timeval tv0, tv1;
-    gettimeofday(&tv0, NULL);
+    // struct timeval tv0, tv1;
+    // gettimeofday(&tv0, NULL);
     DOP(lenZ,vB(y,i)=1)
-    gettimeofday(&tv1, NULL);
     CHECKE(pfnOrderBy(t,x,y));
-    gettimeofday(&tv1, NULL);
-    P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // gettimeofday(&tv1, NULL);
+    // P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // P("t = \n");
     // printV(t);
 
-    gettimeofday(&tv0, NULL);
+    // gettimeofday(&tv0, NULL);
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp));
@@ -871,8 +872,8 @@ L pfnGroup(V z, V x){
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-    gettimeofday(&tv1, NULL);
-    P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // gettimeofday(&tv1, NULL);
+    // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     R 0;
 }
 
@@ -1555,7 +1556,7 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
     if(isList(y)){
         L lenZ = vn(y);
         initV(z,H_G,lenZ);
-        P("pfnEachRight: size(z) = %lld\n", lenZ);
+        // P("pfnEachRight: size(z) = %lld\n", lenZ);
         DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))  // seg fault after DOI -> DOP
     }
     else {
@@ -1839,6 +1840,39 @@ L pfnAddFKey(V x, V xKey, V y, V yKey){
 
 /* handcraft loop fusion optimization */
 
+L optLoopFusionQ1_1(V z, L r0, V t3, V g7){
+    initV(z,H_E,r0);
+    DOP(r0,{V t=vV(g7,i); E c=0; DOJ(vn(t), c+=vE(t3, vL(t,j))) vE(z,i)=c/vn(t);})
+    R 0;
+}
+
+L optLoopFusionQ1_2(V z, L r0, V g7){
+    initV(z,H_L,r0);
+    DOP(r0, vL(z,i)=vn(vV(g7,i)))
+    R 0;
+}
+
+L optLoopFusionQ1_3(V z, L r0, V t3, V g7){
+    initV(z,H_E,r0);
+    DOP(r0,{V t=vV(g7,i); E c=0; DOJ(vn(t), c+=vE(t3, vL(t,j))) vE(z,i)=c;})
+    R 0;
+}
+
+L optLoopFusionQ1_4(V z0, V z1, L r0, V t0, V t1, V t6, V g7){
+    initV(z0,H_E,r0);
+    initV(z1,H_E,r0);
+    DOP(r0,{V t=vV(g7,i); E c0=0; E c1=0; \
+           DOJ(vn(t), {L k=vL(t,j); E val=vE(t0,k)*(1-vE(t1,k)); c0+=val; c1+=val*(1+vE(t6,i));}) \
+           vE(z0,i)=c0; vE(z1,i)=c1;})
+    R 0;
+}
+
+L optLoopFusionQ3_1(V z, L r0, V p8, V g3){
+    initV(z,H_E,r0);
+    DOP(r0, { V t=vV(g3,i); E c=0; DOJ(vn(t), c+=vE(p8, vL(t,j))) vE(z,i)=c; })
+    R 0;
+}
+
 /* status: on */
 L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3){
     initV(z,H_B,r0);
@@ -1930,6 +1964,7 @@ L pfnGroupBucket(V z, V x){
     if(isInteger(x)){
         L lenX = -1;
         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
+        // P("lenX 1 = %lld\n", lenX);
         L *temp  = (L*)malloc(sizeof(L)*lenX);
         L *count = (L*)malloc(sizeof(L)*lenX);
         L *maps  = (L*)malloc(sizeof(L)*lenX);
@@ -1942,6 +1977,7 @@ L pfnGroupBucket(V z, V x){
         initV(z, H_N, 2);
         V keys = getDictKeys(z);
         V vals = getDictVals(z);
+        // P("size of keys: %lld\n", cnt);
         initV(keys, H_L, cnt); cnt = 0;
         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
         initV(vals, H_G, cnt);
@@ -1953,5 +1989,71 @@ L pfnGroupBucket(V z, V x){
     }
     else R E_DOMAIN;
 }
+
+
+L optLoopFusionQ18_1(V z, V x, V t1){
+    if(isInteger(x)){
+        L lenX = -1;
+        // lenX = vn(x);
+        DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
+        // P("lenX 2 = %lld\n", lenX);
+        L *temp  = (L*)malloc(sizeof(L)*lenX);
+        L *maps  = (L*)malloc(sizeof(L)*lenX);
+        memset(temp , 0, sizeof(L)*lenX);
+        memset(maps ,-1, sizeof(L)*lenX);
+        DOI(vn(x), temp[vL(x,i)]++)
+        L cnt = 0;
+        DOI(lenX, cnt+= temp[i]!=0)
+        initV(z, H_N, 2);
+        V keys = getDictKeys(z);
+        V vals = getDictVals(z);
+        // P("size of keys: %lld\n", cnt);
+        initV(keys, H_L, cnt); cnt = 0;
+        DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
+        initV(vals, H_E, cnt);
+        L chk = 0;
+        DOI(vn(x), {L k=vL(x,i); L c=maps[k]; chk += c; vE(vals,c)+=vE(t1,i); })
+        free(temp);
+        free(maps);
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+/*
+ * two columns: (row 650K)
+ *   A, N, R
+ *   O, F
+ */
+
+#define ENCODE2(x,y) ((x<<8)+y)
+
+L pfnGroupTrie(V z, V x){
+    if(isList(x) && vn(x)==2){
+        initV(z, H_N, 2);
+        V keys = getDictKeys(z);
+        V vals = getDictVals(z);
+        L charMap[65536]={0}; // 256*256
+        L charId[65536]={-1};
+        L lenX = vn(vV(x,0));
+        DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); charMap[t]++; })
+        L lenZ = 0; DOI(65536, if(charMap[i]!=0)charId[i]=lenZ++)
+        // P("val of lenZ: %lld\n", lenZ);
+        initV(vals, H_G, lenZ);
+        L c=0; DOI(65536, if(charMap[i]!=0){ initV(vV(vals,c++),H_L,charMap[i]); })
+        L *count = (L*)malloc(sizeof(L)*lenZ); memset(count, 0, sizeof(L)*lenZ);
+        DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); \
+                   L id=charId[t]; vL(vV(vals,id),count[id]++)=i; })
+        initV(keys, H_L, lenZ);
+        DOI(lenZ, vL(keys,i)=vL(vV(vals,i),0))
+        free(count);
+        R 0;
+    }
+    else R E_NOT_IMPL;
+}
+
+
+
+
 
 

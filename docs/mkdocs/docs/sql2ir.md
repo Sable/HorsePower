@@ -70,10 +70,17 @@ PROFILE(17, pfnEachRight(s0, t3, g7, pfnIndex)); //l_quantity
 
 ### Q3
 
+Porblems
+
 ```no-highlight
 PROFILE(35, pfnEachRight(g5, p8, g3, pfnIndex));  // <--- slow
 PROFILE(36, pfnEach(g6, g5, pfnSum));             // <--- slow
 ```
+
+Explanation
+
+- After groupby, the size of each cell has "min = 1, max = 7"
+- However, there are 11620 cells
 
 ### Q6
 
