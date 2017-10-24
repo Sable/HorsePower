@@ -38,12 +38,13 @@ L readTableNation(){
 
 L readTableCustomer(){
     C CSV_LINE[] = "data/tpch/db1/customer.tbl";
-    L TYPE_LINE[]  = {H_L, H_Q, H_S, H_L, H_S, H_E, H_Q, H_S};
+    L TYPE_LINE[]  = {H_L, H_Q, H_S, H_L,\
+                      H_S, H_E, H_Q, H_S};
     const L NUM_COL_LINE = 8;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
-        "c_custkey", "c_name", "c_address", "c_nationkey",
-        "c_phone", "c_acctabl","c_mktsegment", "c_comment"
+        "c_custkey", "c_name",    "c_address",    "c_nationkey",
+        "c_phone"  , "c_acctbal", "c_mktsegment", "c_comment"
     };
 
     initTable(NUM_COL_LINE, PRE_DEFINED, SYM_LIST_LINE);

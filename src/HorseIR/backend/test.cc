@@ -88,10 +88,17 @@ V literalI64Vector(L n, L b[]){
     R z;
 }
 
-#define PROFILE(n,x) x
-// #define PROFILE(n,x) { struct timeval tt_0, tt_1; \
-//         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
-//         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
+V literalStrVector(L n, S b[]){
+    V z = allocNode();
+    initV(z,H_S,n);
+    DOI(n, {S t=allocStrMem(strlen(b[i])); strcpy(t,b[i]); vS(z,i)=t;})
+    R z;
+}
+
+// #define PROFILE(n,x) x
+#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
+        gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
+        P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
 B isOptimized = true;
 

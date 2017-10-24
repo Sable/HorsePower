@@ -363,6 +363,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         SORT_CMP(F); \
         SORT_CMP(E); \
         SORT_CMP(C); \
+        caseS {L tmp=strcmp(vS(t,a),vS(t,b)); if(tmp) R tmp<0?cmp_switch(f);} break; \
         caseQ if(vQ(t,a)!=vQ(t,b)) R compareSymbol(vQ(t,a),vQ(t,b))<0?cmp_switch(f); break; \
         SORT_CMP(M); \
         SORT_CMP(D); \

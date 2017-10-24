@@ -192,6 +192,7 @@ L pfnDatetimeAdd   (V z, V x, V y, V m);
 L pfnDatetimeSub   (V z, V x, V y, V m);
 L pfnBetween       (V z, V x, V p, V q);
 L pfnAddFKey       (V x, V xKey, V y, V yKey);
+L pfnSubString     (V z, V x, V y);
 
 /* optimizations */
 

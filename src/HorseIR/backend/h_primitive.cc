@@ -1839,6 +1839,24 @@ L pfnAddFKey(V x, V xKey, V y, V yKey){
     R 0;
 }
 
+L pfnSubString(V z, V x, V y){
+    if(isString(x) && isInteger(y)){
+        if(2==vn(y)){
+            L start = vL(y,0); // starting position
+            L seg   = vL(y,1); // length of segment
+            initV(z,H_S,vn(x));
+            // warning: must not DOI -> DOP, because of race condition in allocStrMem
+            DOI(vn(x), {S t=vS(x,i); L t0=strlen(t); S p=allocStrMem(seg); \
+                       L space = t0 - start; L len=seg<space?seg:space;\
+                       DOJ(len, p[j]=t[start+j-1]) while(len<seg) p[len++]=' ';\
+                       p[seg]=0; vS(z,i)=p; })
+            R 0;
+        }
+        else R E_NOT_IMPL;
+    }
+    else R E_DOMAIN;
+}
+
 /* handcraft loop fusion optimization */
 
 L optLoopFusionQ1_1(V z, L r0, V t3, V g7){
