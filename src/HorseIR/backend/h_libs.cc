@@ -52,6 +52,8 @@ typedef struct hash_node {
 #define toS(v,f) toBase(S,v,f)
 #define toC(v,f) toBase(C,v,f)
 
+L *LARGE_BUFF; // used in merge sort
+
 /*
  * A method name starts with "lib" and ends with a specific type
  * e.g. libIndexOf_I
@@ -374,10 +376,10 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
     R 0;
 }
 
-
 void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     // P("Entering merge sort: (%lld, %lld)\n",low,high);
-    #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
+    // #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
+    #define SWAP_I(a,b) { rtn[a]^=rtn[b]; rtn[b]^=rtn[a]; rtn[a]^=rtn[b]; }
     // P("type of val: %lld\n", vp(val));
     // P("before:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
     if(low < high - 1){
@@ -390,29 +392,31 @@ void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
             L mid = (low + high) >> 1, len = high-low;
             lib_mergesort(rtn, val, low, mid , isUp, cmp);
             lib_mergesort(rtn, val, mid, high, isUp, cmp);
-            L curLeft=low, curRight=mid;
-            L *buff = (L*)malloc(sizeof(L)*len);
-            for(L i=0;i<len;i++){
-                if(curLeft == mid){
-                    // P("trace 1\n");
-                    buff[i]=rtn[curRight++];
+            if((*cmp)(val,rtn[mid-1],rtn[mid],isUp)>0){ // need to sort
+                L curLeft=low, curRight=mid;
+                // L *buff = (L*)malloc(sizeof(L)*len);
+                for(L i=0;i<len;i++){
+                    if(curLeft == mid){
+                        // P("trace 1\n");
+                        LARGE_BUFF[i]=rtn[curRight++];
+                    }
+                    else if(curRight == high){
+                        // P("trace 2\n");
+                        LARGE_BUFF[i]=rtn[curLeft++];
+                    }
+                    else if((*cmp)(val,rtn[curLeft],rtn[curRight],isUp)>0){
+                        // P("trace 3\n");
+                        LARGE_BUFF[i]=rtn[curRight++];
+                    }
+                    else {
+                        // P("trace 4\n");
+                        LARGE_BUFF[i]=rtn[curLeft++];
+                    }
                 }
-                else if(curRight == high){
-                    // P("trace 2\n");
-                    buff[i]=rtn[curLeft++];
-                }
-                else if((*cmp)(val,rtn[curLeft],rtn[curRight],isUp)>0){
-                    // P("trace 3\n");
-                    buff[i]=rtn[curRight++];
-                }
-                else {
-                    // P("trace 4\n");
-                    buff[i]=rtn[curLeft++];
-                }
-            }
-            memcpy(rtn+low,buff,sizeof(L)*len);
-            // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
-            free(buff);
+                memcpy(rtn+low,LARGE_BUFF,sizeof(L)*len);
+                // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
+                // free(buff);
+            } // else no need to sort
         }
     }
     // P("after:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
@@ -459,9 +463,15 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
         //     P("hahahahahah\n");
         // }
         #ifdef OPT_Q16
+            LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
             lib_mergesort(targ, curV, low, high, curB, cmp);
+            free(LARGE_BUFF);
         #else
-            if(isInteger(curV)) lib_mergesort(targ, curV, low, high, curB, cmp);
+            if(isInteger(curV)) {
+                LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
+                lib_mergesort(targ, curV, low, high, curB, cmp);
+                free(LARGE_BUFF);
+            }
             else lib_quicksort(targ, curV, low, high, curB, cmp);
         #endif
     }

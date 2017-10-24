@@ -108,8 +108,8 @@ L simulateQ16(){
     PROFILE(44, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-    printTablePretty(z, 35);  // limit 10
+    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    printTablePretty(z, 10);  // limit 35
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
     R 0;
 }
