@@ -874,6 +874,7 @@ L pfnGroup(V z, V x){
     else R E_DOMAIN;
     // gettimeofday(&tv1, NULL);
     // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // getchar();
     R 0;
 }
 
@@ -1431,7 +1432,7 @@ L pfnLike(V z, V x, V y){
             pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
             if(re==NULL) R E_NULL_VALUE;
             initV(z,H_B,lenZ);
-            P("entering\n");
+            // P("Entering pfnLike\n");
             switch(vp(x)){
                 caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
                 caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
@@ -1901,6 +1902,15 @@ L optLoopFusionQ14_1(V z, L r0, V t0){
 L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5){
     initV(z,H_E,r0);
     DOP(r0, vE(z,i)=vB(p4,i)?vE(p2,i)*vE(p5,i):0)
+    R 0;
+}
+
+L optLoopFusionQ16_1(V z, L r0, V g3, V g6){
+    initV(z,H_L,r0);
+    DOP(r0, {V t=vV(g6,i); L len=vn(t); L tot=0; B f[99]={0}; \
+            DOJ(len, if(!f[j]){ \
+                DOK(len, if(k!=j && vL(g3,vL(t,j)) == vL(g3,vL(t,k))) f[k]=1) \
+                f[j]=1; tot++;}) vL(z,i)=tot; })
     R 0;
 }
 

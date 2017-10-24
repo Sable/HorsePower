@@ -375,15 +375,60 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
 }
 
 
+void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
+    // P("Entering merge sort: (%lld, %lld)\n",low,high);
+    #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
+    // P("type of val: %lld\n", vp(val));
+    // P("before:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    if(low < high - 1){
+        if(low + 1 == high - 1){
+            if((*cmp)(val,rtn[low],rtn[high-1],isUp)>0){
+                SWAP_I(low, high-1);
+            }
+        }
+        else {
+            L mid = (low + high) >> 1, len = high-low;
+            lib_mergesort(rtn, val, low, mid , isUp, cmp);
+            lib_mergesort(rtn, val, mid, high, isUp, cmp);
+            L curLeft=low, curRight=mid;
+            L *buff = (L*)malloc(sizeof(L)*len);
+            for(L i=0;i<len;i++){
+                if(curLeft == mid){
+                    // P("trace 1\n");
+                    buff[i]=rtn[curRight++];
+                }
+                else if(curRight == high){
+                    // P("trace 2\n");
+                    buff[i]=rtn[curLeft++];
+                }
+                else if((*cmp)(val,rtn[curLeft],rtn[curRight],isUp)>0){
+                    // P("trace 3\n");
+                    buff[i]=rtn[curRight++];
+                }
+                else {
+                    // P("trace 4\n");
+                    buff[i]=rtn[curLeft++];
+                }
+            }
+            memcpy(rtn+low,buff,sizeof(L)*len);
+            // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
+            free(buff);
+        }
+    }
+    // P("after:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    // getchar();
+    // P("exit.\n");
+}
+
 /*
  * check if it is a sorted vector by a given order, isUp
  * isUp: true  -> -1
  *     : false ->  1
  */
-B lib_order_by_sorted(V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
+B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
     L rtn = 0;
     #define DOIm(m, n, x) {for(L i=m+1,i2=n;i<i2;i++)x;}
-    DOIm(low, high, {L t=(*cmp)(val,i-1,i,isUp); \
+    DOIm(low, high, {L t=(*cmp)(val,targ[i-1],targ[i],isUp); \
         rtn=rtn==0?t:rtn==-1?(t==1?-2:rtn):(t==-1?-2:rtn); \
         if(rtn==-2) { /*P("i=%lld, %lld, %lld\n",i,vL(val,i-1),vL(val,i));*/ R 0;} })
     R rtn==(*isUp?-1:1);
@@ -395,27 +440,37 @@ void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
 }
 
 void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CMP(cmp)){
-    #define DOId(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
     if(colId >= vn(val)) R;
     V curV = vV(val,colId);
     B* curB = isUp+colId;
     // if(*curB == 0)
     //     { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
-    // P("low = %lld, high = %lld, colId = %lld\n", low, high, colId); // getchar();
-    // struct timeval tv0, tv1;
+    // if(colId == 2 && low == 29)
+    // P("low = %lld, high = %lld, colId = %lld, val=%lld\n", low, high, colId, *curB); // getchar();
+    struct timeval tv0, tv1;
     // gettimeofday(&tv0, NULL);
-    if(lib_order_by_sorted(curV,curB,low,high,cmp)){
-        // if(colId == 0){
+    if(lib_order_by_sorted(targ,curV,curB,low,high,cmp)){
+        // if(colId == 2 && low == 29 && high == 33){
         //     P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
         // }
     }
     else {
-        lib_quicksort(targ, curV, low, high, isUp, cmp);
+        // if(colId == 2 && low == 29 && high == 33){
+        //     P("hahahahahah\n");
+        // }
+        #ifdef OPT_Q16
+            lib_mergesort(targ, curV, low, high, curB, cmp);
+        #else
+            if(isInteger(curV)) lib_mergesort(targ, curV, low, high, curB, cmp);
+            else lib_quicksort(targ, curV, low, high, curB, cmp);
+        #endif
     }
     // gettimeofday(&tv1, NULL);
+    // if(colId == 0)
     // P("1. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // gettimeofday(&tv0, NULL);
     {
+        // P("len: %lld - %lld = %lld\n", high, low, high-low); getchar();
         int pos = low;
         do{
             // find next
@@ -453,8 +508,19 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
         }while(pos < high);
     }
     // gettimeofday(&tv1, NULL);
-    // P("2. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-    // P("low = %lld, high = %lld, colId = %lld\n", low, high, colId); // getchar();
+    // if(colId == 0){
+    //     P("2. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    //     P("size = %lld (%lld, %lld),  colId = %lld\n", high-low, low, high, colId);
+    //     if(isInteger(curV)){
+    //         P("1. type = %lld |", vp(curV)); DOI(100, P(" %lld",vL(curV,i))) P("\n");
+    //         L temp_max = -1; L temp_min = 99999;
+    //         DOI(vn(curV), {if(temp_min>vL(curV,i))temp_min=vL(curV,i); \
+    //                        if(temp_max<vL(curV,i))temp_max=vL(curV,i);})
+    //         P("min = %lld, max = %lld\n", temp_min, temp_max);
+    //         P("2. type = %lld |", vp(curV)); DOI(100, P(" %lld",vL(curV,targ[i]))) P("\n");
+    //         // getchar();
+    //     }
+    // }
 }
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){

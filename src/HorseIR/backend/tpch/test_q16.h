@@ -31,15 +31,15 @@ L simulateQ16(){
 	struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
 
-	PROFILE(1, pfnLoadTable(a0, literalSym((S)"partsupp")));
-	PROFILE(2, pfnLoadTable(a1, literalSym((S)"part")));
-	PROFILE(3, pfnColumnValue(t0, a1, literalSym((S)"p_brand")));
-	PROFILE(4, pfnColumnValue(t1, a1, literalSym((S)"p_type")));
-	PROFILE(5, pfnColumnValue(t2, a1, literalSym((S)"p_size")));
-	PROFILE(6, pfnColumnValue(t3, a1, literalSym((S)"p_partkey")));
-	PROFILE(7, pfnColumnValue(t4, a0, literalSym((S)"ps_partkey")));  // fkey
-	PROFILE(8, pfnColumnValue(t5, a0, literalSym((S)"ps_suppkey")));
-	PROFILE(9, pfnNeq(w0, t0, literalSym((S)"Brand#45")));
+	PROFILE( 1, pfnLoadTable(a0, literalSym((S)"partsupp")));
+	PROFILE( 2, pfnLoadTable(a1, literalSym((S)"part")));
+	PROFILE( 3, pfnColumnValue(t0, a1, literalSym((S)"p_brand")));
+	PROFILE( 4, pfnColumnValue(t1, a1, literalSym((S)"p_type")));
+	PROFILE( 5, pfnColumnValue(t2, a1, literalSym((S)"p_size")));
+	PROFILE( 6, pfnColumnValue(t3, a1, literalSym((S)"p_partkey")));
+	PROFILE( 7, pfnColumnValue(t4, a0, literalSym((S)"ps_partkey")));  // fkey
+	PROFILE( 8, pfnColumnValue(t5, a0, literalSym((S)"ps_suppkey")));
+	PROFILE( 9, pfnNeq(w0, t0, literalSym((S)"Brand#45")));
 	PROFILE(10, pfnLike(w1, t1, literalString((S)"MEDIUM POLISHED\%")));
 	PROFILE(11, pfnNot(w2, w1));
 	L group1[] = {49, 14, 23, 45, 19, 3, 36, 9};
@@ -60,38 +60,39 @@ L simulateQ16(){
 	PROFILE(21, pfnWhere(w12, w5));
 	PROFILE(22, pfnCompress(w13, w10, w12)); // index for partsupp
 
-	P("len of w11: %lld\n", vn(w11));  // 118274
+	// P("len of w11: %lld\n", vn(w11));  // 118274
 	// group by
 	PROFILE(23, pfnIndex(g0, t0, w11)); // p_brand
 	PROFILE(24, pfnIndex(g1, t1, w11)); // p_type
 	PROFILE(25, pfnIndex(g2, t2, w11)); // p_size
 	PROFILE(26, pfnIndex(g3, t5, w13)); // ps_suppkey
-	DOI(vn(g0), if(!strcmp(getSymbolStr(vQ(g0,i)), "Brand#54") && \
-            !strcmp(getSymbolStr(vQ(g1,i)), "STANDARD BRUSHED COPPER") && vL(g2,i)==14) \
-            P("[%5lld] %s, %s, %lld\n", i, \
-            getSymbolStr(vQ(g0,i)), getSymbolStr(vQ(g1,i)), vL(g2,i)))
-	getchar();
+
 	V group2[] = {g0, g1, g2};
 	PROFILE(27, pfnList(g4, 3, group2));
-	PROFILE(28, pfnGroup(g5, g4));
+	PROFILE(28, pfnGroup(g5, g4));   // <-- slow
 	PROFILE(29, pfnValues(g6, g5));  // index
 	PROFILE(30, pfnKeys(g7, g5));    // index
-	P("len of g7: %lld\n", vn(g7));  // should be 18314
-	// R 0;
+	// P("len of g7: %lld\n", vn(g7));  // should be 18314
 
-	PROFILE(99, pfnEachRight(f0, g3, g6, pfnIndex));
-	PROFILE(99, pfnEach(f1, f0, pfnUnique));
-	PROFILE(31, pfnEach(g8, f1, pfnLen)); // unique count
-	PROFILE(32, pfnRaze(g9, g8));         // supplier_cnt
+	if(!isOptimized){
+		PROFILE(99, pfnEachRight(f0, g3, g6, pfnIndex));  // <-- very slow
+		PROFILE(99, pfnEach(f1, f0, pfnUnique));          // <-- very slow
+		PROFILE(31, pfnEach(g8, f1, pfnLen)); // unique count
+		PROFILE(32, pfnRaze(g9, g8));         // supplier_cnt
+	}
+	else {
+		PROFILE(31, optLoopFusionQ16_1(g9, vn(g6), g3, g6));
+	}
 	PROFILE(33, pfnIndex(g10, g0, g7));   // p_brand
 	PROFILE(34, pfnIndex(g11, g1, g7));   // p_type
 	PROFILE(35, pfnIndex(g12, g2, g7));   // p_size
 
-	// order by
+	// order by	
 	V group3[] = {g9, g10, g11, g12};
 	PROFILE(36, pfnList(d0, 4, group3));
 	B group4[] = {0 ,  1 ,  1 ,  1};
-	PROFILE(37, pfnOrderBy(d1, d0, literalBoolVector(4, group4)));
+	PROFILE(37, pfnOrderBy(d1, d0, literalBoolVector(4, group4))); // <-- slow
+	
 
 	// materialization
 	PROFILE(38, pfnIndex(m0, g10, d1));
@@ -108,7 +109,7 @@ L simulateQ16(){
 
 	gettimeofday(&tv1, NULL);
     P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-    printTablePretty(z, 10);  // limit 10
+    printTablePretty(z, 35);  // limit 10
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
     R 0;
 }

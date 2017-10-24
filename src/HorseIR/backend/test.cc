@@ -90,8 +90,8 @@ V literalI64Vector(L n, L b[]){
 
 #define PROFILE(n,x) x
 // #define PROFILE(n,x) { struct timeval tt_0, tt_1; \
-        gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
-        P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
+//         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
+//         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
 B isOptimized = true;
 
