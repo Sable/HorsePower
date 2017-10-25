@@ -101,6 +101,8 @@ V literalStrVector(L n, S b[]){
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
 B isOptimized = true;
+C CSV_FILE_ROOT[] = "data/tpch/db";
+L CSV_FILE_SCALE = 1;
 
 #include "test_simple.h"
 #include "test_types.h"
@@ -108,20 +110,21 @@ B isOptimized = true;
 #include "test_tpch.h"
 #include "test_pl.h"
 
-L testMain(I qid){
+L testMain(L option, L id, L scale, B isOptimized){
     initMain();  // memory
     initSym();   // symbol
     initSys();
-    L op = 4;
-    switch(op){
-        case 1: testSimple();     break;
-        case 2: testTypes();      break;
-        case 3: testOrderBy();    break;
-        case 4: testTPCH(qid);    break;
-        case 5: testPL(0);        break;
-        case 6: testPfns();       break;
-        case 7: testMemory();     break;
-        case 8: readTpchTables(); break;
+    isOptimized    = isOptimized;
+    CSV_FILE_SCALE = scale;
+    switch(option){
+        case 0: testTPCH(id);     break;
+        case 1: testPL(0);        break;
+        case 2: testSimple();     break;
+        case 3: testTypes();      break;
+        case 4: testOrderBy();    break;
+        case 5: testPfns();       break;
+        case 6: testMemory();     break;
+        case 7: readTpchTables(); break;
         default: break;
     }
     /* Print info */

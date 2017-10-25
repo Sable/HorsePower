@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-if [ "$#" -ne 2 ]; then
-    echo "Usage: ./run [debug|release] [id]"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: ./run [debug|release] [scale=1] [id]"
     exit 1
 fi
 echo Starting ...
@@ -15,12 +15,13 @@ echo Starting ...
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=4
-id=$2
+scale=$2
+id=$3
 if [ "debug" == "$1" ]; then
-    (cd ../ && make TPCH="-DOPT_Q$id" debug && time ./horse -t $id)
+    (cd ../ && make TPCH="-DOPT_Q$id" debug && time ./horse -q $id -s $scale -o)
 elif [ "release" == "$1" ]; then
-    (cd ../ && make TPCH="-DOPT_Q$id" release && time ./horse -t $id)
+    (cd ../ && make TPCH="-DOPT_Q$id" release && time ./horse -q $id -s $scale -o)
 else
-    (cd ../ && time ./horse -t $id)
+    (cd ../ && time ./horse -q $id -s $scale -o)
 fi
 echo Done.
