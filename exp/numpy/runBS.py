@@ -40,11 +40,11 @@ def runBS(check):
     start = tm.time()
     sptprice,strike,rate,volatility,time,otypeC=loadFile(input_file)
     end   = tm.time()
-    print "%s is loaded within (seconds): %lf" % (input_file, end-start)
+    print "%s is loaded within (ms): %lf" % (input_file, (end-start)*1000)
     start = tm.time()
     price = BlkSchls(0,sptprice,strike,rate,volatility,time,otypeC)
     end   = tm.time()
-    print "The elapsed time is (seconds): %lf" % (end-start)
+    print "The elapsed time is (ms): %lf" % ((end-start) * 1000)
     if check:
         print price
 

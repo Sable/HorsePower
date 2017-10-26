@@ -118,6 +118,7 @@ typedef struct list_table{
 extern G H_heap;
 extern E H_EPSILON;
 extern L H_CORE;
+extern C LINE_SEP;
 
 #ifdef	__cplusplus
 }

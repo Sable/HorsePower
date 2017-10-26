@@ -110,15 +110,16 @@ L CSV_FILE_SCALE = 1;
 #include "test_tpch.h"
 #include "test_pl.h"
 
-L testMain(L option, L id, L scale, B isOptimized){
+L testMain(L option, L id, L scale, B isOptimized, C del){
     initMain();  // memory
     initSym();   // symbol
     initSys();
     isOptimized    = isOptimized;
     CSV_FILE_SCALE = scale;
+    LINE_SEP       = del;
     switch(option){
         case 0: testTPCH(id);     break;
-        case 1: testPL(0);        break;
+        case 1: testPL(id);        break;
         case 2: testSimple();     break;
         case 3: testTypes();      break;
         case 4: testOrderBy();    break;

@@ -6,9 +6,9 @@
 #include <unistd.h>
 
 
-const L LINE_MAX_CHAR = 1024;
-const C LINE_SEP      = '|';
-const L BUFF_SIZE     = 256;
+L LINE_MAX_CHAR = 1024;
+C LINE_SEP      = '|';
+L BUFF_SIZE     = 256;
 
 /*
  * 1: csv
