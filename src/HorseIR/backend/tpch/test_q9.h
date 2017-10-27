@@ -105,7 +105,7 @@ L createTableProfit(V* z){
     R 0;
 }
 
-L simulateQ9(){
+E simulateQ9(){
     L e;
     V a0 = allocNode();
     V t0 = allocNode(); V t1 = allocNode(); V t2 = allocNode();
@@ -153,9 +153,10 @@ L simulateQ9(){
     PROFILE(23, pfnTable(z,z1,z2));
 
     gettimeofday(&tv1, NULL);
-    P("Result of the Query 9: (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printV(z);
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ9(){
@@ -168,7 +169,8 @@ L testTPCHQ9(){
     initTableByName((S)"nation");
     // PROFILE(91, pfnAddFKey(literalSym((S)"customer"), literalSym((S)"c_custkey"),\
     //                        literalSym((S)"orders"),   literalSym((S)"o_custkey")));
-    simulateQ9();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ9();})
     P("** End Query 9\n");
     R 0;
 }

@@ -7,7 +7,6 @@
 #include "tpch/test_q3.h"   // pass (good, optimized)
 #include "tpch/test_q4.h"   // pass (good, optimized)
 #include "tpch/test_q6.h"   // pass (good, optimized)
-// #include "tpch/test_q9.h"   // working
 #include "tpch/test_q14.h"  // pass (good, optimized)
 #include "tpch/test_q16.h"  // pass (improved, optimized)
 #include "tpch/test_q17.h"  // pass (good, optimized)

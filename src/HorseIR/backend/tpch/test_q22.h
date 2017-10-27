@@ -64,7 +64,7 @@ V simulateQ22_sub1(){
 	R z;
 }
 
-L simulateQ22(){
+E simulateQ22(){
 	V t0 = allocNode();  V t1 = allocNode();
 	V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
 	V w4 = allocNode();  V w5 = allocNode();
@@ -95,9 +95,10 @@ L simulateQ22(){
 	PROFILE(15, pfnTable(z, z0, z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
 	printV(z);
-	R 0;
+	R elapsed;
 }
 
 L testTPCHQ22(){
@@ -106,7 +107,8 @@ L testTPCHQ22(){
     initTableByName((S)"orders");
     PROFILE(91, pfnAddFKey(literalSym((S)"customer"), literalSym((S)"c_custkey"),\
     	                   literalSym((S)"orders"),   literalSym((S)"o_custkey")));
-    simulateQ22();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ6();})
     P("** End Query 22\n");
     R 0;
 }

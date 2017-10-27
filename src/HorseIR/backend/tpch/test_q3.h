@@ -1,5 +1,5 @@
 
-L simulateQ3(){
+E simulateQ3(){
 	/* declaration */
 	V a0 = allocNode();  V a1 = allocNode();  V a2 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
@@ -112,10 +112,11 @@ L simulateQ3(){
     PROFILE(52, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printTablePretty(z, 10);  // limit 10
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ3(){
@@ -127,7 +128,8 @@ L testTPCHQ3(){
     	                  literalSym((S)"orders"),   literalSym((S)"o_custkey")));
     PROFILE(92, pfnAddFKey(literalSym((S)"orders"),   literalSym((S)"o_orderkey"),\
     	                  literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
-    simulateQ3();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ3();})
     P("** End Query 3\n");
     R 0;
 }

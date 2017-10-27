@@ -1,5 +1,5 @@
 
-L simulateQ19(){
+E simulateQ19(){
 	V a0 = allocNode();  V a1 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
 	V t4 = allocNode();  V t5 = allocNode();  V t6 = allocNode();  V t7 = allocNode();
@@ -184,16 +184,18 @@ L simulateQ19(){
     PROFILE(102, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printV(z);
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ19(){
     P("** Start simulation for TPC-H Query 19\n");
     initTableByName((S)"lineitem");
     initTableByName((S)"part");
-    simulateQ19();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ19();})
     P("** End Query 19\n");
     R 0;
 }

@@ -121,6 +121,14 @@ L getTypeSize(L typ, L len){
     return r * len + k;
 }
 
+L getHeapOffset(){
+    R gHeapCur;
+}
+
+L setHeapOffset(L cur){
+    R gHeapCur = cur;
+}
+
 
 /* allocate */
 

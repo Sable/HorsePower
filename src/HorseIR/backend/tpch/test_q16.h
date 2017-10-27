@@ -11,7 +11,7 @@ V simulateQ16_sub(){
 	R w1;
 }
 
-L simulateQ16(){
+E simulateQ16(){
 	V a0 = allocNode();  V a1 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
 	V t4 = allocNode();  V t5 = allocNode();
@@ -108,10 +108,11 @@ L simulateQ16(){
     PROFILE(44, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printTablePretty(z, 10);  // limit 35
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ16(){
@@ -121,7 +122,8 @@ L testTPCHQ16(){
     initTableByName((S)"supplier");
     PROFILE(91, pfnAddFKey(literalSym((S)"part")    , literalSym((S)"p_partkey"),\
     	                   literalSym((S)"partsupp"), literalSym((S)"ps_partkey")));
-    simulateQ16();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ16();})
     P("** End Query 16\n");
     R 0;
 }

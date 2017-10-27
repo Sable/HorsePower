@@ -1,5 +1,5 @@
 
-L simulateQ6(){
+E simulateQ6(){
     L e;
     V t0 = allocNode();  V t5 = allocNode();  V t10 = allocNode();  V t15 = allocNode();
     V t1 = allocNode();  V t6 = allocNode();  V t11 = allocNode();  V t16 = allocNode();
@@ -57,15 +57,17 @@ L simulateQ6(){
 
     gettimeofday(&tv1, NULL);
 
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printV(t22);
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ6(){
     P("** Start simulation for TPC-H Query 6\n");
     initTableByName((S)"lineitem");
-    simulateQ6();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ6();})
     P("** End Query 6\n");
     R 0;
 }

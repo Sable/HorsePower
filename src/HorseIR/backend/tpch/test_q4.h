@@ -28,7 +28,7 @@ V udfExists() {
     R w5;
 }
 
-L simulateQ4(){
+E simulateQ4(){
     L e = 0;
     V a0 = allocNode();
     V t0 = allocNode(); V t1 = allocNode();
@@ -85,9 +85,10 @@ L simulateQ4(){
     PROFILE(23,pfnTable(z, m0, m3));
 
     gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printV(z);
-    R 0;
+    R elapsed;
 }
 
 L testTPCHQ4(){
@@ -96,7 +97,8 @@ L testTPCHQ4(){
     initTableByName((S)"lineitem");
     PROFILE(91, pfnAddFKey(literalSym((S)"orders"),   literalSym((S)"o_orderkey"),\
                            literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
-    simulateQ4();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ4();})
     P("** End Query 4\n");
     R 0;
 }

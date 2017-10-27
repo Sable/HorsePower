@@ -1,5 +1,5 @@
 
-L simulateQ17(){
+E simulateQ17(){
 	V a0 = allocNode();  V a1 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
 	V t4 = allocNode();  V t5 = allocNode();
@@ -71,9 +71,10 @@ L simulateQ17(){
 	PROFILE(33, pfnTable(z, z0, z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
 	printV(z);
-	R 0;
+	R elapsed;
 
 }
 
@@ -81,7 +82,8 @@ L testTPCHQ17(){
     P("** Start simulation for TPC-H Query 17\n");
     initTableByName((S)"lineitem");
     initTableByName((S)"part");
-    simulateQ17();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ17();})
     P("** End Query 17\n");
     R 0;
 }

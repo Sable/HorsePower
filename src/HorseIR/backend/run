@@ -17,11 +17,12 @@ export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=4
 scale=$2
 id=$3
+cmd="./horse -q $id -s $scale -o -r 10"
 if [ "debug" == "$1" ]; then
-    (cd ../ && make TPCH="-DOPT_Q$id" debug && time ./horse -q $id -s $scale -o)
+    (cd ../ && make TPCH="-DOPT_Q$id" debug && time $cmd)
 elif [ "release" == "$1" ]; then
-    (cd ../ && make TPCH="-DOPT_Q$id" release && time ./horse -q $id -s $scale -o)
+    (cd ../ && make TPCH="-DOPT_Q$id" release && time $cmd)
 else
-    (cd ../ && time ./horse -q $id -s $scale -o)
+    (cd ../ && time $cmd)
 fi
 echo Done.

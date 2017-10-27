@@ -11,7 +11,7 @@ Query profile (<u>Total 22</u>: **Pass** 10; <blue>Testing</blue>: 0; <red>Worki
 | [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      | **Pass**                      |
 | [4][q4]  | O,L         | 5     | 1    | 1     | 1     | 1     | 3      | **Pass**                      |
 | [5][q5]  | C,O,L,S,N,R | 9     | 6    | 1     | 1     | 1     | 2      |                               |
-| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | **Pass**                      |
+| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | **Pass**, ready               |
 | [7][q7]  | S,L,O,C,N   | 9     | 5    | 1     | 3     | 3     | 8      |                               |
 | [8][q8]  |P,S,L,O,C,N,R| 10    | 7    | 1     | 1     | 1     | 5      |                               |
 | [9][q9]  |P,S,L,PS,O,N | 7     | 6    | 1     | 2     | 2     | 6      | <red>Working</red>            |
@@ -22,12 +22,12 @@ Query profile (<u>Total 22</u>: **Pass** 10; <blue>Testing</blue>: 0; <red>Worki
 | [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      | **Pass**                      |
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
 | [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      | **Pass**                      |
-| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | **Pass**                      |
+| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | **Pass**, ready               |
 | [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | **Pass**                      |
-| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | **Pass**                      |
+| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | **Pass**, ready               |
 | [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
 | [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |
-| [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      | **pass**                      |
+| [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      | **pass**, ready               |
 
 
 \* List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md))

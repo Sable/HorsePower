@@ -1,6 +1,6 @@
 
 
-L simulateQ14(){
+E simulateQ14(){
 	V a0 = allocNode();  V a1 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
 	V t4 = allocNode();  V t5 = allocNode();
@@ -74,9 +74,10 @@ L simulateQ14(){
 	PROFILE(30, pfnTable(z, z0, z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+	E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
 	printV(z);
-	R 0;
+	R elapsed;
 }
 
 
@@ -84,9 +85,8 @@ L testTPCHQ14(){
     P("** Start simulation for TPC-H Query 14\n");
     initTableByName((S)"lineitem");
     initTableByName((S)"part");
-    // PROFILE(91, pfnAddFKey(literalSym((S)"customer"), literalSym((S)"c_custkey"),\
-    // 	                  literalSym((S)"orders"),   literalSym((S)"o_custkey")));
-    simulateQ14();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ14();})
     P("** End Query 14\n");
     R 0;
 }

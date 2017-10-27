@@ -25,6 +25,7 @@ int  queryId     = -1;
 int  queryScale  = 1;
 int  plId        = -1;
 char delimiter   = '|';
+int  runs        = 1;
 
 void usage();
 int getOption(int argc, char *argv[]);
@@ -44,10 +45,10 @@ int main(int argc, char *argv[]){
     else if(flagQuery){
         printf("...Testing...\n");
         // testInputFile(inputPath);
-        testMain(0, queryId, queryScale, flagOpt, delimiter);
+        testMain(0, queryId, queryScale, flagOpt, delimiter, runs);
     }
     else if(flagPL){
-        testMain(1, plId, -1, flagOpt, delimiter);
+        testMain(1, plId, -1, flagOpt, delimiter, runs);
     }
     else {
         usage();
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]){
 
 int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvop:q:s:d:")) != -1){
+    while((c = getopt(argc, argv, "hvop:q:s:d:r:")) != -1){
         switch(c){
             case 'h': flagUsage   = true; break;
             case 'v': flagVersion = true; break;
@@ -69,6 +70,7 @@ int getOption(int argc, char *argv[]){
             case 's': queryScale  = atoi(optarg); break;
             case 'o': flagOpt     = true;         break;
             case 'd': delimiter   = optarg[0];    break;
+            case 'r': runs        = atoi(optarg); break;
             default : return 1;
         }
     }
@@ -90,5 +92,6 @@ void usage(){
     std::cout << "  -s <sid>     TPC-H query scale"      << std::endl;
     std::cout << "  -o           TPC-H query opt on/off" << std::endl;
     std::cout << "  -d 'del'     Set delimiter"          << std::endl;
+    std::cout << "  -r runs      Number of runs"         << std::endl;
 }
 

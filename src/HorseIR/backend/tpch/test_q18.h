@@ -32,7 +32,7 @@ V simulateQ18_sub(){
 	R w7;
 }
 
-L simulateQ18(){
+E simulateQ18(){
 	V a0 = allocNode();  V a1 = allocNode();  V a2 = allocNode();
 	V t0 = allocNode();  V t1 = allocNode();  V t2 = allocNode();  V t3 = allocNode();
 	V t4 = allocNode();  V t5 = allocNode();  V t6 = allocNode();
@@ -124,10 +124,11 @@ L simulateQ18(){
     PROFILE(48, pfnTable(z,z0,z1));
 
 	gettimeofday(&tv1, NULL);
-    P("The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
     printTablePretty(z, 10);  // limit 10
     P("size of z: row = %lld, col = %lld\n", tableRow(z), tableCol(z));
-	R 0;
+	R elapsed;
 }
 
 L testTPCHQ18(){
@@ -139,7 +140,8 @@ L testTPCHQ18(){
     	                  literalSym((S)"orders"),   literalSym((S)"o_custkey")));
     PROFILE(92, pfnAddFKey(literalSym((S)"orders"),   literalSym((S)"o_orderkey"),\
     	                  literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
-    simulateQ18();
+    L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ18();})
     P("** End Query 18\n");
     R 0;
 }

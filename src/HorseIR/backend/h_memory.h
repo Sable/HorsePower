@@ -30,6 +30,9 @@ V allocNode         ();
 V allocTable        (L numCols);
 G allocStrMem       (L n);
 
+L getHeapOffset     ();
+L setHeapOffset     (L cur);
+
 V initV             (V x, L typ, L len);
 V initTableDict     (V x, L typ, L numCols);
 V initSymbol        (V x, L val);
