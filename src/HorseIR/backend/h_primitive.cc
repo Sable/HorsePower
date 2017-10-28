@@ -2039,8 +2039,8 @@ L optLoopFusionQ18_1(V z, V x, V t1){
         initV(keys, H_L, cnt); cnt = 0;
         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
         initV(vals, H_E, cnt);
-        L chk = 0;
-        DOI(vn(x), {L k=vL(x,i); L c=maps[k]; chk += c; vE(vals,c)+=vE(t1,i); })
+        memset(sE(vals), 0, sizeof(E)*cnt);  // clean before sum up
+        DOI(vn(x), {L k=vL(x,i); L c=maps[k]; vE(vals,c)+=vE(t1,i); })
         free(temp);
         free(maps);
         R 0;

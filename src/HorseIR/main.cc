@@ -25,7 +25,7 @@ int  queryId     = -1;
 int  queryScale  = 1;
 int  plId        = -1;
 char delimiter   = '|';
-int  runs        = 1;
+int  runs        = 0;
 
 void usage();
 int getOption(int argc, char *argv[]);

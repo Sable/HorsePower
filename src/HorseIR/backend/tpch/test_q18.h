@@ -137,9 +137,9 @@ L testTPCHQ18(){
     initTableByName((S)"orders");
     initTableByName((S)"lineitem");
     PROFILE(91, pfnAddFKey(literalSym((S)"customer"), literalSym((S)"c_custkey"),\
-    	                  literalSym((S)"orders"),   literalSym((S)"o_custkey")));
-    PROFILE(92, pfnAddFKey(literalSym((S)"orders"),   literalSym((S)"o_orderkey"),\
-    	                  literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
+    	                   literalSym((S)"orders")  , literalSym((S)"o_custkey")));
+    PROFILE(92, pfnAddFKey(literalSym((S)"orders")  , literalSym((S)"o_orderkey"),\
+    	                   literalSym((S)"lineitem"), literalSym((S)"l_orderkey")));
     L cur = getHeapOffset();
     DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ18();})
     P("** End Query 18\n");

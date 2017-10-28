@@ -95,8 +95,8 @@ V literalStrVector(L n, S b[]){
     R z;
 }
 
-#define PROFILE(n,x) x
-//#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
+// #define PROFILE(n,x) x
+#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
@@ -123,7 +123,7 @@ L testMain(L option, L id, L scale, B isOptimized, C del, L runs){
     P("runs = %lld\n", runs);
     switch(option){
         case 0: testTPCH(id);     break;
-        case 1: testPL(id);        break;
+        case 1: testPL(id);       break;
         case 2: testSimple();     break;
         case 3: testTypes();      break;
         case 4: testOrderBy();    break;

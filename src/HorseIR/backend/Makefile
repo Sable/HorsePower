@@ -2,7 +2,7 @@ CC=gcc-7
 H_FILES=h_io.h  test.h  h_memory.h  h_symbol.h  h_system.h  h_primitive.h  h_libs.h
 C_FILES=h_io.cc test.cc h_memory.cc h_symbol.cc h_system.cc h_primitive.cc h_libs.cc
 D_FLAGS=-std=c++14 -DUSE_MMAP -fopenmp -I"../../../libs/include/" -g
-R_FLAGS=-std=c++14 -DUSE_MMAP -fopenmp -I"../../../libs/include/" -O3
+R_FLAGS=-std=c++14 -DUSE_MMAP -fopenmp -I"../../../libs/include/" -O3 -march=native
 
 all: backend
 
