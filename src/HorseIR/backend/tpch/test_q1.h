@@ -50,9 +50,9 @@ E simulateQ1(){
     // P("number of groups: %lld\n", vn(g4));  getchar();
     PROFILE(16, pfnValues(g5,g3));
     PROFILE(991, pfnWhere(g6,w2));
-    PROFILE(992, pfnEachRight(g7,g6,g5,pfnIndex));
     // select
     if(!isOptimized){
+        PROFILE(992, pfnEachRight(g7,g6,g5,pfnIndex));
         PROFILE(17, pfnEachRight(s0, t3, g7, pfnIndex)); //l_quantity
         PROFILE(18, pfnEachRight(s1, t0, g7, pfnIndex)); //l_extendedprice
         PROFILE(19, pfnEachRight(s2, t1, g7, pfnIndex)); //l_discount
@@ -85,14 +85,12 @@ E simulateQ1(){
         PROFILE(43, pfnRaze(s26,s16));
     }
     else {
-        PROFILE(17, optLoopFusionQ1_1(s23, vn(g7), t3, g7));
-        PROFILE(18, optLoopFusionQ1_1(s24, vn(g7), t0, g7));
-        PROFILE(19, optLoopFusionQ1_1(s25, vn(g7), t1, g7));
-        PROFILE(19, optLoopFusionQ1_2(s26, vn(g7), g7));
-
-        PROFILE(20, optLoopFusionQ1_3(s19, vn(g7), t3, g7));
-        PROFILE(21, optLoopFusionQ1_3(s20, vn(g7), t0, g7));
-        PROFILE(22, optLoopFusionQ1_4(s21, s22, vn(g7), t0, t1, t6, g7));
+        // PROFILE(17, optLoopFusionQ1_1(s19, s23, vn(g5), t3, g6, g5)); // avg + sum
+        // PROFILE(18, optLoopFusionQ1_1(s20, s24, vn(g5), t0, g6, g5)); // avg + sum
+        PROFILE(99, optLoopFusionQ1_all(s19, s20, s23, s24, s25, vn(g5), t0, t1, t3, g5, g6));
+        // PROFILE(19, optLoopFusionQ1_3(s25, vn(g5), t1, g6, g5)); // avg
+        PROFILE(20, optLoopFusionQ1_2(s26, vn(g5), g6, g5));
+        PROFILE(21, optLoopFusionQ1_4(s21, s22, vn(g5), t0, t1, t6, g6, g5));
 
         PROFILE(34, pfnIndex(s17,g0, g4));               //l_returnflag
         PROFILE(35, pfnIndex(s18,g1, g4));               //l_linestatus
@@ -112,16 +110,16 @@ E simulateQ1(){
     // PROFILE(53, pfnIndex(m7,s24,r0));
     // PROFILE(54, pfnIndex(m8,s25,r0));
     // PROFILE(55, pfnIndex(m9,s26,r0));
-    PROFILE(46, copyV(m0,s17));
-    PROFILE(47, copyV(m1,s18));
-    PROFILE(48, copyV(m2,s19));
-    PROFILE(49, copyV(m3,s20));
-    PROFILE(50, copyV(m4,s21));
-    PROFILE(51, copyV(m5,s22));
-    PROFILE(52, copyV(m6,s23));
-    PROFILE(53, copyV(m7,s24));
-    PROFILE(54, copyV(m8,s25));
-    PROFILE(55, copyV(m9,s26));
+    PROFILE(46, copyV(m0,s17)); // l_returnflag
+    PROFILE(47, copyV(m1,s18)); // l_linestatus
+    PROFILE(48, copyV(m2,s19)); // sum(l_quantity)
+    PROFILE(49, copyV(m3,s20)); // sum(l_extendedprice)
+    PROFILE(50, copyV(m4,s21)); // sum()
+    PROFILE(51, copyV(m5,s22)); // sum()
+    PROFILE(52, copyV(m6,s23)); // avg(l_quantity)
+    PROFILE(53, copyV(m7,s24)); // avg(l_extendedprice)
+    PROFILE(54, copyV(m8,s25)); // avg(L_discount)
+    PROFILE(55, copyV(m9,s26)); // count(*)
 
     // printV(m0);
     // printV(m1);

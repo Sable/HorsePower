@@ -135,6 +135,7 @@ L testMain(L option, L id, L scale, B isOptimized, C del, L runs){
     if(runs > 0){
         E tot = 0;
         P("Summary of %lld runs:\n", runs);
+        P("Query %lld:", id);
         DOI(TEST_RUNS, if(i>0){tot+=times[i];P("  %g", times[i]);})
         P(" => Average: %g\n",tot/runs);
     }
