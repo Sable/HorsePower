@@ -1328,21 +1328,27 @@ L pfnCompress(V z, V x, V y){
 #define INDEXOFG(z,x,lenX,y,lenY) lib_index_of_G(sL(z),sG(x),lenX,sG(y),lenY)
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-        L typMax = MAX(vp(x), vp(y));
-        L lenZ   = vn(y);
-        V tempX = allocNode();
-        V tempY = allocNode();
-        CHECKE(promoteValue(tempX, x, typMax));
-        CHECKE(promoteValue(tempY, y, typMax));
-        initV(z,H_L,lenZ);
-        switch(typMax){
-            caseB INDEXOF(B, z, tempX, tempY); break;
-            caseH INDEXOF(H, z, tempX, tempY); break;
-            caseI INDEXOF(I, z, tempX, tempY); break;
-            caseL INDEXOF(L, z, tempX, tempY); break;
-            caseF INDEXOF(F, z, tempX, tempY); break;
-            caseE INDEXOF(E, z, tempX, tempY); break;
-            default: R E_NOT_IMPL;
+        if(isOrdered(x)){
+            P("Ordered data found in index_of\n");
+            R searchOrdered(z,x,y);
+        }
+        else {
+            L typMax = MAX(vp(x), vp(y));
+            L lenZ   = vn(y);
+            V tempX = allocNode();
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempX, x, typMax));
+            CHECKE(promoteValue(tempY, y, typMax));
+            initV(z,H_L,lenZ);
+            switch(typMax){
+                caseB INDEXOF(B, z, tempX, tempY); break;
+                caseH INDEXOF(H, z, tempX, tempY); break;
+                caseI INDEXOF(I, z, tempX, tempY); break;
+                caseL INDEXOF(L, z, tempX, tempY); break;
+                caseF INDEXOF(F, z, tempX, tempY); break;
+                caseE INDEXOF(E, z, tempX, tempY); break;
+                default: R E_NOT_IMPL;
+            }
         }
         R 0;
     }
@@ -1970,6 +1976,11 @@ L optLoopFusionQ14_1(V z, L r0, V t0){
 L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5){
     initV(z,H_E,r0);
     DOP(r0, vE(z,i)=vB(p4,i)?vE(p2,i)*vE(p5,i):0)
+    R 0;
+}
+
+L optLoopFusionQ14_3(V z, L r0, V p8, V p12){
+    initV(z,H_E,r0);
     R 0;
 }
 

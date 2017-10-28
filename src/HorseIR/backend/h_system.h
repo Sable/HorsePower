@@ -58,6 +58,9 @@ B isAssignableType      (L x, L y);
 B compareTuple          (V x, L ax, V y, L ay);
 L isListIndexOf         (V x, V y, L *sizeX, L *sizeY);
 L setFKey               (V x, V colName, V fKey);
+B isOrdered             (V x);
+L searchOrdered         (V z, V x, V y);
+
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);

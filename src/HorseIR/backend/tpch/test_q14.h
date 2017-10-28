@@ -44,6 +44,7 @@ E simulateQ14(){
 	PROFILE(16, pfnIndex(p1, t3, p0));     // p_type
 	PROFILE(17, pfnCompress(p2, w3, t4));  // l_extendedprice
 	PROFILE(18, pfnCompress(p3, w3, t5));  // l_discount
+	P("before: %lld, after: %lld\n", vn(t4), vn(p2));
 	PROFILE(19, pfnLike(p4, p1, literalString((S)"PROMO%")));
 	
 	PROFILE(20, pfnMinus(p5,literalF64(1), p3));

@@ -513,6 +513,33 @@ L setFKey(V x, V colName, V fKey){
     else R E_DOMAIN;
 }
 
+/* x must be both integers */
+B isOrdered(V x){
+    if(isInteger(x)){
+        B isOrder = true; L order = -2;
+        DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0; \
+                    if(val!=0) order=val; \
+                    if(order!=-2 && val!=0 && order!=val) { isOrder=false; break; } })
+        R isOrder;
+    }
+    else R false;
+}
+
+L binarySearch(L *x, L low, L high, L val){
+    L mid = (low+high)>>1;
+    if(x[mid] == val) R mid;
+    else if(low == mid) R -1;
+    else if(x[mid] > val) R binarySearch(x, low, mid, val);
+    else R binarySearch(x, mid, high, val);
+}
+
+L searchOrdered(V z, V x, V y){
+    L lenZ = vn(y);
+    initV(z,H_L,lenZ);
+    DOP(lenZ, {L k=binarySearch(sL(x),0,vn(x),vL(y,i)); vL(z,i)=k<0?vn(x):k;})
+    R 0;
+}
+
 
 /* Checking types */
 
