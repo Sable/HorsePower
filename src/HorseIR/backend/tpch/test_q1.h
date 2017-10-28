@@ -39,7 +39,7 @@ E simulateQ1(){
 
     // group by
     PROFILE(12, pfnCompress(g0,w2,t4));
-    PROFILE(13, pfnCompress(g1,w2,t5));
+    PROFILE(13, pfnCompress(g1,w2,t5)); // high selectivity: 591K out of 600K
     V group1[] = {g0,g1};
 
     // P("len of g0: %lld, type: %lld\n", vn(g0), vp(g0));
@@ -87,10 +87,10 @@ E simulateQ1(){
     else {
         // PROFILE(17, optLoopFusionQ1_1(s19, s23, vn(g5), t3, g6, g5)); // avg + sum
         // PROFILE(18, optLoopFusionQ1_1(s20, s24, vn(g5), t0, g6, g5)); // avg + sum
-        PROFILE(99, optLoopFusionQ1_all(s19, s20, s23, s24, s25, vn(g5), t0, t1, t3, g5, g6));
         // PROFILE(19, optLoopFusionQ1_3(s25, vn(g5), t1, g6, g5)); // avg
+        PROFILE(99, optLoopFusionQ1_all(s19, s20, s21, s22, s23, s24, s25, vn(g5), t0, t1, t3, t6, g5, g6));
         PROFILE(20, optLoopFusionQ1_2(s26, vn(g5), g6, g5));
-        PROFILE(21, optLoopFusionQ1_4(s21, s22, vn(g5), t0, t1, t6, g6, g5));
+        // PROFILE(21, optLoopFusionQ1_4(s21, s22, vn(g5), t0, t1, t6, g6, g5));
 
         PROFILE(34, pfnIndex(s17,g0, g4));               //l_returnflag
         PROFILE(35, pfnIndex(s18,g1, g4));               //l_linestatus

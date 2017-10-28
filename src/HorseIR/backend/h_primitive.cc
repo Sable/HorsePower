@@ -1872,17 +1872,29 @@ L pfnSubString(V z, V x, V y){
 
 /* handcraft loop fusion optimization */
 
-L optLoopFusionQ1_all(V s19, V s20, V s23, V s24, V s25, L r0, V t0, V t1, V t3, V g5, V g6){
+L optLoopFusionQ1_all(V s19, V s20, V s21, V s22, V s23, V s24, V s25, L r0, V t0, V t1, V t3, V t6, V g5, V g6){
     initV(s19,H_E,r0);
     initV(s20,H_E,r0);
+    initV(s21,H_E,r0);
+    initV(s22,H_E,r0);
     initV(s23,H_E,r0);
     initV(s24,H_E,r0);
     initV(s25,H_E,r0);
-    DOP(r0, {V t=vV(g5,i); E c0=0; E c1=0; E c2=0; \
-             DOJ(vn(t), {L k=vL(g6, vL(t,j)); c0+=vE(t3, k); c1+=vE(t0, k); c2+=vE(t1, k);}) \
-             vE(s19,i)=c0; vE(s23,i)=c0/vn(t); \
-             vE(s20,i)=c1; vE(s24,i)=c1/vn(t); \
-             vE(s25,i)=c2/vn(t); })
+    DOJ(r0, {V t=vV(g5,j); E c0=0; E c1=0; E c2=0; E c3=0; E c4=0; \
+            DOP(vn(t), \
+                {L k=vL(g6, vL(t,i)); c0+=vE(t3, k); c1+=vE(t0, k); c2+=vE(t1, k);\
+                 E val=vE(t0,k)*(1-vE(t1,k)); c3+=val; c4+=val*(1+vE(t6,k)); \
+                }, \
+                reduction(+:c0,c1,c2,c3,c4)) \
+            vE(s19,j)=c0; vE(s23,j)=c0/vn(t); \
+            vE(s20,j)=c1; vE(s24,j)=c1/vn(t); \
+            vE(s25,j)=c2/vn(t); \
+            vE(s21,j)=c3; vE(s22,j)=c4; })
+
+     // DO(vn(t), {L k=vL(g6, vL(t,j)); c0+=vE(t3, k); c1+=vE(t0, k); c2+=vE(t1, k);}) \
+     vE(s19,i)=c0; vE(s23,i)=c0/vn(t); \
+     vE(s20,i)=c1; vE(s24,i)=c1/vn(t); \
+     vE(s25,i)=c2/vn(t); })
     R 0;
 }
 
@@ -1906,12 +1918,15 @@ L optLoopFusionQ1_3(V z, L r0, V t1, V g6, V g5){
     R 0;
 }
 
+// opt inner loop
 L optLoopFusionQ1_4(V z0, V z1, L r0, V t0, V t1, V t6, V g6, V g5){
     initV(z0,H_E,r0);
     initV(z1,H_E,r0);
-    DOP(r0,{V t=vV(g5,i); E c0=0; E c1=0; \
-           DOJ(vn(t), {L k=vL(g6, vL(t,j)); E val=vE(t0,k)*(1-vE(t1,k)); c0+=val; c1+=val*(1+vE(t6,i));}) \
-           vE(z0,i)=c0; vE(z1,i)=c1;})
+    DOJ(r0,{V t=vV(g5,j); E c0=0; E c1=0; \
+           DOP(vn(t), \
+               {L k=vL(g6, vL(t,i)); E val=vE(t0,k)*(1-vE(t1,k)); c0+=val; c1+=val*(1+vE(t6,k));},
+               reduction(+:c0,c1)) \
+           vE(z0,j)=c0; vE(z1,j)=c1;})
     R 0;
 }
 
@@ -2093,21 +2108,21 @@ L pfnGroupTrie(V z, V x){
         L charMap[65536]={0}; // 256*256
         L charId[65536]={-1};
         L lenX = vn(vV(x,0));
-    struct timeval tv0, tv1;
-    gettimeofday(&tv0, NULL);
+    // struct timeval tv0, tv1;
+    // gettimeofday(&tv0, NULL);
         DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); charMap[t]++; })
-    gettimeofday(&tv1, NULL);
-    P("1. The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    // gettimeofday(&tv1, NULL);
+    // P("1. The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
         L lenZ = 0; DOI(65536, if(charMap[i]!=0)charId[i]=lenZ++)
         // P("val of lenZ: %lld\n", lenZ);
         initV(vals, H_G, lenZ);
         L c=0; DOI(65536, if(charMap[i]!=0){ initV(vV(vals,c++),H_L,charMap[i]); })
         L *count = (L*)malloc(sizeof(L)*lenZ); memset(count, 0, sizeof(L)*lenZ);
-    gettimeofday(&tv0, NULL);
+    // gettimeofday(&tv0, NULL);
         DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); \
                    L id=charId[t]; vL(vV(vals,id),count[id]++)=i; })
-    gettimeofday(&tv1, NULL);
-    P("1. The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
+    // gettimeofday(&tv1, NULL);
+    // P("2. The elapsed time (ms): %g\n\n", calcInterval(tv0,tv1)/1000.0);
         initV(keys, H_L, lenZ);
         DOI(lenZ, vL(keys,i)=vL(vV(vals,i),0))
         free(count);
