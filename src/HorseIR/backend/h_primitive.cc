@@ -1936,6 +1936,12 @@ L optLoopFusionQ3_1(V z, L r0, V p8, V g3){
     R 0;
 }
 
+L optLoopFusionQ4_1(V z, L r0, V t2, V t3, V w2, V w3){
+    initV(z, H_B, r0);
+    memset(sB(z), 0, sizeof(B)*r0);
+    DOP(vn(w2), if(vD(t2,i)<vD(t3,i))vB(z,vL(w2,i))=1)
+    R 0;
+}
 /* status: on */
 L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3){
     initV(z,H_B,r0);

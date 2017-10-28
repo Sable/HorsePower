@@ -17,13 +17,20 @@ V udfExists() {
     PROFILE( 6,pfnColumnValue(t3, a1, literalSym((S)"l_receiptdate")));
 
     // PROFILE( 7,pfnEnum(j0, t0, t1));     // <--- slow
-    PROFILE( 8,pfnLt      (w0, t2, t3));
-    PROFILE( 9,pfnCompress(w1, w0, t1));
-    PROFILE(10,pfnValues  (w2, w1));
-    PROFILE(11,pfnKeys    (w3, w1));
-    PROFILE(12,pfnLen     (w4, w3));
-    PROFILE(13,pfnVector  (w5, w4, literalBool(0)));
-    PROFILE(14,pfnIndexA  (w5, w2, literalBool(1)));
+    if(!isOptimized){
+        PROFILE( 8,pfnLt      (w0, t2, t3));
+        PROFILE( 9,pfnCompress(w1, w0, t1));
+        PROFILE(10,pfnValues  (w2, w1));
+        PROFILE(11,pfnKeys    (w3, w1));
+        PROFILE(12,pfnLen     (w4, w3));
+        PROFILE(13,pfnVector  (w5, w4, literalBool(0)));
+        PROFILE(14,pfnIndexA  (w5, w2, literalBool(1)));
+    }
+    else {
+        PROFILE(10,pfnValues  (w2, t1));
+        PROFILE(11,pfnKeys    (w3, t1));
+        PROFILE(12,optLoopFusionQ4_1(w5, vn(w3), t2, t3, w2, w3));
+    }
     FS("Leaving: udfExists\n");
     R w5;
 }

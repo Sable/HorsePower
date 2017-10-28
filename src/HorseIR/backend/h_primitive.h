@@ -204,6 +204,8 @@ L optLoopFusionQ1_all(V s19, V s20, V s21, V s22, V s23, V s24, V s25, L r0, V t
 
 L optLoopFusionQ3_1 (V z, L r0, V p8, V g3);
 
+L optLoopFusionQ4_1 (V z, L r0, V t2, V t3, V w2, V w3);
+
 L optLoopFusionQ6_1 (V z, L r0, V t1, V t2, V t3);
 L optLoopFusionQ6_2 (V z, L r0, V t15, V t0, V t1);
 
