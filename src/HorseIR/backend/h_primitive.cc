@@ -864,16 +864,16 @@ L pfnGroup(V z, V x){
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
     initV(y,H_B,lenZ);
-    // struct timeval tv0, tv1;
-    // gettimeofday(&tv0, NULL);
+// struct timeval tv0, tv1;
+// gettimeofday(&tv0, NULL);
     DOP(lenZ,vB(y,i)=1)
     CHECKE(pfnOrderBy(t,x,y));
-    // gettimeofday(&tv1, NULL);
-    // P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+// gettimeofday(&tv1, NULL);
+// P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // P("t = \n");
     // printV(t);
 
-    // gettimeofday(&tv0, NULL);
+// gettimeofday(&tv0, NULL);
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp));
@@ -885,9 +885,9 @@ L pfnGroup(V z, V x){
         CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-    // gettimeofday(&tv1, NULL);
-    // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-    // getchar();
+// gettimeofday(&tv1, NULL);
+// P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+// getchar();
     R 0;
 }
 
