@@ -450,6 +450,7 @@ void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
             lib_mergesort_list(rtn, val, mid, high, isUp, cmp);
             // if((*cmp)(val,rtn[mid-1],rtn[mid],isUp)>0){ // need to sort
             if(lib_mergesort_decide(val,rtn[mid-1],rtn[mid],isUp,cmp)>0){
+                // P("1. low = %lld, high = %lld\n", low, high); // check
                 L curLeft=low, curRight=mid;
                 // L *buff = (L*)malloc(sizeof(L)*len);
                 for(L i=0;i<len;i++){
@@ -475,6 +476,9 @@ void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
                 // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
                 // free(buff);
             } // else no need to sort
+            else if(lib_mergesort_decide(val,rtn[low],rtn[high-1],isUp,cmp)>0){
+                P("2. low = %lld, high = %lld\n", low, high); // in q16, no case found
+            }
         }
     }
     // P("after:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
@@ -499,6 +503,9 @@ B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
 void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i);
     #ifdef OPT_Q16
+        /* quick sort */
+        // lib_quicksort_other(targ, val, 0, tLen, isUp, lib_quicksort_cmp);
+        /* merge sort (fast) */ 
         LARGE_BUFF = (L*)malloc(sizeof(L)*vn(vV(val,0)));
         lib_mergesort_list(targ, val, 0, tLen, isUp, cmp);
         free(LARGE_BUFF);

@@ -45,7 +45,7 @@ E simulateQ16(){
 	L group1[] = {49, 14, 23, 45, 19, 3, 36, 9};
 	PROFILE(12, pfnMember(w3, literalI64Vector(8, group1), t2));
 	V sub = simulateQ16_sub();
-	PROFILE(13, pfnMember(w4, sub, t5));
+	PROFILE(13, pfnMember(w4, sub, t5));  // could
 	PROFILE(14, pfnNot(w5, w4));     // ps
 
 	// and
@@ -55,9 +55,9 @@ E simulateQ16(){
 	// join
 	PROFILE(17, pfnValues(w8, t4));
 	PROFILE(18, pfnCompress(w9, w5, w8));
-	PROFILE(19, pfnIndex(w10, w7, w9));
+	PROFILE(19, pfnIndex(w10, w7, w9)); // could
 	PROFILE(20, pfnCompress(w11, w10, w9));  // index for part
-	PROFILE(21, pfnWhere(w12, w5));
+	PROFILE(21, pfnWhere(w12, w5)); // could
 	PROFILE(22, pfnCompress(w13, w10, w12)); // index for partsupp
 
 	// P("len of w11: %lld\n", vn(w11));  // 118274
@@ -71,6 +71,7 @@ E simulateQ16(){
 	PROFILE(27, pfnList(g4, 3, group2));
 	PROFILE(28, pfnGroup(g5, g4));   // <-- slow
 	PROFILE(29, pfnValues(g6, g5));  // index
+	// P("before group: (3, %lld); after group: %lld\n", vn(g0), vn(g6)); // 118274 -> 18314
 	PROFILE(30, pfnKeys(g7, g5));    // index
 	// P("len of g7: %lld\n", vn(g7));  // should be 18314
 

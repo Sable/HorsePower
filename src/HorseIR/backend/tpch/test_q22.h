@@ -108,7 +108,7 @@ L testTPCHQ22(){
     PROFILE(91, pfnAddFKey(literalSym((S)"customer"), literalSym((S)"c_custkey"),\
     	                   literalSym((S)"orders"),   literalSym((S)"o_custkey")));
     L cur = getHeapOffset();
-    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ6();})
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=simulateQ22();})
     P("** End Query 22\n");
     R 0;
 }
