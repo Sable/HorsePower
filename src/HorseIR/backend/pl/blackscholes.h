@@ -110,8 +110,7 @@ L BlkSchls(V sptprice, V strike, V rate, V volatility, V time, V otypeC){
 	R 0;
 }
 
-L runBS(){
-	readTableBS();
+E runSingleBS(){
 	V a0 = allocNode(); V sptprice = allocNode(); V strike = allocNode(); V rate = allocNode();
 	V volatility = allocNode(); V time = allocNode(); V otypeC = allocNode();
 	struct timeval tv0, tv1;
@@ -125,7 +124,17 @@ L runBS(){
 	PROFILE( 7, pfnColumnValue(otypeC    , a0, literalSym((S)"optiontype")));
 	PROFILE( 8, BlkSchls(sptprice, strike, rate, volatility, time, otypeC));
 	gettimeofday(&tv1, NULL);
-    P("Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+	E elapsed = calcInterval(tv0,tv1)/1000.0;
+    P("The elapsed time (ms): %g\n\n", elapsed);
+    R elapsed;
+}
+
+L runBS(){
+	P("** Start simulation for Black-Scholes\n");
+	readTableBS();
+	L cur = getHeapOffset();
+    DOI(TEST_RUNS, {setHeapOffset(cur); times[i]=runSingleBS();})
+    P("** End Black-Scholes\n");
 }
 
 

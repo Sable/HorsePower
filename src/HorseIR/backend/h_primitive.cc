@@ -1986,7 +1986,7 @@ L optLoopFusionQ14_3(V z, L r0, V p8, V p12){
 
 L optLoopFusionQ16_1(V z, L r0, V g3, V g6){
     initV(z,H_L,r0);
-    DOP(r0, {V t=vV(g6,i); L len=vn(t); L tot=0; B f[99]={0}; \
+    DOP(r0, {V t=vV(g6,i); L len=vn(t); L tot=0; B f[199]={0}; \
             DOJ(len, if(!f[j]){ \
                 DOK(len, if(k!=j && vL(g3,vL(t,j)) == vL(g3,vL(t,k))) f[k]=1) \
                 f[j]=1; tot++;}) vL(z,i)=tot; })

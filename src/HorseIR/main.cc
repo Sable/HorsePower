@@ -91,7 +91,7 @@ void usage(){
     std::cout << "  -q <qid>     TPC-H query id"         << std::endl;
     std::cout << "  -s <sid>     TPC-H query scale"      << std::endl;
     std::cout << "  -o           TPC-H query opt on/off" << std::endl;
-    std::cout << "  -d 'del'     Set delimiter"          << std::endl;
+    std::cout << "  -d 'del'     Set delimiter to del"   << std::endl;
     std::cout << "  -r runs      Number of runs"         << std::endl;
 }
 
