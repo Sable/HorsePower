@@ -2047,6 +2047,12 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
     R 0;
 }
 
+L optLoopFusionBS_3(V z, L r0, V sptprice){
+    initV(z,H_B,r0);
+    DOP(r0, vB(z,i)=(vE(sptprice,i)>50) && (vE(sptprice,i)<100))
+    R 0;
+}
+
 /* q18: bucket group by */
 
 L pfnGroupBucket(V z, V x){

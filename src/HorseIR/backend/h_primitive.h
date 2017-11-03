@@ -224,6 +224,7 @@ L optLoopFusionQ19_4(V z, L r0, V d9, V c9, V d11, V d12, V h1);
 
 L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
+L optLoopFusionBS_3(V z, L r0, V sptprice);
 
 L pfnGroupBucket   (V z, V x);
 L pfnGroupTrie     (V z, V x);

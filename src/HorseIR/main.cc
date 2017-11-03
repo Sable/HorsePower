@@ -26,6 +26,7 @@ int  queryScale  = 1;
 int  plId        = -1;
 char delimiter   = '|';
 int  runs        = 0;
+int  plSid       = 0;
 
 void usage();
 int getOption(int argc, char *argv[]);
@@ -45,10 +46,10 @@ int main(int argc, char *argv[]){
     else if(flagQuery){
         printf("...Testing...\n");
         // testInputFile(inputPath);
-        testMain(0, queryId, queryScale, flagOpt, delimiter, runs);
+        testMain(0, queryId, -1, queryScale, flagOpt, delimiter, runs);
     }
     else if(flagPL){
-        testMain(1, plId, -1, flagOpt, delimiter, runs);
+        testMain(1, plId, plSid, -1, flagOpt, delimiter, runs);
     }
     else {
         usage();
@@ -59,12 +60,13 @@ int main(int argc, char *argv[]){
 
 int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvop:q:s:d:r:")) != -1){
+    while((c = getopt(argc, argv, "hvop:q:s:d:r:u:")) != -1){
         switch(c){
             case 'h': flagUsage   = true; break;
             case 'v': flagVersion = true; break;
             case 'p': flagPL      = true; \
                       plId        = atoi(optarg); break;
+            case 'u': plSid       = atoi(optarg); break;
             case 'q': flagQuery   = true; \
                       queryId     = atoi(optarg); break;
             case 's': queryScale  = atoi(optarg); break;
@@ -89,6 +91,7 @@ void usage(){
     std::cout << "  -p <pid>     Set PL test id"         << std::endl;
     std::cout << "  -v           Print HorseIR version"  << std::endl;
     std::cout << "  -q <qid>     TPC-H query id"         << std::endl;
+    std::cout << "  -u <sid>     Sub id in -q"           << std::endl;
     std::cout << "  -s <sid>     TPC-H query scale"      << std::endl;
     std::cout << "  -o           TPC-H query opt on/off" << std::endl;
     std::cout << "  -d 'del'     Set delimiter to del"   << std::endl;

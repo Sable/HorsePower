@@ -5,7 +5,7 @@ extern "C" {
 /* test only */
 
 L testInputFile(S path);
-L testMain(L option, L id, L scale, B isOptimized, C del, L runs);
+L testMain(L option, L id, L sid, L scale, B isOpt, C del, L runs);
 // L loadCSV();
 
 #ifdef	__cplusplus

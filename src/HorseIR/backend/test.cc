@@ -95,12 +95,12 @@ V literalStrVector(L n, S b[]){
     R z;
 }
 
-// #define PROFILE(n,x) x
-#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
+#define PROFILE(n,x) x
+// #define PROFILE(n,x) { struct timeval tt_0, tt_1; \
         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
-B isOptimized = true;
+B isOptimized = false;  // default: opt off
 C CSV_FILE_ROOT[] = "data/tpch/db";
 L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
@@ -112,18 +112,19 @@ E times[999];
 #include "test_tpch.h"
 #include "test_pl.h"
 
-L testMain(L option, L id, L scale, B isOptimized, C del, L runs){
+L testMain(L option, L id, L sid, L scale, B isOpt, C del, L runs){
     initMain();  // memory
     initSym();   // symbol
     initSys();
-    isOptimized    = isOptimized;
+    L threshold = 5;  // discard first $threshold runs
+    isOptimized    = isOpt;
     CSV_FILE_SCALE = scale;
     LINE_SEP       = del;
-    TEST_RUNS      = runs + 1;
-    P("runs = %lld\n", runs);
+    TEST_RUNS      = runs==0?1:runs+threshold;
+    P("runs = %lld (optimized?: %s)\n", runs, isOptimized?"yes":"no");
     switch(option){
         case 0: testTPCH(id);     break;
-        case 1: testPL(id);       break;
+        case 1: testPL(id, sid);  break; // sub id
         case 2: testSimple();     break;
         case 3: testTypes();      break;
         case 4: testOrderBy();    break;
@@ -136,7 +137,7 @@ L testMain(L option, L id, L scale, B isOptimized, C del, L runs){
         E tot = 0;
         P("Summary of %lld runs:\n", runs);
         P("Query %lld:", id);
-        DOI(TEST_RUNS, if(i>0){tot+=times[i];P("  %g", times[i]);})
+        DOI(TEST_RUNS, if(i>threshold){tot+=times[i];P("  %g", times[i]);})
         P(" => Average: %g\n",tot/runs);
     }
     /* Print info */
