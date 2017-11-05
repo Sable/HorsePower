@@ -117,7 +117,8 @@ V BlkSchls(V sptprice, V strike, V rate, V volatility, V time, V otypeC){
 	FROM
 	    myudf((select * from blackscholes));
  */
-V myudf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+V mybs_udf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+	P("Entering mybs_udf0\n");
 	V z0 = allocNode(); V z1 = allocNode(); V z = allocNode();
 	V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
 	S group1[] = {(S)"optiontype", (S)"sptprice", (S)"optionprice"};
@@ -136,7 +137,8 @@ V myudf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontyp
 	FROM
 	    myudf((select * from blackscholes))
  */
-V myudf1(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+V mybs_udf1(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+	P("Entering mybs_udf1\n");
 	V z0 = allocNode(); V z1 = allocNode(); V z = allocNode();
 	if(!isOptimized){
 		V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
@@ -153,59 +155,53 @@ V myudf1(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontyp
 }
 
 /*
-	-- query 2: high selectivity
+	-- query 2: filter
 	SELECT
-	    *
-	FROM
-	    myudf((select * from blackscholes))
-	WHERE
-	    optiontype = 'P';
- */
-
-V myudf2(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
-	V z0 = allocNode(); V z1 = allocNode(); V z  = allocNode();
-	V w0 = allocNode();
-	V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode();
-	if(!isOptimized){
-		V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
-		PROFILE(10, pfnGt(w0, sptprice, literalChar('P')));
-		PROFILE(11, pfnCompress(m0, w0, optiontype));
-		PROFILE(12, pfnCompress(m1, w0, sptprice));
-		PROFILE(13, pfnCompress(m2, w0, optionprice));
-	}
-	else {
-		V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
-		V w4 = allocNode();  V w5 = allocNode();  V w6 = allocNode();
-		PROFILE(10, pfnGt(w0, sptprice, literalChar('P')));
-		PROFILE(11, pfnCompress(w1, w0, sptprice));
-		PROFILE(12, pfnCompress(w2, w0, strike));
-		PROFILE(13, pfnCompress(w3, w0, rate));
-		PROFILE(14, pfnCompress(w4, w0, volatility));
-		PROFILE(15, pfnCompress(w5, w0, time));
-		PROFILE(16, pfnCompress(w6, w0, optiontype));
-		V optionprice = BlkSchls(w1,w2,w3,w4,w5,w6);
-		copyV(m0, w6);
-		copyV(m1, w1);
-		copyV(m2, optionprice);
-	}
-	S group1[] = {(S)"optiontype", (S)"sptprice", (S)"optionprice"};
-	PROFILE(1, copyV(z0, literalSymVector(3, group1)));
-	V group2[] = {m0, m1, m2};
-	PROFILE(2, pfnList(z1, 3, group2));
-	PROFILE(3, pfnTable(z, z0, z1));
-	R z;
-}
-
-/*
-	-- query 3: low selectivity
-	SELECT
-	    *
+	    optiontype, sptprice
 	FROM
 	    myudf((select * from blackscholes))
 	WHERE
 	    sptprice > 50 and sptprice < 100
  */
-V myudf3(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+
+V mybs_udf2(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+	P("Entering mybs_udf2\n");
+	V z0 = allocNode(); V z1 = allocNode(); V z  = allocNode();
+	V w0 = allocNode(); V w1 = allocNode(); V w2 = allocNode();
+	V m0 = allocNode(); V m1 = allocNode();
+	if(!isOptimized){
+		V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
+		PROFILE(10, pfnGt(w0, sptprice, literalF64(50)));
+		PROFILE(11, pfnLt(w1, sptprice, literalF64(100)));
+		PROFILE(12, pfnCompress(m0, w1, optiontype));
+		PROFILE(13, pfnCompress(m1, w1, sptprice));
+	}
+	else {
+		PROFILE(10, optLoopFusionBS_3(w0, vn(sptprice), sptprice));
+		PROFILE(11, pfnCompress(w1, w0, optiontype));
+		PROFILE(12, pfnCompress(w2, w0, sptprice));
+		copyV(m0, w1);
+		copyV(m1, w2);
+	}
+	S group1[] = {(S)"optiontype", (S)"sptprice"};
+	PROFILE(1, copyV(z0, literalSymVector(2, group1)));
+	V group2[] = {m0, m1};
+	PROFILE(2, pfnList(z1, 2, group2));
+	PROFILE(3, pfnTable(z, z0, z1));
+	R z;
+}
+
+/*
+	-- query 3: return all
+	SELECT
+	    optiontype, sptprice, optionprice
+	FROM
+	    myudf((select * from blackscholes))
+	WHERE
+	    sptprice > 50 and sptprice < 100
+ */
+V mybs_udf3(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
+	P("Entering mybs_udf3\n");
 	V z0 = allocNode(); V z1 = allocNode(); V z  = allocNode();
 	V w0 = allocNode();
 	V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode();
@@ -213,11 +209,11 @@ V myudf3(V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontyp
 		V w1 = allocNode();  V w2 = allocNode();
 		V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
 		PROFILE(10, pfnGt(w0, sptprice, literalF64(50)));
-		PROFILE(10, pfnLt(w1, sptprice, literalF64(100)));
-		PROFILE(11, pfnAnd(w2, w0, w1));
-		PROFILE(11, pfnCompress(m0, w2, optiontype));
-		PROFILE(12, pfnCompress(m1, w2, sptprice));
-		PROFILE(13, pfnCompress(m2, w2, optionprice));
+		PROFILE(11, pfnLt(w1, sptprice, literalF64(100)));
+		PROFILE(12, pfnAnd(w2, w0, w1));
+		PROFILE(13, pfnCompress(m0, w2, optiontype));
+		PROFILE(14, pfnCompress(m1, w2, sptprice));
+		PROFILE(15, pfnCompress(m2, w2, optionprice));
 	}
 	else {
 		V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
@@ -262,20 +258,20 @@ E runBSQuery(L id){
 	V z;
 	switch(id){
 		// base 0
-		case 0: z = myudf0(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
+		case 0: z = mybs_udf0(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
 		// query 1
-		case 1: z = myudf1(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
+		case 1: z = mybs_udf1(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
 		// query 2
-		case 2: z = myudf2(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
+		case 2: z = mybs_udf2(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
 		// query 3
-		case 3: z = myudf3(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
+		case 3: z = mybs_udf3(sptprice, strike, rate, divq, volatility, time, optiontype, divs, dgrefval); break;
 		// query 4?
 		default: P("Invalid query id (%lld) in blackscholes\n", id); exit(99);
 	}
 	gettimeofday(&tv1, NULL);
 	E elapsed = calcInterval(tv0,tv1)/1000.0;
     P("The elapsed time (ms): %g\n", elapsed);
-    printTablePretty(z, 5);
+    printTablePretty(z, 10);
     R elapsed;
 }
 
