@@ -2,10 +2,12 @@ import numpy as np
 import time  as tm
 
 def PageRank(webGraph):
-    v = np.sum(webGraph, 0) # refcount
-    h = np.sum(webGraph, 1) # urlcount
-    s = np.argsort(v)
-    return [s, v[s], h[s]]
+    v = np.sum(webGraph, 0) # inbound
+    h = np.sum(webGraph, 1) # outbound
+    u = np.arange(len(v))
+    s = np.arange(len(v))
+    s[np.argsort(-1*v, kind='mergesort')] = u;
+    return [u, h, v, s]
 
 def loadFile(fileName):
     fullPath = "../../src/HorseIR/data/pl/" + fileName
@@ -29,7 +31,7 @@ def logMsg(msg):
     f.close()
 
 def runPR():
-    fileName = "pr_in10.tbl"
+    fileName = "pr_in1K.tbl"
     start = tm.time()
     webGraph = loadFile(fileName)
     end   = tm.time()
@@ -38,6 +40,8 @@ def runPR():
     result= PageRank(webGraph)
     end   = tm.time()
     logMsg("The elapsed time is (ms): %lf" % ((end-start) * 1000))
+    for x in range(10):
+        print '%d %d %d %d' % (result[0][x],result[1][x],result[2][x],result[3][x])
     return result
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ L getBasicItemStr     (V x, L k, S buff, B hasTick);
 L getStringItemStr    (V x, L k);
 L getColWidth         (V x, L k, L rowLimit);
 L getStrPretty        (S str, L maxSize);
-
+V readMatrix          (S fileName);
 
 #define ALL -1
 #define printValue(x) printValueItem(x,ALL)

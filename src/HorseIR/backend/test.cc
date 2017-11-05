@@ -95,8 +95,8 @@ V literalStrVector(L n, S b[]){
     R z;
 }
 
-#define PROFILE(n,x) x
-// #define PROFILE(n,x) { struct timeval tt_0, tt_1; \
+// #define PROFILE(n,x) x
+#define PROFILE(n,x) { struct timeval tt_0, tt_1; \
         gettimeofday(&tt_0, NULL); L e = x; CHECK(e,n); gettimeofday(&tt_1, NULL); \
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
@@ -137,7 +137,7 @@ L testMain(L option, L id, L sid, L scale, B isOpt, C del, L runs){
         E tot = 0;
         P("Summary of %lld runs:\n", runs);
         P("Query %lld:", id);
-        DOI(TEST_RUNS, if(i>threshold){tot+=times[i];P("  %g", times[i]);})
+        DOI(TEST_RUNS, if(i>=threshold){tot+=times[i];P("  %g", times[i]);})
         P(" => Average: %g\n",tot/runs);
     }
     /* Print info */

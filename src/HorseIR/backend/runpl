@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-if [ "$#" -ne 3 ]; then
-    echo "Usage: ./runpl [debug|release] [id] [sid]"
+if [ "$#" -ne 4 ]; then
+    echo "Usage: ./runpl [debug|release] [opt|noopt] [id] [sid]"
     exit 1
 fi
 echo Starting ...
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=4
-id=$2
-sid=$3
+if [ "$2" = "opt" ]; then
+    opt="-o"
+fi
+id=$3
+sid=$4
 # cmd="./horse -p $id -o -r 10"
-cmd="./horse -p $id -u $sid -o"
+cmd="./horse -p $id -u $sid $opt"
 if [ "debug" == "$1" ]; then
     (cd ../ && make debug   && time $cmd -d ' ')
 elif [ "release" == "$1" ]; then

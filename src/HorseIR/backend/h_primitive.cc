@@ -149,9 +149,18 @@ L pfnIndexA(V x, V y, V m){
 
 /* copy alias */
 L pfnFlip(V z, V x){
-    initTable(z, vn(x));
-    /* need to check dict */
-    DOP(vn(x), *(sV(z)+i)=*(sV(x)+i))
+    if(isDict(x)){
+        initTable(z, vn(x));
+        /* need to check dict */
+        DOP(vn(x), *(sV(z)+i)=*(sV(x)+i))
+    }
+    else if(isList(x)){
+        L cellSize = vn(x)>0?vn(vV(x,0)):0;
+        DOI(vn(x), if(cellSize != vn(vV(x,i))) R E_DOMAIN)
+        initList(z, cellSize);
+        DOJ(cellSize, {V y=vV(z,j); initV(y,H_L,vn(x));  DOP(vn(x), { vL(y,i)=vL(vV(x,i),j); })})
+    }
+    else R E_DOMAIN;
     R 0;
 }
 
@@ -2049,7 +2058,54 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
 
 L optLoopFusionBS_3(V z, L r0, V sptprice){
     initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=(vE(sptprice,i)>50) && (vE(sptprice,i)<100))
+    DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+    R 0;
+}
+
+L optLoopFusionPR_1(V m0, V m1, L r0, V web){
+    initV(m0, H_L, r0);
+    initV(m1, H_L, r0);
+    memset(sL(m1), 0 , sizeof(L)*r0);
+    DOJ(r0, {V x=vV(web,j); {L t=0; DOI(vn(x), t+=vL(x,i)) vL(m0,j)=t;\
+             DOI(vn(x), vL(m1,i)+=vL(x,i))} })
+    // DOJ(r0, {V x=vV(web,j); {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vL(m0,j)=t;\
+    //          DOI(vn(x), vL(m1,i)+=vL(x,i))} }) // slow with DOP
+    R 0;
+}
+
+L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web){
+    L *cnt = (L*)malloc(sizeof(L)*r0); memset(cnt, 0, sizeof(L)*r0);
+    L *indx= (L*)malloc(sizeof(L)*r0); memset(indx,0, sizeof(L)*r0);
+    DOI(r0, { DOJ(r0, cnt[j] +=vL(vV(web,i),j)) } )
+    L tot = 0;
+    DOI(r0, if(cnt[i]>70)indx[tot++]=i)
+    initV(m0, H_L, tot);
+    initV(m1, H_L, tot);
+    initV(m2, H_L, tot);
+    DOI(tot, vL(m0,i)=indx[i])
+    DOI(tot, vL(m2,i)=cnt[indx[i]])
+    DOI(tot, {V x=vV(web,indx[i]); {L t=0; DOJ(vn(x), t+=vL(x,j)) vL(m1,i)=t;}})
+    free(cnt);
+    free(indx);
+    R 0;
+}
+
+
+L optLoopFusionPR_4(V w5, L r0, V w2){
+    initV(w5, H_L, r0);
+    DOI(r0, vL(w5,vL(w2,i))=i)
+    R 0;
+}
+
+L optLoopFusionPR_5(V w8, L r0, V w1, V w5){
+    initV(w8, H_B, r0);
+    DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<10)
+    R 0;
+}
+
+L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
+    initV(m2, H_L, r0);
+    DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
     R 0;
 }
 

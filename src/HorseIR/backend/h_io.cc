@@ -520,3 +520,30 @@ L getStrPretty(S str, L maxSize){
     R 0;
 }
 
+/* read a matrix */
+
+const L LINE_SPECIAL_MAX = 29999;
+C line_special[LINE_SPECIAL_MAX];
+
+V readMatrix(S fileName){
+    FILE *fp = openFile(fileName);
+    L lineNo = 0, numRows, numCols;
+    V x = allocNode();
+    while(fgets(line_special, LINE_SPECIAL_MAX, (FILE*)fp)){
+        if(0 == lineNo){
+            sscanf(line_special, "%lld %lld", &numRows, &numCols);
+            initList(x, numRows);
+            P("Loading %s: %lld, %lld\n", fileName, numRows, numCols);
+        }
+        else {
+            S ptr = line_special;
+            V y = vV(x,lineNo-1);  initV(y, H_L, numCols);
+            DOI(numCols, {L k=sscanf(ptr, "%lld", sL(y)+i); while(ptr[k]==' ')k++; ptr+=k;})
+        }
+        lineNo++;
+    }
+    fclose(fp);
+    R x;
+}
+
+

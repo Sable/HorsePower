@@ -226,6 +226,12 @@ L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
 L optLoopFusionBS_3(V z, L r0, V sptprice);
 
+L optLoopFusionPR_1(V m0, V m1, L r0, V web);
+L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web);
+L optLoopFusionPR_4(V w5, L r0, V w2);
+L optLoopFusionPR_5(V w8, L r0, V w1, V w5);
+L optLoopFusionPR_6(V m2, L r0, V w4, V m3);
+
 L pfnGroupBucket   (V z, V x);
 L pfnGroupTrie     (V z, V x);
 
