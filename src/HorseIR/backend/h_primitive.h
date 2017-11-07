@@ -222,6 +222,7 @@ L optLoopFusionQ19_1(V z, L r0, V t3, V w0, V w1);
 L optLoopFusionQ19_2(V z, L r0, V d9, V c9, V d11, V d12, V r1);
 L optLoopFusionQ19_3(V z, L r0, V d9, V c9, V d11, V d12, V k1);
 L optLoopFusionQ19_4(V z, L r0, V d9, V c9, V d11, V d12, V h1);
+L optLoopFusionQ19_5(V d1, V d7, V p2, V t4);
 
 L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);

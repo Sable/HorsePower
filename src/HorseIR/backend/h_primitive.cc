@@ -2061,6 +2061,22 @@ L optLoopFusionQ19_4(V z, L r0, V d9, V c9, V d11, V d12, V h1){
 }
 
 
+/* similar to optLoopFusionQ14_3 */
+L optLoopFusionQ19_5(V d1, V d7, V p2, V t4){
+    if(!isEqualLength(p2,t4)) R E_LENGTH;
+    L lenX = vn(p2);
+    L k    = 0;
+    L lenZ = 0, parZ[H_CORE]={0}, offset[H_CORE]={0};
+    CHECKE(getNumOfNonZero(p2,parZ));
+    DOI(H_CORE, lenZ += parZ[i])
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    initV(d1,H_L,lenZ); // vp(t4)
+    initV(d7,H_L,lenZ); // where
+    DOT(lenX, if(vB(p2,i)){L c=offset[tid]++; \
+                          vL(d1,c)=vL(t4,i); vL(d7,c)=i; })
+    R 0;
+}
+
 /* status: on */
 L optLoopFusionBS_1(V z, L r0, V volatility, V time){
     initV(z,H_E,r0);

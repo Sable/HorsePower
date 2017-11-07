@@ -87,12 +87,16 @@ E simulateQ19(){
 	// join - d
 	// P("type: %lld\n", vp(t1)); DOI(vn(t1), if(vB(w10,i))P(" %s", getSymbolStr(vQ(t1 ,i)))) getchar(); P("\n");
 	PROFILE(40, pfnCompress(d0, w10, t0)); // p_
-	PROFILE(41, pfnCompress(d1, p2 , t4)); // l_
+	if(!isOptimized){
+		PROFILE(41, pfnCompress(d1, p2, t4)); // l_
+		PROFILE(45, pfnWhere(d7, p2));
+	}
+	else {
+		PROFILE(45, optLoopFusionQ19_5(d1, d7, p2, t4));
+	}
 	PROFILE(42, pfnIndexOf(d2, d0, d1));
-
 	PROFILE(43, pfnLen(d3, d0));
 	PROFILE(44, pfnLt(d4, d2, d3));
-	PROFILE(45, pfnWhere(d7, p2));
 	PROFILE(46, pfnCompress(d5, d4, d7)); // l_
 	PROFILE(47, pfnWhere(f0, w10));
 	PROFILE(48, pfnCompress(d6, d4, d2)); // p_
