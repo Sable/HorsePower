@@ -374,7 +374,8 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         default: P("No impl. for type %lld\n",vp(t)); exit(99); break; \
         /* Pending: caseC */
     } 
-    R (a>b?1:a<b?-1:0);
+    // R (a>b?1:a<b?-1:0);
+    R 0;
 }
 
 void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
