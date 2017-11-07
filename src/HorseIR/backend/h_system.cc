@@ -389,7 +389,7 @@ pcre2_code* getLikePatten(S pat){
     L newLen = strlen(newString);
     PCRE2_SPTR pattern = (PCRE2_SPTR)newString;
     I errNum; PCRE2_SIZE errOff;
-    pcre2_code *re = pcre2_compile(pattern,newLen,PCRE2_NO_UTF_CHECK,&errNum,&errOff,NULL);
+    pcre2_code *re = pcre2_compile(pattern,newLen,PCRE2_ANCHORED|PCRE2_NO_UTF_CHECK,&errNum,&errOff,NULL);
     if(!re) R NULL;
     R re;
 }

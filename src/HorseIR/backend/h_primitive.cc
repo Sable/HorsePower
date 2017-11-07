@@ -1457,6 +1457,10 @@ L pfnLike(V z, V x, V y){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):vs(y);
             pcre2_code *re = getLikePatten(strY);
+            // I rc = pcre2_jit_compile(re, PCRE2_JIT_PARTIAL_HARD);
+            // pcre2_match_context *mcontext = pcre2_match_context_create(NULL);
+            // pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
+            // pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
             pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
             if(re==NULL) R E_NULL_VALUE;
             initV(z,H_B,lenZ);
@@ -1466,6 +1470,10 @@ L pfnLike(V z, V x, V y){
                 caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
                 caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
             }
+            pcre2_code_free(re);
+            pcre2_match_data_free(match);
+            // pcre2_match_context_free(mcontext);
+            // pcre2_jit_stack_free(jit_stack);
             R 0;
         }
         else if(isChar(x) || isEqualLength(x,y)){  // y:string
@@ -1988,8 +1996,19 @@ L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5){
     R 0;
 }
 
-L optLoopFusionQ14_3(V z, L r0, V p8, V p12){
-    initV(z,H_E,r0);
+L optLoopFusionQ14_3(V w4, V p2, V p3, V w3, V t1, V t4, V t5){
+    if(!isEqualLength(w3,t1) || !isEqualLength(w3,t4) || !isEqualLength(w3,t5)) R E_LENGTH;
+    L lenX = vn(w3);
+    L k    = 0;
+    L lenZ = 0, parZ[H_CORE]={0}, offset[H_CORE]={0};
+    CHECKE(getNumOfNonZero(w3,parZ));
+    DOI(H_CORE, lenZ += parZ[i])
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    initV(w4,vp(t1),lenZ); // H_L
+    initV(p2,vp(t4),lenZ); // H_E
+    initV(p3,vp(t5),lenZ); // H_E
+    DOT(lenX, if(vB(w3,i)){L c=offset[tid]++; \
+                          vL(w4,c)=vL(t1,i); vE(p2,c)=vE(t4,i); vE(p3,c)=vE(t5,i); })
     R 0;
 }
 
