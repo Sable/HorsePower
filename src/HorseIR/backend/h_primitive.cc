@@ -2107,9 +2107,14 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
     R 0;
 }
 
-L optLoopFusionBS_3(V z, L r0, V sptprice){
+L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
     initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+    if(id <= 3){
+        DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+    }
+    else {
+        DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
+    }
     R 0;
 }
 
@@ -2124,12 +2129,17 @@ L optLoopFusionPR_1(V m0, V m1, L r0, V web){
     R 0;
 }
 
-L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web){
+L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id){
     L *cnt = (L*)malloc(sizeof(L)*r0); memset(cnt, 0, sizeof(L)*r0);
     L *indx= (L*)malloc(sizeof(L)*r0); memset(indx,0, sizeof(L)*r0);
     DOI(r0, { DOJ(r0, cnt[j] +=vL(vV(web,i),j)) } )
     L tot = 0;
-    DOI(r0, if(cnt[i]>70)indx[tot++]=i)
+    if(id<=3) {
+        DOI(r0, if(cnt[i]>70)indx[tot++]=i)
+    }
+    else {
+        DOI(r0, if(cnt[i]<=70)indx[tot++]=i)
+    }
     initV(m0, H_L, tot);
     initV(m1, H_L, tot);
     initV(m2, H_L, tot);
@@ -2148,9 +2158,14 @@ L optLoopFusionPR_4(V w5, L r0, V w2){
     R 0;
 }
 
-L optLoopFusionPR_5(V w8, L r0, V w1, V w5){
+L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
     initV(w8, H_B, r0);
-    DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<10)
+    if(id <= 3){
+        DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<10)
+    }
+    else {
+        DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=10)
+    }
     R 0;
 }
 

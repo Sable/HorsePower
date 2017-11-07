@@ -55,22 +55,28 @@ V mypr_udf0(V web){
         inbound > 70;
  */
 
-V mypr_udf1(V web){
+V mypr_udf1(L id, V web){
     V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
     V m0 = allocNode();  V m1 = allocNode();  V m2 = allocNode();
     V z0 = allocNode();  V z1 = allocNode();  V z  = allocNode();
     if(!isOptimized){
         PROFILE(1, optLoopFusionPR_1(w0,w1,vn(web),web));
         PROFILE(2, pfnOrderBy(w2, w1, literalBool(0)));
-        PROFILE(3, pfnGt(w3, w1, literalI64(70)));
+        if(id==1){
+            PROFILE(3, pfnGt(w3, w1, literalI64(70)));
+        }
+        else {
+            PROFILE(3, pfnLeq(w3, w1, literalI64(70)));
+        }
         PROFILE(4, pfnWhere(m0, w3));
         PROFILE(5, pfnCompress(m1, w3, w0));
         PROFILE(6, pfnCompress(m2, w3, w1));
     }
     else {
-        PROFILE(1, optLoopFusionPR_2(m0,m1,m2,vn(web),web));
+        PROFILE(1, optLoopFusionPR_2(m0,m1,m2,vn(web),web,id));
         /* skip w2 (rank) */
     }
+    P("pr_udf1 selectivity: %lf%%\n", (vn(m1)*100.0)/vn(web));
     S group1[] = { (S)"urlid", (S)"outbound", (S)"inbound" };
     PROFILE(7, copyV(z0, literalSymVector(3, group1)));
     V group2[] = { m0, m1, m2 };
@@ -88,7 +94,7 @@ V mypr_udf1(V web){
     WHERE
         inbound > 70;
  */
-V mypr_udf2(V web){
+V mypr_udf2(L id, V web){
     V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
     V w4 = allocNode();  V w5 = allocNode();  V w6 = allocNode();  V w7 = allocNode();
     V m0 = allocNode();  V m1 = allocNode();
@@ -105,9 +111,15 @@ V mypr_udf2(V web){
     else {
         PROFILE(5, optLoopFusionPR_6(w6,vn(w2),w2,w4));
     }
-    PROFILE(8, pfnGt(w7, w1, literalI64(70)));
+    if(id == 2){
+        PROFILE(8, pfnGt(w7, w1, literalI64(70)));
+    }
+    else {
+        PROFILE(8, pfnLeq(w7, w1, literalI64(70)));
+    }
     PROFILE(9, pfnCompress(m0, w7, w4));
     PROFILE(10,pfnCompress(m1, w7, w6));
+    P("pr_udf2 selectivity: %lf%%\n", (vn(m1)*100.0)/vn(w7));
     S group1[] = { (S)"urlid", (S)"urlrank" };
     PROFILE(11,copyV(z0, literalSymVector(2, group1)));
     V group2[] = { m0, m1 };
@@ -126,7 +138,7 @@ V mypr_udf2(V web){
         inbound > 70
         AND urlrank < 10;
  */
-V mypr_udf3(V web){
+V mypr_udf3(L id, V web){
     V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
     V w4 = allocNode();  V w5 = allocNode();  V w6 = allocNode();  V w7 = allocNode();
     V w8 = allocNode();
@@ -139,17 +151,25 @@ V mypr_udf3(V web){
         PROFILE(4, pfnRange(w4, w3));
         initV(w5, H_L, vn(w2));
         PROFILE(5, pfnIndexA(w5,w2,w4));
-        PROFILE(6, pfnGt(w6, w1, literalI64(70)));
-        PROFILE(7, pfnLt(w7, w5, literalI64(10)));
-        PROFILE(8, pfnAnd(w8,w6,w7));
+        if(id == 3){
+            PROFILE(6, pfnGt(w6, w1, literalI64(70)));
+            PROFILE(7, pfnLt(w7, w5, literalI64(10)));
+            PROFILE(8, pfnAnd(w8,w6,w7));
+        }
+        else {
+            PROFILE(6, pfnLeq(w6, w1, literalI64(70)));
+            PROFILE(7, pfnGeq(w7, w5, literalI64(10)));
+            PROFILE(8, pfnOr(w8,w6,w7));
+        }
     }
     else {
         PROFILE(1, optLoopFusionPR_4(w5,vn(w2),w2));
-        PROFILE(4, optLoopFusionPR_5(w8,vn(w1),w1,w5));
+        PROFILE(4, optLoopFusionPR_5(w8,vn(w1),w1,w5,id));
     }
     PROFILE(9, pfnWhere(m0, w8));
     PROFILE(10,pfnCompress(m1, w8, w0));
     PROFILE(10,pfnCompress(m2, w8, w1));
+    P("pr_udf3 selectivity: %lf%%\n", (vn(m1)*100.0)/vn(w8));
     // PROFILE(11,pfnCompress(m2, w8, w5));  // urlrank
     S group1[] = { (S)"urlid", (S)"outbound", (S)"inbound" };
     PROFILE(7, copyV(z0, literalSymVector(3, group1)));
@@ -165,9 +185,13 @@ E runPRQuery(L id, V web){
     V z;
     switch(id){
         case 0: z = mypr_udf0(web); break;
-        case 1: z = mypr_udf1(web); break;
-        case 2: z = mypr_udf2(web); break;
-        case 3: z = mypr_udf3(web); break;
+        case 1: z = mypr_udf1(id, web); break;
+        case 2: z = mypr_udf2(id, web); break;
+        case 3: z = mypr_udf3(id, web); break;
+        case 4: z = mypr_udf1(id, web); break;
+        case 5: z = mypr_udf2(id, web); break;
+        case 6: z = mypr_udf3(id, web); break;
+        default: P("Invalid query id (%lld) in Page-Rank\n", id); exit(99);
     }
     gettimeofday(&tv1, NULL);
     E elapsed = calcInterval(tv0,tv1)/1000.0;
