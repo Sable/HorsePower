@@ -45,7 +45,7 @@ E simulateQ14(){
         PROFILE(16, pfnIndex(p1, t3, p0));     // p_type
         PROFILE(17, pfnCompress(p2, w3, t4));  // l_extendedprice
         PROFILE(18, pfnCompress(p3, w3, t5));  // l_discount
-        P("before: %lld, after: %lld\n", vn(t4), vn(p2));
+        // P("before: %lld, after: %lld\n", vn(t4), vn(p2));
     }
     else {
         PROFILE( 8, pfnColumnValue(t1, a0, literalSym((S)"l_partkey")));
