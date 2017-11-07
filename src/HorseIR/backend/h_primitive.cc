@@ -1984,6 +1984,22 @@ L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1){
     R 0;
 }
 
+/* similar to optLoopFusionQ14_3 */
+L optLoopFusionQ6_3(V t16, V t17, V t15, V t0, V t1){
+    if(!isEqualLength(t15,t0) || !isEqualLength(t15,t1)) R E_LENGTH;
+    L lenX = vn(t15);
+    L k    = 0;
+    L lenZ = 0, parZ[H_CORE]={0}, offset[H_CORE]={0};
+    CHECKE(getNumOfNonZero(t15,parZ));
+    DOI(H_CORE, lenZ += parZ[i])
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    initV(t16,vp(t0),lenZ); // H_E
+    initV(t17,vp(t1),lenZ); // H_E
+    DOT(lenX, if(vB(t15,i)){L c=offset[tid]++; \
+                          vE(t16,c)=vE(t0,i); vE(t17,c)=vE(t1,i);})
+    R 0;
+}
+
 L optLoopFusionQ14_1(V z, L r0, V t0){
     initV(z,H_B,r0);
     DOP(r0, vB(z,i)=(vD(t0,i)>=19950901 && vD(t0,i)<19951001))

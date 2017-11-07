@@ -43,8 +43,13 @@ E simulateQ6(){
         PROFILE(91, optLoopFusionQ6_1(t15,tableRow(a0),t1,t2,t3));
     }
 
-    PROFILE(18,pfnCompress(t16,t15,t0));
-    PROFILE(19,pfnCompress(t17,t15,t1));
+    if(!isOptimized){
+        PROFILE(18,pfnCompress(t16,t15,t0));
+        PROFILE(19,pfnCompress(t17,t15,t1));
+    }
+    else {
+        PROFILE(18,optLoopFusionQ6_3(t16,t17,t15,t0,t1));
+    }
     PROFILE(20,pfnMul(t18,t16,t17));
     // P("before %lld, after %lld\n", vn(t0),vn(t16));
     // before 6001215, after 114160  -->  selectivity 1.9%
