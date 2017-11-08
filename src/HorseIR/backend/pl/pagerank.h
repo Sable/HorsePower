@@ -1,6 +1,6 @@
 
 V readPRData(){
-    C DATA_PATH[] = "data/pl/pr_in1K.tbl";
+    C DATA_PATH[] = "data/pl/pr_in10K.tbl";
     R readMatrix(DATA_PATH);
 }
 
@@ -135,8 +135,8 @@ V mypr_udf2(L id, V web){
     FROM
         myudf()
     WHERE
-        inbound > 70
-        AND urlrank < 10;
+        inbound > 70        ==>  inbound <= 70
+        AND urlrank < 100;  ==>   AND urlrank < 100;
  */
 V mypr_udf3(L id, V web){
     V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
@@ -153,13 +153,13 @@ V mypr_udf3(L id, V web){
         PROFILE(5, pfnIndexA(w5,w2,w4));
         if(id == 3){
             PROFILE(6, pfnGt(w6, w1, literalI64(70)));
-            PROFILE(7, pfnLt(w7, w5, literalI64(10)));
+            PROFILE(7, pfnLt(w7, w5, literalI64(100)));
             PROFILE(8, pfnAnd(w8,w6,w7));
         }
         else {
             PROFILE(6, pfnLeq(w6, w1, literalI64(70)));
-            PROFILE(7, pfnGeq(w7, w5, literalI64(10)));
-            PROFILE(8, pfnOr(w8,w6,w7));
+            PROFILE(7, pfnLt(w7, w5, literalI64(100)));
+            PROFILE(8, pfnAnd(w8,w6,w7));
         }
     }
     else {

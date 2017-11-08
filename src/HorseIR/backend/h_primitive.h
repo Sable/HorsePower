@@ -228,6 +228,7 @@ L optLoopFusionQ19_5(V d1, V d7, V p2, V t4);
 L optLoopFusionBS_1(V z, L r0, V volatility, V time);
 L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility);
 L optLoopFusionBS_3(V z, L r0, V sptprice, L id);
+L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice);
 
 L optLoopFusionPR_1(V m0, V m1, L r0, V web);
 L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id);

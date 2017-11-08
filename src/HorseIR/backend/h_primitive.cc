@@ -1325,7 +1325,7 @@ L pfnCompress(V z, V x, V y){
                 default: R E_NOT_IMPL;
             }
         }
-        else { // copy all of items
+        else if(lenZ > 0){ // copy all of items
             CHECKE(copyV(z,y));
         }
         R 0;
@@ -2118,6 +2118,13 @@ L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
     R 0;
 }
 
+L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice){
+    initV(z,H_B,r0);
+    // DOP(r0, vB(z,i)=((vE(sptprice,i)<50) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
+    DOP(r0, vB(z,i)=((vE(sptprice,i)<50) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
+    R 0;
+}
+
 L optLoopFusionPR_1(V m0, V m1, L r0, V web){
     initV(m0, H_L, r0);
     initV(m1, H_L, r0);
@@ -2161,10 +2168,11 @@ L optLoopFusionPR_4(V w5, L r0, V w2){
 L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
     initV(w8, H_B, r0);
     if(id <= 3){
-        DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<10)
+        DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<100)
     }
     else {
-        DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=10)
+        // DOI(r0, vB(w8,i)=vL(w1,i)<=70&&vL(w5,i)<100)
+        DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=100)
     }
     R 0;
 }

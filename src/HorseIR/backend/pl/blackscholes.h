@@ -245,8 +245,8 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     FROM
         myudf((select * from blackscholes))
     WHERE
-        sptprice BETWEEN 50 AND 100
-        AND optionprice > 15
+        sptprice BETWEEN 50 AND 100   ==>  sptprice < 50 OR sptprice > 100   //no records returned
+        AND optionprice > 15          ==>  AND optionprice > 15
  */
 V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
     P("Entering mybs_udf3\n");
@@ -267,8 +267,8 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
             PROFILE(10, pfnLt(w0, sptprice, literalF64(50)));
             PROFILE(11, pfnGt(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnOr(w2, w0, w1));
-            PROFILE(13, pfnLeq(w3, optionprice, literalF64(15)));
-            PROFILE(14, pfnOr(w4, w2, w3));
+            PROFILE(13, pfnGt(w3, optionprice, literalF64(15)));
+            PROFILE(14, pfnAnd(w4, w2, w3));
         }
         PROFILE(15, pfnCompress(m0, w4, optiontype));
         PROFILE(16, pfnCompress(m1, w4, sptprice));
@@ -290,11 +290,9 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         }
         else {
             V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
-            PROFILE(10, optLoopFusionBS_3(w0, vn(sptprice), sptprice, id));
-            PROFILE(13, pfnLeq(w1, optionprice, literalF64(15)));
-            PROFILE(14, pfnOr(w2, w0, w1));
-            PROFILE(18, pfnCompress(m0, w2, optiontype));
-            PROFILE(19, pfnCompress(m1, w2, sptprice));
+            PROFILE(10, optLoopFusionBS_4(w0, vn(sptprice), sptprice, optionprice));
+            PROFILE(18, pfnCompress(m0, w0, optiontype));
+            PROFILE(19, pfnCompress(m1, w0, sptprice));
         }
         P("udf3 selectivity: %lf%%\n", (vn(m0)*100.0)/vn(w0));
     }
