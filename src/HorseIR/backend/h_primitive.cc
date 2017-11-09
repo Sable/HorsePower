@@ -2110,18 +2110,18 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
 L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
     initV(z,H_B,r0);
     if(id <= 3){
-        DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+        DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
     }
     else {
-        DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
+        DOP(r0, vB(z,i)=(vE(sptprice,i)<51) || (vE(sptprice,i)>100))
     }
     R 0;
 }
 
 L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice){
     initV(z,H_B,r0);
-    // DOP(r0, vB(z,i)=((vE(sptprice,i)<50) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
-    DOP(r0, vB(z,i)=((vE(sptprice,i)<50) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
+    // DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
+    DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
     R 0;
 }
 

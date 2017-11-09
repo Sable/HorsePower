@@ -142,7 +142,7 @@ V mybs_udf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V option
     FROM
         myudf((select * from blackscholes))
     WHERE
-        sptprice BETWEEN 50 AND 100
+        sptprice BETWEEN 51 AND 100
  */
 
 V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
@@ -153,12 +153,12 @@ V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     if(!isOptimized){
         V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
         if(id == 1){
-            PROFILE(10, pfnGeq(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnGeq(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnLeq(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnAnd(w2, w0, w1));
         }
         else {
-            PROFILE(10, pfnLt(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnLt(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnGt(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnOr(w2, w0, w1));
         }
@@ -188,7 +188,7 @@ V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     FROM
         myudf((select * from blackscholes))
     WHERE
-        sptprice BETWEEN 50 AND 100
+        sptprice BETWEEN 51 AND 100
  */
 V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
     P("Entering mybs_udf2\n");
@@ -199,12 +199,12 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         V w1 = allocNode();  V w2 = allocNode();
         V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
         if(id == 2){
-            PROFILE(10, pfnGeq(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnGeq(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnLeq(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnAnd(w2, w0, w1));
         }
         else {
-            PROFILE(10, pfnLt(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnLt(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnGt(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnOr(w2, w0, w1));
         }
@@ -245,7 +245,7 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     FROM
         myudf((select * from blackscholes))
     WHERE
-        sptprice BETWEEN 50 AND 100   ==>  sptprice < 50 OR sptprice > 100   //no records returned
+        sptprice BETWEEN 51 AND 100   ==>  sptprice < 51 OR sptprice > 100   //no records returned
         AND optionprice > 15          ==>  AND optionprice > 15
  */
 V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
@@ -257,14 +257,14 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     if(!isOptimized){
         V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
         if(id == 3){
-            PROFILE(10, pfnGeq(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnGeq(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnLeq(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnAnd(w2, w0, w1));
             PROFILE(13, pfnGt(w3, optionprice, literalF64(15)));
             PROFILE(14, pfnAnd(w4, w2, w3));
         }
         else {
-            PROFILE(10, pfnLt(w0, sptprice, literalF64(50)));
+            PROFILE(10, pfnLt(w0, sptprice, literalF64(51)));
             PROFILE(11, pfnGt(w1, sptprice, literalF64(100)));
             PROFILE(12, pfnOr(w2, w0, w1));
             PROFILE(13, pfnGt(w3, optionprice, literalF64(15)));
