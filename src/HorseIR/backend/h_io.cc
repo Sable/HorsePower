@@ -126,6 +126,11 @@ L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
             loadItem(getTableCol(val,numCols),rowID,types[numCols],tmp);\
             cnt=0;numCols++;}\
         else{tmp[cnt++]=lineT[i];}})
+    if(' '==sp){ // remainder
+        tmp[cnt]=0; trimSelf(tmp);
+        loadItem(getTableCol(val,numCols),rowID,types[numCols],tmp);
+        cnt=0; numCols++;
+    }
     R numCols;
 }
 

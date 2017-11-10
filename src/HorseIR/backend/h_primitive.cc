@@ -2110,10 +2110,13 @@ L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatilit
 L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
     initV(z,H_B,r0);
     if(id <= 3){
-        DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
+        DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+    }
+    else if(id <= 6){
+        DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
     }
     else {
-        DOP(r0, vB(z,i)=(vE(sptprice,i)<51) || (vE(sptprice,i)>100))
+        DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
     }
     R 0;
 }
@@ -2144,8 +2147,11 @@ L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id){
     if(id<=3) {
         DOI(r0, if(cnt[i]>70)indx[tot++]=i)
     }
-    else {
+    else if(id<=6){
         DOI(r0, if(cnt[i]<=70)indx[tot++]=i)
+    }
+    else {
+        DOI(r0, if(cnt[i]>54)indx[tot++]=i)
     }
     initV(m0, H_L, tot);
     initV(m1, H_L, tot);
@@ -2179,7 +2185,7 @@ L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
 
 L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
     initV(m2, H_L, r0);
-    DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
+    DOP(r0, vL(m2,vL(w4,i))=vL(m3,i))
     R 0;
 }
 

@@ -375,7 +375,11 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         /* Pending: caseC */
     } 
     // R (a>b?1:a<b?-1:0);
-    R 0;
+    #ifdef SORT_MERGE
+        R a>b?cmp_switch(f); //think..
+    #else
+        R 0;
+    #endif
 }
 
 void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
@@ -503,7 +507,7 @@ B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
 
 void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i);
-    #ifdef OPT_Q16
+    #if defined(OPT_Q16) || defined(SORT_MERGE)
         /* quick sort */
         // lib_quicksort_other(targ, val, 0, tLen, isUp, lib_quicksort_cmp);
         /* merge sort (fast) */ 
