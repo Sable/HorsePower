@@ -255,7 +255,7 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         sptprice BETWEEN 51 AND 100   ==>  sptprice < 51 OR sptprice > 100   //no records returned
         AND optionprice > 15          ==>  OR optionprice <= 15
     -- 2nd version
-        optionprice > 15              ==>  optionprice <= 15   ==> optionprice > 7
+        optionprice > 25              ==>  optionprice <= 25   ==> optionprice > 7
  */
 V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
     V w0 = allocNode(); V w1 = allocNode(); V w2 = allocNode(); V w3 = allocNode();
@@ -265,10 +265,10 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
     if(!isOptimized){
         V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
         if(id == 3){
-            PROFILE(13, pfnGt(w4, optionprice, literalF64(15)));
+            PROFILE(13, pfnGt(w4, optionprice, literalF64(25)));
         }
         else if(id == 6) {
-            PROFILE(13, pfnLeq(w4, optionprice, literalF64(15)));
+            PROFILE(13, pfnLeq(w4, optionprice, literalF64(25)));
         }
         else if(id == 9){
             PROFILE(13, pfnGt(w4, optionprice, literalF64(6)));
@@ -280,10 +280,10 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         V w7 = allocNode();
         V optionprice = BlkSchls(sptprice, strike, rate, volatility, time, optiontype);
         if(3==id){
-            PROFILE(17, pfnGt(w7, optionprice, literalF64(15)));
+            PROFILE(17, pfnGt(w7, optionprice, literalF64(25)));
         }
         else if(6==id){
-            PROFILE(17, pfnLeq(w7, optionprice, literalF64(15)));
+            PROFILE(17, pfnLeq(w7, optionprice, literalF64(25)));
         }
         else if(9==id){
             PROFILE(17, pfnGt(w7, optionprice, literalF64(6)));

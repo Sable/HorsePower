@@ -2185,7 +2185,7 @@ L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
 
 L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
     initV(m2, H_L, r0);
-    DOP(r0, vL(m2,vL(w4,i))=vL(m3,i))
+    DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
     R 0;
 }
 
