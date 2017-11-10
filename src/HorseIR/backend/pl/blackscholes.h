@@ -146,7 +146,6 @@ V mybs_udf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V option
  */
 
 V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
-    P("Entering mybs_udf1\n");
     V z0 = allocNode(); V z1 = allocNode(); V z  = allocNode();
     V w0 = allocNode(); V w1 = allocNode(); V w2 = allocNode();
     V m0 = allocNode(); V m1 = allocNode(); V m2 = allocNode();
@@ -185,7 +184,7 @@ V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         copyV(m0, w6);
         copyV(m1, w1);
         copyV(m2, optionprice);
-        P("udf1 selectivity %lld: %lf%%\n", id,(vn(w1)*100.0)/vn(w0));
+        P("bs1 selectivity %lld: %lf%%\n", id,(vn(w1)*100.0)/vn(w0));
     }
     S group1[] = {(S)"optiontype", (S)"sptprice", (S)"optionprice"};
     PROFILE(1, copyV(z0, literalSymVector(3, group1)));
@@ -205,7 +204,6 @@ V mybs_udf1(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         sptprice BETWEEN 51 AND 100
  */
 V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
-    P("Entering mybs_udf2\n");
     V z0 = allocNode(); V z1 = allocNode(); V z  = allocNode();
     V w0 = allocNode();
     V m0 = allocNode(); V m1 = allocNode();
@@ -234,7 +232,7 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         PROFILE(10, optLoopFusionBS_3(w0, vn(sptprice), sptprice, id));
         PROFILE(16, pfnCompress(m0, w0, optiontype));
         PROFILE(16, pfnCompress(m1, w0, sptprice));
-        P("udf2 selectivity %lld: %lf%%\n", id,(vn(m0)*100.0)/vn(w0));
+        P("bs2 selectivity %lld: %lf%%\n", id,(vn(m0)*100.0)/vn(w0));
     }
     S group1[] = {(S)"optiontype", (S)"sptprice"};
     PROFILE(1, copyV(z0, literalSymVector(2, group1)));
@@ -260,7 +258,6 @@ V mybs_udf2(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         optionprice > 15              ==>  optionprice <= 15   ==> optionprice > 7
  */
 V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V optiontype, V divs, V dgrefval){
-    P("Entering mybs_udf3\n");  
     V w0 = allocNode(); V w1 = allocNode(); V w2 = allocNode(); V w3 = allocNode();
     V w4 = allocNode();
     V m0 = allocNode(); V m1 = allocNode();
@@ -293,7 +290,7 @@ V mybs_udf3(L id, V sptprice, V strike, V rate, V divq, V volatility, V time, V 
         }
         PROFILE(18, pfnCompress(m0, w7, optiontype));
         PROFILE(19, pfnCompress(m1, w7, sptprice));
-        P("udf3 selectivity %lld: %lf%%\n", id,(vn(m0)*100.0)/vn(w0));
+        P("bs3 selectivity %lld: %lf%%\n", id,(vn(m0)*100.0)/vn(w7));
     }
     S group1[] = {(S)"optiontype", (S)"sptprice"};
     PROFILE(1, copyV(z0, literalSymVector(2, group1)));

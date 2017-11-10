@@ -79,7 +79,7 @@ V mypr_udf1(L id, V urlid, V outbound, V inbound){
     V group2[] = { m0, m1, m2, m3 };
     PROFILE(2,pfnList(z1, 4, group2));
     PROFILE(3,pfnTable(z,z0,z1));
-    P("udf1 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
+    P("pr1 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
     R z;
 }
 
@@ -115,7 +115,7 @@ V mypr_udf2(L id, V urlid, V outbound, V inbound){
     V group2[] = { m0, m1 };
     PROFILE(2,pfnList(z1, 2, group2));
     PROFILE(3,pfnTable(z,z0,z1));
-    P("udf2 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
+    P("pr2 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
     R z;
 }
 
@@ -124,7 +124,7 @@ V mypr_udf2(L id, V urlid, V outbound, V inbound){
     SELECT
         urlid, inbound
     FROM
-        mypr((select * from pagerank));
+        mypr((select * from pagerank))
     WHERE
         urlrank < 10000;      ==>  urlrank >= 10000;     ==>   urlrank <= 500000;
  */
@@ -149,51 +149,9 @@ V mypr_udf3(L id, V urlid, V outbound, V inbound){
     V group2[] = { m0, m1 };
     PROFILE(2,pfnList(z1, 2, group2));
     PROFILE(3,pfnTable(z,z0,z1));
-    P("udf3 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
+    P("pr3 selectivity %lld: %lf%%\n", id, (vn(m0)*100.0)/vn(w0));
     R z;
 }
-// V mypr_udf3(L id, V web){
-//     V w0 = allocNode();  V w1 = allocNode();  V w2 = allocNode();  V w3 = allocNode();
-//     V w4 = allocNode();  V w5 = allocNode();  V w6 = allocNode();  V w7 = allocNode();
-//     V w8 = allocNode();
-//     V m0 = allocNode();  V m1 = allocNode();  V m2 = allocNode();
-//     V z0 = allocNode();  V z1 = allocNode();  V z  = allocNode();
-//     PROFILE(1, optLoopFusionPR_1(w0,w1,vn(web),web));
-//     PROFILE(2, pfnOrderBy(w2, w1, literalBool(0)));
-//     if(!isOptimized){
-//         PROFILE(3, pfnLen(w3, w2));
-//         PROFILE(4, pfnRange(w4, w3));
-//         initV(w5, H_L, vn(w2));
-//         PROFILE(5, pfnIndexA(w5,w2,w4));
-//         // if(id == 3){
-//         //     PROFILE(6, pfnGt(w6, w1, literalI64(70)));
-//         //     PROFILE(7, pfnLt(w7, w5, literalI64(100)));
-//         //     PROFILE(8, pfnAnd(w8,w6,w7));
-//         // }
-//         // else if(id == 6){
-//         //     PROFILE(6, pfnLeq(w6, w1, literalI64(70)));
-//         //     PROFILE(7, pfnLt(w7, w5, literalI64(100)));
-//         //     PROFILE(8, pfnAnd(w8,w6,w7));
-//         // }
-//         // else if(id == 9){
-//         // }
-//     }
-//     else {
-//         PROFILE(1, optLoopFusionPR_4(w5,vn(w2),w2));
-//         PROFILE(4, optLoopFusionPR_5(w8,vn(w1),w1,w5,id));
-//     }
-//     PROFILE(9, pfnWhere(m0, w8));
-//     PROFILE(10,pfnCompress(m1, w8, w0));
-//     PROFILE(10,pfnCompress(m2, w8, w1));
-//     P("pr_udf3 selectivity: %lf%%\n", (vn(m1)*100.0)/vn(w8));
-//     // PROFILE(11,pfnCompress(m2, w8, w5));  // urlrank
-//     S group1[] = { (S)"urlid", (S)"outbound", (S)"inbound" };
-//     PROFILE(7, copyV(z0, literalSymVector(3, group1)));
-//     V group2[] = { m0, m1, m2};
-//     PROFILE(8, pfnList(z1, 3, group2));
-//     PROFILE(9, pfnTable(z,z0,z1));
-//     R z;
-// }
 
 E runPRQuery(L id){
     V a0 = allocNode();
