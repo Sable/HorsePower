@@ -50,25 +50,25 @@ CSTConverter::convert (ASTNodeMemory &mem, TypeCasePrimitiveContext *type)
   using PrimitiveClass = PrimitiveType::PrimitiveClass;
   using ConvertMapT = std::unordered_map<std::string, PrimitiveClass>;
   ConvertMapT convertMap = {
-      {"bool", PrimitiveClass::Bool},
-      {"char", PrimitiveClass::Character},
-      {"i8", PrimitiveClass::Integer8},
-      {"i16", PrimitiveClass::Integer16},
-      {"i32", PrimitiveClass::Integer32},
-      {"i64", PrimitiveClass::Integer64},
-      {"f32", PrimitiveClass::FP32},
-      {"f64", PrimitiveClass::FP64},
+      {"bool",    PrimitiveClass::Bool},
+      {"char",    PrimitiveClass::Character},
+      {"i8",      PrimitiveClass::Integer8},
+      {"i16",     PrimitiveClass::Integer16},
+      {"i32",     PrimitiveClass::Integer32},
+      {"i64",     PrimitiveClass::Integer64},
+      {"f32",     PrimitiveClass::FP32},
+      {"f64",     PrimitiveClass::FP64},
       {"complex", PrimitiveClass::Complex},
-      {"sym", PrimitiveClass::Symbol},
-      {"m", PrimitiveClass::Month},
-      {"d", PrimitiveClass::Date},
-      {"z", PrimitiveClass::DateTime},
-      {"u", PrimitiveClass::Minute},
-      {"v", PrimitiveClass::Second},
-      {"t", PrimitiveClass::Time},
-      {"str", PrimitiveClass::String},
-      {"table", PrimitiveClass::Table},
-      {"ktable", PrimitiveClass::KeyTable}
+      {"sym",     PrimitiveClass::Symbol},
+      {"m",       PrimitiveClass::Month},
+      {"d",       PrimitiveClass::Date},
+      {"z",       PrimitiveClass::DateTime},
+      {"u",       PrimitiveClass::Minute},
+      {"v",       PrimitiveClass::Second},
+      {"t",       PrimitiveClass::Time},
+      {"str",     PrimitiveClass::String},
+      {"table",   PrimitiveClass::Table},
+      {"ktable",  PrimitiveClass::KeyTable}
   };
   auto iter = convertMap.find (cstText);
   assert (iter != convertMap.end ());
@@ -183,8 +183,8 @@ CSTConverter::convert (ASTNodeMemory &mem, TypeFuncCase2Context *type)
       std::back_inserter (parameterTypes),
       [&] (TypeContext *typeContext) -> Type *
       {
-        Type *retType = convert (mem, typeContext);
-        return retType;
+          Type *retType = convert (mem, typeContext);
+          return retType;
       });
 
   TypeContext *returnContext = *(std::prev (types.cend ()));
@@ -209,8 +209,8 @@ CSTConverter::convert (ASTNodeMemory &mem, TypeFuncCase3Context *type)
       std::back_inserter (parameterTypes),
       [&] (TypeContext *typeContext) -> Type *
       {
-        Type *retType = convert (mem, typeContext);
-        return retType;
+          Type *retType = convert (mem, typeContext);
+          return retType;
       });
 
   TypeContext *returnContext = *(std::prev (types.cend ()));
@@ -322,18 +322,18 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralBoolCase1 *literalBool)
       std::back_inserter (valueVector),
       [=] (const BoolValueN *context) -> BoolLiteral::ElementType
       {
-        using ElementType = BoolLiteral::ElementType;
-        assert (context->value != nullptr);
-        const std::string stringValue = context->value->getText ();
-        if (stringValue != "null")
-          {
-            const std::string valueString = context->value->getText ();
-            if (valueString == "0") return ElementType (false);
-            if (valueString == "1") return ElementType (true);
-            throw CSTConverterException (literalBool);
-          }
-        else
-          { return ElementType (nullptr); }
+          using ElementType = BoolLiteral::ElementType;
+          assert (context->value != nullptr);
+          const std::string stringValue = context->value->getText ();
+          if (stringValue != "null")
+            {
+              const std::string valueString = context->value->getText ();
+              if (valueString == "0") return ElementType (false);
+              if (valueString == "1") return ElementType (true);
+              throw CSTConverterException (literalBool);
+            }
+          else
+            { return ElementType (nullptr); }
       });
   auto boolLiteral = mem.alloc<BoolLiteral> (literalBool);
   boolLiteral->setValue (std::move (valueVector));
@@ -542,9 +542,9 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralCharCase3Context *literalChar)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        if (dynamic_cast<CharValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          if (dynamic_cast<CharValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<CharLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -552,10 +552,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralCharCase3Context *literalChar)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> CharLiteral::ElementType
       {
-        CharValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertCharValue (value); }
-        return CharLiteral::ElementType (nullptr);
+          CharValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertCharValue (value); }
+          return CharLiteral::ElementType (nullptr);
       });
   auto charLiteral = mem.alloc<CharLiteral> (literalChar);
   charLiteral->setValue (std::move (valueVector));
@@ -674,9 +674,9 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralStringCase2Context *stringCST)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        if (dynamic_cast<StringValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          if (dynamic_cast<StringValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<StringLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -684,10 +684,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralStringCase2Context *stringCST)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> StringLiteral::ElementType
       {
-        StringValueContext *string = nullptr;
-        if ((string = dynamic_cast<decltype (string)>(parseTree)) != nullptr)
-          { return convertStringValue (string); }
-        return StringLiteral::ElementType (nullptr);
+          StringValueContext *string = nullptr;
+          if ((string = dynamic_cast<decltype (string)>(parseTree)) != nullptr)
+            { return convertStringValue (string); }
+          return StringLiteral::ElementType (nullptr);
       });
   auto stringLiteral = mem.alloc<StringLiteral> (stringCST);
   stringLiteral->setValue (std::move (valueVector));
@@ -1200,8 +1200,20 @@ CSTConverter::convertSymbolValue (SymbolValueContext *valueContext)
 {
   assert (valueContext != nullptr);
   const std::string rawString = valueContext->LITERAL_SYMBOL ()->getText ();
-  std::string valueString = rawString.substr (1, std::string::npos);
-  return SymbolLiteral::ElementType (std::move (valueString));
+  if (rawString[0] == '`' && rawString[1] == '"')
+    {
+      std::string valueString = rawString.substr (2, rawString.length () - 3);
+      auto bytes = convertEscapedChar (valueString);
+      std::string escapedString;
+      std::copy (bytes.cbegin (), bytes.cend (),
+                 std::back_inserter (escapedString));
+      return SymbolLiteral::ElementType (std::move (escapedString));
+    }
+  else
+    {
+      std::string valueString = rawString.substr (1, std::string::npos);
+      return SymbolLiteral::ElementType (std::move (valueString));
+    }
 }
 
 SymbolLiteral *
@@ -1244,9 +1256,9 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralSymbolCase2Context *literal)
       std::back_inserter (children),
       [] (antlr4::tree::ParseTree *parseTree) -> bool
       {
-        if ((dynamic_cast<SymbolValueContext *>(parseTree)) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          if ((dynamic_cast<SymbolValueContext *>(parseTree)) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<SymbolLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -1255,10 +1267,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralSymbolCase2Context *literal)
       std::back_inserter (valueVector),
       [] (antlr4::tree::ParseTree *parseTree) -> SymbolLiteral::ElementType
       {
-        SymbolValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertSymbolValue (value); }
-        return SymbolLiteral::ElementType (nullptr);
+          SymbolValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertSymbolValue (value); }
+          return SymbolLiteral::ElementType (nullptr);
       });
   auto symbolLiteral = mem.alloc<SymbolLiteral> ();
   symbolLiteral->setValue (std::move (valueVector));
@@ -1520,10 +1532,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTDateCase2Context *literal)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        using TDateValueContext = HorseIRParser::TDateValueContext;
-        if (dynamic_cast<TDateValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          using TDateValueContext = HorseIRParser::TDateValueContext;
+          if (dynamic_cast<TDateValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<DateLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -1532,10 +1544,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTDateCase2Context *literal)
       std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> DateLiteral::ElementType
       {
-        HorseIRParser::TDateValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertDateValue (value); }
-        return DateLiteral::ElementType (nullptr);
+          HorseIRParser::TDateValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertDateValue (value); }
+          return DateLiteral::ElementType (nullptr);
       });
   auto dateLiteral = mem.alloc<DateLiteral> (literal);
   dateLiteral->setValue (std::move (valueVector));
@@ -1731,10 +1743,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTDateTime2Context *literal)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        using DateTimeValueContext = HorseIRParser::TDateTimeValueContext;
-        if (dynamic_cast<DateTimeValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          using DateTimeValueContext = HorseIRParser::TDateTimeValueContext;
+          if (dynamic_cast<DateTimeValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<DateTimeLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -1742,10 +1754,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTDateTime2Context *literal)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> DateTimeLiteral::ElementType
       {
-        HorseIRParser::TDateTimeValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertDateTimeValue (value); }
-        return DateTimeLiteral::ElementType (nullptr);
+          HorseIRParser::TDateTimeValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertDateTimeValue (value); }
+          return DateTimeLiteral::ElementType (nullptr);
       });
   auto dateTimeLiteral = mem.alloc<DateTimeLiteral> (literal);
   dateTimeLiteral->setValue (std::move (valueVector));
@@ -1890,10 +1902,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTMinuteCase2Context *literal)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        using MinuteValueContext = HorseIRParser::TMinuteValueContext;
-        if (dynamic_cast<MinuteValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          using MinuteValueContext = HorseIRParser::TMinuteValueContext;
+          if (dynamic_cast<MinuteValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<MinuteLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -1901,10 +1913,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTMinuteCase2Context *literal)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> MinuteLiteral::ElementType
       {
-        HorseIRParser::TMinuteValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertMinuteValue (value); }
-        return MinuteLiteral::ElementType (nullptr);
+          HorseIRParser::TMinuteValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertMinuteValue (value); }
+          return MinuteLiteral::ElementType (nullptr);
       });
   auto minuteLiteral = mem.alloc<MinuteLiteral> (literal);
   minuteLiteral->setValue (std::move (valueVector));
@@ -2055,10 +2067,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTSecondCase2Context *literal)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        using TSecondValueContext = HorseIRParser::TSecondValueContext;
-        if (dynamic_cast<TSecondValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          using TSecondValueContext = HorseIRParser::TSecondValueContext;
+          if (dynamic_cast<TSecondValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<SecondLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -2066,10 +2078,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTSecondCase2Context *literal)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> SecondLiteral::ElementType
       {
-        HorseIRParser::TSecondValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertSecondValue (value); }
-        return SecondLiteral::ElementType (nullptr);
+          HorseIRParser::TSecondValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertSecondValue (value); }
+          return SecondLiteral::ElementType (nullptr);
       });
   auto secondLiteral = mem.alloc<SecondLiteral> (literal);
   secondLiteral->setValue (std::move (valueVector));
@@ -2225,10 +2237,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTTimeCase2Context *literal)
       std::back_inserter (children),
       [] (ParseTree *parseTree) -> bool
       {
-        using TimeValueContext = HorseIRParser::TTimeValueContext;
-        if (dynamic_cast<TimeValueContext *>(parseTree) != nullptr)
-          { return true; }
-        return parseTree->getText () == "null";
+          using TimeValueContext = HorseIRParser::TTimeValueContext;
+          if (dynamic_cast<TimeValueContext *>(parseTree) != nullptr)
+            { return true; }
+          return parseTree->getText () == "null";
       });
   std::vector<TimeLiteral::ElementType> valueVector{};
   valueVector.reserve (children.size ());
@@ -2236,10 +2248,10 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTTimeCase2Context *literal)
       children.cbegin (), children.cend (), std::back_inserter (valueVector),
       [] (ParseTree *parseTree) -> TimeLiteral::ElementType
       {
-        HorseIRParser::TTimeValueContext *value = nullptr;
-        if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
-          { return convertTimeValue (value); }
-        return TimeLiteral::ElementType (nullptr);
+          HorseIRParser::TTimeValueContext *value = nullptr;
+          if ((value = dynamic_cast<decltype (value)>(parseTree)) != nullptr)
+            { return convertTimeValue (value); }
+          return TimeLiteral::ElementType (nullptr);
       });
   auto timeLiteral = mem.alloc<TimeLiteral> (literal);
   timeLiteral->setValue (std::move (valueVector));
@@ -2565,14 +2577,14 @@ CSTConverter::convert (ASTNodeMemory &mem, LiteralTableCase1Context *literal)
       std::back_inserter (valueVector),
       [&] (TableColumnContext *element) -> TableLiteral::ElementType
       {
-        auto headContext = element->tableHeader ();
-        auto dbContentContext = element->dbContent ();
-        std::string columnName = convertTableHead (headContext);
-        Literal *content = convert (mem, dbContentContext);
-        TableLiteral::ElementType returnElement{};
-        returnElement.head = std::move (columnName);
-        returnElement.content = content;
-        return returnElement;
+          auto headContext = element->tableHeader ();
+          auto dbContentContext = element->dbContent ();
+          std::string columnName = convertTableHead (headContext);
+          Literal *content = convert (mem, dbContentContext);
+          TableLiteral::ElementType returnElement{};
+          returnElement.head = std::move (columnName);
+          returnElement.content = content;
+          return returnElement;
       });
   auto tableLiteral = mem.alloc<TableLiteral> (literal);
   tableLiteral->setValue (std::move (valueVector));
@@ -2625,30 +2637,30 @@ KeyTableLiteral *CSTConverter::convert (ASTNodeMemory &mem,
       std::back_inserter (valueVector),
       [&] (TableKeyedColumnContext *context) -> KeyTableLiteral::ElementType
       {
-        const auto tableHeaderContext = context->tableHeader ();
-        const auto dbContentContext = context->dbContent ();
-        std::string tableHead = convertTableHead (tableHeaderContext);
-        Literal *dbContent = convert (mem, dbContentContext);
-        KeyTableLiteral::ElementType element{};
-        element.head = std::move (tableHead);
-        element.content = dbContent;
-        element.isKey = true;
-        return element;
+          const auto tableHeaderContext = context->tableHeader ();
+          const auto dbContentContext = context->dbContent ();
+          std::string tableHead = convertTableHead (tableHeaderContext);
+          Literal *dbContent = convert (mem, dbContentContext);
+          KeyTableLiteral::ElementType element{};
+          element.head = std::move (tableHead);
+          element.content = dbContent;
+          element.isKey = true;
+          return element;
       });
   std::transform (
       normalColumns.cbegin (), normalColumns.cend (),
       std::back_inserter (valueVector),
       [&] (TableColumnContext *context) -> KeyTableLiteral::ElementType
       {
-        const auto tableHeaderContext = context->tableHeader ();
-        const auto dbContentContext = context->dbContent ();
-        std::string tableHead = convertTableHead (tableHeaderContext);
-        Literal *dbContent = convert (mem, dbContentContext);
-        KeyTableLiteral::ElementType element{};
-        element.head = std::move (tableHead);
-        element.content = dbContent;
-        element.isKey = false;
-        return element;
+          const auto tableHeaderContext = context->tableHeader ();
+          const auto dbContentContext = context->dbContent ();
+          std::string tableHead = convertTableHead (tableHeaderContext);
+          Literal *dbContent = convert (mem, dbContentContext);
+          KeyTableLiteral::ElementType element{};
+          element.head = std::move (tableHead);
+          element.content = dbContent;
+          element.isKey = false;
+          return element;
       });
 
   auto keyTableLiteral = mem.alloc<KeyTableLiteral> (literal);

@@ -41,8 +41,8 @@ void Dispatcher::DispatcherPrinter
       misc::InfixOStreamIterator<std::string> (this->stream, ", "),
       [] (const MethodMETA *methodMETA) -> std::string
       {
-        return methodMETA->getMoudleName () + "."
-               + methodMETA->getMethodName ();
+          return methodMETA->getMoudleName () + "."
+                 + methodMETA->getMethodName ();
       });
   this->stream << ") */";
 }
@@ -67,73 +67,214 @@ Dispatcher::getMethodMETA (const ast::FunctionLiteral *literal) const
   return functionLiteralMap.at (literal);
 }
 
+#include <stdexcept>
+#include <h_system.h>
+#define HORSEIR_BUILTIN_ARG1(func, registerName)                               \
+{                                                                              \
+  addExternalMethodMETA("Builtin", registerName,                               \
+                        [](V ret, std::size_t argc, V argv[])                  \
+                        {                                                      \
+                          L opCode = func(ret, argv[0]);                       \
+                          if (opCode != 0)                                     \
+                          {                                                    \
+                            printErrMsg(opCode);                               \
+                            throw std::runtime_error("runtime exception");     \
+                          }                                                    \
+                        }, (void*) func);                                      \
+}
+#define HORSEIR_BUILTIN_ARG2(func, registerName)                                             \
+{                                                                              \
+  addExternalMethodMETA("Builtin", registerName,                               \
+                        [](V ret, std::size_t argc, V argv[])                  \
+                        {                                                      \
+                          L opCode = func(ret, argv[0], argv[1]);              \
+                          if (opCode != 0)                                     \
+                          {                                                    \
+                            printErrMsg(opCode);                               \
+                            throw std::runtime_error("runtime exception");     \
+                          }                                                    \
+                        }, (void*) func);                                      \
+}
+#define HORSEIR_BUILTIN_ARG3(func, registerName)                                             \
+{                                                                              \
+  addExternalMethodMETA("Builtin", registerName,                               \
+                        [](V ret, std::size_t argc, V argv[])                  \
+                        {                                                      \
+                          L opCode = func(ret, argv[0], argv[1], argv[2]);     \
+                          if (opCode != 0)                                     \
+                          {                                                    \
+                            printErrMsg(opCode);                               \
+                            throw std::runtime_error("runtime exception");     \
+                          }                                                    \
+                        }, (void*) func);                                      \
+}
+
 void Dispatcher::registerExternalMethods ()
 {
-  addExternalMethodMETA ("Builtin", "len",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnLen (ret, argv[0]); });
-  addExternalMethodMETA ("Builtin", "lt",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnLt (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "range",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnRange (ret, argv[0]); });
-  addExternalMethodMETA ("Builtin", "compress",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnCompress (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "load_table",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnLoadTable (ret, argv[0]); });
-  addExternalMethodMETA ("Builtin", "column_value",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnColumnValue (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "index_of",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnIndexOf (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "index",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnIndex (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "tolist",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnTolist (ret, argv[0]); });
+  HORSEIR_BUILTIN_ARG1 (pfnLoadTable, "load_table");
   addExternalMethodMETA ("Builtin", "list",
                          [] (V ret, std::size_t argc, V argv[])
-                         { pfnList (ret, static_cast<L>(argc), argv); });
-  addExternalMethodMETA ("Builtin", "table",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnTable (ret, argv[0], argv[1]); });
+                         {
+                             L opCode = pfnList (ret, (L) argc, argv);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnList);
+  HORSEIR_BUILTIN_ARG2 (pfnIndex, "index");
+  HORSEIR_BUILTIN_ARG2 (pfnIndexA, "index_assign");
+  HORSEIR_BUILTIN_ARG1 (pfnFlip, "flip");
+  HORSEIR_BUILTIN_ARG2 (pfnMatch, "match");
+  HORSEIR_BUILTIN_ARG1 (pfnMeta, "meta");
+  HORSEIR_BUILTIN_ARG1 (pfnKeys, "keys");
+  HORSEIR_BUILTIN_ARG1 (pfnValues, "values");
+  HORSEIR_BUILTIN_ARG1 (pfnFetch, "fetch");
+  HORSEIR_BUILTIN_ARG2 (pfnColumnValue, "column_value");
 
-  addExternalMethodMETA ("Builtin", "eq",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnEq (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "minus",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnMinus (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "plus",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnPlus (ret, argv[0], argv[1]); });
+  HORSEIR_BUILTIN_ARG1 (pfnAbs, "abs");
+  HORSEIR_BUILTIN_ARG1 (pfnNeg, "neg");
+  HORSEIR_BUILTIN_ARG1 (pfnCeil, "ceil");
+  HORSEIR_BUILTIN_ARG1 (pfnFloor, "floor");
+  HORSEIR_BUILTIN_ARG1 (pfnRound, "round");
 
-  addExternalMethodMETA ("Builtin", "datetime_add",
+  HORSEIR_BUILTIN_ARG1 (pfnTrigSin, "sin");
+  HORSEIR_BUILTIN_ARG1 (pfnTrigAsin, "asin");
+  HORSEIR_BUILTIN_ARG1 (pfnTrigCos, "cos");
+  HORSEIR_BUILTIN_ARG1 (pfnTrigAcos, "acos");
+  HORSEIR_BUILTIN_ARG1 (pfnTrigTan, "tan");
+  HORSEIR_BUILTIN_ARG1 (pfnTrigAtan, "atan");
+
+  HORSEIR_BUILTIN_ARG1 (pfnHyperSinh, "sinh");
+  HORSEIR_BUILTIN_ARG1 (pfnHyperAsinh, "asinh");
+  HORSEIR_BUILTIN_ARG1 (pfnHyperCosh, "cosh");
+  HORSEIR_BUILTIN_ARG1 (pfnHyperAcosh, "acosh");
+  HORSEIR_BUILTIN_ARG1 (pfnHyperTanh, "tanh");
+  HORSEIR_BUILTIN_ARG1 (pfnHyperAtanh, "atanh");
+
+  HORSEIR_BUILTIN_ARG1 (pfnConj, "conj");
+  HORSEIR_BUILTIN_ARG1 (pfnRecip, "recip");
+  HORSEIR_BUILTIN_ARG1 (pfnSignum, "signum");
+  HORSEIR_BUILTIN_ARG1 (pfnPi, "pi");
+  HORSEIR_BUILTIN_ARG1 (pfnNot, "not");
+  HORSEIR_BUILTIN_ARG1 (pfnExp, "exp");
+  HORSEIR_BUILTIN_ARG1 (pfnLog, "log");
+  HORSEIR_BUILTIN_ARG1 (pfnLen, "len");
+  HORSEIR_BUILTIN_ARG1 (pfnRange, "range");
+  HORSEIR_BUILTIN_ARG1 (pfnFact, "fact");
+  HORSEIR_BUILTIN_ARG1 (pfnReverse, "reverse");
+  HORSEIR_BUILTIN_ARG1 (pfnUnique, "unique");
+  HORSEIR_BUILTIN_ARG1 (pfnWhere, "where");
+  HORSEIR_BUILTIN_ARG1 (pfnSum, "sum");
+  HORSEIR_BUILTIN_ARG1 (pfnAvg, "avg");
+
+  HORSEIR_BUILTIN_ARG1 (pfnMin, "min");
+  HORSEIR_BUILTIN_ARG1 (pfnMax, "max");
+
+  HORSEIR_BUILTIN_ARG1 (pfnDateYear, "year");
+  HORSEIR_BUILTIN_ARG1 (pfnDateMonth, "month");
+  HORSEIR_BUILTIN_ARG1 (pfnDateDay, "day");
+  HORSEIR_BUILTIN_ARG1 (pfnDate, "date");
+
+  HORSEIR_BUILTIN_ARG1 (pfnTimeHour, "hour");
+  HORSEIR_BUILTIN_ARG1 (pfnTimeMinute, "minute");
+  HORSEIR_BUILTIN_ARG1 (pfnTimeSecond, "second");
+  HORSEIR_BUILTIN_ARG1 (pfnTimeMill, "mill");
+  HORSEIR_BUILTIN_ARG1 (pfnTime, "time");
+
+  HORSEIR_BUILTIN_ARG1 (pfnEnlist, "enlist");
+  HORSEIR_BUILTIN_ARG1 (pfnRaze, "raze");
+  HORSEIR_BUILTIN_ARG1 (pfnToList, "to_list");
+  HORSEIR_BUILTIN_ARG1 (pfnToIndex, "to_index");
+  HORSEIR_BUILTIN_ARG1 (pfnGroup, "group");
+  HORSEIR_BUILTIN_ARG1 (pfnGroupBucket, "group_bucket"); // FIXME
+
+  HORSEIR_BUILTIN_ARG2 (pfnLt, "lt");
+  HORSEIR_BUILTIN_ARG2 (pfnLeq, "leq");
+  HORSEIR_BUILTIN_ARG2 (pfnGt, "gt");
+  HORSEIR_BUILTIN_ARG2 (pfnGeq, "geq");
+  HORSEIR_BUILTIN_ARG2 (pfnEq, "eq");
+  HORSEIR_BUILTIN_ARG2 (pfnNeq, "neq");
+
+  HORSEIR_BUILTIN_ARG2 (pfnPlus, "plus");
+  HORSEIR_BUILTIN_ARG2 (pfnMinus, "minus");
+  HORSEIR_BUILTIN_ARG2 (pfnMul, "mul");
+  HORSEIR_BUILTIN_ARG2 (pfnDiv, "div");
+
+  HORSEIR_BUILTIN_ARG2 (pfnAnd, "and");
+  HORSEIR_BUILTIN_ARG2 (pfnNand, "nand");
+  HORSEIR_BUILTIN_ARG2 (pfnOr, "or");
+  HORSEIR_BUILTIN_ARG2 (pfnNor, "nor");
+  HORSEIR_BUILTIN_ARG2 (pfnXor, "xor");
+
+  HORSEIR_BUILTIN_ARG2 (pfnPower, "power");
+  HORSEIR_BUILTIN_ARG2 (pfnLog2, "log2");
+  HORSEIR_BUILTIN_ARG2 (pfnMod, "mod");
+  HORSEIR_BUILTIN_ARG2 (pfnCompress, "compress");
+
+  HORSEIR_BUILTIN_ARG2 (pfnIndexOf, "index_of");
+  HORSEIR_BUILTIN_ARG2 (pfnAppend, "append");
+  HORSEIR_BUILTIN_ARG2 (pfnLike, "like");
+  HORSEIR_BUILTIN_ARG2 (pfnOrderBy, "order");
+
+  addExternalMethodMETA ("Builtin", "each",
                          [] (V ret, std::size_t argc, V argv[])
-                         { pfnDatetimeAdd (ret, argv[0], argv[1], argv[2]); });
-  addExternalMethodMETA ("Builtin", "geq",
+                         {
+                             L opCode = pfnEach (ret, argv[0],
+                                                 (L(*) (V, V)) argv[1]);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnEach);
+  addExternalMethodMETA ("Builtin", "each_item",
                          [] (V ret, std::size_t argc, V argv[])
-                         { pfnGeq (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "gt",
+                         {
+                             L opCode = pfnEachItem (ret, argv[0], argv[1],
+                                                     (L(*) (V, V, V)) argv[2]);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnEachItem);
+  addExternalMethodMETA ("Builtin", "each_left",
                          [] (V ret, std::size_t argc, V argv[])
-                         { pfnGt (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "and",
+                         {
+                             L opCode = pfnEachLeft (ret, argv[0], argv[1],
+                                                     (L(*) (V, V, V)) argv[2]);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnEachLeft);
+  addExternalMethodMETA ("Builtin", "each_right",
                          [] (V ret, std::size_t argc, V argv[])
-                         { pfnAnd (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "mul",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnMul (ret, argv[0], argv[1]); });
-  addExternalMethodMETA ("Builtin", "sum",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnSum (ret, argv[0]); });
-  addExternalMethodMETA ("Builtin", "enlist",
-                         [] (V ret, std::size_t argc, V argv[])
-                         { pfnEnlist (ret, argv[0]); });
+                         {
+                             L opCode = pfnEachRight (ret, argv[0], argv[1],
+                                                      (L(*) (V, V, V)) argv[2]);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnEachRight);
+
+  HORSEIR_BUILTIN_ARG2 (pfnDict, "dict");
+  HORSEIR_BUILTIN_ARG2 (pfnTable, "table");
+  HORSEIR_BUILTIN_ARG2 (pfnEnum, "enum");
+  HORSEIR_BUILTIN_ARG2 (pfnKTable, "ktable");
+
+  HORSEIR_BUILTIN_ARG2 (pfnMember, "member");
+  HORSEIR_BUILTIN_ARG2 (pfnVector, "vector");
+
+  HORSEIR_BUILTIN_ARG3 (pfnDatetimeAdd, "datetime_add");
+  HORSEIR_BUILTIN_ARG3 (pfnDatetimeSub, "datetime_sub");
+  HORSEIR_BUILTIN_ARG3 (pfnBetween, "between");
+  HORSEIR_BUILTIN_ARG3 (pfnAddFKey, "add_fkey");
+  HORSEIR_BUILTIN_ARG2 (pfnSubString, "sub_string");
 }
 
 void Dispatcher::addMethodMETA (MethodMETA *methodMETA)
@@ -146,13 +287,14 @@ void Dispatcher::addMethodMETA (MethodMETA *methodMETA)
 
 void Dispatcher::addExternalMethodMETA (
     const std::string &moduleName, const std::string &methodName,
-    void (*funcPtr) (V, size_t, V *)
+    void (*funcPtr) (V, size_t, V *),
+    void *rawPtr
 )
 {
   auto methodMETA = new __ExternalMethodMETA ();
   methodMETA->setModuleName (moduleName);
   methodMETA->setMethodName (methodName);
-  methodMETA->setInvokeTarget (funcPtr);
+  methodMETA->setInvokeTarget (funcPtr, rawPtr);
   addMethodMETA (methodMETA);
 }
 
@@ -177,11 +319,11 @@ void Dispatcher::collectInternalMethods (const ast::Module *module)
       module->methodsConstBegin (), module->methodsConstEnd (),
       [this, &moduleName] (const ValueType &method) -> void
       {
-        auto internalMethodMETA = new InternalMethodMETA ();
-        internalMethodMETA->setModuleName (moduleName);
-        internalMethodMETA->setMethodName (method->getMethodName ());
-        internalMethodMETA->setMethodAST (method);
-        addMethodMETA (internalMethodMETA);
+          auto internalMethodMETA = new InternalMethodMETA ();
+          internalMethodMETA->setModuleName (moduleName);
+          internalMethodMETA->setMethodName (method->getMethodName ());
+          internalMethodMETA->setMethodAST (method);
+          addMethodMETA (internalMethodMETA);
       });
 }
 
@@ -280,8 +422,8 @@ void Dispatcher::analysis (const ast::InvokeStatement *invokeStatement,
           visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
           [&moduleName, &methodName] (MethodMETA *searchMethodMETA) -> bool
           {
-            return searchMethodMETA->getMoudleName () == moduleName &&
-                   searchMethodMETA->getMethodName () == methodName;
+              return searchMethodMETA->getMoudleName () == moduleName &&
+                     searchMethodMETA->getMethodName () == methodName;
           });
       assert (pos != visibleMethodMETAs.cend ());
       methodMETA = *pos;
@@ -369,8 +511,8 @@ void Dispatcher::analysis (const ast::FunctionLiteral *functionLiteral,
                   visibleMethodMETAs.cbegin (), visibleMethodMETAs.cend (),
                   [&moduleName, &methodName] (MethodMETA *searchMethodMETA)
                   {
-                    return searchMethodMETA->getMoudleName () == moduleName &&
-                           searchMethodMETA->getMethodName () == methodName;
+                      return searchMethodMETA->getMoudleName () == moduleName &&
+                             searchMethodMETA->getMethodName () == methodName;
                   });
               assert (pos != visibleMethodMETAs.cend ());
               methodMETA = *pos;
@@ -403,12 +545,14 @@ Dispatcher::getVisibleMethodMETAs (const ast::Module *module) const
               module->importedModulesConstEnd (),
               [&methodMETA] (const VType &importedEntry) -> bool
               {
-                MethodMETA *candidateMETA = methodMETA.get ();
-                if (importedEntry.first == candidateMETA->getMoudleName () &&
-                    importedEntry.second == "*")
-                  { return true; }
-                return importedEntry.first == candidateMETA->getMoudleName () &&
-                       importedEntry.second == candidateMETA->getMethodName ();
+                  MethodMETA *candidateMETA = methodMETA.get ();
+                  if (importedEntry.first == candidateMETA->getMoudleName () &&
+                      importedEntry.second == "*")
+                    { return true; }
+                  return importedEntry.first == candidateMETA->getMoudleName ()
+                         &&
+                         importedEntry.second
+                         == candidateMETA->getMethodName ();
               });
           if (visible)
             { visibleMethodMETAs.push_back (methodMETA.get ()); }

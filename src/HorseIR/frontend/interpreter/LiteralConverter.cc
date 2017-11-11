@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <cstring>
 
 #include "LiteralConverter.h"
 #include "h_global.h"
@@ -19,51 +20,97 @@ V LiteralConverter::convert (const Literal *literal)
   switch (literal->getLiteralClass ())
     {
       case Literal::LiteralClass::Bool:
-        { CAST_APPLY (BoolLiteral, caseBoolLiteral, literal); }
+        {
+          CAST_APPLY (BoolLiteral, caseBoolLiteral, literal);
+        }
       case Literal::LiteralClass::Character:
-        { CAST_APPLY (CharLiteral, caseCharLiteral, literal); }
+        {
+          CAST_APPLY (CharLiteral, caseCharLiteral, literal);
+        }
       case Literal::LiteralClass::Integer8:
-        { CAST_APPLY (Integer8Literal, caseInteger8Literal, literal); }
+        {
+          CAST_APPLY (Integer8Literal, caseInteger8Literal, literal);
+        }
       case Literal::LiteralClass::Integer16:
-        { CAST_APPLY (Integer16Literal, caseInteger16Literal, literal); }
+        {
+          CAST_APPLY (Integer16Literal, caseInteger16Literal, literal);
+        }
       case Literal::LiteralClass::Integer32:
-        { CAST_APPLY (Integer32Literal, caseInteger32Literal, literal); }
+        {
+          CAST_APPLY (Integer32Literal, caseInteger32Literal, literal);
+        }
       case Literal::LiteralClass::Integer64:
-        { CAST_APPLY (Integer64Literal, caseInteger64Literal, literal); }
+        {
+          CAST_APPLY (Integer64Literal, caseInteger64Literal, literal);
+        }
       case Literal::LiteralClass::FP32:
-        { CAST_APPLY (FP32Literal, caseFP32Literal, literal); }
+        {
+          CAST_APPLY (FP32Literal, caseFP32Literal, literal);
+        }
       case Literal::LiteralClass::FP64:
-        { CAST_APPLY (FP64Literal, caseFP64Literal, literal); }
+        {
+          CAST_APPLY (FP64Literal, caseFP64Literal, literal);
+        }
       case Literal::LiteralClass::Complex:
-        { CAST_APPLY (ComplexLiteral, caseComplexLiteral, literal); }
+        {
+          CAST_APPLY (ComplexLiteral, caseComplexLiteral, literal);
+        }
       case Literal::LiteralClass::Symbol:
-        { CAST_APPLY (SymbolLiteral, caseSymbolLiteral, literal); }
+        {
+          CAST_APPLY (SymbolLiteral, caseSymbolLiteral, literal);
+        }
       case Literal::LiteralClass::String:
-        { CAST_APPLY (StringLiteral, caseStringLiteral, literal); }
+        {
+          CAST_APPLY (StringLiteral, caseStringLiteral, literal);
+        }
       case Literal::LiteralClass::Date:
-        { CAST_APPLY (DateLiteral, caseDateLiteral, literal); }
+        {
+          CAST_APPLY (DateLiteral, caseDateLiteral, literal);
+        }
       case Literal::LiteralClass::DateTime:
-        { CAST_APPLY (DateTimeLiteral, caseDateTimeLiteral, literal); }
+        {
+          CAST_APPLY (DateTimeLiteral, caseDateTimeLiteral, literal);
+        }
       case Literal::LiteralClass::Minute:
-        { CAST_APPLY (MinuteLiteral, caseMinuteLiteral, literal); }
+        {
+          CAST_APPLY (MinuteLiteral, caseMinuteLiteral, literal);
+        }
       case Literal::LiteralClass::Month:
-        { CAST_APPLY (MonthLiteral, caseMonthLiteral, literal); }
+        {
+          CAST_APPLY (MonthLiteral, caseMonthLiteral, literal);
+        }
       case Literal::LiteralClass::Second:
-        { CAST_APPLY (SecondLiteral, caseSecondLiteral, literal); }
+        {
+          CAST_APPLY (SecondLiteral, caseSecondLiteral, literal);
+        }
       case Literal::LiteralClass::Time:
-        { CAST_APPLY (TimeLiteral, caseTimeLiteral, literal); }
+        {
+          CAST_APPLY (TimeLiteral, caseTimeLiteral, literal);
+        }
       case Literal::LiteralClass::Function:
-        { throw /* TODO: */ NOT_YET_IMPLEMENTED; }
+        {
+          throw /* TODO: */ NOT_YET_IMPLEMENTED;
+        }
       case Literal::LiteralClass::List:
-        { CAST_APPLY (ListLiteral, caseListLiteral, literal); }
+        {
+          CAST_APPLY (ListLiteral, caseListLiteral, literal);
+        }
       case Literal::LiteralClass::Dictionary:
-        { CAST_APPLY (DictionaryLiteral, caseDictionaryLiteral, literal); }
+        {
+          CAST_APPLY (DictionaryLiteral, caseDictionaryLiteral, literal);
+        }
       case Literal::LiteralClass::Enumeration:
-        { CAST_APPLY (EnumerationLiteral, caseEnumerationLiteral, literal); }
+        {
+          CAST_APPLY (EnumerationLiteral, caseEnumerationLiteral, literal);
+        }
       case Literal::LiteralClass::Table:
-        { CAST_APPLY (TableLiteral, caseTableLiteral, literal); }
+        {
+          CAST_APPLY (TableLiteral, caseTableLiteral, literal);
+        }
       case Literal::LiteralClass::KeyTable:
-        { CAST_APPLY (KeyTableLiteral, caseKeyTableLiteral, literal); }
+        {
+          CAST_APPLY (KeyTableLiteral, caseKeyTableLiteral, literal);
+        }
     }
 }
 
@@ -116,10 +163,10 @@ V LiteralConverter::caseComplexLiteral (const ComplexLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const ComplexLiteral::ElementType::ValueType &value) -> X
       {
-        X backendValue{};
-        backendValue.real = static_cast<F>(value.real ());
-        backendValue.imag = static_cast<F>(value.imag ());
-        return backendValue;
+          X backendValue{};
+          backendValue.real = static_cast<F>(value.real ());
+          backendValue.imag = static_cast<F>(value.imag ());
+          return backendValue;
       },
       [] (V v, const X &backendValue, std::size_t pos) -> void
       { vX (v, pos) = backendValue; });
@@ -139,11 +186,11 @@ V LiteralConverter::caseDateLiteral (const DateLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const DateLiteral::ElementType::ValueType &value) -> D
       {
-        auto backendValue = static_cast<D>(0);
-        backendValue = backendValue + static_cast<D>(value.year);
-        backendValue = backendValue * 100 + static_cast<D>(value.month);
-        backendValue = backendValue * 100 + static_cast<D>(value.day);
-        return backendValue;
+          auto backendValue = static_cast<D>(0);
+          backendValue = backendValue + static_cast<D>(value.year);
+          backendValue = backendValue * 100 + static_cast<D>(value.month);
+          backendValue = backendValue * 100 + static_cast<D>(value.day);
+          return backendValue;
       },
       [] (V v, const D &backendValue, std::size_t pos) -> void
       { vD (v, pos) = backendValue; }
@@ -164,15 +211,16 @@ V LiteralConverter::caseDateTimeLiteral (const DateTimeLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const DateTimeLiteral::ElementType::ValueType &value) -> Z
       {
-        auto backendValue = static_cast<Z>(0);
-        backendValue = backendValue + static_cast<Z>(value.year);
-        backendValue = backendValue * 100 + static_cast<Z>(value.month);
-        backendValue = backendValue * 100 + static_cast<Z>(value.day);
-        backendValue = backendValue * 60 + static_cast<Z>(value.hour);
-        backendValue = backendValue * 60 + static_cast<Z>(value.minute);
-        backendValue = backendValue * 60 + static_cast<Z>(value.second);
-        backendValue = backendValue * 1000 + static_cast<Z>(value.millisecond);
-        return backendValue;
+          auto backendValue = static_cast<Z>(0);
+          backendValue = backendValue + static_cast<Z>(value.year);
+          backendValue = backendValue * 100 + static_cast<Z>(value.month);
+          backendValue = backendValue * 100 + static_cast<Z>(value.day);
+          backendValue = backendValue * 60 + static_cast<Z>(value.hour);
+          backendValue = backendValue * 60 + static_cast<Z>(value.minute);
+          backendValue = backendValue * 60 + static_cast<Z>(value.second);
+          backendValue =
+              backendValue * 1000 + static_cast<Z>(value.millisecond);
+          return backendValue;
       },
       [] (V v, const Z &backendValue, std::size_t pos) -> void
       { vZ (v, pos) = backendValue; }
@@ -327,10 +375,10 @@ V LiteralConverter::caseMinuteLiteral (const MinuteLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const MinuteLiteral::ElementType::ValueType &value) -> U
       {
-        auto backendValue = static_cast<U>(0);
-        backendValue = backendValue + static_cast<U>(value.hour);
-        backendValue = backendValue * 60 + static_cast<U>(value.minute);
-        return backendValue;
+          auto backendValue = static_cast<U>(0);
+          backendValue = backendValue + static_cast<U>(value.hour);
+          backendValue = backendValue * 60 + static_cast<U>(value.minute);
+          return backendValue;
       },
       [] (V v, const U &backendValue, std::size_t pos) -> void
       { vU (v, pos) = backendValue; });
@@ -350,10 +398,10 @@ V LiteralConverter::caseMonthLiteral (const MonthLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const MonthLiteral::ElementType::ValueType &value) -> M
       {
-        auto backendValue = static_cast<M>(0);
-        backendValue = backendValue + static_cast<M>(value.year);
-        backendValue = backendValue * 100 + static_cast<M>(value.month);
-        return backendValue;
+          auto backendValue = static_cast<M>(0);
+          backendValue = backendValue + static_cast<M>(value.year);
+          backendValue = backendValue * 100 + static_cast<M>(value.month);
+          return backendValue;
       },
       [] (V v, const M &backendValue, std::size_t pos) -> void
       { vM (v, pos) = backendValue; });
@@ -373,11 +421,11 @@ V LiteralConverter::caseSecondLiteral (const SecondLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const SecondLiteral::ElementType::ValueType &value) -> W
       {
-        auto backendValue = static_cast<W>(0);
-        backendValue = backendValue + value.hour;
-        backendValue = backendValue * 60 + value.minute;
-        backendValue = backendValue * 60 + value.second;
-        return backendValue;
+          auto backendValue = static_cast<W>(0);
+          backendValue = backendValue + value.hour;
+          backendValue = backendValue * 60 + value.minute;
+          backendValue = backendValue * 60 + value.second;
+          return backendValue;
       },
       [] (V v, const W &backendValue, std::size_t pos) -> void
       { vW (v, pos) = backendValue; });
@@ -387,7 +435,27 @@ V LiteralConverter::caseSecondLiteral (const SecondLiteral *literal)
 V LiteralConverter::caseStringLiteral (const StringLiteral *literal)
 {
   assert (literal != nullptr);
-  throw /* TODO: */ NOT_YET_IMPLEMENTED;
+  const auto values = literal->getValue ();
+  V backendNode = nullptr;
+  ALLOC_NODE (backendNode);
+  initV (backendNode, H_S, static_cast<L>(values.size ()));
+  writeVectorLiteral (
+      backendNode, values,
+      [] (const StringLiteral::ElementType &element) -> S
+      { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
+      [] (const StringLiteral::ElementType::ValueType &value) -> S
+      {
+          const std::size_t length = value.size () + 1;
+          S str = allocStrMem (static_cast<L>(length));
+          std::memset (str, '\0', length);
+          for (std::size_t index = 0; index < value.size (); ++index)
+            { str[index] = static_cast<char >(value[index]); }
+          return str;
+      },
+      [] (V v, const S &backendValue, std::size_t pos) -> void
+      { vS (v, pos) = backendValue; }
+  );
+  return backendNode;
 }
 
 V LiteralConverter::caseSymbolLiteral (const SymbolLiteral *literal)
@@ -427,12 +495,12 @@ V LiteralConverter::caseTimeLiteral (const TimeLiteral *literal)
       { throw /* TODO: */ NOT_YET_IMPLEMENTED; },
       [] (const TimeLiteral::ElementType::ValueType &value) -> T
       {
-        auto backendValue = static_cast<T>(0);
-        backendValue = backendValue + value.hour;
-        backendValue = backendValue * 60 + value.minute;
-        backendValue = backendValue * 60 + value.second;
-        backendValue = backendValue * 1000 + value.millisecond;
-        return backendValue;
+          auto backendValue = static_cast<T>(0);
+          backendValue = backendValue + value.hour;
+          backendValue = backendValue * 60 + value.minute;
+          backendValue = backendValue * 60 + value.second;
+          backendValue = backendValue * 1000 + value.millisecond;
+          return backendValue;
       },
       [] (V v, const T &backendValue, std::size_t pos) -> void
       { vT (v, pos) = backendValue; });

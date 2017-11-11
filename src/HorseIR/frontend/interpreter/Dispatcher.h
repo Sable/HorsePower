@@ -25,7 +25,9 @@ class Dispatcher {
     MethodMETA &operator= (MethodMETA &&methodMETA) = default;
     MethodMETA &operator= (const MethodMETA &methodMETA) = default;
     virtual ~MethodMETA () = default;
-    enum class MethodMETAClass { Internal, External };
+    enum class MethodMETAClass {
+      Internal, External
+    };
 
     virtual MethodMETAClass getMethodMETAClass () const = 0;
 
@@ -85,6 +87,7 @@ class Dispatcher {
     { return MethodMETAClass::External; }
 
     virtual void invoke (V ret, std::size_t argc, V argv[]) const = 0;
+    virtual void *getRawPtr () const = 0;
   };
 
   class __ExternalMethodMETA : public ExternalMethodMETA {
@@ -100,14 +103,21 @@ class Dispatcher {
     void invoke (V ret, std::size_t argc, V argv[]) const override
     { invokePtr (ret, argc, argv); }
 
+    void *getRawPtr () const override
+    { return rawPtr; }
+
     BindingFunctionType getInvokeTarget () const
     { return invokePtr; }
 
-    void setInvokeTarget (BindingFunctionType newInvokePtr)
-    { invokePtr = newInvokePtr; }
+    void setInvokeTarget (BindingFunctionType newInvokePtr, void *newRawPtr)
+    {
+      invokePtr = newInvokePtr;
+      rawPtr = newRawPtr;
+    }
 
    protected:
     BindingFunctionType invokePtr = nullptr;
+    void *rawPtr = nullptr;
   };
 
   explicit Dispatcher (const ast::CompilationUnit *pCompilationUnit);
@@ -151,15 +161,16 @@ class Dispatcher {
   const ast::CompilationUnit *compilationUnit;
   std::vector<std::unique_ptr<MethodMETA>> methodMETAs;
   std::unordered_map<const ast::InvokeStatement *,
-                     MethodMETA *> invokeStatementMap;
+      MethodMETA *> invokeStatementMap;
   std::unordered_map<const ast::FunctionLiteral *,
-                     std::vector<MethodMETA *>> functionLiteralMap;
+      std::vector<MethodMETA *>> functionLiteralMap;
 
   void registerExternalMethods ();
   void addMethodMETA (MethodMETA *methodMETA);
   void addExternalMethodMETA (
       const std::string &moduleName, const std::string &methodName,
-      void (*funcPtr) (V, std::size_t, V[])
+      void (*funcPtr) (V, std::size_t, V[]),
+      void *rawPtr
   );
 
   void collectInternalMethods (const ast::CompilationUnit *compilationUnit);

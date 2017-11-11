@@ -241,7 +241,9 @@ LITERAL_STRING  : '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"' ;
 LITERAL_CHAR        : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE) '\'' ;
 LITERAL_CHAR_VECTOR : '\'' (~('\'' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE)* '\'' ;
 
-LITERAL_SYMBOL  : '`' FRAGMENT_ID ;
+LITERAL_SYMBOL  : '`' FRAGMENT_ID
+                | '`' '"' (~('"' | '\\' | '\r' | '\n') | ESCAPE_SEQUENCE )* '"'
+                ;
 
 LITERAL_FUNCTION: '@' FRAGMENT_ID ('.' FRAGMENT_ID)? ;
 

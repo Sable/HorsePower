@@ -2,216 +2,190 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <chrono>
 
-#include "boost/program_options.hpp"
-#include "boost/algorithm/string.hpp"
+#include <yaml-cpp/yaml.h>
+#include <spdlog/spdlog.h>
 
 #include "../ast/AST.h"
 #include "../ast/CSTConverter.h"
 #include "../interpreter/Interpreter.h"
+#include "../misc/StringUtils.h"
 
 #include "../../backend/h_global.h"
 #include "../../backend/h_primitive.h"
 
-#define HORSEIR_VERSION "dev"
-
-using namespace boost::program_options;
-
-std::vector<L> parseTableTypes (const std::string typeString)
+L parseTableTypes (const std::string &str)
 {
-  std::vector<L> parsedTypes;
-  parsedTypes.reserve (typeString.size ());
-  for (const std::string::value_type &character : typeString)
-    {
-      if (character == 'B') parsedTypes.push_back (H_B);        /* boolean    */
-      else if (character == 'H') parsedTypes.push_back (H_H);   /* integer16  */
-      else if (character == 'I') parsedTypes.push_back (H_I);   /* integer32  */
-      else if (character == 'L') parsedTypes.push_back (H_L);   /* integer64  */
-      else if (character == 'F') parsedTypes.push_back (H_F);   /* FP32       */
-      else if (character == 'E') parsedTypes.push_back (H_E);   /* FP64       */
-      else if (character == 'C') parsedTypes.push_back (H_C);   /* Character  */
-      else if (character == 'Q') parsedTypes.push_back (H_Q);   /* Symbol     */
-      else if (character == 'S') parsedTypes.push_back (H_S);   /* String     */
-      else if (character == 'M') parsedTypes.push_back (H_M);   /* Month      */
-      else if (character == 'D') parsedTypes.push_back (H_D);   /* Date       */
-      else if (character == 'Z') parsedTypes.push_back (H_Z);   /* Date Time  */
-      else if (character == 'U') parsedTypes.push_back (H_U);   /* Minute     */
-      else if (character == 'W') parsedTypes.push_back (H_W);   /* Second     */
-      else if (character == 'T') parsedTypes.push_back (H_T);   /* Time       */
-      else if (character == 'X') parsedTypes.push_back (H_X);   /* Complex    */
-      else throw std::invalid_argument ("invalid argument");
-    }
-  parsedTypes.shrink_to_fit ();
-  return parsedTypes;
+  assert (str.length () == 1);
+  const char character = str[0];
+  if (character == 'B') return H_B;        /* boolean    */
+  else if (character == 'H') return H_H;   /* integer16  */
+  else if (character == 'I') return H_I;   /* integer32  */
+  else if (character == 'L') return H_L;   /* integer64  */
+  else if (character == 'F') return H_F;   /* FP32       */
+  else if (character == 'E') return H_E;   /* FP64       */
+  else if (character == 'C') return H_C;   /* Character  */
+  else if (character == 'Q') return H_Q;   /* Symbol     */
+  else if (character == 'S') return H_S;   /* String     */
+  else if (character == 'M') return H_M;   /* Month      */
+  else if (character == 'D') return H_D;   /* Date       */
+  else if (character == 'Z') return H_Z;   /* Date Time  */
+  else if (character == 'U') return H_U;   /* Minute     */
+  else if (character == 'W') return H_W;   /* Second     */
+  else if (character == 'T') return H_T;   /* Time       */
+  else if (character == 'X') return H_X;   /* Complex    */
+  else throw std::invalid_argument ("invalid argument");
 }
 
-std::vector<Q> parseTableHeaders (const std::string &headerString)
+std::string typeToString (L type)
 {
-  std::vector<Q> parsedHeaders;
-  std::istringstream stream (headerString);
-  std::string buffer;
-  while (std::getline (stream, buffer, ','))
-    {
-      boost::trim (buffer);
-      insertSym (createSymbol ((S) buffer.c_str ()));
-      parsedHeaders.push_back (getSymbol ((S) buffer.c_str ()));
-    }
-  return parsedHeaders;
+  if (type == H_B) return "B (boolean)";
+  else if (type == H_H) return "H (integer16)";
+  else if (type == H_I) return "I (integer32)";
+  else if (type == H_L) return "L (integer64)";
+  else if (type == H_F) return "F (FP32)";
+  else if (type == H_E) return "E (FP64)";
+  else if (type == H_C) return "C (character)";
+  else if (type == H_Q) return "Q (symbol)";
+  else if (type == H_S) return "S (string)";
+  else if (type == H_M) return "M (month)";
+  else if (type == H_D) return "D (date)";
+  else if (type == H_Z) return "Z (date time)";
+  else if (type == H_U) return "U (minute)";
+  else if (type == H_W) return "W (second)";
+  else if (type == H_T) return "T (time)";
+  else if (type == H_X) return "X (complex)";
+  else throw std::invalid_argument ("invalid argument");
 }
-
-class ErrorListener : public antlr4::BaseErrorListener {
- public:
-  void syntaxError (antlr4::Recognizer *recognizer,
-                    antlr4::Token *offendingSymbol,
-                    std::size_t line, std::size_t charPositionInLine,
-                    const std::string &msg, std::exception_ptr e) override
-  {
-    std::cerr << '[' << line << ", " << charPositionInLine << ']'
-              << msg << std::endl;
-    exit (EXIT_FAILURE);
-  }
-};
 
 int main (int argc, const char *argv[])
 {
-  using ArgType = std::vector<std::string>;
-  std::string moduleNameArg, methodNameArg;
-  options_description description ("Allowed options");
-  description.add_options ()
-      ("help,h", "produce help message")
-      ("version,v", "version message")
-      ("table-path,p", value<ArgType> (), "load table from given CSV file")
-      ("table-name,n", value<ArgType> (), "specify the table name")
-      ("table-type,t", value<ArgType> (), "specify the table column types")
-      ("table-header,h", value<ArgType> (), "specify the table column headers")
-      ("entry-module,M",
-       value<std::string> (&moduleNameArg)->default_value ("default"),
-       "specify HorseIR entry module name")
-      ("entry-method,m",
-       value<std::string> (&methodNameArg)->default_value ("main"),
-       "specify HorseIR entry method name");
-  variables_map argMap;
-  store (parse_command_line (argc, argv, description), argMap);
-  notify (argMap);
 
-  if (argMap.count ("help") != 0)
+  if (argc != 4)
     {
-      std::cout << description << std::endl;
-      return EXIT_SUCCESS;
+      std::cout << "usage:" << std::endl
+                << argv[0] << " [database config(.yml)]" << ' '
+                << "[key relationship(.yml)]" << ' '
+                << "[hir file]" << std::endl;
+      return EXIT_FAILURE;
     }
-  if (argMap.count ("version") != 0)
-    {
-      std::cout << "HorseIR " HORSEIR_VERSION << std::endl;
-      return EXIT_SUCCESS;
-    }
+
+  auto logger = spdlog::stdout_color_mt ("console");
+  logger->set_pattern ("[%n] [%l] %v");
 
   initMain ();
-  initSym ();
   initSys ();
+  logger->info ("initializing system ...");
+  initSym ();
+  logger->info ("initializing symbol pool ...");
 
-  /* loading table from CSV file */
-  if (argMap.count ("table-path") != 0 || argMap.count ("table-name") != 0 ||
-      argMap.count ("table-type") != 0 || argMap.count ("table-header") != 0)
+  const std::string tableYamlPath = argv[1];
+  const std::string keyYamlPath = argv[2];
+
+  YAML::Node configYAMLNode = YAML::LoadFile (tableYamlPath);
+  logger->info ("loading configuration file at {0}", tableYamlPath);
+  for (std::size_t tableIndex = 0;
+       tableIndex < configYAMLNode.size (); ++tableIndex)
     {
-      if (argMap.count ("table-path") == 0 ||
-          argMap.count ("table-name") == 0 ||
-          argMap.count ("table-type") == 0 ||
-          argMap.count ("table-header") == 0)
+      logger->info ("loading #{} table", tableIndex + 1);
+      const std::string path = horseIR::misc::trim_copy (
+          configYAMLNode[tableIndex]["table"]["path"].as<std::string> ());
+      const std::string name = horseIR::misc::trim_copy (
+          configYAMLNode[tableIndex]["table"]["name"].as<std::string> ());
+      logger->info ("table #{} CSV path: {}", tableIndex + 1, path);
+      logger->info ("table #{} name: {}", tableIndex + 1, name);
+
+      auto contentNode = configYAMLNode[tableIndex]["table"]["content"];
+      std::vector<std::string> fieldHeaders;
+      fieldHeaders.reserve (contentNode.size ());
+      std::unique_ptr<L[]> fieldTypes (new L[contentNode.size ()]);
+      for (std::size_t fieldIndex = 0;
+           fieldIndex < contentNode.size (); ++fieldIndex)
         {
-          std::cerr << "Not Enough Number of Arguments" << std::endl;
-          std::cerr << description << std::endl;
-          return EXIT_FAILURE;
+          std::string fieldHeader =
+              contentNode[fieldIndex]["name"].as<std::string> ();
+          fieldHeaders.emplace_back (std::move (fieldHeader));
+          const std::string fieldType =
+              contentNode[fieldIndex]["type"].as<std::string> ();
+          fieldTypes[fieldIndex] = parseTableTypes (fieldType);
+          logger->info ("table #{} field #{} header {} type {}",
+                        tableIndex + 1, fieldIndex + 1,
+                        fieldHeaders[fieldIndex],
+                        typeToString (fieldTypes[fieldIndex])
+          );
         }
-      const ArgType rawTablePaths = argMap["table-path"].as<ArgType> ();
-      const ArgType rawTableNames = argMap["table-name"].as<ArgType> ();
-      const ArgType rawTableTypes = argMap["table-type"].as<ArgType> ();
-      const ArgType rawTableHeaders = argMap["table-header"].as<ArgType> ();
-
-      if (rawTablePaths.size () != rawTableNames.size () ||
-          rawTableNames.size () != rawTableTypes.size () ||
-          rawTableTypes.size () != rawTableHeaders.size () ||
-          rawTableHeaders.size () != rawTablePaths.size ())
+      std::unique_ptr<C *[]> fieldHeadersCStr (new C *[contentNode.size ()]);
+      for (std::size_t index = 0; index < contentNode.size (); ++index)
+        fieldHeadersCStr[index] = (C *) fieldHeaders[index].c_str ();
+      std::unique_ptr<Q[]> fieldHeadersSym (new Q[contentNode.size ()]);
+      for (std::size_t index = 0; index < contentNode.size (); ++index)
         {
-          std::cerr << "Invalid Number of Arguments. Abort." << std::endl;
-          std::cerr << description << std::endl;
-          return EXIT_FAILURE;
+          insertSym (createSymbol (fieldHeadersCStr[index]));
+          fieldHeadersSym[index] = getSymbol (fieldHeadersCStr[index]);
         }
+      V table = readCSV ((S) path.c_str (),
+                         (L) contentNode.size (),
+                         &fieldTypes[0],
+                         &fieldHeadersSym[0]);
+      registerTable ((S) name.c_str (), table);
+    }
+  logger->info ("table loaded");
+  logger->info ("loading key relationship at {}", keyYamlPath);
+  YAML::Node keyConfigNode = YAML::LoadFile (keyYamlPath);
+  for (std::size_t relationIndex = 0;
+       relationIndex < keyConfigNode.size (); ++relationIndex)
+    {
+      const std::string xTable =
+          keyConfigNode[relationIndex]["xTable"].as<std::string> ();
+      const std::string xKey =
+          keyConfigNode[relationIndex]["xKey"].as<std::string> ();
+      const std::string yTable =
+          keyConfigNode[relationIndex]["yTable"].as<std::string> ();
+      const std::string yKey =
+          keyConfigNode[relationIndex]["yKey"].as<std::string> ();
+      logger->info ("loading {}.{} -> {}.{} ...", xTable, xKey, yTable, yKey);
 
-      const std::size_t numArgs = rawTablePaths.size ();
-      assert (rawTableNames.size () == numArgs);
-      assert (rawTableTypes.size () == numArgs);
-      assert (rawTableHeaders.size () == numArgs);
-      for (std::size_t pos = 0; pos < numArgs; ++pos)
-        {
-          ArgType::value_type tablePath = rawTablePaths[pos];
-          boost::trim (tablePath);
 
-          ArgType::value_type rawTableName = rawTableNames[pos];
-          boost::trim (rawTableName);
+      V xTableNode = allocNode (); initV (xTableNode, H_Q, 1);
+      V xKeyNode = allocNode (); initV (xKeyNode, H_Q, 1);
+      V yTableNode = allocNode (); initV (yTableNode, H_Q, 1);
+      V yKeyNode = allocNode (); initV (yKeyNode, H_Q, 1);
 
-          const ArgType::value_type &rawTableType = rawTableTypes[pos];
-          std::vector<L> tableType;
-          try
-            { tableType = parseTableTypes (rawTableType); }
-          catch (std::invalid_argument &exception)
-            {
-              std::cerr << "Invalid Table Type Specifier. Abort." << std::endl;
-              std::cerr << description << std::endl;
-              return EXIT_FAILURE;
-            }
-          const auto tableHeader = parseTableHeaders (rawTableHeaders[pos]);
-          const std::size_t numCol = tableType.size ();
-          if (tableHeader.size () != numCol)
-            {
-              std::cerr << "Error Occured During Loading Table" << tablePath
-                        << ". Number of Columns Does Not Agree. Abort.";
-              std::cerr << description << std::endl;
-              return EXIT_FAILURE;
-            }
+      vq (xTableNode) = getSymbol ((S) xTable.c_str ());
+      vq (xKeyNode) = getSymbol ((S) xKey.c_str ());
+      vq (yTableNode) = getSymbol ((S) yTable.c_str ());
+      vq (yKeyNode) = getSymbol ((S) yKey.c_str ());
 
-          auto tableTypeArray = new L[tableType.size ()];
-          for (std::size_t iter = 0; iter < tableType.size (); ++iter)
-            { tableTypeArray[iter] = tableType[iter]; }
-          auto tableHeaderArray = new Q[tableHeader.size ()];
-          for (std::size_t iter = 0; iter < tableHeader.size (); ++iter)
-            { tableHeaderArray[iter] = tableHeader[iter]; }
-          V table = readCSV ((S) tablePath.c_str (),
-                             static_cast<L>(numCol),
-                             tableTypeArray, tableHeaderArray);
-          registerTable ((S) rawTableName.c_str (), table);
-          delete[] tableTypeArray;
-          delete[] tableHeaderArray;
-        }
+      pfnAddFKey (xTableNode, xKeyNode, yTableNode, yKeyNode);
     }
 
-  std::string line;
-  std::string programString;
-  while (std::getline (std::cin, line))
-    {
-      programString.append (line);
-      programString.append ("\n");
-    }
-
-  antlr4::ANTLRInputStream antlrStream (programString);
-  horseIR::HorseIRLexer lexer (&antlrStream);
+  std::ifstream stream (argv[3]);
+  antlr4::ANTLRInputStream inputStream (stream);
+  horseIR::HorseIRLexer lexer (&inputStream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   horseIR::HorseIRParser parser (&tokenStream);
 
-  lexer.removeErrorListeners ();
-  parser.removeErrorListeners ();
-
-  ErrorListener errorListener;
-  lexer.addErrorListener (&errorListener);
-  parser.addErrorListener (&errorListener);
-
-  auto context = parser.program ();
   horseIR::ast::ASTNode::ASTNodeMemory memory;
-  auto ast = horseIR::ast::CSTConverter::convert (memory, context);
 
-  horseIR::interpreter::Interpreter interpreter (ast);
-  boost::trim (moduleNameArg);
-  boost::trim (methodNameArg);
-  printV (interpreter.interpret (moduleNameArg, methodNameArg));
+  auto startParse = std::chrono::steady_clock::now ();
+  auto programCST = parser.program ();
+  auto programAST = horseIR::ast::CSTConverter::convert (memory, programCST);
+  auto endParse = std::chrono::steady_clock::now ();
+  logger->info ("parsed ... ({}ms)",
+                std::chrono::duration_cast<std::chrono::milliseconds> (
+                    endParse - startParse).count ());
+
+  auto startExec = std::chrono::steady_clock::now ();
+  horseIR::interpreter::Interpreter interpreter (programAST);
+  V result = interpreter.interpret ("default", "main");
+  auto endExec = std::chrono::steady_clock::now ();
+  printV (result);
+  logger->info ("done. (parsing: {}ms, execution: {}ms)",
+                std::chrono::duration_cast<std::chrono::milliseconds> (
+                    endParse - startParse).count (),
+                std::chrono::duration_cast<std::chrono::milliseconds> (
+                    endExec - startExec).count ());
 
   return EXIT_SUCCESS;
 }

@@ -24,85 +24,161 @@ void ASTPrinter::print (const ASTNode *astNode, std::size_t indent)
   switch (astNode->getASTNodeClass ())
     {
       case ASTNode::ASTNodeClass::CompilationUnit:
-        { APPLY (caseCompilationUnit, astNode, CompilationUnit, indent); }
+        {
+          APPLY (caseCompilationUnit, astNode, CompilationUnit, indent);
+        }
       case ASTNode::ASTNodeClass::Module:
-        { APPLY (caseModule, astNode, Module, indent); }
+        {
+          APPLY (caseModule, astNode, Module, indent);
+        }
       case ASTNode::ASTNodeClass::Method:
-        { APPLY (caseMethod, astNode, Method, indent); }
+        {
+          APPLY (caseMethod, astNode, Method, indent);
+        }
       case ASTNode::ASTNodeClass::AssignStatement:
-        { APPLY (caseAssignStatement, astNode, AssignStatement, indent); }
+        {
+          APPLY (caseAssignStatement, astNode, AssignStatement, indent);
+        }
       case ASTNode::ASTNodeClass::BranchStatement:
-        { APPLY (caseBranchStatement, astNode, BranchStatement, indent); }
+        {
+          APPLY (caseBranchStatement, astNode, BranchStatement, indent);
+        }
       case ASTNode::ASTNodeClass::InvokeStatement:
-        { APPLY (caseInvokeStatement, astNode, InvokeStatement, indent); }
+        {
+          APPLY (caseInvokeStatement, astNode, InvokeStatement, indent);
+        }
       case ASTNode::ASTNodeClass::LabelStatement:
-        { APPLY (caseLabelStatement, astNode, LabelStatement, indent); }
+        {
+          APPLY (caseLabelStatement, astNode, LabelStatement, indent);
+        }
       case ASTNode::ASTNodeClass::PhiStatement:
-        { APPLY (casePhiStatement, astNode, PhiStatement, indent); }
+        {
+          APPLY (casePhiStatement, astNode, PhiStatement, indent);
+        }
       case ASTNode::ASTNodeClass::ReturnStatement:
-        { APPLY (caseReturnStatement, astNode, ReturnStatement, indent); }
+        {
+          APPLY (caseReturnStatement, astNode, ReturnStatement, indent);
+        }
       case ASTNode::ASTNodeClass::BoolLiteral:
-        { APPLY_NO_INDENT (caseBoolLiteral, astNode, BoolLiteral); }
+        {
+          APPLY_NO_INDENT (caseBoolLiteral, astNode, BoolLiteral);
+        }
       case ASTNode::ASTNodeClass::CharLiteral:
-        { APPLY_NO_INDENT (caseCharLiteral, astNode, CharLiteral); }
+        {
+          APPLY_NO_INDENT (caseCharLiteral, astNode, CharLiteral);
+        }
       case ASTNode::ASTNodeClass::ComplexLiteral:
-        { APPLY_NO_INDENT (caseComplexLiteral, astNode, ComplexLiteral); }
+        {
+          APPLY_NO_INDENT (caseComplexLiteral, astNode, ComplexLiteral);
+        }
       case ASTNode::ASTNodeClass::DateLiteral:
-        { APPLY_NO_INDENT (caseDateLiteral, astNode, DateLiteral); }
+        {
+          APPLY_NO_INDENT (caseDateLiteral, astNode, DateLiteral);
+        }
       case ASTNode::ASTNodeClass::DateTimeLiteral:
-        { APPLY_NO_INDENT (caseDateTimeLiteral, astNode, DateTimeLiteral); }
+        {
+          APPLY_NO_INDENT (caseDateTimeLiteral, astNode, DateTimeLiteral);
+        }
       case ASTNode::ASTNodeClass::DictionaryLiteral:
-        { APPLY_NO_INDENT (caseDictionaryLiteral, astNode, DictionaryLiteral); }
+        {
+          APPLY_NO_INDENT (caseDictionaryLiteral, astNode, DictionaryLiteral);
+        }
       case ASTNode::ASTNodeClass::EnumerationLiteral:
         {
           APPLY_NO_INDENT (caseEnumerationLiteral, astNode, EnumerationLiteral);
         }
       case ASTNode::ASTNodeClass::FP32Literal:
-        { APPLY_NO_INDENT (caseFP32Literal, astNode, FP32Literal); }
+        {
+          APPLY_NO_INDENT (caseFP32Literal, astNode, FP32Literal);
+        }
       case ASTNode::ASTNodeClass::FP64Literal:
-        { APPLY_NO_INDENT (caseFP64Literal, astNode, FP64Literal); }
+        {
+          APPLY_NO_INDENT (caseFP64Literal, astNode, FP64Literal);
+        }
       case ASTNode::ASTNodeClass::FunctionLiteral:
-        { APPLY_NO_INDENT (caseFunctionLiteral, astNode, FunctionLiteral); }
+        {
+          APPLY_NO_INDENT (caseFunctionLiteral, astNode, FunctionLiteral);
+        }
       case ASTNode::ASTNodeClass::Integer8Literal:
-        { APPLY_NO_INDENT (caseInteger8Literal, astNode, Integer8Literal); }
+        {
+          APPLY_NO_INDENT (caseInteger8Literal, astNode, Integer8Literal);
+        }
       case ASTNode::ASTNodeClass::Integer16Literal:
-        { APPLY_NO_INDENT (caseInteger16Literal, astNode, Integer16Literal); }
+        {
+          APPLY_NO_INDENT (caseInteger16Literal, astNode, Integer16Literal);
+        }
       case ASTNode::ASTNodeClass::Integer32Literal:
-        { APPLY_NO_INDENT (caseInteger32Literal, astNode, Integer32Literal); }
+        {
+          APPLY_NO_INDENT (caseInteger32Literal, astNode, Integer32Literal);
+        }
       case ASTNode::ASTNodeClass::Integer64Literal:
-        { APPLY_NO_INDENT (caseInteger64Literal, astNode, Integer64Literal); }
+        {
+          APPLY_NO_INDENT (caseInteger64Literal, astNode, Integer64Literal);
+        }
       case ASTNode::ASTNodeClass::KeyTableLiteral:
-        { APPLY_NO_INDENT (caseKeyTableLiteral, astNode, KeyTableLiteral); }
+        {
+          APPLY_NO_INDENT (caseKeyTableLiteral, astNode, KeyTableLiteral);
+        }
       case ASTNode::ASTNodeClass::ListLiteral:
-        { APPLY_NO_INDENT (caseListLiteral, astNode, ListLiteral); }
+        {
+          APPLY_NO_INDENT (caseListLiteral, astNode, ListLiteral);
+        }
       case ASTNode::ASTNodeClass::MinuteLiteral:
-        { APPLY_NO_INDENT (caseMinuteLiteral, astNode, MinuteLiteral); }
+        {
+          APPLY_NO_INDENT (caseMinuteLiteral, astNode, MinuteLiteral);
+        }
       case ASTNode::ASTNodeClass::MonthLiteral:
-        { APPLY_NO_INDENT (caseMonthLiteral, astNode, MonthLiteral); }
+        {
+          APPLY_NO_INDENT (caseMonthLiteral, astNode, MonthLiteral);
+        }
       case ASTNode::ASTNodeClass::SecondLiteral:
-        { APPLY_NO_INDENT (caseSecondLiteral, astNode, SecondLiteral); }
+        {
+          APPLY_NO_INDENT (caseSecondLiteral, astNode, SecondLiteral);
+        }
       case ASTNode::ASTNodeClass::StringLiteral:
-        { APPLY_NO_INDENT (caseStringLiteral, astNode, StringLiteral); }
+        {
+          APPLY_NO_INDENT (caseStringLiteral, astNode, StringLiteral);
+        }
       case ASTNode::ASTNodeClass::SymbolLiteral:
-        { APPLY_NO_INDENT (caseSymbolLiteral, astNode, SymbolLiteral); }
+        {
+          APPLY_NO_INDENT (caseSymbolLiteral, astNode, SymbolLiteral);
+        }
       case ASTNode::ASTNodeClass::TableLiteral:
-        { APPLY_NO_INDENT (caseTableLiteral, astNode, TableLiteral); }
+        {
+          APPLY_NO_INDENT (caseTableLiteral, astNode, TableLiteral);
+        }
       case ASTNode::ASTNodeClass::TimeLiteral:
-        { APPLY_NO_INDENT (caseTimeLiteral, astNode, TimeLiteral); }
+        {
+          APPLY_NO_INDENT (caseTimeLiteral, astNode, TimeLiteral);
+        }
       case ASTNode::ASTNodeClass::DictionaryType:
-        { APPLY_NO_INDENT (caseDictionaryType, astNode, DictionaryType); }
+        {
+          APPLY_NO_INDENT (caseDictionaryType, astNode, DictionaryType);
+        }
       case ASTNode::ASTNodeClass::EnumerationType:
-        { APPLY_NO_INDENT (caseEnumerationType, astNode, EnumerationType); }
+        {
+          APPLY_NO_INDENT (caseEnumerationType, astNode, EnumerationType);
+        }
       case ASTNode::ASTNodeClass::FunctionType:
-        { APPLY_NO_INDENT (caseFunctionType, astNode, FunctionType); }
+        {
+          APPLY_NO_INDENT (caseFunctionType, astNode, FunctionType);
+        }
       case ASTNode::ASTNodeClass::ListType:
-        { APPLY_NO_INDENT (caseListType, astNode, ListType); }
+        {
+          APPLY_NO_INDENT (caseListType, astNode, ListType);
+        }
       case ASTNode::ASTNodeClass::PrimitiveType:
-        { APPLY_NO_INDENT (casePrimitiveType, astNode, PrimitiveType); }
+        {
+          APPLY_NO_INDENT (casePrimitiveType, astNode, PrimitiveType);
+        }
       case ASTNode::ASTNodeClass::WildcardType:
-        { APPLY_NO_INDENT (caseWildcardType, astNode, WildcardType); }
+        {
+          APPLY_NO_INDENT (caseWildcardType, astNode, WildcardType);
+        }
       case ASTNode::ASTNodeClass::Identifier:
-        { APPLY_NO_INDENT (caseIdentifier, astNode, Identifier); }
+        {
+          APPLY_NO_INDENT (caseIdentifier, astNode, Identifier);
+        }
     }
 }
 
@@ -114,8 +190,8 @@ ASTPrinter::caseCompilationUnit (const CompilationUnit *unit, size_t indent)
       unit->modulesConstBegin (), unit->modulesConstEnd (),
       [&] (const Module *module) -> void
       {
-        print (module, indent);
-        stream << LINE_BREAK;
+          print (module, indent);
+          stream << LINE_BREAK;
       });
 }
 
@@ -129,29 +205,31 @@ void ASTPrinter::caseModule (const Module *module, size_t indent)
       module->importedModulesConstEnd (),
       [&] (const Module::ImportedModuleConstIterator::value_type &value) -> void
       {
-        for (std::size_t iter = 0; iter < indent + 1; ++iter) stream << INDENT;
-        stream << "def "
-               << value.first << '.'
-               << value.second << ';' << LINE_BREAK;
+          for (std::size_t iter = 0; iter < indent + 1; ++iter)
+            stream << INDENT;
+          stream << "def "
+                 << value.first << '.'
+                 << value.second << ';' << LINE_BREAK;
       });
   std::for_each (
       module->globalVariablesConstBegin (),
       module->globalVariablesConstEnd (),
       [&] (const Module::GlobalVariableConstIterator::value_type &value) -> void
       {
-        for (std::size_t iter = 0; iter < indent + 1; ++iter) stream << INDENT;
-        stream << "def "
-               << value.first << " :";
-        print (value.second, 0);
-        stream << ';' << LINE_BREAK;
+          for (std::size_t iter = 0; iter < indent + 1; ++iter)
+            stream << INDENT;
+          stream << "def "
+                 << value.first << " :";
+          print (value.second, 0);
+          stream << ';' << LINE_BREAK;
       });
   std::for_each (
       module->methodsConstBegin (),
       module->methodsConstEnd (),
       [&] (const Module::MethodConstIterator::value_type &value) -> void
       {
-        print (value, indent + 1);
-        stream << LINE_BREAK;
+          print (value, indent + 1);
+          stream << LINE_BREAK;
       });
   for (std::size_t iter = 0; iter < indent; ++iter) stream << INDENT;
   stream << '}';
@@ -179,8 +257,8 @@ void ASTPrinter::caseMethod (const Method *method, size_t indent)
       method->statementsConstEnd (),
       [&] (const Method::StatementConstIterator::value_type &value) -> void
       {
-        print (value, indent + 1);
-        stream << LINE_BREAK;
+          print (value, indent + 1);
+          stream << LINE_BREAK;
       });
   for (std::size_t iter = 0; iter < indent; ++iter) stream << INDENT;
   stream << '}';
@@ -355,7 +433,11 @@ void ASTPrinter::caseCharLiteral (const CharLiteral *charLiteral)
   caseVectorLiteral (
       charLiteral,
       [&] (const ValueType &value) -> void
-      { printCharWithEscape (value); });
+      {
+          stream << "'";
+          printCharWithEscape (value);
+          stream << "'";
+      });
 }
 
 void ASTPrinter::caseComplexLiteral (const ComplexLiteral *complexLiteral)
@@ -366,9 +448,9 @@ void ASTPrinter::caseComplexLiteral (const ComplexLiteral *complexLiteral)
       complexLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << value.real ();
-        if (value.imag () >= 0) stream << '+';
-        stream << value.imag () << 'i';
+          stream << value.real ();
+          if (value.imag () >= 0) stream << '+';
+          stream << value.imag () << 'i';
       });
 }
 
@@ -380,9 +462,9 @@ void ASTPrinter::caseDateLiteral (const DateLiteral *dateLiteral)
       dateLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << std::to_string (value.year) << '.'
-               << std::to_string (value.month) << '.'
-               << std::to_string (value.day);
+          stream << std::to_string (value.year) << '.'
+                 << std::to_string (value.month) << '.'
+                 << std::to_string (value.day);
       });
 }
 
@@ -394,13 +476,13 @@ void ASTPrinter::caseDateTimeLiteral (const DateTimeLiteral *dateTimeLiteral)
       dateTimeLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << std::to_string (value.year) << '.'
-               << std::to_string (value.month) << '.'
-               << std::to_string (value.day) << 'T'
-               << std::to_string (value.hour) << ':'
-               << std::to_string (value.minute) << ':'
-               << std::to_string (value.second) << '.'
-               << std::to_string (value.millisecond);
+          stream << std::to_string (value.year) << '.'
+                 << std::to_string (value.month) << '.'
+                 << std::to_string (value.day) << 'T'
+                 << std::to_string (value.hour) << ':'
+                 << std::to_string (value.minute) << ':'
+                 << std::to_string (value.second) << '.'
+                 << std::to_string (value.millisecond);
       });
 }
 
@@ -473,13 +555,13 @@ void ASTPrinter::caseFunctionLiteral (const FunctionLiteral *functionLiteral)
       functionLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << '@';
-        if (value.moduleName.empty ())
-          {
-            stream << value.methodName;
-            return;
-          }
-        stream << value.moduleName << '.' << value.methodName;
+          stream << '@';
+          if (value.moduleName.empty ())
+            {
+              stream << value.methodName;
+              return;
+            }
+          stream << value.moduleName << '.' << value.methodName;
       });
 }
 
@@ -569,32 +651,32 @@ void ASTPrinter::printCharWithEscape (std::uint8_t value)
 {
   std::locale cLocale ("C");
   if (value == 0x07)
-    { stream << R"STR('\a')STR"; }
+    { stream << R"STR(\a)STR"; }
   else if (value == 0x08)
-    { stream << R"STR('\b')STR"; }
+    { stream << R"STR(\b)STR"; }
   else if (value == 0x0C)
-    { stream << R"STR('\f')STR"; }
+    { stream << R"STR(\f)STR"; }
   else if (value == 0x0A)
-    { stream << R"STR('\n')STR"; }
+    { stream << R"STR(\n)STR"; }
   else if (value == 0x0D)
-    { stream << R"STR('\r')STR"; }
+    { stream << R"STR(\r)STR"; }
   else if (value == 0x09)
-    { stream << R"STR('\t')STR"; }
+    { stream << R"STR(\t)STR"; }
   else if (value == 0x0B)
-    { stream << R"STR('\v')STR"; }
+    { stream << R"STR(\v)STR"; }
   else if (value == 0x5C)
-    { stream << R"STR('\\')STR"; }
+    { stream << R"STR(\\)STR"; }
   else if (value == 0x27)
-    { stream << R"STR('\'')STR"; }
+    { stream << R"STR(\')STR"; }
   else if (value == 0x22)
-    { stream << R"STR('\"')STR"; }
+    { stream << R"STR(\")STR"; }
   else if (value == 0x3F)
-    { stream << R"STR('?')STR"; }
+    { stream << R"STR(?)STR"; }
   else if (std::isprint (static_cast<char>(value), cLocale))
-    { stream << '\'' << static_cast<char>(value) << '\''; }
+    { stream << static_cast<char>(value); }
   else
     {
-      stream << '\'' << R"STR(\x)STR";
+      stream << R"STR(\x)STR";
       if (value <= 0x0F) stream << '0';
       static std::array<char, 16> digits = {
           '0', '1', '2', '3', '4', '5', '6', '7',
@@ -602,7 +684,7 @@ void ASTPrinter::printCharWithEscape (std::uint8_t value)
       };
       auto highBits = static_cast<std::size_t>(((value & 0xf0) >> 4) & 0x0f);
       auto lowBits = static_cast<std::size_t>(value & 0x0f);
-      stream << digits.at (highBits) << digits.at (lowBits) << '\'';
+      stream << digits.at (highBits) << digits.at (lowBits);
     }
 }
 
@@ -629,8 +711,8 @@ void ASTPrinter::caseMinuteLiteral (const MinuteLiteral *minuteLiteral)
       minuteLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << std::to_string (value.hour) << ':'
-               << std::to_string (value.minute);
+          stream << std::to_string (value.hour) << ':'
+                 << std::to_string (value.minute);
       });
 }
 
@@ -642,8 +724,8 @@ void ASTPrinter::caseMonthLiteral (const MonthLiteral *monthLiteral)
       monthLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << std::to_string (value.year) << '.'
-               << std::to_string (value.month);
+          stream << std::to_string (value.year) << '.'
+                 << std::to_string (value.month);
       });
 }
 
@@ -665,9 +747,9 @@ void ASTPrinter::caseStringLiteral (const StringLiteral *stringLiteral)
       stringLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << '\"';
-        for (const auto &character : value) printCharWithEscape (character);
-        stream << '\"';
+          stream << '\"';
+          for (const auto &character : value) printCharWithEscape (character);
+          stream << '\"';
       });
 }
 
@@ -678,7 +760,7 @@ void ASTPrinter::caseSymbolLiteral (const SymbolLiteral *symbolLiteral)
   caseVectorLiteral (
       symbolLiteral,
       [&] (const ValueType &value) -> void
-      { stream << '`' << value; });
+      { stream << "`\"" << value << '"'; });
 }
 
 void ASTPrinter::caseTableLiteral (const TableLiteral *tableLiteral)
@@ -705,10 +787,10 @@ void ASTPrinter::caseTimeLiteral (const TimeLiteral *timeLiteral)
       timeLiteral,
       [&] (const ValueType &value) -> void
       {
-        stream << std::to_string (value.hour) << ':'
-               << std::to_string (value.minute) << ':'
-               << std::to_string (value.second) << '.'
-               << std::to_string (value.millisecond);
+          stream << std::to_string (value.hour) << ':'
+                 << std::to_string (value.minute) << ':'
+                 << std::to_string (value.second) << '.'
+                 << std::to_string (value.millisecond);
       });
 }
 

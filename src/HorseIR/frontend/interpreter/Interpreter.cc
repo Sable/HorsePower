@@ -79,7 +79,6 @@ V Interpreter::interpret (const ast::Method *method, std::size_t argc, V *argv)
       if (statementClass == StatementClass::Return)
         { CAST_INTERPRET (ast::ReturnStatement, stmt, context); }
     }
-
   return context.returnValue;
 }
 
@@ -168,5 +167,18 @@ V Interpreter::fetchOperand (const ast::Operand *operand, InterpretContext &c)
     }
   assert (operand->getOperandClass () == ast::Operand::OperandClass::Literal);
   auto castedPtr = dynamic_cast<const ast::Literal *>(operand);
-  return LiteralConverter::convert (castedPtr);
+  if (castedPtr->getLiteralClass () == ast::Literal::LiteralClass::Function)
+    {
+      auto funcLiteral = dynamic_cast<const ast::FunctionLiteral *>(castedPtr);
+      auto dispatchedFunc = dispatcher.getMethodMETA (funcLiteral);
+      assert (dispatchedFunc.size () == 1); // FIXME
+      auto methodMETA = dispatchedFunc[0];
+      assert (methodMETA->getMethodMETAClass () ==
+              Dispatcher::MethodMETA::MethodMETAClass::External);
+      auto externalMethodMETA =
+          dynamic_cast<Dispatcher::ExternalMethodMETA*>(methodMETA);
+      return (V) externalMethodMETA->getRawPtr();
+    }
+  else
+    { return LiteralConverter::convert (castedPtr); }
 }
