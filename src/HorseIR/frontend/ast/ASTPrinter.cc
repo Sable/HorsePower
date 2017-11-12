@@ -1,4 +1,5 @@
 #include "ASTPrinter.h"
+#include <regex>
 
 #define APPLY(func, x, T, indent)                       \
   func(dynamic_cast<const T *>(x), indent);             \
@@ -757,10 +758,19 @@ void ASTPrinter::caseSymbolLiteral (const SymbolLiteral *symbolLiteral)
 {
   assert (symbolLiteral != nullptr);
   using ValueType = SymbolLiteral::ElementType::ValueType;
+
+  const std::string regexStr = R"REGEX([a-zA-Z_][a-zA-Z0-9_]*)REGEX";
+  const std::regex regex (regexStr);
+  std::smatch regexMatch;
   caseVectorLiteral (
       symbolLiteral,
       [&] (const ValueType &value) -> void
-      { stream << "`\"" << value << '"'; });
+      {
+          if (std::regex_match (value, regexMatch, regex))
+            { stream << '`' << value; }
+          else
+            { stream << "`\"" << value << '"'; }
+      });
 }
 
 void ASTPrinter::caseTableLiteral (const TableLiteral *tableLiteral)

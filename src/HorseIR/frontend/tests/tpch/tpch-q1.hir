@@ -1,0 +1,81 @@
+module default{
+    import Bultin.*;
+    def main() : table{
+        // 1. load table
+        a0:table = @load_table(`lineitem);
+
+        t0:f64 = check_cast(@column_value(a0, `l_extendedprice), f64);
+        t1:f64 = check_cast(@column_value(a0, `l_discount     ), f64);
+        t2:d   = check_cast(@column_value(a0, `l_shipdate     ), d  );
+        t3:f64 = check_cast(@column_value(a0, `l_quantity     ), f64);
+        t4:f64 = check_cast(@column_value(a0, `l_returnflag   ), char);
+        t5:f64 = check_cast(@column_value(a0, `l_linestatus   ), char);
+        t6:f64 = check_cast(@column_value(a0, `l_tax          ), f64);
+
+        // 2. where
+        w0:i64 = @len(a0);
+        w1:d   = @datetime_sub(1998.12.01:d, 90:i64, `day);
+        w2:bool= @leq(t2, w1);
+
+        // 3. group by
+        g0:char       = @compress(w2, t4);
+        g1:char       = @compress(w2, t5);
+        g2:list<char> = @list(g0, g1);
+        g3:dict<list<char>, i64> = @group(g2);
+        g4:list<char> = @keys(g3);
+        g5:list<i64>  = @values(g3);
+        g6:i64        = @where(w2);
+        g7:list<i64>  = @each_right(g6, g5, @index:func<...:?>);
+
+        // 4. select
+        s0 :list<f64> = @each_right(t3, g7, @index:func<...:?>);
+        s1 :list<f64> = @each_right(t0, g7, @index:func<...:?>);
+        s2 :list<f64> = @each_right(t1, g7, @index:func<...:?>);
+        s3 :list<f64> = @each_right(t6, g7, @index:func<...:?>);
+        s4 :list<f64> = @each(s0, @sum:func<...:?>);
+        s5 :list<f64> = @each(s1, @sum:func<...:?>);
+        s6 :list<f64> = @each_item(1:i64, s2, @minus:func<...:?>);
+        s7 :list<f64> = @each_item(s1, s6, @mul:func<...:?>);
+        s8 :list<f64> = @each(s7, @sum:func<...:?>);
+        s9 :list<f64> = @each_item(1:i64, s2, @minus:func<...:?>);
+        s10:list<f64> = @each_item(s1, s9, @mul:func<...:?>);
+        s11:list<f64> = @each_item(1:i64, s3, @plus:func<...:?>);
+        s12:list<f64> = @each_item(s10, s11, @mul:func<...:?>);
+        f0:list<f64>  = @each(s12, @sum:func<...:?>);
+        s13:list<f64> = @each(s0, @avg:func<...:?>);
+        s14:list<f64> = @each(s1, @avg:func<...:?>);
+        s15:list<f64> = @each(s2, @avg:func<...:?>);
+        s16:list<i64> = @each(g7, @len:func<...:?>);
+        s17:char      = @index(g0, g4);
+        s18:char      = @index(g1, g4);
+        s19:f64       = @raze(s4);
+        s20:f64       = @raze(s5);
+        s21:f64       = @raze(s8);
+        s22:f64       = @raze(f0);
+        s23:f64       = @raze(s13);
+        s24:f64       = @raze(s14);
+        s25:f64       = @raze(s15);
+        s26:i64       = @raze(s16);
+        // 5. order by
+        // r0:i64        = @order(g4,(1):bool);
+
+        // 6. materialization
+        m0:char = s17;
+        m1:char = s18;
+        m2:char = s19;
+        m3:char = s20;
+        m4:char = s21;
+        m5:char = s22;
+        m6:char = s23;
+        m7:char = s24;
+        m8:char = s25;
+        m9:char = s26;
+
+        // 7. return
+        z0:sym     = (`l_returnflag,`l_linestatus,`sum_qty,`sum_base_price,`sum_disc_price,`sum_charge,`avg_qty,`avg_price,`avg_disc,`count_order);
+        z1:list<?> = @list(m0,m1,m2,m3,m4,m5,m6,m7,m8,m9);
+        z :table   = @table(z0,z1);
+
+        return z; //z is table
+   }
+}

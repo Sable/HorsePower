@@ -1,0 +1,12 @@
+- xTable: customer
+  xKey: c_custkey
+  yTable: orders
+  yKey: o_custkey
+- xTable: orders
+  xKey: o_orderkey
+  yTable: lineitem
+  yKey: l_orderkey
+- xTable: part
+  xKey: p_partkey
+  yTable: partsupp
+  yKey: ps_partkey

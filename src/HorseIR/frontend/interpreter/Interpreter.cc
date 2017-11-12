@@ -1,6 +1,7 @@
 #include "Interpreter.h"
 
 #include <stdexcept>
+#include <spdlog/spdlog.h>
 #define NOT_YET_IMPLEMENTED std::runtime_error("not yet implemented")
 #define ALLOC_NODE(x) {                                  \
             (x) = allocNode();                           \
@@ -50,6 +51,10 @@ V Interpreter::InterpretContext::readLocalVariable (
 V Interpreter::interpret (const ast::Method *method, std::size_t argc, V *argv)
 {
   assert (method != nullptr);
+
+  auto logger = spdlog::stdout_color_mt (method->getMethodName ());
+  logger->set_pattern ("[%n] %v");
+
   InterpretContext context;
 
   const auto parametersAST = method->getParameters ();
@@ -65,6 +70,16 @@ V Interpreter::interpret (const ast::Method *method, std::size_t argc, V *argv)
     {
       using StatementClass = ast::Statement::StatementClass;
       const ast::Statement *stmt = context.pc;
+      // FIXME
+      auto constStmtCST =
+          dynamic_cast<const HorseIRParser::StatementContext *>(stmt->getCST ());
+      auto stmtCST =
+          const_cast<HorseIRParser::StatementContext *>(constStmtCST);
+      const std::size_t lineNum = stmtCST->getStart ()->getLine ();
+      std::ostringstream stream;
+      horseIR::ast::ASTPrinter printer (stream);
+      printer.print (stmt);
+      logger->info ("[{:>3}] {}", lineNum, stream.str ());
       const auto statementClass = context.pc->getStatementClass ();
       if (statementClass == StatementClass::Assign)
         { CAST_INTERPRET (ast::AssignStatement, stmt, context); }
@@ -176,8 +191,8 @@ V Interpreter::fetchOperand (const ast::Operand *operand, InterpretContext &c)
       assert (methodMETA->getMethodMETAClass () ==
               Dispatcher::MethodMETA::MethodMETAClass::External);
       auto externalMethodMETA =
-          dynamic_cast<Dispatcher::ExternalMethodMETA*>(methodMETA);
-      return (V) externalMethodMETA->getRawPtr();
+          dynamic_cast<Dispatcher::ExternalMethodMETA *>(methodMETA);
+      return (V) externalMethodMETA->getRawPtr ();
     }
   else
     { return LiteralConverter::convert (castedPtr); }

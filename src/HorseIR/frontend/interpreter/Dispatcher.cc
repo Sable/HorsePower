@@ -123,7 +123,16 @@ void Dispatcher::registerExternalMethods ()
                                }
                          }, (void *) pfnList);
   HORSEIR_BUILTIN_ARG2 (pfnIndex, "index");
-  HORSEIR_BUILTIN_ARG2 (pfnIndexA, "index_assign");
+  addExternalMethodMETA ("Buitlin", "index_assign",
+                         [] (V ret, std::size_t argc, V argv[])
+                         {
+                             L opCode = pfnIndexA (argv[0], argv[1], argv[2]);
+                             if (opCode != 0)
+                               {
+                                 printErrMsg (opCode);
+                                 throw std::runtime_error ("runtime exception");
+                               }
+                         }, (void *) pfnIndexA);
   HORSEIR_BUILTIN_ARG1 (pfnFlip, "flip");
   HORSEIR_BUILTIN_ARG2 (pfnMatch, "match");
   HORSEIR_BUILTIN_ARG1 (pfnMeta, "meta");

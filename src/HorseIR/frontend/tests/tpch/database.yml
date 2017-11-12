@@ -1,0 +1,154 @@
+- table:
+    path: region.tbl
+    name: region
+    content:
+      - name: r_regionkey
+        type: L
+      - name: r_name
+        type: Q
+      - name: r_comment
+        type: S
+- table:
+    path: nation.tbl
+    name: nation
+    content:
+      - name: n_nationkey
+        type: L
+      - name: n_name
+        type: Q
+      - name: n_regionkey
+        type: L
+      - name: n_comment
+        type: S
+- table:
+    path: customer.tbl
+    name: customer
+    content:
+      - name: c_custkey
+        type: L
+      - name: c_name
+        type: Q
+      - name: c_address
+        type: S
+      - name: c_nationkey
+        type: L
+      - name: c_phone
+        type: S
+      - name: c_acctbal
+        type: E
+      - name: c_mktsegment
+        type: Q
+      - name: c_comment
+        type: S
+- table:
+    path: orders.tbl
+    name: orders
+    content:
+      - name: o_orderkey
+        type: L
+      - name: o_custkey
+        type: L
+      - name: o_orderstatus
+        type: C
+      - name: o_totalprice
+        type: E
+      - name: o_orderdate
+        type: D
+      - name: o_orderpriority
+        type: Q
+      - name: o_clerk
+        type: S
+      - name: o_shippriority
+        type: L
+      - name: o_comment
+        type: S
+- table:
+    path: lineitem.tbl
+    name: lineitem
+    content:
+      - name: l_orderkey
+        type: L
+      - name: l_partkey
+        type: L
+      - name: l_suppkey
+        type: L
+      - name: l_linenumber
+        type: L
+      - name: l_quantity
+        type: E
+      - name: l_extendedprice
+        type: E
+      - name: l_discount
+        type: E
+      - name: l_tax
+        type: E
+      - name: l_returnflag
+        type: C
+      - name: l_linestatus
+        type: C
+      - name: l_shipdate
+        type: D
+      - name: l_commitdate
+        type: D
+      - name: l_receiptdate
+        type: D
+      - name: l_shipinstruct
+        type: Q
+      - name: l_shipmode
+        type: Q
+      - name: l_comment
+        type: S
+- table:
+    path: part.tbl
+    name: part
+    content:
+      - name: p_partkey
+        type: L
+      - name: p_name
+        type: S
+      - name: p_mfgr
+        type: S
+      - name: p_brand
+        type: Q
+      - name: p_type
+        type: Q
+      - name: p_size
+        type: L
+      - name: p_container
+        type: Q
+      - name: p_retailprice
+        type: E
+      - name: p_comment
+        type: S
+- table:
+    path: supplier.tbl
+    name: supplier
+    content:
+      - name: s_suppkey
+        type: L
+      - name: s_name
+        type: S
+      - name: s_address
+        type: S
+      - name: s_nationkey
+        type: L
+      - name: s_phone
+        type: S
+      - name: s_acctbal
+        type: E
+      - name: s_comment
+        type: S
+- table:
+    path: partsupp.tbl
+    name: partsupp
+    content:
+      - name: ps_partkey
+        type: L
+      - name: ps_suppkey
+        type: L
+      - name: ps_availqty
+        type: L
+      - name: ps_supplycost
+        type: E
+      - name: ps_comment
+        type: S

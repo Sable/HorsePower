@@ -62,16 +62,16 @@ std::string typeToString (L type)
 int main (int argc, const char *argv[])
 {
 
-  if (argc != 4)
+  if (argc != 3)
     {
       std::cout << "usage:" << std::endl
                 << argv[0] << " [database config(.yml)]" << ' '
-                << "[key relationship(.yml)]" << ' '
-                << "[hir file]" << std::endl;
+                << "[key relationship(.yml)]" << std::endl;
       return EXIT_FAILURE;
     }
 
-  auto logger = spdlog::stdout_color_mt ("console");
+
+  auto logger = spdlog::stdout_color_mt ("Top");
   logger->set_pattern ("[%n] [%l] %v");
 
   initMain ();
@@ -160,8 +160,7 @@ int main (int argc, const char *argv[])
       pfnAddFKey (xTableNode, xKeyNode, yTableNode, yKeyNode);
     }
 
-  std::ifstream stream (argv[3]);
-  antlr4::ANTLRInputStream inputStream (stream);
+  antlr4::ANTLRInputStream inputStream (std::cin);
   horseIR::HorseIRLexer lexer (&inputStream);
   antlr4::CommonTokenStream tokenStream (&lexer);
   horseIR::HorseIRParser parser (&tokenStream);
