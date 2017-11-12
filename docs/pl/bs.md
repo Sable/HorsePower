@@ -39,11 +39,11 @@ module default{
         OutputX:f64    = @plus(t16,t14);
         return OutputX;
     }
-    def main() : f64 {
+    def BlkSchls(sptprice:f64, strike:f64, rate:f64, divq:f64, volatility:f64, time:f64, optiontype:char, divs:f64, dfrefval:f64) : f64 {
         xSqrtTime:f64     = @power(time:f64,  0.5);
         t0:f64            = @div(sptprice, strike);
         xLogTerm:f64      = @log(xLogTerm, t0);
-        xRiskFreeRate:f64 = rate:f64;
+        xRiskFreeRate:f64 = rate;
         xDen:f64          = @mul(volatility,xSqrtTime);
         t1:f64            = @mul(volatility, 0.5:f64);
         xPowerTerm:f64    = @mul*volatility, t1);
@@ -51,10 +51,10 @@ module default{
         t3:f64            = @mul(time, t2);
         t4:f64            = @plus(xLogTerm, t3);
         xD1:f64           = @div(t4, xDen);
-        d1:f64            = @copy(xD1);
+        d1:f64            = xD1;
         xD2:f64           = @minus(xD1, xDen);
-        d2:f64            = @copy(xD2);
-        invs2xPI:f64      = @copy(0.39894228040143270286:f64);
+        d2:f64            = xD2;
+        invs2xPI:f64      = 0.39894228040143270286:f64;
         NofXd1:f64        = @CNDF(d1, invs2xPI); 
         NofXd2:f64        = @CNDF(d2, invs2xPI); 
         t5:f64            = @mul(rate, time);
@@ -74,6 +74,25 @@ module default{
         t17:f64           = @mul(t16,t15);
         OptionPrice:f64   = @plus(OptionPrice, t17);
         return OptionPrice;
+    }
+
+    def main() : table {
+        bs:table        = @load_table(`blackscholes_table);
+        sptprice:f64    = check_cast(@column_value(bs, `sptprice)  , f64);
+        strike:f64      = check_cast(@column_value(bs, `strike)    , f64);
+        rate:f64        = check_cast(@column_value(bs, `rate)      , f64);
+        divq:f64        = check_cast(@column_value(bs, `divq)      , f64);
+        volatility:f64  = check_cast(@column_value(bs, `volatility), f64);
+        time:f64        = check_cast(@column_value(bs, `time)      , f64);
+        optiontype:char = check_cast(@column_value(bs, `optiontype), char);
+        divs:f64        = check_cast(@column_value(bs, `divs)      , f64);
+        dgrefval:f64    = check_cast(@column_value(bs, `dgrefval)  , f64);
+        optionprice:f64 = @BlkSchls(sptprice,strike,rate,divq,volatility,time,optiontype,divs,dgrefval);
+
+        columnname:sym      = (`optionprice,`optiontype,`sptprice):sym;
+        columnvalue:list<?> = @list(optiontype, sptprice, optionprice);
+        result:table        = @table(columnname, columnvalue);
+        return result;
     }
 }
 ```
