@@ -76,8 +76,11 @@ module default{
         return OptionPrice;
     }
 
-    def main() : table {
+    def bs0_base() : table {
+        // Load a table "blackscholess_table" into "bs"
         bs:table        = @load_table(`blackscholes_table);
+
+        // Load all columns by its column names and save to in sptprice and etc.
         sptprice:f64    = check_cast(@column_value(bs, `sptprice)  , f64);
         strike:f64      = check_cast(@column_value(bs, `strike)    , f64);
         rate:f64        = check_cast(@column_value(bs, `rate)      , f64);
@@ -87,12 +90,58 @@ module default{
         optiontype:char = check_cast(@column_value(bs, `optiontype), char);
         divs:f64        = check_cast(@column_value(bs, `divs)      , f64);
         dgrefval:f64    = check_cast(@column_value(bs, `dgrefval)  , f64);
+
+        // Pass all columns to "@BlkSchls" and save its output to "optionprice"
         optionprice:f64 = @BlkSchls(sptprice,strike,rate,divq,volatility,time,optiontype,divs,dgrefval);
 
+        // Construct a new table (with optionprice) and return it
         columnname:sym      = (`optionprice,`optiontype,`sptprice):sym;
         columnvalue:list<?> = @list(optiontype, sptprice, optionprice);
         result:table        = @table(columnname, columnvalue);
         return result;
+    }
+
+    def bs1_high() : table {
+        // Load a table "blackscholess_table" into "bs"
+        bs:table        = @load_table(`blackscholes_table);
+
+        // Load all columns by its column names and save to in sptprice and etc.
+        sptprice:f64    = check_cast(@column_value(bs, `sptprice)  , f64);
+        strike:f64      = check_cast(@column_value(bs, `strike)    , f64);
+        rate:f64        = check_cast(@column_value(bs, `rate)      , f64);
+        divq:f64        = check_cast(@column_value(bs, `divq)      , f64);
+        volatility:f64  = check_cast(@column_value(bs, `volatility), f64);
+        time:f64        = check_cast(@column_value(bs, `time)      , f64);
+        optiontype:char = check_cast(@column_value(bs, `optiontype), char);
+        divs:f64        = check_cast(@column_value(bs, `divs)      , f64);
+        dgrefval:f64    = check_cast(@column_value(bs, `dgrefval)  , f64);
+
+        // Apply filters first
+        w0:bool         = @lt(sptprice, 50:i64);
+        w1:bool         = @gt(sptprice, 100:i64);
+        w2:bool         = @and(w0, w1);
+
+        m0:f64          = @compress(w3, sptprice);
+        m1:f64          = @compress(w3, strike);
+        m2:f64          = @compress(w3, rate);
+        m3:f64          = @compress(w3, divq);
+        m4:f64          = @compress(w3, volatility);
+        m5:f64          = @compress(w3, time);
+        m6:char         = @compress(w3, optiontype);
+        m7:f64          = @compress(w3, divs);
+        m8:f64          = @compress(w3, dgrefval);
+
+        // Pass all "selected" columns to "@BlkSchls" and save its output to "optionprice"
+        optionprice:f64 = @BlkSchls(m0,m1,m2,m3,m4,m5,m6,m7,m8);
+
+        // Construct a new table (with optionprice) and return it
+        columnname:sym      = (`optionprice,`optiontype,`sptprice):sym;
+        columnvalue:list<?> = @list(optiontype, sptprice, optionprice);
+        result:table        = @table(columnname, columnvalue);
+        return result;
+    }
+    def main() : table {
+        return bs0_base();  //Or  return bs1_high();
     }
 }
 ```
