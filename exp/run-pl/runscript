@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# bs="newtest-bs-t1.log"
+bs="newtest-bs-t40.log"
+rm -f $bs
+for id in {0..9}
+do
+    echo processing bs$id
+    (cd ../../src/HorseIR/backend && ./runpl release opt 0 $id) >> $bs
+done
+

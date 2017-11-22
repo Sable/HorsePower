@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+scale=(1 2 4 8 16)
+for s in ${scale[@]}
+do
+    echo "running scale $s"
+    (time ./runexp $s) &> "run$s.log"
+done
+
+
