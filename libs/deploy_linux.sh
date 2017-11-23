@@ -28,7 +28,7 @@ mv pcre2/pcre2-10.30/src/*.h include/
 ## Download yaml-cpp
 wget https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.5.3.tar.gz
 tar -xf yaml-cpp-0.5.3.tar.gz
-mv yaml-cpp-0.5.3 yaml-cpp
+mv yaml-cpp-yaml-cpp-0.5.3 yaml-cpp
 (cd yaml-cpp && mkdir build && cd build && cmake ../ && make)
 mv yaml-cpp/build/libyaml-cpp.a lib/
 mv yaml-cpp/include/yaml-cpp include/
