@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 project(HorseIR)
 
+set(CMAKE_C_COMPILER /usr/local/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/local/bin/g++)
+
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -O3")
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 set(ANTLR4CPP_JAR_LOCATION "${PROJECT_SOURCE_DIR}/jar/antlr-4.7-complete.jar")
+
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 find_package(ANTLR4CPP)
@@ -25,10 +29,14 @@ find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+else()
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 endif()
 
 include(CollectSource)
 
+include(FindYAMLCPP)
 find_package(YAMLCPP)
 if (NOT YAMLCPP_FOUND)
   message(FATAL_ERROR "require yaml-cpp")
@@ -50,9 +58,9 @@ target_link_libraries(HorseIRInterpreter ${PCRE2_LIBRARIES})
 target_link_libraries(HorseIRInterpreter ${YAMLCPP_LIBRARIES})
 
 # == debug ==
-add_executable(HorseIRDebug
-        ${HORSE_IR_FRONTEND_SRC}
-        ${CMAKE_SOURCE_DIR}/Debug.cc)
-target_link_libraries(HorseIRDebug ${ANTLR4CPP_LIBRARIES})
-target_link_libraries(HorseIRDebug ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
-target_link_libraries(HorseIRDebug ${PCRE2_LIBRARIES})
+# add_executable(HorseIRDebug
+#         ${HORSE_IR_FRONTEND_SRC}
+#         ${CMAKE_SOURCE_DIR}/Debug.cc)
+# target_link_libraries(HorseIRDebug ${ANTLR4CPP_LIBRARIES})
+# target_link_libraries(HorseIRDebug ${CMAKE_SOURCE_DIR}/../backend/libBackend.a)
+# target_link_libraries(HorseIRDebug ${PCRE2_LIBRARIES})
