@@ -1,0 +1,51 @@
+
+Base types
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{cc|cc}
+\hline
+Identifier & Type & Identifier & Type \\ \hline
+bool & bool & d & date \\
+i8 & char & & \\
+\hline
+\end{tabular}
+
+\end{table}
+
+\subsection{Variable declarations}
+The mapping
+
+\begin{align*}
+x:T
+\end{align*}
+
+is added to the symbol table:
+
+\begin{align}
+\frac{V\cup \{x:\tau\},F,T\vdash rest}{V,T,F\vdash x:\tau;rest}
+\end{align}
+
+\head{When an assignment is given:}
+
+\begin{align*}
+x:T = expr
+\end{align*}
+
+If \texttt{expr} is well-typed and its type is T1 and T=T1, then the mapping x:T is added to the symbol table:
+
+\begin{align}
+\frac
+{V,T,F\vdash e:\tau\ \ V\cup\{x:\tau\},T,F\vdash rest}
+{V,T,F\vdash x:\tau; rest}
+\end{align}
+
+\subsection{Function declarations}
+
+\begin{verbatim}
+def func(p1:T1, p2:T2, ..., pn:Tn):Tr{
+   // statements
+}
+\end{verbatim}
+
+\textbf{pending}

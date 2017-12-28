@@ -1,0 +1,217 @@
+
+\subsection{Literals}
+
+Literals are typed in HorseIR.  There are two kinds of literals: \texttt{simple} and \texttt{advanced} literals.
+
+\subsubsection{Simple literals}
+
+A simple literal contains homogeneous data.  One or multiple single values conforms a simple literal.  The definition of a simple literal is defined as follows.
+
+\begin{verbatim}
+simple_literal ::= simple_values [':' single_type];
+simple_values  ::= single_value
+                 | '(' single_value {',' single_value} ')';
+\end{verbatim}
+
+\head{The following literals are considered as simple literals.}
+
+% varwidth: https://tex.stackexchange.com/questions/233780/two-itemized-lists-side-by-side
+
+\begin{itemize}[noitemsep]
+\item Boolean literals
+\item Integer literals
+\item Float literals
+\item Complex literals
+\item Char literals
+\item String literals
+\item Symbol literals
+\item Datetime literals
+\end{itemize}
+
+\headb{Boolean literals.}
+
+\begin{verbatim}
+1:bool    // bool
+\end{verbatim}
+
+\head{A boolean literal must only have 0 or 1 with a \texttt{bool} type.}
+
+\begin{align*}
+\frac{b\ is\ a\ boolean literal}{V,T,F\vdash b:bool}
+\end{align*}
+
+\headb{Integer literals.}
+
+\begin{verbatim}
+42       // int64
+42:i8    // int8
+42:i16   // int16
+42:i32   // int32
+42:i64   // int64
+\end{verbatim}
+
+\head{An integer literal contains four types of integers with different sizes.  The default type of an integer is \texttt{i64}.}
+
+\begin{align*}
+\frac{n\ is\ an\ int8 }{V,T,F\vdash n:i8 }\ \ 
+\frac{n\ is\ an\ int16}{V,T,F\vdash n:i16}\ \ 
+\frac{n\ is\ an\ int32}{V,T,F\vdash n:i32}\ \ 
+\frac{n\ is\ an\ int64}{V,T,F\vdash n:i64}
+\end{align*}
+
+\headb{Float literals.}
+
+\begin{verbatim}
+3.2       // float64
+3.2:f32   // float32
+3.2:f64   // float64
+\end{verbatim}
+
+\head{A float literal contains float and double (i.e. \texttt{float64}) types.  The default type of a floating point number is float64.}
+
+\begin{align*}
+\frac{f\ is\ a\ float32}{V,T,F\vdash f:32}\ \ 
+\frac{f\ is\ a\ float64}{V,T,F\vdash f:i64}
+\end{align*}
+
+\headb{Complex literals.}
+
+\begin{verbatim}
+1+2i      // complex
+1-2i      // complex
+\end{verbatim}
+
+\head{A complex literal consists of two parts: real and image.  Both parts can be either integers or floating numbers.}
+
+\begin{align*}
+\frac{p\ is\ a\ complex}{V,T,F\vdash p:complex}
+\end{align*}
+
+\headb{Char literals.}
+
+\begin{verbatim}
+'c'      // char
+'c':char // char
+\end{verbatim}
+
+\begin{align*}
+\frac{c\ is\ a\ char\ literal}{V,T,F\vdash c:char}
+\end{align*}
+
+\headb{String literals.}
+
+\begin{verbatim}
+"horseir"  // string
+\end{verbatim}
+
+\begin{align*}
+\frac{s\ is\ a\ string\ literal}{V,T,F\vdash s:string}
+\end{align*}
+
+\headb{Symbol literals.}
+
+\begin{verbatim}
+`horseir   // symbol
+`"horseir" // symbol
+\end{verbatim}
+
+\begin{align*}
+\frac{s\ is\ a\ symbol\ literal}{V,T,F\vdash s:symbol}
+\end{align*}
+
+\headb{Datetime literals.}
+
+pending $\ldots$
+
+\subsubsection{Advanced literals}
+
+An advnced literal usually derives from a list-based type which contains hetegeneous data.  A list type may consist of one or more cells.  In each cell, it has different formats of storing \texttt{simple\_literal}s.
+
+\begin{verbatim}
+advanced_literal ::= '{' cell_value { ';' cell_value } '}';
+cell_value       ::= ... simple_literal ... ;
+\end{verbatim}
+
+\head{The following literals are considered as advanced literals.}
+
+\begin{itemize}[noitemsep]
+\item List
+\item Dictionary
+\item Enumeration
+\item Table
+\item Keyed table
+\end{itemize}
+
+
+% second section
+\subsection{Identifier}
+
+An identifier looks up its type in a symbol table.  An error will be returned if it is not found.
+
+\begin{align*}
+\frac{V(x)=\tau}{V,T,F\vdash x:\tau}
+\end{align*}
+
+\subsection{Built-in function calls (Unary)}
+
+\subsection{Built-in function calls (Binary)}
+
+There are different sets of binary built-in functions:
+
+\begin{itemize} %[noitemsep]
+\item BultinSetBool: a set of builtin functions for \textit{boolean} operation
+\item BultinSetArith: a set of builtin functions for \textit{arithmetic} operation
+\end{itemize}
+
+\headb{BultinSetBool}
+
+\begin{verbatim}
+@and(a1, a2)
+@or(a1, a2)
+@nand(a1, a2)
+@nor(a1, a2)
+\end{verbatim}
+
+\head{The operands (i.e. \texttt{a1} and \texttt{a2}) and return value must be boolean.}
+
+\begin{align*}
+\frac
+{V,T,F\vdash a_1:\tau_1\ \ V,T,F\vdash a_2:\tau_2\ \ \tau_1=\tau_2=bool\ \ op\in BultinSetBool}
+{V,T,F\vdash\ op(a_1,a_2):bool}
+\end{align*}
+
+\subsection{General function calls}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

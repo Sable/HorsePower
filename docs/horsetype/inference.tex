@@ -1,0 +1,67 @@
+\documentclass{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{pifont} % https://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{listings}
+\usepackage{tablefootnote}
+
+\newcommand{\head}[1]{\noindent #1}
+\newcommand{\headb}[1]{\noindent \ding{245}\ \textbf{#1}}
+\newcommand{\s}[1]{$\rho$(#1)}
+\newcommand{\spair}[2]{(#1,~#2)}
+\newcommand{\spaira}[1]{\spair{$\alpha$}{#1}}
+\newcommand{\spairb}[1]{\spair{$\beta$}{#1}}
+\newcommand{\spairs}[1]{\spair{$\beta_s$}{#1}}
+\newcommand{\spairv}[1]{\spair{$\beta_v$}{#1}}
+\newcommand{\tops}{$\top$}
+\newcommand{\bots}{$\bot$}
+\newcommand{\len}[1]{$\theta_{#1}$}
+\newcommand{\type}[1]{$\tau_{#1}$}
+
+\author{Hanfeng Chen}
+\title{Type and Shape Inference for HorseIR}
+
+\begin{document}
+\maketitle
+
+\pagenumbering{gobble}
+
+\newpage
+
+\tableofcontents % for a table of contents
+
+\newpage
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+\chapter{Type Inference}
+
+\section{Introduction}
+
+\subsection{Notations}
+
+\begin{itemize}
+\item V: the set of variables
+\item T: the set of types in scopea
+\item F: return type
+\end{itemize}
+
+\section{Type rules} \label{Sec::type_rules}
+\input{rules}
+
+\section{Statements} \label{Sec::stmts}
+\input{stmts}
+
+\section{Expressions} \label{Sec::exprs}
+\input{expressions}
+
+\chapter{Shape Inference}
+\input{shape}
+
+\end{document}
+

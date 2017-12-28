@@ -1,0 +1,49 @@
+\subsection{return}
+
+\begin{verbatim}
+return operand
+\end{verbatim}
+
+\head{A \texttt{return} statement is well-typed if the \texttt{operand} has the same type as the return type of the enclosing function.}
+
+\begin{align*}
+\frac
+{V,T,F\vdash op:\tau\ \ F=\tau\ \ V,T,F\vdash rest}
+{V,T,F\vdash return\ op;rest}
+\end{align*}
+
+\subsection{goto}
+
+\begin{verbatim}
+goto [label_name]
+\end{verbatim}
+
+\head{A \texttt{goto} statement with a label is an unconditional jump.  It is well-typed if the label has a \texttt{label} type.}
+
+\begin{align*}
+\frac
+{V,T,F\vdash n:label\ \ V,T,F\vdash rest}
+{V,T,F\vdash goto\ [n]; rest}
+\end{align*}
+
+\begin{verbatim}
+goto [label_name] label_flag
+\end{verbatim}
+
+\head{A \texttt{goto} statement with a label and a flag is a conditional jump.  It is well typed if the label has a \texttt{label} type and the flag has a \texttt{boolean} type.}
+
+\begin{align*}
+\frac
+{V,T,F\vdash n:label,f:bool\ \ V,T,F\vdash rest}
+{V,T,F\vdash goto\ [n]\ f; rest}
+\end{align*}
+
+\subsection{Block}
+
+\begin{verbatim}
+{
+	// statements
+}
+\end{verbatim}
+
+\head{It checks if all statements in the block are well-typed.  A block opens a new scope in the symbol table.}

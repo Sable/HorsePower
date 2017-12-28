@@ -1,0 +1,190 @@
+\section{Introduction}
+
+A shape is the meta information of an object.  In HorseIR, the shape information is implicit.  By knowing the shape information, it is helpful to reduce boundary checks, generate efficient code with pre-allocated memory, and report the early warnings of shape errors.  Mostly, shape information should be viewed together with type information.  For example, \texttt{z=x+y} where \texttt{x} and \texttt{y} are both scalars.  This expression may be true when both variables are vectors.  However, when either side is a list or any list-based type, it is not allowed in HorseIR.
+
+Therefore, our analyzer should perform type checks before shape inference.
+A shape consists of kind, length and the shape of its sub-items.
+
+\begin{verbatim}
+shape ::= "(" kind "," length ["," "(" shape ")" ] ")"
+\end{verbatim}
+
+%We should note that
+
+\begin{itemize}[noitemsep]
+\item The \texttt{kind} can be vector-based, list-based, or unknown.
+\item The \texttt{length} can be 1, $\neq$ 1, or unknown.
+\item When kind is vector-based, there are only kind and length.
+\item Otherwise, the shape of sub-items should be generated recursively.
+\end{itemize}
+
+%In order to simplify the shape inference while passing enough information for subsequent optimizations, we ignore the shape details of cells in a list type.  Here is the
+%modified shape information as follows.
+%
+%\begin{verbatim}
+%shape ::= "(" type "," length ")"
+%\end{verbatim}
+
+%\headb{Indicator}
+%
+%\begin{itemize}[noitemsep]
+%\item Type $\alpha$ for vector type
+%\item Type $\beta$ for list type
+%\begin{itemize}[noitemsep]
+%\item Type $\beta_s$ for list type and same-length cells
+%\item Type $\beta_v$ for list type and various-length cells
+%\end{itemize}
+%\item Type $\phi$
+%\end{itemize}
+  
+%\headb{Length}
+%
+%\begin{itemize}[noitemsep]
+%\item Length $\theta$
+%\begin{itemize}[noitemsep]
+%\item Length $\theta_s$ for a constant length = 1
+%\item Length $\theta_c$ for a constant length $\neq$ 1
+%\end{itemize}
+%\item Length $\psi_x$ for an unkown length of the variable \texttt{x}
+%\end{itemize}
+%
+%\head{Possible combinations are as follows.}
+%
+%\begin{itemize}[noitemsep]
+%\item \spaira{$\theta_s$}: a vector with a single value (called \textit{scalar})
+%\item \spaira{$\theta_c$}: a vector with length $\neq$ 1
+%\item \spaira{$\psi_x$}  : a vector with unknown length
+%\item \spairb{$\theta_s$}: a list with a single item (called \textit{singleton})
+%\item \spairb{$\theta_c$}: a list with length $\neq$ 1
+%\item \spairb{$\psi_x$}  : a list with unkown length
+%\end{itemize}
+
+%Given the following examples,
+%
+%\begin{lstlisting}[mathescape,basicstyle=\footnotesize\ttfamily]
+%42        // i64, ($\alpha$,1)
+%(2,3,5)   // i64, ($\alpha$,3)
+%(2; 4)    // list<i64>, ($\beta_s$,2)
+%(2; 4 5)  // list<?>, ($\beta_v$,2)
+%\end{lstlisting}
+
+%which are equivalent to
+%
+%\head{\s{42} = \spaira{1}} \\
+%\head{\s{(2,3,5)} = \spaira{3}} \\
+%\head{\s{(2; 4)} = \spairs{2}} \\
+%\head{\s{(2; 4 5)} = \spairv{2}} \\
+
+%Clearly, there are possible 9 combinations.
+%
+%\begin{table}[!ht]
+%\centering
+%\begin{tabular}{c|c|c}
+%\hline
+% $\bowtie$          & $\theta_c$ & $\psi_x$ \\ \hline
+% $\alpha$  & \spaira{$\theta_c$} & \spaira{$\psi_x$} \\
+% $\beta_r$ & \spairs{$\theta_c$} & \spairs{$\psi_x$} \\
+% $\beta_v$ & \spairv{$\theta_c$} & \spairv{$\psi_x$} \\
+% \hline
+%\end{tabular}
+%\end{table}
+
+\subsection{Notations}
+
+We denote that
+
+\begin{itemize}
+\item a shape: $\rho$ = (\type{}, \len{}), which has an unkown shape \tops
+\item a kind: \type{} with vector (\type{v}), list (\type{t}) or unkown (\type{u})
+\item a length: \len{} with scalar (\len{s}), non-scalar (\len{n}), and unknown (\len{u})
+\end{itemize}
+
+\section{Built-in functions}
+
+Let \texttt{op1} be a \textit{unary} function and \texttt{op2} be a \textit{binary } function.
+
+
+
+\subsection{Element-wise functions}
+
+\headb{Unary}
+
+\begin{verbatim}
+z = @op1(x)
+\end{verbatim}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|c|c|c|cc|}
+\hline
+op1     & (, \len{s} & \len{n} & \len{u} & \\ \hline
+return  & \len{s} & \len{n} & \len{u} & \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\headb{Binary}
+
+\begin{verbatim}
+z = @op2(x,y)
+\end{verbatim}
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|c||c|c|c|c|c|c|}
+\hline
+op2                    & \bots                  & \spaira{$\theta_{s2}$} & \spaira{$\theta_{c2}$} & \spaira{$\psi_{x2}$} & \spair{$\beta$}{Any}  & \tops \\ \hline
+\bots                  & \bots                  & \spaira{$\theta_{s2}$} & \spaira{$\theta_{c2}$} & \spaira{$\psi_{x2}$} & \spair{$\beta$}{Any}  & \tops \\ \hline
+\spaira{$\theta_{s1}$} & \spaira{$\theta_{s1}$} & \spaira{$\theta_{s1}$} & \spaira{$\theta_{c2}$} & \spaira{$\psi_{x2}$} & \tops                 & \tops \\ \hline
+\spaira{$\theta_{c1}$} & \spaira{$\theta_{c1}$} & \spaira{$\theta_{c1}$} & Cond.1*                & \tops                & \tops                 & \tops \\ \hline
+\spaira{$\psi_{x1}$}   & \spaira{$\psi_{x1}$}   & \spaira{$\psi_{x1}$}   & \tops                  & Cond.2*              & \tops                 & \tops \\ \hline
+\spair{$\beta$}{Any}   & \spair{$\beta$}{Any}   & \tops               & \tops               & \tops             & \tops                 & \tops \\ \hline
+\tops                  & \tops                  & \tops               & \tops               & \tops             &\tops                  & \tops \\ \hline
+\end{tabular}
+\end{table}
+
+Conditions applied:
+
+\begin{description}
+\item[Cond.1]{}
+\item[Cond.2]{}
+\end{description}
+
+
+\subsection{List based functions}
+
+Each function
+
+\begin{itemize}
+\item \texttt{each\_item}
+\item \texttt{each}
+\item \texttt{each\_left}
+\item \texttt{each\_right}
+\end{itemize}
+
+\headb{each\_item}
+
+\headb{each}
+
+\headb{each\_left}
+
+\headb{each\_right}
+
+\subsection{General functions}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
