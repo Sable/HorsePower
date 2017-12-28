@@ -24,6 +24,7 @@ In HorsePower, we focus on the following parts.
     | [Valid examples](src/HorseIR/tests/valid)
     | [TPC-H](docs/tpch)
     | [Reference](docs/mkdocs/docs)
+    | [IR Type](docs/horsetype)
     |
 - Implementation: 
     [Details](docs/implementation)
