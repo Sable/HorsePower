@@ -1,20 +1,12 @@
 # HorsePower
 
-HorsePower is a set of infrastructures for parsing and optimizing database
-queries.  It involves all phases of query compilation from high-level source
-language to low-level code.  Moreover, it provides a well-designed IR,
-*HorseIR*, in array programming before generating low-level code.  Based on
-HorseIR, sophisticated compiler optimizations can be applied for database
-operations.  Furthermore, using array programming offers a promising option for
-the fine-grained parallelism.
+HorsePower is designed for optimizing database queries with modern hardware.
+At its core is **HorseIR**, which is a well-designed array-based intermediate
+representation (IR) for database queries.  Based on HorseIR, sophisticated
+compiler optimizations can be applied for database operations.  Moreover, using
+array programming offers a promising option for performance speedup with
+fine-grained parallelism.
 
-In HorsePower, we focus on the following parts.
-
-    - High-level source language design
-    - Fine-grained primitives and highly tuned library
-    - Static analysis for an array-based IR (i.e. HorseIR)
-    - Query optimizations with heuristics
-    - Query optimizations with data-flow analyses
 
 ## Quick entries
 
@@ -35,7 +27,7 @@ In HorsePower, we focus on the following parts.
     |
 
 
-## Project
+## Project Overview
 
 In the summer 2017, we started this project from scratch.  We planned to build
 the framework in the first three months (12 weeks). Thus, we could have another
@@ -68,6 +60,14 @@ of IRs consists of an acyclic graph.  The workflow is described as follows.
 <p align="center">Figure 2. The design of 3 IRs.</p>
 
 -->
+
+In HorsePower, we focus on the following parts.
+
+    - High-level source language design
+    - Fine-grained primitives and highly tuned library
+    - Static analysis for an array-based IR (i.e. HorseIR)
+    - Query optimizations with heuristics
+    - Query optimizations with data-flow analyses
 
 ### Settings
 
