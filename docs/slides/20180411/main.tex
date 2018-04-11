@@ -1,0 +1,65 @@
+\documentclass[11pt]{beamer}
+\usetheme{CambridgeUS}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\setbeamercovered{transparent} %gray-out for pause
+
+\input{common}
+
+\author{Hanfeng Chen}
+\title{
+  {\color{Black}{Improving Database Performance on Modern Hardware}}
+}
+%\subtitle{{\color{Black}{(Combining array languages and in-memory databases)}}}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+%\logo{} 
+%\institute{McGill University}
+\date{2018.04.11}
+%\subject{} 
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+%\section*{Outline}
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+\AtBeginSection[]
+  {
+     \begin{frame}<beamer>
+     \frametitle{Outline}
+     \tableofcontents[currentsection]
+     \end{frame}
+  }
+
+\section{Introduction}
+\input{src/introduction}
+
+%\section{Related Work}
+%\input{src/related}
+
+\section{Part I: Compiled Queries}
+\input{src/compiled_query}
+
+% Voodoo, HorseIR
+\section{Part II: Vector Algebra}
+\input{src/algebra}
+
+\section{Conclusion}
+\input{src/conclusion}
+
+% \begin{frame}[t,allowframebreaks]{References}
+% \bibliographystyle{amsalpha}
+% \bibliography{reference.bib}
+% \end{frame}
+
+\end{document}

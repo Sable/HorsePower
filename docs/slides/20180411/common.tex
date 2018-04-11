@@ -1,0 +1,74 @@
+
+\usepackage{listings}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\definecolor{Black}{RGB}{0,0,0}
+\definecolor{Red}{RGB}{255,0,0}
+% colors
+\definecolor{Orange}{rgb}{1,0.5,0}
+\definecolor{Blue}{RGB}{0,0,255}
+\definecolor{OrangeRed}{RGB}{255,69,0}
+\definecolor{LightGreen}{RGB}{11,83,69}
+\definecolor{DarkYellow}{RGB}{160,64,0}
+\definecolor{AntiqueBrass}{rgb}{0.8, 0.58, 0.46}
+\definecolor{NiceBlue}{RGB}{11, 102, 163}
+\definecolor{NiceRed}{RGB}{160, 64, 0}
+\definecolor{Grey}{RGB}{128,128,128}
+\definecolor{SlightRed}{RGB}{249,38,114}
+\definecolor{SlightPink}{RGB}{155, 89, 182}
+
+\newcommand{\hgb}[1]{{\color{Blue}{#1}}}
+\newcommand{\hgr}[1]{{\color{OrangeRed}{#1}}}
+\newcommand{\hgd}[1]{{\color{Red}{#1}}}
+\newcommand{\head}[2]{{\textbf{#2}, #1}}
+
+% syntax highlighting
+\usepackage{textcomp} % other glyphs needed for upquote in listings below
+\lstdefinelanguage{HorseIR}
+{ basicstyle=\footnotesize\ttfamily,
+  commentstyle=\color{Grey}\rmfamily\itshape,
+  keywordstyle=\color{SlightPink},
+  keywordstyle=[2]\color{NiceBlue},
+  keywordstyle=[3]\color{NiceRed},
+  keywordstyle=[4]\color{SlightRed},
+  % list of keywords
+  morekeywords={
+  module,
+  def,
+  import
+  },
+  keywords=[2]{
+  @table,
+  @sum,
+  @gt,
+  @load_table,
+  @column_value,
+  @and,
+  @compress,
+  @enum,
+  @list,
+  @group,
+  @values,
+  @each_right,
+  @raze,
+  @compute_discount
+  },
+  keywords=[3]{
+  table,
+  sym,
+  list,
+  i64,
+  f64,
+  bool,
+  },
+  keywords=[4]{
+  return,
+  check_cast
+  },
+  sensitive=false, % keywords are not case-sensitive
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b]", % defines that strings are enclosed in double quotes
+  upquote=true % ensures that backtick displays correctly
+}

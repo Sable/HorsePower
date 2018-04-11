@@ -1,0 +1,62 @@
+\begin{frame}{Introduction}
+
+The goal of SQL query processing
+
+\pause
+\begin{itemize}
+\item Performance: \hgr{low} response time and \hgb{high} throughputs
+\end{itemize}
+
+\pause
+How to achieve the goal
+
+\begin{itemize}
+\pause
+\item Implement a fast interpreter (Conventional approach)
+\pause
+\item Compile SQL to relatively low-level languages, such as C++/LLVM (Recent decade)
+\pause
+\item Adopt new hardware devices, such as GPU/FPGA (Latest!)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Approach} 
+Levels of difficulty 
+\begin{itemize}
+\item Interpreter \textless\ Compiler+CPU \textless\ Compiler+GPU
+\end{itemize} 
+\pause
+State-of-the-art approach
+\begin{itemize} 
+\item A high-level abstraction for generating \hgb{robust} and
+\hgr{efficient} code
+\item Platform-specific strategies for optimizing code
+\item Relatively low compilation time compared with execution time
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Topics} 
+Topics in this presentation
+\begin{enumerate}
+\item Compiling queries to LLVM with/without adaptive execution
+\item Generating efficient code for modern hardware from a vector algebra 
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Topics} 
+\textbf{I:} Compiling queries to LLVM with/without adaptive execution
+\begin{enumerate}
+\item \head{Thomas}{Neumann},
+      ``\uline{Efficiently compiling efficient query plans for modern hardware}",
+      PVLDB, 2011, vol. 4, no. 9, pp. 539--550
+\item \head{Andre}{Kohn}, Viktor Leis, Thomas Neumann,
+      ``\uline{Adaptive Execution of Compiled Queries}", 2018, appear soon.
+\end{enumerate} 
+\pause
+\textbf{II:} Generating efficient code for modern hardware from a vector algebra 
+\begin{enumerate} 
+\item \head{Holger}{Pirk}, Oscar Moll, Matei Zaharia, Sam Madden,
+      ``\uline{Voodoo - A Vector Algebra for Portable Database Performance on Modern Hardware}",
+      PVLDB, 2016, vol. 9, no. 14, pp. 1707--1718 
+\end{enumerate}
+\end{frame}
