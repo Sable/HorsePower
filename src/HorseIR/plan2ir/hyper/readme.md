@@ -1,5 +1,5 @@
 
-List of Queries
+## List of Queries
 
 | ID | Status | is10 | Joins                                    | Special
 |----|--------|------|------------------------------------------|-------------------------
@@ -71,6 +71,33 @@ Todo list
 - program debugging
 - performance tuning
 
+## Figures
+
+Screenshots of query plans from the HyPer's web (see dir: `fig/`)
+
+- [x] [q1.png](fig/q1.png)
+- [x] [q2.png](fig/q2.png)
+- [ ] q3.png
+- [x] [q4.png](fig/q4.png)
+- [ ] q5.png
+- [x] [q6.png](fig/q2.png)
+- [ ] q7.png
+- [ ] q8.png
+- [ ] q9.png
+- [ ] q10.png
+- [ ] q11.png
+- [x] [q12.png](fig/q2.png)
+- [ ] q13.png
+- [ ] q14.png
+- [ ] q15.png
+- [ ] q16.png
+- [x] [q17.png](fig/q2.png)
+- [ ] q18.png
+- [x] [q19.png](fig/q2.png)
+- [ ] q20.png
+- [ ] q21.png
+- [ ] q22.png
+
 
 ## Issues Remaining
 
@@ -105,11 +132,6 @@ What is early probe?
 4.4K q4   Y
 4.3K q13  Y
 2.9K q6   Y
-
-
-Check all queries in list
-
-	./list.sh 2>&1  | grep -i query
 
 
 How block nested loop (bnl) join works?
