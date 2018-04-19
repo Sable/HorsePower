@@ -1,0 +1,409 @@
+{"optimizersteps": [{"name": "Unoptimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "leftmarkjoin",
+          "operatorId": 4,
+          "left": {
+            "operator": "join",
+            "operatorId": 5,
+            "left": {
+              "operator": "tablescan",
+              "operatorId": 6,
+              "segment": 20,
+              "from": "partsupp",
+              "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+              "tid": ["v5", ["BigInt"]],
+              "tableOid": ["v6", ["RegClass"]],
+              "tupleFlags": ["v7", ["BigInt"]],
+              "restrictions": []
+            },
+            "right": {
+              "operator": "tablescan",
+              "operatorId": 7,
+              "segment": 18,
+              "from": "part",
+              "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+              "tid": ["v8", ["BigInt"]],
+              "tableOid": ["v9", ["RegClass"]],
+              "tupleFlags": ["v10", ["BigInt"]],
+              "restrictions": []
+            },
+            "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+          },
+          "right": {
+            "operator": "select",
+            "operatorId": 8,
+            "input": {
+              "operator": "select",
+              "operatorId": 9,
+              "input": {
+                "operator": "tablescan",
+                "operatorId": 10,
+                "segment": 19,
+                "from": "supplier",
+                "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+                "tid": ["v32", ["BigInt"]],
+                "tableOid": ["v33", ["RegClass"]],
+                "tupleFlags": ["v34", ["BigInt"]],
+                "restrictions": []
+              },
+              "condition": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}
+            },
+            "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}},
+          "marker": ["v35", ["Bool"]]
+        },
+        "condition": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}, {"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "not", "input": {"expression": "iuref", "iu": "v35"}}]}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+},{"name": "Unnesting", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "leftmarkjoin",
+          "operatorId": 4,
+          "left": {
+            "operator": "join",
+            "operatorId": 5,
+            "left": {
+              "operator": "tablescan",
+              "operatorId": 6,
+              "segment": 20,
+              "from": "partsupp",
+              "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+              "tid": ["v5", ["BigInt"]],
+              "tableOid": ["v6", ["RegClass"]],
+              "tupleFlags": ["v7", ["BigInt"]],
+              "restrictions": []
+            },
+            "right": {
+              "operator": "tablescan",
+              "operatorId": 7,
+              "segment": 18,
+              "from": "part",
+              "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+              "tid": ["v8", ["BigInt"]],
+              "tableOid": ["v9", ["RegClass"]],
+              "tupleFlags": ["v10", ["BigInt"]],
+              "restrictions": []
+            },
+            "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+          },
+          "right": {
+            "operator": "select",
+            "operatorId": 8,
+            "input": {
+              "operator": "select",
+              "operatorId": 9,
+              "input": {
+                "operator": "tablescan",
+                "operatorId": 10,
+                "segment": 19,
+                "from": "supplier",
+                "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+                "tid": ["v32", ["BigInt"]],
+                "tableOid": ["v33", ["RegClass"]],
+                "tupleFlags": ["v34", ["BigInt"]],
+                "restrictions": []
+              },
+              "condition": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}
+            },
+            "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}},
+          "marker": ["v35", ["Bool"]]
+        },
+        "condition": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}, {"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "not", "input": {"expression": "iuref", "iu": "v35"}}]}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+},{"name": "Predicate Pushdown", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "leftantijoin",
+        "operatorId": 3,
+        "left": {
+          "operator": "join",
+          "operatorId": 4,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 5,
+            "segment": 18,
+            "from": "part",
+            "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+            "tid": ["v5", ["BigInt"]],
+            "tableOid": ["v6", ["RegClass"]],
+            "tupleFlags": ["v7", ["BigInt"]],
+            "restrictions": [],
+            "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Char", 10], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}]
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "segment": 20,
+            "from": "partsupp",
+            "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+            "tid": ["v8", ["BigInt"]],
+            "tableOid": ["v9", ["RegClass"]],
+            "tupleFlags": ["v10", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}
+        },
+        "right": {
+          "operator": "tablescan",
+          "operatorId": 7,
+          "segment": 19,
+          "from": "supplier",
+          "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+          "tid": ["v32", ["BigInt"]],
+          "tableOid": ["v33", ["RegClass"]],
+          "tupleFlags": ["v34", ["BigInt"]],
+          "restrictions": [],
+          "residuals": [{"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}]
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+},{"name": "Operator Reordering", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "rightantijoin",
+        "operatorId": 3,
+        "cardinality": 1504,
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 1000,
+          "segment": 19,
+          "from": "supplier",
+          "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": [],
+          "residuals": [{"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}]
+        },
+        "right": {
+          "operator": "join",
+          "operatorId": 5,
+          "cardinality": 15048,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "cardinality": 3762,
+            "segment": 18,
+            "from": "part",
+            "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+            "tid": ["v8", ["BigInt"]],
+            "tableOid": ["v9", ["RegClass"]],
+            "tupleFlags": ["v10", ["BigInt"]],
+            "restrictions": [],
+            "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Char", 10], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}]
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 7,
+            "cardinality": 800000,
+            "segment": 20,
+            "from": "partsupp",
+            "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+            "tid": ["v32", ["BigInt"]],
+            "tableOid": ["v33", ["RegClass"]],
+            "tupleFlags": ["v34", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+},{"name": "Physical Operator Mapping", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "rightantijoin",
+        "operatorId": 3,
+        "cardinality": 1504,
+        "method": "hash",
+        "singleMatch": true,
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 1000,
+          "segment": 19,
+          "from": "supplier",
+          "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": [],
+          "residuals": [{"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}]
+        },
+        "right": {
+          "operator": "join",
+          "operatorId": 5,
+          "cardinality": 15048,
+          "method": "hash",
+          "singleMatch": true,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "cardinality": 3762,
+            "segment": 18,
+            "from": "part",
+            "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+            "tid": ["v8", ["BigInt"]],
+            "tableOid": ["v9", ["RegClass"]],
+            "tupleFlags": ["v10", ["BigInt"]],
+            "restrictions": [],
+            "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Char", 10], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}]
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 7,
+            "cardinality": 800000,
+            "segment": 20,
+            "from": "partsupp",
+            "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+            "tid": ["v32", ["BigInt"]],
+            "tableOid": ["v33", ["RegClass"]],
+            "tupleFlags": ["v34", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+},{"name": "Optimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "cardinality": 1354,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["BigInt"]]}, "descending": true, "nullFirst": true}, {"value": {"expression": "iuref", "iu": ["v2", ["Char", 10]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v3", ["Varchar", 25]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v4", ["Integer"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "cardinality": 1354,
+      "input": {
+        "operator": "rightantijoin",
+        "operatorId": 3,
+        "cardinality": 1504,
+        "method": "hash",
+        "singleMatch": true,
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 1000,
+          "segment": 19,
+          "from": "supplier",
+          "values": [{"name": "s_suppkey", "iu": ["s_suppkey", ["Integer"]]}, {"name": "s_name", "iu": ["s_name", ["Char", 25]]}, {"name": "s_address", "iu": ["s_address", ["Varchar", 40]]}, {"name": "s_nationkey", "iu": ["s_nationkey", ["Integer"]]}, {"name": "s_phone", "iu": ["s_phone", ["Char", 15]]}, {"name": "s_acctbal", "iu": ["s_acctbal", ["Numeric", 12, 2]]}, {"name": "s_comment", "iu": ["s_comment", ["Varchar", 101]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": [],
+          "residuals": [{"expression": "like", "arguments": [{"expression": "iuref", "iu": "s_comment"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "%Customer%Complaints%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}]
+        },
+        "right": {
+          "operator": "join",
+          "operatorId": 5,
+          "cardinality": 15048,
+          "method": "hash",
+          "singleMatch": true,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "cardinality": 3762,
+            "segment": 18,
+            "from": "part",
+            "values": [{"name": "p_partkey", "iu": ["p_partkey", ["Integer"]]}, {"name": "p_name", "iu": ["p_name", ["Varchar", 55]]}, {"name": "p_mfgr", "iu": ["p_mfgr", ["Char", 25]]}, {"name": "p_brand", "iu": ["p_brand", ["Char", 10]]}, {"name": "p_type", "iu": ["p_type", ["Varchar", 25]]}, {"name": "p_size", "iu": ["p_size", ["Integer"]]}, {"name": "p_container", "iu": ["p_container", ["Char", 10]]}, {"name": "p_retailprice", "iu": ["p_retailprice", ["Numeric", 12, 2]]}, {"name": "p_comment", "iu": ["p_comment", ["Varchar", 23]]}],
+            "tid": ["v8", ["BigInt"]],
+            "tableOid": ["v9", ["RegClass"]],
+            "tupleFlags": ["v10", ["BigInt"]],
+            "restrictions": [],
+            "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "p_size"}, "set": [{"expression": "const", "value": {"type": ["Integer"], "value": 49}}, {"expression": "const", "value": {"type": ["Integer"], "value": 14}}, {"expression": "const", "value": {"type": ["Integer"], "value": 23}}, {"expression": "const", "value": {"type": ["Integer"], "value": 45}}, {"expression": "const", "value": {"type": ["Integer"], "value": 19}}, {"expression": "const", "value": {"type": ["Integer"], "value": 3}}, {"expression": "const", "value": {"type": ["Integer"], "value": 36}}, {"expression": "const", "value": {"type": ["Integer"], "value": 9}}]}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "p_brand"}, "right": {"expression": "const", "value": {"type": ["Char", 10], "value": "Brand#45"}}}, {"expression": "not", "input": {"expression": "like", "arguments": [{"expression": "iuref", "iu": "p_type"}, {"expression": "const", "value": {"type": ["Varchar"], "value": "MEDIUM POLISHED%"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": ""}}]}}]
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 7,
+            "cardinality": 800000,
+            "segment": 20,
+            "from": "partsupp",
+            "values": [{"name": "ps_partkey", "iu": ["ps_partkey", ["Integer"]]}, {"name": "ps_suppkey", "iu": ["ps_suppkey", ["Integer"]]}, {"name": "ps_availqty", "iu": ["ps_availqty", ["Integer"]]}, {"name": "ps_supplycost", "iu": ["ps_supplycost", ["Numeric", 12, 2]]}, {"name": "ps_comment", "iu": ["ps_comment", ["Varchar", 199]]}],
+            "tid": ["v32", ["BigInt"]],
+            "tableOid": ["v33", ["RegClass"]],
+            "tupleFlags": ["v34", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "p_partkey"}, "right": {"expression": "iuref", "iu": "ps_partkey"}}
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "ps_suppkey"}, "right": {"expression": "iuref", "iu": "s_suppkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "p_brand"}}, {"value": {"expression": "iuref", "iu": "p_type"}}, {"value": {"expression": "iuref", "iu": "p_size"}}, {"value": {"expression": "iuref", "iu": "ps_suppkey"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v2", ["Char", 10]]}, {"source": 1, "operation": "keep", "iu": ["v3", ["Varchar", 25]]}, {"source": 2, "operation": "keep", "iu": ["v4", ["Integer"]]}, {"source": 3, "operation": "countdistinct", "iu": ["v", ["BigInt"]]}]
+    }
+  },
+  "header": ["p_brand", "v2", "p_type", "v3", "p_size", "v4", "supplier_cnt", "v"]
+}
+}]}
+

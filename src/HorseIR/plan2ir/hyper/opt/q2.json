@@ -1,0 +1,351 @@
+{
+  "header": [
+    "s_acctbal", "v", 
+    "s_name"   , "v3", 
+    "n_name"   , "v2", 
+    "p_partkey", "v4", 
+    "p_mfgr"   , "p_mfgr", 
+    "s_address", "s_address", 
+    "s_phone"  , "s_phone", 
+    "s_comment", "s_comment"
+  ], 
+  "plan": {
+    "count": 100, 
+    "operatorId": 1, 
+    "criterion": [
+      { "nullFirst": true, "descending": true, "value": { "iu": [ "v", [ "Numeric", 12, 2 ] ], "expression": "iuref" } }, 
+      { "nullFirst": false, "descending": false, "value": { "iu": [ "v2", [ "Char", 25 ] ], "expression": "iuref" } }, 
+      { "nullFirst": false, "descending": false, "value": { "iu": [ "v3", [ "Char", 25 ] ], "expression": "iuref" } }, 
+      { "nullFirst": false, "descending": false, "value": { "iu": [ "v4", [ "Integer" ] ], "expression": "iuref" } }
+    ], 
+    "operator": "sort", 
+    "input": {
+      "right": {
+        "right": {
+          "tupleFlags": [ "v76", [ "BigInt" ] ], 
+          "from": "partsupp", 
+          "operatorId": 20, 
+          "restrictions": [], 
+          "tid": [ "v74", [ "BigInt" ]
+          ], 
+          "values": [
+            { "iu": [ "ps_partkey2", [ "Integer" ] ], "name": "ps_partkey" }, 
+            { "iu": [ "ps_suppkey2", [ "Integer" ] ], "name": "ps_suppkey" }, 
+            { "iu": [ "ps_availqty2", [ "Integer" ] ], "name": "ps_availqty" }, 
+            { "iu": [ "ps_supplycost2", [ "Numeric", 12, 2 ] ], "name": "ps_supplycost" }, 
+            { "iu": [ "ps_comment2", [ "Varchar", 199 ] ], "name": "ps_comment" }
+          ], 
+          "operator": "tablescan", 
+          "tableOid": [ "v75", [ "RegClass" ] ], 
+          "cardinality": 800000, 
+          "segment": 20
+        }, 
+        "operatorId": 8, 
+        "singleMatch": true, 
+        "operator": "join", 
+        "cardinality": 3135, 
+        "method": "indexnl", 
+        "condition": {
+          "expression": "and", 
+          "arguments": [
+            { "right": { "iu": "v67", "expression": "iuref" }, 
+              "expression": "comparison", 
+              "mode": "=", 
+              "left": { "iu": "ps_supplycost2", "expression": "iuref" }
+            }, 
+            {
+              "right": { "iu": "ps_partkey2", "expression": "iuref" }, 
+              "expression": "comparison", 
+              "mode": "=", 
+              "left": { "iu": "v4", "expression": "iuref" }
+            }
+          ]
+        }, 
+        "left": {
+          "right": {
+            "operatorId": 11, 
+            "aggregates": [
+              { "source": 0, "operation": "min", "iu": [ "v67", [ "Numeric", 12, 2, "nullable" ] ] }, 
+              { "source": 1, "operation": "keep", "iu": [ "v68", [ "Integer" ] ] }
+            ], 
+            "values": [
+              { "value": { "iu": "ps_supplycost", "expression": "iuref" } }, 
+              { "value": { "iu": "ps_partkey", "expression": "iuref" } }
+            ], 
+            "operator": "groupby", 
+            "input": {
+              "right": {
+                "operator": "earlyprobe", 
+                "input": {
+                  "tupleFlags": [ "v66", [ "BigInt" ] ], 
+                  "from": "partsupp", 
+                  "operatorId": 19, 
+                  "restrictions": [], 
+                  "tid": [ "v64", [ "BigInt" ] ], 
+                  "values": [
+                    { "iu": [ "ps_partkey", [ "Integer" ] ], "name": "ps_partkey" }, 
+                    { "iu": [ "ps_suppkey", [ "Integer" ] ], "name": "ps_suppkey" }, 
+                    { "iu": [ "ps_availqty", [ "Integer" ] ], "name": "ps_availqty" }, 
+                    { "iu": [ "ps_supplycost", [ "Numeric", 12, 2 ] ], "name": "ps_supplycost" }, 
+                    { "iu": [ "ps_comment", [ "Varchar", 199 ] ], "name": "ps_comment" }
+                  ], 
+                  "residuals": [ { "input": { "iu": "ps_partkey", "expression": "iuref" }, "expression": "isnotnull" } ], 
+                  "operator": "tablescan", 
+                  "tableOid": [ "v65", [ "RegClass" ] ], 
+                  "cardinality": 800000, 
+                  "segment": 20
+                }, 
+                "builder": 9, 
+                "values": [ "ps_partkey" ], 
+                "operatorId": 18
+              }, 
+              "operatorId": 12, 
+              "singleMatch": true, 
+              "operator": "join", 
+              "cardinality": 160000, 
+              "method": "hash", 
+              "condition": {
+                "right": { "iu": "ps_suppkey", "expression": "iuref" }, 
+                "expression": "comparison", 
+                "mode": "=", 
+                "left": { "iu": "s_suppkey2", "expression": "iuref" }
+              }, 
+              "left": {
+                "right": {
+                  "tupleFlags": [ "v58", [ "BigInt" ] ], 
+                  "from": "supplier", 
+                  "operatorId": 17, 
+                  "restrictions": [], 
+                  "tid": [ "v56", [ "BigInt" ] ], 
+                  "values": [
+                    { "iu": [ "s_suppkey2", [ "Integer" ] ], "name": "s_suppkey" }, 
+                    { "iu": [ "s_name", [ "Char", 25 ] ], "name": "s_name" }, 
+                    { "iu": [ "s_address2", [ "Varchar", 40 ] ], "name": "s_address" }, 
+                    { "iu": [ "s_nationkey2", [ "Integer" ] ], "name": "s_nationkey" }, 
+                    { "iu": [ "s_phone2", [ "Char", 15 ] ], "name": "s_phone" }, 
+                    { "iu": [ "s_acctbal", [ "Numeric", 12, 2 ] ], "name": "s_acctbal" }, 
+                    { "iu": [ "s_comment2", [ "Varchar", 101 ] ], "name": "s_comment" }
+                  ], 
+                  "operator": "tablescan", 
+                  "tableOid": [ "v57", [ "RegClass" ] ], 
+                  "cardinality": 10000, 
+                  "segment": 19
+                }, 
+                "operatorId": 13, 
+                "singleMatch": true, 
+                "operator": "join", 
+                "cardinality": 2000, 
+                "method": "hash", 
+                "condition": {
+                  "right": { "iu": "n_nationkey2", "expression": "iuref" }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": { "iu": "s_nationkey2", "expression": "iuref" }
+                }, 
+                "left": {
+                  "right": {
+                    "tupleFlags": [ "v48", [ "BigInt" ] ], 
+                    "from": "nation", 
+                    "operatorId": 16, 
+                    "restrictions": [], 
+                    "tid": [ "v46", [ "BigInt" ] ], 
+                    "values": [
+                      { "iu": [ "n_nationkey2", [ "Integer" ] ], "name": "n_nationkey" }, 
+                      { "iu": [ "n_name", [ "Char", 25 ] ], "name": "n_name" }, 
+                      { "iu": [ "n_regionkey2", [ "Integer" ] ], "name": "n_regionkey" }, 
+                      { "iu": [ "n_comment2", [ "Varchar", 152 ] ], "name": "n_comment" }
+                    ], 
+                    "operator": "tablescan", 
+                    "tableOid": [ "v47", [ "RegClass" ] ], 
+                    "cardinality": 25, 
+                    "segment": 24
+                  }, 
+                  "operatorId": 14, 
+                  "singleMatch": true, 
+                  "operator": "join", 
+                  "cardinality": 5, 
+                  "method": "hash", 
+                  "condition": {
+                    "right": { "iu": "r_regionkey2", "expression": "iuref" }, 
+                    "expression": "comparison", 
+                    "mode": "=", 
+                    "left": { "iu": "n_regionkey2", "expression": "iuref" }
+                  }, 
+                  "left": {
+                    "tupleFlags": [ "v41", [ "BigInt" ] ], 
+                    "from": "region", 
+                    "operatorId": 15, 
+                    "restrictions": [
+                      {
+                        "attribute": 1, 
+                        "mode": "=", 
+                        "value": { "expression": "const", "value": { "type": [ "Char", 25 ], "value": "EUROPE" } }
+                      }
+                    ], 
+                    "tid": [ "v39", [ "BigInt" ] ], 
+                    "values": [
+                      { "iu": [ "r_regionkey2", [ "Integer" ] ], "name": "r_regionkey" }, 
+                      { "iu": [ "r_name2", [ "Char", 25 ] ], "name": "r_name" }, 
+                      { "iu": [ "r_comment2", [ "Varchar", 152 ] ], "name": "r_comment" }
+                    ], 
+                    "operator": "tablescan", 
+                    "tableOid": [ "v40", [ "RegClass" ] ], 
+                    "cardinality": 1, 
+                    "segment": 25
+                  }
+                }
+              }
+            }, 
+            "cardinality": 142524
+          }, 
+          "operatorId": 9, 
+          "singleMatch": true, 
+          "operator": "join", 
+          "cardinality": 783, 
+          "method": "hash", 
+          "condition": {
+            "right": { "iu": "v68", "expression": "iuref" }, 
+            "expression": "comparison", 
+            "mode": "is", 
+            "left": { "iu": "v4", "expression": "iuref" }
+          }, 
+          "left": {
+            "tupleFlags": [ "v35", [ "BigInt" ] ], 
+            "from": "part", 
+            "operatorId": 10, 
+            "restrictions": [
+              {
+                "attribute": 5, 
+                "mode": "=", 
+                "value": { "expression": "const", "value": { "type": [ "Integer" ], "value": 15 } }
+              }
+            ], 
+            "tid": [ "v33", [ "BigInt" ] ], 
+            "values": [
+              { "iu": [ "v4", [ "Integer" ] ], "name": "p_partkey" }, 
+              { "iu": [ "p_name", [ "Varchar", 55 ] ], "name": "p_name" }, 
+              { "iu": [ "p_mfgr", [ "Char", 25 ] ], "name": "p_mfgr" }, 
+              { "iu": [ "p_brand", [ "Char", 10 ] ], "name": "p_brand" }, 
+              { "iu": [ "p_type", [ "Varchar", 25 ] ], "name": "p_type" }, 
+              { "iu": [ "p_size", [ "Integer" ] ], "name": "p_size" }, 
+              { "iu": [ "p_container", [ "Char", 10 ] ], "name": "p_container" }, 
+              { "iu": [ "p_retailprice", [ "Numeric", 12, 2 ] ], "name": "p_retailprice" }, 
+              { "iu": [ "p_comment", [ "Varchar", 23 ] ], "name": "p_comment" }
+            ], 
+            "residuals": [
+              {
+                "expression": "like", 
+                "arguments": [
+                  { "iu": "p_type", "expression": "iuref" }, 
+                  { "expression": "const", "value": { "type": [ "Varchar" ], "value": "%BRASS" } }, 
+                  { "expression": "const", "value": { "type": [ "Varchar" ], "value": "" } }
+                ]
+              }
+            ], 
+            "operator": "tablescan", 
+            "tableOid": [ "v34", [ "RegClass" ] ], 
+            "cardinality": 1100, 
+            "segment": 18
+          }
+        }
+      }, 
+      "operatorId": 2, 
+      "singleMatch": true, 
+      "operator": "join", 
+      "cardinality": 627, 
+      "method": "hash", 
+      "condition": {
+        "right": { "iu": "ps_suppkey2", "expression": "iuref" }, 
+        "expression": "comparison", 
+        "mode": "=", 
+        "left": { "iu": "s_suppkey", "expression": "iuref" }
+      }, 
+      "left": {
+        "right": {
+          "tupleFlags": [ "v24", [ "BigInt" ] ], 
+          "from": "supplier", 
+          "operatorId": 7, 
+          "restrictions": [], 
+          "tid": [ "v22", [ "BigInt" ] ], 
+          "values": [
+            { "iu": [ "s_suppkey", [ "Integer" ] ], "name": "s_suppkey" }, 
+            { "iu": [ "v3", [ "Char", 25 ] ], "name": "s_name" }, 
+            { "iu": [ "s_address", [ "Varchar", 40 ] ], "name": "s_address" }, 
+            { "iu": [ "s_nationkey", [ "Integer" ] ], "name": "s_nationkey" }, 
+            { "iu": [ "s_phone", [ "Char", 15 ] ], "name": "s_phone" }, 
+            { "iu": [ "v", [ "Numeric", 12, 2 ] ], "name": "s_acctbal" }, 
+            { "iu": [ "s_comment", [ "Varchar", 101 ] ], "name": "s_comment" }
+          ], 
+          "operator": "tablescan", 
+          "tableOid": [ "v23", [ "RegClass" ] ], 
+          "cardinality": 10000, 
+          "segment": 19
+        }, 
+        "operatorId": 3, 
+        "singleMatch": true, 
+        "operator": "join", 
+        "cardinality": 2000, 
+        "method": "hash", 
+        "condition": {
+          "right": { "iu": "n_nationkey", "expression": "iuref" }, 
+          "expression": "comparison", 
+          "mode": "=", 
+          "left": { "iu": "s_nationkey", "expression": "iuref" }
+        }, 
+        "left": {
+          "right": {
+            "tupleFlags": [ "v10", [ "BigInt" ] ], 
+            "from": "nation", 
+            "operatorId": 6, 
+            "restrictions": [], 
+            "tid": [ "v8", [ "BigInt" ] ], 
+            "values": [
+              { "iu": [ "n_nationkey", [ "Integer" ] ], "name": "n_nationkey" }, 
+              { "iu": [ "v2", [ "Char", 25 ] ], "name": "n_name" }, 
+              { "iu": [ "n_regionkey", [ "Integer" ] ], "name": "n_regionkey" }, 
+              { "iu": [ "n_comment", [ "Varchar", 152 ] ], "name": "n_comment" }
+            ], 
+            "operator": "tablescan", 
+            "tableOid": [ "v9", [ "RegClass" ] ], 
+            "cardinality": 25, 
+            "segment": 24
+          }, 
+          "operatorId": 4, 
+          "singleMatch": true, 
+          "operator": "join", 
+          "cardinality": 5, 
+          "method": "hash", 
+          "condition": {
+            "right": { "iu": "r_regionkey", "expression": "iuref" }, 
+            "expression": "comparison", 
+            "mode": "=", 
+            "left": { "iu": "n_regionkey", "expression": "iuref" }
+          }, 
+          "left": {
+            "tupleFlags": [ "v7", [ "BigInt" ] ], 
+            "from": "region", 
+            "operatorId": 5, 
+            "restrictions": [
+              {
+                "attribute": 1, 
+                "mode": "=", 
+                "value": { "expression": "const", "value": { "type": [ "Char", 25 ], "value": "EUROPE" } }
+              }
+            ], 
+            "tid": [ "v5", [ "BigInt" ] ], 
+            "values": [
+              { "iu": [ "r_regionkey", [ "Integer" ] ], "name": "r_regionkey" }, 
+              { "iu": [ "r_name", [ "Char", 25 ] ], "name": "r_name" }, 
+              { "iu": [ "r_comment", [ "Varchar", 152 ] ], "name": "r_comment" }
+            ], 
+            "operator": "tablescan", 
+            "tableOid": [ "v6", [ "RegClass" ] ], 
+            "cardinality": 1, 
+            "segment": 25
+          }
+        }
+      }
+    }, 
+    "cardinality": 100
+  }
+}

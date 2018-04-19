@@ -1,0 +1,275 @@
+{"optimizersteps": [{"name": "Unoptimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "join",
+          "operatorId": 4,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 5,
+            "segment": 22,
+            "from": "orders",
+            "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+            "tid": ["v2", ["BigInt"]],
+            "tableOid": ["v3", ["RegClass"]],
+            "tupleFlags": ["v4", ["BigInt"]],
+            "restrictions": []
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "segment": 23,
+            "from": "lineitem",
+            "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+            "tid": ["v5", ["BigInt"]],
+            "tableOid": ["v6", ["RegClass"]],
+            "tupleFlags": ["v7", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+        },
+        "condition": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}, {"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}, {"expression": "comparison", "mode": ">=", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}]}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "or", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+},{"name": "Unnesting", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "join",
+          "operatorId": 4,
+          "left": {
+            "operator": "tablescan",
+            "operatorId": 5,
+            "segment": 22,
+            "from": "orders",
+            "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+            "tid": ["v2", ["BigInt"]],
+            "tableOid": ["v3", ["RegClass"]],
+            "tupleFlags": ["v4", ["BigInt"]],
+            "restrictions": []
+          },
+          "right": {
+            "operator": "tablescan",
+            "operatorId": 6,
+            "segment": 23,
+            "from": "lineitem",
+            "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+            "tid": ["v5", ["BigInt"]],
+            "tableOid": ["v6", ["RegClass"]],
+            "tupleFlags": ["v7", ["BigInt"]],
+            "restrictions": []
+          },
+          "condition": {"expression": "const", "value": {"type": ["Bool"], "value": true}}
+        },
+        "condition": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}, {"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}, {"expression": "comparison", "mode": ">=", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}]}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "or", "arguments": [{"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Varchar"], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+},{"name": "Predicate Pushdown", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "join",
+        "operatorId": 3,
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v2", ["BigInt"]],
+          "tableOid": ["v3", ["RegClass"]],
+          "tupleFlags": ["v4", ["BigInt"]],
+          "restrictions": [],
+          "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}, {"expression": "comparison", "mode": ">=", "left": {"expression": "iuref", "iu": "l_receiptdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}]
+        },
+        "right": {
+          "operator": "tablescan",
+          "operatorId": 5,
+          "segment": 22,
+          "from": "orders",
+          "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "lookup", "input": [{"expression": "iuref", "iu": "o_orderpriority"}], "values": [{"type": ["Char", 15], "value": "1-URGENT"}, {"type": ["Char", 15], "value": "2-HIGH"}], "collates": [""]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+},{"name": "Operator Reordering", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "join",
+        "operatorId": 3,
+        "cardinality": 415982,
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 415982,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v2", ["BigInt"]],
+          "tableOid": ["v3", ["RegClass"]],
+          "tupleFlags": ["v4", ["BigInt"]],
+          "restrictions": [{"attribute": 12, "mode": "[)", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}, "value2": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}],
+          "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}]
+        },
+        "right": {
+          "operator": "tablescan",
+          "operatorId": 5,
+          "cardinality": 1500000,
+          "segment": 22,
+          "from": "orders",
+          "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "lookup", "input": [{"expression": "iuref", "iu": "o_orderpriority"}], "values": [{"type": ["Char", 15], "value": "1-URGENT"}, {"type": ["Char", 15], "value": "2-HIGH"}], "collates": [""]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+},{"name": "Physical Operator Mapping", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "join",
+        "operatorId": 3,
+        "cardinality": 415982,
+        "method": "indexnl",
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 415982,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v2", ["BigInt"]],
+          "tableOid": ["v3", ["RegClass"]],
+          "tupleFlags": ["v4", ["BigInt"]],
+          "restrictions": [{"attribute": 12, "mode": "[)", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}, "value2": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}],
+          "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}]
+        },
+        "right": {
+          "operator": "tablescan",
+          "operatorId": 5,
+          "cardinality": 1500000,
+          "segment": 22,
+          "from": "orders",
+          "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "lookup", "input": [{"expression": "iuref", "iu": "o_orderpriority"}], "values": [{"type": ["Char", 15], "value": "1-URGENT"}, {"type": ["Char", 15], "value": "2-HIGH"}], "collates": [""]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+},{"name": "Optimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "cardinality": 7,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char", 10]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "cardinality": 7,
+      "input": {
+        "operator": "join",
+        "operatorId": 3,
+        "cardinality": 415982,
+        "method": "indexnl",
+        "left": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "cardinality": 415982,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v2", ["BigInt"]],
+          "tableOid": ["v3", ["RegClass"]],
+          "tupleFlags": ["v4", ["BigInt"]],
+          "restrictions": [{"attribute": 12, "mode": "[)", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2449354}}, "value2": {"expression": "const", "value": {"type": ["Date"], "value": 2449719}}}],
+          "residuals": [{"expression": "quantor", "mode": "=some", "value": {"expression": "iuref", "iu": "l_shipmode"}, "set": [{"expression": "const", "value": {"type": ["Varchar"], "value": "MAIL"}}, {"expression": "const", "value": {"type": ["Varchar"], "value": "SHIP"}}]}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_commitdate"}, "right": {"expression": "iuref", "iu": "l_receiptdate"}}, {"expression": "comparison", "mode": "<", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "iuref", "iu": "l_commitdate"}}]
+        },
+        "right": {
+          "operator": "tablescan",
+          "operatorId": 5,
+          "cardinality": 1500000,
+          "segment": 22,
+          "from": "orders",
+          "values": [{"name": "o_orderkey", "iu": ["o_orderkey", ["Integer"]]}, {"name": "o_custkey", "iu": ["o_custkey", ["Integer"]]}, {"name": "o_orderstatus", "iu": ["o_orderstatus", ["Char1"]]}, {"name": "o_totalprice", "iu": ["o_totalprice", ["Numeric", 12, 2]]}, {"name": "o_orderdate", "iu": ["o_orderdate", ["Date"]]}, {"name": "o_orderpriority", "iu": ["o_orderpriority", ["Char", 15]]}, {"name": "o_clerk", "iu": ["o_clerk", ["Char", 15]]}, {"name": "o_shippriority", "iu": ["o_shippriority", ["Integer"]]}, {"name": "o_comment", "iu": ["o_comment", ["Varchar", 79]]}],
+          "tid": ["v5", ["BigInt"]],
+          "tableOid": ["v6", ["RegClass"]],
+          "tupleFlags": ["v7", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "=", "left": {"expression": "iuref", "iu": "o_orderkey"}, "right": {"expression": "iuref", "iu": "l_orderkey"}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_shipmode"}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "lookup", "input": [{"expression": "iuref", "iu": "o_orderpriority"}], "values": [{"type": ["Char", 15], "value": "1-URGENT"}, {"type": ["Char", 15], "value": "2-HIGH"}], "collates": [""]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}, {"value": {"expression": "case", "cases": [{"case": {"expression": "and", "arguments": [{"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "1-URGENT"}}}, {"expression": "comparison", "mode": "<>", "left": {"expression": "iuref", "iu": "o_orderpriority"}, "right": {"expression": "const", "value": {"type": ["Char", 15], "value": "2-HIGH"}}}]}, "value": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}}], "else": {"expression": "const", "value": {"type": ["Integer"], "value": 0}}}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char", 10]]}, {"source": 1, "operation": "sum", "iu": ["v8", ["Integer"]]}, {"source": 2, "operation": "sum", "iu": ["v9", ["Integer"]]}]
+    }
+  },
+  "header": ["l_shipmode", "v", "high_line_count", "v8", "low_line_count", "v9"]
+}
+}]}
+

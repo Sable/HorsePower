@@ -1,0 +1,168 @@
+{"optimizersteps": [{"name": "Unoptimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v3", ["BigInt"]],
+          "tableOid": ["v4", ["RegClass"]],
+          "tupleFlags": ["v5", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "<=", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Date"], "value": 2451149}}, "right": {"expression": "const", "value": {"type": ["Interval"], "value": 0, "value2": 90}}}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+},{"name": "Unnesting", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "select",
+        "operatorId": 3,
+        "input": {
+          "operator": "tablescan",
+          "operatorId": 4,
+          "segment": 23,
+          "from": "lineitem",
+          "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+          "tid": ["v3", ["BigInt"]],
+          "tableOid": ["v4", ["RegClass"]],
+          "tupleFlags": ["v5", ["BigInt"]],
+          "restrictions": []
+        },
+        "condition": {"expression": "comparison", "mode": "<=", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "const", "value": {"type": ["Timestamp"], "value": 211771497600000000}}}
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+},{"name": "Predicate Pushdown", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "tablescan",
+        "operatorId": 3,
+        "segment": 23,
+        "from": "lineitem",
+        "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+        "tid": ["v3", ["BigInt"]],
+        "tableOid": ["v4", ["RegClass"]],
+        "tupleFlags": ["v5", ["BigInt"]],
+        "restrictions": [],
+        "residuals": [{"expression": "comparison", "mode": "<=", "left": {"expression": "iuref", "iu": "l_shipdate"}, "right": {"expression": "const", "value": {"type": ["Date"], "value": 2451059}}}]
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+},{"name": "Operator Reordering", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "tablescan",
+        "operatorId": 3,
+        "cardinality": 5899194,
+        "segment": 23,
+        "from": "lineitem",
+        "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+        "tid": ["v3", ["BigInt"]],
+        "tableOid": ["v4", ["RegClass"]],
+        "tupleFlags": ["v5", ["BigInt"]],
+        "restrictions": [{"attribute": 10, "mode": "<=", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2451059}}}]
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+},{"name": "Physical Operator Mapping", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "input": {
+        "operator": "tablescan",
+        "operatorId": 3,
+        "cardinality": 5899194,
+        "segment": 23,
+        "from": "lineitem",
+        "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+        "tid": ["v3", ["BigInt"]],
+        "tableOid": ["v4", ["RegClass"]],
+        "tupleFlags": ["v5", ["BigInt"]],
+        "restrictions": [{"attribute": 10, "mode": "<=", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2451059}}}]
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+},{"name": "Optimized Plan", "plan": {
+  "plan": {
+    "operator": "sort",
+    "operatorId": 1,
+    "cardinality": 24,
+    "criterion": [{"value": {"expression": "iuref", "iu": ["v", ["Char1"]]}, "descending": false, "nullFirst": false}, {"value": {"expression": "iuref", "iu": ["v2", ["Char1"]]}, "descending": false, "nullFirst": false}],
+    "input": {
+      "operator": "groupby",
+      "operatorId": 2,
+      "cardinality": 24,
+      "input": {
+        "operator": "tablescan",
+        "operatorId": 3,
+        "cardinality": 5899194,
+        "segment": 23,
+        "from": "lineitem",
+        "values": [{"name": "l_orderkey", "iu": ["l_orderkey", ["Integer"]]}, {"name": "l_partkey", "iu": ["l_partkey", ["Integer"]]}, {"name": "l_suppkey", "iu": ["l_suppkey", ["Integer"]]}, {"name": "l_linenumber", "iu": ["l_linenumber", ["Integer"]]}, {"name": "l_quantity", "iu": ["l_quantity", ["Numeric", 12, 2]]}, {"name": "l_extendedprice", "iu": ["l_extendedprice", ["Numeric", 12, 2]]}, {"name": "l_discount", "iu": ["l_discount", ["Numeric", 12, 2]]}, {"name": "l_tax", "iu": ["l_tax", ["Numeric", 12, 2]]}, {"name": "l_returnflag", "iu": ["l_returnflag", ["Char1"]]}, {"name": "l_linestatus", "iu": ["l_linestatus", ["Char1"]]}, {"name": "l_shipdate", "iu": ["l_shipdate", ["Date"]]}, {"name": "l_commitdate", "iu": ["l_commitdate", ["Date"]]}, {"name": "l_receiptdate", "iu": ["l_receiptdate", ["Date"]]}, {"name": "l_shipinstruct", "iu": ["l_shipinstruct", ["Char", 25]]}, {"name": "l_shipmode", "iu": ["l_shipmode", ["Char", 10]]}, {"name": "l_comment", "iu": ["l_comment", ["Varchar", 44]]}],
+        "tid": ["v3", ["BigInt"]],
+        "tableOid": ["v4", ["RegClass"]],
+        "tupleFlags": ["v5", ["BigInt"]],
+        "restrictions": [{"attribute": 10, "mode": "<=", "value": {"expression": "const", "value": {"type": ["Date"], "value": 2451059}}}]
+      },
+      "values": [{"value": {"expression": "iuref", "iu": "l_returnflag"}}, {"value": {"expression": "iuref", "iu": "l_linestatus"}}, {"value": {"expression": "iuref", "iu": "l_quantity"}}, {"value": {"expression": "iuref", "iu": "l_extendedprice"}}, {"value": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}}, {"value": {"expression": "mul", "left": {"expression": "mul", "left": {"expression": "iuref", "iu": "l_extendedprice"}, "right": {"expression": "sub", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_discount"}}}, "right": {"expression": "add", "left": {"expression": "const", "value": {"type": ["Integer"], "value": 1}}, "right": {"expression": "iuref", "iu": "l_tax"}}}}, {"value": {"expression": "iuref", "iu": "l_discount"}}],
+      "aggregates": [{"source": 0, "operation": "keep", "iu": ["v", ["Char1"]]}, {"source": 1, "operation": "keep", "iu": ["v2", ["Char1"]]}, {"source": 2, "operation": "sum", "iu": ["v6", ["Numeric", 12, 2]]}, {"source": 2, "operation": "avg", "iu": ["v7", ["Numeric", 14, 4]]}, {"source": 3, "operation": "sum", "iu": ["v8", ["Numeric", 12, 2]]}, {"source": 3, "operation": "avg", "iu": ["v9", ["Numeric", 14, 4]]}, {"source": 4, "operation": "sum", "iu": ["v10", ["Numeric", 14, 4]]}, {"source": 5, "operation": "sum", "iu": ["v27", ["Numeric", 16, 6]]}, {"source": 6, "operation": "sum", "iu": ["v28", ["Numeric", 12, 2]]}, {"source": 6, "operation": "avg", "iu": ["v29", ["Numeric", 14, 4]]}, {"source": 4294967295, "operation": "count", "iu": ["v30", ["BigInt"]]}]
+    }
+  },
+  "header": ["l_returnflag", "v", "l_linestatus", "v2", "sum_qty", "v6", "sum_base_price", "v8", "sum_disc_price", "v10", "sum_charge", "v27", "avg_qty", "v7", "avg_price", "v9", "avg_disc", "v29", "count_order", "v30"]
+}
+}]}
+
