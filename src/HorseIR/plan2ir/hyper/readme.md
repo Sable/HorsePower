@@ -75,28 +75,14 @@ Todo list
 
 Screenshots of query plans from the HyPer's web (see dir: `fig/`)
 
-- [x] [q1.png](fig/q1.png)
-- [x] [q2.png](fig/q2.png)
-- [ ] q3.png
-- [x] [q4.png](fig/q4.png)
-- [ ] q5.png
-- [x] [q6.png](fig/q2.png)
-- [ ] q7.png
-- [ ] q8.png
-- [ ] q9.png
-- [ ] q10.png
-- [ ] q11.png
-- [x] [q12.png](fig/q2.png)
-- [ ] q13.png
-- [ ] q14.png
-- [ ] q15.png
-- [ ] q16.png
-- [x] [q17.png](fig/q2.png)
-- [ ] q18.png
-- [x] [q19.png](fig/q2.png)
-- [ ] q20.png
-- [ ] q21.png
-- [ ] q22.png
+| Figures (A)          | Figures (B)            | Figures (C)            | Figures (D)            |
+| :------------------: | :--------------------: | :--------------------: | :--------------------: |
+| [q1.png](fig/q1.png) | q7.png                 | q13.png                | [q19.png](fig/q19.png) |
+| [q2.png](fig/q2.png) | q8.png                 | q14.png                | q20.png                |
+| q3.png               | q9.png                 | q15.png                | q21.png                |
+| [q4.png](fig/q4.png) | q10.png                | q16.png                | q22.png                |
+| q5.png               | q11.png                | [q17.png](fig/q17.png) | |
+| [q6.png](fig/q6.png) | [q12.png](fig/q12.png) | q18.png                | |
 
 
 ## Issues Remaining
