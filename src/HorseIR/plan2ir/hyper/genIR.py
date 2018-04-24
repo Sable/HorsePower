@@ -90,7 +90,7 @@ def scanValuesRef(v, env):
         _,alias = findAliasByName2(v['iu'], env)
     else:
         alias = findAliasByName(v['iu'], env)
-    return genAssignment(alias)
+    return genCopy(alias)
 
 def scanValuesConst(v):
     typ = v['value']['type']
@@ -172,7 +172,8 @@ def scanLogicExpr(v, expr, env):
     if len(temp) > 0:
         t0 = temp[0]
         for t in temp[1:]:
-            t0 = genAssignment('@%s(%s, %s)' % (expr, t0, t))
+            # t0 = genAssignment('@%s(%s, %s)' % (expr, t0, t))
+            t0 = genDyadic(expr, t0, t)
         return t0
     else:
         unexpected('Empty logic expr found')
@@ -349,7 +350,7 @@ def scanValues(d, env):
 #         else:
 #             warning("invalid value")
 
-def scanAggr(d, env):
+def scanAggr(d, values):
     debug('aggregates')
     keep_list = []
     env_names = [] ; env_types = []; env_alias = []
@@ -364,17 +365,17 @@ def scanAggr(d, env):
             typ    = strType(fetch('iu'        , a)[1])
             env_names.append(nam)
             env_types.append(typ)
-            if op == 'sum'    : env_alias.append(genSum(findAliasByIndex(source, env)))
-            elif op == 'avg'  : env_alias.append(genAvg(findAliasByIndex(source, env)))
-            elif op == 'max'  : env_alias.append(genMax(findAliasByIndex(source, env)))
-            elif op == 'min'  : env_alias.append(genMin(findAliasByIndex(source, env)))
-            elif op == 'count': env_alias.append(genCount(findAliasByIndex(0, env)))
+            if op == 'sum'    : env_alias.append(genSum(values[source]))
+            elif op == 'avg'  : env_alias.append(genAvg(values[source]))
+            elif op == 'max'  : env_alias.append(genMax(values[source]))
+            elif op == 'min'  : env_alias.append(genMin(values[source]))
+            elif op == 'count': env_alias.append(genCount(values[0]))
             else: unexpected("Not impl. %s"%op)
     else: # explicit aggr
         t_list = []
-        for k in keep_list: t_list.append(findAliasByIndex(int(k['source']), env))
-        temp = '@list(' + stringList(t_list) + ')'
-        t0 = genAssignment(temp)
+        # for k in keep_list: t_list.append(findAliasByIndex(int(k['source']), env))
+        for k in keep_list: t_list.append(values[int(k['source'])])
+        t0 = genList  (t_list)
         t1 = genGroup (t0)
         t2 = genKeys  (t1)
         t3 = genValues(t2)
@@ -389,17 +390,17 @@ def scanAggr(d, env):
             env_names.append(nam)
             env_types.append(typ)
             if op == 'sum':
-                a0 = genEachRight('@index', findAliasByIndex(source, env), t3)
+                a0 = genEachRight('@index', values[source], t3)
                 a1 = genEach     ('@sum'  , a0)
                 a2 = genRaze     (a1)
                 env_alias.append(a2)
             elif op == 'avg':
-                a0 = genEachRight('@index', findAliasByIndex(source, env), t3)
+                a0 = genEachRight('@index', values[source], t3)
                 a1 = genEach     ('@avg'  , a0)
                 a2 = genRaze     (a1)
                 env_alias.append(a2)
             elif op == 'count':
-                a0 = genEachRight('@index', findAliasByIndex(0, env), t3)
+                a0 = genEachRight('@index', values[0], t3)
                 a1 = genEach     ('@len'  , a0)
                 a2 = genRaze     (a1)
                 env_alias.append(a2)
@@ -426,18 +427,23 @@ def scanHeader(d, env):
     # build col names
     for x in range(size):
         temp = temp + '`%s' % head[x*2]
-    a0 = genAssignment(temp)
+    # a0 = genAssignment(temp)
+    a0 = genLiteral(temp)
     # build col values
     if size == 1:
-        temp = '@enlist(%s)' % findAliasByName(head[1], new_env)
+        a1 = genEnlist(findAliasByName(head[1], new_env))
     else:
-        temp = '@list('
+        temp = []
         for x in range(size):
-            if x > 0:
-                temp = temp + ','
-            temp = temp + findAliasByName(head[x*2+1], new_env)
-        temp = temp + ')'
-    a1 = genAssignment(temp)
+            temp.append(findAliasByName(head[x*2+1], new_env))
+        a1 = genList(temp)
+        # temp = '@list('
+        # for x in range(size):
+        #     if x > 0:
+        #         temp = temp + ','
+        #     temp = temp + findAliasByName(head[x*2+1], new_env)
+        # temp = temp + ')'
+        # a1 = genAssignment(temp)
     a2 = genTable(a0, a1)
     return None
 
@@ -447,11 +453,14 @@ def scanRestrictionCell(d, cols):
     if 'value' in d:
         col_name = cols[int(attr)]
         if 'value2' in d:
-            a0 = genAssignment('@%s(%s,%s)'%(m2p(mode[0]),col_name,scanValuesConst(d['value'])))
-            a1 = genAssignment('@%s(%s,%s)'%(m2p(mode[1]),col_name,scanValuesConst(d['value2'])))
+            # a0 = genAssignment('@%s(%s,%s)'%(m2p(mode[0]),col_name,scanValuesConst(d['value'])))
+            # a1 = genAssignment('@%s(%s,%s)'%(m2p(mode[1]),col_name,scanValuesConst(d['value2'])))
+            a0 = genDyadic(m2p(mode[0]),col_name,scanValuesConst(d['value']));
+            a1 = genDyadic(m2p(mode[1]),col_name,scanValuesConst(d['value2']));
             return genAnd(a0, a1)
         else:
-            return genAssignment('@%s(%s,%s)'%(m2p(mode[0]),col_name,scanValuesConst(d['value'])))
+            # return genAssignment('@%s(%s,%s)'%(m2p(mode[0]),col_name,scanValuesConst(d['value'])))
+            return genDyadic(m2p(mode[0]),col_name,scanValuesConst(d['value']));
     else:
         unexpected("Not impl.")
 
@@ -496,8 +505,8 @@ def scanByFunc(d, name, foo):
 
 def scanGroupby(d, env):
     debug('groupby')
-    scanValues(d['values'], env)
-    return scanAggr(d['aggregates'], env)
+    values = scanValues(d['values'], env)
+    return scanAggr(d['aggregates'], values)
 
 def encodeEnv(table_name, cols_names, cols_alias, cols_types, mask=''):
     return {
@@ -570,7 +579,8 @@ def scanResidualsCell(d):
     if expr == 'comparison':
         leftValue  = scanValuesV(d['left'])
         rightValue = scanValuesV(d['right'])
-        return genAssignment('@%s(%s,%s)'%(m2p(mode),leftValue,rightValue))
+        # return genAssignment('@%s(%s,%s)'%(m2p(mode),leftValue,rightValue))
+        return genDyadic(m2p(mode),leftValue,rightValue)
     else:
         unexpected("Not impl. %s" % expr)
 
@@ -789,8 +799,10 @@ def findExprFromSide(d, env2, isCollect=False):
             new_left, new_right = findExprFromSide(d0, env2, True)
             left_list.append(new_left)
             right_list.append(new_right)
-        t0 = genList(stringList(left_list))
-        t1 = genList(stringList(right_list))
+        # t0 = genList(stringList(left_list))
+        # t1 = genList(stringList(right_list))
+        t0 = genList(left_list)
+        t1 = genList(right_list)
         return joinColumns(t0, 'left_list', t1, 'right_list', True)
     elif expr == 'or': #q19
         warning('think about q19: and & or in condition')
@@ -803,7 +815,8 @@ def findExprFromSide(d, env2, isCollect=False):
             indx1 = genCons(indx1, t1) if indx0 else t1
             size = size + len(d['input'])
         # unique [indx0, indx1]
-        indx = genUnique(genList('%s,%s' % (indx0, indx1)))
+        # indx = genUnique(genList('%s,%s' % (indx0, indx1)))
+        indx = genUnique(genList([indx0, indx1]))
         left  = genIndex(indx0, indx)
         right = genIndex(indx1, indx)
         return left, right
@@ -1210,6 +1223,8 @@ def main():
     genModuleBegin('default')
     scanMain(plan, {})
     genModuleEnd()
+    traverseUse()
+    printVarNum()
 
 if __name__ == '__main__':
     start = time.time()
