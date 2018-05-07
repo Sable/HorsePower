@@ -6,6 +6,8 @@ import copy
 from codegen import *
 from codelib import *
 from collections import OrderedDict
+from analysis import *
+from datetime import date, timedelta
 
 # Class definitions
 # class Node(object):
@@ -38,6 +40,7 @@ col_to_table  = {}
 table_to_cols = {}
 join_list     = [] # find join pairs in condition
 id_to_env     = {} # map operatorId to env
+standard_date = date(2000,1,1) # standard date: 2000.01.01
 
 """
 string_map
@@ -90,7 +93,8 @@ def scanValuesRef(v, env):
         _,alias = findAliasByName2(v['iu'], env)
     else:
         alias = findAliasByName(v['iu'], env)
-    return genCopy(alias)
+    return alias
+    # return genCopy(alias)
 
 def scanValuesConst(v):
     typ = v['value']['type']
@@ -98,9 +102,17 @@ def scanValuesConst(v):
     return stringValue(typ, val)
 
 def stringValue(typ, value):
+    def date2date(d):
+        global standard_date
+        current_date = standard_date + timedelta(int(d) - 2451545)
+        return '%d.%02d.%02d'%(current_date.year,current_date.month,current_date.day)
     typ =  strType(typ)
     if typ == 'char':
         return '"%s"' % value
+    elif typ == 'char1':
+        return "'%c'" % value
+    elif typ == 'd':
+        return '%s:%s'%(date2date(value), typ)
     else:
         return '%s:%s'%(value, typ)
 
@@ -199,7 +211,8 @@ def scanValuesSet(v):
                 sets.append(scanValuesConst(s))
             else:
                 unexpected('mixed typ in sets: %s and %s' % (typ, s['expression']))
-        return genAssignment('(%s):%s' % (stringList(sets), typ)) #gen literal
+        return genLiteral('(%s):%s' % (stringList(sets), typ)) #gen literal
+        # return genAssignment('(%s):%s' % (stringList(sets), typ)) #gen literal
     else:
         unexpected('size 0 set found')
 
@@ -322,14 +335,16 @@ def loadTables(d, t):
     for v in d:
         nam = v['iu'][0]
         typ = strType(v['iu'][1])
-        vid = genLoadTableWithCols(nam, typ, t)
+        vid = genColumnValue(t, '`'+nam, typ)
+        # vid = genLoadTableWithCols(nam, typ, t)
         cols.append(nam); alias.append(vid); types.append(typ)
     return cols,alias,types
 
 def scanValuesI(v):
     nam = v['iu'][0]
     typ = v['iu'][1]
-    vid = genLoadTableWithCols(nam,strType(typ),current_table) #value id
+    vid = genColumnValue(current_table, '`'+nam, strType(typ)) #value id
+    # vid = genLoadTableWithCols(nam,strType(typ),current_table) 
     insertMap(nam, vid)  # for compress
     linkCol2Table(nam, current_table)
     linkTable2Cols(current_table, nam)
@@ -414,7 +429,7 @@ def scanAggr(d, values):
 
 def scanHeader(d, env):
     new_env = scanMain(d['plan'], env)
-    print new_env
+    # debug(new_env)
     debug('result')
     head = d['header']
     size = len(head)/2 
@@ -460,7 +475,7 @@ def scanRestrictionCell(d, cols):
             return genAnd(a0, a1)
         else:
             # return genAssignment('@%s(%s,%s)'%(m2p(mode[0]),col_name,scanValuesConst(d['value'])))
-            return genDyadic(m2p(mode[0]),col_name,scanValuesConst(d['value']));
+            return genDyadic(m2p(mode),col_name,scanValuesConst(d['value']));
     else:
         unexpected("Not impl.")
 
@@ -595,11 +610,14 @@ def scanSort(d, env):
         if v['expression'] == 'iuref':
             names.append(findAliasByName(v['iu'][0], env))
             bools.append(1 if c['descending']==False else 0)
-    list_order  = genAssignment('@list(%s)'%stringList(names))
+    list_order = genList(names)
+    # list_order  = genAssignment('@list(%s)'%stringList(names))
     if len(bools) == 1:
-        final_order = genAssignment('@sort(%s,%s:bool)'%(list_order,stringList(bools)))
+        final_order = genSort(list_order, '%s:bool' % stringList(bools))
+        # final_order = genAssignment('@sort(%s,%s:bool)'%(list_order,stringList(bools)))
     else:
-        final_order = genAssignment('@sort(%s,(%s):bool)'%(list_order,stringList(bools)))
+        final_order = genSort(list_order, '(%s):bool' % stringList(bools))
+        # final_order = genAssignment('@sort(%s,(%s):bool)'%(list_order,stringList(bools)))
     return addOrderToEnv(final_order, env)
 
 """
@@ -609,7 +627,7 @@ def scanSemijoin(d, env2, side):
     debug('%s semijoin <----' % side)
     left_env = env2[0];  left_mask  = left_env ['mask']
     right_env= env2[1];  right_mask = right_env['mask']
-    left_col, right_col = scanCondition(d['condition'], 'hash', env2)
+    left_col, right_col, result_type = scanCondition(d['condition'], 'hash', env2)
     if side == 'left':
         # left side
         # y0 = findAliasByName(left_col, left_env)
@@ -723,8 +741,13 @@ keycol_list = [
 ]
 
 def joinColumnsGeneral(left_alias, left_name, right_alias, right_name):
-    todo('general join not impl.')
-    return ['<none>', '<none>']
+    # todo('general join not impl.')
+    t0 = genOuter('@eq', left_alias, right_alias)
+    t1 = genWhere(t0)
+    t2 = genIndex(t1,'0:i64','i64')
+    t3 = genIndex(t2,'1:i64','i64')
+    return [t2, t3, 'indexing']
+    # return ['<none>', '<none>']
 
 def joinColumns(left_alias, left_name, right_alias, right_name, isList=False):
     global keycol_list
@@ -740,7 +763,7 @@ def joinColumns(left_alias, left_name, right_alias, right_name, isList=False):
             t1 = genKeys(e0)
             t2 = genLt(t0, genLength(t1))
             t3 = genWhere(t2)  # right_index
-            return [t0, t3]
+            return [t0, t3, 'indexing']
         else:
             # right side is a keyed column
             if right_name in keycol_list:
@@ -749,13 +772,17 @@ def joinColumns(left_alias, left_name, right_alias, right_name, isList=False):
                 t1 = genKeys(e0)
                 t2 = genLt(t0, genLength(t1))
                 t3 = genWhere(t2)  # left_index
-                return [t3, t0]
+                return [t3, t0, 'indexing']
             else:
                 # q15
                 # joinColumnsGeneral
                 # unexpected('Both sides are non-key (%s = %s)' % (left_name, right_name))
                 return joinColumnsGeneral(left_alias, left_name, right_alias, right_name)
 
+"""
+return: [left,right,type]
+type  : value / indexing
+"""
 def findExprFromSide(d, env2, isCollect=False):
     expr = d['expression']
     if expr == 'comparison':
@@ -819,7 +846,7 @@ def findExprFromSide(d, env2, isCollect=False):
         indx = genUnique(genList([indx0, indx1]))
         left  = genIndex(indx0, indx)
         right = genIndex(indx1, indx)
-        return left, right
+        return left, right, 'value'
     else:
         unexpected('not handled (%s) when looking for side info.' % expr)
 
@@ -911,11 +938,14 @@ def updateTableWithAntiEnum(e0, env):
     t2 = genGe(t0, t1)
     return updateEnvWithMask(t2, env)
 
+def updateEnvWithIndex2(ind1, ind2, env1, env2):
+    return combineEnv2(updateEnvWithIndex(ind1,env1), updateEnvWithIndex(ind2,env2))
+
 def scanJoinIndex(d, env2):
     debug('join index <----')
-    left_col, right_col = scanCondition(fetch('condition', d), 'index', env2)
-    e0 = genEnum(left_col, right_col)
-    return updateTableWithEnum(e0, env2[0], env2[1])
+    return processJoinResult(scanCondition(fetch('condition', d), 'index', env2), env2)
+    # e0 = genEnum(left_col, right_col)
+    # return updateTableWithEnum(e0, env2[0], env2[1])
 
 # def scanJoinIndex(d, env2):
 #     debug('join index <----')
@@ -947,9 +977,7 @@ Q2: key (left) and fkey(right)?
 """
 def scanJoinHash(d, env2, msg='hash join'):
     debug('%s <----' % msg)
-    left_col,right_col = scanCondition(d['condition'], 'hash', env2)
-    e0 = genEnum(left_col, right_col)
-    return updateTableWithEnum(e0, env2[0], env2[1])
+    return processJoinResult(scanCondition(d['condition'], 'hash', env2), env2)
 
 # def scanJoinHash(d, env2, msg='hash join'):
 #     debug('%s <----' % msg)
@@ -1076,7 +1104,8 @@ def addTarget2Env(d, env):
     for x in d:
         source_name = x['source'][0] if isList(x['source']) else x['source']
         env_names.append(x['target'][0])
-        env_alias.append(genAssignment(findAliasByName(source_name, env)))
+        env_alias.append(findAliasByName(source_name, env))
+        # env_alias.append(genAssignment(findAliasByName(source_name, env)))
         env_types.append(strType(x['target'][1]))
     return combineEnv2(env, encodeEnv('handleTarget', env_names, env_alias, env_types), False)
 
@@ -1100,12 +1129,23 @@ def scanTempscan(d, env):
 
 def scanAntijoin(d, env2, side):
     debug('%s anti join <----' % side)
-    left_col, right_col = scanCondition(d['condition'], 'hash', env2)
-    if side == 'right':
-        e0 = genEnum(right_col, left_col)
+    return processJoinResult(scanCondition(d['condition'], 'hash', env2), env2, side)
+
+"""
+default: side='left'
+"""
+def processJoinResult(res, env2, side='left'):
+    left_col, right_col, result_type = res
+    if result_type == 'value':
+        if side == 'right':
+            e0 = genEnum(right_col, left_col)
+        else:
+            e0 = genEnum(left_col, right_col)
+        return updateTableWithEnum(e0, env2[0], env2[1])
+    elif result_type == 'indexing':
+        return updateEnvWithIndex2(left_col, right_col, env2[0], env2[1])
     else:
-        e0 = genEnum(left_col, right_col)
-    return updateTableWithEnum(e0, env2[0], env2[1])
+        unexpected('Unsupported return type for join: (%s)' % result_type)
 
 
 # def scanAntijoin(d, env2, side):
@@ -1220,11 +1260,18 @@ def main():
         sys.exit(1)
     name = sys.argv[1]
     plan = json.loads(readLines(name, ''))
-    genModuleBegin('default')
     scanMain(plan, {})
-    genModuleEnd()
-    traverseUse()
-    printVarNum()
+    debug= True
+    if debug:
+        # printVarNum()
+        # selected_columns = traverseUse()
+        # print selected_columns
+        # printAllCode([], debug=True)
+        pass
+    else:
+        selected_columns = traverseUse()
+        printAllCode(selected_columns)
+
 
 if __name__ == '__main__':
     start = time.time()
