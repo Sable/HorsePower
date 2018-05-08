@@ -429,16 +429,19 @@ def scanAggr(d, values):
 
 def scanHeader(d, env):
     new_env = scanMain(d['plan'], env)
-    # debug(new_env)
-    debug('result')
+    debug(new_env)
+    # debug('result')
     head = d['header']
     size = len(head)/2 
     temp = ''
     # sort?
     if 'order' in new_env:
         final_order = new_env['order']
+        new_env_copy = copy.deepcopy(new_env)
         for x in range(size):
-            insertMap(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env),final_order))
+            updateEnvWithPartialAlias(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env), final_order), new_env_copy)
+        new_env = new_env_copy
+        # insertMap(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env),final_order))
     # build col names
     for x in range(size):
         temp = temp + '`%s' % head[x*2]
@@ -740,9 +743,9 @@ keycol_list = [
   'n_nationkey2', 's_suppkey2'
 ]
 
-def joinColumnsGeneral(left_alias, left_name, right_alias, right_name):
-    # todo('general join not impl.')
-    t0 = genOuter('@eq', left_alias, right_alias)
+def joinColumnsGeneral(left_alias, left_name, right_alias, right_name, isList=False):
+    todo('general join -- need check')
+    t0 = genOuter('@eq' if not isList else '@same', left_alias, right_alias)
     t1 = genWhere(t0)
     t2 = genIndex(t1,'0:i64','i64')
     t3 = genIndex(t2,'1:i64','i64')
@@ -752,9 +755,10 @@ def joinColumnsGeneral(left_alias, left_name, right_alias, right_name):
 def joinColumns(left_alias, left_name, right_alias, right_name, isList=False):
     global keycol_list
     if isList:
-        todo('list join (multi-column join) not impl.')
+        todo('list join (multi-column join) -- need check')
+        return joinColumnsGeneral(left_alias, left_name, right_alias, right_name, isList)
         # joinColumnsGeneral
-        return ['<none>', '<none>']
+        # return ['<none>', '<none>', 'unknown']
     else:
         # left side is a keyed column
         if left_name in keycol_list:
@@ -779,13 +783,72 @@ def joinColumns(left_alias, left_name, right_alias, right_name, isList=False):
                 # unexpected('Both sides are non-key (%s = %s)' % (left_name, right_name))
                 return joinColumnsGeneral(left_alias, left_name, right_alias, right_name)
 
+
+"""
+0: none
+1: left/value
+2: right
+3: both
+"""
+def checkExpr(expr):
+    expr_name = expr['expression']
+    # print expr_name
+    if expr_name == 'quantor':
+        return [1,fetchID(expr['value'])]
+    elif expr_name == 'between':
+        return [1,fetchID(expr['arguments'][0])]
+    elif expr['left']['expression'] == 'iuref':
+        return [3,[fetchID(expr['left']),fetchID(expr['right'])]] if expr['right']['expression'] == 'iuref' else [1,fetchID(expr['left'])]
+    elif expr['right']['expression'] == 'iuref':
+        return [2,fetchID(expr['right'])]
+    else:
+        return [0,'<none>']
+
+# q19: trick
+def scanConditionOr(d, env2):
+    # off load to scanValue
+    vec_left_or = []
+    vec_right_or = []
+    for d0 in d['arguments']:
+        if d0['expression'] == 'and':
+            vec_left_and = []
+            vec_right_and = []
+            for d1 in d0['arguments']:
+                t0 = scanValuesV(d1, env2)
+                typ,nam = checkExpr(d1)
+                if typ == 1 or typ == 2:
+                    side = whichTableByName(nam, env2)  # important: decide a name from which side
+                    if side == 0:  # 0:left / 1:right
+                        vec_left_and.append(t0)
+                    else:
+                        vec_right_and.append(t0)
+                else:
+                    unexpected('unknown type %d' % typ)
+            vec_left_or.append(genVectorAnd(vec_left_and))
+            vec_right_or.append(genVectorAnd(vec_right_and))
+    return genVectorOr(vec_left_or),genVectorOr(vec_right_or)
+
+# return if multiple columns (>1)
+def isMultipleColumnJoin(d, env2):
+    numJoin = 0
+    if d['expression'] == 'and':
+        for d0 in d['arguments']:
+            if d0['expression'] == 'comparison': #q17, d0['mode'] == '<' | 'is'
+                typ,_ = checkExpr(d0)
+                if typ != 3: return False
+                else: numJoin = numJoin + 1
+            else:
+                return False
+    # print 'Number of joins: %d' % numJoin
+    return True if numJoin > 1 else False
+
 """
 return: [left,right,type]
 type  : value / indexing
 """
 def findExprFromSide(d, env2, isCollect=False):
     expr = d['expression']
-    if expr == 'comparison':
+    if expr == 'comparison': # single join case
         mode = d['mode']; left = [] ; right = []
         name0 = fetchID(d['left' ])
         name1 = fetchID(d['right'])
@@ -798,7 +861,7 @@ def findExprFromSide(d, env2, isCollect=False):
             # print 'side0 = %d, side1 = %d' % (side0, side1)
             # print 'alias0 = %s, alias1 = %s' % (alias0, alias1)
             if isCollect:
-                return [alias0, alias1] if side0 == 0 else [alias1, alias0]
+                return [alias0, alias1, 'value'] if side0 == 0 else [alias1, alias0, 'value']
             if side0 == 0:
                 return joinColumns(alias0, name0, alias1, name1)
             else:
@@ -821,18 +884,47 @@ def findExprFromSide(d, env2, isCollect=False):
                 return joinColumnsGeneral(alias1, name1, alias0, name0)
         else: unexpected('cond (%s) not handled' % mode)
     elif expr == 'and':  #q7, multiple column join
-        left_list = [] ; right_list = []
-        for d0 in d['arguments']:
-            new_left, new_right = findExprFromSide(d0, env2, True)
-            left_list.append(new_left)
-            right_list.append(new_right)
-        # t0 = genList(stringList(left_list))
-        # t1 = genList(stringList(right_list))
-        t0 = genList(left_list)
-        t1 = genList(right_list)
-        return joinColumns(t0, 'left_list', t1, 'right_list', True)
-    elif expr == 'or': #q19
-        warning('think about q19: and & or in condition')
+        if isMultipleColumnJoin(d, env2):
+            left_list = [] ; right_list = []
+            for d0 in d['arguments']:
+                new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                left_list.append(new_left)
+                right_list.append(new_right)
+            t0 = genList(left_list)
+            t1 = genList(right_list)
+            return joinColumns(t0, 'left_list', t1, 'right_list', True)
+        else:
+            # q19
+            cnt_pred = cnt_new = 0
+            left_list = []; right_list = []
+            for d0 in d['arguments']:
+                if d0['expression'] == 'or':
+                    pred_left, pred_right = scanConditionOr(d0, env2)
+                    cnt_pred = cnt_pred + 1
+                elif d0['expression'] == 'and':
+                    new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                    left_list.append(new_left)
+                    right_list.append(new_right)
+                elif d0['expression'] == 'comparison' and d0['mode'] == '=':
+                    new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                    left_list.append(new_left)
+                    right_list.append(new_right)
+                    cnt_new = cnt_new + 1
+                else:
+                    print d0
+                    unexpected('unknown expression (%s) in join' % d0['expression'])
+            # assume only 1 'or' and 1 'and' upon
+            if cnt_pred == 1 and cnt_new == 1:
+                # apply pred to new first before join two sides
+                t0 = genCompress(pred_left, new_left)
+                t1 = genCompress(pred_right, new_right)
+                return joinColumns(t0,'l_partkey',t1,'p_partkey')
+            elif cnt_pred == 0 and len(left_list) > 1: #q9
+                t0 = genList(left_list)
+                t1 = genList(right_list)
+                return joinColumns(t0, 'left_list', t1, 'right_list')
+            else:
+                unexpected('cnt_pred = %d, cnt_new = %d' % (cnt_pred,cnt_new))
     elif expr == 'lookup':
         const_list = getConstList(d['values'])
         size = 0; indx0 = ''; indx1 = ''
@@ -846,7 +938,7 @@ def findExprFromSide(d, env2, isCollect=False):
         indx = genUnique(genList([indx0, indx1]))
         left  = genIndex(indx0, indx)
         right = genIndex(indx1, indx)
-        return left, right, 'value'
+        return [left, right, 'value']
     else:
         unexpected('not handled (%s) when looking for side info.' % expr)
 
@@ -862,6 +954,30 @@ def scanCondition(d, tag, env):
         return scanValuesV(d, env)
     else:
         unexpected("unknown tag %s found in condition" % tag)
+
+def genVectorAnd(vec_and):
+    size = len(vec_and)
+    if size == 1:
+        return vec_and[0]
+    elif size > 1:
+        t0 = genAnd(vec_and[0], vec_and[1])
+        for x in vec_and[2:]:
+            t0 = genAnd(t0, x)
+        return t0
+    else:
+        unexpected('length 0 found in vec_and')
+
+def genVectorOr(vec_or):
+    size = len(vec_or)
+    if size == 1:
+        return vec_or[0]
+    elif size > 1:
+        t0 = genOr(vec_or[0], vec_or[1])
+        for x in vec_or[2:]:
+            t0 = genOr(t0, x)
+        return t0
+    else:
+        unexpected('length 0 found in vec_or')
 
 # join condition
 # def scanCondition(d, cond, env):
@@ -907,6 +1023,14 @@ def updateEnvWithAlias(a, env):
     new_env = copy.deepcopy(env)
     new_env['cols_a'] = a
     return new_env
+
+def updateEnvWithPartialAlias(n, a, env):
+    cols_n = getEnvName(env)
+    cols_a = getEnvAlias(env)
+    if n not in cols_n:
+        unexpected('name %s, alias %s not found' % (n,a))
+    else:
+        cols_a[cols_n.index(n)] = a
 
 def updateEnvWithIndex(ind, env):
     alias = env['cols_a']
@@ -1135,6 +1259,7 @@ def scanAntijoin(d, env2, side):
 default: side='left'
 """
 def processJoinResult(res, env2, side='left'):
+    # print res
     left_col, right_col, result_type = res
     if result_type == 'value':
         if side == 'right':
@@ -1261,7 +1386,8 @@ def main():
     name = sys.argv[1]
     plan = json.loads(readLines(name, ''))
     scanMain(plan, {})
-    debug= True
+    # debug= True
+    debug= False
     if debug:
         # printVarNum()
         # selected_columns = traverseUse()

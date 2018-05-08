@@ -1,30 +1,41 @@
-
+V
 ## List of Queries
 
-| ID | Status | is10 | Joins                                    | Special
-|----|--------|------|------------------------------------------|-------------------------
-| 1  | Pass   |  Y   | 0 join                                   |
-| 2  | Pass*  |      | 8 joins                                  | earlyprobe, is
-| 3  | Pass   |  Y   | 1 join,  1 groupjoin                     |
-| 4  | Pass   |  Y   | 1 leftsemijoin                           |
-| 5  | Pass   |      | 5 joins                                  |
-| 6  | Pass   |  Y   | 0 join                                   |
-| 7  | Pass*  |      | 5 joins                                  | bnl
-| 8  | Pass*  |      | 7 joins                                  |
-| 9  | Pass*  |      | 5 joins                                  |
-| 10 | Pass   |      | 3 joins                                  |
-| 11 | Pass   |      | 5 joins                                  | bnl join
-| 12 | Pass   |      | 1 join                                   | lookup
-| 13 | Pass   |      | 1 groupjoin                              |
-| 14 | Pass   |  Y   | 1 join                                   |
-| 15 | Pass   |      | 1 join,  1 index join                    |
-| 16 | Pass   |  Y   | 1 join,  1 rightantijoin                 |
-| 17 | Pass*  |  Y   | 2 joins, 1 groupjoin                     | groupby scan, magic?
-| 18 | Pass   |  Y   | 2 joins, 1 rightsemijoin                 | select
-| 19 | Pass   |  Y   | 1 join                                   |
-| 20 | Pass*  |      | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
-| 21 | Pass*  |      | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
-| 22 | Pass   |  Y   | 1 join,  1 leftantijoin                  | bnl
+| ID | Verify | Status | is10 | Joins                                    | Special
+|----|:------:|--------|------|------------------------------------------|-------------------------
+| 1  | V      | Pass   |  Y   | 0 join                                   |
+| 2  | V      | Pass*  |      | 8 joins                                  | earlyprobe, is
+| 3  | V      | Pass   |  Y   | 1 join,  1 groupjoin                     |
+| 4  | V      | Pass   |  Y   | 1 leftsemijoin                           |
+| 5  | V      | Pass   |      | 5 joins                                  |
+| 6  | V      | Pass   |  Y   | 0 join                                   |
+| 7  | V      | Pass*  |      | 5 joins                                  | bnl
+| 8  | V      | Pass*  |      | 7 joins                                  |
+| 9  | V      | Pass*  |      | 5 joins                                  |
+| 10 | V      | Pass   |      | 3 joins                                  |
+| 11 | V      | Pass   |      | 5 joins                                  | bnl join
+| 12 | V      | Pass   |      | 1 join                                   | lookup
+| 13 | V      | Pass   |      | 1 groupjoin                              |
+| 14 | V      | Pass   |  Y   | 1 join                                   |
+| 15 | V      | Pass   |      | 1 join,  1 index join                    |
+| 16 | V      | Pass   |  Y   | 1 join,  1 rightantijoin                 |
+| 17 | V      | Pass*  |  Y   | 2 joins, 1 groupjoin                     | groupby scan, magic?
+| 18 | V      | Pass   |  Y   | 2 joins, 1 rightsemijoin                 | select
+| 19 | V      | Pass   |  Y   | 2 join                                   |
+| 20 | V      | Pass*  |      | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
+| 21 | V      | Pass*  |      | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
+| 22 | V      | Pass   |  Y   | 1 join,  1 leftantijoin                  | bnl
+
+Note (May 7)
+
+- Special join: `<`, `>`, `is`, `<>` (other than `=`)
+    + q17/20/21
+- `whichTableByName`: decide a column from which side (0: left or 1:right)
+
+Note (May 6)
+
+- V: viewed; P: problematic; F: fail
+- Need a primitive `same` to find a pair of equal lists (list1 = list2)
 
 Note:
 
@@ -83,6 +94,16 @@ Screenshots of query plans from the HyPer's web (see dir: `fig/`)
 | [q4.png](fig/q4.png) | q10.png                | q16.png                | q22.png                |
 | q5.png               | q11.png                | [q17.png](fig/q17.png) | |
 | [q6.png](fig/q6.png) | [q12.png](fig/q12.png) | q18.png                | |
+
+## Folders
+
+Description of folders
+
+    - raw/ Execution plans downloaded from hyper online
+    - opt/ Optimized plans extracted from raw
+    - fig/ Hyper's optimized execution plans in figures
+
+    - gen/ Execution plans generated in HorseIR (Optimized)
 
 
 ## Issues Remaining
