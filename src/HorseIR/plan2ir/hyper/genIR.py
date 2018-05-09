@@ -463,6 +463,7 @@ def scanHeader(d, env):
         # temp = temp + ')'
         # a1 = genAssignment(temp)
     a2 = genTable(a0, a1)
+    genReturn(a2)  # return table
     return None
 
 def scanRestrictionCell(d, cols):
@@ -1360,8 +1361,8 @@ def scanMain(d, env):
                 else: unexpected('Unhandled magic in (%s)' % op)
             env2.append(scanMain(d['right'], env))
         if   op == 'tablescan'    : return scanTablescan    (d, env )  # 0 child
-        elif op == 'tempscan'     : return scanTempscan     (d, env)   # 0 child
-        elif op == 'groupbyscan'  : return scanGroupbyscan  (d, env)   # 0 children
+        elif op == 'tempscan'     : return scanTempscan     (d, env )  # 0 child
+        elif op == 'groupbyscan'  : return scanGroupbyscan  (d, env )  # 0 children
         elif op == 'groupby'      : return scanGroupby      (d, env1)  # 1 child
         elif op == 'sort'         : return scanSort         (d, env1)  # 1 child
         elif op == 'map'          : return scanMap          (d, env1)  # 1 child
