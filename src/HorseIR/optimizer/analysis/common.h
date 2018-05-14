@@ -1,4 +1,7 @@
+#ifndef __H_COMMON__
+#define __H_COMMON__
 
+/* nodes */
 typedef struct ValueNode{
     Kind kind; int len;
     union {
@@ -11,3 +14,6 @@ typedef struct ValueNode{
     char *g;
 }ValueNode;
 
+/* signatures */
+void propagateType(char *funcName, Node *param);
+#endif

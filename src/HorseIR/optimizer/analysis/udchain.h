@@ -13,15 +13,16 @@ typedef struct Chain {
     int useSize, maxUSize;
     struct Chain **chain_uses;
     struct Chain **chain_defs;
+    bool isVisited;
 }Chain;
 
 typedef struct ChainList {
     Chain *chain;
-    int flag;
     struct ChainList *next;
 }ChainList;
 
 void printChainList();
 char *fetchName(Node *n);
+void printChainInfo(Chain *chain, char opt);
 
 #endif

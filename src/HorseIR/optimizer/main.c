@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
     printf("** Pretty printer **\n");
     prettyProg(root);
     initGlobal();
-    //buildUDChain(root);
-    analyzeSR(root);
+    buildUDChain(root); analyzeLF();
+    //analyzeSR(root);
     return 0;
 }

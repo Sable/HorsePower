@@ -21,8 +21,8 @@ void error(const char* s);
 
 #include "tree.h"
 #include "pretty.h"
+#include "analysis/common.h"
 #include "analysis/udchain.h"
-#include "analysis/sr.h"
 
 void initGlobal ();
 void initTrie   ();
@@ -33,5 +33,6 @@ Chain *getChain(char *str);
 
 void buildUDChain(Prog *root);
 void analyzeSR(Prog *root);
+void analyzeLF();
 
 #endif

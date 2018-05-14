@@ -88,7 +88,7 @@ void prettyNode(Node *n){
         case          intK: printInt         (n); break;
         case         dateK: printDate        (n); break;
         case          symK: printSym         (n); break;
-        case         typeK: printType        (n); break;
+        case         typeK: printNodeType    (n); break;
         case     compoundK: printComp        (n); break;
         case         funcK: printFunc        (n); break;
         case         exprK: printExpr        (n); break;
@@ -125,9 +125,8 @@ void prettyList(List *list, char sep){
     else { PN("<NULL list found>"); }
 }
 
-void printType(Node *n){
-    pType k = n->val.typeS;
-    switch(k){
+void printType(pType p){
+    switch(p){
         case unknownT: echo("?");    break;
         case    boolT: echo("bool"); break;
         case      i8T: echo("i8");   break;
@@ -144,9 +143,46 @@ void printType(Node *n){
         case    dateT: echo("d");       break;
         case   tableT: echo("table");   break;
         case  ktableT: echo("ktable");  break;
-        default: P("Not supported yet.: %d\n", k);
+        default: P("Not supported yet.: %d\n", p);
                  error("something wrong");
     }
+}
+
+void printNodeType(Node *n){
+    pType k = n->val.typeS;
+    printType(k);
+}
+
+void printKind(Kind k){
+    switch(k){
+        case           idK: echo("idK"          ); break;
+        case        floatK: echo("floatK"       ); break;
+        case          intK: echo("intK"         ); break;
+        case         typeK: echo("typeK"        ); break;
+        case     compoundK: echo("compoundK"    ); break;
+        case         dateK: echo("dateK"        ); break;
+        case          symK: echo("symK"         ); break;
+        case         funcK: echo("funcK"        ); break;
+        case         exprK: echo("exprK"        ); break;
+        case    paramExprK: echo("paramExprK"   ); break;
+        case       importK: echo("importK"      ); break;
+        case       methodK: echo("moduleK"      ); break;
+        case   simpleStmtK: echo("simpleStmtK"  ); break;
+        case     castStmtK: echo("castStmtK"    ); break;
+        case literalFloatK: echo("literalFloatK"); break;
+        case   literalSymK: echo("literalSymK"  ); break;
+        case  literalDateK: echo("literalDateK" ); break;
+        case  literalCharK: echo("literalCharK" ); break;
+        case  literalBoolK: echo("literalBoolK" ); break;
+        case literalParamK: echo("literalParamK"); break;
+        case   literalIntK: echo("literalIntK"  ); break;
+        default: P("kind = %d\n", k);
+                 error("kind not supported");
+    }
+}
+
+void printNodeKind(Node *n){
+    printKind(n->kind);
 }
 
 

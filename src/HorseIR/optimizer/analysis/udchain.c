@@ -9,7 +9,7 @@ Chain *initChainWithNode(Node *val);
 void addDefNameToChain(Chain *chain, char *defName);
 void addUseNameToChain(Chain *chain, char *useName);
 void printChainList();
-void printChainInfo(Chain *chain, char opt);
+//void printChainInfo(Chain *chain, char opt);
 void printUDChain(Chain *chain);
 
 #define scanModule(n)    scanList(n->val.module.body)
@@ -17,7 +17,7 @@ void printUDChain(Chain *chain);
 #define scanReturn(n)    {exitChain = currentChain; scanNode(n->val.nodeS);}
 #define scanParamExpr(n) scanList(n->val.listS)
 #define scanParam(n)     scanNode(n->val.nodeS)
-#define scanExpr(n)      scanNode(n->val.expr.param);
+#define isFuncCall(n)    (n->val.expr.func)
 
 Chain *currentChain, *exitChain;
 ChainList *chain_list, *chain_rt;
@@ -26,7 +26,6 @@ void addToChainList(Chain *c){
     chain_rt->next = NEW(ChainList);
     chain_rt = chain_rt->next;
     chain_rt->chain = c;
-    chain_rt->flag  = 0;
 }
 
 void addToNameList(NameList *n, char *str){
@@ -50,12 +49,20 @@ void scanID(Node *n){
         char *useName = fetchName(n);
         addUseNameToChain(currentChain, useName);
         Chain *chain = getChain(useName);
-        P("use: %-3s -> ", useName);
-          if(chain == NULL) P("not found\n");
-          else prettyNode(chain->cur);
+        //P("use: %-3s -> ", useName);
+        //  if(chain == NULL) P("not found\n");
+        //  else prettyNode(chain->cur);
         addToUDChain(currentChain, chain); // use-def chain
         addToDUChain(chain, currentChain); // def-use chain
     }
+}
+
+static void scanExpr(Node *n){
+    if(isFuncCall(n)){
+        char *funcName = fetchName(n->val.expr.func);
+        propagateType(funcName, n->val.expr.param);
+    }
+    scanNode(n->val.expr.param);
 }
 
 void scanSimpleStmt(Node *n){
@@ -89,13 +96,13 @@ void scanNode(Node *n){
     switch(n->kind){
         case       moduleK: scanModule    (n); break;
         case       methodK: scanMethod    (n); break;
-        case       returnK: scanReturn    (n); break;
         case   simpleStmtK: scanSimpleStmt(n); break;
         case     castStmtK: scanCastStmt  (n); break;
-        case    paramExprK: scanParamExpr (n); break;
-        case           idK: scanID        (n); break;
         case         exprK: scanExpr      (n); break;
+        case    paramExprK: scanParamExpr (n); break;
         case literalParamK: scanParam     (n); break;
+        case           idK: scanID        (n); break;
+        case       returnK: scanReturn    (n); break;
     }
     setCurrentNode(n, NULL);
 }
@@ -212,7 +219,7 @@ void printUDChain(Chain *chain){
 /* entry */
 void buildUDChain(Prog *root){
     scanList(root->module_list);
-    printChainList();
-    printUDChain(exitChain);
+    //printChainList();
+    //printUDChain(exitChain);
 }
 
