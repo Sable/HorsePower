@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 void *newM(int n);
 void error(const char* s);
 #define NEW(typ) (typ*)newM(sizeof(typ))
@@ -23,16 +26,19 @@ void error(const char* s);
 #include "pretty.h"
 #include "analysis/common.h"
 #include "analysis/udchain.h"
+#include "analysis/typeshape.h"
 
 void initGlobal ();
 void initTrie   ();
 void initUDChain();
 
-void insertString(char *str, Chain *chain);
-Chain *getChain(char *str);
+void insertString(char *str, Chain *chain, InfoNode *in);
+Chain    *getChain(char *str);
+InfoNode *getInfoNode(char *str);
 
 void buildUDChain(Prog *root);
 void analyzeSR(Prog *root);
 void analyzeLF();
+void printTrieType();
 
 #endif

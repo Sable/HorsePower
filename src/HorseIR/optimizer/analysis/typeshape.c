@@ -1,32 +1,12 @@
 #include "../global.h"
-
-typedef enum ShapeType {
-    unknownH, vectorH, listH
-}pShape;
-
-typedef struct ShapeNode{
-    pShape type;
-    union {
-        int size;    /* actual literal size */
-        int sizeId;  /* sequential size id  */
-    };
-}ShapeNode;
-
-typedef struct TypeShapeNode{
-         char *name;
-        pType  type;
-    ShapeNode *shape;
-}InfoNode;
-
-typedef struct TypeShapeNodeList{
-    InfoNode *in;
-    struct TypeShapeNodeList *next;
-}InfoNodeList;
-
 #include "typerule.h" // need above nodes
 
+typedef InfoNode* (*NilFunc)();
+typedef InfoNode* (*MonFunc)(InfoNode*);
+typedef InfoNode* (*DyaFunc)(InfoNode*, InfoNode*);
+typedef InfoNode* (*AllFunc)(InfoNodeList*);
+
 /* signatures */
-static void printInfoNode(InfoNode *in);
 
 static ShapeNode *newShapeNode(pShape type, int size){
     ShapeNode *sn = NEW(ShapeNode);
@@ -36,17 +16,11 @@ static ShapeNode *newShapeNode(pShape type, int size){
     return sn;
 }
 
-// delete later
-static InfoNode *queryInSet(char *def){
-    InfoNode *info = NEW(InfoNode);
-    info->name  = strdup("pending");
-    info->type  = unknownT;
-    info->shape = newShapeNode(vectorH, 1);
-}
-
 static InfoNode *addParamCaseIdK(Node *n){
     char *name = fetchName(n);
-    return queryInSet(name);
+    InfoNode *idIn = getInfoNode(name);
+    if(idIn) return idIn;
+    else {P("name = %s",name); error(" has not been typed\n");}
 }
 static InfoNode *addParamCaseLiteral(pType typ){
     InfoNode *info = NEW(InfoNode);
@@ -72,8 +46,14 @@ static InfoNode *getParamItemInfo(Node *n){
 
 static void addInfoNodeToList(InfoNodeList *in_list, InfoNode *in){
     in_list->next = NEW(InfoNodeList);
-    in_list = in_list->next;
-    in_list->in = in;
+    in_list       = in_list->next;
+    in_list->in   = in;
+}
+
+static int totalNode(InfoNodeList *rt){
+    int n = 0;
+    while(rt->next) {n++; rt=rt->next;}
+    return n;
 }
 
 static InfoNodeList *getParamInfo(Node *n){
@@ -81,19 +61,22 @@ static InfoNodeList *getParamInfo(Node *n){
     List *temp = params;
     int c = 0;
     InfoNodeList *in_list = NEW(InfoNodeList);
+    InfoNodeList *in_temp = in_list;
     while(temp){
         Node *pVal = temp->val; //paramValue
         Node *n   = pVal->val.nodeS;
         InfoNode *in = getParamItemInfo(n);
-        addInfoNodeToList(in_list, in);
+        addInfoNodeToList(in_temp, in);
         printInfoNode(in);
         temp = temp->next;
+        in_temp = in_temp->next;
         c++;
     }
+    P("c = %d, tot = %d\n",c,totalNode(in_list));
     return in_list;
 }
 
-static void printInfoNode(InfoNode *in){
+void printInfoNode(InfoNode *in){
     if(in->name){
         P("[var] %s -> ", in->name);
         printType(in->type);
@@ -106,52 +89,64 @@ static void printInfoNode(InfoNode *in){
     }
 }
 
-static int totalNode(InfoNodeList *rt){
-    int n = 0;
-    while(rt->next) {n++; rt=rt->next;}
-    return n;
-}
-
 static InfoNode *getNode(InfoNodeList *rt, int k){
     while(rt->next && k>=0){ rt=rt->next; k--; }
     return rt->in;
 }
 
-typedef InfoNode* (*nilFunc)();
-typedef InfoNode* (*monFunc)(InfoNode*);
-typedef InfoNode* (*dyaFunc)(InfoNode*, InfoNode*);
-typedef InfoNode* (*allFunc)(InfoNodeList*);
-
 /* entry */
-void propagateType(char *funcName, Node *param_list){
+InfoNode *propagateType(char *funcName, Node *param_list){
     int valence=-1;
     P("funcName = %s\n", funcName);
     InfoNodeList *in_list = getParamInfo(param_list);
-    void* funcRtn = fetchTypeRules(funcName, &valence);
+    void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
+    P("valence = %d, total = %d\n", valence, totalNode(in_list));
     if(totalNode(in_list) == valence){
         InfoNode *newNode;
         if(valence == 2){
-            dyaFunc func = (dyaFunc)funcRtn;
+            DyaFunc func = (DyaFunc)funcRtn;
             newNode = func(getNode(in_list,0), getNode(in_list, 1));
-            printInfoNode(newNode);
+            if(newNode == NULL){
+                error("1 null type rules found\n");
+            }
         }
-        if(valence == 1){
-            monFunc func = (monFunc)funcRtn;
-            InfoNode *newNode = func(getNode(in_list,0));
-            printInfoNode(newNode);
+        else if(valence == 1){
+            MonFunc func = (MonFunc)funcRtn;
+            newNode = func(getNode(in_list,0));
         }
         else if(valence > 2){
-            allFunc func = (allFunc)funcRtn;
+            AllFunc func = (AllFunc)funcRtn;
             newNode = func(in_list);
-            printInfoNode(newNode);
         }
         else if(valence == 0){
-            nilFunc func = (nilFunc)funcRtn;
+            NilFunc func = (NilFunc)funcRtn;
             newNode = func();
-            printInfoNode(newNode);
         }
         else error("valence must >= 0");
+        if(newNode == NULL){
+            error("null type rules found\n");
+        }
+        printInfoNode(newNode);
+        return newNode;
     }
     else error("# of params != expected valence");
 }
 
+InfoNode *propagateTypeCopy(Node *param){
+    P("=====Copy=====\n");
+    return getParamItemInfo(param->val.nodeS);
+}
+
+/* TODO: add more cases */
+static bool isCastable(pType x, pType c){
+    if(x == unknownT) return true;
+    else false;
+}
+
+void propagateTypeCast(InfoNode *in, Node *cast){
+    pType ctype = cast->val.typeS;
+    if(isCastable(in->type, ctype)){
+        in->type = ctype;
+    }
+    else error("can't cast the type");
+}

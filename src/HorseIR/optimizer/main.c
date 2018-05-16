@@ -27,5 +27,6 @@ int main(int argc, char *argv[]){
     initGlobal();
     buildUDChain(root); analyzeLF();
     //analyzeSR(root);
+    printTrieType();
     return 0;
 }

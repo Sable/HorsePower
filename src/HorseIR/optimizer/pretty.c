@@ -143,6 +143,7 @@ void printType(pType p){
         case    dateT: echo("d");       break;
         case   tableT: echo("table");   break;
         case  ktableT: echo("ktable");  break;
+        case    listT: echo("list");    break;
         default: P("Not supported yet.: %d\n", p);
                  error("something wrong");
     }
@@ -161,7 +162,7 @@ void printKind(Kind k){
         case         typeK: echo("typeK"        ); break;
         case     compoundK: echo("compoundK"    ); break;
         case         dateK: echo("dateK"        ); break;
-        case          symK: echo("symK"         ); break;
+        case          symK: P("symK"         ); break;
         case         funcK: echo("funcK"        ); break;
         case         exprK: echo("exprK"        ); break;
         case    paramExprK: echo("paramExprK"   ); break;

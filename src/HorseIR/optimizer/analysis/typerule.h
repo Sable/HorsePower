@@ -1,7 +1,7 @@
 /* constants */
 
 const char *FUNCTIONS[] = {
-    /* unary */
+    /* unary 53 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" , "not",
     "log", "exp",  "cos",   "sin",   "tan", "acos",  "asin",  "atan", "cosh", "sinh",
     "tanh", "acosh", "asinh", "atanh",
@@ -9,14 +9,14 @@ const char *FUNCTIONS[] = {
     "time", "time_hour", "time_minute", "time_second", "time_mill",
     "unique", "str", "len", "range", "fact", "rand", "seed", "flip", "reverse",
     "where", "group", "count", "sum", "avg", "min", "max", "raze", "enlist", "tolist",
-    "format"
-    /* binary */
+    "format",
+    /* binary 32 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul", "div",
     "power", "log2", "mod", "and", "or", "nand", "nor" , "xor",
     "datetime_diff", "datetime_add", "datetime_sub",
     "append", "like", "compress", "randk", "index_of", "take", "drop", "order",
-    "member", "vector", "match"
-    /* special */
+    "member", "vector", "match",
+    /* special 16 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
     "ktable", "keys", "values", "meta", "column_value", "load_table", "fetch",
     "index", "index_a"
@@ -125,7 +125,7 @@ typedef enum FunctionType {
 #define ruleDtsub    NULL
 #define ruleAppend   NULL
 #define ruleLike     NULL
-#define ruleCompress specialColumnValue
+#define ruleCompress specialCompress
 #define ruleRandk    NULL
 #define ruleIndexof  NULL
 #define ruleTake     NULL
@@ -141,7 +141,7 @@ typedef enum FunctionType {
 #define ruleEachRight   NULL
 #define ruleEnum        NULL
 #define ruleDict        NULL
-#define ruleTable       NULL
+#define ruleTable       specialTable
 #define ruleKtable      NULL
 #define ruleKeys        NULL
 #define ruleValues      NULL
@@ -152,23 +152,26 @@ typedef enum FunctionType {
 #define ruleIndex       NULL
 #define ruleIndexA      NULL
 
-#define isT(t) (t==x)
-#define isU(n) (unknownT==(n)->type)
+#define isT(t) (t==n->type)
 
 #define isBT isT(boolT)
 #define isIT isT(i64T)||isT(i32T)||isT(i16T)||isT(i8T)
 #define isFT isT(f64T)||isT(f32T)
 #define isST isT(symT)||isT(strT)
 #define isDT isT(monthT)||isT(dateT)
+#define isTT isT(tableT)||isT(ktableT)
 #define sameT(x,y) ((x)->type==(y)->type)
 
-bool isInt   (InfoNode *n) {pType x=n->type; return isIT;}
-bool isFloat (InfoNode *n) {pType x=n->type; return isFT;}
-bool isBool  (InfoNode *n) {pType x=n->type; return isBT;}
-bool isReal  (InfoNode *n) {pType x=n->type; return isIT||isFT||isBT;}
-bool isString(InfoNode *n) {pType x=n->type; return isST;}
-bool isDate  (InfoNode *n) {pType x=n->type; return isDT;}
+bool isInt   (InfoNode *n) {return isIT;}
+bool isFloat (InfoNode *n) {return isFT;}
+bool isBool  (InfoNode *n) {return isBT;}
+bool isReal  (InfoNode *n) {return isIT||isFT||isBT;}
+bool isString(InfoNode *n) {return isST;}
+bool isDate  (InfoNode *n) {return isDT;}
 bool isBasic (InfoNode *n) {return isReal(n)||isDate(n);}
+bool isTable (InfoNode *n) {return isTT;}
+#define isU(n) (unknownT==(n)->type)
+#define isList(n) (listT==(n)->type)
 
 static InfoNode *newInfoNode(pType type, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
@@ -244,6 +247,9 @@ static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
         rtnType = boolT;
         // TODO: elementwise shape
     }
+    else if(isU(x) || isU(y)){
+        rtnType = unknownT;
+    }
     else return NULL;
     return newInfoNode(rtnType, rtnShape);
 }
@@ -255,6 +261,9 @@ static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
     }
     else if(isDate(x) && sameT(x,y)){
         rtnType = boolT;
+    }
+    else if(isU(x) || isU(y)){
+        rtnType = unknownT;
     }
     else return NULL;
     // TODO: elementwise shape
@@ -270,29 +279,53 @@ static InfoNode *specialLoadTable(InfoNode *x){
     }
     else return NULL;
 }
-static InfoNode *specialColumnValue(InfoNode *x){
-    if(isString(x)){
+static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
+    P("type: column value\n");
+    printType(x->type); P(" "); printType(y->type); P("\n");
+    if(isTable(x) && isString(y)){
         // TODO: decide shape
+        return newInfoNode(unknownT, NULL);
+    }
+    else if(isU(x) || isU(y)){
         return newInfoNode(unknownT, NULL);
     }
     else return NULL;
 }
 
-static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
+static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
+    pType rtnType; ShapeNode *rtnShape=NULL;
     if(isBool(x) && (isBasic(y)||isU(y))){
+        rtnType = y->type;
+    }
+    else if(isU(x) || isU(y)){
+        rtnType = unknownT;
+    }
+    else return NULL;
+    // TODO: decide shape
+    return newInfoNode(y->type, NULL);
+}
+static InfoNode *specialTable(InfoNode *x, InfoNode *y){
+    if(isString(x) && isList(y)){
         // TODO: decide shape
-        return newInfoNode(y->type, NULL);
+        return newInfoNode(tableT, NULL);
+    }
+    else if(isU(x) || isU(y)){
+        return newInfoNode(unknownT, NULL);
     }
     else return NULL;
 }
 
 /* main */ 
 static int findInBuiltinSet(char *funcName, const char *set[]){
-    DOI(strlen((char*)set), if(!strcmp(funcName, set[i])) return i)
+    DOI(totalFunc, if(!strcmp(funcName, set[i])) return i)
     return -1;
 }
 
 static void *fetchTypeRules(char *name, int* num){
+    if(sizeof(FUNCTIONS)/8 != totalFunc){
+        P("%d vs. %d\n", sizeof(FUNCTIONS)/8, totalFunc);
+        error("FUNCTIONS and FunctionType should have the same # of elem.");
+    }
     int k = findInBuiltinSet(name, FUNCTIONS);
     if(k>=0){
         switch(k){
@@ -389,12 +422,12 @@ static void *fetchTypeRules(char *name, int* num){
             CASE(0,   eachRightF, ruleEachRight)
             CASE(0,        enumF, ruleEnum)
             CASE(0,        dictF, ruleDict)
-            CASE(0,       tableF, ruleTable)
+            CASE(2,       tableF, ruleTable)
             CASE(0,      ktableF, ruleKtable)
             CASE(0,        keysF, ruleKeys)
             CASE(0,      valuesF, ruleValues)
             CASE(0,        metaF, ruleMeta)
-            CASE(1, columnValueF, ruleColumnValue)
+            CASE(2, columnValueF, ruleColumnValue)
             CASE(1,   loadTableF, ruleLoadTable)
             CASE(0,       fetchF, ruleFetch)
             CASE(0,       indexF, ruleIndex)
@@ -402,7 +435,7 @@ static void *fetchTypeRules(char *name, int* num){
             default: error("type rules not defined.");
         }
     }
-    else return NULL;
+    else error("primitive not defined");
 }
 
 

@@ -15,5 +15,4 @@ typedef struct ValueNode{
 }ValueNode;
 
 /* signatures */
-void propagateType(char *funcName, Node *param);
 #endif

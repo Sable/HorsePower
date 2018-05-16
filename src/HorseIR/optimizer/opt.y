@@ -175,12 +175,12 @@ literalSymbol   : symbol_list ':' kSYM
                 | symbol_list
 ;*/
 literalSymbol   : symbol_list ':' kSYM
-                 { $$ = makeNodeLiteralSymbol($1); }
+                 { $$ = makeNodeLiteralSymbol($1); P("symbol3\n"); }
 ;
 symbol_list     : tSYMBOL
-                 { $$ = makeList(makeNodeConstSymbol($1), NULL); }
+                 { $$ = makeList(makeNodeConstSymbol($1), NULL); P("symbol1\n"); }
                 | tSYMBOL symbol_list
-                 { $$ = makeList(makeNodeConstSymbol($1), $2); }
+                 { $$ = makeList(makeNodeConstSymbol($1), $2); P("symbol2\n"); }
 ;
 
 /* date */

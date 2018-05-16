@@ -21,6 +21,7 @@ void printUDChain(Chain *chain);
 
 Chain *currentChain, *exitChain;
 ChainList *chain_list, *chain_rt;
+InfoNode *currentIn;
 
 void addToChainList(Chain *c){
     chain_rt->next = NEW(ChainList);
@@ -60,8 +61,9 @@ void scanID(Node *n){
 static void scanExpr(Node *n){
     if(isFuncCall(n)){
         char *funcName = fetchName(n->val.expr.func);
-        propagateType(funcName, n->val.expr.param);
+        currentIn = propagateType(funcName, n->val.expr.param);
     }
+    else currentIn = propagateTypeCopy(n->val.expr.param);
     scanNode(n->val.expr.param);
 }
 
@@ -69,18 +71,19 @@ void scanSimpleStmt(Node *n){
     char *defName = fetchName(n->val.simpleStmt.name);
     addDefNameToChain(currentChain, defName);
     addToChainList(currentChain);
-    insertString(defName, currentChain);
     /* continue scan */
     scanNode(n->val.simpleStmt.expr); 
+    insertString(defName, currentChain, currentIn);
 }
 
 void scanCastStmt(Node *n){
     char *defName = fetchName(n->val.castStmt.name);
     addDefNameToChain(currentChain, defName);
     addToChainList(currentChain);
-    insertString(defName, currentChain);
     /* continue scan */
     scanNode(n->val.castStmt.expr); 
+    propagateTypeCast(currentIn, n->val.castStmt.cast);
+    insertString(defName, currentChain, currentIn);
 }
 
 void setCurrentNode(Node *n, Node *val){

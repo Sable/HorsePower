@@ -12,9 +12,10 @@ typedef struct Program {
     struct List *module_list;
 }Prog;
 
+/* TODO: add listT */
 typedef enum pType {
     unknownT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT,
-    strT, monthT, dateT, tableT, ktableT
+    strT, monthT, dateT, tableT, ktableT, listT
 }pType;
 
 typedef enum Kind {
@@ -45,8 +46,8 @@ typedef struct Node {
 }Node;
 
 
-Prog *makeProg (List* module_list);
-List *makeList (Node*val, List *next);
+Prog *makeProg (List *module_list);
+List *makeList (Node *val, List *next);
 
 Node *makeNodeID           (char *id);
 Node *makeNodeKind         (Node *d, Kind k);
