@@ -21,7 +21,7 @@ void printTireAllType(TNode *rt, char *name, int dep){
     if(rt) {
         if(rt->in){
             name[dep] = 0;
-            P("name = %s:",name); printInfoNode(rt->in);
+            P("%-3s:",name); printInfoNode(rt->in);
         }
         for(int i=0;i<128;i++){
             if(rt->child[i]) {

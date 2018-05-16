@@ -2,11 +2,12 @@
 #define __H__TYPESHAPE__
 
 typedef enum ShapeType {
-    unknownH, vectorH, listH
+    unknownH, vectorH, listH, tableH
 }pShape;
 
 typedef struct ShapeNode{
     pShape type;
+    bool isId;
     union {
         int size;    /* actual literal size */
         int sizeId;  /* sequential size id  */
@@ -23,6 +24,9 @@ typedef struct TypeShapeNodeList{
     InfoNode *in;
     struct TypeShapeNodeList *next;
 }InfoNodeList;
+
+/* ids */
+extern int shapeId;
 
 /* signatures */
 void printInfoNode(InfoNode *in);

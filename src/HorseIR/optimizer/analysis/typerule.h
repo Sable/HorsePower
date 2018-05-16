@@ -45,6 +45,8 @@ typedef enum FunctionType {
     totalFunc
 }pFunc;
 
+static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
+
 #define CASE(c, k, x) case k: *num=c; return x; break;
 #define commonTrig commonArith1
 /* monadic */
@@ -81,7 +83,7 @@ typedef enum FunctionType {
 #define ruleMinute  NULL
 #define ruleSecond  NULL
 #define ruleMill    NULL
-#define ruleUnique  NULL
+#define ruleUnique  specialUnique  //return indices
 #define ruleStr     NULL
 #define ruleLen     NULL
 #define ruleRange   NULL
@@ -173,6 +175,15 @@ bool isTable (InfoNode *n) {return isTT;}
 #define isU(n) (unknownT==(n)->type)
 #define isList(n) (listT==(n)->type)
 
+#define isS(n, t) (t == n->type)
+#define isShapeU(n) isS(n, unknownH)
+#define isShapeV(n) isS(n,  vectorH)
+#define isShapeL(n) isS(n,    listH)
+#define isShapeT(n) isS(n,   tableH)
+
+typedef bool (*TypeCond)(InfoNode *);
+int shapeId = 0;
+
 static InfoNode *newInfoNode(pType type, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
     in->type     = type;
@@ -180,56 +191,70 @@ static InfoNode *newInfoNode(pType type, ShapeNode *shape){
     return in;
 }
 
-/* monadic */
-static InfoNode *commonArith1(InfoNode *x){
-    pType rtnType; ShapeNode *rtnShape=NULL;
-    if(isReal(x)||isU(x)) {
-        rtnType = x->type;
-        // TODO: copy shape
+static ShapeNode *newShapeNode(pShape type, bool isId, int size){
+    ShapeNode *sn = NEW(ShapeNode);
+    sn->type = type;
+    sn->isId = isId;
+    switch(type){
+        case unknownH: sn->size   = -1;   break;
+        case  vectorH: 
+        case    listH:
+        case   tableH:
+              if(isId) sn->sizeId = size<0?(shapeId++):size;
+              else sn->size = size; break;
+        default: sn->size   = -2;   break;
     }
+    return sn;
+}
+
+/* monadic */
+static InfoNode *commonElemementSingle(InfoNode *x, TypeCond cond, pType t){
+    pType rtnType; 
+    if(cond(x)||isU(x)) rtnType = t;
     else return NULL;
-    return newInfoNode(rtnType, rtnShape);
+    return newInfoNode(rtnType, x->shape);
+}
+
+static InfoNode *commonReduction(InfoNode *x, TypeCond cond, pType t){
+    pType rtnType;
+    if(cond(x)||isU(x)) rtnType = t;
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
+}
+
+static InfoNode *commonArith1(InfoNode *x){
+    return commonElemementSingle(x, &isReal, x->type);
 } 
 
 static InfoNode *commonBool1(InfoNode *x){
-    pType rtnType; ShapeNode *rtnShape=NULL;
-    if(isBool(x)||isU(x)){
-        rtnType = boolT;
-        // TODO: copy shape
-    }
-    else return NULL;
-    return newInfoNode(rtnType, rtnShape);
+    return commonElemementSingle(x, &isBool, boolT);
 }
 
 static InfoNode *reductionSum(InfoNode *x){
-    pType rtnType; ShapeNode *rtnShape=NULL;
+    pType rtnType;
     if(isInt(x)||isBool(x)) rtnType = i64T;
     else if(isFloat(x)) rtnType = f64T;
     else if(isU(x)) rtnType = unknownT;
     else return NULL;
     // TODO: decide shape
-    return newInfoNode(rtnType, NULL);
+    return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
 }
 
 static InfoNode *reductionCount(InfoNode *x){
-    pType rtnType; ShapeNode *rtnShape=NULL;
-    if(isBasic(x)||isU(x)) rtnType = i64T;
-    else return NULL;
-    // TODO: decide shape
-    return newInfoNode(rtnType, NULL);
+    return commonReduction(x, &isBasic, i64T);
 }
 
 static InfoNode *specialEnlist(InfoNode *x){
-    pType rtnType; ShapeNode *rtnShape=NULL;
-    if(isBasic(x)||isU(x)) rtnType = listT;
-    else return NULL;
-    // TODO: decide shape
-    return newInfoNode(rtnType, NULL);
+    return commonReduction(x, &isBasic, listT);
+}
+
+static InfoNode *specialUnique(InfoNode *x){
+    return commonElemementSingle(x, &isBasic, i64T);
 }
 
 /* dyadic */
 static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
-    pType rtnType; ShapeNode *rtnShape=NULL;
+    pType rtnType;
     if(isReal(x)&&isReal(x)){
         rtnType = MAX(x->type, y->type);
     }
@@ -237,25 +262,56 @@ static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
         rtnType = unknownT;
     }
     else return NULL;
-    // TODO: elementwise shape
-    return newInfoNode(rtnType, rtnShape);
+    return newInfoNode(rtnType, decideShapeElementwise(x,y));
 }
 
 static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
-    pType rtnType; ShapeNode *rtnShape=NULL;
+    pType rtnType;
     if(isBool(x)&&isBool(y)){
         rtnType = boolT;
-        // TODO: elementwise shape
     }
     else if(isU(x) || isU(y)){
         rtnType = unknownT;
     }
     else return NULL;
-    return newInfoNode(rtnType, rtnShape);
+    return newInfoNode(rtnType, decideShapeElementwise(x,y));
+}
+
+static ShapeNode *decideShapeV(ShapeNode *x, ShapeNode *y){
+    ShapeNode *rtnShape = NULL;
+    if(!(x->isId)){
+        if(x->size == 1) rtnShape = y;
+        else if(isShapeV(y) && !(y->isId)){
+            if(x->size == y->size) rtnShape = y;
+            else error("length of both sides should obey the elemetwise rule");
+        }
+        else rtnShape = newShapeNode(unknownH, true, -1);
+    }
+    else {
+        if(isShapeV(y)){
+            if(y->isId && x->sizeId == y->sizeId) rtnShape = x;
+            else if(!(y->isId) && y->size == 1) rtnShape = x;
+            else rtnShape = newShapeNode(unknownH, true, -1);
+        }
+        else rtnShape = newShapeNode(unknownH, true, -1);
+    }
+    return rtnShape;
+}
+
+static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y){
+    ShapeNode *rtnShape = NULL;
+    if(isShapeV(x->shape) || isShapeV(y->shape)){
+        rtnShape = decideShapeV(x->shape,y->shape);
+    }
+    else if(isShapeU(x->shape) || isShapeU(y->shape)){
+        rtnShape = newShapeNode(unknownH, true, -1);
+    }
+    else error("unknown shape case for elementwise");
+    return rtnShape;
 }
 
 static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
-    pType rtnType; ShapeNode *rtnShape=NULL;
+    pType rtnType; 
     if(isReal(x) && isReal(y)){
         rtnType = boolT;
     }
@@ -267,33 +323,31 @@ static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
     }
     else return NULL;
     // TODO: elementwise shape
-    return newInfoNode(rtnType, rtnShape);
+    return newInfoNode(rtnType, decideShapeElementwise(x,y));
 }
 
 /* special */
 
 static InfoNode *specialLoadTable(InfoNode *x){
     if(isString(x)){
-        // TODO: decide shape
-        return newInfoNode(tableT, NULL);
+        return newInfoNode(tableT, newShapeNode(tableH,true,-1));
     }
     else return NULL;
 }
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
-    P("type: column value\n");
-    printType(x->type); P(" "); printType(y->type); P("\n");
+    //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n");
+    ShapeNode *rtnShape = newShapeNode(vectorH, true, x->shape->sizeId);
     if(isTable(x) && isString(y)){
-        // TODO: decide shape
-        return newInfoNode(unknownT, NULL);
+        return newInfoNode(unknownT, rtnShape);
     }
     else if(isU(x) || isU(y)){
-        return newInfoNode(unknownT, NULL);
+        return newInfoNode(unknownT, rtnShape);
     }
     else return NULL;
 }
 
 static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
-    pType rtnType; ShapeNode *rtnShape=NULL;
+    pType rtnType; ShapeNode *rtnShape=y->shape;
     if(isBool(x) && (isBasic(y)||isU(y))){
         rtnType = y->type;
     }
@@ -301,16 +355,15 @@ static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
         rtnType = unknownT;
     }
     else return NULL;
-    // TODO: decide shape
-    return newInfoNode(y->type, NULL);
+    return newInfoNode(y->type, rtnShape);
 }
 static InfoNode *specialTable(InfoNode *x, InfoNode *y){
+    ShapeNode *rtnShape = newShapeNode(tableH, true, -1);
     if(isString(x) && isList(y)){
-        // TODO: decide shape
-        return newInfoNode(tableT, NULL);
+        return newInfoNode(tableT, rtnShape);
     }
     else if(isU(x) || isU(y)){
-        return newInfoNode(unknownT, NULL);
+        return newInfoNode(unknownT, rtnShape);
     }
     else return NULL;
 }

@@ -8,37 +8,35 @@ typedef InfoNode* (*AllFunc)(InfoNodeList*);
 
 /* signatures */
 
-static ShapeNode *newShapeNode(pShape type, int size){
-    ShapeNode *sn = NEW(ShapeNode);
-    sn->type = type;
-    if(type == unknownH) { sn->sizeId = size; }
-    else sn->size = size;
-    return sn;
-}
-
 static InfoNode *addParamCaseIdK(Node *n){
     char *name = fetchName(n);
     InfoNode *idIn = getInfoNode(name);
     if(idIn) return idIn;
     else {P("name = %s",name); error(" has not been typed\n");}
 }
-static InfoNode *addParamCaseLiteral(pType typ){
+static InfoNode *addParamCaseLiteral(pType typ, int size){
     InfoNode *info = NEW(InfoNode);
     info->name = NULL;
     info->type = typ;
-    info->shape = newShapeNode(vectorH, 1);
+    info->shape = newShapeNode(vectorH, false, size);
+}
+
+static int literalSize(Node *n){
+    List *list = n->val.listS;
+    int tot = 0; while(list) {list=list->next; tot++;}
+    return tot;
 }
 
 static InfoNode *getParamItemInfo(Node *n){
     printNodeKind(n); P("\n");
     switch(n->kind){
         case           idK: return addParamCaseIdK(n); break;
-        case literalFloatK: return addParamCaseLiteral(f64T ); break;
-        case   literalIntK: return addParamCaseLiteral(i64T ); break;
-        case   literalSymK: return addParamCaseLiteral(symT ); break;
-        case  literalDateK: return addParamCaseLiteral(dateT); break;
-        case  literalBoolK: return addParamCaseLiteral(boolT); break;
-        case  literalCharK: return addParamCaseLiteral(charT); break;
+        case literalFloatK: return addParamCaseLiteral(f64T , literalSize(n)); break;
+        case   literalIntK: return addParamCaseLiteral(i64T , literalSize(n)); break;
+        case   literalSymK: return addParamCaseLiteral(symT , literalSize(n)); break;
+        case  literalDateK: return addParamCaseLiteral(dateT, literalSize(n)); break;
+        case  literalBoolK: return addParamCaseLiteral(boolT, literalSize(n)); break;
+        case  literalCharK: return addParamCaseLiteral(charT, literalSize(n)); break;
         default: printNodeKind(n);
                  error("Unknown kind found\n");
     }
@@ -76,17 +74,36 @@ static InfoNodeList *getParamInfo(Node *n){
     return in_list;
 }
 
+
+void printShapeNode(ShapeNode *sn){
+    if(sn){
+        switch(sn->type){
+            case unknownH: P("shape(?,"); break;
+            case  vectorH: P("shape(vector,"); break;
+            case    listH: P("shape(list,"); break;
+            case   tableH: P("shape(table,"); break;
+            default: error("shape type not supported yet.");
+        }
+        switch(sn->type){
+            case unknownH: P("%d)",sn->size); break;
+            case  vectorH:
+            case    listH:
+            case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);
+                           else P("%d)",sn->size); break;
+        }
+    }
+}
+
 void printInfoNode(InfoNode *in){
     if(in->name){
         P("[var] %s -> ", in->name);
         printType(in->type);
-        P(" -> %d (shape)\n", in->shape->type);
     }
     else {
         P("[literal] ");
         printType(in->type);
-        P("\n");
     }
+    P(" -> "); printShapeNode(in->shape); P("\n");
 }
 
 static InfoNode *getNode(InfoNodeList *rt, int k){
