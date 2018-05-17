@@ -18,6 +18,7 @@ void error(const char* s);
 
 
 #define P printf
+#define SP sprintf
 #define PN(x) P("%s\n",x)
 #define newLine() P("\n")
 

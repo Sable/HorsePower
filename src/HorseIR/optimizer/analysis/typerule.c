@@ -1,5 +1,7 @@
-/* constants */
+#include "../global.h"
+/* check typeshape.h */
 
+/* constants */
 const char *FUNCTIONS[] = {
     /* unary 53 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" , "not",
@@ -21,29 +23,6 @@ const char *FUNCTIONS[] = {
     "ktable", "keys", "values", "meta", "column_value", "load_table", "fetch",
     "index", "index_a"
 };
-
-typedef enum FunctionType {
-    /* unary */
-    absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
-    logF, expF,  cosF,   sinF,   tanF, acosF,  asinF,   atanF, coshF, sinhF,
-    tanhF, acoshF, asinhF, atanhF,
-    dateF, yearF, monthF, dayF,
-    timeF, hourF, minuteF, secondF, millF,
-    uniqueF, strF, lenF, rangeF, factF, randF, seedF, flipF, reverseF,
-    whereF, groupF, countF, sumF, avgF, minF, maxF, razeF, enlistF, tolistF,
-    formatF,
-    /* binary */
-    ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
-    powerF, log2F, modF, andF, orF, nandF, norF, xorF,
-    dtdiffF, dtaddF, dtsubF,
-    appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
-    memberF, vectorF, matchF,
-    /* special */
-    eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF,
-    ktableF, keysF, valuesF, metaF, columnValueF, loadTableF, fetchF,
-    indexF, indexAF,
-    totalFunc
-}pFunc;
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 
@@ -191,7 +170,7 @@ static InfoNode *newInfoNode(pType type, ShapeNode *shape){
     return in;
 }
 
-static ShapeNode *newShapeNode(pShape type, bool isId, int size){
+ShapeNode *newShapeNode(pShape type, bool isId, int size){
     ShapeNode *sn = NEW(ShapeNode);
     sn->type = type;
     sn->isId = isId;
@@ -236,7 +215,6 @@ static InfoNode *reductionSum(InfoNode *x){
     else if(isFloat(x)) rtnType = f64T;
     else if(isU(x)) rtnType = unknownT;
     else return NULL;
-    // TODO: decide shape
     return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
 }
 
@@ -322,7 +300,6 @@ static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
         rtnType = unknownT;
     }
     else return NULL;
-    // TODO: elementwise shape
     return newInfoNode(rtnType, decideShapeElementwise(x,y));
 }
 
@@ -374,7 +351,7 @@ static int findInBuiltinSet(char *funcName, const char *set[]){
     return -1;
 }
 
-static void *fetchTypeRules(char *name, int* num){
+void *fetchTypeRules(char *name, int* num){
     if(sizeof(FUNCTIONS)/8 != totalFunc){
         P("%d vs. %d\n", sizeof(FUNCTIONS)/8, totalFunc);
         error("FUNCTIONS and FunctionType should have the same # of elem.");
@@ -491,5 +468,8 @@ static void *fetchTypeRules(char *name, int* num){
     else error("primitive not defined");
 }
 
+int findFuncIndex(char *funcName){
+    return findInBuiltinSet(funcName, FUNCTIONS);
+}
 
 

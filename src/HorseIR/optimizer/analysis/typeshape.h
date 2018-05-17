@@ -34,4 +34,9 @@ InfoNode *propagateType(char *funcName, Node *param_list);
 InfoNode *propagateTypeCopy(Node *param);
 void propagateTypeCast(InfoNode *in, Node *cast);
 
+/* typerule.c */
+ShapeNode *newShapeNode(pShape type, bool isId, int size);
+void *fetchTypeRules(char *name, int* num);
+int findFuncIndex(char *funcName);
+
 #endif

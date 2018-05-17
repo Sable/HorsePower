@@ -45,6 +45,7 @@ void insertKey(TNode *n, char *str, int index, Chain *chain, InfoNode *in){
 }
 
 void insertString(char *str, Chain *chain, InfoNode *in){
+    in->name = strdup(str); // set defName
     insertKey(TRoot, str, 0, chain, in);
 }
 
@@ -79,7 +80,7 @@ void initTrie(){
 
 void printTrieType(){
     char name[99];
-    P("** print trie type **\n");
+    P("** Print type and shape info **\n");
     printTireAllType(TRoot, name, 0);
 }
 

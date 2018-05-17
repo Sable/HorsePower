@@ -1,5 +1,4 @@
 #include "../global.h"
-#include "typerule.h" // need above nodes
 
 typedef InfoNode* (*NilFunc)();
 typedef InfoNode* (*MonFunc)(InfoNode*);
@@ -28,7 +27,7 @@ static int literalSize(Node *n){
 }
 
 static InfoNode *getParamItemInfo(Node *n){
-    printNodeKind(n); P("\n");
+    //printNodeKind(n); P("\n");
     switch(n->kind){
         case           idK: return addParamCaseIdK(n); break;
         case literalFloatK: return addParamCaseLiteral(f64T , literalSize(n)); break;
@@ -65,12 +64,11 @@ static InfoNodeList *getParamInfo(Node *n){
         Node *n   = pVal->val.nodeS;
         InfoNode *in = getParamItemInfo(n);
         addInfoNodeToList(in_temp, in);
-        printInfoNode(in);
         temp = temp->next;
         in_temp = in_temp->next;
         c++;
     }
-    P("c = %d, tot = %d\n",c,totalNode(in_list));
+    //P("c = %d, tot = %d\n",c,totalNode(in_list));
     return in_list;
 }
 
@@ -96,7 +94,7 @@ void printShapeNode(ShapeNode *sn){
 
 void printInfoNode(InfoNode *in){
     if(in->name){
-        P("[var] %s -> ", in->name);
+        P("[var] %-3s -> ", in->name);
         printType(in->type);
     }
     else {
@@ -114,10 +112,10 @@ static InfoNode *getNode(InfoNodeList *rt, int k){
 /* entry */
 InfoNode *propagateType(char *funcName, Node *param_list){
     int valence=-1;
-    P("funcName = %s\n", funcName);
+    //P("funcName = %s\n", funcName);
     InfoNodeList *in_list = getParamInfo(param_list);
     void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
-    P("valence = %d, total = %d\n", valence, totalNode(in_list));
+    //P("valence = %d, total = %d\n", valence, totalNode(in_list));
     if(totalNode(in_list) == valence){
         InfoNode *newNode;
         if(valence == 2){
@@ -143,14 +141,14 @@ InfoNode *propagateType(char *funcName, Node *param_list){
         if(newNode == NULL){
             error("null type rules found\n");
         }
-        printInfoNode(newNode);
+        //printInfoNode(newNode);
         return newNode;
     }
     else error("# of params != expected valence");
 }
 
 InfoNode *propagateTypeCopy(Node *param){
-    P("=====Copy=====\n");
+    //P("=====Copy=====\n");
     return getParamItemInfo(param->val.nodeS);
 }
 
