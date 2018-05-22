@@ -78,9 +78,9 @@ void initTrie(){
     TRoot = NEW(TNode);
 }
 
-void printTrieType(){
+void printTypeShape(){
     char name[99];
-    P("** Print type and shape info **\n");
+    printBanner("Type and Shape Info");
     printTireAllType(TRoot, name, 0);
 }
 

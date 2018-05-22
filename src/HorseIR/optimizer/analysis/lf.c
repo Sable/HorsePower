@@ -3,7 +3,9 @@
 /* signatures */
 
 extern Chain *exitChain;
-extern FuncKind FuncMap[999];
+extern bool ElementFuncMap[999];
+
+static void genFusedFunc(char *str, char *targ);
 
 #define chainNode(c) (c->cur)
 #define isSimpleStmt(n) instanceOf(n,simpleStmtK)
@@ -12,11 +14,16 @@ extern FuncKind FuncMap[999];
 #define isReturnStmt(n) instanceOf(n,returnK)
 #define setVisited(c, v) c->isVisited=v
 #define isVisited(c) (c->isVisited)
+#define resetBuff(b) if(b[0]!=0) b+=strlen(b) /* copied from pretty.c */
+#define indent "    "
 
+static char *list_name[256];
+static int list_total = 0;
+static int num_func = 0; /* number of fused functions */
 
-static bool isElementwise(char *funcName){
+bool isElementwise(char *funcName){
     int p = findFuncIndex(funcName);
-    return FuncMap[p] == elemKind;
+    return ElementFuncMap[p];
 }
 
 static int findParamName(char *pName, Chain *chain){
@@ -30,8 +37,58 @@ static int findParamName(char *pName, Chain *chain){
     return -1;
 }
 
+static void fuseNameClean(){
+    DOI(list_total, free(list_name[i]))
+    list_total = 0;
+}
+
+static void fuseNamePrint(){
+    DOI(list_total, P(indent "V x%d = x[%d]; // %s\n",i,i,list_name[i]))
+}
+
+static void fuseNameByStr(char *buff, char *name, char *str){
+    InfoNode *in = getInfoNode(name);
+    pType k = in->type;
+    ShapeNode *sn = in->shape;
+    resetBuff(buff);
+    //if(isVector(sn))
+    switch(k){
+        case  boolT: SP(buff, "vB(%s,i)", str); break;
+        case   i64T: SP(buff, "vL(%s,i)", str); break;
+        case   f64T: SP(buff, "vE(%s,i)", str); break;
+        case  dateT: SP(buff, "vL(%s,i)", str); break;
+        default: EP("type %d not supported yet\n", k);
+    }
+}
+
+static void fuseName(char *buff, int nameID){
+    char str[20]; SP(str, "x%d",nameID);
+    fuseNameByStr(buff, list_name[nameID], str);
+}
+
+static int findNameID(char *name){
+    DOI(list_total, if(!strcmp(list_name[i], name)) return i)
+    /* add into list */
+    list_name[list_total] = strdup(name);
+    return list_total++;
+}
+
+static char *fuseNameFinal(char *buff, Chain *chain){
+    /* must be assignment stmt */
+    Node *name = chainNode(chain)->val.simpleStmt.name;
+    Node *expr = chainNode(chain)->val.simpleStmt.expr;
+    Node *func = expr->val.expr.func;  // function node
+    if(func){
+        char *targ = fetchName(name);
+        fuseNameByStr(buff, targ, "z");
+        strcat(buff, "=");
+        return targ;
+    }
+    else error("Unexpexted case in loop fusion.\n");
+}
+
 static bool findFusionSub(Chain *chain, char *buff){
-    buff[0]=0;
+    resetBuff(buff); //buff[0]=0;
     if(isSimpleStmt(chainNode(chain))){
         Node *expr = chainNode(chain)->val.simpleStmt.expr;
         Node *func = expr->val.expr.func;  // function node
@@ -41,7 +98,7 @@ static bool findFusionSub(Chain *chain, char *buff){
         List *params   = param->val.listS;
         bool fusable   = isElementwise(funcName);
         if(!fusable) return false;
-        sprintf(buff,"%s(",funcName);
+        sprintf(buff,"%s(",funcName); num_func++;
         int pId = 0;
         while(params){
             if(pId>0) strcat(buff, ",");
@@ -52,13 +109,13 @@ static bool findFusionSub(Chain *chain, char *buff){
                 int c = findParamName(pName, chain);
                 if(c>=0){
                     if(!findFusionSub(chain->chain_defs[c], buff+strlen(buff))){
-                        strcat(buff, pName);
+                        fuseName(buff, findNameID(pName));
                     }
                 }
                 else error("<0 index found\n");
             }
             else {
-                prettyNodeBuff(buff,p);
+                prettyNodeBuff2C(buff,p);
             }
             params=params->next;
             pId++;
@@ -83,10 +140,12 @@ static void findFusion(Chain *chain){
         List *params   = param->val.listS;
         bool fusable   = isElementwise(funcName);
         bool fusableNext = fusable;
-        char buff[512]; 
+        char buff[512];  buff[0]=0;
         if(fusable && !isVisited(chain)) {
+            fuseNameClean();
+            char *targ = fuseNameFinal(buff, chain);
             findFusionSub(chain, buff);
-            P("buff: %s\n", buff);
+            genFusedFunc(buff, targ);
         }
         while(params){
             Node *pLiteral = params->val;  //literalParamK
@@ -110,6 +169,17 @@ static void findFusion(Chain *chain){
     }
 }
 
+static void genFusedFunc(char *str, char *targ){
+    P("num_func = %d\n", num_func);
+    if(num_func > 1) { /* only valid gen */
+        P("void q6_loopfusion_0(V z, V *x){\n");
+        P(indent "// z -> %s\n",targ);
+        fuseNamePrint();
+        P(indent "DOI(r0, %s)\n", str);
+        P("}\n");
+    }
+}
+
 static void analyzeChain(Chain *chain){
     //if(isAssignment(chainNode(chain))){
     //}
@@ -122,7 +192,7 @@ static void analyzeChain(Chain *chain){
 
 /* entry */
 void analyzeLF(){
-    P("=====Loop Fusion=====\n");
+    printBanner("Loop Fusion");
     analyzeChain(exitChain);
 }
 

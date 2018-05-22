@@ -1,6 +1,8 @@
 #include "global.h"
 
 int depth;
+static bool withAttr = true;
+static bool toC      = false;
 
 #define comma ','
 #define nospace 0
@@ -9,18 +11,27 @@ int depth;
 #define echo(b,n)     strcat(b,n)
 #define printChar(c)  SP(b+strlen(b),"%c",c)
 #define printID(b,n)  echo(b,n->val.idS)
-#define printFloat(b,n) SP(b,"%g:f64", n->val.floatS)
-#define printInt(b,n)   SP(b,"%d:i64", n->val.intS)
+#define printFloat(b,n) SP(b,"%g", n->val.floatS)
+#define printInt(b,n)   SP(b,"%d", n->val.intS)
 #define printComp(b,n)  SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
-#define printDate(b,n)  {int x=n->val.dateS; SP(b,"%d.%02d.%02d:d",x/10000,x%10000/100,x%100);}
-#define printSym(b,n)   SP(b,"`%s",n->val.charS)
+#define printDate(b,n)  {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
+#define printSym(b,n)   {if(toC)EP("toC: sym type not impl.\n")else SP(b,"`%s",n->val.charS);}
 #define printFunc(b,n)  echo(b,n->val.idS)
-#define printLiteralFloat(b,n) prettyListBuff(b, n->val.listS, comma)
-#define printLiteralSym(b,n)   {prettyListBuff(b,n->val.listS, nospace);strcat(b,":sym");}
-#define printLiteralDate(b,n)  prettyListBuff(b,n->val.listS, comma)
+
+#define printPlainList(b,n)  prettyListBuff(b, n->val.listS, comma)
+#define printPlainList2(b,n) prettyListBuff(b, n->val.listS, nospace)
+#define printPlainFloat(b,n) printPlainList(b,n)
+#define printPlainSym(b,n)   printPlainList2(b,n)
+#define printPlainDate(b,n)  printPlainList(b,n)
+#define printPlainBool(b,n)  printPlainList(b,n)
+#define printPlainInt(b,n)   printPlainList(b,n)
+
+#define printLiteralFloat(b,n) {printPlainFloat(b,n); if(withAttr) strcat(b,":f64");}
+#define printLiteralSym(b,n)   {printPlainSym(b,n);   if(withAttr) strcat(b,":sym");}
+#define printLiteralDate(b,n)  {printPlainDate(b,n);  if(withAttr) strcat(b,":d");  }
 #define printLiteralChar(b,n)  SP(b,"'%s'", n->val.charS)
-#define printLiteralBool(b,n)  prettyListBuff(b,n->val.listS, comma)
-#define printLiteralInt(b,n)   prettyListBuff(b,n->val.listS, comma)
+#define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
+#define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64"); }
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
 #define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
@@ -204,28 +215,43 @@ void printKindBuff(char *b, Kind k){
     }
 }
 
+void prettyNodeBuffNoAttr(char *b, Node *n){
+    withAttr = false;
+    prettyNodeBuff(b,n);
+    withAttr = true;
+}
+
+void prettyNodeBuff2C(char *b, Node *n){
+    toC = true;
+    prettyNodeBuffNoAttr(b,n);
+    toC = false;
+}
+
+#define BUFF_SIZE 10240
+static char buff[BUFF_SIZE];
+
 void prettyNode(Node *n){
-    char buff[1024]; buff[0]=0;
+    buff[0]=0;
     prettyNodeBuff(buff, n);
-    P("Node: %s\n",buff);
+    P("%s",buff);
 }
 
 void printKind(Kind k){
-    char buff[1024]; buff[0]=0;
+    buff[0]=0;
     printKindBuff(buff, k);
     P("%s\n",buff);
 }
 
 void prettyList(List *list, char sep){
-    char buff[1024]; buff[0]=0;
+    buff[0]=0;
     prettyListBuff(buff, list, sep);
     P("List: %s\n",buff);
 }
 
 void printType(pType p){
-    char buff[1024]; buff[0]=0;
+    buff[0]=0;
     printTypeBuff(buff, p);
-    P("Type: %s\n",buff);
+    P("Type: %s",buff);
 }
 
 void printNodeKind(Node *n){
@@ -233,10 +259,10 @@ void printNodeKind(Node *n){
 } 
 
 void prettyProg(Prog *root){
-    char buff[1024]; buff[0]=0;
+    buff[0]=0;
+    printBanner("Pretty Printer");
     depth = 0;
     prettyListBuff(buff, root->module_list, nospace);
-    P("%s\n",buff);
-    PN("Done.");
+    P(buff);
 }
 
