@@ -38,5 +38,6 @@ void propagateTypeCast(InfoNode *in, Node *cast);
 ShapeNode *newShapeNode(pShape type, bool isId, int size);
 void *fetchTypeRules(char *name, int* num);
 int findFuncIndex(char *funcName);
+int getValence(pFunc k);
 
 #endif

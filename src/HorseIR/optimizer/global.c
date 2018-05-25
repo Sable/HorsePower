@@ -30,12 +30,12 @@ const pFunc ElementWiseFunc[] = {
     powerF, modF, andF, orF, nandF, norF, xorF
 };
 
-FuncKind FuncMap[999]; /* max # of functions, must > totalFunc */
+bool ElementFuncMap[999]; /* max # of functions, must > totalFunc */
 
 static void initFuncKind(){
     if(totalFunc >= 999) error("Size of FuncMap is not enough");
-    memset(FuncMap, -1, sizeof(FuncKind)*999);
-    DOI(sizeof(ElementWiseFunc)/sizeof(pFunc), FuncMap[ElementWiseFunc[i]]=elemKind)
+    memset(ElementFuncMap, 0, sizeof(bool)*999);
+    DOI(sizeof(ElementWiseFunc)/sizeof(pFunc), ElementFuncMap[ElementWiseFunc[i]]=1)
 }
 
 

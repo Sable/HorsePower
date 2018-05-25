@@ -55,8 +55,10 @@ static void fuseNameByStr(char *buff, char *name, char *str){
     switch(k){
         case  boolT: SP(buff, "vB(%s,i)", str); break;
         case   i64T: SP(buff, "vL(%s,i)", str); break;
+        case   f32T: SP(buff, "vF(%s,i)", str); break;
         case   f64T: SP(buff, "vE(%s,i)", str); break;
-        case  dateT: SP(buff, "vL(%s,i)", str); break;
+        case  dateT: SP(buff, "vD(%s,i)", str); break;
+        case monthT: SP(buff, "vM(%s,i)", str); break;
         default: EP("type %d not supported yet\n", k);
     }
 }
@@ -73,7 +75,7 @@ static int findNameID(char *name){
     return list_total++;
 }
 
-static char *fuseNameFinal(char *buff, Chain *chain){
+static char *fuseNameTarg(char *buff, Chain *chain){
     /* must be assignment stmt */
     Node *name = chainNode(chain)->val.simpleStmt.name;
     Node *expr = chainNode(chain)->val.simpleStmt.expr;
@@ -87,6 +89,13 @@ static char *fuseNameFinal(char *buff, Chain *chain){
     else error("Unexpexted case in loop fusion.\n");
 }
 
+static void fuseNameUpperCase(char *buff, char *name){
+    int len = strlen(name);
+    DOI(len, buff[i]=(name[i]>='a'&&name[i]<='z')?name[i]-'a'+'A':name[i])
+    buff[len]=0;
+}
+
+
 static bool findFusionSub(Chain *chain, char *buff){
     resetBuff(buff); //buff[0]=0;
     if(isSimpleStmt(chainNode(chain))){
@@ -98,7 +107,8 @@ static bool findFusionSub(Chain *chain, char *buff){
         List *params   = param->val.listS;
         bool fusable   = isElementwise(funcName);
         if(!fusable) return false;
-        sprintf(buff,"%s(",funcName); num_func++;
+        fuseNameUpperCase(buff, funcName); strcat(buff,"("); num_func++;
+        //sprintf(buff,"%s(",funcName); num_func++;
         int pId = 0;
         while(params){
             if(pId>0) strcat(buff, ",");
@@ -143,7 +153,7 @@ static void findFusion(Chain *chain){
         char buff[512];  buff[0]=0;
         if(fusable && !isVisited(chain)) {
             fuseNameClean();
-            char *targ = fuseNameFinal(buff, chain);
+            char *targ = fuseNameTarg(buff, chain);
             findFusionSub(chain, buff);
             genFusedFunc(buff, targ);
         }

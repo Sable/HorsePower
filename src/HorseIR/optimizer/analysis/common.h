@@ -3,7 +3,7 @@
 
 /* nodes */
 typedef struct ValueNode{
-    Kind kind; int len;
+    pType typ; int len;
     union {
         bool   b;
         int    i64,d;

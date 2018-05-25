@@ -5,7 +5,7 @@ static void scanNode(Node *n);
 static void scanList(List *list);
 static void scanSimpleStmt(Node *n);
 static void scanCastStmt(Node *n);
-static Node *scanExpr(Node *n);
+static void scanExpr(Node *n);
 
 #define scanModule(n)    scanList(n->val.module.body)
 #define scanMethod(n)    scanList(n->val.method.list)
@@ -27,26 +27,37 @@ static void scanCastStmt(Node *n){
 
 static void printValueNode(ValueNode *v){
     if(v->len == 1){
-        switch(v->kind){
-            case  literalBoolK: P("%d:b"  ,v->b  ); break;
-            case   literalIntK: P("%d:i64",v->i64); break;
-            case  literalDateK: P("%d:d"  ,v->d  ); break;
-            case literalFloatK: P("%g:f64",v->f64); break;
-            default: P("kind: %d not supported\n", v->kind);
+        switch(v->typ){
+            case  boolT: P("%d:b"  ,v->b  ); break;
+            case   i64T: P("%d:i64",v->i64); break;
+            case  dateT: P("%d:d"  ,v->d  ); break;
+            case   f64T: P("%g:f64",v->f64); break;
+            default: P("type: %d not supported\n", v->typ);
         }
     }
     else if(v->len > 1){
-        switch(v->kind){
-            case  literalBoolK:
+        switch(v->typ){
+            case boolT:
                 {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):b");} break;
-            case  literalDateK:
+            case dateT: 
                 {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):d");} break;
-            case   literalIntK: 
+            case i64T: 
                 {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):i64");} break;
-            case literalFloatK: 
+            case f64T: 
                 {double *num=(double*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%g",num[i]);}) P("):f64");} break;
-            default: P("kind: %d not supported\n", v->kind);
+            default: P("kind: %d not supported\n", v->typ);
         }
+    }
+}
+
+static pType kind2type(Kind k){
+    switch(k){
+        case   literalIntK: return  i64T;
+        case  literalDateK: return dateT;
+        case   literalSymK: return  symT;
+        case  literalBoolK: return boolT;
+        case literalFloatK: return  f64T;
+        default: EP("kind to type fail : k = %d\n", k);
     }
 }
 
@@ -55,11 +66,14 @@ static ValueNode *fetchLiteralFloat(Node *n, Kind k){
     for(list=n->val.listS;list!=NULL;list=list->next) c++;
     double *num = NEWL(double,c); c=0;
     for(list=n->val.listS;list!=NULL;list=list->next) {
-        num[c++] = list->val->val.floatS;
+        if(list->val->kind == intK)
+            num[c++] = list->val->val.intS;
+        else
+            num[c++] = list->val->val.floatS;
     }
     ValueNode *v = NEW(ValueNode);
-    v->len  = c;
-    v->kind = k;
+    v->len = c;
+    v->typ = kind2type(k);
     if(c==1){
         switch(k){
             case literalFloatK: v->f64 = num[0]; break;
@@ -79,13 +93,13 @@ static ValueNode *fetchLiteralInt(Node *n, Kind k){
         num[c++] = list->val->val.intS;
     }
     ValueNode *v = NEW(ValueNode);
-    v->len  = c;
-    v->kind = k;
+    v->len = c;
+    v->typ = kind2type(k);
     if(c==1){
         switch(k){
-            case literalBoolK: v->b   = num[0]; break;
-            case  literalIntK: v->i64 = num[0]; break;
-            case literalDateK: v->d   = num[0]; break;
+            case  literalBoolK: v->b   = num[0]; break;
+            case   literalIntK: v->i64 = num[0]; break;
+            case  literalDateK: v->d   = num[0]; break;
         }
         free(num);
     }
@@ -106,7 +120,18 @@ static ValueNode *scanLiteral(Node *n){
     return NULL;
 }
 
-static Node *scanExpr(Node *n){
+static bool isSingleInt(ValueNode *vn, int c, Node *var){
+    if(vn->typ == i64T && vn->len == 1){
+        return vn->i64 == c;
+    }
+    else if(vn->typ == f64T && vn->len == 1){
+        InfoNode *in = getInfoNode(fetchName(var->val.nodeS));
+        return (vn->f64 == c) && (in->type == f64T);
+    }
+    else return false;
+}
+
+static void scanExpr(Node *n){
     Node *func = n->val.expr.func;
     Node *param= n->val.expr.param;
     if(func){
@@ -121,11 +146,35 @@ static Node *scanExpr(Node *n){
             ValueNode *v2 = scanLiteral(p2);
             //if(v2 != NULL) printValueNode(v2);
             if(!v1 && v2){ // mul(var, const)
-                //if(singleInt(2))
+                if(isSingleInt(v2, 2, p1)){
+                    P("Update: "); prettyNode(n);
+                    /* expr.func */
+                    Node *funcNew = NEW(Node);
+                    funcNew->val.idS = strdup("plus");
+                    funcNew->kind= idK;
+                    n->val.expr.func = funcNew;
+                    /* expr.param */
+                    params->next->val = p1;
+                    P(" => "); prettyNode(n); P("\n");
+                }
+            }
+            else if(v1 && !v2){
+                if(isSingleInt(v1, 2, p2)){
+                    prettyNode(p2);
+                    P("Update: "); prettyNode(n);
+                    /* expr.func */
+                    Node *funcNew = NEW(Node);
+                    funcNew->val.idS = strdup("plus");
+                    funcNew->kind= idK;
+                    n->val.expr.func = funcNew;
+                    /* expr.param */
+                    params->val = p2;
+                    P(" => "); prettyNode(n); P("\n");
+                }
             }
         }
     }
-    return NULL;
+    return ;
 }
 
 static void scanNode(Node *n){
@@ -134,7 +183,6 @@ static void scanNode(Node *n){
         case       methodK: scanMethod    (n); break;
         case   simpleStmtK: scanSimpleStmt(n); break;
         case     castStmtK: scanCastStmt  (n); break;
-        case         exprK: scanExpr      (n); break;
         case    paramExprK: scanParamExpr (n); break;
         case literalParamK: scanParam     (n); break;
     }
@@ -153,6 +201,7 @@ static void scanList(List *list){
 
 /* entry */
 void analyzeSR(Prog *root){
+    printBanner("Strength Reduction");
     scanList(root->module_list);
 }
 

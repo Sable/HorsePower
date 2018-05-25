@@ -26,7 +26,7 @@ const char *FUNCTIONS[] = {
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 
-#define CASE(c, k, x) case k: *num=c; return x; break;
+#define CASE(k, x) case k: return x; break;
 #define commonTrig commonArith1
 /* monadic */
 #define ruleAbs     commonArith1
@@ -358,110 +358,111 @@ void *fetchTypeRules(char *name, int* num){
     }
     int k = findInBuiltinSet(name, FUNCTIONS);
     if(k>=0){
+        *num = getValence(k);
         switch(k){
             /* monadic */
-            CASE(1,    absF, ruleAbs)
-            CASE(1,    negF, ruleNeg)
-            CASE(1,   ceilF, ruleCeil)
-            CASE(1,  floorF, ruleFloor)
-            CASE(1,  roundF, ruleRound)
-            CASE(1,   conjF, ruleConj)
-            CASE(1,  recipF, ruleRecip)
-            CASE(1, signumF, ruleSignum)
-            CASE(1,     piF, rulePi)
-            CASE(1,    notF, ruleNot)
-            CASE(1,    logF, ruleLog)
-            CASE(1,    expF, ruleExp)
-            CASE(1,    cosF, ruleCos)
-            CASE(1,    sinF, ruleSin)
-            CASE(1,    tanF, ruleTan)
-            CASE(1,   acosF, ruleAcos)
-            CASE(1,   asinF, ruleAsin)
-            CASE(1,   atanF, ruleAtan)
-            CASE(1,   coshF, ruleCosh)
-            CASE(1,   sinhF, ruleSinh)
-            CASE(1,   tanhF, ruleTanh)
-            CASE(1,  acoshF, ruleAcosh)
-            CASE(1,  asinhF, ruleAsinh)
-            CASE(1,  atanhF, ruleAtanh)
-            CASE(1,   dateF, ruleDate)
-            CASE(1,   yearF, ruleYear)
-            CASE(1,  monthF, ruleMonth)
-            CASE(1,   timeF, ruleTime)
-            CASE(1,   hourF, ruleHour)
-            CASE(1, minuteF, ruleMinute)
-            CASE(1, secondF, ruleSecond)
-            CASE(1,   millF, ruleMill)
-            CASE(1, uniqueF, ruleUnique)
-            CASE(1,    strF, ruleStr)
-            CASE(1,    lenF, ruleLen)
-            CASE(1,  rangeF, ruleRange)
-            CASE(1,   factF, ruleFact)
-            CASE(1,   randF, ruleRand)
-            CASE(1,   seedF, ruleSeed)
-            CASE(1,   flipF, ruleFlip)
-            CASE(1,reverseF, ruleReverse)
-            CASE(1,  whereF, ruleWhere)
-            CASE(1,  groupF, ruleGroup)
-            CASE(1,  countF, ruleCount)
-            CASE(1,    sumF, ruleSum)
-            CASE(1,    avgF, ruleAvg)
-            CASE(1,    minF, ruleMin)
-            CASE(1,    maxF, ruleMax)
-            CASE(1,   razeF, ruleRaze)
-            CASE(1, enlistF, ruleEnlist)
-            CASE(1, tolistF, ruleTolist)
-            CASE(1, formatF, ruleFormat)
+            CASE(    absF, ruleAbs)
+            CASE(    negF, ruleNeg)
+            CASE(   ceilF, ruleCeil)
+            CASE(  floorF, ruleFloor)
+            CASE(  roundF, ruleRound)
+            CASE(   conjF, ruleConj)
+            CASE(  recipF, ruleRecip)
+            CASE( signumF, ruleSignum)
+            CASE(     piF, rulePi)
+            CASE(    notF, ruleNot)
+            CASE(    logF, ruleLog)
+            CASE(    expF, ruleExp)
+            CASE(    cosF, ruleCos)
+            CASE(    sinF, ruleSin)
+            CASE(    tanF, ruleTan)
+            CASE(   acosF, ruleAcos)
+            CASE(   asinF, ruleAsin)
+            CASE(   atanF, ruleAtan)
+            CASE(   coshF, ruleCosh)
+            CASE(   sinhF, ruleSinh)
+            CASE(   tanhF, ruleTanh)
+            CASE(  acoshF, ruleAcosh)
+            CASE(  asinhF, ruleAsinh)
+            CASE(  atanhF, ruleAtanh)
+            CASE(   dateF, ruleDate)
+            CASE(   yearF, ruleYear)
+            CASE(  monthF, ruleMonth)
+            CASE(   timeF, ruleTime)
+            CASE(   hourF, ruleHour)
+            CASE( minuteF, ruleMinute)
+            CASE( secondF, ruleSecond)
+            CASE(   millF, ruleMill)
+            CASE( uniqueF, ruleUnique)
+            CASE(    strF, ruleStr)
+            CASE(    lenF, ruleLen)
+            CASE(  rangeF, ruleRange)
+            CASE(   factF, ruleFact)
+            CASE(   randF, ruleRand)
+            CASE(   seedF, ruleSeed)
+            CASE(   flipF, ruleFlip)
+            CASE(reverseF, ruleReverse)
+            CASE(  whereF, ruleWhere)
+            CASE(  groupF, ruleGroup)
+            CASE(  countF, ruleCount)
+            CASE(    sumF, ruleSum)
+            CASE(    avgF, ruleAvg)
+            CASE(    minF, ruleMin)
+            CASE(    maxF, ruleMax)
+            CASE(   razeF, ruleRaze)
+            CASE( enlistF, ruleEnlist)
+            CASE( tolistF, ruleTolist)
+            CASE( formatF, ruleFormat)
             /* dyadic */
-            CASE(2,      ltF, ruleLt)
-            CASE(2,      gtF, ruleGt)
-            CASE(2,     leqF, ruleLeq)
-            CASE(2,     geqF, ruleGeq)
-            CASE(2,      eqF, ruleEq)
-            CASE(2,     neqF, ruleNeq)
-            CASE(2,    plusF, rulePlus)
-            CASE(2,   minusF, ruleMinus)
-            CASE(2,     mulF, ruleMul)
-            CASE(2,     divF, ruleDiv)
-            CASE(2,   powerF, rulePower)
-            CASE(2,    log2F, ruleLog2)
-            CASE(2,     modF, ruleMod)
-            CASE(2,     andF, ruleAnd)
-            CASE(2,      orF, ruleOr)
-            CASE(2,    nandF, ruleNand)
-            CASE(2,     norF, ruleNor)
-            CASE(2,     xorF, ruleXor)
-            CASE(2,  dtdiffF, ruleDtdiff)
-            CASE(2,   dtaddF, ruleDtadd)
-            CASE(2,   dtsubF, ruleDtsub)
-            CASE(2,  appendF, ruleAppend)
-            CASE(2,    likeF, ruleLike)
-            CASE(2,compressF, ruleCompress)
-            CASE(2,   randkF, ruleRandk)
-            CASE(2, indexofF, ruleIndexof)
-            CASE(2,    takeF, ruleTake)
-            CASE(2,    dropF, ruleDrop)
-            CASE(2,   orderF, ruleOrder)
-            CASE(2,  memberF, ruleMember)
-            CASE(2,  vectorF, ruleVector)
-            CASE(2,   matchF, ruleMatch)
+            CASE(      ltF, ruleLt)
+            CASE(      gtF, ruleGt)
+            CASE(     leqF, ruleLeq)
+            CASE(     geqF, ruleGeq)
+            CASE(      eqF, ruleEq)
+            CASE(     neqF, ruleNeq)
+            CASE(    plusF, rulePlus)
+            CASE(   minusF, ruleMinus)
+            CASE(     mulF, ruleMul)
+            CASE(     divF, ruleDiv)
+            CASE(   powerF, rulePower)
+            CASE(    log2F, ruleLog2)
+            CASE(     modF, ruleMod)
+            CASE(     andF, ruleAnd)
+            CASE(      orF, ruleOr)
+            CASE(    nandF, ruleNand)
+            CASE(     norF, ruleNor)
+            CASE(     xorF, ruleXor)
+            CASE(  dtdiffF, ruleDtdiff)
+            CASE(   dtaddF, ruleDtadd)
+            CASE(   dtsubF, ruleDtsub)
+            CASE(  appendF, ruleAppend)
+            CASE(    likeF, ruleLike)
+            CASE(compressF, ruleCompress)
+            CASE(   randkF, ruleRandk)
+            CASE( indexofF, ruleIndexof)
+            CASE(    takeF, ruleTake)
+            CASE(    dropF, ruleDrop)
+            CASE(   orderF, ruleOrder)
+            CASE(  memberF, ruleMember)
+            CASE(  vectorF, ruleVector)
+            CASE(   matchF, ruleMatch)
             /* special */
-            CASE(0,        eachF, ruleEach)
-            CASE(0,    eachItemF, ruleEachItem)
-            CASE(0,    eachLeftF, ruleEachLeft)
-            CASE(0,   eachRightF, ruleEachRight)
-            CASE(0,        enumF, ruleEnum)
-            CASE(0,        dictF, ruleDict)
-            CASE(2,       tableF, ruleTable)
-            CASE(0,      ktableF, ruleKtable)
-            CASE(0,        keysF, ruleKeys)
-            CASE(0,      valuesF, ruleValues)
-            CASE(0,        metaF, ruleMeta)
-            CASE(2, columnValueF, ruleColumnValue)
-            CASE(1,   loadTableF, ruleLoadTable)
-            CASE(0,       fetchF, ruleFetch)
-            CASE(0,       indexF, ruleIndex)
-            CASE(0,      indexAF, ruleIndexA)
+            CASE(       eachF, ruleEach)
+            CASE(   eachItemF, ruleEachItem)
+            CASE(   eachLeftF, ruleEachLeft)
+            CASE(  eachRightF, ruleEachRight)
+            CASE(       enumF, ruleEnum)
+            CASE(       dictF, ruleDict)
+            CASE(      tableF, ruleTable)
+            CASE(     ktableF, ruleKtable)
+            CASE(       keysF, ruleKeys)
+            CASE(     valuesF, ruleValues)
+            CASE(       metaF, ruleMeta)
+            CASE(columnValueF, ruleColumnValue)
+            CASE(  loadTableF, ruleLoadTable)
+            CASE(      fetchF, ruleFetch)
+            CASE(      indexF, ruleIndex)
+            CASE(     indexAF, ruleIndexA)
             default: error("type rules not defined.");
         }
     }
@@ -472,4 +473,32 @@ int findFuncIndex(char *funcName){
     return findInBuiltinSet(funcName, FUNCTIONS);
 }
 
+int getValence(pFunc k){
+    /* debug: check, removable */
+    if(formatF+1 != ltF)  { EP("ltF must follow formatF");  }
+    if( matchF+1 != eachF){ EP("eachF must follow matchF"); }
+    if(k<=formatF) return 1;
+    else if(k>=ltF && k<=matchF) return 2;
+    else {
+        switch(k){
+            case        eachF: return 0;
+            case    eachItemF: return 0;
+            case    eachLeftF: return 0;
+            case   eachRightF: return 0;
+            case        enumF: return 0;
+            case        dictF: return 0;
+            case       tableF: return 2;
+            case      ktableF: return 0;
+            case        keysF: return 0;
+            case      valuesF: return 0;
+            case        metaF: return 0;
+            case columnValueF: return 2;
+            case   loadTableF: return 1;
+            case       fetchF: return 0;
+            case       indexF: return 0;
+            case      indexAF: return 0;
+            default: EP("Func (%d) not defined yet.",k);
+        }
+    }
+}
 

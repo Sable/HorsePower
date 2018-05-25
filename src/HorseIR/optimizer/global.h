@@ -19,8 +19,13 @@ void error(const char* s);
 
 #define P printf
 #define SP sprintf
+#define FP fprintf
 #define PN(x) P("%s\n",x)
 #define newLine() P("\n")
+#define WP(...) FP(stderr,__VA_ARGS__)             // warning
+#define EP(...) {FP(stderr,__VA_ARGS__);exit(1);}  // error
+
+#define printBanner(s) P("====="s"=====\n")
 
 
 #include "tree.h"
@@ -40,6 +45,8 @@ InfoNode *getInfoNode(char *str);
 void buildUDChain(Prog *root);
 void analyzeSR(Prog *root);
 void analyzeLF();
-void printTrieType();
+void analyzeCPF();
+void printTypeShape(); /*util/trie.c*/
+bool isElementwise(char *funcName);
 
 #endif
