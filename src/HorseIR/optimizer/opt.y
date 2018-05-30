@@ -62,7 +62,7 @@ module_body_list:
 ;
 
 moduleBody      : kDEF name '(' ')' ':' type '{' stmt_list '}'
-                  { printf("xxx\n"); $$ = makeNodeModuleMethod($2, $6, $8); }
+                  { $$ = makeNodeModuleMethod($2, $6, $8); }
                 | kIMPORT compoundID ';'
                   { $$ = makeNodeImport($2); }
 ;
@@ -122,7 +122,7 @@ literal         : literalBool
                 | literalFloat
                  { $$ = $1; }
                 | literalSymbol
-                 { printf("symbol??\n"); $$ = $1; }
+                 { $$ = $1; }
                 | literalDate
                  { $$ = $1; }
 ;

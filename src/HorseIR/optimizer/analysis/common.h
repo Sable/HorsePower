@@ -1,18 +1,18 @@
-#ifndef __H_COMMON__
-#define __H_COMMON__
+#ifndef __A_COMMON__
+#define __A_COMMON__
 
 /* nodes */
-typedef struct ValueNode{
-    pType typ; int len;
-    union {
-        bool   b;
-        int    i64,d;
-        char   c;
-        float  f32;
-        double f64;
-    };
-    char *g;
-}ValueNode;
+//typedef struct ValueNode{
+//    pType typ; int len;
+//    union {
+//        bool   b;
+//        int    i64,d;
+//        char   c;
+//        float  f32;
+//        double f64;
+//    };
+//    char *g;
+//}ValueNode;
 
 /* consts */
 typedef enum FunctionType {
@@ -43,5 +43,7 @@ typedef enum FuncKind {
 }FuncKind;
 
 /* signature */
+V getLiteralFromNode(Node *n);
+int getFuncIndexByName(char *name);
 
 #endif

@@ -38,13 +38,19 @@ static void initFuncKind(){
     DOI(sizeof(ElementWiseFunc)/sizeof(pFunc), ElementFuncMap[ElementWiseFunc[i]]=1)
 }
 
-
+void initBackend(){
+    initNameTable(); // util/nametable.c
+    initMemory();    // h_memory.c
+    initSym();       // h_symbol.c
+    initSys();       // h_system.c
+}
 
 /* entry */
 void initGlobal(){
     initTrie();
     initUDChain();
     initFuncKind();
+    initBackend();
 }
 
 

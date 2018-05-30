@@ -25,43 +25,39 @@ static void scanCastStmt(Node *n){
     scanExpr(expr);
 }
 
-static void printValueNode(ValueNode *v){
+static void printValueNode(V v){
     if(v->len == 1){
         switch(v->typ){
-            case  boolT: P("%d:b"  ,v->b  ); break;
-            case   i64T: P("%d:i64",v->i64); break;
-            case  dateT: P("%d:d"  ,v->d  ); break;
-            case   f64T: P("%g:f64",v->f64); break;
+            caseB P("%d:b"  ,v->b  ); break;
+            caseL P("%d:i64",v->i64); break;
+            caseD P("%d:d"  ,v->d  ); break;
+            caseE P("%g:f64",v->f64); break;
             default: P("type: %d not supported\n", v->typ);
         }
     }
     else if(v->len > 1){
         switch(v->typ){
-            case boolT:
-                {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):b");} break;
-            case dateT: 
-                {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):d");} break;
-            case i64T: 
-                {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):i64");} break;
-            case f64T: 
-                {double *num=(double*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%g",num[i]);}) P("):f64");} break;
+            caseB {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):b");} break;
+            caseD {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):d");} break;
+            caseL {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):i64");} break;
+            caseE {double *num=(double*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%g",num[i]);}) P("):f64");} break;
             default: P("kind: %d not supported\n", v->typ);
         }
     }
 }
 
-static pType kind2type(Kind k){
+static int kind2type(Kind k){
     switch(k){
-        case   literalIntK: return  i64T;
-        case  literalDateK: return dateT;
-        case   literalSymK: return  symT;
-        case  literalBoolK: return boolT;
-        case literalFloatK: return  f64T;
+        case   literalIntK: return H_L;
+        case  literalDateK: return H_D;
+        case   literalSymK: return H_Q;
+        case  literalBoolK: return H_B;
+        case literalFloatK: return H_E;
         default: EP("kind to type fail : k = %d\n", k);
     }
 }
 
-static ValueNode *fetchLiteralFloat(Node *n, Kind k){
+static V fetchLiteralFloat(Node *n, Kind k){
     List *list; int c=0;
     for(list=n->val.listS;list!=NULL;list=list->next) c++;
     double *num = NEWL(double,c); c=0;
@@ -71,62 +67,87 @@ static ValueNode *fetchLiteralFloat(Node *n, Kind k){
         else
             num[c++] = list->val->val.floatS;
     }
-    ValueNode *v = NEW(ValueNode);
-    v->len = c;
-    v->typ = kind2type(k);
+    V z = allocNode();
+    initV(z, kind2type(k), c);
     if(c==1){
         switch(k){
-            case literalFloatK: v->f64 = num[0]; break;
+            case literalFloatK: ve(z) = num[0]; break;
         }
-        free(num);
     }
     else if(c>0){
-        v->g = (char*)num;
+        switch(k){
+            case literalFloatK: DOI(c, vE(z,i) = num[i]) break;
+        }
     }
-    return v;
+    free(num);
+    return z;
 }
-static ValueNode *fetchLiteralInt(Node *n, Kind k){
+static V fetchLiteralInt(Node *n, Kind k){
     List *list; int c=0;
     for(list=n->val.listS;list!=NULL;list=list->next) c++;
     int *num = NEWL(int,c); c=0;
     for(list=n->val.listS;list!=NULL;list=list->next) {
         num[c++] = list->val->val.intS;
     }
-    ValueNode *v = NEW(ValueNode);
-    v->len = c;
-    v->typ = kind2type(k);
+    V z = allocNode();
+    initV(z, kind2type(k), c);
     if(c==1){
         switch(k){
-            case  literalBoolK: v->b   = num[0]; break;
-            case   literalIntK: v->i64 = num[0]; break;
-            case  literalDateK: v->d   = num[0]; break;
+            case  literalBoolK: vb(z) = num[0]; break;
+            case   literalIntK: vl(z) = num[0]; break;
+            case  literalDateK: vd(z) = num[0]; break;
         }
-        free(num);
     }
     else if(c>0){
-        v->g = (char*)num;
+        switch(k){
+            case  literalBoolK: DOI(c, vB(z,i) = num[i]) break;
+            case   literalIntK: DOI(c, vL(z,i) = num[i]) break;
+            case  literalDateK: DOI(c, vD(z,i) = num[i]) break;
+        }
     }
-    return v;
+    free(num);
+    return z;
 }
 
-static ValueNode *scanLiteral(Node *n){
+static V fetchLiteralSym(Node *n, Kind k){
+    List *list; int c=0;
+    for(list=n->val.listS;list!=NULL;list=list->next) c++;
+    char **sym = NEW2(char,c); c=0;
+    for(list=n->val.listS;list!=NULL;list=list->next) {
+        sym[c++] = list->val->val.symS;
+    }
+    V z = allocNode();
+    initV(z,H_Q,c);
+    if(c==1){
+        vq(z) = getSymbol(sym[0]);
+        free(sym);
+    }
+    else if(c>0){
+        DOI(c, vQ(z,i)=getSymbol(sym[i]))
+    }
+    return z;
+}
+
+V getLiteralFromNode(Node *n){
     Node *paramValue = n->val.nodeS;
     switch(paramValue->kind){
         case  literalBoolK: return fetchLiteralInt  (paramValue, literalBoolK );
         case   literalIntK: return fetchLiteralInt  (paramValue, literalIntK  );
         case  literalDateK: return fetchLiteralInt  (paramValue, literalDateK );
         case literalFloatK: return fetchLiteralFloat(paramValue, literalFloatK);
+        case   literalSymK: return fetchLiteralSym  (paramValue, literalSymK  );
+        default: printNodeKind(paramValue); EP("kind (%d) not supported yet.\n", paramValue->kind);
     }
     return NULL;
 }
 
-static bool isSingleInt(ValueNode *vn, int c, Node *var){
-    if(vn->typ == i64T && vn->len == 1){
+static bool isSingleInt(V vn, int c, Node *var){
+    if(vn->typ == H_L && vn->len == 1){
         return vn->i64 == c;
     }
-    else if(vn->typ == f64T && vn->len == 1){
+    else if(vn->typ == H_E && vn->len == 1){
         InfoNode *in = getInfoNode(fetchName(var->val.nodeS));
-        return (vn->f64 == c) && (in->type == f64T);
+        return (vn->f64 == c) && (in->type == H_E);
     }
     else return false;
 }
@@ -141,9 +162,9 @@ static void scanExpr(Node *n){
             //prettyNode(param);
             Node *p1 = params->val;
             Node *p2 = params->next->val;
-            ValueNode *v1 = scanLiteral(p1);
+            V v1 = getLiteralFromNode(p1);
             //if(v1 != NULL) printValueNode(v1);
-            ValueNode *v2 = scanLiteral(p2);
+            V v2 = getLiteralFromNode(p2);
             //if(v2 != NULL) printValueNode(v2);
             if(!v1 && v2){ // mul(var, const)
                 if(isSingleInt(v2, 2, p1)){

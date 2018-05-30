@@ -35,9 +35,9 @@ typedef struct Node {
         struct module{struct Node *name; List *body;} module;
         struct Node *nodeS;
         bool   boolS;
-        int    intS, dateS, symS, monthS;
+        int    intS, dateS, monthS;
         double floatS;
-        char   *idS, *charS;
+        char   *idS, *charS, *symS;
         pType  typeS;
         List   *listS;
     } val;

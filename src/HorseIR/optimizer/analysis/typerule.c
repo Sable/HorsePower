@@ -143,16 +143,16 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define isTT isT(tableT)||isT(ktableT)
 #define sameT(x,y) ((x)->type==(y)->type)
 
-bool isInt   (InfoNode *n) {return isIT;}
-bool isFloat (InfoNode *n) {return isFT;}
-bool isBool  (InfoNode *n) {return isBT;}
-bool isReal  (InfoNode *n) {return isIT||isFT||isBT;}
-bool isString(InfoNode *n) {return isST;}
-bool isDate  (InfoNode *n) {return isDT;}
-bool isBasic (InfoNode *n) {return isReal(n)||isDate(n);}
-bool isTable (InfoNode *n) {return isTT;}
+bool isIntIN   (InfoNode *n) {return isIT;}
+bool isFloatIN (InfoNode *n) {return isFT;}
+bool isBoolIN  (InfoNode *n) {return isBT;}
+bool isRealIN  (InfoNode *n) {return isIT||isFT||isBT;}
+bool isStringIN(InfoNode *n) {return isST;}
+bool isDateIN  (InfoNode *n) {return isDT;}
+bool isBasicIN (InfoNode *n) {return isRealIN(n)||isDateIN(n);}
+bool isTableIN (InfoNode *n) {return isTT;}
 #define isU(n) (unknownT==(n)->type)
-#define isList(n) (listT==(n)->type)
+#define isListT(n) (listT==(n)->type)
 
 #define isS(n, t) (t == n->type)
 #define isShapeU(n) isS(n, unknownH)
@@ -202,38 +202,38 @@ static InfoNode *commonReduction(InfoNode *x, TypeCond cond, pType t){
 }
 
 static InfoNode *commonArith1(InfoNode *x){
-    return commonElemementSingle(x, &isReal, x->type);
+    return commonElemementSingle(x, &isRealIN, x->type);
 } 
 
 static InfoNode *commonBool1(InfoNode *x){
-    return commonElemementSingle(x, &isBool, boolT);
+    return commonElemementSingle(x, &isBoolIN, boolT);
 }
 
 static InfoNode *reductionSum(InfoNode *x){
     pType rtnType;
-    if(isInt(x)||isBool(x)) rtnType = i64T;
-    else if(isFloat(x)) rtnType = f64T;
+    if(isIntIN(x)||isBoolIN(x)) rtnType = i64T;
+    else if(isFloatIN(x)) rtnType = f64T;
     else if(isU(x)) rtnType = unknownT;
     else return NULL;
     return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
 }
 
 static InfoNode *reductionCount(InfoNode *x){
-    return commonReduction(x, &isBasic, i64T);
+    return commonReduction(x, &isBasicIN, i64T);
 }
 
 static InfoNode *specialEnlist(InfoNode *x){
-    return commonReduction(x, &isBasic, listT);
+    return commonReduction(x, &isBasicIN, listT);
 }
 
 static InfoNode *specialUnique(InfoNode *x){
-    return commonElemementSingle(x, &isBasic, i64T);
+    return commonElemementSingle(x, &isBasicIN, i64T);
 }
 
 /* dyadic */
 static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
     pType rtnType;
-    if(isReal(x)&&isReal(x)){
+    if(isRealIN(x)&&isRealIN(x)){
         rtnType = MAX(x->type, y->type);
     }
     else if(isU(x)||isU(y)){
@@ -245,7 +245,7 @@ static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
 
 static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
     pType rtnType;
-    if(isBool(x)&&isBool(y)){
+    if(isBoolIN(x)&&isBoolIN(y)){
         rtnType = boolT;
     }
     else if(isU(x) || isU(y)){
@@ -290,10 +290,10 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y){
 
 static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
     pType rtnType; 
-    if(isReal(x) && isReal(y)){
+    if(isRealIN(x) && isRealIN(y)){
         rtnType = boolT;
     }
-    else if(isDate(x) && sameT(x,y)){
+    else if(isDateIN(x) && sameT(x,y)){
         rtnType = boolT;
     }
     else if(isU(x) || isU(y)){
@@ -306,7 +306,7 @@ static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
 /* special */
 
 static InfoNode *specialLoadTable(InfoNode *x){
-    if(isString(x)){
+    if(isStringIN(x)){
         return newInfoNode(tableT, newShapeNode(tableH,true,-1));
     }
     else return NULL;
@@ -314,7 +314,7 @@ static InfoNode *specialLoadTable(InfoNode *x){
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
     //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n");
     ShapeNode *rtnShape = newShapeNode(vectorH, true, x->shape->sizeId);
-    if(isTable(x) && isString(y)){
+    if(isTableIN(x) && isStringIN(y)){
         return newInfoNode(unknownT, rtnShape);
     }
     else if(isU(x) || isU(y)){
@@ -325,7 +325,7 @@ static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
 
 static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
     pType rtnType; ShapeNode *rtnShape=y->shape;
-    if(isBool(x) && (isBasic(y)||isU(y))){
+    if(isBoolIN(x) && (isBasicIN(y)||isU(y))){
         rtnType = y->type;
     }
     else if(isU(x) || isU(y)){
@@ -336,7 +336,7 @@ static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
 }
 static InfoNode *specialTable(InfoNode *x, InfoNode *y){
     ShapeNode *rtnShape = newShapeNode(tableH, true, -1);
-    if(isString(x) && isList(y)){
+    if(isStringIN(x) && isListT(y)){
         return newInfoNode(tableT, rtnShape);
     }
     else if(isU(x) || isU(y)){
@@ -351,12 +351,18 @@ static int findInBuiltinSet(char *funcName, const char *set[]){
     return -1;
 }
 
-void *fetchTypeRules(char *name, int* num){
+int getFuncIndexByName(char *name){
     if(sizeof(FUNCTIONS)/8 != totalFunc){
         P("%d vs. %d\n", sizeof(FUNCTIONS)/8, totalFunc);
         error("FUNCTIONS and FunctionType should have the same # of elem.");
     }
     int k = findInBuiltinSet(name, FUNCTIONS);
+    if(k>=0) return k;
+    else error("primitive not defined");
+}
+
+void *fetchTypeRules(char *name, int* num){
+    int k = getFuncIndexByName(name);
     if(k>=0){
         *num = getValence(k);
         switch(k){

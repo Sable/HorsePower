@@ -1,8 +1,9 @@
 # library: -lfl (Linux) or -ll (MacOS)
 all: optimizer
 
-optimizer: flex bison *.h analysis/*.h
-	gcc -g -o opt lex.yy.c y.tab.c tree.c global.c pretty.c main.c analysis/*.c util/*.c -ll -std=c99
+# Horse with optimizer
+optimizer: flex bison *.h analysis/*.h interpreter/*.h backend/*.h
+	gcc -O3 -o horse lex.yy.c y.tab.c tree.c global.c pretty.c main.c analysis/*.c util/*.c interpreter/*c backend/*.c -ll -std=c99 -fopenmp -I"../../../libs/include/" ../../../libs/lib/libpcre2-8.a -lm
 
 flex:
 	flex -o lex.yy.c opt.l

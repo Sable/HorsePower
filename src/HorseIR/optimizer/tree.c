@@ -213,7 +213,7 @@ Node *makeNodeFloatValue(double value, char op){
 Node *makeNodeConstSymbol(char *value){
     Node *n     = NEW(Node);
     n->kind     = symK;
-    n->val.charS= strdup(value);
+    n->val.symS = strdup(value);
     n->lineno   = yylineno;
     return n;
 }

@@ -69,7 +69,7 @@ LETTER          [a-zA-Z_]
     return tINT;
 }
 {LETTER}({LETTER}|{DIGIT})* {
-    printf("-- Saw a token %s\n", yytext);
+    //printf("-- Saw a token %s\n", yytext);
     yylval.stringconst = (char*)malloc(strlen(yytext)+1);
     sprintf(yylval.stringconst, "%s", yytext);
     return tID;
@@ -80,7 +80,7 @@ LETTER          [a-zA-Z_]
     return tFLOAT;
 }
 `{LETTER}({LETTER}|{DIGIT})* {
-    printf("-- Saw a symbol %s\n", yytext);
+    //printf("-- Saw a symbol %s\n", yytext);
     yylval.stringconst = (char*)malloc(strlen(yytext)+1);
     sprintf(yylval.stringconst, "%s", yytext+1);
     return tSYMBOL;
@@ -98,7 +98,7 @@ LETTER          [a-zA-Z_]
     return tCHAR;
 }
 \"[^"]*\" {
-    printf("-- Saw a string %s\n", yytext);
+    //printf("-- Saw a string %s\n", yytext);
     int len = strlen(yytext);
     yylval.stringconst = (char*)malloc(len-1);
     sprintf(yylval.stringconst, "%s", yytext+1);
