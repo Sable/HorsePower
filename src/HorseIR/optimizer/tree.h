@@ -21,7 +21,7 @@ typedef enum pType {
 typedef enum Kind {
     idK, floatK, intK, typeK, compoundK, dateK, symK,
     literalFloatK, literalSymK, literalDateK, literalCharK, literalBoolK,
-    literalParamK, literalIntK, funcK, exprK, paramExprK,
+    literalParamK, literalIntK, literalFuncK, funcK, exprK, paramExprK,
     simpleStmtK, castStmtK, returnK, importK, methodK, moduleK
 }Kind;
 

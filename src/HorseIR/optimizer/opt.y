@@ -38,7 +38,7 @@
 
 %type <prog> program 
 %type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list
-%type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param name literal literalBool literalChar literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr
+%type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr
 
 %start program
 
@@ -107,8 +107,13 @@ param_list      : param
 ;
 param           : name
                  { $$ = makeNodeParamLiteral($1); }
+                | funcName
+                 { $$ = makeNodeParamLiteral($1); }
                 | literal
                  { $$ = makeNodeParamLiteral($1); }
+;
+funcName        : '@' name
+                 { $$ = makeNodeKind($2, literalFuncK); }
 ;
 name            : tID
                  { $$ = makeNodeID($1); }
@@ -175,12 +180,12 @@ literalSymbol   : symbol_list ':' kSYM
                 | symbol_list
 ;*/
 literalSymbol   : symbol_list ':' kSYM
-                 { $$ = makeNodeLiteralSymbol($1); P("symbol3\n"); }
+                 { $$ = makeNodeLiteralSymbol($1); }
 ;
 symbol_list     : tSYMBOL
-                 { $$ = makeList(makeNodeConstSymbol($1), NULL); P("symbol1\n"); }
+                 { $$ = makeList(makeNodeConstSymbol($1), NULL); }
                 | tSYMBOL symbol_list
-                 { $$ = makeList(makeNodeConstSymbol($1), $2); P("symbol2\n"); }
+                 { $$ = makeList(makeNodeConstSymbol($1), $2); }
 ;
 
 /* date */

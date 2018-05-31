@@ -21,7 +21,7 @@ const char *FUNCTIONS[] = {
     /* special 16 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
     "ktable", "keys", "values", "meta", "column_value", "load_table", "fetch",
-    "index", "index_a"
+    "index", "index_a", "list"
 };
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
@@ -132,6 +132,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleFetch       NULL
 #define ruleIndex       NULL
 #define ruleIndexA      NULL
+#define ruleList        NULL
 
 #define isT(t) (t==n->type)
 
@@ -358,7 +359,7 @@ int getFuncIndexByName(char *name){
     }
     int k = findInBuiltinSet(name, FUNCTIONS);
     if(k>=0) return k;
-    else error("primitive not defined");
+    else EP("primitive not defined: %d\n", k);
 }
 
 void *fetchTypeRules(char *name, int* num){
@@ -469,6 +470,7 @@ void *fetchTypeRules(char *name, int* num){
             CASE(      fetchF, ruleFetch)
             CASE(      indexF, ruleIndex)
             CASE(     indexAF, ruleIndexA)
+            CASE(       listF, ruleList)
             default: error("type rules not defined.");
         }
     }
@@ -487,23 +489,24 @@ int getValence(pFunc k){
     else if(k>=ltF && k<=matchF) return 2;
     else {
         switch(k){
-            case        eachF: return 0;
-            case    eachItemF: return 0;
-            case    eachLeftF: return 0;
-            case   eachRightF: return 0;
+            case        eachF: return 2;
+            case    eachItemF: return 3;
+            case    eachLeftF: return 3;
+            case   eachRightF: return 3;
             case        enumF: return 0;
             case        dictF: return 0;
             case       tableF: return 2;
             case      ktableF: return 0;
-            case        keysF: return 0;
-            case      valuesF: return 0;
+            case        keysF: return 1;
+            case      valuesF: return 1;
             case        metaF: return 0;
             case columnValueF: return 2;
             case   loadTableF: return 1;
-            case       fetchF: return 0;
-            case       indexF: return 0;
+            case       fetchF: return 1;
+            case       indexF: return 2;
             case      indexAF: return 0;
-            default: EP("Func (%d) not defined yet.",k);
+            case        listF: return -1; //any
+            default: EP("[getValence] Func (%d) not defined yet.\n",k);
         }
     }
 }

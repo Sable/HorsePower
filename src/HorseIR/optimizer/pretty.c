@@ -33,6 +33,7 @@ static bool toC      = false;
 #define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
 #define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64"); }
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
+#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS); }
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
 #define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
 #define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
@@ -123,6 +124,7 @@ void prettyNodeBuff(char *b, Node *n){
         case  literalBoolK: printLiteralBool     (b,n); break;
         case   literalIntK: printLiteralInt      (b,n); break;
         case literalParamK: printLiteralParam    (b,n); break;
+        case  literalFuncK: printLiteralFunc     (b,n); break;
         case   simpleStmtK: printSimpleStmtBuff  (b,n); break;
         case     castStmtK: printCastStmtBuff    (b,n); break;
         case       returnK: printReturnStmt      (b,n); break;
@@ -210,8 +212,8 @@ void printKindBuff(char *b, Kind k){
         case  literalBoolK: echo(b, "literalBoolK" ); break;
         case literalParamK: echo(b, "literalParamK"); break;
         case   literalIntK: echo(b, "literalIntK"  ); break;
-        default: P("kind = %d\n", k);
-                 error("kind not supported");
+        case  literalFuncK: echo(b, "literalFuncK" ); break;
+        default: EP("[printKindBuff] kind (%d) not supported\n", k);
     }
 }
 

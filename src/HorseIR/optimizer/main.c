@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
         if(argc == 3) flagOpt = argv[2];
     }
     else { EP("Usage: %s file [sr/lf]\n",argv[0]); }
-    double parseTime = 0, exeTime = 0;
+    double parseTime = 0, exeTime = 0, optTime = 0;
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
     int ret = yyparse();
@@ -29,8 +29,9 @@ int main(int argc, char *argv[]){
         /* basics */
         prettyProg(root);
         initGlobal();
+        gettimeofday(&tv0, NULL);
         buildUDChain(root); /* include type and shape propagation */
-        printTypeShape();
+        if(H_DEBUG) printTypeShape();
         /* optimizations */
         if(!strcmp(flagOpt, "sr")){
             analyzeSR(root);
@@ -40,6 +41,9 @@ int main(int argc, char *argv[]){
             analyzeLF();
         }
         else { EP("opt %s is not supported\n",flagOpt); }
+        gettimeofday(&tv1, NULL);
+        optTime = calcInterval(tv0, tv1)/1000.0;
+        P("Optimizing time: %g ms\n", optTime);
     }
     else {
         initBackend();

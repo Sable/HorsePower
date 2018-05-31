@@ -18,6 +18,7 @@ static InfoNode *addParamCaseLiteral(pType typ, int size){
     info->name = NULL;
     info->type = typ;
     info->shape = newShapeNode(vectorH, false, size);
+    return info;
 }
 
 static int literalSize(Node *n){
@@ -139,7 +140,7 @@ InfoNode *propagateType(char *funcName, Node *param_list){
         }
         else error("valence must >= 0");
         if(newNode == NULL){
-            error("null type rules found\n");
+            EP("null type rules found for [%s]\n",funcName);
         }
         //printInfoNode(newNode);
         return newNode;

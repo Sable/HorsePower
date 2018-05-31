@@ -24,7 +24,6 @@ Node *makeNodeID(char *id){
     return n;
 }
 
-
 // list -> node
 Node *makeListKind(List *t, Kind k){
     Node *n     = NEW(Node);

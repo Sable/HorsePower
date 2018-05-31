@@ -128,6 +128,15 @@ static V fetchLiteralSym(Node *n, Kind k){
     return z;
 }
 
+static V fetchLiteralFunc(Node *n, Kind k){
+    Node *name = n->val.nodeS;
+    char *sym = name->val.idS;
+    V z = allocNode();
+    initV(z,H_Q,1);
+    vq(z) = getSymbol(sym); 
+    return z;
+}
+
 V getLiteralFromNode(Node *n){
     Node *paramValue = n->val.nodeS;
     switch(paramValue->kind){
@@ -136,7 +145,9 @@ V getLiteralFromNode(Node *n){
         case  literalDateK: return fetchLiteralInt  (paramValue, literalDateK );
         case literalFloatK: return fetchLiteralFloat(paramValue, literalFloatK);
         case   literalSymK: return fetchLiteralSym  (paramValue, literalSymK  );
-        default: printNodeKind(paramValue); EP("kind (%d) not supported yet.\n", paramValue->kind);
+        case  literalFuncK: return fetchLiteralFunc (paramValue, literalFuncK );
+        default: printNodeKind(paramValue);
+                 EP("[getLiteralFromNode]: kind (%d) not supported yet.\n", paramValue->kind);
     }
     return NULL;
 }
