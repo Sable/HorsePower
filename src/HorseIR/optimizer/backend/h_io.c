@@ -412,6 +412,10 @@ L printV(V x){
     printValue(x); FS("\n"); R 0;
 }
 
+L printV2(V x, L n){
+    DOI(n, printValueItem(x, i)); FS("\n"); R 0;
+}
+
 L printTable(V x){
     printTablePretty(x,-1);
     R 0;

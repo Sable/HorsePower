@@ -41,11 +41,12 @@ void error(const char* s);
 #include "analysis/typeshape.h"
 #include "interpreter/intp.h"
 
-void initGlobal ();
-void initTrie   ();
-void initUDChain();
+void initGlobal   ();
+void initTrie     ();
+void initUDChain  ();
 void initNameTable();
-void initBackend();
+void initBackend  ();
+void initTablesByQid(I id);
 
 void insertString(char *str, Chain *chain, InfoNode *in);
 Chain    *getChain(char *str);

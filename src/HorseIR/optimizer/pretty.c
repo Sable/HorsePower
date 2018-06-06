@@ -30,6 +30,7 @@ static bool toC      = false;
 #define printLiteralSym(b,n)   {printPlainSym(b,n);   if(withAttr) strcat(b,":sym");}
 #define printLiteralDate(b,n)  {printPlainDate(b,n);  if(withAttr) strcat(b,":d");  }
 #define printLiteralChar(b,n)  SP(b,"'%s'", n->val.charS)
+#define printLiteralStr(b,n)   SP(b,"\"%s\"", n->val.strS)
 #define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
 #define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64"); }
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
@@ -121,6 +122,7 @@ void prettyNodeBuff(char *b, Node *n){
         case   literalSymK: printLiteralSym      (b,n); break;
         case  literalDateK: printLiteralDate     (b,n); break;
         case  literalCharK: printLiteralChar     (b,n); break;
+        case   literalStrK: printLiteralStr      (b,n); break;
         case  literalBoolK: printLiteralBool     (b,n); break;
         case   literalIntK: printLiteralInt      (b,n); break;
         case literalParamK: printLiteralParam    (b,n); break;
@@ -131,8 +133,7 @@ void prettyNodeBuff(char *b, Node *n){
         case       importK: printImportStmt      (b,n); break;
         case       methodK: printMethodBuff      (b,n); break;
         case       moduleK: printModuleBuff      (b,n); break;
-        default: P("%d\n",n->kind);
-                 error("unexpected node type");
+        default: EP("[prettyNodeBuff] unexpected node type: %d\n", n->kind);
     }
 }
 
@@ -152,6 +153,7 @@ void prettyListBuff(char *b, List *list, char sep){
     else { strcat(b, "<NULL list found>"); }
 }
 
+/* TODO: check TypeNames in tree.c */
 void printTypeBuff(char *b, pType p){
     resetBuff(b);
     switch(p){
@@ -172,8 +174,8 @@ void printTypeBuff(char *b, pType p){
         case   tableT: echo(b, "table");   break;
         case  ktableT: echo(b, "ktable");  break;
         case    listT: echo(b, "list");    break;
-        default: P("Not supported yet.: %d\n", p);
-                 error("something wrong");
+        case    enumT: echo(b, "enum");    break;
+        default: EP("Not supported yet.: %d\n", p);
     }
 }
 

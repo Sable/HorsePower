@@ -518,8 +518,10 @@ B isOrdered(V x){
     if(isInteger(x)){
         B isOrder = true; L order = -2;
         DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0; \
-                    if(val!=0) order=val; \
-                    if(order!=-2 && val!=0 && order!=val) { isOrder=false; break; } })
+                     if(order==-2 && val!=0) {order=val; break;}})
+        if(order == -2) R true;
+        DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0; \
+                    if(val!=0 && order!=val) { isOrder=false; break; } })
         R isOrder;
     }
     else R false;
@@ -621,10 +623,10 @@ L inferPi(L t){
 
 /* Error messages */
 
-#define errCaseCell(label, msg) case label: P(msg); break
+#define errCaseCell(label, msg)\
+    case label: EP("Error: " msg ".\n"); break
 
 void printErrMsg(L eid){
-    P("Error: ");
     switch(eid){
         errCaseCell(E_DOMAIN,          "Domain error"       );
         errCaseCell(E_GENERAL,         "General error"      );
@@ -641,6 +643,6 @@ void printErrMsg(L eid){
         errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
         errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
         errCaseCell(E_NOT_IMPL,        "Not implement yet"  );
+        default: EP("Error code not specified: %lld\n", eid);
     }
-    P(".\n");
 }

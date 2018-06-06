@@ -15,7 +15,7 @@ LETTER          [a-zA-Z_]
 %%
 
 [ \t\r]+   ; /* ignore white spaces         */
-\/\/.*\n     ; /* ignore single line comments */
+\/\/.*\n   ; /* ignore single line comments */
 
 \n { printf("---- LINE %2d ----\n", yylineno); }
 
@@ -79,12 +79,6 @@ LETTER          [a-zA-Z_]
     yylval.floatconst = atof(yytext);
     return tFLOAT;
 }
-`{LETTER}({LETTER}|{DIGIT})* {
-    //printf("-- Saw a symbol %s\n", yytext);
-    yylval.stringconst = (char*)malloc(strlen(yytext)+1);
-    sprintf(yylval.stringconst, "%s", yytext+1);
-    return tSYMBOL;
-}
 {DIGIT}{DIGIT}{DIGIT}{DIGIT}\.{DIGIT}{DIGIT}\.{DIGIT}{DIGIT} {
     //printf("-- Saw a date %s\n", yytext);
     int yy,mm,dd;
@@ -93,8 +87,10 @@ LETTER          [a-zA-Z_]
     return tDATE;
 }
 '[^']*' {
-    yylval.stringconst = (char*)malloc(strlen(yytext)+1);
-    sprintf(yylval.stringconst, "%s", yytext);
+    int len = strlen(yytext);
+    yylval.stringconst = (char*)malloc(len-1);
+    sprintf(yylval.stringconst, "%s", yytext+1);
+    yylval.stringconst[len-2] = 0;
     return tCHAR;
 }
 \"[^"]*\" {

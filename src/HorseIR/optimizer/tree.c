@@ -131,6 +131,14 @@ Node *makeNodeLiteralChar(char *charValue){
     return n;
 }
 
+Node *makeNodeLiteralString(char *strValue){
+    Node *n     = NEW(Node);
+    n->kind     = literalStrK;
+    n->val.strS = strdup(strValue);
+    n->lineno   = yylineno;
+    return n;
+}
+
 Node *makeNodeLiteralInt(List *int_list, Node *type){
     return makeListKind(int_list, literalIntK);
 }
@@ -178,11 +186,16 @@ Node *makeNodeType(pType typ){
     return n; 
 }
 
+char *TypeNames[] = {
+    "bool", "i8", "i16", "i32", "i64", "f32", "f64", "char", "complex", "sym", "str",
+    "m", "d", "z", "u", "v", "t",
+    "table", "ktable", "list", "enum"
+};
 
+// TODO: remove reserved keywords for types
 Node *makeNodeTypeWithName(char *type){
-    if(!strcmp(type, "table"))return makeNodeType(tableT);
-    if(!strcmp(type, "table"))return makeNodeType(ktableT);
-    error("type has not been specified");
+    DOI(totalT-1, if(!strcmp(type, TypeNames[i])) return makeNodeType(i+1))
+    EP("type has not been specified: %s\n", type);
 }
 
 // literals

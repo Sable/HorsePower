@@ -137,6 +137,10 @@ static V fetchLiteralFunc(Node *n, Kind k){
     return z;
 }
 
+static V fetchLiteralStr(Node *n){
+    R initLiteralString(n->val.strS);
+}
+
 V getLiteralFromNode(Node *n){
     Node *paramValue = n->val.nodeS;
     switch(paramValue->kind){
@@ -146,6 +150,7 @@ V getLiteralFromNode(Node *n){
         case literalFloatK: return fetchLiteralFloat(paramValue, literalFloatK);
         case   literalSymK: return fetchLiteralSym  (paramValue, literalSymK  );
         case  literalFuncK: return fetchLiteralFunc (paramValue, literalFuncK );
+        case   literalStrK: return fetchLiteralStr  (paramValue);
         default: printNodeKind(paramValue);
                  EP("[getLiteralFromNode]: kind (%d) not supported yet.\n", paramValue->kind);
     }

@@ -3,15 +3,20 @@
 Prog *root;
 int yyparse(); /* see y.tab.c */
 extern FILE *yyin;
+char file_path[128];
+#define isCharNumber(c) ((c)>='0'&&(c)<='9')
 
 /*
  * ./program filename
 */
 int main(int argc, char *argv[]){
     char *flagOpt=NULL;
+    I qid = -1;
     if(argc == 2 || argc == 3){
-        if(!(yyin=fopen(argv[1], "r"))){
-            EP("File %s not found\n", argv[1]);
+        if(isCharNumber(argv[1][0])) { qid=atoi(argv[1]);  SP(file_path, "data/q%d.hir", qid);}
+        else strcpy(file_path, argv[1]);
+        if(!(yyin=fopen(file_path, "r"))){
+            EP("File %s not found\n", file_path);
         }
         if(argc == 3) flagOpt = argv[2];
     }
@@ -47,7 +52,7 @@ int main(int argc, char *argv[]){
     }
     else {
         initBackend();
-        initTableByName((S)"lineitem");
+        initTablesByQid(qid);
         gettimeofday(&tv0, NULL);
         HorseInterpreter(root);
         gettimeofday(&tv1, NULL);

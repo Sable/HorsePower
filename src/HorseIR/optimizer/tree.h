@@ -14,14 +14,17 @@ typedef struct Program {
 
 /* TODO: add listT */
 typedef enum pType {
-    unknownT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT,
-    strT, monthT, dateT, tableT, ktableT, listT
+    unknownT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT, strT,
+    monthT, dateT, dtT, hourT, minuteT, timeT,
+    tableT, ktableT, listT, enumT,
+    totalT
 }pType;
 
 typedef enum Kind {
     idK, floatK, intK, typeK, compoundK, dateK, symK,
-    literalFloatK, literalSymK, literalDateK, literalCharK, literalBoolK,
-    literalParamK, literalIntK, literalFuncK, funcK, exprK, paramExprK,
+    literalFloatK, literalSymK, literalDateK, literalCharK, literalStrK,
+    literalBoolK, literalParamK, literalIntK, literalFuncK,
+    funcK, exprK, paramExprK,
     simpleStmtK, castStmtK, returnK, importK, methodK, moduleK
 }Kind;
 
@@ -37,7 +40,7 @@ typedef struct Node {
         bool   boolS;
         int    intS, dateS, monthS;
         double floatS;
-        char   *idS, *charS, *symS;
+        char   *idS, *charS, *strS, *symS;
         pType  typeS;
         List   *listS;
     } val;
@@ -63,6 +66,7 @@ Node *makeNodeFunction     (char *name);
 Node *makeNodeParamLiteral (Node *paramValue);
 Node *makeNodeLiteralBool  (List *int_list);
 Node *makeNodeLiteralChar  (char *charValue);
+Node *makeNodeLiteralString(char *strValue);
 Node *makeNodeLiteralInt   (List *int_list, Node *type);
 Node *makeNodeIntType      (pType typ);
 Node *makeNodeLiteralFloat (List *float_list, Node *type);

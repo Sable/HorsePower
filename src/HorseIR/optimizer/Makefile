@@ -3,7 +3,7 @@ all: optimizer
 
 # Horse with optimizer
 optimizer: flex bison *.h analysis/*.h interpreter/*.h backend/*.h
-	gcc -g -o horse lex.yy.c y.tab.c tree.c global.c pretty.c main.c analysis/*.c util/*.c interpreter/*c backend/*.c -ll -std=c99 -fopenmp -I"../../../libs/include/" ../../../libs/lib/libpcre2-8.a -lm
+	gcc -g -o horse lex.yy.c y.tab.c tree.c global.c pretty.c main.c analysis/*.c util/*.c interpreter/*c backend/*.c -ll -fopenmp -std=c99 -I"../../../libs/include/" ../../../libs/lib/libpcre2-8.a -lm
 
 flex:
 	flex -o lex.yy.c opt.l

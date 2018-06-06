@@ -14,7 +14,6 @@
  */
 
 L pfnLoadTable(V z, V x){
-    P("load table\n");
     if(isSymbol(x)){
         initTableByName(getSymbolStr(vq(x))); // register table
         V t = findTableByName(vq(x));
@@ -1344,7 +1343,7 @@ L pfnCompress(V z, V x, V y){
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(isOrdered(x)){
-            P("Ordered data found in index_of\n");
+            if(H_DEBUG) P("Ordered data found in index_of\n");
             R searchOrdered(z,x,y);
         }
         else {
@@ -1461,11 +1460,13 @@ L pfnAppend(V z, V x, V y){
 //        reinterpret_cast<unsigned char*>(src),\
 //        slen,0,PCRE2_ANCHORED,matchData,NULL\
 //    )<0?0:1
+// PCRE2_SPTR -> unsigned char*
 #define LIKEMATCH(src,slen,re,matchData) \
     pcre2_match(re,\
-       (unsigned char*)src,\
+       (PCRE2_SPTR)src,\
         slen,0,PCRE2_ANCHORED,matchData,NULL\
     )<0?0:1
+// TODO: debug caseQ, a non-deterministic bug
 L pfnLike(V z, V x, V y){
     if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
         B t;
@@ -1483,11 +1484,25 @@ L pfnLike(V z, V x, V y){
             // P("Entering pfnLike\n");
             switch(vp(x)){
                 caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
-                caseQ DOP(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vL(x,i)),getSymbolSize(vL(x,i)),re,match);}) break;
+                caseQ DOI(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vL(x,i)),getSymbolSize(vL(x,i)),re,match);}) break;
+//                caseQ {
+//                    L i2 = vn(x);
+//#pragma omp parallel for
+//                    for(L i=0;i<i2;i++){
+//                        vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);
+//                    }
+//                } break;
                 caseS DOP(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
                 // caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
                 // caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
             }
+            //L tt=0; DOI(vn(z), tt+=vB(z,i)) P("tt = %lld, string = %s\n",tt,strY);
+            //if(tt>4){
+            //    P("input [1389] %s, patt = %s, => %d\n", getSymbolStr(vQ(x,1389)), strY, LIKEMATCH(getSymbolStr(vQ(x,1389)),getSymbolSize(vQ(x,1389)),re,match));
+            //    P("input [5130] %s, patt = %s, => %d\n", getSymbolStr(vQ(x,5130)), strY, LIKEMATCH(getSymbolStr(vQ(x,5130)),getSymbolSize(vQ(x,5130)),re,match));
+            //    L k=500; DOI(vn(z), if(k>0 && vB(z,i)){k--;P("%lld ", i);}) P("\n");
+            //    getchar();
+            //}
             pcre2_code_free(re);
             pcre2_match_data_free(match);
             // pcre2_match_context_free(mcontext);
@@ -1514,6 +1529,7 @@ L pfnLike(V z, V x, V y){
                       {getLikeFromString(&t,vS(x,i),vS(y,i)); \
                        vB(z,i)=t;})                                                  break;
             }
+            DOI(10, P("%lld ",vB(z,i))) P("\n");
             R 0;
         }
         else R E_LENGTH;
@@ -1543,6 +1559,7 @@ L pfnOrderBy(V z, V x, V y){
         // DOI(20, P("[%3lld] %s, %s, %lld\n", i, \
         //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
         // getchar();
+        DOI(10, P("%lld ",vL(z,i))) P("\n");
         R 0;
     }
     else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){

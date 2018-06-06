@@ -32,13 +32,14 @@
 
 %token <stringconst> kMODULE kIMPORT kDEF kCKCAST kRETURN
 %token <stringconst> kBOOL kCHAR kI8 kI16 kI32 kI64 kF32 kF64 kCLEX kSYM kSTR kMONTH kDATE kTZ kTU kTV kTT
-%token <stringconst> tID tSTRING tCHAR tSYMBOL
+%token <stringconst> tID tSTRING tCHAR
 %token <intconst>    tINT tDATE
 %token <floatconst>  tFLOAT
 
 %type <prog> program 
 %type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list
-%type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr
+%type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr symbol_single
+%type <stringconst> symbol_name
 
 %start program
 
@@ -122,6 +123,8 @@ literal         : literalBool
                  { $$ = $1; }
                 | literalChar
                  { $$ = $1; }
+                | literalString
+                 { $$ = $1; }
                 | literalInteger
                  { $$ = $1; }
                 | literalFloat
@@ -141,6 +144,9 @@ literalBool     : int_list ':' kBOOL
 literalChar     : tCHAR ':' kCHAR
                  { $$ = makeNodeLiteralChar($1); }
 ;
+
+literalString   : tSTRING
+                 { $$ = makeNodeLiteralString($1); }
 
 literalInteger  : int_list ':' intType
                  { $$ = makeNodeLiteralInt($1, $3); }
@@ -182,10 +188,18 @@ literalSymbol   : symbol_list ':' kSYM
 literalSymbol   : symbol_list ':' kSYM
                  { $$ = makeNodeLiteralSymbol($1); }
 ;
-symbol_list     : tSYMBOL
-                 { $$ = makeList(makeNodeConstSymbol($1), NULL); }
-                | tSYMBOL symbol_list
-                 { $$ = makeList(makeNodeConstSymbol($1), $2); }
+symbol_list     : symbol_single
+                 { $$ = makeList($1, NULL); }
+                | symbol_single symbol_list
+                 { $$ = makeList($1, $2);   }
+;
+symbol_single   : '`' symbol_name
+                 { $$ = makeNodeConstSymbol($2); }
+;
+symbol_name     : tID
+                 { $$ = $1; }
+                | tSTRING
+                 { $$ = $1; }
 ;
 
 /* date */

@@ -24,17 +24,16 @@ typedef enum FunctionType {
     timeF, hourF, minuteF, secondF, millF,
     uniqueF, strF, lenF, rangeF, factF, randF, seedF, flipF, reverseF,
     whereF, groupF, countF, sumF, avgF, minF, maxF, razeF, enlistF, tolistF,
-    formatF,
+    formatF, keysF, valuesF, metaF, loadTableF, fetchF,
     /* binary */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
     powerF, log2F, modF, andF, orF, nandF, norF, xorF,
     dtdiffF, dtaddF, dtsubF,
     appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
-    memberF, vectorF, matchF,
+    memberF, vectorF, matchF, indexF, columnValueF,
     /* special */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF,
-    ktableF, keysF, valuesF, metaF, columnValueF, loadTableF, fetchF,
-    indexF, indexAF, listF,
+    ktableF, indexAF, listF,
     totalFunc
 }pFunc;
 

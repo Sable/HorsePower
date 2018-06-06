@@ -47,6 +47,7 @@ L printDictItem       (V x, L k);
 L printEnumItem       (V x, L k);
 L printValueItem      (V x, L k);
 L printV              (V x);
+L printV2             (V x, L n);
 L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);

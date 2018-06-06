@@ -3,7 +3,7 @@
 
 /* constants */
 const char *FUNCTIONS[] = {
-    /* unary 53 */
+    /* unary 58 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" , "not",
     "log", "exp",  "cos",   "sin",   "tan", "acos",  "asin",  "atan", "cosh", "sinh",
     "tanh", "acosh", "asinh", "atanh",
@@ -11,17 +11,16 @@ const char *FUNCTIONS[] = {
     "time", "time_hour", "time_minute", "time_second", "time_mill",
     "unique", "str", "len", "range", "fact", "rand", "seed", "flip", "reverse",
     "where", "group", "count", "sum", "avg", "min", "max", "raze", "enlist", "tolist",
-    "format",
-    /* binary 32 */
+    "format", "keys", "values", "meta", "load_table", "fetch",
+    /* binary 34 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul", "div",
     "power", "log2", "mod", "and", "or", "nand", "nor" , "xor",
     "datetime_diff", "datetime_add", "datetime_sub",
     "append", "like", "compress", "randk", "index_of", "take", "drop", "order",
-    "member", "vector", "match",
-    /* special 16 */
+    "member", "vector", "match", "index", "column_value",
+    /* special 10 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
-    "ktable", "keys", "values", "meta", "column_value", "load_table", "fetch",
-    "index", "index_a", "list"
+    "ktable", "index_a", "list"
 };
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
@@ -483,28 +482,21 @@ int findFuncIndex(char *funcName){
 
 int getValence(pFunc k){
     /* debug: check, removable */
-    if(formatF+1 != ltF)  { EP("ltF must follow formatF");  }
-    if( matchF+1 != eachF){ EP("eachF must follow matchF"); }
-    if(k<=formatF) return 1;
-    else if(k>=ltF && k<=matchF) return 2;
+    if(fetchF+1 != ltF)  { EP("ltF must follow fetchF\n");  }
+    if(columnValueF+1 != eachF){ EP("eachF must follow columnValueF\n"); }
+    if(k>=0 && k<ltF) return 1;
+    else if(k>=ltF && k<eachF) return 2;
     else {
         switch(k){
             case        eachF: return 2;
             case    eachItemF: return 3;
             case    eachLeftF: return 3;
             case   eachRightF: return 3;
-            case        enumF: return 0;
+            case        enumF: return 2;
             case        dictF: return 0;
             case       tableF: return 2;
             case      ktableF: return 0;
-            case        keysF: return 1;
-            case      valuesF: return 1;
-            case        metaF: return 0;
-            case columnValueF: return 2;
-            case   loadTableF: return 1;
-            case       fetchF: return 1;
-            case       indexF: return 2;
-            case      indexAF: return 0;
+            case      indexAF: return 3;
             case        listF: return -1; //any
             default: EP("[getValence] Func (%d) not defined yet.\n",k);
         }
