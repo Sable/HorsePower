@@ -1,4 +1,3 @@
-V
 ## List of Queries
 
 | ID | Verify | Status | is10 | Joins                                    | Special
@@ -26,11 +25,14 @@ V
 | 21 | V      | Pass*  |      | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
 | 22 | V      | Pass   |  Y   | 1 join,  1 leftantijoin                  | bnl
 
+
 Note (Jun 8)
 
-- No join: 1,6
-- 1 join: 4,14
-- 2 joins: 16
+- No join : 1,6
+- 1  join : 4,14
+- 2  joins: 16 (22)
+
+Testing: 3,17,18,19 (12,13)
 
 Note (May 7)
 
