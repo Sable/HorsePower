@@ -11,12 +11,13 @@ static bool toC      = false;
 #define echo(b,n)     strcat(b,n)
 #define printChar(c)  SP(b+strlen(b),"%c",c)
 #define printID(b,n)  echo(b,n->val.idS)
-#define printFloat(b,n) SP(b,"%g", n->val.floatS)
-#define printInt(b,n)   SP(b,"%d", n->val.intS)
-#define printComp(b,n)  SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
-#define printDate(b,n)  {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
-#define printSym(b,n)   {if(toC)EP("toC: sym type not impl.\n" );else SP(b,"`%s",n->val.charS);}
-#define printFunc(b,n)  echo(b,n->val.idS)
+#define printFloat(b,n)  SP(b,"%g", n->val.floatS)
+#define printInt(b,n)    SP(b,"%d", n->val.intS)
+#define printString(b,n) SP(b,"\"%s\"", n->val.strS)
+#define printComp(b,n)   SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
+#define printDate(b,n)   {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
+#define printSym(b,n)    {if(toC)EP("toC: sym type not impl.\n" );else SP(b,"`%s",n->val.charS);}
+#define printFunc(b,n)   echo(b,n->val.idS)
 
 #define printPlainList(b,n)  prettyListBuff(b, n->val.listS, comma)
 #define printPlainList2(b,n) prettyListBuff(b, n->val.listS, nospace)
@@ -25,12 +26,13 @@ static bool toC      = false;
 #define printPlainDate(b,n)  printPlainList(b,n)
 #define printPlainBool(b,n)  printPlainList(b,n)
 #define printPlainInt(b,n)   printPlainList(b,n)
+#define printPlainStr(b,n)   printPlainList(b,n)
 
 #define printLiteralFloat(b,n) {printPlainFloat(b,n); if(withAttr) strcat(b,":f64");}
 #define printLiteralSym(b,n)   {printPlainSym(b,n);   if(withAttr) strcat(b,":sym");}
 #define printLiteralDate(b,n)  {printPlainDate(b,n);  if(withAttr) strcat(b,":d");  }
 #define printLiteralChar(b,n)  SP(b,"'%s'", n->val.charS)
-#define printLiteralStr(b,n)   SP(b,"\"%s\"", n->val.strS)
+#define printLiteralStr(b,n)   {printPlainStr(b,n);   if(withAttr) strcat(b,":str");}
 #define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
 #define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64"); }
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
@@ -116,6 +118,7 @@ void prettyNodeBuff(char *b, Node *n){
         case         typeK: printNodeTypeBuff    (b,n); break;
         case     compoundK: printComp            (b,n); break;
         case         funcK: printFunc            (b,n); break;
+        case          strK: printString          (b,n); break;
         case         exprK: printExprBuff        (b,n); break;
         case    paramExprK: printParamExpr       (b,n); break;
         case literalFloatK: printLiteralFloat    (b,n); break;

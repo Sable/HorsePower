@@ -30,7 +30,7 @@ typedef enum FunctionType {
     powerF, log2F, modF, andF, orF, nandF, norF, xorF,
     dtdiffF, dtaddF, dtsubF,
     appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
-    memberF, vectorF, matchF, indexF, columnValueF,
+    memberF, vectorF, matchF, indexF, columnValueF, subStringF,
     /* special */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF,
     ktableF, indexAF, listF,

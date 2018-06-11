@@ -4,6 +4,7 @@
 
 extern Chain *exitChain;
 extern bool ElementFuncMap[999];
+extern I qid;
 
 static void genFusedFunc(char *str, char *targ);
 
@@ -182,7 +183,7 @@ static void findFusion(Chain *chain){
 static void genFusedFunc(char *str, char *targ){
     P("num_func = %d\n", num_func);
     if(num_func > 1) { /* only valid gen */
-        P("void q6_loopfusion_0(V z, V *x){\n");
+        P("void q%d_loopfusion_0(V z, V *x){\n",qid);
         P(indent "// z -> %s\n",targ);
         fuseNamePrint();
         P(indent "DOI(r0, %s)\n", str);

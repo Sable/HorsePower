@@ -39,7 +39,7 @@ void error(const char* s);
 #include "analysis/common.h"
 #include "analysis/udchain.h"
 #include "analysis/typeshape.h"
-#include "interpreter/intp.h"
+#include "translator/common.h"
 
 void initGlobal   ();
 void initTrie     ();

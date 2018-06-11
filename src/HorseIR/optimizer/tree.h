@@ -21,7 +21,7 @@ typedef enum pType {
 }pType;
 
 typedef enum Kind {
-    idK, floatK, intK, typeK, compoundK, dateK, symK,
+    idK, floatK, intK, typeK, compoundK, dateK, symK, strK,
     literalFloatK, literalSymK, literalDateK, literalCharK, literalStrK,
     literalBoolK, literalParamK, literalIntK, literalFuncK,
     funcK, exprK, paramExprK,
@@ -66,7 +66,7 @@ Node *makeNodeFunction     (char *name);
 Node *makeNodeParamLiteral (Node *paramValue);
 Node *makeNodeLiteralBool  (List *int_list);
 Node *makeNodeLiteralChar  (char *charValue);
-Node *makeNodeLiteralString(char *strValue);
+Node *makeNodeLiteralString(List *string_list);
 Node *makeNodeLiteralInt   (List *int_list, Node *type);
 Node *makeNodeIntType      (pType typ);
 Node *makeNodeLiteralFloat (List *float_list, Node *type);
@@ -79,6 +79,7 @@ Node *makeNodeType         (pType typ);
 Node *makeNodeTypeWithName (char *type);
 Node *makeNodeIntValue     (int value, char op);
 Node *makeNodeFloatValue   (double value, char op);
+Node *makeNodeStringValue  (char *str);
 Node *makeNodeConstSymbol  (char *value);
 Node *makeNodeConstDate    (int value);
 Node *makeNodeParamExpr    (List *param_list);

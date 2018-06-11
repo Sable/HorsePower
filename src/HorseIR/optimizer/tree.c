@@ -131,12 +131,8 @@ Node *makeNodeLiteralChar(char *charValue){
     return n;
 }
 
-Node *makeNodeLiteralString(char *strValue){
-    Node *n     = NEW(Node);
-    n->kind     = literalStrK;
-    n->val.strS = strdup(strValue);
-    n->lineno   = yylineno;
-    return n;
+Node *makeNodeLiteralString(List *string_list){
+    return makeListKind(string_list, literalStrK);
 }
 
 Node *makeNodeLiteralInt(List *int_list, Node *type){
@@ -208,6 +204,7 @@ Node *makeNodeIntValue(int value, char op){
         case '-': n->val.intS = -1 * value; break;
         default: error("unexpected op for int");
     }
+    n->lineno   = yylineno;
     return n;
 }
 
@@ -219,6 +216,15 @@ Node *makeNodeFloatValue(double value, char op){
         case '-': n->val.floatS = -1 * value; break;
         default: error("unexpected op for float");
     }
+    n->lineno   = yylineno;
+    return n;
+}
+
+Node *makeNodeStringValue(char *str){
+    Node *n     = NEW(Node);
+    n->kind     = strK;
+    n->val.strS = str;
+    n->lineno   = yylineno;
     return n;
 }
 

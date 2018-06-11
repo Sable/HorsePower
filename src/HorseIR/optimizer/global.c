@@ -46,6 +46,10 @@ void initBackend(){
 }
 
 #define initQ1 initQ6 
+#define addFKey(t0,c0,t1,c1) \
+    pfnAddFKey(initLiteralSym((S)t0), initLiteralSym((S)c0),\
+               initLiteralSym((S)t1), initLiteralSym((S)c1))
+
 static void initQ6(){
     initTableByName((S)"lineitem");
     /* no fkey */
@@ -54,8 +58,7 @@ static void initQ6(){
 static void initQ4(){
     initTableByName((S)"lineitem");
     initTableByName((S)"orders");
-    pfnAddFKey(initLiteralSym((S)"orders"),   initLiteralSym((S)"o_orderkey"),\
-               initLiteralSym((S)"lineitem"), initLiteralSym((S)"l_orderkey"));
+    addFKey("orders", "o_orderkey", "lineitem", "l_orderkey");
 }
 
 static void initQ14(){
@@ -68,8 +71,26 @@ static void initQ16(){
     initTableByName((S)"partsupp");
     initTableByName((S)"part");
     initTableByName((S)"supplier");
-    pfnAddFKey(initLiteralSym((S)"part")    , initLiteralSym((S)"p_partkey"),\
-               initLiteralSym((S)"partsupp"), initLiteralSym((S)"ps_partkey"));
+    addFKey("part", "p_partkey", "partsupp", "ps_partkey");
+}
+
+static void initQ18(){
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    initTableByName((S)"lineitem");
+    addFKey("customer", "c_custkey", "orders", "o_custkey");
+    addFKey("orders", "o_orderkey", "lineitem", "l_orderkey");
+}
+
+static void initQ19(){
+    initTableByName((S)"lineitem");
+    initTableByName((S)"part");
+}
+
+static void initQ22(){
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    addFKey("customer", "c_custkey", "orders", "o_custkey");
 }
 
 void initTablesByQid(I id){
@@ -80,6 +101,9 @@ void initTablesByQid(I id){
             case  6: initQ6 (); break;
             case 14: initQ14(); break;
             case 16: initQ16(); break;
+            case 18: initQ18(); break;
+            case 19: initQ19(); break;
+            case 22: initQ22(); break;
             default: EP("Pending initTablesByQid: %d\n",id);
         }
     }

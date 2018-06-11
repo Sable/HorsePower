@@ -138,7 +138,13 @@ static V fetchLiteralFunc(Node *n, Kind k){
 }
 
 static V fetchLiteralStr(Node *n){
-    R initLiteralString(n->val.strS);
+    List *t = n->val.listS;
+    V z = allocNode();
+    L c=0; while(t){c++; t=t->next;}
+    t = n->val.listS;
+    initV(z,H_S,c);
+    c=0; while(t){vS(z,c)=strdup(t->val->val.strS); c++; t=t->next;}
+    R z;
 }
 
 V getLiteralFromNode(Node *n){

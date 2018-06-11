@@ -12,12 +12,12 @@ const char *FUNCTIONS[] = {
     "unique", "str", "len", "range", "fact", "rand", "seed", "flip", "reverse",
     "where", "group", "count", "sum", "avg", "min", "max", "raze", "enlist", "tolist",
     "format", "keys", "values", "meta", "load_table", "fetch",
-    /* binary 34 */
+    /* binary 35 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul", "div",
     "power", "log2", "mod", "and", "or", "nand", "nor" , "xor",
     "datetime_diff", "datetime_add", "datetime_sub",
     "append", "like", "compress", "randk", "index_of", "take", "drop", "order",
-    "member", "vector", "match", "index", "column_value",
+    "member", "vector", "match", "index", "column_value", "sub_string",
     /* special 10 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
     "ktable", "index_a", "list"
@@ -483,7 +483,7 @@ int findFuncIndex(char *funcName){
 int getValence(pFunc k){
     /* debug: check, removable */
     if(fetchF+1 != ltF)  { EP("ltF must follow fetchF\n");  }
-    if(columnValueF+1 != eachF){ EP("eachF must follow columnValueF\n"); }
+    if(subStringF+1 != eachF){ EP("eachF must follow subStringF\n"); }
     if(k>=0 && k<ltF) return 1;
     else if(k>=ltF && k<eachF) return 2;
     else {

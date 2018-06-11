@@ -37,7 +37,7 @@
 %token <floatconst>  tFLOAT
 
 %type <prog> program 
-%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list
+%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list string_list
 %type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr symbol_single
 %type <stringconst> symbol_name
 
@@ -145,8 +145,10 @@ literalChar     : tCHAR ':' kCHAR
                  { $$ = makeNodeLiteralChar($1); }
 ;
 
-literalString   : tSTRING
+literalString   : string_list  ':' kSTR
                  { $$ = makeNodeLiteralString($1); }
+                | '(' string_list ')' ':' kSTR
+                 { $$ = makeNodeLiteralString($2); }
 
 literalInteger  : int_list ':' intType
                  { $$ = makeNodeLiteralInt($1, $3); }
@@ -278,4 +280,9 @@ floatValue      : tFLOAT
                 | '-' tFLOAT
                  { $$ = makeNodeFloatValue($2, '-'); }
 ;
+
+string_list     : tSTRING
+                 { $$ = makeList(makeNodeStringValue($1), NULL); }
+                | tSTRING ',' string_list
+                 { $$ = makeList(makeNodeStringValue($1), $3); }
 %%
