@@ -595,6 +595,11 @@ def scanTablescan(d, env):
     newAlias = actionCompress(mask, alias) if mask is not None else alias  #??
     return encodeEnv(table_name, columns, newAlias, types, mask, alias)
 
+def updateMaskInEnv(mask, env):
+    alias = getEnvAlias(env)
+    newAlias = actionCompress(mask, alias) if mask is not None else alias
+    return encodeEnv(getEnvTable(env), getEnvName(env), newAlias, getEnvType(env), mask, alias)
+
 # def scanTablescan(d):
 #     global table_list, column_list, current_table, \
 #            prev_mask_t, current_resz, left_join_mask
@@ -806,6 +811,12 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
     pending('[joinWithEnum] add more join types: join type (%s), mask (%s, %s)' % (joinType, k_mask, f_mask))
 
 def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
+    # print joinType
+    # print k_alias
+    # printEnv(k_env)
+    # print v_alias
+    # printEnv(v_env)
+    # raw_input()
     if joinType == 'equi_join':
         e0 = genEnum  (k_alias, v_alias)
         t0 = genValues(e0)  #p0
@@ -814,17 +825,21 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
         t3 = genWhere (t2)  #p1
         return [t0, t3, 'indexing']
     elif joinType == 'right_antijoin':
-        return joinWithOutRelation(joinType, k_alias, k_env, v_alias, v_env)
+        return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
     elif joinType == 'left_antijoin':
-        return joinWithOutRelation(joinType, k_alias, k_env, v_alias, v_env)
+        return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
+    elif joinType == 'right_semijoin':
+        return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
+    elif joinType == 'left_semijoin':
+        return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
     else:
         pending('[joinWithKeys] add more join types: join type (%s)' % joinType)
 
-def joinWithOutRelation(joinType, left_alias, left_env, right_alias, right_env, isList=False):
-    # print joinType
-    # printEnv(left_env)
-    # printEnv(right_env)
-    # raw_input()
+def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, isList=False):
+    print joinType
+    printEnv(left_env)
+    printEnv(right_env)
+    raw_input()
     if joinType == 'right_antijoin':
         t0 = genMember(left_alias, right_alias)
         p1 = genNot(t0)
@@ -832,6 +847,12 @@ def joinWithOutRelation(joinType, left_alias, left_env, right_alias, right_env, 
     elif joinType == 'left_antijoin':
         t0 = genMember(right_alias, left_alias)
         p0 = genNot(t0)
+        return [p0, None, 'masking']
+    elif joinType == 'right_semijoin':
+        p1 = genMember(left_alias, right_alias)
+        return [None, p1, 'masking']
+    elif joinType == 'left_semijoin':
+        p0 = genMember(right_alias, left_alias)
         return [p0, None, 'masking']
     elif joinType == 'equi_join':
         pending('general equi_join')
@@ -841,15 +862,25 @@ def joinWithOutRelation(joinType, left_alias, left_env, right_alias, right_env, 
         p1 = genIndex(t2,'1:i64','i64')
         return [p0, p1, 'indexing']
     else:
-        pending('[joinWithOutRelation] add more join types: join type (%s)' % joinType)
+        pending('[joinWithoutRelation] add more join types: join type (%s)' % joinType)
 
 """
  return type: indexing / masking
 """
 def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=False):
+    def reverseJoinType(t):
+        return {
+          'left_semijoin' : 'right_semijoin',
+          'right_semijoin': 'left_semijoin'
+        }.get(t,t)
     global keycol_list
     left_table  = getEnvTable(left_env)
     right_table = getEnvTable(right_env)
+    print left_name
+    printEnv(left_env)
+    print right_name
+    printEnv(right_env)
+    raw_input()
     left_alias  = findAliasByName(left_name, left_env)
     right_alias = findAliasByName(right_name, right_env)
     # debugging
@@ -862,11 +893,6 @@ def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=Fal
         debug('%s.%s (fkey) -> %s.%s(key)' % (left_table, left_name, right_table, right_name))
         left_alias  = findMaskAliasByName(left_name , left_env)
         right_alias = findMaskAliasByName(right_name, right_env)
-        def reverseJoinType(t):
-            return {
-              'left_semijoin' : 'right_semijoin',
-              'right_semijoin': 'left_semijoin'
-            }.get(t,t)
         r = joinWithEnum(reverseJoinType(joinType), right_alias, right_env, left_alias, left_env)
         return [r[1],r[0],r[2],'relation']  # reverse order: p0/1
     elif checkPrimaryKey(left_table, left_name):
@@ -874,11 +900,11 @@ def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=Fal
         return joinWithKeys(joinType, left_alias, left_env, right_alias, right_env) + ['plain']
     elif checkPrimaryKey(right_table, right_name):
         debug('right keys (%s)' % right_alias)
-        r = joinWithKeys(joinType, right_alias, right_env, left_alias, left_env) + ['plain']
+        r = joinWithKeys(reverseJoinType(joinType), right_alias, right_env, left_alias, left_env) + ['plain']
         return [r[1],r[0],r[2],'plain']
     else: # plain join
         debug('plain join for (%s.%s) and (%s.%s)' % (left_table, left_name, right_table, right_name))
-        return joinWithOutRelation(joinType, left_alias, left_env, right_alias, right_env) + ['plain']
+        return joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env) + ['plain']
     # below can be commented out
     if isList:
         todo('list join (multi-column join) -- need check')
@@ -1003,7 +1029,10 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
             # print 'side0 = %d, side1 = %d' % (side0, side1)
             # print 'alias0 = %s, alias1 = %s' % (alias0, alias1)
             if isCollect:
-                return [alias0, alias1, 'value'] if side0 == 0 else [alias1, alias0, 'value']
+                print name0, name1
+                alias0 = findAliasByName(name0, env2[side0])
+                alias1 = findAliasByName(name1, env2[side1])
+                return ([alias0, alias1, 'value'] if side0 == 0 else [alias1, alias0, 'value']) + [name0, name1]
             if side0 != 0:
                 name0,name1 = name1,name0
             return joinColumns(joinType, name0, env2[0], name1, env2[1])
@@ -1026,12 +1055,12 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         if isMultipleColumnJoin(d, env2):
             left_list = [] ; right_list = []
             for d0 in d['arguments']:
-                new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
                 left_list.append(new_left)
                 right_list.append(new_right)
             t0 = genList(left_list)
             t1 = genList(right_list)
-            return joinColumns(t0, 'left_list', t1, 'right_list', True)
+            return joinColumns(joinType, t0, env2[0], t1, env2[1], True)
         else:
             # q19
             cnt_pred = cnt_new = 0
@@ -1041,11 +1070,11 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
                     pred_left, pred_right = scanConditionOr(d0, env2)
                     cnt_pred = cnt_pred + 1
                 elif d0['expression'] == 'and':
-                    new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                    new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
                     left_list.append(new_left)
                     right_list.append(new_right)
                 elif d0['expression'] == 'comparison' and d0['mode'] == '=':
-                    new_left, new_right, _ = findExprFromSide(d0, env2, True)
+                    new_left, new_right, _, name0, name1 = findExprFromSide(d0, joinType, env2, True)
                     left_list.append(new_left)
                     right_list.append(new_right)
                     cnt_new = cnt_new + 1
@@ -1055,13 +1084,15 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
             # assume only 1 'or' and 1 'and' upon
             if cnt_pred == 1 and cnt_new == 1:
                 # apply pred to new first before join two sides
-                t0 = genCompress(pred_left, new_left)
-                t1 = genCompress(pred_right, new_right)
-                return joinColumns(t0,'l_partkey',t1,'p_partkey')
+                # t0 = genCompress(pred_left, new_left)
+                # t1 = genCompress(pred_right, new_right)
+                left_env  = updateMaskInEnv(pred_left, env2[0])
+                right_env = updateMaskInEnv(pred_right, env2[1])
+                return joinColumns(joinType, name0, left_env, name1, right_env) # l_partkey / p_partkey
             elif cnt_pred == 0 and len(left_list) > 1: #q9
                 t0 = genList(left_list)
                 t1 = genList(right_list)
-                return joinColumns(t0, 'left_list', t1, 'right_list')
+                return joinColumns(joinType, t0, env2[0], t1, env2[1]) # left_list / right_list
             else:
                 unexpected('cnt_pred = %d, cnt_new = %d' % (cnt_pred,cnt_new))
     elif expr == 'lookup':
@@ -1434,6 +1465,8 @@ def scanAntijoin(d, env2, joinType):
     return handleJoinResult(scanCondition(d['condition'], 'hash', joinType, env2), joinType, env2)
 
 def handleJoinResult(result, joinType, env2):
+    print result
+    raw_input()
     left_col, right_col, result_type, result_kind = result
     left_env, right_env = env2  # assign env2[0]/[1]
     if result_kind == 'relation':
@@ -1521,7 +1554,7 @@ def scanRightantijoin(d, env2):
 
 def scanSelect(d, env):
     debug('select')
-    mask = scanCondition(d['condition'], 'select', env)
+    mask = scanCondition(d['condition'], 'select', 'Not a join (select)', env)
     return updateEnvWithMask(mask, env)
 
 # do nothing ...
@@ -1636,9 +1669,11 @@ def checkRelation(left_table, left_name, right_table, right_name):
     return False
 
 def checkPrimaryKey(table, name):
+    if name == 'l_orderkey2':
+        print table, getMappedKey(name)
+        raw_input()
     name = getMappedKey(name)
     return table in primary_key and sameListString(primary_key[table], packColumnName(name))
-
 
 def main():
     if len(sys.argv) != 2:
