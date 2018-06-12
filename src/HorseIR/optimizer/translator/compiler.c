@@ -5,6 +5,9 @@
 #define DyaFuncSize 35
 
 extern I qid; // ../main.c
+extern Chain *exitChain;
+extern FuseNode FuseList[99];
+extern I        FuseTotal;
 static I lineNo = 0;
 static I depth = 0;
 
@@ -183,6 +186,7 @@ static int compileSingleStmt(Node *stmt){
 static void genMethodHead(){ FP(outF, "E simulateQ%d(){\n",qid); }
 static void genMethodTail(){ FP(outF, "}\n"); }
 
+/* optional */
 static void compileMethod(Node *method){
     List *stmts = method->val.method.list;
     depth++; lineNo = 0; 
@@ -199,6 +203,48 @@ static void compileMethod(Node *method){
     depth--;
 }
 
+static int findTargInFuseList(S n){
+    DOI(FuseTotal, if(!strcmp(n, FuseList[i].targ)) return i) R -1;
+}
+
+static void identifyLoopFusion(Node *stmt){
+    S writeName = NULL;
+    if(instanceOf(stmt, simpleStmtK))
+        writeName = fetchName(stmt->val.simpleStmt.name);
+    else if(instanceOf(stmt, castStmtK))
+        writeName = fetchName(stmt->val.castStmt.name);
+    else return ;
+    L x = findTargInFuseList(writeName);
+    if(x>=0){
+        genStmt(writeName, FP(outF, "%s", FuseList[x].invc));
+    }
+}
+
+static void identifyOptimization(Node *stmt){
+    identifyLoopFusion(stmt);
+}
+
+static void compileChain(ChainList *list){
+    ChainList *p = list;
+    depth++; lineNo = 0; 
+    genMethodHead();
+    genOther(FP(outF, "E elapsed=0;\n"));
+    genOther(FP(outF, "tic;\n"));
+    while(p->next){
+        p = p->next;
+        Node *stmt = p->chain->cur;
+        //prettyNode(stmt);
+        //P("(isvisited: %d)\n", p->chain->isVisited);
+        if(p->chain->isVisited){
+            identifyOptimization(stmt);
+        }
+        else compileSingleStmt(stmt);
+        if(instanceOf(stmt, returnK)) break;
+    }
+    genMethodTail();
+    depth--;
+}
+
 FILE *writeFile(S s){
     FILE *fp = fopen(s, "w");
     if(NULL == fp){
@@ -208,9 +254,11 @@ FILE *writeFile(S s){
     return fp;
 }
 
-int HorseCompiler(Prog *rt){
+int HorseCompiler(ChainList *rt){
     char outPath[128]; SP(outPath, "./compile/q%d.out", qid);
     outF = writeFile(outPath);
-    Node *method = findMethod(findModule(rt->module_list, "default")->val.module.body, "main");
-    compileMethod(method);
+    //Node *method = findMethod(findModule(rt->module_list, "default")->val.module.body, "main");
+    //compileMethod(method);
+    //printChainList();
+    compileChain(rt);
 }

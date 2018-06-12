@@ -41,6 +41,10 @@ typedef enum FuncKind {
     elemKind
 }FuncKind;
 
+typedef struct FuseNode {
+    S targ, invc;
+}FuseNode;
+
 /* signature */
 V getLiteralFromNode(Node *n);
 int getFuncIndexByName(char *name);

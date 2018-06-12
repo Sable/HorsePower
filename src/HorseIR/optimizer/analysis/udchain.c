@@ -14,7 +14,6 @@ void printUDChain(Chain *chain);
 
 #define scanModule(n)    scanList(n->val.module.body)
 #define scanMethod(n)    scanList(n->val.method.list)
-#define scanReturn(n)    {exitChain = currentChain; scanNode(n->val.nodeS);}
 #define scanParamExpr(n) scanList(n->val.listS)
 #define scanParam(n)     scanNode(n->val.nodeS)
 #define isFuncCall(n)    (n->val.expr.func)
@@ -84,6 +83,13 @@ void scanCastStmt(Node *n){
     scanNode(n->val.castStmt.expr); 
     propagateTypeCast(currentIn, n->val.castStmt.cast);
     insertString(defName, currentChain, currentIn);
+}
+
+void scanReturn(Node *n){
+    exitChain = currentChain;
+    addToChainList(currentChain);
+    /* continue scan */
+    scanNode(n->val.nodeS);
 }
 
 void setCurrentNode(Node *n, Node *val){

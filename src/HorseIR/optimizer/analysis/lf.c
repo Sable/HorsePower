@@ -6,6 +6,9 @@ extern Chain *exitChain;
 extern bool ElementFuncMap[999];
 extern I qid;
 
+FuseNode FuseList[99];
+I FuseTotal = 0;
+
 static void genFusedFunc(char *str, char *targ);
 
 #define chainNode(c) (c->cur)
@@ -45,6 +48,22 @@ static void fuseNameClean(){
 
 static void fuseNamePrint(){
     DOI(list_total, P(indent "V x%d = x[%d]; // %s\n",i,i,list_name[i]))
+}
+
+static S fuseNameString(S targ, S invc){
+    char tmp[99]; SP(tmp, "%s(%s,{", invc,targ);
+    DOI(list_total, {if(i>0)strcat(tmp,",");strcat(tmp,list_name[i]);})
+    strcat(tmp, "})");
+    return strdup(tmp);
+}
+
+#define isLength1(sn) (sn->type==vectorH && !(sn->isId) && sn->size==1)
+
+static S fuseLength(){
+    DOI(list_total, {\
+            ShapeNode *sn=getInfoNode(list_name[i])->shape;\
+            if(!isLength1(sn))R list_name[i];})
+    R NULL;
 }
 
 static void fuseNameByStr(char *buff, char *name, char *str){
@@ -155,8 +174,10 @@ static void findFusion(Chain *chain){
         if(fusable && !isVisited(chain)) {
             fuseNameClean();
             char *targ = fuseNameTarg(buff, chain);
+            num_func = 0;
             findFusionSub(chain, buff);
-            genFusedFunc(buff, targ);
+            if(num_func == 1) setVisited(chain, false);
+            else if(num_func > 1) genFusedFunc(buff, targ);
         }
         while(params){
             Node *pLiteral = params->val;  //literalParamK
@@ -180,15 +201,18 @@ static void findFusion(Chain *chain){
     }
 }
 
+/* num_func must > 1 */
 static void genFusedFunc(char *str, char *targ){
-    P("num_func = %d\n", num_func);
-    if(num_func > 1) { /* only valid gen */
-        P("void q%d_loopfusion_0(V z, V *x){\n",qid);
-        P(indent "// z -> %s\n",targ);
-        fuseNamePrint();
-        P(indent "DOI(r0, %s)\n", str);
-        P("}\n");
-    }
+    char tmp[99];
+    P("num_func = %d, targ = %s\n", num_func,targ);
+    SP(tmp,"q%d_loopfusion_%d",qid,FuseTotal);
+    P("L %s(V z, V *x){\n",tmp);
+    P(indent "// z -> %s\n",targ);
+    fuseNamePrint();
+    P(indent "DOI(vL(%s), %s) R 0;\n", fuseLength(), str);
+    P("}\n");
+    FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
+    FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;
 }
 
 static void analyzeChain(Chain *chain){
