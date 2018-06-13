@@ -818,12 +818,16 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
     # printEnv(v_env)
     # raw_input()
     if joinType == 'equi_join':
-        e0 = genEnum  (k_alias, v_alias)
-        t0 = genValues(e0)  #p0
-        t1 = genKeys  (e0)
-        t2 = genLt    (t0, genLength(t1))
-        t3 = genWhere (t2)  #p1
-        return [t0, t3, 'indexing']
+        t0 = genIndexOf(k_alias, v_alias)  #p0
+        t1 = genLt     (t0, genLength(k_alias))
+        t2 = genWhere  (t1)                #p1
+        return [t0, t2, 'indexing']
+        # e0 = genEnum  (k_alias, v_alias)
+        # t0 = genValues(e0)  #p0
+        # t1 = genKeys  (e0)
+        # t2 = genLt    (t0, genLength(t1))
+        # t3 = genWhere (t2)  #p1
+        # return [t0, t3, 'indexing']
     elif joinType == 'right_antijoin':
         return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
     elif joinType == 'left_antijoin':
@@ -836,10 +840,11 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
         pending('[joinWithKeys] add more join types: join type (%s)' % joinType)
 
 def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, isList=False):
-    print joinType
-    printEnv(left_env)
-    printEnv(right_env)
-    raw_input()
+    debug('join without relation')
+    # print joinType
+    # printEnv(left_env)
+    # printEnv(right_env)
+    # raw_input()
     if joinType == 'right_antijoin':
         t0 = genMember(left_alias, right_alias)
         p1 = genNot(t0)
@@ -861,6 +866,13 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
         p0 = genIndex(t1,'0:i64','i64')
         p1 = genIndex(t2,'1:i64','i64')
         return [p0, p1, 'indexing']
+    elif joinType == 'groupjoin':
+        e0 = genEnum  (left_alias, right_alias) # if t0: key; t1 is fkey
+        t0 = genValues(e0)
+        t1 = genGroup (t0)   # dict<key, value>
+        t2 = genKeys  (t1)   # key on the left should be kept
+        t3 = genValues(t1)   # value
+        return [None, t3, 'indexing']
     else:
         pending('[joinWithoutRelation] add more join types: join type (%s)' % joinType)
 
@@ -876,11 +888,11 @@ def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=Fal
     global keycol_list
     left_table  = getEnvTable(left_env)
     right_table = getEnvTable(right_env)
-    print left_name
-    printEnv(left_env)
-    print right_name
-    printEnv(right_env)
-    raw_input()
+    # print left_name
+    # printEnv(left_env)
+    # print right_name
+    # printEnv(right_env)
+    # raw_input()
     left_alias  = findAliasByName(left_name, left_env)
     right_alias = findAliasByName(right_name, right_env)
     # debugging
@@ -950,6 +962,35 @@ def joinColumnsWithMode(mode, left_name, left_env, right_name, right_env):
     t0 = funcOp(left_alias, right_alias)
     return [t0,None,'masking','plain']
 
+# only for q17
+def joinColumnsSpecial(joinType, d, env2):
+    opSet = {}
+    left_env, right_env = env2
+    if d['expression'] == 'and':
+        for d0 in d['arguments']:
+            if d0['expression'] == 'comparison': #q17, d0['mode'] == '<' | 'is'
+                mode = d0['mode'];
+                left_key = d0['left']['iu']
+                right_key= d0['right']['iu']
+                opSet[mode] = [left_key, right_key]
+                if mode == '<':
+                    joinWithKeys('equi_join', left_key, left_env, right_key, right_env)
+                elif mode == 'is':
+                    joinWithKeys('equi_join', left_key, left_env, right_key, right_env)
+    # 1st join
+    left1, right1 = opSet['is']
+    r_left1, r_right1, r_type = joinWithKeys('equi_join', left1, left_env, right1, right_env) #return 'indexing'
+    # 2nd join
+    left2, right2 = opSet['<']
+    left_alias = findAliasByName(left2, left_env)
+    right_alias= findAliasByName(right2, right_env)
+    t0 = genIndex(left_alias, r_left1)
+    t1 = genIndex(right_alias, r_right1)
+    t2 = genLt(t0, t1)
+    t3 = genCompress(t2, r_left1)
+    t4 = genCompress(t2, r_right1)
+    return [t3,t4,'indexing', 'plain']
+
 """
 0: none
 1: left/value
@@ -1003,9 +1044,10 @@ def isMultipleColumnJoin(d, env2):
                 typ,_ = checkExpr(d0)
                 if typ != 3: return False
                 else: numJoin = numJoin + 1
+                print d0
             else:
                 return False
-    # print 'Number of joins: %d' % numJoin
+    print 'Number of joins: %d' % numJoin
     return True if numJoin > 1 else False
 
 """
@@ -1053,14 +1095,15 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         else: unexpected('cond (%s) not handled' % mode)
     elif expr == 'and':  #q7, multiple column join
         if isMultipleColumnJoin(d, env2):
-            left_list = [] ; right_list = []
-            for d0 in d['arguments']:
-                new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
-                left_list.append(new_left)
-                right_list.append(new_right)
-            t0 = genList(left_list)
-            t1 = genList(right_list)
-            return joinColumns(joinType, t0, env2[0], t1, env2[1], True)
+            return joinColumnsSpecial(joinType, d, env2)
+            # left_list = [] ; right_list = []
+            # for d0 in d['arguments']:
+            #     new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
+            #     left_list.append(new_left)
+            #     right_list.append(new_right)
+            # t0 = genList(left_list)
+            # t1 = genList(right_list)
+            # return joinColumns(joinType, t0, env2[0], t1, env2[1], True)
         else:
             # q19
             cnt_pred = cnt_new = 0
@@ -1413,18 +1456,24 @@ def scanGroupjoin(d, env2):
     debug('group join')
     left_keys  = d['leftKey']
     right_keys = d['rightKey']
+    print left_keys, right_keys
+    printEnv(env2[0])
+    printEnv(env2[1])
     if len(left_keys) == 1:
         # it seems left_col and right_col are useless
         # since 'source' has indicated the name of keys from both sides 
         left_col  = left_keys [0]['iu']
         right_col = right_keys[0]['iu']
-        t0 = findAliasByName(left_col , env2[0])
-        t1 = findAliasByName(right_col, env2[1])
-        e0 = genEnum(t0, t1) # if t0: key; t1 is fkey
-        w0 = genValues(e0)
-        w1 = genGroup(w0)  # dict<key, value>
-        w2 = genKeys(w1)   # key on the left should be kept
-        w3 = genValues(w1) # value
+        left_env, right_env = env2
+        result = joinColumns('groupjoin', left_col, left_env, right_col, right_env)
+        _,w3,_,_ = result
+        # t0 = findAliasByName(left_col , env2[0])
+        # t1 = findAliasByName(right_col, env2[1])
+        # e0 = genEnum(t0, t1) # if t0: key; t1 is fkey
+        # w0 = genValues(e0)
+        # w1 = genGroup(w0)  # dict<key, value>
+        # w2 = genKeys(w1)   # key on the left should be kept
+        # w3 = genValues(w1) # value
         env_names =[] ; env_alias = []; env_types = []
         addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],env2[0], None)
         addEnvValues(env_names, env_alias, env_types, d['rightAggregates'],env2[1], w3)
@@ -1585,6 +1634,11 @@ def scanMagic(d, env):
     global id_to_env
     op = d['operator']
     if op == 'groupby':
+        # if len(d['values']) == 1:  #q17
+        #     colName = d['values'][0]['value']['iu']
+        #     print checkPrimaryKey(getEnvTable(env), colName) # False
+        #     printEnv(env)
+        #     raw_input()
         id_to_env[d['operatorId']] = scanGroupby(d, env)
     else:
         unexpected('(%s) not impl. in magic' % op)

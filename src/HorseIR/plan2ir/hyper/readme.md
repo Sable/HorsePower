@@ -30,9 +30,9 @@ Note (Jun 8)
 
 - No join : 1,6
 - 1  join : 4,14
-- 2  joins: 16 (19,22)
+- 2  joins: 16 (17,19,22)
 
-Testing: 3,17 (12,13); Pending: 18
+Testing: (12,13); Pending: 3,18
 
 Note (May 7)
 
