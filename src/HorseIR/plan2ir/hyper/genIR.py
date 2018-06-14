@@ -808,6 +808,18 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
         else:
             pending('join without masks found. 4')
         return [p0, None, 'masking']
+    elif joinType == 'groupjoin':
+        if k_mask:
+            pending('adding k_mask for %s' % joinType)
+        elif f_mask:
+            t0 = genValues   (f_alias)
+            t1 = genCompress (f_mask, t0)
+            t2 = genGroup    (t1)
+            t3 = genKeys     (t2)
+            t4 = genValues   (t2)
+            return [None, t4, 'indexing']
+        else:
+            pending('adding neither k_mask nor f_mask for %s' % joinType)
     pending('[joinWithEnum] add more join types: join type (%s), mask (%s, %s)' % (joinType, k_mask, f_mask))
 
 def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
@@ -1514,8 +1526,8 @@ def scanAntijoin(d, env2, joinType):
     return handleJoinResult(scanCondition(d['condition'], 'hash', joinType, env2), joinType, env2)
 
 def handleJoinResult(result, joinType, env2):
-    print result
-    raw_input()
+    # print result
+    # raw_input()
     left_col, right_col, result_type, result_kind = result
     left_env, right_env = env2  # assign env2[0]/[1]
     if result_kind == 'relation':
