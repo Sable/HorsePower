@@ -754,7 +754,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
             t3 = genLength   (t1)
             t4 = genVector   (t3, '0:bool')
             t5 = genIndexA   (t4, t2, '1:bool')
-            p0 = genCopy     (t5)
+            p0 = t5
         else:
             pending('join without masks found. 1')
         return [p0, None, 'masking']
@@ -771,7 +771,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
             p1 = genIndex    (k_mask, t0)
             kind = 'masking'
         elif f_mask:
-            p1 = genCopy     (f_mask)
+            p1 = f_mask
             kind = 'masking'
         else:
             pending('join without masks found. 2')
@@ -791,8 +791,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
             p1 = genWhere    (t1)
         elif f_mask:
             t0 = genValues   (f_alias)
-            t1 = genCompress (f_mask, t0)
-            p0 = genCopy     (t0)
+            p0 = genCompress (f_mask, t0)
             p1 = genWhere    (f_mask)
         else:
             pending('join without masks found. 3')
@@ -1455,13 +1454,16 @@ def addEnvValues(names, alias, types, d, env, indx):
             continue
         nam = a['iu'][0]
         typ = strType(a['iu'][1])
+        aaa = findAliasByIndex(source, env)
+        print nam, typ, aaa, indx
+        raw_input()
         if indx == None:
             names.append(nam)
-            alias.append(findAliasByIndex(source, env))
+            alias.append(aaa)
             types.append(typ)
         else:
             names.append(nam)
-            alias.append(genRaze(genIndex(nam, indx)))
+            alias.append(genRaze(genIndex(aaa, indx)))
             types.append(typ)
 
 def scanGroupjoin(d, env2):

@@ -14,7 +14,7 @@
 | 10 | V      | Pass   |      | 3 joins                                  |
 | 11 | V      | Pass   |      | 5 joins                                  | bnl join
 | 12 | V      | Pass   |      | 1 join                                   | lookup
-| 13 | V      | Pass   |      | 1 groupjoin                              |
+| 13 | V      | Pass   |      | 1 groupjoin                              | (left-outer-join)
 | 14 | V      | Pass   |  Y   | 1 join                                   |
 | 15 | V      | Pass   |      | 1 join,  1 index join                    |
 | 16 | V      | Pass   |  Y   | 1 join,  1 rightantijoin                 |
@@ -26,10 +26,10 @@
 | 22 | V      | Pass   |  Y   | 1 join,  1 leftantijoin                  | bnl
 
 
-Note (Jun 8)
+Note (Jun 14)
 
 - No join : 1,6
-- 1  join : 4,14 (12, 13)
+- 1  join : 4,12,13,14
 - 2  joins: 16 (17,19,22)
 
 Testing: 3,18
