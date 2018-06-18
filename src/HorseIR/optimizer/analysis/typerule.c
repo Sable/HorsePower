@@ -111,7 +111,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleTake     NULL
 #define ruleDrop     NULL
 #define ruleOrder    NULL
-#define ruleMember   NULL
+#define ruleMember   propMember
 #define ruleVector   NULL
 #define ruleMatch    NULL
 /* special */ 
@@ -149,7 +149,7 @@ bool isBoolIN  (InfoNode *n) {return isBT;}
 bool isRealIN  (InfoNode *n) {return isIT||isFT||isBT;}
 bool isStringIN(InfoNode *n) {return isST;}
 bool isDateIN  (InfoNode *n) {return isDT;}
-bool isBasicIN (InfoNode *n) {return isRealIN(n)||isDateIN(n);}
+bool isBasicIN (InfoNode *n) {return isRealIN(n)||isStringIN(n)||isDateIN(n);}
 bool isTableIN (InfoNode *n) {return isTT;}
 #define isU(n) (unknownT==(n)->type)
 #define isListT(n) (listT==(n)->type)
@@ -159,6 +159,9 @@ bool isTableIN (InfoNode *n) {return isTT;}
 #define isShapeV(n) isS(n,  vectorH)
 #define isShapeL(n) isS(n,    listH)
 #define isShapeT(n) isS(n,   tableH)
+
+#define decideShapeLeft(x,y) x->shape
+#define decideShapeRight(x,y) y->shape
 
 typedef bool (*TypeCond)(InfoNode *);
 int shapeId = 0;
@@ -253,6 +256,18 @@ static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
     }
     else return NULL;
     return newInfoNode(rtnType, decideShapeElementwise(x,y));
+}
+
+static InfoNode *propMember(InfoNode *x, InfoNode *y){
+    pType rtnType;
+    if(sameT(x,y) && isBasicIN(x)){
+        rtnType = boolT;
+    }
+    else if(isU(x) || isU(y)){
+        rtnType = unknownT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, decideShapeRight(x,y));
 }
 
 static ShapeNode *decideShapeV(ShapeNode *x, ShapeNode *y){

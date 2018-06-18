@@ -116,6 +116,7 @@ InfoNode *propagateType(char *funcName, Node *param_list){
     //P("funcName = %s\n", funcName);
     InfoNodeList *in_list = getParamInfo(param_list);
     void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
+    if(!funcRtn) EP("Error type rules found in %s\n", funcName);
     //P("valence = %d, total = %d\n", valence, totalNode(in_list));
     if(totalNode(in_list) == valence){
         InfoNode *newNode;

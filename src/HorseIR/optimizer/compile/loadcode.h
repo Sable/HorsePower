@@ -1,3 +1,7 @@
+#ifdef QALL
+    #include "q6.h"
+#endif
+
 #ifdef Q1
     #include "q1.out"
 #endif
@@ -19,7 +23,7 @@
 #endif
 
 #ifdef Q6
-    #include "q6.out"
+    #include "q6.h"
 #endif
 
 #ifdef Q7
@@ -86,6 +90,3 @@
     #include "q22.out"
 #endif
 
-#ifdef QALL
-    #include "q6.out"
-#endif

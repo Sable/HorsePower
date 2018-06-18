@@ -209,7 +209,7 @@ static void genFusedFunc(char *str, char *targ){
     P("L %s(V z, V *x){\n",tmp);
     P(indent "// z -> %s\n",targ);
     fuseNamePrint();
-    P(indent "DOI(vL(%s), %s) R 0;\n", fuseLength(), str);
+    P(indent "DOP(vL(%s), %s) R 0;\n", fuseLength(), str);
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
     FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;

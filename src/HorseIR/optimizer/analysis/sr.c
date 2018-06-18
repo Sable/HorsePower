@@ -157,8 +157,8 @@ V getLiteralFromNode(Node *n){
         case   literalSymK: return fetchLiteralSym  (paramValue, literalSymK  );
         case  literalFuncK: return fetchLiteralFunc (paramValue, literalFuncK );
         case   literalStrK: return fetchLiteralStr  (paramValue);
-        default: printNodeKind(paramValue);
-                 EP("[getLiteralFromNode]: kind (%d) not supported yet.\n", paramValue->kind);
+        //default: printNodeKind(paramValue);
+        //         EP("[getLiteralFromNode]: kind (%d) not supported yet.\n", paramValue->kind);
     }
     return NULL;
 }
