@@ -829,10 +829,10 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
     # printEnv(v_env)
     # raw_input()
     if joinType == 'equi_join':
-        t0 = genIndexOf(k_alias, v_alias)  #p0
-        t1 = genLt     (t0, genLength(k_alias))
-        t2 = genWhere  (t1)                #p1
-        return [t0, t2, 'indexing']
+        t0 = genMember (k_alias, v_alias)
+        t1 = genVector(genLength(k_alias), '0:bool')
+        t2 = genIndexA(t1, genCompress(t0, v_alias), '1:bool')
+        return [t2, t0, 'masking']
         # e0 = genEnum  (k_alias, v_alias)
         # t0 = genValues(e0)  #p0
         # t1 = genKeys  (e0)
@@ -1455,8 +1455,8 @@ def addEnvValues(names, alias, types, d, env, indx):
         nam = a['iu'][0]
         typ = strType(a['iu'][1])
         aaa = findAliasByIndex(source, env)
-        print nam, typ, aaa, indx
-        raw_input()
+        # print nam, typ, aaa, indx
+        # raw_input()
         if indx == None:
             names.append(nam)
             alias.append(aaa)
