@@ -43,7 +43,7 @@ typedef enum FuncKind {
 
 typedef struct FuseNode {
     S targ, invc;
-}FuseNode;
+}OptNode, FuseNode, PeepholeNode;
 
 /* signature */
 V getLiteralFromNode(Node *n);

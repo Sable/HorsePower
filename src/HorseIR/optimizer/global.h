@@ -56,6 +56,7 @@ void buildUDChain(Prog *root);
 void analyzeSR(Prog *root);
 void analyzeLF();
 void analyzeCPF();
+void analyzePeephole();
 void printTypeShape(); /*util/trie.c*/
 bool isElementwise(char *funcName);
 L calcInterval(struct timeval t0, struct timeval t1); /* util/mics.c*/

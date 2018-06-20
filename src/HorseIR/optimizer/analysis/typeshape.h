@@ -16,7 +16,7 @@ typedef struct ShapeNode{
 
 typedef struct TypeShapeNode{
          char *name;
-        pType  type;
+        pType  type, subtype;
     ShapeNode *shape;
 }InfoNode;
 

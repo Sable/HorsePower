@@ -2,7 +2,8 @@
 
 extern ChainList *chain_list;
 extern I qid;
-I PeepholeTotal = 0;
+I PhTotal = 0;
+PeepholeNode PhList[99];
 
 // copied from lf.c (TODO: need to be removed)
 #define chainNode(c) (c->cur)
@@ -56,15 +57,25 @@ static int getVarShortByName(char *name, char *rtnShort){
         case   f32T: strcpy(rtnShort, "vF"); break;
         case   f64T: strcpy(rtnShort, "vE"); break;
         case monthT: strcpy(rtnShort, "vM"); break;
-        default: EP("type %d not supported yet.\n");
+        case  charT: strcpy(rtnShort, "vC"); break;
+        default: printInfoNode(in); EP("type %d not supported yet.\n", k);
     }
     return 0;
 
 }
 
+static S phNameString(char *invc, char **targ, char *lval, char **rval, int n){
+    char tmp[99]; SP(tmp, "%s({", invc);
+    DOI(n, {if(i>0)strcat(tmp,","); strcat(tmp,targ[i]);})
+    SP(tmp+strlen(tmp),"},%s,{",lval);
+    DOI(n, {if(i>0)strcat(tmp,","); strcat(tmp,rval[i]);})
+    strcat(tmp, "})");
+    return strdup(tmp);
+}
+
 static void genCompressCode(char **targ, char *lval, char **rval, int n){
     char tmp[99], typ[20];
-    SP(tmp, "q%d_peephole_%d", qid, PeepholeTotal++);
+    SP(tmp, "q%d_peephole_%d", qid, PhTotal);
     P("L %s(V *z, V y, V *x){\n", tmp);
     DOI(n, P(indent "V z%lld = z[%lld]; // %s\n", i,i,targ[i]))
     DOI(n, P(indent "V x%lld = x[%lld]; // %s\n", i,i,rval[i]))
@@ -78,6 +89,8 @@ static void genCompressCode(char **targ, char *lval, char **rval, int n){
     P(indent "DOT(len, if(vB(y,i)){L c=offset[tid]++;");
     DOI(n, {getVarShortByName(rval[i],typ); P("%s(z%lld,c)=%s(x%lld,i);",typ,i,typ,i);})
     P("})\n}\n");
+    PhList[PhTotal].invc = phNameString(tmp, targ, lval, rval, n);
+    PhList[PhTotal].targ = targ[n-1]; PhTotal++;
 }
 
 static void genCompress(ChainList *list, int count){

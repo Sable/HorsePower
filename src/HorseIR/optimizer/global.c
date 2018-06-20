@@ -46,6 +46,8 @@ void initBackend(){
 }
 
 #define initQ1 initQ6 
+#define initQ12 initQ4
+#define initQ17 initQ14
 #define addFKey(t0,c0,t1,c1) \
     pfnAddFKey(initLiteralSym((S)t0), initLiteralSym((S)c0),\
                initLiteralSym((S)t1), initLiteralSym((S)c1))
@@ -59,6 +61,12 @@ static void initQ4(){
     initTableByName((S)"lineitem");
     initTableByName((S)"orders");
     addFKey("orders", "o_orderkey", "lineitem", "l_orderkey");
+}
+
+static void initQ13(){
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    addFKey("customer", "c_custkey", "orders", "o_custkey");
 }
 
 static void initQ14(){
@@ -99,8 +107,11 @@ void initTablesByQid(I id){
             case  1: initQ1 (); break;
             case  4: initQ4 (); break;
             case  6: initQ6 (); break;
+            case 12: initQ12(); break;
+            case 13: initQ13(); break;
             case 14: initQ14(); break;
             case 16: initQ16(); break;
+            case 17: initQ17(); break;
             case 18: initQ18(); break;
             case 19: initQ19(); break;
             case 22: initQ22(); break;

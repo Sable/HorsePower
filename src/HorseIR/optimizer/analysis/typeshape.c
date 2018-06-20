@@ -4,6 +4,7 @@ typedef InfoNode* (*NilFunc)();
 typedef InfoNode* (*MonFunc)(InfoNode*);
 typedef InfoNode* (*DyaFunc)(InfoNode*, InfoNode*);
 typedef InfoNode* (*AllFunc)(InfoNodeList*);
+// InfoNodeList has a leading dummy node
 
 /* signatures */
 
@@ -31,12 +32,14 @@ static InfoNode *getParamItemInfo(Node *n){
     //printNodeKind(n); P("\n");
     switch(n->kind){
         case           idK: return addParamCaseIdK(n); break;
-        case literalFloatK: return addParamCaseLiteral(f64T , literalSize(n)); break;
-        case   literalIntK: return addParamCaseLiteral(i64T , literalSize(n)); break;
-        case   literalSymK: return addParamCaseLiteral(symT , literalSize(n)); break;
+        case literalFloatK: return addParamCaseLiteral( f64T, literalSize(n)); break;
+        case   literalIntK: return addParamCaseLiteral( i64T, literalSize(n)); break;
+        case   literalSymK: return addParamCaseLiteral( symT, literalSize(n)); break;
         case  literalDateK: return addParamCaseLiteral(dateT, literalSize(n)); break;
         case  literalBoolK: return addParamCaseLiteral(boolT, literalSize(n)); break;
         case  literalCharK: return addParamCaseLiteral(charT, literalSize(n)); break;
+        case   literalStrK: return addParamCaseLiteral( strT, literalSize(n)); break;
+        case  literalFuncK: return addParamCaseLiteral(funcT, literalSize(n)); break;
         default: printNodeKind(n);
                  error("Unknown kind found\n");
     }
@@ -113,10 +116,12 @@ static InfoNode *getNode(InfoNodeList *rt, int k){
 /* entry */
 InfoNode *propagateType(char *funcName, Node *param_list){
     int valence=-1;
-    //P("funcName = %s\n", funcName);
+    P("--> %s\n", funcName);
     InfoNodeList *in_list = getParamInfo(param_list);
     void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
-    if(!funcRtn) EP("Error type rules found in %s\n", funcName);
+    if(!funcRtn) {
+        EP("Error type rules found in *%s*\n", funcName);
+    }
     //P("valence = %d, total = %d\n", valence, totalNode(in_list));
     if(totalNode(in_list) == valence){
         InfoNode *newNode;
@@ -124,7 +129,9 @@ InfoNode *propagateType(char *funcName, Node *param_list){
             DyaFunc func = (DyaFunc)funcRtn;
             newNode = func(getNode(in_list,0), getNode(in_list, 1));
             if(newNode == NULL){
-                error("1 null type rules found\n");
+                printInfoNode(getNode(in_list, 0));
+                printInfoNode(getNode(in_list, 1));
+                EP("[Dynamic] null type rules found for %s\n",funcName);
             }
         }
         else if(valence == 1){
@@ -144,6 +151,14 @@ InfoNode *propagateType(char *funcName, Node *param_list){
             EP("null type rules found for [%s]\n",funcName);
         }
         //printInfoNode(newNode);
+        return newNode;
+    }
+    else if(valence == -1){
+        AllFunc func = (AllFunc)funcRtn;
+        InfoNode *newNode = func(in_list);
+        if(newNode == NULL){
+            EP("null type rules found for [%s] (-1)\n",funcName);
+        }
         return newNode;
     }
     else error("# of params != expected valence");

@@ -16,7 +16,7 @@ static bool toC      = false;
 #define printString(b,n) SP(b,"\"%s\"", n->val.strS)
 #define printComp(b,n)   SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
 #define printDate(b,n)   {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
-#define printSym(b,n)    {if(toC)EP("toC: sym type not impl.\n" );else SP(b,"`%s",n->val.charS);}
+#define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else SP(b,"`%s",n->val.charS);}
 #define printFunc(b,n)   echo(b,n->val.idS)
 
 #define printPlainList(b,n)  prettyListBuff(b, n->val.listS, comma)
@@ -178,6 +178,8 @@ void printTypeBuff(char *b, pType p){
         case  ktableT: echo(b, "ktable");  break;
         case    listT: echo(b, "list");    break;
         case    enumT: echo(b, "enum");    break;
+        case    dictT: echo(b, "dict");    break;
+        case    funcT: echo(b, "func");    break;
         default: EP("Not supported yet.: %d\n", p);
     }
 }
@@ -214,6 +216,7 @@ void printKindBuff(char *b, Kind k){
         case   literalSymK: echo(b, "literalSymK"  ); break;
         case  literalDateK: echo(b, "literalDateK" ); break;
         case  literalCharK: echo(b, "literalCharK" ); break;
+        case   literalStrK: echo(b, "literalStrK"  ); break;
         case  literalBoolK: echo(b, "literalBoolK" ); break;
         case literalParamK: echo(b, "literalParamK"); break;
         case   literalIntK: echo(b, "literalIntK"  ); break;

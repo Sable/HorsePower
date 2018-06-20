@@ -16,7 +16,7 @@ typedef struct Program {
 typedef enum pType {
     unknownT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT, strT,
     monthT, dateT, dtT, hourT, minuteT, timeT,
-    tableT, ktableT, listT, enumT,
+    tableT, ktableT, listT, enumT, dictT, funcT,
     totalT
 }pType;
 

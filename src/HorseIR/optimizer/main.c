@@ -46,6 +46,9 @@ int main(int argc, char *argv[]){
         else if(!strcmp(flagOpt, "lf")){
             analyzeLF();
         }
+        else if(!strcmp(flagOpt, "ph")){
+            analyzePeephole();
+        }
         else { EP("opt %s is not supported\n",flagOpt); }
         gettimeofday(&tv1, NULL);
         optTime = calcInterval(tv0, tv1)/1000.0;
@@ -67,6 +70,7 @@ int main(int argc, char *argv[]){
             buildUDChain(root); /* include type and shape propagation */
             printTypeShape();
             analyzeLF();
+            analyzePeephole();
             HorseCompiler(chain_list);
         }
     }

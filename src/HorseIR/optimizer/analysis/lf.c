@@ -54,6 +54,7 @@ static S fuseNameString(S targ, S invc){
     char tmp[99]; SP(tmp, "%s(%s,{", invc,targ);
     DOI(list_total, {if(i>0)strcat(tmp,",");strcat(tmp,list_name[i]);})
     strcat(tmp, "})");
+    //P("tmp = %s, targ = %s, invc = %s\n", tmp,targ,invc);
     return strdup(tmp);
 }
 
@@ -79,6 +80,7 @@ static void fuseNameByStr(char *buff, char *name, char *str){
         case   f64T: SP(buff, "vE(%s,i)", str); break;
         case  dateT: SP(buff, "vD(%s,i)", str); break;
         case monthT: SP(buff, "vM(%s,i)", str); break;
+        case   symT: SP(buff, "vQ(%s,i)", str); break;
         default: EP("type %d not supported yet\n", k);
     }
 }
@@ -204,12 +206,14 @@ static void findFusion(Chain *chain){
 /* num_func must > 1 */
 static void genFusedFunc(char *str, char *targ){
     char tmp[99];
-    P("num_func = %d, targ = %s\n", num_func,targ);
+    P("/* num_func = %d, targ = %s */\n", num_func,targ);
     SP(tmp,"q%d_loopfusion_%d",qid,FuseTotal);
     P("L %s(V z, V *x){\n",tmp);
     P(indent "// z -> %s\n",targ);
     fuseNamePrint();
-    P(indent "DOP(vL(%s), %s) R 0;\n", fuseLength(), str);
+    S size = fuseLength();
+    if(size) P(indent "DOP(vL(%s), %s) R 0;\n", size, str);
+    else P(indent "L i=0; %s; R 0;\n", str);
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
     FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;

@@ -8,6 +8,8 @@ extern I qid; // ../main.c
 extern Chain *exitChain;
 extern FuseNode FuseList[99];
 extern I        FuseTotal;
+extern PeepholeNode PhList[99];
+extern I            PhTotal;
 static I lineNo = 0;
 static I depth = 0;
 
@@ -30,8 +32,8 @@ char *dyaFnName[] = {
     "pfnMember", "pfnVector", "pfnMatch", "pfnIndex", "pfnColumnValue", "pfnSubString"
 };
 
-//#define outF stdout
-FILE* outF;
+#define outF stdout
+//FILE* outF;
 #define genIndent() DOI(depth*4, FP(outF, " "))
 #define genStmt(n, stmt) {genIndent(); FP(outF,"PROFILE(%3d, %-3s, ",lineNo++,n); stmt; FP(outF,");\n");}
 #define genOther(stmt) {genIndent(); stmt;}
@@ -67,11 +69,11 @@ static char *stringifyLiteral(V x){
     char t[99];
     if(xn == 1){
         switch(xp){
-            caseL SP(t,"literalI64(\"%lld\")", xl); break;
-            caseQ SP(t,"literalSym((S)\"%s\")",getSymbolStr(xq)); break;
+            caseL SP(t,"initLiteralI64(\"%lld\")", xl); break;
+            caseQ SP(t,"initLiteralSym((S)\"%s\")",getSymbolStr(xq)); break;
             caseD {I d=xd;SP(t,"%d.%02d.%02d:d", d/10000,d%10000/100,d%100);} break;
-            caseF SP(t,"literalF32(%g:f32)", xf); break;
-            caseE SP(t,"literalF64(%g:f64)", xe); break;
+            caseF SP(t,"initLiteralF32(%g:f32)", xf); break;
+            caseE SP(t,"initLiteralF64(%g:f64)", xe); break;
             default: EP("adding more types: %d\n",xp);
         }
         return strdup(t);
@@ -203,25 +205,26 @@ static void compileMethod(Node *method){
     depth--;
 }
 
-static int findTargInFuseList(S n){
-    DOI(FuseTotal, if(!strcmp(n, FuseList[i].targ)) return i) R -1;
+static int findTargInList(OptNode *list, S s, I n){
+    DOI(n, if(!strcmp(s, list[i].targ)) return i) R -1;
 }
 
-static void identifyLoopFusion(Node *stmt){
+static void identifyStmt(Node *stmt, OptNode *OptList, I OptTotal){
     S writeName = NULL;
     if(instanceOf(stmt, simpleStmtK))
         writeName = fetchName(stmt->val.simpleStmt.name);
     else if(instanceOf(stmt, castStmtK))
         writeName = fetchName(stmt->val.castStmt.name);
     else return ;
-    L x = findTargInFuseList(writeName);
+    L x = findTargInList(OptList,writeName,OptTotal);
     if(x>=0){
-        genStmt(writeName, FP(outF, "%s", FuseList[x].invc));
+        genStmt(writeName, FP(outF, "%s", OptList[x].invc));
     }
 }
 
 static void identifyOptimization(Node *stmt){
-    identifyLoopFusion(stmt);
+    identifyStmt(stmt, FuseList, FuseTotal);
+    identifyStmt(stmt, PhList  , PhTotal);
 }
 
 static void compileChain(ChainList *list){
@@ -255,8 +258,8 @@ FILE *writeFile(S s){
 }
 
 int HorseCompiler(ChainList *rt){
-    char outPath[128]; SP(outPath, "./compile/q%d.out", qid);
-    outF = writeFile(outPath);
+    //char outPath[128]; SP(outPath, "./compile/q%d.out", qid);
+    //outF = writeFile(outPath);
     //Node *method = findMethod(findModule(rt->module_list, "default")->val.module.body, "main");
     //compileMethod(method);
     //printChainList();

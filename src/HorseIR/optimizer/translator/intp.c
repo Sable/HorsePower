@@ -195,7 +195,7 @@ static int runMethod(Node *method){
         stmts = stmts->next;
     }
     if(rtn){
-        printTablePretty(rtn, 20);
+        printTablePretty(rtn, 42);
     }
     return 0;
 }
