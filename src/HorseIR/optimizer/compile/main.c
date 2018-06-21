@@ -7,7 +7,11 @@ I qid = -1;
 
 E runSingle(int id){
     switch(id){
-        case 6: R compiledQ6(); break;
+        //case 1: R compiledQ1(); break;
+        //case 4: R compiledQ4(); break;
+        //case 6: R compiledQ6(); break;
+        //case 12: R compiledQ12(); break;
+        case 13: R compiledQ13(); break;
         default: R -1;
     }
 }
@@ -16,7 +20,8 @@ void run(int n, int id){
     E *record=(E*)malloc(sizeof(E)*n), total=0;
     initBackend();
     initTablesByQid(id);
-    DOI(n, record[i]=runSingle(id))
+    L cur = getHeapOffset();
+    DOI(n, {setHeapOffset(cur); record[i]=runSingle(id);})
     DOI(n, total += record[i])
     P(">> Run with %d times, average (ms): %g |",n,total/n);
     DOI(n, P(" %g",record[i])) P("\n");

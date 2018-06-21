@@ -900,6 +900,8 @@ L pfnGroup(V z, V x){
 // gettimeofday(&tv1, NULL);
 // P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
 // getchar();
+    //L tid = getSymbol((S)"148561");
+    //DOI(vn(x), if(vQ(x,i)==tid)P("%lld\n",i))
     R 0;
 }
 
@@ -1492,7 +1494,7 @@ L pfnLike(V z, V x, V y){
 //                        vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);
 //                    }
 //                } break;
-                caseS DOP(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
+                caseS DOI(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
                 // caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
                 // caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
             }
@@ -1559,7 +1561,6 @@ L pfnOrderBy(V z, V x, V y){
         // DOI(20, P("[%3lld] %s, %s, %lld\n", i, \
         //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
         // getchar();
-        DOI(10, P("%lld ",vL(z,i))) P("\n");
         R 0;
     }
     else if(isTypeGroupBasic(vp(x)) && isBool(y) && 1==vn(y)){
@@ -1767,6 +1768,7 @@ L pfnKTable(V z, V x, V y){
 
 #define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
 L pfnMember(V z, V x, V y){
+    //P("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
     if(isTypeGroupReal(vp(x))){
         V tempX = allocNode();
         V tempY = allocNode();

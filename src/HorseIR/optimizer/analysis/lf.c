@@ -60,11 +60,26 @@ static S fuseNameString(S targ, S invc){
 
 #define isLength1(sn) (sn->type==vectorH && !(sn->isId) && sn->size==1)
 
-static S fuseLength(){
+static L fuseLength(){
     DOI(list_total, {\
             ShapeNode *sn=getInfoNode(list_name[i])->shape;\
-            if(!isLength1(sn))R list_name[i];})
-    R NULL;
+            if(!isLength1(sn))R i;})
+    R -1;
+}
+
+static void getNameTypeAlias(char *buff, char *name){
+    InfoNode *in = getInfoNode(name);
+    pType k = in->type;
+    switch(k){
+        case  boolT: strcpy(buff, "H_B"); break;
+        case   i64T: strcpy(buff, "H_L"); break;
+        case   f32T: strcpy(buff, "H_F"); break;
+        case   f64T: strcpy(buff, "H_E"); break;
+        case  dateT: strcpy(buff, "H_D"); break;
+        case monthT: strcpy(buff, "H_M"); break;
+        case   symT: strcpy(buff, "H_Q"); break;
+        default: EP("type %d not supported yet 2\n", k);
+    }
 }
 
 static void fuseNameByStr(char *buff, char *name, char *str){
@@ -211,9 +226,14 @@ static void genFusedFunc(char *str, char *targ){
     P("L %s(V z, V *x){\n",tmp);
     P(indent "// z -> %s\n",targ);
     fuseNamePrint();
-    S size = fuseLength();
-    if(size) P(indent "DOP(vL(%s), %s) R 0;\n", size, str);
-    else P(indent "L i=0; %s; R 0;\n", str);
+    L size_index = fuseLength();
+    if(size_index >= 0){
+        char type[10]; getNameTypeAlias(type, targ);
+        P(indent "initV(z,%s,vn(x%lld));\n", type, size_index);
+        P(indent "DOP(vn(x%lld), %s) R 0;\n", size_index, str);
+    }
+    else
+        P(indent "L i=0; %s; R 0;\n", str);
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
     FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;

@@ -46,19 +46,42 @@ static void compileDya(S f, S n, S *p){
 }
 
 static void compileAny(S f, S n, S *p, L tot){
-    genStmt(n, {FP(outF, "%s(%s, %s",f,n); DOI(tot, FP(outF, ", %s", p[i])) FP(outF, ")");})
+    genStmt(n, {FP(outF, "%s(%s, %lld, {",f,n,tot); DOI(tot, {if(i>0)FP(outF," ,");FP(outF, "%s", p[i]);}) FP(outF, "})");})
 }
 
 static void compileIndexA(S n, S *p){
     genStmt(n, FP(outF, "pfnIndexA(%s, %s, %s)",p[0],p[1],p[2]))
 }
 
+static void fetchFuncName(S s, S func){
+    S s0=NULL, s1=NULL;
+    while(s[0]!=0 && s[0]!='"') s++;
+    if(s[0]=='"') {
+        s0 = ++s;
+        while(s[0]!=0 && s[0]!='"') s++;
+        if(s[0]=='"') s1=s;
+    }
+    if(s0==NULL || s1==NULL) func[0]=0;
+    else { L n=s1-s0; strncpy(func,s0,n); func[n]=0; }
+}
+
 static void compileEachDya(S f, S n, S *p){
-    genStmt(n, FP(outF, "%s(%s,%s,%s,@%s)",f,n,p[1],p[2],p[0]))
+    char func[99]; fetchFuncName(p[0], func);
+    if(!strcmp(func, "index"))      strcpy(func, "pfnIndex");
+    else if(!strcmp(func, "mul"))   strcpy(func, "pfnMul");
+    else if(!strcmp(func, "minus")) strcpy(func, "pfnMinus");
+    else if(!strcmp(func, "plus"))  strcpy(func, "pfnPlus");
+    else EP("[compileEachDya] add more func %s\n", func);
+    genStmt(n, FP(outF, "%s(%s,%s,%s,%s)",f,n,p[1],p[2],func))
 }
 
 static void compileEachMon(S f,S n, S *p){
-    genStmt(n, FP(outF, "%s(%s,%s,@%s)",f,n,p[1],p[0]))
+    char func[99]; fetchFuncName(p[0], func);
+    if(!strcmp(func, "sum"))      strcpy(func, "pfnSum");
+    else if(!strcmp(func, "avg")) strcpy(func, "pfnAvg");
+    else if(!strcmp(func, "len")) strcpy(func, "pfnLen");
+    else EP("[compileEachMon] add more func %s\n", func);
+    genStmt(n, FP(outF, "%s(%s,%s,%s)",f,n,p[1],func))
 }
 
 static void genAssignment(S n, S p){
@@ -66,19 +89,35 @@ static void genAssignment(S n, S p){
 }
 
 static char *stringifyLiteral(V x){
-    char t[99];
+    char t[999];
     if(xn == 1){
         switch(xp){
-            caseL SP(t,"initLiteralI64(\"%lld\")", xl); break;
+            caseB SP(t,"initLiteralBool(%d)", xb); break;
+            caseL SP(t,"initLiteralI64(%lld)", xl); break;
+            caseS SP(t,"initLiteralString((S)\"%s\")", xs); break;
             caseQ SP(t,"initLiteralSym((S)\"%s\")",getSymbolStr(xq)); break;
-            caseD {I d=xd;SP(t,"%d.%02d.%02d:d", d/10000,d%10000/100,d%100);} break;
-            caseF SP(t,"initLiteralF32(%g:f32)", xf); break;
-            caseE SP(t,"initLiteralF64(%g:f64)", xe); break;
+            caseD {I d=xd;SP(t,"initLiteralDate(%d%02d%02d)", d/10000,d%10000/100,d%100);} break;
+            caseF SP(t,"initLiteralF32(%g)", xf); break;
+            caseE SP(t,"initLiteralF64(%g)", xe); break;
             default: EP("adding more types: %d\n",xp);
         }
-        return strdup(t);
     }
-    else EP("adding xn > 1\n");
+    else {
+        char *str = t;
+        switch(xp){
+            caseB str+=SP(str,"initLiteralBoolVector(%lld, {",xn);
+                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%lld",xB(i));})
+                  str+=SP(str, "})"); break;
+            caseQ str+=SP(str,"initLiteralSymVector(%lld, {",xn);
+                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"\"%s\"",getSymbolStr(xQ(i)));})
+                  str+=SP(str, "})"); break;
+            caseL str+=SP(str,"initLiteralI64Vector(%lld, {",xn);
+                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%lld",xL(i));})
+                  str+=SP(str, "})"); break;
+            default: EP("adding more types: %d (%lld)\n",xp,xn);
+        }
+    }
+    return strdup(t);
 }
 
 static S loadParam2V(Node *param){
@@ -185,7 +224,7 @@ static int compileSingleStmt(Node *stmt){
     return 0;
 }
 
-static void genMethodHead(){ FP(outF, "E simulateQ%d(){\n",qid); }
+static void genMethodHead(){ FP(outF, "E compiledQ%d(){\n",qid); }
 static void genMethodTail(){ FP(outF, "}\n"); }
 
 /* optional */

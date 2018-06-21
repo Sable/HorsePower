@@ -116,7 +116,7 @@ static InfoNode *getNode(InfoNodeList *rt, int k){
 /* entry */
 InfoNode *propagateType(char *funcName, Node *param_list){
     int valence=-1;
-    P("--> %s\n", funcName);
+    //P("--> %s\n", funcName);
     InfoNodeList *in_list = getParamInfo(param_list);
     void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
     if(!funcRtn) {
