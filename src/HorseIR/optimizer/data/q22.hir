@@ -23,6 +23,7 @@ module default{
     t49:enum = check_cast(@column_value(t47,`o_custkey:sym), enum);
     t57:? = @values(t49);
     t58:? = @index_a(t46,t57,0:bool);
+    x0:? = @sum(t58);
     t63:? = @compress(t58,t30);
     t64:? = @compress(t58,t31);
     t67:? = @sub_string(t63,(1,2):i64);
