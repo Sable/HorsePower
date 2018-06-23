@@ -77,9 +77,10 @@ static void compileEachDya(S f, S n, S *p){
 
 static void compileEachMon(S f,S n, S *p){
     char func[99]; fetchFuncName(p[0], func);
-    if(!strcmp(func, "sum"))      strcpy(func, "pfnSum");
-    else if(!strcmp(func, "avg")) strcpy(func, "pfnAvg");
-    else if(!strcmp(func, "len")) strcpy(func, "pfnLen");
+    if(!strcmp(func, "sum"))         strcpy(func, "pfnSum");
+    else if(!strcmp(func, "avg"))    strcpy(func, "pfnAvg");
+    else if(!strcmp(func, "len"))    strcpy(func, "pfnLen");
+    else if(!strcmp(func, "unique")) strcpy(func, "pfnUnique");
     else EP("[compileEachMon] add more func %s\n", func);
     genStmt(n, FP(outF, "%s(%s,%s,%s)",f,n,p[1],func))
 }
@@ -105,14 +106,17 @@ static char *stringifyLiteral(V x){
     else {
         char *str = t;
         switch(xp){
-            caseB str+=SP(str,"initLiteralBoolVector(%lld, {",xn);
+            caseB str+=SP(str,"initLiteralBoolVector(%lld, (B []){",xn);
                   DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%lld",xB(i));})
                   str+=SP(str, "})"); break;
-            caseQ str+=SP(str,"initLiteralSymVector(%lld, {",xn);
+            caseQ str+=SP(str,"initLiteralSymVector(%lld, (S []){",xn);
                   DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"\"%s\"",getSymbolStr(xQ(i)));})
                   str+=SP(str, "})"); break;
-            caseL str+=SP(str,"initLiteralI64Vector(%lld, {",xn);
+            caseL str+=SP(str,"initLiteralI64Vector(%lld, (L []){",xn);
                   DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%lld",xL(i));})
+                  str+=SP(str, "})"); break;
+            caseS str+=SP(str,"initLiteralStrVector(%lld, (S []){",xn);
+                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"\"%s\"",xS(i));})
                   str+=SP(str, "})"); break;
             default: EP("adding more types: %d (%lld)\n",xp,xn);
         }
