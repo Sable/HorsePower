@@ -1,0 +1,15 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:table = @load_table(`stores:sym);
+      t1:f64   = check_cast(@column_value(a0, `discount:sym), f64);
+      t2:bool  = @geq(t1, 0.5:f64);
+      t3:bool  = @lt(t1, 0.8:f64);
+      t4:bool  = @and(t2,t3);
+      t5:f64   = @sum(t4);
+      t6:sym   = `DiscountTotal:sym;
+      t7:?     = @list(t5);
+      t8:table = @table(t6, t7);
+      return t8;
+  }
+}

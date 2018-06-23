@@ -1,0 +1,57 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`part:sym);
+    t1:i64 = check_cast(@column_value(t0,`p_partkey:sym), i64);
+    t4:sym = check_cast(@column_value(t0,`p_brand:sym), sym);
+    t7:sym = check_cast(@column_value(t0,`p_container:sym), sym);
+    t10:? = @eq(t7,`"MED BOX":sym);
+    t11:? = @eq(t4,`"Brand#23":sym);
+    t12:? = @and(t10,t11);
+    t13:? = @compress(t12,t1); //w3
+    t22:? = @load_table(`lineitem:sym);
+    t24:i64 = check_cast(@column_value(t22,`l_partkey:sym), i64);
+    t27:f64 = check_cast(@column_value(t22,`l_quantity:sym), f64);
+    t28:f64 = check_cast(@column_value(t22,`l_extendedprice:sym), f64);
+    //t39:? = @index_of(t13,t24);
+    //t40:? = @len(t13);
+    //t41:? = @lt(t39,t40);
+    t41:? = @member(t13,t24);
+    t42:? = @where(t41);
+    //t43:? = @index(t13,t39);
+    t43:? = @compress(t41,t24);
+    t56:? = @index(t27,t42);
+    t57:? = @index(t28,t42);
+    // group
+    t68:? = @list(t43);
+    t69:? = @group(t68);
+    t70:? = @keys(t69);
+    t72:? = @index(t43,t70);
+    t73:? = @load_table(`lineitem:sym);
+    t75:i64 = check_cast(@column_value(t73,`l_partkey:sym), i64);
+    //t91:? = @compress(t75,t75);
+    t106:? = @enum(t72,t75);
+    t107:? = @values(t106);
+    t108:? = @group(t107);
+    t110:? = @values(t108);
+    t115:? = @index(t91,t110);
+    t116:? = @raze(t115);
+    t117:? = @mul(0.2:f64,t116);
+    //t126:? = @index_of(p_partkey,v53);
+    //t127:? = @len(p_partkey);
+    //t128:? = @lt(t126,t127);
+    t128:? = @member
+    t129:? = @where(t128);
+    t130:? = @index(t56,t126);
+    t131:? = @index(t117,t129);
+    t132:? = @lt(t130,t131);
+    t133:? = @compress(t132,t126);
+    t149:? = @index(t57,t133);
+    t165:? = @sum(t149);
+    t166:? = @div(t165,7:f64);
+    t167:? = `avg_yearly:sym;
+    t168:? = @enlist(t166);
+    t169:? = @table(t167,t168);
+    return t169;
+  }
+}
