@@ -34,7 +34,7 @@ HorsePower/src/HorseIR/plan2ir/hyper/fig/
 
 ## HyPer Online Rough Time
 
-Time: ms
+Time: ms  (single thread)
 
 | ID | Compile Time | Execution Time | Higher Compile Time |
 |:--:|:------------:|:--------------:|:-------------------:|
@@ -63,36 +63,36 @@ Time: ms
 
 ## MonetDB Execution Time on Sable-Intel
 
-Time: ms
+Time: ms (1 or 80 threads)
 
-| ID | Compile Time | Execution Time |
-|:--:|:------------:|:--------------:|
-| 1  | N/A          | 158.95         | 
-| 2  | N/A          |          | 
-| 3  | N/A          |          | 
-| 4  | N/A          |          | 
-| 5  | N/A          |          | 
-| 6  | N/A          |          | 
-| 7  | N/A          |          | 
-| 8  | N/A          |          | 
-| 9  | N/A          |          | 
-| 10 | N/A          |          | 
-| 11 | N/A          |          | 
-| 12 | N/A          |          | 
-| 13 | N/A          |          | 
-| 14 | N/A          |          | 
-| 15 | N/A          |          | 
-| 16 | N/A          |          | 
-| 17 | N/A          |          | 
-| 18 | N/A          |          | 
-| 19 | N/A          |          | 
-| 20 | N/A          |          | 
-| 21 | N/A          |          | 
-| 22 | N/A          |          | 
+| ID | Compile Time | Exe. T. (1th)  | Exe. T. (80th) | Hyper's Exe. T.|
+|:--:|:------------:|:--------------:|:--------------:|:--------------:|
+| 1  | N/A          | 1592           | 158.95         | 133.16         | 
+| 2  | N/A          |   16.29        |  34.396        |   6.96         | 
+| 3  | N/A          |  200.0         | 159.31         |  97.83         | 
+| 4  | N/A          |  144.7         |  38.12         |  75.36         | 
+| 5  | N/A          |  265.8         |  77.77         |  60.53         | 
+| 6  | N/A          |   84.41        |  49.02         |  32.89         | 
+| 7  | N/A          |  221.5         |  95.85         |  72.37         | 
+| 8  | N/A          |  249.7         | 111.80         |  60.80         | 
+| 9  | N/A          |  308.2         | 108.82         | 141.83         | 
+| 10 | N/A          |  453.8         | 545.15         |  70.29         | 
+| 11 | N/A          |   39.43        |  40.70         |  13.62         | 
+| 12 | N/A          |  162.2         |  78.37         |  79.95         | 
+| 13 | N/A          |  267.9         | 191.52         | 255.84         | 
+| 14 | N/A          |   67.91        |  55.08         |  41.61         | 
+| 15 | N/A          |   27.41        |  35.01         |  44.78         | 
+| 16 | N/A          |   69.97        |  92.48         |  59.45         | 
+| 17 | N/A          |  293.1         | 171.16         |  69.62         | 
+| 18 | N/A          |  258.4         | 283.30         | 220.42         | 
+| 19 | N/A          |  985.4         | 189.64         | 199.48         | 
+| 20 | N/A          |  127.5         |  85.07         |  33.37         | 
+| 21 | N/A          |  487.6         |1196.74         | 132.35         | 
+| 22 | N/A          |  121.6         |  80.51         |  31.14         | 
 
-Data path: `/mnt/local/script-tpch`
+Data path: `/mnt/local/script-tpch/temp`
 
 - Script: runtemp
-- Log file: summary-temp.log
-
+- Log file: summary-thread-1.log, summary-thread-80.log
+- Note: workspace is on `../`
 
