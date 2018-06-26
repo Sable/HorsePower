@@ -30,8 +30,10 @@ L q6_peephole_0(V *z, V y, V *x){
 
 E compiledQ6(){
     E elapsed=0;
-    V t0  = allocNode(); V t5  = allocNode(); V t6 = allocNode(); V t7 = allocNode();
-    V t11 = allocNode(); V t25 = allocNode();
+    V t0  = allocNode(); V t5  = allocNode(); V t6  = allocNode(); V t7  = allocNode();
+    V t11 = allocNode(); V t17 = allocNode(); V t18 = allocNode(); V t19 = allocNode();
+    V t20 = allocNode(); V t21 = allocNode(); V t22 = allocNode(); V t23 = allocNode();
+    V t24 = allocNode(); V t25 = allocNode();
     V t31 = allocNode(); V t32 = allocNode();
     V t42 = allocNode(); V t43 = allocNode(); V t44 = allocNode(); V t45 = allocNode();
     V t46 = allocNode();
@@ -41,13 +43,32 @@ E compiledQ6(){
     PROFILE(  2, t6 , pfnColumnValue(t6, t0, initLiteralSym((S)"l_extendedprice")));
     PROFILE(  3, t7 , pfnColumnValue(t7, t0, initLiteralSym((S)"l_discount")));
     PROFILE(  4, t11, pfnColumnValue(t11, t0, initLiteralSym((S)"l_shipdate")));
-    V tt1[] = {t11,t5,t7};
-    PROFILE(  5, t25, q6_loopfusion_0(t25,tt1));
+    //V tt1[] = {t11,t5,t7};
+    if(OPT_LF){
+        PROFILE(  5, t25, q6_loopfusion_0(t25,(V []){t11,t5,t7}));
+    }
+    else {
+        PROFILE(  5, t17, pfnGeq(t17, t11, initLiteralDate(19940101)));
+        PROFILE(  6, t18, pfnLt(t18, t11, initLiteralDate(19950101)));
+        PROFILE(  7, t19, pfnAnd(t19, t17, t18));
+        PROFILE(  8, t20, pfnLt(t20, t5, initLiteralF64(24)));
+        PROFILE(  9, t21, pfnGeq(t21, t7, initLiteralF64(0.05)));
+        PROFILE( 10, t22, pfnLeq(t22, t7, initLiteralF64(0.07)));
+        PROFILE( 11, t23, pfnAnd(t23, t21, t22));
+        PROFILE( 12, t24, pfnAnd(t24, t19, t20));
+        PROFILE( 13, t25, pfnAnd(t25, t24, t23));
+    }
     //PROFILE(  6, t31, pfnCompress(t31, t25, t6));
     //PROFILE(  7, t32, pfnCompress(t32, t25, t7));
-    V tt2[] = {t6,t7};
-    V tt3[] = {t31,t32};
-    PROFILE(  7, t99, q6_peephole_0(tt3, t25, tt2));
+    //V tt2[] = {t6,t7};
+    //V tt3[] = {t31,t32};
+    if(OPT_PH){
+        PROFILE(  7, t99, q6_peephole_0((V []){t31,t32}, t25, (V []){t6,t7}));
+    }
+    else {
+        PROFILE( 14, t31, pfnCompress(t31, t25, t6));
+        PROFILE( 15, t32, pfnCompress(t32, t25, t7));
+    }
     PROFILE(  8, t42, pfnMul(t42, t31, t32));
     PROFILE(  9, t43, pfnSum(t43, t42));
     PROFILE( 10, t44, copyV(t44, initLiteralSym((S)"revenue")));

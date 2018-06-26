@@ -1,10 +1,26 @@
 #ifdef QALL
-    #include "q1.h"
-    #include "q4.h"
-    #include "q6.h"
-    #include "q12.h"
-    #include "q13.h"
+    #include "opt/q1.h"
+    #include "opt/q4.h"
+    #include "opt/q6.h"
+    #include "opt/q12.h"
+    #include "opt/q13.h"
+    #include "opt/q14.h"
+    #include "opt/q16.h"
+    #include "opt/q19.h"
+    #include "opt/q22.h"
 #endif
+
+//#ifdef QALL
+//    #include "naive/q1.h"
+//    #include "naive/q4.h"
+//    #include "naive/q6.h"
+//    #include "naive/q12.h"
+//    #include "naive/q13.h"
+//    #include "naive/q14.h"
+//    #include "naive/q16.h"
+//    #include "naive/q19.h"
+//    #include "naive/q22.h"
+//#endif
 
 #ifdef Q1
     #include "q1.h"
@@ -59,7 +75,7 @@
 #endif
 
 #ifdef Q14
-    #include "q14.out"
+    #include "q14.h"
 #endif
 
 #ifdef Q15
@@ -67,7 +83,7 @@
 #endif
 
 #ifdef Q16
-    #include "q16.out"
+    #include "q16.h"
 #endif
 
 #ifdef Q17
@@ -79,7 +95,7 @@
 #endif
 
 #ifdef Q19
-    #include "q19.out"
+    #include "q19.h"
 #endif
 
 #ifdef Q20
@@ -91,6 +107,6 @@
 #endif
 
 #ifdef Q22
-    #include "q22.out"
+    #include "q22.h"
 #endif
 

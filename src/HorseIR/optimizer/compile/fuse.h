@@ -20,6 +20,7 @@
 #define NEQ(x,y) (x)!=(y)
 
 #define MUL(x,y)   (x)*(y)
+#define DIV(x,y)   (x)/(y)
 #define MINUS(x,y) (x)-(y)
 #define PLUS(x,y)  (x)+(y)
 #define NOT(x)     !(x)
