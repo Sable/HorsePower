@@ -51,7 +51,7 @@ static void fuseNamePrint(){
 }
 
 static S fuseNameString(S targ, S invc){
-    char tmp[99]; SP(tmp, "%s(%s,{", invc,targ);
+    char tmp[99]; SP(tmp, "%s(%s,(V []){", invc,targ);
     DOI(list_total, {if(i>0)strcat(tmp,",");strcat(tmp,list_name[i]);})
     strcat(tmp, "})");
     //P("tmp = %s, targ = %s, invc = %s\n", tmp,targ,invc);
@@ -220,20 +220,22 @@ static void findFusion(Chain *chain){
 
 /* num_func must > 1 */
 static void genFusedFunc(char *str, char *targ){
-    char tmp[99];
+    char tmp[99], type_alias[10];
     P("/* num_func = %d, targ = %s */\n", num_func,targ);
     SP(tmp,"q%d_loopfusion_%d",qid,FuseTotal);
     P("L %s(V z, V *x){\n",tmp);
     P(indent "// z -> %s\n",targ);
     fuseNamePrint();
     L size_index = fuseLength();
+    getNameTypeAlias(type_alias, targ);
     if(size_index >= 0){
-        char type[10]; getNameTypeAlias(type, targ);
-        P(indent "initV(z,%s,vn(x%lld));\n", type, size_index);
+        P(indent "initV(z,%s,vn(x%lld));\n", type_alias, size_index);
         P(indent "DOP(vn(x%lld), %s) R 0;\n", size_index, str);
     }
-    else
+    else{
+        P(indent "initV(z,%s,1);\n", type_alias);
         P(indent "L i=0; %s; R 0;\n", str);
+    }
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
     FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;

@@ -37,6 +37,7 @@ void addToNameList(NameList *n, char *str){
 char *fetchName(Node *n){
     if(n->kind == idK) return n->val.idS;
     else if(n->kind == funcK) return n->val.idS;
+    else if(n->kind == literalFuncK) return fetchName(n->val.nodeS); // next: idK
     else {
         P("id found: %d not %d\n", n->kind, idK);
         error("Kind must be idK (0) or funcK(14)");

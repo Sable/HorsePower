@@ -74,7 +74,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleGroup   propGroup
 #define ruleCount   reductionCount
 #define ruleSum     reductionSum
-#define ruleAvg     NULL
+#define ruleAvg     propAvg
 #define ruleMin     NULL
 #define ruleMax     NULL
 #define ruleRaze    propRaze
@@ -114,6 +114,9 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleMember   propMember
 #define ruleVector   propVector
 #define ruleMatch    NULL
+#define ruleIndex       propIndex
+#define ruleColumnValue specialColumnValue
+#define ruleSubString   propSubString
 /* special */ 
 #define ruleEach        propEach
 #define ruleEachItem    propEachItem
@@ -126,10 +129,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleKeys        propKeys
 #define ruleValues      propValues
 #define ruleMeta        NULL
-#define ruleColumnValue specialColumnValue
 #define ruleLoadTable   specialLoadTable
 #define ruleFetch       NULL
-#define ruleIndex       propIndex
 #define ruleIndexA      propIndexA
 #define ruleList        propList
 
@@ -278,6 +279,18 @@ static InfoNode *propWhere(InfoNode *x){
     }
     else return NULL;
     return newInfoNode(rtnType, newShapeNode(vectorH, true, -1));
+}
+
+static InfoNode *propAvg(InfoNode *x){
+    pType rtnType;
+    if(isRealIN(x)){
+        rtnType = f64T;
+    }
+    else if(isU(x)){
+        rtnType = unknownT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
 }
 
 /* dyadic */
@@ -440,6 +453,21 @@ static InfoNode *propAppend(InfoNode *x, InfoNode *y){
     else return NULL;
     return newInfoNode(rtnType, decideShapeAppend(x,y));
 }
+
+// sub_string(x, (1,2):i64)
+//    --> can be more precise if literal values are known
+static InfoNode *propSubString(InfoNode *x, InfoNode *y){
+    pType rtnType;
+    if(isStringIN(x) && isIntIN(y)){
+        rtnType = x->type;
+    }
+    else if(isU(x) || isU(y)){
+        rtnType = unknownT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, true, -1));
+}
+
 
 /* special */
 
@@ -612,7 +640,12 @@ int getFuncIndexByName(char *name){
     }
     int k = findInBuiltinSet(name, FUNCTIONS);
     if(k>=0) return k;
-    else EP("primitive not defined: %d\n", k);
+    else {
+        if(!strcmp(name, "le")) P("Do you mean 'leq' instead of 'le'?\n");
+        else if(!strcmp(name, "ge")) P("Do you mean 'geq' instead of 'ge'?\n");
+        else if(!strcmp(name, "sub")) P("Do you mean 'minus' instead of 'sub'?\n");
+        EP("primitive not defined: %d, %s\n", k,name);
+    }
 }
 
 void *fetchTypeRules(char *name, int* num){
@@ -707,6 +740,9 @@ void *fetchTypeRules(char *name, int* num){
             CASE(  memberF, ruleMember)
             CASE(  vectorF, ruleVector)
             CASE(   matchF, ruleMatch)
+            CASE(   indexF, ruleIndex)
+            CASE(columnValueF, ruleColumnValue)
+            CASE(  subStringF, ruleSubString)
             /* special */
             CASE(       eachF, ruleEach)
             CASE(   eachItemF, ruleEachItem)
@@ -719,16 +755,14 @@ void *fetchTypeRules(char *name, int* num){
             CASE(       keysF, ruleKeys)
             CASE(     valuesF, ruleValues)
             CASE(       metaF, ruleMeta)
-            CASE(columnValueF, ruleColumnValue)
             CASE(  loadTableF, ruleLoadTable)
             CASE(      fetchF, ruleFetch)
-            CASE(      indexF, ruleIndex)
             CASE(     indexAF, ruleIndexA)
             CASE(       listF, ruleList)
-            default: error("type rules not defined.");
+            default: EP("type rules not defined.: %s\n", name);
         }
     }
-    else error("primitive not defined");
+    else EP("primitive not defined: %s\n", name);
 }
 
 int findFuncIndex(char *funcName){
