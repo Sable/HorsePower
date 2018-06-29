@@ -82,7 +82,7 @@ L q1_peephole_2(V z, V x, V y){
     // z -> t72, x -> t26, y -> t43
     L r0 = vn(y);
     initV(z, H_L, r0);
-    DOP(r0, vL(z,i)=vn(vV(x,i))); R 0;
+    DOP(r0, vL(z,i)=vn(vV(y,i))); R 0;
 }
 
 E compiledQ1(){

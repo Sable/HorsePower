@@ -1,5 +1,11 @@
 //=====Loop Fusion=====
 //=====Peephole=====
+L q13_peephole_0(V z, V x, V y){
+    // z -> t44, x -> k7, y -> t40
+    L r0 = vn(y);
+    initV(z, H_L, r0);
+    DOP(r0, vL(z,i)=vn(vV(y,i))); R 0;
+}
 E compiledQ13(){
     E elapsed=0;
     V a0  = allocNode(); V a1  = allocNode(); V t9  = allocNode(); V t11 = allocNode();
@@ -45,9 +51,14 @@ E compiledQ13(){
     PROFILE( 23, t39, pfnKeys(t39, t38));
     PROFILE( 24, t40, pfnValues(t40, t38));
     PROFILE( 25, t41, pfnIndex(t41, k7, t39));
-    PROFILE( 26, t42, pfnEachRight(t42,k7,t40,pfnIndex));
-    PROFILE( 27, t43, pfnEach(t43,t42,pfnLen));
-    PROFILE( 28, t44, pfnRaze(t44, t43));
+    if(OPT_PH){
+        PROFILE( 28, t44, q13_peephole_0(t44, k7, t40));
+    }
+    else {
+        PROFILE( 26, t42, pfnEachRight(t42,k7,t40,pfnIndex));
+        PROFILE( 27, t43, pfnEach(t43,t42,pfnLen));
+        PROFILE( 28, t44, pfnRaze(t44, t43));
+    }
     PROFILE( 29, t45, pfnList(t45, 2, (V []){t44,t41}));
     PROFILE( 30, t46, pfnOrderBy(t46, t45, initLiteralBoolVector(2, (B []){0,0})));
     PROFILE( 31, t47, pfnIndex(t47, t41, t46));

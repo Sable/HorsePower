@@ -6,6 +6,16 @@ L q4_loopfusion_0(V z, V *x){
     initV(z,H_B,vn(x0));
     DOP(vn(x0), vB(z,i)=AND(AND(GEQ(vD(x0,i),19930701),LT(vD(x0,i),19931001)),vB(x1,i))) R 0;
 }
+L q4_peephole_0(V z, V *x, V *y){
+    // z -> k4
+    V x0 = x[0]; // t34;
+    V x1 = x[1]; // t35;
+    V y0 = y[0]; // k0;
+    V y1 = y[1]; // k1;
+    L r0 = vn(y1);
+    initV(z, H_B, r0);
+    DOP(vn(y0), if(vD(x0,i)<vD(x1,i))vB(z,vL(y0,i))=1)
+}
 E compiledQ4(){
     E elapsed=0;
     V t0  = allocNode(); V t1  = allocNode(); V t5  = allocNode(); V t6  = allocNode(); 
@@ -30,13 +40,18 @@ E compiledQ4(){
     PROFILE(  5, t23, pfnColumnValue(t23, t22, initLiteralSym((S)"l_orderkey")));
     PROFILE(  6, t34, pfnColumnValue(t34, t22, initLiteralSym((S)"l_commitdate")));
     PROFILE(  7, t35, pfnColumnValue(t35, t22, initLiteralSym((S)"l_receiptdate")));
-    PROFILE(  8, t39, pfnLt(t39, t34, t35));
     PROFILE(  9, k0 , pfnValues(k0, t23));
     PROFILE( 10, k1 , pfnKeys(k1, t23));
-    PROFILE( 99, k2 , pfnCompress(k2, t39, k0)); //
-    PROFILE( 11, k3 , pfnLen(k3, k1));
-    PROFILE( 12, k4 , pfnVector(k4, k3, initLiteralBool(0)));
-    PROFILE( 13, k5 , pfnIndexA(k4, k2, initLiteralBool(1)));
+    if(OPT_PH){
+        PROFILE(11, k4, q4_peephole_0(k4,(V []){t34, t35}, (V []){k0,k1}));
+    }
+    else {
+        PROFILE(  8, t39, pfnLt(t39, t34, t35));
+        PROFILE( 99, k2 , pfnCompress(k2, t39, k0)); //
+        PROFILE( 11, k3 , pfnLen(k3, k1));
+        PROFILE( 12, k4 , pfnVector(k4, k3, initLiteralBool(0)));
+        PROFILE( 13, k5 , pfnIndexA(k4, k2, initLiteralBool(1)));
+    }
     if(OPT_LF){
         PROFILE( 14, p0 , q4_loopfusion_0(p0,(V []){t5,k4}));
     }

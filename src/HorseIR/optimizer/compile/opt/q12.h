@@ -26,6 +26,21 @@ L q12_loopfusion_2(V z, V *x){
     initV(z,H_L,vn(x0));
     DOP(vn(x0), vL(z,i)=PLUS(MUL(AND(NEQ(vQ(x0,i),s0),NEQ(vQ(x0,i),s1)),1),MUL(NOT(AND(NEQ(vQ(x0,i),s0),NEQ(vQ(x0,i),s1))),0))) R 0;
 }
+L q12_peephole_0(V *z, V *x, V y){
+    L r0 = vn(y);// y -> t99
+    V z0 = z[0]; // t103
+    V z1 = z[1]; // t106
+    V x0 = x[0]; // t88
+    V x1 = x[1]; // t95
+    initV(z0, H_L, r0);
+    initV(z1, H_L, r0);
+    DOJ(r0, {V t=vV(y,j);  L c0=0; L c1=0; \
+        DOI(vn(t), {L k=vL(t,i); c0+=vL(x0,k); c1+=vL(x1,k);})\
+        vL(z0,j)=c0; \
+        vL(z1,j)=c1; \
+    })
+    R 0;
+}
 E compiledQ12(){
     E elapsed=0;
     V t0  = allocNode(); V t1  = allocNode(); V t11 = allocNode(); V t12 = allocNode();
@@ -104,12 +119,17 @@ E compiledQ12(){
     PROFILE( 19, t98, pfnKeys(t98, t97));
     PROFILE( 20, t99, pfnValues(t99, t97));
     PROFILE( 21, t100, pfnIndex(t100, t71, t98));
-    PROFILE( 22, t101, pfnEachRight(t101,t88,t99,pfnIndex));
-    PROFILE( 23, t102, pfnEach(t102,t101,pfnSum));
-    PROFILE( 24, t103, pfnRaze(t103, t102));
-    PROFILE( 25, t104, pfnEachRight(t104,t95,t99,pfnIndex));
-    PROFILE( 26, t105, pfnEach(t105,t104,pfnSum));
-    PROFILE( 27, t106, pfnRaze(t106, t105));
+    if(OPT_PH){
+        PROFILE(27, t106, q12_peephole_0((V []){t103,t106}, (V []){t88,t95}, t99));
+    }
+    else {
+        PROFILE( 22, t101, pfnEachRight(t101,t88,t99,pfnIndex));
+        PROFILE( 23, t102, pfnEach(t102,t101,pfnSum));
+        PROFILE( 24, t103, pfnRaze(t103, t102));
+        PROFILE( 25, t104, pfnEachRight(t104,t95,t99,pfnIndex));
+        PROFILE( 26, t105, pfnEach(t105,t104,pfnSum));
+        PROFILE( 27, t106, pfnRaze(t106, t105));
+    }
     PROFILE( 28, t107, pfnList(t107, 1, (V []){t100}));
     PROFILE( 29, t108, pfnOrderBy(t108, t107, initLiteralBool(1)));
     PROFILE( 30, t109, pfnIndex(t109, t100, t108));
