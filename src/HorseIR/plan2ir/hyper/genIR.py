@@ -470,12 +470,11 @@ def scanHeader(d, env):
             updateEnvWithPartialAlias(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env), final_order), new_env_copy)
         new_env = new_env_copy
         # insertMap(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env),final_order))
-    # build col names
+    # build column names
     for x in range(size):
         temp = temp + '`%s' % head[x*2]
-    # a0 = genAssignment(temp)
-    a0 = genLiteral(temp+':sym')
-    # build col values
+    a0 = genLiteral(temp + ':sym')
+    # build column values
     if size == 1:
         a1 = genEnlist(findAliasByName(head[1], new_env))
     else:
@@ -483,13 +482,6 @@ def scanHeader(d, env):
         for x in range(size):
             temp.append(findAliasByName(head[x*2+1], new_env))
         a1 = genList(temp)
-        # temp = '@list('
-        # for x in range(size):
-        #     if x > 0:
-        #         temp = temp + ','
-        #     temp = temp + findAliasByName(head[x*2+1], new_env)
-        # temp = temp + ')'
-        # a1 = genAssignment(temp)
     a2 = genTable(a0, a1)
     genReturn(a2)  # return table
     return None
@@ -794,7 +786,9 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
             p0 = genCompress (f_mask, t0)
             p1 = genWhere    (f_mask)
         else:
-            pending('join without masks found. 3')
+            p0 = k_alias;
+            p1 = f_alias;
+            # pending('join without masks found. 3')  #9
         return [p0, p1, 'indexing']
     elif joinType == 'left_antijoin':
         if k_mask and f_mask:
@@ -829,6 +823,9 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
     # printEnv(v_env)
     # raw_input()
     if joinType == 'equi_join':
+        # printEnv(k_env)
+        # printEnv(v_env)
+        # raw_input()
         t0 = genMember (k_alias, v_alias)
         t1 = genVector(genLength(k_alias), '0:bool')
         t2 = genIndexA(t1, genCompress(t0, v_alias), '1:bool')
@@ -878,6 +875,7 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
         p1 = genIndex(t2,'1:i64','i64')
         return [p0, p1, 'indexing']
     elif joinType == 'groupjoin':
+        pending('general equi_join')
         e0 = genEnum  (left_alias, right_alias) # if t0: key; t1 is fkey
         t0 = genValues(e0)
         t1 = genGroup (t0)   # dict<key, value>
@@ -1106,7 +1104,8 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         else: unexpected('cond (%s) not handled' % mode)
     elif expr == 'and':  #q7, multiple column join
         if isMultipleColumnJoin(d, env2):
-            return joinColumnsSpecial(joinType, d, env2)
+            # return joinColumnsSpecial(joinType, d, env2)
+            pending('No support for multiple column joins')
             # left_list = [] ; right_list = []
             # for d0 in d['arguments']:
             #     new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
@@ -1142,6 +1141,7 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
                 # t1 = genCompress(pred_right, new_right)
                 left_env  = updateMaskInEnv(pred_left, env2[0])
                 right_env = updateMaskInEnv(pred_right, env2[1])
+                env2[0], env2[1] = left_env, right_env  # q19: need update env2
                 return joinColumns(joinType, name0, left_env, name1, right_env) # l_partkey / p_partkey
             elif cnt_pred == 0 and len(left_list) > 1: #q9
                 t0 = genList(left_list)
@@ -1149,7 +1149,7 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
                 return joinColumns(joinType, t0, env2[0], t1, env2[1]) # left_list / right_list
             else:
                 unexpected('cnt_pred = %d, cnt_new = %d' % (cnt_pred,cnt_new))
-    elif expr == 'lookup':
+    elif expr == 'lookup': #q7
         const_list = getConstList(d['values'])
         size = 0; indx0 = ''; indx1 = ''
         while size < len(const_list):
@@ -1162,7 +1162,7 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         indx = genUnique(genList([indx0, indx1]))
         left  = genIndex(indx0, indx)
         right = genIndex(indx1, indx)
-        return [left, right, 'value']
+        return [left, right, 'indexing', 'plain'] 
     else:
         unexpected('not handled (%s) when looking for side info.' % expr)
 
@@ -1300,11 +1300,17 @@ def updateTableWithEnum(e0, key_env, value_env):
 def updateTableWithAntiEnum(e0, env):
     t0 = genValues(e0)
     t1 = genLength(e0)
-    t2 = genGe(t0, t1)
+    t2 = genGeq(t0, t1)
     return updateEnvWithMask(t2, env)
 
 def updateEnvWithIndex2(ind1, ind2, env1, env2):
     return combineEnv2(updateEnvWithIndex(ind1,env1), updateEnvWithIndex(ind2,env2))
+
+def updateEnvWithMask2(mask1, mask2, env1, env2):
+    # printEnv(env1)
+    # printEnv(env2)
+    # raw_input()
+    return combineEnv2(updateEnvWithMask(mask1,env1), updateEnvWithMask(mask2,env2))
 
 def scanJoinIndex(d, env2):
     debug('join index <----')
@@ -1344,12 +1350,16 @@ Q2: key (left) and fkey(right)?
 def scanJoinHash(d, env2, msg='hash join'):
     debug('%s <----' % msg)
     joinType = 'equi_join'
+    # printEnv(env2[0])
+    # printEnv(env2[1])
+    # raw_input()
     return handleJoinResult2(scanCondition(d['condition'], 'hash', joinType, env2), joinType, env2)
 
 """
 Need to update the result of both sides
 """
 def handleJoinResult2(result, joinType, env2):
+    print result
     left_col, right_col, result_type, result_kind = result
     if right_col == None:
         return handleJoinResultWithMode(result, joinType, env2) # see joinColumnsWithMode (q22)
@@ -1412,7 +1422,7 @@ def handleJoinResult2(result, joinType, env2):
 #     pending('working on join hash')
 
 def scanJoin(d, env2):
-    method = fetch('method', d)
+    method = fetch('method', d)  # unopt may don't have a method after join
     if method == 'hash':
         return scanJoinHash (d, env2)
     elif method == 'indexnl':
@@ -1481,13 +1491,9 @@ def scanGroupjoin(d, env2):
         left_env, right_env = env2
         result = joinColumns('groupjoin', left_col, left_env, right_col, right_env)
         _,w3,_,_ = result
-        # t0 = findAliasByName(left_col , env2[0])
-        # t1 = findAliasByName(right_col, env2[1])
-        # e0 = genEnum(t0, t1) # if t0: key; t1 is fkey
-        # w0 = genValues(e0)
-        # w1 = genGroup(w0)  # dict<key, value>
-        # w2 = genKeys(w1)   # key on the left should be kept
-        # w3 = genValues(w1) # value
+        # q3
+        # handle: leftExpressions
+        # handle: rightExpressions
         env_names =[] ; env_alias = []; env_types = []
         addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],env2[0], None)
         addEnvValues(env_names, env_alias, env_types, d['rightAggregates'],env2[1], w3)
@@ -1669,11 +1675,11 @@ def scanMain(d, env):
             env2.append(scanMain(d['left'], env))
             if 'magic' in d:
                 if op == 'join': scanMagic(d['magic'], env2[0])  # q17
-                else: unexpected('Unhandled magic in (%s)' % op)
+                else: unexpected('Unhandled magic in the operator (%s)' % op)
             env2.append(scanMain(d['right'], env))
         if   op == 'tablescan'    : return scanTablescan    (d, env )  # 0 child
         elif op == 'tempscan'     : return scanTempscan     (d, env )  # 0 child
-        elif op == 'groupbyscan'  : return scanGroupbyscan  (d, env )  # 0 children
+        elif op == 'groupbyscan'  : return scanGroupbyscan  (d, env )  # 0 child
         elif op == 'groupby'      : return scanGroupby      (d, env1)  # 1 child
         elif op == 'sort'         : return scanSort         (d, env1)  # 1 child
         elif op == 'map'          : return scanMap          (d, env1)  # 1 child
@@ -1685,6 +1691,8 @@ def scanMain(d, env):
         elif op == 'rightantijoin': return scanRightantijoin(d, env2)  # 2 children
         elif op == 'leftsemijoin' : return scanLeftsemijoin (d, env2)  # 2 children
         elif op == 'rightsemijoin': return scanRightsemijoin(d, env2)  # 2 children
+        # leftouterjoin
+        # leftmarkjoin
         else:
             unexpected("Not impl. %s" % op)
     else:
@@ -1737,9 +1745,9 @@ def checkRelation(left_table, left_name, right_table, right_name):
     return False
 
 def checkPrimaryKey(table, name):
-    if name == 'l_orderkey2':
-        print table, getMappedKey(name)
-        raw_input()
+    # if name == 'l_orderkey2':
+    #     print table, getMappedKey(name)
+    #     raw_input()
     name = getMappedKey(name)
     return table in primary_key and sameListString(primary_key[table], packColumnName(name))
 
