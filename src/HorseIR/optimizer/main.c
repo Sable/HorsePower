@@ -164,6 +164,17 @@ static void validateParameters(){
     }
 }
 
+static void serializeToFile(char *name){
+    char temp[99];
+    SP(temp, "temp/%s.bin",name);
+    FILE *fp = fopen(temp, "w");
+    V x = allocNode();
+    pfnLoadTable(x, initLiteralSym(name));
+    serializeV(x, fp);
+    fclose(fp);
+    P("done\n");
+}
+
 /*
  * ./a.out -x
  */
@@ -175,11 +186,19 @@ static void runExperiment(){
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
     if(isReadFromText){
+        initTableByName((S)"nation");
+        initTableByName((S)"region");
+        initTableByName((S)"supplier");
         initTableByName((S)"customer");
+        initTableByName((S)"lineitem");
     }
     gettimeofday(&tv1, NULL);
     P("Reading time: %g ms\n", calcInterval(tv0, tv1));
     pfnLoadTable(t0, initLiteralSym((S)"customer"));
     printTablePretty(t0, 20);
+    serializeToFile("customer");
+    serializeToFile("region");
+    serializeToFile("supplier");
+    serializeToFile("lineitem");
 }
 
