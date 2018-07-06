@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -59,7 +60,7 @@ void analyzeCPF();
 void analyzePeephole();
 void printTypeShape(); /*util/trie.c*/
 bool isElementwise(char *funcName);
-L calcInterval(struct timeval t0, struct timeval t1); /* util/mics.c*/
+E calcInterval(struct timeval t0, struct timeval t1); /* util/mics.c*/
 
 /* util/nametable.c */
 void saveToNameTable(char *str, V val);

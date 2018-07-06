@@ -212,4 +212,16 @@ L initTableByName(S tableName){
     R 0;
 }
 
+/* load from bin */
+
+L initTableFromBin(S tableName){
+    char temp[99];
+    SP(temp, "temp/%s.bin",tableName);
+    FILE *fp = fopen(temp, "rb");
+    V x = allocNode();
+    readSerializeV(x, fp);
+    fclose(fp);
+    registerTable(tableName, x);
+    R 0;
+}
 

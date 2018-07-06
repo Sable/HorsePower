@@ -558,4 +558,142 @@ V readMatrix(S fileName){
     R x;
 }
 
+/* serialization */
+
+#define serializeV1(x) fwrite(x,sizeof(V0),1,fp)
+
+static void serializeStr(S x, L n, FILE *fp){
+    fwrite(x, 1, n + 1, fp);
+}
+
+static void serializeInt(L x, FILE *fp){
+    fwrite(&x, sizeof(L), 1, fp);
+}
+
+static void serializeBasic(V x, FILE *fp){
+    L size = getTypeSize(xp, xn);
+    fwrite(xg, 1, size, fp);
+}
+
+static void serializeQ(V x,FILE *fp){
+    DOI(xn, serializeInt(getSymbolSize(vQ(x,i)), fp));
+    DOI(xn, serializeStr(getSymbolStr(vQ(x,i)), getSymbolSize(vQ(x,i)), fp));
+}
+
+static void serializeS(V x,FILE *fp){
+    //DOI(xn, P(" %lld",strlen(vS(x,i)))); P("\n");
+    DOI(xn, serializeInt(strlen(vS(x,i)), fp));
+    DOI(xn, serializeStr(vS(x,i), strlen(vS(x,i)), fp));
+}
+
+static void serializeG(V x, FILE *fp){
+    DOI(xn, {V val=vV(x,i);serializeV(val, fp);})
+}
+
+static void serializeA(V x, FILE *fp){
+    V keyV = getTableKeys(x);
+    V valV = getTableVals(x);
+    /* write keys */
+    serializeV(keyV, fp);  // symbol
+    /* write columns */
+    serializeV(valV, fp);  // list
+}
+
+void serializeV(V x, FILE *fp){
+    serializeV1(x);
+    // check if size > 1 => xg is not NULL
+    switch(xp){
+        caseB serializeBasic(x, fp); break;
+        caseH serializeBasic(x, fp); break;
+        caseI serializeBasic(x, fp); break;
+        caseL serializeBasic(x, fp); break;
+        caseF serializeBasic(x, fp); break;
+        caseE serializeBasic(x, fp); break;
+        caseC serializeBasic(x, fp); break;
+        caseQ serializeQ    (x, fp); break;
+        caseS serializeS    (x, fp); break;
+        caseM serializeBasic(x, fp); break;
+        caseD serializeBasic(x, fp); break;
+        caseZ serializeBasic(x, fp); break;
+        caseU serializeBasic(x, fp); break;
+        caseW serializeBasic(x, fp); break;
+        caseT serializeBasic(x, fp); break;
+        caseX serializeBasic(x, fp); break;
+        caseA serializeA    (x, fp); break;
+        caseG serializeG    (x, fp); break;
+        default: EP("[serializeV] not support type: %lld\n", xp);
+    }
+}
+
+// read from bin
+#define readSerializeV1(x) fread(x,sizeof(V0),1,fp)
+
+static void readSerializeBasic(V x, FILE *fp){
+    L size = getTypeSize(xp, xn);
+    //switch(xp){ // no performance up
+    //    caseI fread(xg, sizeof(I), size/sizeof(I), fp); break;
+    //    caseL fread(xg, sizeof(L), size/sizeof(L), fp); break;
+    //    caseF fread(xg, sizeof(F), size/sizeof(F), fp); break;
+    //    caseE fread(xg, sizeof(E), size/sizeof(E), fp); break;
+    //    caseD fread(xg, sizeof(D), size/sizeof(D), fp); break;
+    //    default: fread(xg, 1, size, fp);
+    //}
+    fread(xg, 1, size, fp);
+}
+
+static void readSerializeQ(V x,FILE *fp){
+    DOI(xn, fread(sQ(x)+i, sizeof(L), 1, fp));
+    L maxSize=-1; DOI(xn, if(maxSize < vQ(x,i)) maxSize=vQ(x,i))
+    S temp = malloc(maxSize + 1);
+    DOI(xn, {L size=vQ(x,i); fread(temp, 1, size+1, fp); vQ(x,i)=getSymbol(temp);})
+    free(temp);
+}
+
+static void readSerializeS(V x, FILE *fp){
+    L *temp = (L*)malloc(sizeof(L)*(xn));
+    DOI(xn, fread(temp+i, sizeof(L), 1, fp))
+    DOI(xn, {S t=allocStrMem(temp[i]); fread(t,1,temp[i]+1,fp); vS(x,i)=t;})
+    free(temp);
+}
+
+static void readSerializeG(V x, FILE *fp){
+    DOI(xn, {V val=vV(x,i);readSerializeV(val, fp);})
+}
+
+static void readSerializeA(V x, FILE *fp){
+    V keyV = getTableKeys(x); initV(keyV, vp(keyV), vn(keyV));
+    V valV = getTableVals(x); initV(valV, vp(valV), vn(valV));
+    /* write keys */
+    readSerializeV(keyV, fp);  // symbol
+    /* write columns */
+    readSerializeV(valV, fp);  // list
+}
+
+void readSerializeV(V x, FILE *fp){
+    readSerializeV1(x);
+    initV(x, xp, xn);
+    switch(xp){
+        caseB readSerializeBasic(x, fp); break; 
+        caseH readSerializeBasic(x, fp); break; 
+        caseI readSerializeBasic(x, fp); break; 
+        caseL readSerializeBasic(x, fp); break; 
+        caseF readSerializeBasic(x, fp); break; 
+        caseE readSerializeBasic(x, fp); break; 
+        caseC readSerializeBasic(x, fp); break; 
+        caseQ readSerializeQ    (x, fp); break; 
+        caseS readSerializeS    (x, fp); break; 
+        caseM readSerializeBasic(x, fp); break; 
+        caseD readSerializeBasic(x, fp); break; 
+        caseZ readSerializeBasic(x, fp); break; 
+        caseU readSerializeBasic(x, fp); break; 
+        caseW readSerializeBasic(x, fp); break; 
+        caseT readSerializeBasic(x, fp); break; 
+        caseX readSerializeBasic(x, fp); break; 
+        caseA readSerializeA    (x, fp); break; 
+        caseG readSerializeG    (x, fp); break; 
+        default: EP("[readSerializeV] not support type: %lld\n", xp);
+    }
+}
+
+
 

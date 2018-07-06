@@ -17,7 +17,7 @@ LETTER          [a-zA-Z_]
 [ \t\r]+   ; /* ignore white spaces         */
 \/\/.*\n   ; /* ignore single line comments */
 
-\n { printf("---- LINE %2d ----\n", yylineno); }
+\n ; //{ printf("---- LINE %2d ----\n", yylineno); }
 
  /* reserved words */
 "(" return '(';

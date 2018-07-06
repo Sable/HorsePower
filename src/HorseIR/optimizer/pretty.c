@@ -16,7 +16,7 @@ static bool toC      = false;
 #define printString(b,n) SP(b,"\"%s\"", n->val.strS)
 #define printComp(b,n)   SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
 #define printDate(b,n)   {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
-#define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else SP(b,"`%s",n->val.charS);}
+#define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else printSymCommon(b,n->val.charS);}
 #define printFunc(b,n)   echo(b,n->val.idS)
 
 #define printPlainList(b,n)  prettyListBuff(b, n->val.listS, comma)
@@ -47,6 +47,13 @@ static void printDepth(char* b){
     for(int i=0;i<depth;i++){
         SP(b+i*4, "    ");
     }
+}
+
+static void printSymCommon(char *b, char *str){
+    bool flag = false;
+    DOI(strlen(str), if(str[i]==' '){flag=true;break;})
+    if(flag) SP(b, "`\"%s\"", str);
+    else SP(b, "`%s", str);
 }
 
 static void printExprBuff(char *b, Node *n){

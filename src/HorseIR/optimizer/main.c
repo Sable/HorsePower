@@ -14,6 +14,7 @@ B isOpt     = false;
 B isCompiler= false;
 B isInterp  = false;
 B isExp     = false;
+B isW       = false;
 I runs      = 1;
 I qid       = -1;
 I qscale    = 1;
@@ -67,7 +68,7 @@ int main(int argc, char *argv[]){
 
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "xhvtq:s:d:r:o:")) != -1){
+    while((c = getopt(argc, argv, "x:hvtq:s:d:r:o:")) != -1){
         switch(c){
             case 'h': isUsage   = true; break;
             case 'v': isVersion = true; break;
@@ -81,7 +82,8 @@ static int getOption(int argc, char *argv[]){
                       optName   = strdup(optarg);break;
             case 'd': delimiter = optarg[0];     break;
             case 'r': runs      = atoi(optarg);  break;
-            case 'x': isExp     = true;          break;
+            case 'x': isExp     = true; \
+                      isW       = 0==atoi(optarg); break;
             default : return 1;
         }
     }
@@ -167,7 +169,7 @@ static void validateParameters(){
 static void serializeToFile(char *name){
     char temp[99];
     SP(temp, "temp/%s.bin",name);
-    FILE *fp = fopen(temp, "w");
+    FILE *fp = fopen(temp, "wb");
     V x = allocNode();
     pfnLoadTable(x, initLiteralSym(name));
     serializeV(x, fp);
@@ -176,29 +178,48 @@ static void serializeToFile(char *name){
 }
 
 /*
- * ./a.out -x
+ * ./a.out -x 0/1
  */
 static void runExperiment(){
     P(">> Hello experiments\n");
-    B isReadFromText = true;
+    B isReadFromText = isW;
     initBackend();
     V t0 = allocNode();
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
-    if(isReadFromText){
-        initTableByName((S)"nation");
+    if(isReadFromText){ // total: 29376.3 ms
         initTableByName((S)"region");
+        initTableByName((S)"nation");
         initTableByName((S)"supplier");
+        initTableByName((S)"part");
         initTableByName((S)"customer");
+        initTableByName((S)"partsupp");
+        initTableByName((S)"orders");
         initTableByName((S)"lineitem");
+    }
+    else { // total: 14142.6 ms
+        initTableFromBin((S)"region");
+        initTableFromBin((S)"nation");
+        initTableFromBin((S)"supplier");
+        initTableFromBin((S)"part");
+        initTableFromBin((S)"customer");
+        initTableFromBin((S)"partsupp");
+        initTableFromBin((S)"orders");
+        initTableFromBin((S)"lineitem");
     }
     gettimeofday(&tv1, NULL);
     P("Reading time: %g ms\n", calcInterval(tv0, tv1));
-    pfnLoadTable(t0, initLiteralSym((S)"customer"));
-    printTablePretty(t0, 20);
-    serializeToFile("customer");
-    serializeToFile("region");
-    serializeToFile("supplier");
-    serializeToFile("lineitem");
+    pfnLoadTable(t0, initLiteralSym((S)"lineitem"));
+    printTablePretty(t0, 10);
+    if(isReadFromText){
+        serializeToFile("region");
+        serializeToFile("nation");
+        serializeToFile("supplier");
+        serializeToFile("part");
+        serializeToFile("customer");
+        serializeToFile("partsupp");
+        serializeToFile("orders");
+        serializeToFile("lineitem");
+    }
 }
 

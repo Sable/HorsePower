@@ -65,23 +65,33 @@ static void fetchFuncName(S s, S func){
     else { L n=s1-s0; strncpy(func,s0,n); func[n]=0; }
 }
 
+void getRealFuncName(S func, S x){
+    if(!strcmp(x, "index"))      strcpy(func, "pfnIndex");
+    else if(!strcmp(x, "mul"))   strcpy(func, "pfnMul");
+    else if(!strcmp(x, "minus")) strcpy(func, "pfnMinus");
+    else if(!strcmp(x, "plus"))  strcpy(func, "pfnPlus");
+    else if(!strcmp(x, "sum"))   strcpy(func, "pfnSum");
+    else if(!strcmp(x, "avg"))   strcpy(func, "pfnAvg");
+    else if(!strcmp(x, "len"))   strcpy(func, "pfnLen");
+    else if(!strcmp(x, "unique"))strcpy(func, "pfnUnique");
+    else func[0]=0;
+}
+
 static void compileEachDya(S f, S n, S *p){
-    char func[99]; fetchFuncName(p[0], func);
-    if(!strcmp(func, "index"))      strcpy(func, "pfnIndex");
-    else if(!strcmp(func, "mul"))   strcpy(func, "pfnMul");
-    else if(!strcmp(func, "minus")) strcpy(func, "pfnMinus");
-    else if(!strcmp(func, "plus"))  strcpy(func, "pfnPlus");
-    else EP("[compileEachDya] add more func %s\n", func);
+    char func[99];
+    fetchFuncName(p[0], func);
+    getRealFuncName(func, func);
+    if(func[0]==0)
+        EP("[compileEachDya] add more func %s\n", func);
     genStmt(n, FP(outF, "%s(%s,%s,%s,%s)",f,n,p[1],p[2],func))
 }
 
 static void compileEachMon(S f,S n, S *p){
-    char func[99]; fetchFuncName(p[0], func);
-    if(!strcmp(func, "sum"))         strcpy(func, "pfnSum");
-    else if(!strcmp(func, "avg"))    strcpy(func, "pfnAvg");
-    else if(!strcmp(func, "len"))    strcpy(func, "pfnLen");
-    else if(!strcmp(func, "unique")) strcpy(func, "pfnUnique");
-    else EP("[compileEachMon] add more func %s\n", func);
+    char func[99];
+    fetchFuncName(p[0], func);
+    getRealFuncName(func, func);
+    if(func[0]==0)
+        EP("[compileEachMon] add more func %s\n", func);
     genStmt(n, FP(outF, "%s(%s,%s,%s)",f,n,p[1],func))
 }
 

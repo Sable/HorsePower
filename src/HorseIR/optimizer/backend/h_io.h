@@ -52,6 +52,9 @@ L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);
 
+void serializeV(V x, FILE *fp);
+void readSerializeV(V x, FILE *fp);
+
 #ifdef	__cplusplus
 }
 #endif
