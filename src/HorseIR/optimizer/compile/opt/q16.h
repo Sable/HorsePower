@@ -94,7 +94,7 @@ E compiledQ16(){
     PROFILE( 19, t64, pfnIndex(t64, t44, p1));
     PROFILE( 20, t68, pfnMember(t68, t9, t64));
     PROFILE( 21, w0 , pfnNot(w0, t68));
-    if(OPT_LF){
+    if(OPT_PH){
         PROFILE( 22, w2 , q16_peephole_0(x2,w0,x3));
     }
     else {
@@ -109,7 +109,7 @@ E compiledQ16(){
     PROFILE( 28, t96, pfnGroup(t96, t95));
     PROFILE( 29, u0 , pfnValues(u0, t96));
     PROFILE( 30, u1 , pfnKeys(u1, t96));
-    if(OPT_LF){
+    if(OPT_PH){
         PROFILE( 99, u5 , q16_peephole_1(u5, t87, u0)); // <--
     }
     else {

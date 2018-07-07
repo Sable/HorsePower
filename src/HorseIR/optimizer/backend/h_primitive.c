@@ -871,15 +871,24 @@ L pfnToIndex(V z, V x){
 }
 
 L pfnGroup(V z, V x){
+    //P("Input len = %lld, type = %lld\n", xn,xp);
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
+    L *order_list = NULL;
     initV(y,H_B,lenZ);
 // struct timeval tv0, tv1;
 // gettimeofday(&tv0, NULL);
-    DOP(lenZ,vB(y,i)=1)
-    CHECKE(pfnOrderBy(t,x,y));
+    if(isOrdered(x)){
+        if(H_DEBUG) P("Ordered data found in pfnGroup\n");
+        order_list = NULL;
+    }
+    else {
+        DOP(lenZ,vB(y,i)=1)
+        CHECKE(pfnOrderBy(t,x,y));
+        order_list = sL(t);
+    }
 // gettimeofday(&tv1, NULL);
 // P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // P("t = \n");
@@ -888,13 +897,13 @@ L pfnGroup(V z, V x){
 // gettimeofday(&tv0, NULL);
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
-        CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp));
+        CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
     }
     else if(isTypeGroupBasic(xp)){
         // V0 t1; V tx=&t1;
         L numRow= vn(x);
         // CHECKE(pfnEnlist(tx,x));
-        CHECKE(lib_get_group_by(z,x,sL(t),numRow,lib_quicksort_cmp_item));
+        CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
 // gettimeofday(&tv1, NULL);
@@ -1344,7 +1353,7 @@ L pfnCompress(V z, V x, V y){
 #define INDEXOFG(z,x,lenX,y,lenY) lib_index_of_G(sL(z),sG(x),lenX,sG(y),lenY)
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-        if(isOrdered(x)){
+        if(false && isOrdered(x)){
             if(H_DEBUG) P("Ordered data found in index_of\n");
             R searchOrdered(z,x,y);
         }
@@ -1575,6 +1584,9 @@ L pfnOrderBy(V z, V x, V y){
 L pfnEach(V z, V x, FUNC1(foo)){
     if(isList(x)){
         initV(z,H_G,vn(x));
+        //P("Each: input size = %lld\n", vn(x));
+        L total = 0;
+        //DOI(xn, total += vn(vV(x,i))) P("avg = %g\n", total*1.0/vn(x));
         DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
         R 0;
     }
@@ -1896,6 +1908,7 @@ L pfnAddFKey(V x, V xKey, V y, V yKey){
     V fKey   = allocNode();
     CHECKE(pfnLoadTable(tableX, x));
     CHECKE(pfnLoadTable(tableY, y));
+    B testing = true;
     if(isSymbol(x) && isSameType(x,y) && isEqualLength(x,y)){
         if(isOne(x)){
             CHECKE(pfnColumnValue(xCol, tableX, xKey));

@@ -116,7 +116,7 @@ static void parseInput(I qid){
     if(ret == 0) P("Successfully parsed: %s!\n",file_path);
     else { EP("Parsing failed: %s\n",file_path);}
     gettimeofday(&tv1, NULL);
-    WP("Parsing time: %s\n", calcInterval(tv0, tv1));
+    WP("Parsing time (ms): %g\n", calcInterval(tv0, tv1));
 }
 
 static void runCompileWithOpt(char *optName){
@@ -157,7 +157,7 @@ static void runInterpreter(I qid){
     gettimeofday(&tv0, NULL);
     HorseInterpreter(root);
     gettimeofday(&tv1, NULL);
-    P("Interpreter time: %g ms\n", calcInterval(tv0, tv1));
+    P("Interpreter time (ms): %g ms\n", calcInterval(tv0, tv1));
 }
 
 static void validateParameters(){
@@ -208,7 +208,7 @@ static void runExperiment(){
         initTableFromBin((S)"lineitem");
     }
     gettimeofday(&tv1, NULL);
-    P("Reading time: %g ms\n", calcInterval(tv0, tv1));
+    P("Reading time (ms): %g ms\n", calcInterval(tv0, tv1));
     pfnLoadTable(t0, initLiteralSym((S)"lineitem"));
     printTablePretty(t0, 10);
     if(isReadFromText){

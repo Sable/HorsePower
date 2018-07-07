@@ -220,6 +220,17 @@ L profileHash(HN ht, L htSize){
 
 /* functions exposed as libraries */
 
+// #define lib_index_template(typ) \
+//     P("......"); getchar(); \
+//     HN hashT; \
+//     L hashLen = getHashTableSize(sLen); \
+//     CHECKE(createHash(&hashT,hashLen)); \
+//     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
+//     struct timeval tv0, tv1; E optTime[10];\
+//     DOJ(10, {gettimeofday(&tv0, NULL); DOP(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;}) \
+//     gettimeofday(&tv1, NULL); optTime[j] = calcInterval(tv0, tv1)/1000.0;}) \
+//     E total = 0; DOI(10, total += optTime[i]) P("Createing index time (avg): %g ms\n", total/10);
+
 #define lib_index_template(typ) \
     HN hashT; \
     L hashLen = getHashTableSize(sLen); \
@@ -319,8 +330,8 @@ void lib_quicksort_other(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
-        // if(leftSame) P("low = %lld, high = %lld\n",low,high);
-        // P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
+        //if(leftSame) P("low = %lld, high = %lld\n",low,high);
+        //P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
         if(!leftSame)
             lib_quicksort_other(rtn, val, low, pos, isUp, cmp);
         if(pos<high)
@@ -689,11 +700,53 @@ L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     R 0;
 }
 
+/* 
+ * copy from lib_get_group_by_other
+ * index[x] => x
+ */
+L lib_get_group_by_order(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+    L k, c, cz; V d,t;
+    /* 1. get the total number of cells: lenZ */
+    // P("step 1\n");
+    L lenZ=iLen>0?1:0;
+    DOIa(iLen, if(0!=(*cmp)(val,i-1,i,NULL))lenZ++)
+    /* 2. allocate list and get the info of each cell */
+    // P("step 2\n");
+    // initV(z, H_N, lenZ);
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initV(zKey, H_L, lenZ);
+    initV(zVal, H_G, lenZ);
+    c=iLen>0?1:0;
+    k=cz=0;
+    d=vV(zVal,k++);
+    if(iLen>0) vL(zKey,cz++)=0;
+    DOIa(iLen, if(0!=(*cmp)(val,i-1,i,NULL)){ \
+                 vL(zKey,cz++)=i; \
+                 initV(d,H_L,c); d=vV(zVal,k++); c=1; } \
+               else c++;)
+    if(c>0) initV(d,H_L,c);
+    /* 3. fill indices into each cell */
+    // P("step 3\n");
+    k=0, c=0;
+    d=vV(zVal,k++);
+    if(iLen>0) vL(d,c++)=0;
+    DOIa(iLen, if(0!=(*cmp)(val,i-1,i,NULL)){ \
+                  d=vV(zVal,k++); vL(d,0)=i; c=1; } \
+               else vL(d,c++)=i)
+    // P("exit\n");
+    R 0;
+}
+
 L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     // #ifdef OPT_Q1
     //     R lib_get_group_by_q1(z, val, index, iLen, cmp);
     // #else
-        R lib_get_group_by_other(z, val, index, iLen, cmp);
+       if(index == NULL)
+           R lib_get_group_by_order(z, val, index, iLen, cmp);
+       else
+           R lib_get_group_by_other(z, val, index, iLen, cmp);
     // #endif
 }
 
@@ -845,28 +898,28 @@ L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen){
 /*
  Call external shared libraries
 */
-#include <dlfcn.h>
-#include <unistd.h>
-
-void *load_shared_lib(S name){
-    void *handle=NULL;
-    handle=dlopen(name, RTLD_NOW | RTLD_GLOBAL);
-    if(!handle){
-        printf("Load lib %s fail: %s\n", name,dlerror());
-        exit(1);
-    }
-    return handle;
-}
-
-void *load_shared_func(S fn, S name, void *handle){
-    void *func = dlsym(handle, fn);
-    if(!func){
-        fprintf(stderr, "Can't find func %s in %s: %s\n", fn,name,dlerror());
-        dlclose(handle);
-        exit(1);
-    }
-    return func;
-}
+// #include <dlfcn.h>
+// #include <unistd.h>
+// 
+// void *load_shared_lib(S name){
+//     void *handle=NULL;
+//     handle=dlopen(name, RTLD_NOW | RTLD_GLOBAL);
+//     if(!handle){
+//         printf("Load lib %s fail: %s\n", name,dlerror());
+//         exit(1);
+//     }
+//     return handle;
+// }
+// 
+// void *load_shared_func(S fn, S name, void *handle){
+//     void *func = dlsym(handle, fn);
+//     if(!func){
+//         fprintf(stderr, "Can't find func %s in %s: %s\n", fn,name,dlerror());
+//         dlclose(handle);
+//         exit(1);
+//     }
+//     return func;
+// }
 
 /* a helper function */
 void get_current_path(){
@@ -879,6 +932,62 @@ void get_current_path(){
     P("current path: %s\n", pBuf);
 }
 
+#define U8  uint8_t
+#define U32 uint32_t
+#define CU8 const U8
+#define CU32 const U32
+#define getBlock32(p,i) p[i]
+#define ROTL32(x, r) ((x<<r)|(x>>(32-r)))
+#define fmix32(h) {h^=h>>16; h*=0x85ebca6b; h^=h>>13; h*=0xc2b2ae35; h^= h>>16;}
+
+static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
+    CU8 *data = (CU8*) key;
+    const int nblocks = len/4;
+    U32 h1 = seed;
+    CU32 c1 = 0xcc9e2d51;
+    CU32 c2 = 0x1b873593;
+    // body
+    CU32 *blocks = (CU32*)(data+(nblocks<<2));
+    for(int i=-nblocks;i;i++){
+        U32 k1 = getBlock32(blocks,i);
+        k1 *= c1;
+        k1 = ROTL32(k1, 15);
+        k1 *= c2;
+
+        h1 ^= k1;
+        h1 = ROTL32(h1,13);
+        h1 = h1*5+0xe6546b64;
+    }
+    // tail
+    CU8 *tail  = (CU8*)(data + (nblocks<<2));
+    U32 k1 = 0;
+
+    switch(len & 3){
+        case 3: k1 ^= tail[2] << 16;
+        case 2: k1 ^= tail[1] << 8;
+        case 1: k1 ^= tail[0];
+                k1 *= c1;
+                k1 = ROTL32(k1, 15);
+                k1 *=c2;
+                h1 ^= k1;
+    } 
+
+    // final
+    h1 ^= len;
+    fmix32(h1);
+    *(U32*)out = h1;
+}
+
+//int main(){
+//    U32 outString = 0, outDouble = 0;
+//    char helloString[] = "hello world";
+//    MurmurHash3(helloString, strlen(helloString), 16807, &outString);
+//    printf("outString = %d\n", outString);
+//    double helloDouble = 25.9;
+//    MurmurHash3(&helloDouble, sizeof(double), 16807, &outDouble);
+//    printf("outDouble = %d\n", outDouble);
+//    return 0;
+//}
 
 
 

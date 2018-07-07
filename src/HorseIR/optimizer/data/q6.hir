@@ -2,27 +2,26 @@ module default{
   import Builtin.*;
   def main() : table{
     t0:? = @load_table(`lineitem:sym);
-    t5:f64 = check_cast(@column_value(t0,`l_quantity:sym), f64);
-    t6:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
-    t7:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
-    t11:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
-    t17:? = @geq(t11,1994.01.01:d);
-    t18:? = @lt(t11,1995.01.01:d);
-    t19:? = @and(t17,t18);
-    t20:? = @lt(t5,24:f64);
-    t21:? = @geq(t7,0.05:f64);
-    t22:? = @leq(t7,0.07:f64);
-    t23:? = @and(t21,t22);
-    t24:? = @and(t19,t20);
-    t25:? = @and(t24,t23);
-    t31:? = @compress(t25,t6);
-    t32:? = @compress(t25,t7);
-    t42:? = @mul(t31,t32);
-    t43:? = @sum(t42);
-    t44:? = `revenue:sym;
-    t45:? = @enlist(t43);
-    t46:? = @table(t44,t45);
-    return t46;
+    t6:f64 = check_cast(@column_value(t0,`l_quantity:sym), f64);
+    t7:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
+    t8:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
+    t12:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
+    t18:? = @geq(t12,1994.01.01:d);
+    t19:? = @lt(t12,1995.01.01:d);
+    t20:? = @and(t18,t19);
+    t21:? = @lt(t6,24:f64);
+    t22:? = @geq(t8,0.05:f64);
+    t23:? = @leq(t8,0.07:f64);
+    t24:? = @and(t22,t23);
+    t25:? = @and(t20,t21);
+    t26:? = @and(t25,t24);
+    t32:? = @compress(t26,t7);
+    t33:? = @compress(t26,t8);
+    t43:? = @mul(t32,t33);
+    t44:? = @sum(t43);
+    t45:? = `revenue:sym;
+    t46:? = @enlist(t44);
+    t47:? = @table(t45,t46);
+    return t47;
   }
 }
-

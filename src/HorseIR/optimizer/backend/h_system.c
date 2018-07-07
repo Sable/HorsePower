@@ -15,6 +15,7 @@ L H_CORE = 1;
 void initSys(){
     listTable = (ListT)malloc(sizeof(ListT0) * NUM_LIST_TABLE);
     listTableCur = 0;
+    //omp_set_num_threads(1);
     getNumberOfCore();
 }
 
@@ -541,6 +542,16 @@ L searchOrdered(V z, V x, V y){
     DOP(lenZ, {L k=binarySearch(sL(x),0,vn(x),vL(y,i)); vL(z,i)=k<0?vn(x):k;})
     R 0;
 }
+
+//L searchOrdered(V z, V x, V y){
+//    L lenZ = vn(y);
+//    initV(z,H_L,lenZ);
+//    E optTime[10]; struct timeval tv0, tv1; 
+//    P("Input size: %lld, vp(x) = %lld, vp(y) = %lld\n", lenZ, vp(x), vp(y));
+//    DOJ(10, {gettimeofday(&tv0, NULL); DOP(lenZ, {L k=binarySearch(sL(x),0,vn(x),vL(y,i)); vL(z,i)=k<0?vn(x):k;}) gettimeofday(&tv1, NULL); optTime[j] = calcInterval(tv0, tv1)/1000.0; })
+//    E total = 0; DOI(10, total += optTime[i]) P("[searchOrdered] Createing index time (avg): %g ms\n", total/10); getchar();
+//    R 0;
+//}
 
 
 /* Checking types */
