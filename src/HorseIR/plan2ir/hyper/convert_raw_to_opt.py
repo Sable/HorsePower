@@ -22,6 +22,7 @@ def main():
     plan = json.loads(readLines(name, ''))['optimizersteps']
     numb = len(plan)
     opt  = numb - 1 # output optimized one, i.e. 5
+    #opt = 0  # unopt
     # for k in range(numb):
     #     print '%d -> %s' % (k,plan[k]['name'])
     #decide = raw_input("Extract one plan? > ")

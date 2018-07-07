@@ -45,6 +45,9 @@ standard_date = date(2000,1,1) # standard date: 2000.01.01
 primary_key   = {}
 foreign_key   = {}
 mapping_key   = {}
+table_types   = {} # char to sym
+isOpSubstring = False
+vec_side_or   = {}
 
 """
 string_map
@@ -100,28 +103,35 @@ def scanValuesRef(v, env):
     return alias
     # return genCopy(alias)
 
-def scanValuesConst(v):
+def scanValuesConst(v, withType=True):
     typ = v['value']['type']
     val = v['value']['value']
-    return stringValue(typ, val)
+    return stringValue(typ, val, withType)
 
-def stringValue(typ, value):
+def stringValue(typ, value, withType=True):
+    global isOpSubstring
     def date2date(d):
         global standard_date
         current_date = standard_date + timedelta(int(d) - 2451545)
         return '%d.%02d.%02d'%(current_date.year,current_date.month,current_date.day)
     t = strType(typ)
-    if t == 'char':
+    if t == 'sym' and isOpSubstring:
+        t = 'str' #chf
+    if t == 'str':
         return '"%s"' % value
-    elif t == 'char1':
+    elif t == 'char':
         return "'%c'" % value
+    elif t == 'sym':
+        if ' ' in value:
+            return '`"%s"' % value
+        return '`%s' % value
     elif t == 'd':
         return '%s:%s'%(date2date(value), t)
     elif t == 'f64': # Example: "type": [ "Numeric", 12, 2 ], "value": 2400 }
         digit = int(typ[2])
         return '%g:%s' %(float(value)/(10**digit), t)
     else:
-        return '%s:%s'%(value, t)
+        return ('%s:%s'%(value, t)) if withType else value
 
 def scanValuesExpr(v, expr, env):
     global join_list
@@ -212,22 +222,31 @@ def scanValuesSet(v):
             typ = strType(s0['value']['type'])
         else:
             unexpected('Not supported')
-        sets = [ scanValuesConst(s0) ]
+        sets = [ scanValuesConst(s0, False) ]
         for s in v[1:]:
             if strType(s['value']['type']) == typ:
-                sets.append(scanValuesConst(s))
+                sets.append(scanValuesConst(s, False))
             else:
                 unexpected('mixed typ in sets: %s and %s' % (typ, s['expression']))
-        return genLiteral('(%s):%s' % (stringList(sets), typ)) #gen literal
+        if typ == 'sym':
+            if isOpSubstring:
+                return genLiteral('(%s):str' % stringList(sets))
+            else:
+                return genLiteral('%s:sym' % stringList(sets,''))
+        else:
+            return genLiteral('(%s):%s' % (stringList(sets), typ)) #gen literal
         # return genAssignment('(%s):%s' % (stringList(sets), typ)) #gen literal
     else:
         unexpected('size 0 set found')
 
 # member
 def scanValuesQuantor(v, env):
+    global isOpSubstring
     mode = fetch('mode', v)
     if mode == '=some':
+        isOpSubstring = fetch('expression', fetch('value', v)) == 'substring' #chf
         setValue = scanValuesSet(fetch('set', v))
+        isOpSubstring = False #chf
         varValue = scanValuesV(fetch('value', v), env)
         return genMember(setValue, varValue)
     else:
@@ -294,6 +313,8 @@ def scanValuesSubstring(v, env):
     if start_type == length_type and start_type == 'i64':
         t5 = genSubString(t0, '(%s,%s):i64'%(start,length))
     else:
+        print t1, t2
+        print 'type: %s, %s' % (start_type, length_type)
         pending('Need to check substring')
     return t5
 
@@ -345,17 +366,21 @@ def scanValuesV(v, env):
 """
 A temporary solution for mapping_key, need to save this info into env
 """
-def loadTables(d, t):
+def loadTables(d, table_name, table_alias):
     global mapping_key
     cols  = []; alias = []; types = []
     for v in d:
         nam = v['iu'][0]
         typ = strType(v['iu'][1])
         col = v['name']
-        vid = genColumnValue(t, '`'+col+':sym', typ)
+        if isOkAny2Enum(table_name, col):
+            typ = 'enum' # convert to symbol
+        elif isOkChar2Sym(table_name, col, typ):
+            typ = 'sym' # convert from char to symbol
+        vid = genColumnValue(table_alias, '`'+col+':sym', typ)
         if nam != col:
             mapping_key[nam] = col
-        # vid = genLoadTableWithCols(nam, typ, t)
+        # vid = genLoadTableWithCols(nam, typ, table_alias)
         cols.append(nam); alias.append(vid); types.append(typ)
     return cols,alias,types
 
@@ -573,7 +598,7 @@ def scanTablescan(d, env):
     table_name = d['from']
     debug('tablescan for %s' % table_name)
     current_table  = genLoadTable(table_name)
-    columns, alias, types = loadTables(d['values'], current_table)
+    columns, alias, types = loadTables(d['values'], table_name, current_table)
     residuals      = scanResiduals(\
                         d['residuals'],\
                         encodeEnv(table_name, columns, alias, types)) \
@@ -816,6 +841,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
     pending('[joinWithEnum] add more join types: join type (%s), mask (%s, %s)' % (joinType, k_mask, f_mask))
 
 def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
+    global vec_side_or
     # print joinType
     # print k_alias
     # printEnv(k_env)
@@ -825,17 +851,38 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
     if joinType == 'equi_join':
         # printEnv(k_env)
         # printEnv(v_env)
-        # raw_input()
-        t0 = genMember (k_alias, v_alias)
-        t1 = genVector(genLength(k_alias), '0:bool')
-        t2 = genIndexA(t1, genCompress(t0, v_alias), '1:bool')
-        return [t2, t0, 'masking']
-        # e0 = genEnum  (k_alias, v_alias)
-        # t0 = genValues(e0)  #p0
-        # t1 = genKeys  (e0)
-        # t2 = genLt    (t0, genLength(t1))
-        # t3 = genWhere (t2)  #p1
-        # return [t0, t3, 'indexing']
+        # Fail in q14
+        # t0 = genMember (k_alias, v_alias)
+        # t1 = genVector(genLength(k_alias), '0:bool')
+        # t2 = genIndexA(t1, genCompress(t0, v_alias), '1:bool')
+        # return [t2, t0, 'masking']
+        # Pass in q14
+        if vec_side_or: # chf: has sth.
+            # print k_alias, v_alias
+            k_cond, v_cond = vec_side_or
+            k_temp = []; v_temp = []; vector_or = []
+            if not getEnvMask(k_env):
+                for cond in k_cond:
+                    k_temp.append(genCompress(cond, k_alias))
+            else:
+                unexpected('mask found')
+            if getEnvMask(v_env):
+                for x in k_temp:
+                    v_temp.append(genMember(x, v_alias))
+                for (i,v) in enumerate(v_temp):
+                    vector_or.append(genAnd(v, v_cond[i]))
+            else:
+                unexpected('mask not found')
+            t0 = genVectorOr(vector_or)
+            vec_side_or = {} # reset
+            return [t0, t0, 'masking']  # chf: t0, t0?
+        else:
+            e0 = genEnum  (k_alias, v_alias)
+            t0 = genValues(e0)  #p0
+            t1 = genKeys  (e0)
+            t2 = genLt    (t0, genLength(t1))
+            t3 = genWhere (t2)  #p1
+            return [t0, t3, 'indexing']
     elif joinType == 'right_antijoin':
         return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
     elif joinType == 'left_antijoin':
@@ -1022,9 +1069,14 @@ def checkExpr(expr):
 
 # q19: trick
 def scanConditionOr(d, env2):
+    global vec_side_or
     # off load to scanValue
     vec_left_or = []
     vec_right_or = []
+    # left_env, right_env = env2
+    # printEnv(left_env)
+    # printEnv(right_env)
+    # raw_input()
     for d0 in d['arguments']:
         if d0['expression'] == 'and':
             vec_left_and = []
@@ -1042,7 +1094,9 @@ def scanConditionOr(d, env2):
                     unexpected('unknown type %d' % typ)
             vec_left_or.append(genVectorAnd(vec_left_and))
             vec_right_or.append(genVectorAnd(vec_right_and))
-    return genVectorOr(vec_left_or),genVectorOr(vec_right_or)
+    vec_side_or = [vec_left_or, vec_right_or]
+    return 0,0
+    # return genVectorOr(vec_left_or),genVectorOr(vec_right_or)
 
 # return if multiple columns (>1)
 def isMultipleColumnJoin(d, env2):
@@ -1080,7 +1134,7 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
             # print 'side0 = %d, side1 = %d' % (side0, side1)
             # print 'alias0 = %s, alias1 = %s' % (alias0, alias1)
             if isCollect:
-                print name0, name1
+                #print name0, name1
                 alias0 = findAliasByName(name0, env2[side0])
                 alias1 = findAliasByName(name1, env2[side1])
                 return ([alias0, alias1, 'value'] if side0 == 0 else [alias1, alias0, 'value']) + [name0, name1]
@@ -1137,11 +1191,14 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
             # assume only 1 'or' and 1 'and' upon
             if cnt_pred == 1 and cnt_new == 1:
                 # apply pred to new first before join two sides
-                # t0 = genCompress(pred_left, new_left)
-                # t1 = genCompress(pred_right, new_right)
-                left_env  = updateMaskInEnv(pred_left, env2[0])
-                right_env = updateMaskInEnv(pred_right, env2[1])
-                env2[0], env2[1] = left_env, right_env  # q19: need update env2
+                # left_env  = updateMaskInEnv(pred_left, env2[0])
+                # right_env = updateMaskInEnv(pred_right, env2[1])
+                # env2[0], env2[1] = left_env, right_env  # q19: need update env2
+                left_env, right_env = env2
+                # printEnv(left_env)
+                # printEnv(right_env)
+                # print vec_side_or
+                # raw_input()
                 return joinColumns(joinType, name0, left_env, name1, right_env) # l_partkey / p_partkey
             elif cnt_pred == 0 and len(left_list) > 1: #q9
                 t0 = genList(left_list)
@@ -1359,7 +1416,6 @@ def scanJoinHash(d, env2, msg='hash join'):
 Need to update the result of both sides
 """
 def handleJoinResult2(result, joinType, env2):
-    print result
     left_col, right_col, result_type, result_kind = result
     if right_col == None:
         return handleJoinResultWithMode(result, joinType, env2) # see joinColumnsWithMode (q22)
@@ -1723,7 +1779,24 @@ def initRelations():
     foreign_key['orders']   = [pack('o_custkey'  , 'customer', 'c_custkey'  )]
     foreign_key['lineitem'] = [pack('l_orderkey' , 'orders'  , 'o_orderkey'),
                                pack(['l_partkey', 'l_suppkey'], 'partsupp', ['ps_partkey', 'ps_suppkey'])]
+    initSpecialColumnTypes()
 
+def initSpecialColumnTypes():
+    global table_types
+    table_types = {}
+    table_types['nation']   = ['n_name']
+    table_types['region']   = ['r_name']
+    table_types['part']     = ['p_brand', 'p_type', 'p_container']
+    table_types['customer'] = ['c_name', 'c_mktsegment']
+    table_types['orders']   = ['o_orderpriority']
+    table_types['lineitem'] = ['l_shipinstruct', 'l_shipmode']
+
+def isOkChar2Sym(tab, col, typ):
+    global table_types
+    return typ == 'char' and tab in table_types and col in table_types[tab]
+
+def isOkAny2Enum(tab, col):
+    return checkForeignKey(tab, col)
 """
 c_custkey2 -> c_custkey
 """
@@ -1750,6 +1823,14 @@ def checkPrimaryKey(table, name):
     #     raw_input()
     name = getMappedKey(name)
     return table in primary_key and sameListString(primary_key[table], packColumnName(name))
+
+def checkForeignKey(table, name):
+    name = getMappedKey(name)
+    if table in foreign_key:
+        for x in foreign_key[table]:
+            if sameListString(x[0], packColumnName(name)):
+                return True
+    return False
 
 def main():
     if len(sys.argv) != 2:
