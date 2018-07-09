@@ -3,16 +3,16 @@ module default{
   def main() : table{
     t0:? = @load_table(`part:sym);
     t1:i64 = check_cast(@column_value(t0,`p_partkey:sym), i64);
-    t4:str = check_cast(@column_value(t0,`p_brand:sym), str);
+    t4:sym = check_cast(@column_value(t0,`p_brand:sym), sym);
     t6:i64 = check_cast(@column_value(t0,`p_size:sym), i64);
-    t7:str = check_cast(@column_value(t0,`p_container:sym), str);
+    t7:sym = check_cast(@column_value(t0,`p_container:sym), sym);
     t10:? = @load_table(`lineitem:sym);
     t13:i64 = check_cast(@column_value(t10,`l_partkey:sym), i64);
     t16:f64 = check_cast(@column_value(t10,`l_quantity:sym), f64);
     t17:f64 = check_cast(@column_value(t10,`l_extendedprice:sym), f64);
     t18:f64 = check_cast(@column_value(t10,`l_discount:sym), f64);
-    t25:str = check_cast(@column_value(t10,`l_shipinstruct:sym), str);
-    t26:str = check_cast(@column_value(t10,`l_shipmode:sym), str);
+    t25:sym = check_cast(@column_value(t10,`l_shipinstruct:sym), sym);
+    t26:sym = check_cast(@column_value(t10,`l_shipmode:sym), sym);
     t28:? = `AIR`"AIR REG":sym;
     t29:? = @member(t28,t26);
     t30:? = @eq(t25,`"DELIVER IN PERSON":sym);

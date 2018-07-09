@@ -262,22 +262,28 @@ static int findTargInList(OptNode *list, S s, I n){
     DOI(n, if(!strcmp(s, list[i].targ)) return i) R -1;
 }
 
-static void identifyStmt(Node *stmt, OptNode *OptList, I OptTotal){
+static bool identifyStmt(Node *stmt, OptNode *OptList, I OptTotal){
     S writeName = NULL;
     if(instanceOf(stmt, simpleStmtK))
         writeName = fetchName(stmt->val.simpleStmt.name);
     else if(instanceOf(stmt, castStmtK))
         writeName = fetchName(stmt->val.castStmt.name);
-    else return ;
+    else return false;
+    //P("writeName = %s\n", writeName);
+    //if(!strcmp(writeName, "t107")){
+    //    int xxxxx = 0;
+    //}
     L x = findTargInList(OptList,writeName,OptTotal);
     if(x>=0){
         genStmt(writeName, FP(outF, "%s", OptList[x].invc));
+        return true;
     }
+    return false;
 }
 
 static void identifyOptimization(Node *stmt){
-    identifyStmt(stmt, FuseList, FuseTotal);
-    identifyStmt(stmt, PhList  , PhTotal);
+    if(!identifyStmt(stmt, FuseList, FuseTotal))
+        identifyStmt(stmt, PhList  , PhTotal);
 }
 
 static void compileChain(ChainList *list){
@@ -317,4 +323,5 @@ int HorseCompiler(ChainList *rt){
     //compileMethod(method);
     //printChainList();
     compileChain(rt);
+    //printChainList(); // display visited chains
 }

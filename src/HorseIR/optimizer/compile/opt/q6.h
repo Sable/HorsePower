@@ -4,10 +4,7 @@ L q6_loopfusion_0(V z, V *x){
     V x1 = x[1]; // t5
     V x2 = x[2]; // t7
     L r0 =vn(x0); initV(z,H_B,r0);
-    // try 0
     DOP(vn(x0), vB(z,i)=AND(AND(AND(GEQ(vD(x0,i),19940101),LT(vD(x0,i),19950101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))) R 0;
-    // try 1
-    //DOP(vn(x0), vB(z,i)=AND(AND(AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)),AND(GEQ(vD(x0,i),19940101),LT(vD(x0,i),19950101))),LT(vE(x1,i),24))) R 0;
 }
 
 L q6_peephole_0(V *z, V y, V *x){
@@ -43,7 +40,6 @@ E compiledQ6(){
     PROFILE(  2, t6 , pfnColumnValue(t6, t0, initLiteralSym((S)"l_extendedprice")));
     PROFILE(  3, t7 , pfnColumnValue(t7, t0, initLiteralSym((S)"l_discount")));
     PROFILE(  4, t11, pfnColumnValue(t11, t0, initLiteralSym((S)"l_shipdate")));
-    //V tt1[] = {t11,t5,t7};
     if(OPT_LF){
         PROFILE(  5, t25, q6_loopfusion_0(t25,(V []){t11,t5,t7}));
     }
@@ -58,10 +54,6 @@ E compiledQ6(){
         PROFILE( 12, t24, pfnAnd(t24, t19, t20));
         PROFILE( 13, t25, pfnAnd(t25, t24, t23));
     }
-    //PROFILE(  6, t31, pfnCompress(t31, t25, t6));
-    //PROFILE(  7, t32, pfnCompress(t32, t25, t7));
-    //V tt2[] = {t6,t7};
-    //V tt3[] = {t31,t32};
     if(OPT_PH){
         PROFILE(  7, t99, q6_peephole_0((V []){t31,t32}, t25, (V []){t6,t7}));
     }

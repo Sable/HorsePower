@@ -58,13 +58,6 @@ E compiledQ12(){
     V t84 = allocNode(); V t85 = allocNode(); V t86 = allocNode(); V t87 = allocNode();
     V t89 = allocNode(); V t90 = allocNode(); V t91 = allocNode(); V t92 = allocNode();
     V t93 = allocNode(); V t94 = allocNode(); V t22 = allocNode();
-    //S w0[] = {"MAIL","SHIP"};
-    //V w1[] = {t13,t18,t12,t11};
-    //V w2[] = {t78};
-    //V w3[] = {t71};
-    //V w4[] = {t100};
-    //S w5[] = {"l_shipmode","high_line_count","low_line_count"};
-    //V w6[] = {t109 ,t110 ,t111};
     tic;
     PROFILE(  0, t0 , pfnLoadTable(t0, initLiteralSym((S)"lineitem")));
     PROFILE(  1, t1 , pfnColumnValue(t1, t0, initLiteralSym((S)"l_orderkey")));

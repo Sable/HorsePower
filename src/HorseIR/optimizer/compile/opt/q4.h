@@ -27,10 +27,6 @@ E compiledQ4(){
     V t88 = allocNode(); V t89 = allocNode(); V t90 = allocNode(); V t91  = allocNode(); 
     V t92 = allocNode(); V k2  = allocNode(); V t74 = allocNode();
     V t10 = allocNode(); V t11 = allocNode(); V t12 = allocNode();
-    //V w0[] = {t5,k4};
-    //V w1[] = {t82};
-    //V w2[] = {t88, t89};
-    //S w3[] = {"o_orderpriority","order_count"};
     tic;
     PROFILE(  0, t0 , pfnLoadTable(t0, initLiteralSym((S)"orders")));
     PROFILE(  1, t1 , pfnColumnValue(t1, t0, initLiteralSym((S)"o_orderkey")));

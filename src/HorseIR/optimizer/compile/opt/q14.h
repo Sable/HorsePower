@@ -61,12 +61,6 @@ E compiledQ14(){
     V t17 = allocNode(); V t18 = allocNode(); V t78 = allocNode(); V t79 = allocNode();
     V t80 = allocNode(); V t81 = allocNode(); V t82 = allocNode(); V t84 = allocNode();
     V t88 = allocNode();
-    //V w0[] = {t11};
-    //V w1[] = {t21,t25,t26};
-    //V w2[] = {t2,t6,t7};
-    //V w3[] = {t77,t57,t58};
-    //V w4[] = {t57,t58};
-    //V w5[] = {t86,t87};
     tic;
     PROFILE(  0, t0 , pfnLoadTable(t0, initLiteralSym((S)"lineitem")));
     PROFILE(  1, t2 , pfnColumnValue(t2, t0, initLiteralSym((S)"l_partkey")));

@@ -31,7 +31,7 @@ void error(const char* s);
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 
-#define printBanner(s) P("====="s"=====\n")
+#define printBanner(s) P("/*===="s"====*/\n")
 
 #include "backend/common.h"
 

@@ -87,15 +87,16 @@ static void fuseNameByStr(char *buff, char *name, char *str){
     pType k = in->type;
     ShapeNode *sn = in->shape;
     resetBuff(buff);
-    //if(isVector(sn))
+    // check if 1-length vector
+    bool is1 = (sn->type == vectorH) && !(sn->isId) && (sn->size == 1);
     switch(k){
-        case  boolT: SP(buff, "vB(%s,i)", str); break;
-        case   i64T: SP(buff, "vL(%s,i)", str); break;
-        case   f32T: SP(buff, "vF(%s,i)", str); break;
-        case   f64T: SP(buff, "vE(%s,i)", str); break;
-        case  dateT: SP(buff, "vD(%s,i)", str); break;
-        case monthT: SP(buff, "vM(%s,i)", str); break;
-        case   symT: SP(buff, "vQ(%s,i)", str); break;
+        case  boolT: SP(buff, is1?"vb(%s)":"vB(%s,i)", str); break;
+        case   i64T: SP(buff, is1?"vl(%s)":"vL(%s,i)", str); break;
+        case   f32T: SP(buff, is1?"vf(%s)":"vF(%s,i)", str); break;
+        case   f64T: SP(buff, is1?"ve(%s)":"vE(%s,i)", str); break;
+        case  dateT: SP(buff, is1?"vd(%s)":"vD(%s,i)", str); break;
+        case monthT: SP(buff, is1?"vm(%s)":"vM(%s,i)", str); break;
+        case   symT: SP(buff, is1?"vq(%s)":"vQ(%s,i)", str); break;
         default: EP("type %d not supported yet\n", k);
     }
 }

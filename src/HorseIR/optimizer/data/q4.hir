@@ -3,7 +3,7 @@ module default{
   def main() : table{
     t0:? = @load_table(`orders:sym);
     t6:d = check_cast(@column_value(t0,`o_orderdate:sym), d);
-    t7:str = check_cast(@column_value(t0,`o_orderpriority:sym), str);
+    t7:sym = check_cast(@column_value(t0,`o_orderpriority:sym), sym);
     t11:? = @geq(t6,1993.07.01:d);
     t12:? = @lt(t6,1993.10.01:d);
     t13:? = @and(t11,t12);

@@ -7,7 +7,7 @@ module default{
     t9:? = @like(t8,"%Customer%Complaints%":str);
     t10:? = @compress(t9,t1);
     t17:? = @load_table(`part:sym);
-    t21:str = check_cast(@column_value(t17,`p_brand:sym), str);
+    t21:sym = check_cast(@column_value(t17,`p_brand:sym), sym);
     t22:sym = check_cast(@column_value(t17,`p_type:sym), sym);
     t23:i64 = check_cast(@column_value(t17,`p_size:sym), i64);
     t27:? = (49,14,23,45,19,3,36,9):i64;

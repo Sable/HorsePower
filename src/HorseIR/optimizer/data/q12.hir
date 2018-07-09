@@ -6,7 +6,7 @@ module default{
     t12:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
     t13:d = check_cast(@column_value(t0,`l_commitdate:sym), d);
     t14:d = check_cast(@column_value(t0,`l_receiptdate:sym), d);
-    t16:str = check_cast(@column_value(t0,`l_shipmode:sym), str);
+    t16:sym = check_cast(@column_value(t0,`l_shipmode:sym), sym);
     t18:? = `MAIL`SHIP:sym;
     t19:? = @member(t18,t16);
     t20:? = @lt(t13,t14);
@@ -18,7 +18,7 @@ module default{
     t26:? = @and(t24,t25);
     t27:? = @and(t26,t23);
     t44:? = @load_table(`orders:sym);
-    t51:str = check_cast(@column_value(t44,`o_orderpriority:sym), str);
+    t51:sym = check_cast(@column_value(t44,`o_orderpriority:sym), sym);
     t55:? = @values(t1);
     t56:? = @compress(t27,t55);
     t57:? = @where(t27);

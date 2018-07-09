@@ -4,7 +4,7 @@ extern ChainList *chain_list;
 extern I qid;
 I PhTotal = 0;
 PeepholeNode PhList[99];
-S RazeNode[99][3];
+S RazeNode[99][4];
 S varIndex = NULL;
 I RazeTotal = 0;
 
@@ -30,7 +30,7 @@ static char *getParamsName(List *params){
 
 /* Pattern: Compress */
 
-static int countCompress(ChainList *list, char *mask){
+static int countCompress(ChainList *list, char *mask, bool isMark){
     if(!list) return 0;
     Chain *chain = list->chain;
     if(isVisited(chain)) return 0;
@@ -46,8 +46,8 @@ static int countCompress(ChainList *list, char *mask){
             if(pName){
                 if(!mask) mask = pName;
                 else if(strcmp(mask, pName)) return 0;
-                setVisited(chain, true);
-                return 1 + countCompress(list->next, mask);
+                if(isMark) setVisited(chain, true);
+                return 1 + countCompress(list->next, mask, isMark);
             }
             else EP("[countCompress]: a potential error here.\n");
         }
@@ -88,6 +88,7 @@ static char getTypeCodeByName(char *name){
         case  charT: return 'C'; break;
         case   symT: return 'Q'; break;
         case   strT: return 'S'; break;
+        case  dateT: return 'D'; break;
         default: printInfoNode(in); EP("[getTypeCodeByName] type %d not supported yet.\n", k);
     }
     return 0;
@@ -136,9 +137,9 @@ static void genCompress(ChainList *list, int count){
             if(!func) return ;
             Node *param  = expr->val.expr.param;
             List *params = param->val.listS;
-            targ[i] = fetchName(name);       // targ name
-            lval    = getParamsName(params); // 1st arg
-            rval[i] = getParamsName(params->next); //2nd arg
+            targ[i] = fetchName(name);             // targ name
+            lval    = getParamsName(params);       // 1st arg
+            rval[i] = getParamsName(params->next); // 2nd arg
         }
         p = p->next;
     }
@@ -153,8 +154,9 @@ static void findPatternCompress(ChainList *list){
     ChainList *p = list->next;
     while(p){
         if(!isVisited(p->chain)){
-            int count = countCompress(p, NULL);
+            int count = countCompress(p, NULL, false);
             if(count > 1){
+                countCompress(p, NULL, true);
                 genCompress(p, count);
             }
         }
@@ -165,6 +167,31 @@ static void findPatternCompress(ChainList *list){
 
 /* Pattern: Raze */
 
+typedef struct raze_group{
+    Chain *first, *second, *third;
+}RazeGroup;
+
+static bool matchChain2(Chain *chain, char *func1, char *func2){
+    if(isVisited(chain)) return false;
+    if(isSimpleStmt(chainNode(chain))){
+        Node *expr = chainNode(chain)->val.simpleStmt.expr;
+        Node *func = expr->val.expr.func;
+        if(!func) return false;
+        char *funcName = fetchName(func);
+        //P("Input: %s, %s\n", funcName, func1);
+        if(!strcmp(funcName, func1) || !strcmp(func1, "?")) {
+            // match func2
+            if(func2){
+                List *params = expr->val.expr.param->val.listS;
+                char *firstP = getParamsName(params);
+                //P("--> matched?: %s, %s | %s, %s\n", funcName, func1, firstP, func2);
+                return !strcmp(func2, firstP);
+            }
+            else return true;
+        }
+    }
+    return false;
+}
 
 static bool matchChain(Chain *chain, char *cur){
     if(isVisited(chain)) return false;
@@ -197,6 +224,22 @@ static int countRaze(ChainList *list, char *mask){
     return 0;
 }
 
+static void setRazeNodeVisited(){
+    DOI(RazeTotal, {RazeGroup *rg=(RazeGroup*)RazeNode[i][3];\
+            setVisited(rg->first , true); \
+            setVisited(rg->second, true); \
+            setVisited(rg->third , true); })
+}
+
+static char *phNameRazeCode(int z, char *invc, int x, char *y, int n){
+    char tmp[99]; SP(tmp, "%s((V []){", invc);
+    DOI(n, {if(i>0)strcat(tmp,",");strcat(tmp,RazeNode[i][z]);}) strcat(tmp, "},");
+    strcat(tmp, "(V []){");
+    DOI(n, {if(i>0)strcat(tmp,",");strcat(tmp,RazeNode[i][x]);}) strcat(tmp, "},");
+    strcat(tmp, y); strcat(tmp, ")");
+    return strdup(tmp);
+}
+
 static void genRazeCode(){
     char tmp[99], typeCode[99];
     DOI(RazeTotal, typeCode[i]=!strcmp(RazeNode[i][1],"sum")?getTypeCodeByName(RazeNode[i][2]):'E')
@@ -218,8 +261,15 @@ static void genRazeCode(){
             else EP("special func not supported: %s\n", func); P(" \\\n");} \
         )
     P(indent "})\n" indent "R 0;\n}\n");
-    PhTotal++;
+    PhList[PhTotal].invc = phNameRazeCode(0, tmp, 2, varIndex, RazeTotal);
+    PhList[PhTotal].targ = RazeNode[RazeTotal-1][0];  PhTotal++;
+    setRazeNodeVisited();
     RazeTotal = 0; varIndex = NULL; // clean
+}
+
+static char *phNameRazeCodeLen(char *z, char *invc, char *x, char *y){
+    char tmp[99]; SP(tmp, "%s(%s,%s,%s)", invc, z, x, y);
+    return strdup(tmp);
 }
 
 static void genRazeCodeLen(char *targ, char *func, char *p0, char *p1){
@@ -232,7 +282,8 @@ static void genRazeCodeLen(char *targ, char *func, char *p0, char *p1){
     P(indent "L r0 = vn(y);\n");
     P(indent "initV(z, H_L, r0);\n");
     P(indent "DOP(r0, vL(z,i) = vn(vV(y,i))) R 0;\n}\n");
-    PhTotal++;
+    PhList[PhTotal].invc = phNameRazeCodeLen(targ, tmp, p0, p1);
+    PhList[PhTotal].targ = targ;  PhTotal++;
     RazeTotal = 0; varIndex = NULL; // clean
 }
 
@@ -258,11 +309,18 @@ static void genRaze(ChainList *list, int count){
     char *p0      = getParamsName(params3->next);
     char *p1      = getParamsName(params3->next->next);
     //P("targ = %s, %s, p0 = %s, p1 = %s\n", targ,func2,p0,p1);
+    //P("func2 = %s, func3 = %s\n", func2, func3);
     if(!strcmp(func3, "index")){
         if(!strcmp(func2, "len")){
             //P("RazeTotal = %d\n", RazeTotal);
-            genRazeCode(); // output all cached
-            genRazeCodeLen(targ, func2, p0, p1);
+            if(RazeTotal > 0){
+                genRazeCode(); // output all cached
+                genRazeCodeLen(targ, func2, p0, p1);
+                // below 3 lines for RazeCodeLen
+                setVisited(first , true);
+                setVisited(second, true);
+                setVisited(third , true);
+            }
             return ;
         }
         else if(varIndex == NULL){
@@ -275,6 +333,11 @@ static void genRaze(ChainList *list, int count){
         RazeNode[RazeTotal][0] = targ;
         RazeNode[RazeTotal][1] = func2;
         RazeNode[RazeTotal][2] = p0;
+        RazeGroup *rg = (RazeGroup*)malloc(sizeof(RazeGroup));
+        rg->first  = first;
+        rg->second = second;
+        rg->third  = third;
+        RazeNode[RazeTotal][3] = (char *)rg;
         RazeTotal++; varIndex = p1;
     }
     else EP("3rd stmt must has pfnIndex\n");
@@ -297,9 +360,208 @@ static void findPatternRaze(ChainList *list){
     }
 }
 
+/* Pattern: general */
+
+typedef struct PatternTree{
+    int num;                    // number of child
+    char *func1, *func2;        // functin name
+    struct PatternTree **child; // children
+    Chain *chain;
+}PatternTree;
+
+static void prettyPatternTree(PatternTree *x){
+    if(x){
+        if(!(x->func2)) P("(%s, %d)", x->func1, x->num);
+        else P("(%s+%s, %d)", x->func1, x->func2, x->num);
+        DOI(x->num, prettyPatternTree(x->child[i]))
+    }
+}
+
+static bool matchPattern(Chain *chain, PatternTree* ptree){
+    if(matchChain2(chain, ptree->func1, ptree->func2)){
+        int numOfDefs = ptree->num==0?0:chain->defSize;
+        //P("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
+        if(numOfDefs == ptree->num){
+            //P("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
+            //prettyPatternTree(ptree->child[i]);
+            //prettyNode(chainNode(chain->chain_defs[i]));
+            DOI(numOfDefs, \
+                    if(!matchPattern(chain->chain_defs[i], ptree->child[i]))R false)
+            //P("return true\n");
+            ptree->chain = chain; /* setup */
+            return true;
+        }
+    }
+    //P("func not matched: %s\n", ptree->func1);
+    return false;
+}
+
+/*
+ * 0: targ
+ * 1: 1st param
+ * 2: 2nd param
+ */
+static char *getParamFromChain(Chain *chain, int pos){
+    if(isSimpleStmt(chainNode(chain))){
+        Node *targ = chainNode(chain)->val.simpleStmt.name;
+        if(pos == 0) return fetchName(targ);
+        Node *expr = chainNode(chain)->val.simpleStmt.expr;
+        Node *func = expr->val.expr.func;
+        if(!func) return false;
+        char *funcName = fetchName(func);
+        List *params = expr->val.expr.param->val.listS;
+        while(pos>1){ params=params->next; pos--; }
+        return getParamsName(params);
+    }
+    return NULL;
+}
+
+static void setAllChainVisited(PatternTree *ptree){
+    Chain *chain = ptree->chain;
+    DOI(ptree->num, setAllChainVisited(ptree->child[i]))
+    if(strcmp(ptree->func1, "?")) setVisited(chain, true);
+    ptree->chain = NULL;
+}
+
+static char *phNameFP3(char *z, char *invc, char *x0, char *x1, char *y0, char *y1){
+    char tmp[99]; SP(tmp, "%s(%s,(V []){%s,%s}, (V []){%s,%s})", invc,z,x0,x1,y0,y1);
+    return strdup(tmp);
+}
+
+static void genPattern3(PatternTree *ptree){
+    char tmp[99], pfn[30];
+    Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
+    Chain *chain_y0 = ptree->child[1]->chain;            // 2nd param of compress
+    Chain *chain_y1 = ptree->child[0]->child[0]->chain;  // 1st param of len
+    Chain *chain_z  = ptree->chain;                      // targ of index_a
+    char *x0 = getParamFromChain(chain_x , 1);
+    char *x1 = getParamFromChain(chain_x , 2);
+    char *y0 = getParamFromChain(chain_y0, 2);
+    char *y1 = getParamFromChain(chain_y1, 1);
+    char *z  = getParamFromChain(chain_z , 0);
+    //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
+    SP(tmp, "q%d_peephole_%d", qid, PhTotal);
+    P("L %s(V z, V *x, V *y){\n", tmp);
+    P(indent "// z -> %s\n", z);
+    P(indent "V x0 = x[0]; // %s\n", x0);
+    P(indent "V x1 = x[1]; // %s\n", x1);
+    P(indent "V y0 = y[0]; // %s\n", y0);
+    P(indent "V y1 = y[1]; // %s\n", y1);
+    P(indent "L r0 = vn(y1);\n");
+    P(indent "initV(z, H_B, r0);\n");
+    P(indent "DOP(vn(y0), if(v%c(x0,i)<v%c(x1,i))v%c(z,vL(y0,i))=1) R 0;\n}\n",
+            getTypeCodeByName(x0),getTypeCodeByName(x1),getTypeCodeByName(z));
+    PhList[PhTotal].invc = phNameFP3(z, tmp, x0, x1, y0, y1);
+    PhList[PhTotal].targ = z;  PhTotal++;
+    setAllChainVisited(ptree);
+}
+
+static char *phNameFP4(char *z, char *invc, char *x, char *y){
+    char tmp[99]; SP(tmp, "%s(%s,%s,%s)", invc,z,x,y);
+    return strdup(tmp);
+}
+
+static void genPattern4(PatternTree *ptree){
+    char tmp[99], pfn[30];
+    Chain *chain_x  = ptree->child[0]->child[0]->child[0]->chain;  // 2 params of each_right
+    Chain *chain_z  = ptree->chain;  // 2 params of each_right
+    char *x = getParamFromChain(chain_x, 2);
+    char *y = getParamFromChain(chain_x, 3);
+    char *z = getParamFromChain(chain_z, 0);
+    //P("x = %s, y = %s, z = %s\n", x,y,z);
+    SP(tmp, "q%d_peephole_%d", qid, PhTotal);
+    P("L %s(V z, V x, V y){\n", tmp);
+    P(indent "// z -> %s, x -> %s, y -> %s\n", z,x,y);
+    P(indent "L r0 = vn(y);\n");
+    P(indent "initV(z, H_L, r0);\n");
+    P(indent "DOP(r0, {V t=vV(y,i); L len=vn(t); L tot=0; B f[199]={0};\\\n");
+    P(indent2 "DOJ(len, if(!f[j]){ \\\n");
+    char x2c = getTypeCodeByName(x);
+    P(indent2 "DOK(len, if(k!=j && v%c(x,vL(t,j))==v%c(x,vL(t,k))) f[k]=1)\\\n",x2c,x2c);
+    P(indent2 "f[j]=1; tot++;}) vL(z,i)=tot; }) R 0;\n}\n");
+    PhList[PhTotal].invc = phNameFP4(z, tmp, x, y);
+    PhList[PhTotal].targ = z;  PhTotal++;
+    setAllChainVisited(ptree);
+}
+
+static void genPattern(PatternTree *ptree, I pid){
+    //P("gen pattern pid = %d\n", pid);
+    switch(pid){
+        case 3: genPattern3(ptree); break;
+        case 4: genPattern4(ptree); break;
+        default: EP("Pattern not supported yet: %d\n", pid);
+    }
+}
+
+static void findPattern(ChainList *list, PatternTree* ptree, I pid){
+    ChainList *p = list->next;
+    while(p){
+        if(!isVisited(p->chain)){
+            if(matchPattern(p->chain, ptree)){
+                genPattern(ptree, pid);
+            }
+        }
+        p = p->next;
+    }
+}
+
+static PatternTree *initPatternTree(char *func1, char *func2, int n){
+    PatternTree *x = (PatternTree*)malloc(sizeof(PatternTree));
+    x->func1 = strdup(func1);
+    x->func2 = func2?strdup(func2):NULL;
+    x->num   = n;
+    x->child = 0==n?NULL:(PatternTree**)malloc(sizeof(PatternTree*) * n);
+    x->chain = NULL;
+    return x;
+}
+
+static void revokePatternTree(PatternTree *ptree){
+    DOI(ptree->num, revokePatternTree(ptree->child[i]))
+    free(ptree->func1);
+    if(ptree->func2) free(ptree->func2);
+    free(ptree->child);
+    free(ptree);
+}
+
+static PatternTree *createFP2(){
+    PatternTree *rt = initPatternTree("raze", NULL, 1);
+    rt->child[0] = initPatternTree("each", "sum", 1);
+    rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
+    return rt;
+}
+
+static PatternTree *createFP3(){
+    PatternTree *rt = initPatternTree("index_a", NULL, 2);
+    rt->child[0] = initPatternTree("vector", NULL, 1);
+    rt->child[0]->child[0] = initPatternTree("len", NULL, 0);
+    rt->child[1] = initPatternTree("compress", NULL, 2);
+    rt->child[1]->child[0] = initPatternTree("lt", NULL, 0);
+    rt->child[1]->child[1] = initPatternTree("?", NULL, 0);
+    return rt;
+}
+
+static PatternTree *createFP4(){
+    PatternTree *rt = initPatternTree("raze", NULL, 1);
+    rt->child[0] = initPatternTree("each", "len", 1);
+    rt->child[0]->child[0] = initPatternTree("each", "unique", 1);
+    rt->child[0]->child[0]->child[0] = initPatternTree("each_right", "index", 0);
+    return rt;
+}
+
+/* main */
+
 static void analyzeChainList(ChainList *list){
     findPatternCompress(list);
     findPatternRaze(list);
+    PatternTree *fp3 = createFP3(); /* q4 */
+    //prettyPatternTree(fp3); P("\n");
+    findPattern(list, fp3, 3);
+    PatternTree *fp4 = createFP4();
+    //prettyPatternTree(fp4); P("\n");
+    findPattern(list, fp4, 4);
+    // clean up
+    revokePatternTree(fp3);
+    revokePatternTree(fp4);
 }
 
 /* entry */
@@ -307,4 +569,5 @@ void analyzePeephole(){
     printBanner("Peephole");
     //printChainList();
     analyzeChainList(chain_list);
+    //printChainList();
 }

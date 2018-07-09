@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
 
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "x:hvtq:s:d:r:o:")) != -1){
+    while((c = getopt(argc, argv, "hvtq:s:co:d:r:x:")) != -1){
         switch(c){
             case 'h': isUsage   = true; break;
             case 'v': isVersion = true; break;
@@ -122,7 +122,7 @@ static void parseInput(I qid){
 static void runCompileWithOpt(char *optName){
     struct timeval tv0, tv1;
     /* basics */
-    prettyProg(root);
+    //prettyProg(root);
     initGlobal();
     gettimeofday(&tv0, NULL);
     buildUDChain(root); /* include type and shape propagation */
@@ -133,10 +133,10 @@ static void runCompileWithOpt(char *optName){
             analyzeSR(root);
             prettyProg(root); /* verify */
         }
-        else if(!strcmp(optName, "lf")){
+        else if(!strcmp(optName, "fe")){ //lf -> fe
             analyzeLF();
         }
-        else if(!strcmp(optName, "ph")){
+        else if(!strcmp(optName, "fp")){ //ph -> fp
             analyzePeephole();
         }
         else { EP("opt %s is not supported\n",optName); }

@@ -132,12 +132,12 @@ void initUDChain(){
 }
 
 void printChainList(){
-    P("print chain list\n");
+    printBanner("Chain list");
     ChainList *p = chain_list;
     int lineno = 0;
     while(p->next){
         p = p->next;
-        P("[%2d] ",lineno++); prettyNode(p->chain->cur);
+        P("[%2d] %d: ",lineno++,p->chain->isVisited); prettyNode(p->chain->cur);
     }
 }
 

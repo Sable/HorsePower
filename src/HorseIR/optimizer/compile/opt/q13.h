@@ -1,5 +1,3 @@
-//=====Loop Fusion=====
-//=====Peephole=====
 L q13_peephole_0(V z, V x, V y){
     // z -> t44, x -> k7, y -> t40
     L r0 = vn(y);
@@ -18,11 +16,6 @@ E compiledQ13(){
     V t45 = allocNode(); V t46 = allocNode(); V t47 = allocNode(); V t48 = allocNode();
     V t49 = allocNode(); V t50 = allocNode(); V t51 = allocNode();
     V t35 = allocNode(); V t31 = allocNode();
-    //V w0[] = {k7};
-    //V w1[] = {t44,t41};
-    //B w2[] = {0,0};
-    //S w3[] = {"c_count","custdist"};
-    //V w4[] = {t47,t48};
     tic;
     PROFILE(  0, a0 , pfnLoadTable(a0, initLiteralSym((S)"customer")));
     PROFILE(  1, a1 , pfnColumnValue(a1, a0, initLiteralSym((S)"c_custkey")));
