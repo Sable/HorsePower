@@ -1,5 +1,7 @@
 #include "global.h"
 
+/* helper functions */
+
 void *newM(int n){
     void *x = malloc(n);
     memset(x, 0, n);
@@ -10,6 +12,14 @@ void *newM(int n){
 void error(const char *s){
     fprintf(stderr,"%s\n", s);
     exit(1);
+}
+
+static L calcIntervalPrecise(struct timeval t0, struct timeval t1){
+    return (t1.tv_sec-t0.tv_sec)*1000000 + t1.tv_usec-t0.tv_usec;
+}
+
+E calcInterval(struct timeval t0, struct timeval t1){
+    return calcIntervalPrecise(t0, t1) / 1000.0;
 }
 
 /* initialization */

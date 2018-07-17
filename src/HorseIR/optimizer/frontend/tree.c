@@ -1,4 +1,4 @@
-#include "global.h"
+#include "../global.h"
 
 extern Prog *root;
 extern int yylineno;

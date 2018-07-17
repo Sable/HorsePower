@@ -1,4 +1,4 @@
-#include "global.h"
+#include "../global.h"
 
 int depth;
 static bool withAttr = true;
@@ -19,7 +19,8 @@ static bool toC      = false;
 #define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else printSymCommon(b,n->val.charS);}
 #define printFunc(b,n)   echo(b,n->val.idS)
 
-#define printPlainList(b,n)  prettyListBuff(b, n->val.listS, comma)
+#define printPlainList(b,n)  {L x=countList(n->val.listS); \
+                              if(x>1)printChar('('); prettyListBuff(b, n->val.listS, comma); if(x>1)printChar(')');}
 #define printPlainList2(b,n) prettyListBuff(b, n->val.listS, nospace)
 #define printPlainFloat(b,n) printPlainList(b,n)
 #define printPlainSym(b,n)   printPlainList2(b,n)
@@ -30,17 +31,21 @@ static bool toC      = false;
 
 #define printLiteralFloat(b,n) {printPlainFloat(b,n); if(withAttr) strcat(b,":f64");}
 #define printLiteralSym(b,n)   {printPlainSym(b,n);   if(withAttr) strcat(b,":sym");}
-#define printLiteralDate(b,n)  {printPlainDate(b,n);  if(withAttr) strcat(b,":d");  }
+#define printLiteralDate(b,n)  {printPlainDate(b,n);  if(withAttr) strcat(b,":d"  );}
 #define printLiteralChar(b,n)  SP(b,"'%s'", n->val.charS)
-#define printLiteralStr(b,n)   {printPlainStr(b,n);   if(withAttr) strcat(b,":str");}
+#define printLiteralStr(b,n)   {printPlainStr(b,n);   if(withAttr) strcat(b,":str" );}
 #define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
-#define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64"); }
+#define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64" );}
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
-#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS); }
+#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS);}
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
 #define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
 #define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
 #define resetBuff(b) if(b[0]!=0) b+=strlen(b)
+
+static int countList(List *list){
+    int tot = 0; while(list){ tot++; list = list->next; } return tot;
+}
 
 static void printDepth(char* b){
     resetBuff(b);
@@ -146,7 +151,6 @@ void prettyNodeBuff(char *b, Node *n){
         default: EP("[prettyNodeBuff] unexpected node type: %d\n", n->kind);
     }
 }
-
 
 void prettyListBuff(char *b, List *list, char sep){
     if(list){

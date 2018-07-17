@@ -15,6 +15,7 @@ B isCompiler= false;
 B isInterp  = false;
 B isExp     = false;
 B isW       = false;
+B isPretty  = false;
 I runs      = 1;
 I qid       = -1;
 I qscale    = 1;
@@ -46,17 +47,19 @@ int main(int argc, char *argv[]){
         usage(); exit(1);
     }
     else if(isCompiler) {
-        validateParameters();
         parseInput(qid);
         runCompileWithOpt(isOpt?optName:NULL);
     }
     else if(isInterp){
-        validateParameters();
         parseInput(qid);
         runInterpreter(qid);
     }
     else if(isExp){
         runExperiment();
+    }
+    else if(isPretty){
+        parseInput(qid);
+        prettyProg(root);
     }
     else if(isUsage)   { usage();   exit(1); }
     else if(isVersion) { version(); exit(1); }
@@ -68,25 +71,27 @@ int main(int argc, char *argv[]){
 
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvtq:s:co:d:r:x:")) != -1){
+    while((c = getopt(argc, argv, "hvtq:s:co:d:r:x:p")) != -1){
         switch(c){
-            case 'h': isUsage   = true; break;
-            case 'v': isVersion = true; break;
-            case 't': isInterp  = true; break;
+            case 'h': isUsage   = true;            break;
+            case 'v': isVersion = true;            break;
+            case 't': isInterp  = true;            break;
             case 'q': isQuery   = true; \
-                      qid       = atoi(optarg); break;
-            case 's': qscale    = atoi(optarg); break;
-            case 'c': isCompiler= true;         break;
+                      qid       = atoi(optarg);    break;
+            case 's': qscale    = atoi(optarg);    break;
+            case 'c': isCompiler= true;            break;
             case 'o': isCompiler= true; \
                       isOpt     = true; \
-                      optName   = strdup(optarg);break;
-            case 'd': delimiter = optarg[0];     break;
-            case 'r': runs      = atoi(optarg);  break;
+                      optName   = strdup(optarg);  break;
+            case 'd': delimiter = optarg[0];       break;
+            case 'r': runs      = atoi(optarg);    break;
             case 'x': isExp     = true; \
                       isW       = 0==atoi(optarg); break;
+            case 'p': isPretty  = true;            break;
             default : return 1;
         }
     }
+    validateParameters();
     return 0;
 }
 
@@ -99,7 +104,7 @@ static void usage(){
     WP("  -q <qid>     TPC-H query id\n"        );
     WP("  -s <sid>     TPC-H query scale\n"     );
     WP("  -o <name>    Query opt. [fe/fp]\n"    );
-    WP("  -d 'del'     Set delimiter to del\n"  );
+    WP("  -d 'del'     CSV del. (default '|')\n");
     WP("  -r <runs>    Number of runs\n"        );
 }
 
@@ -161,8 +166,28 @@ static void runInterpreter(I qid){
 }
 
 static void validateParameters(){
-    if(qid < 0 || qscale < 0){
-        EP("Error found: qid %d, qscale %d\n", qid, qscale);
+    if(isQuery){
+        if(qid<0 || qid>22)
+            EP("> qid must be [1,22], but %d found.\n", qid);
+        if(!isInterp && !isCompiler && !isPretty)
+            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
+    }
+    if(qscale < 0){
+        EP("> qscale must > 0, but %d found.\n", qscale);
+    }
+    if(runs < 0){
+        EP("> # of runs must > 0, but %d found.\n", runs);
+    }
+    if(isInterp && isCompiler){
+        EP("> choose one mode: interpreter (-t) or compiler (-c), not both.\n");
+    }
+    else if(isInterp || isCompiler){
+        if(!isQuery){
+            EP("> query must be specified (-q <id>).\n");
+        }
+    }
+    if(isPretty && !isQuery){
+        EP("> pretty printer needs a query specified (-q <id>).\n");
     }
 }
 

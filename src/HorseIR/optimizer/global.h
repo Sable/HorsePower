@@ -35,8 +35,8 @@ void error(const char* s);
 
 #include "backend/common.h"
 
-#include "tree.h"
-#include "pretty.h"
+#include "frontend/tree.h"
+#include "frontend/pretty.h"
 #include "analysis/common.h"
 #include "analysis/udchain.h"
 #include "analysis/typeshape.h"
