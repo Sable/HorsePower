@@ -1,0 +1,3 @@
+Real,     B -> I
+Datetime, B -> I
+String,   B -> I

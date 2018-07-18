@@ -1,0 +1,3 @@
+Real, Real  -> MaxType
+Datetime, Int -> MaxType
+Int, Datetime -> MaxType
