@@ -25,6 +25,8 @@ L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen);
 #define lib_index_of_T lib_index_of_I
 
 /* quick sort section */
+#define FUNC_QCMP(x) I (*x)(const void*, const void*)
+
 #define FUNC_CMP(x) L (*x)(V,L,L,B*)
 void lib_quicksort          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
 void lib_quicksort_char     (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
@@ -54,6 +56,8 @@ L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen);
 #define lib_member_U lib_member_I
 #define lib_member_W lib_member_I
 #define lib_member_T lib_member_I
+
+//void lib_hash_test(L *val, L n);
 
 #ifdef	__cplusplus
 }

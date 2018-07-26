@@ -151,7 +151,7 @@ G allocStrMem(L n){
 /* initialization */
 
 V initV(V x, L typ, L len){
-    xp= typ;
+    xp = typ;
     xn = len;
     if(isTypeGroupBasic(typ)){
         xg = (len>1)?getHeapMem(typ, len):(G)&xb;

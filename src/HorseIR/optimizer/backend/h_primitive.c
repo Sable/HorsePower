@@ -660,6 +660,16 @@ L pfnWhere(V z, V x){
         }
         R 0;
     }
+    else if(isListSameType(x, H_B)){
+        L c=0,lenZ = 2;
+        DOI(vn(x), {V t=vV(x,i);DOJ(vn(t), if(vB(t,j))c++)})
+        initV(z,H_G,lenZ);
+        V t0 = vV(z,0),  t1 = vV(z,1);
+        initV(t0,H_L,c); initV(t1,H_L,c);
+        c = 0;
+        DOI(vn(x),{V t=vV(x,i); DOJ(vn(t), if(vB(t,j)){vL(t0,c)=i; vL(t1,c)=j; c++;})})
+        R 0;
+    }
     else R E_DOMAIN;
 }
 
@@ -871,15 +881,19 @@ L pfnToIndex(V z, V x){
 }
 
 L pfnGroup(V z, V x){
-    //P("Input len = %lld, type = %lld\n", xn,xp);
+    P("Input len = %lld, type = %lld\n", xn,xp);
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
     V t = allocNode();
     L lenZ = isList(x)?vn(x):1;
     L *order_list = NULL;
     initV(y,H_B,lenZ);
-// struct timeval tv0, tv1;
-// gettimeofday(&tv0, NULL);
+    //if(xn == 1483918){
+        //DOI(20, P("%lld ",vL(x,i))) P("\n");
+        //lib_hash_test(sL(x), vn(x));
+    //}
+ struct timeval tv0, tv1;
+ gettimeofday(&tv0, NULL);
     if(isOrdered(x)){
         if(H_DEBUG) P("Ordered data found in pfnGroup\n");
         order_list = NULL;
@@ -889,12 +903,12 @@ L pfnGroup(V z, V x){
         CHECKE(pfnOrderBy(t,x,y));
         order_list = sL(t);
     }
-// gettimeofday(&tv1, NULL);
-// P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+ gettimeofday(&tv1, NULL);
+ P("1.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1));
     // P("t = \n");
     // printV(t);
 
-// gettimeofday(&tv0, NULL);
+ gettimeofday(&tv0, NULL);
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
@@ -906,9 +920,9 @@ L pfnGroup(V z, V x){
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-// gettimeofday(&tv1, NULL);
-// P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-// getchar();
+ gettimeofday(&tv1, NULL);
+ P("2.(elapsed time %g ms)\n\n", calcInterval(tv0,tv1));
+ //getchar();
     //L tid = getSymbol((S)"148561");
     //DOI(vn(x), if(vQ(x,i)==tid)P("%lld\n",i))
     R 0;
@@ -1344,6 +1358,7 @@ L pfnCompress(V z, V x, V y){
         else if(lenZ > 0){ // copy all of items
             CHECKE(copyV(z,y));
         }
+        //P("Before: %lld; After: %lld\n", vn(x), vn(z));
         R 0;
     }
     else R E_DOMAIN;
@@ -1465,6 +1480,9 @@ L pfnAppend(V z, V x, V y){
 /* 
  * x: string
  * y: string (done), symbol, list of string and symbol (pending)
+ * 
+ * Case 1: create_jit; DOP(...); free_jit
+ * Case 2: DOLIKE(...){create_jit; do; free_jit}  (faster)
  */
 //#define LIKEMATCH(src,slen,re,matchData) \
 //    pcre2_match(re,\
@@ -1473,10 +1491,24 @@ L pfnAppend(V z, V x, V y){
 //    )<0?0:1
 // PCRE2_SPTR -> unsigned char*
 #define LIKEMATCH(src,slen,re,matchData) \
-    pcre2_match(re,\
+    pcre2_jit_match(re,\
        (PCRE2_SPTR)src,\
         slen,0,PCRE2_ANCHORED,matchData,NULL\
     )<0?0:1
+#define DOLIKE(n, x, ...){ L seg=(n)/H_CORE; \
+    _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
+    { \
+        pcre2_match_context *mcontext = pcre2_match_context_create(NULL); \
+        pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(64*1024, 512*1024, NULL);\
+        pcre2_jit_stack_assign(mcontext, NULL, jit_stack);\
+        pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);\
+        L tid = omp_get_thread_num(); \
+        for(L i=tid*seg,i2=(tid!=H_CORE-1?(i+seg):(n));i<i2;i++) x; \
+        pcre2_match_data_free(match); \
+        pcre2_match_context_free(mcontext); \
+        pcre2_jit_stack_free(jit_stack); \
+    } \
+}
 // TODO: debug caseQ, a non-deterministic bug
 L pfnLike(V z, V x, V y){
     if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
@@ -1485,37 +1517,29 @@ L pfnLike(V z, V x, V y){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):vs(y);
             pcre2_code *re = getLikePatten(strY);
-            // I rc = pcre2_jit_compile(re, PCRE2_JIT_PARTIAL_HARD);
+            /* jit facilities */
+            I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+            B case1 = false;
+            //case 1
+            // if(jit_status == 0) P("jit pattern initialized successfully\n");
+            // else P("jit pattern initialized failed %lld\n", jit_status);
             // pcre2_match_context *mcontext = pcre2_match_context_create(NULL);
-            // pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
+            // pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
             // pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
             pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
             if(re==NULL) R E_NULL_VALUE;
             initV(z,H_B,lenZ);
-            // P("Entering pfnLike\n");
+            //P("Entering pfnLike: x(%lld, %lld), y(%lld, %lld)\n",vp(x),vn(x),vp(y),vn(y)); //getchar();
             switch(vp(x)){
                 caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
-                caseQ DOI(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vL(x,i)),getSymbolSize(vL(x,i)),re,match);}) break;
-//                caseQ {
-//                    L i2 = vn(x);
-//#pragma omp parallel for
-//                    for(L i=0;i<i2;i++){
-//                        vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);
-//                    }
-//                } break;
-                caseS DOI(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
-                // caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
-                // caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
+                caseQ DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);}) break;
+                caseS DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
             }
-            //L tt=0; DOI(vn(z), tt+=vB(z,i)) P("tt = %lld, string = %s\n",tt,strY);
-            //if(tt>4){
-            //    P("input [1389] %s, patt = %s, => %d\n", getSymbolStr(vQ(x,1389)), strY, LIKEMATCH(getSymbolStr(vQ(x,1389)),getSymbolSize(vQ(x,1389)),re,match));
-            //    P("input [5130] %s, patt = %s, => %d\n", getSymbolStr(vQ(x,5130)), strY, LIKEMATCH(getSymbolStr(vQ(x,5130)),getSymbolSize(vQ(x,5130)),re,match));
-            //    L k=500; DOI(vn(z), if(k>0 && vB(z,i)){k--;P("%lld ", i);}) P("\n");
-            //    getchar();
-            //}
+            //L jit_size = pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, NULL);
+            //P("pfnLike time (ms): %g ms , jit size = %lld\n", calcInterval(tv0, tv1), jit_size); //getchar();
             pcre2_code_free(re);
             pcre2_match_data_free(match);
+            //case 1
             // pcre2_match_context_free(mcontext);
             // pcre2_jit_stack_free(jit_stack);
             R 0;
@@ -1647,6 +1671,41 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
     else {
         CHECKE((*foo)(z,x,y));
     }
+    R 0;
+}
+
+/* TODO: support more op (currently only eq */
+#define OuterOp(op,x,y) (op==0?(x)==(y):-1)
+L pfnOuter(V z, V x, V y, FUNC2(foo)){
+    if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+        L lenX    = vn(x), lenY = vn(y);
+        L typMax  = MAX(vp(x),vp(y));
+        L typCell = -1, op = -1;
+        if(foo == &pfnEq){ typCell = H_B; op = 0; }
+        else R E_DOMAIN;
+        V tempX = allocNode();
+        V tempY = allocNode();
+        CHECKE(promoteValue(tempX, x, typMax));
+        CHECKE(promoteValue(tempY, y, typMax));
+        initV(z,H_G,lenX);
+        DOI(lenX, initV(vV(z,i),typCell,lenY))
+        switch(typCell){
+            caseB {
+                switch(typMax){
+                    caseB DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vB(tempX,i),vB(tempY,j)))}) break;
+                    caseH DOI(lenX, {V t=vV(z,i); DOJ(lenY, vH(t,j)=OuterOp(op,vH(tempX,i),vH(tempY,j)))}) break;
+                    caseI DOI(lenX, {V t=vV(z,i); DOJ(lenY, vI(t,j)=OuterOp(op,vI(tempX,i),vI(tempY,j)))}) break;
+                    caseL DOI(lenX, {V t=vV(z,i); DOJ(lenY, vL(t,j)=OuterOp(op,vL(tempX,i),vL(tempY,j)))}) break;
+                    caseF DOI(lenX, {V t=vV(z,i); DOJ(lenY, vF(t,j)=OuterOp(op,vF(tempX,i),vF(tempY,j)))}) break;
+                    caseE DOI(lenX, {V t=vV(z,i); DOJ(lenY, vE(t,j)=OuterOp(op,vE(tempX,i),vE(tempY,j)))}) break;
+                    caseC DOI(lenX, {V t=vV(z,i); DOJ(lenY, vC(t,j)=OuterOp(op,vC(tempX,i),vC(tempY,j)))}) break;
+                    default: R E_DOMAIN;
+                }
+            } break;
+            default: R E_DOMAIN;
+        }
+    }
+    else R E_DOMAIN;
     R 0;
 }
 

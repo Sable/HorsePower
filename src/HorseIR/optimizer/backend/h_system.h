@@ -77,6 +77,7 @@ B isTypeGroupColumn     (L t);
 B isTypeGroupComparable (L t);
 B isTypeGroupBasic      (L t);
 B isTypeGroupAny        (L t);
+B isListSameType        (V x, L typ);
 
 L inferReal2Int         (L t);
 L inferNeg              (L t);

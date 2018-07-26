@@ -9,6 +9,7 @@ typedef L (*EachDyadic)(V,V,V,DyadicFunc);
 
 #define MonFuncSize 58
 #define DyaFuncSize 35
+#define OuterProduct EachDyadic
 
 /* pfnRand, pfnSeed, pfnCount */
 MonadicFunc monFunc[MonFuncSize] = {
@@ -56,6 +57,19 @@ static V executeIndexA(V *p){
     L status = pfnIndexA(p[0], p[1], p[2]);
     if(status==0) return p[0];
     else {P("[IndexA]"); printErrMsg(status);}
+}
+
+static V executeOuter(OuterProduct f, V *p){
+    if(H_DEBUG) P("executeOuter\n");
+    V z = NEW(V0);
+    S funcName = getSymbolStr(vq(p[0]));
+    pFunc fIndex = getFuncIndexByName(funcName);
+    if(fIndex >= eachF || fIndex <ltF) EP("[Outer-product] (%s) not supported.\n", funcName);
+    L valence  = getValence(fIndex);
+    if(valence != 2) EP("dyadic op expected for each_left/right, not %s\n", funcName);
+    L status = (*f)(z, p[1], p[2], dyaFunc[fIndex-ltF]);
+    if(status==0) return z;
+    else {P("[Outer-product]"); printErrMsg(status);}
 }
 
 static V executeEachDya(EachDyadic f, V *p){
@@ -141,6 +155,8 @@ static V processStmtCommon(Node *expr){
                 case      indexAF: return executeIndexA(params); break;
                 /* anyadic */
                 case        listF: return executeAny(&pfnList       , params, np); break;
+                /* others */
+                case       outerF: return executeOuter(&pfnOuter, params); break;
                 default: EP("pending ... for %d\n", fIndex);
             }
         }
@@ -175,6 +191,10 @@ static V runReturnStmt(Node *stmt){
 }
 
 static int runSingleStmt(Node *stmt, V *rtn){
+#ifdef PROFILE
+    struct timeval tv0, tv1;
+    gettimeofday(&tv0, NULL);
+#endif
     switch(stmt->kind){
         case simpleStmtK: runSimpleStmt(stmt); break;
         case   castStmtK: runCastStmt(stmt);   break;
@@ -182,6 +202,10 @@ static int runSingleStmt(Node *stmt, V *rtn){
         default: printNodeKind(stmt);
                  EP("[runSingleStmt: kind %d not supported yet.\n", stmt->kind);
     }
+#ifdef PROFILE
+    gettimeofday(&tv1, NULL);
+    P(">> Time (ms): %g ms\n\n", calcInterval(tv0, tv1));
+#endif
     return 0;
 }
 

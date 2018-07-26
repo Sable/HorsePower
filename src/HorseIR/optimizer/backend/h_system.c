@@ -364,6 +364,13 @@ L matchPair(B *t, V x, V y){
     else R 0;
 }
 
+static void check_pcre2_jit(){
+    L has_jit = 0;
+    pcre2_config(PCRE2_CONFIG_JIT, &has_jit);
+    if(has_jit == 1) P("JIT is available!\n");
+    else EP("JIT is not enabled: %lld\n", has_jit);
+}
+
 /* pat = pattern */
 L getLikeFromString(B *t, S src, S pat){
     S newString = genLikeString(pat,strlen(pat));
@@ -385,6 +392,7 @@ L getLikeFromString(B *t, S src, S pat){
 }
 
 pcre2_code* getLikePatten(S pat){
+    if(H_DEBUG) check_pcre2_jit();
     S newString = genLikeString(pat,strlen(pat));
     if(!newString) R NULL;
     L newLen = strlen(newString);
@@ -608,6 +616,13 @@ B isTypeGroupBasic(L t){
 
 B isTypeGroupAny(L t){
     R (isTypeGroupBasic(t) || isTypeGroupCompound(t));
+}
+
+B isListSameType(V x, L typ){
+    if(isList(x)){
+        DOI(vn(x), if(vp(vV(x,i)) != typ) R 0) R 1;
+    }
+    else R 0;
 }
 
 /* Type inference */

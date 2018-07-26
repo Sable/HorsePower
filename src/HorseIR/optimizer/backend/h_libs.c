@@ -299,6 +299,7 @@ L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen){
     R 0;
 }
 
+
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(isChar(val)) lib_quicksort_char(rtn, val, low, high, isUp, cmp);
     else lib_quicksort_other(rtn, val, low, high, isUp, cmp);
@@ -326,18 +327,25 @@ void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     }
 }
 
+
 void lib_quicksort_other(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
-        //if(leftSame) P("low = %lld, high = %lld\n",low,high);
+        //if(leftSame) { P("low = %lld, high = %lld\n",low,high); getchar(); }
         //P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
+//#pragma omp parallel sections
+        {
+//#pragma omp section
         if(!leftSame)
             lib_quicksort_other(rtn, val, low, pos, isUp, cmp);
+//#pragma omp section
         if(pos<high)
             lib_quicksort_other(rtn, val, pos+1, high,isUp, cmp);
+        }
     }
 }
+
 
 L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSame){
     L pivot = low, i = low, j = high, t;
@@ -538,7 +546,7 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     //     { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
     // if(colId == 2 && low == 29)
     // P("low = %lld, high = %lld, colId = %lld, val=%lld\n", low, high, colId, *curB); // getchar();
-    struct timeval tv0, tv1;
+    //struct timeval tv0, tv1;
     // gettimeofday(&tv0, NULL);
     if(lib_order_by_sorted(targ,curV,curB,low,high,cmp)){
         // if(colId == 2 && low == 29 && high == 33){
@@ -620,10 +628,42 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     // }
 }
 
+/*
+ * The performance of qsort is affected by the size of node
+ */
+typedef struct compare_node_L { L i64; L p; }CNL,CN;
+int cmp_L(const void *a, const void *b){
+    R vl(((CNL*)a)) - vl(((CNL*)b));
+}
+static void lib_qsort_vector_L(L *val, L size){
+    CNL *nodes = (CNL*)malloc(sizeof(CNL)*size);
+    DOI(size, {nodes[i].i64=val[i]; nodes[i].p=i;})
+    qsort(nodes, size, sizeof(CNL), cmp_L);
+}
+
+static CN *lib_qsort_node(V val, L size, FUNC_QCMP(cmp)){
+    CN *nodes = (CN*)malloc(sizeof(CN)*size);
+    switch(vp(val)){
+        caseL DOI(size, {nodes[i].i64=vL(val,i); nodes[i].p=i;})
+              qsort(nodes, size, sizeof(CN), cmp_L); break;
+        default: EP("xxxx\n");
+    }
+    //DOI(size, lib_node_assign(nodes+i, val, i))
+    //qsort(nodes, size, sizeof(CN), cmp_test);
+    R nodes;
+}
+
+void lib_order_vector(L *targ, V val, L vLen, B *isUp){
+    CN *nodes = lib_qsort_node(val, vLen, cmp_L);
+    DOI(vLen, targ[i] = nodes[i].p)
+    free(nodes);
+}
+
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i)
     // P("tLen = %lld\n", tLen);
     lib_quicksort(targ, val, 0, tLen, isUp, cmp);
+    //lib_order_vector(targ, val, tLen, isUp); // experimental
     // P("done.\n");
 }
 
@@ -989,9 +1029,113 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //    return 0;
 //}
 
+/* hash grouping (not used) */
 
+//typedef struct hash_test{
+//    L index;
+//    struct hash_test *next;
+//}HT0, *HT;
+//
+//void lib_hash_test(L *val, L n){
+//    //FILE *fp = fopen("problem1_data.txt", "w");
+//    //FP(fp, "%lld\n", n);
+//    //DOI(n, FP(fp, "%lld ", val[i])) FP(fp, "\n"); fclose(fp);
+//    //P("done.\n"); getchar();
+//    U32 out; L size = n * 2;
+//    struct timeval tv0, tv1;
+//    gettimeofday(&tv0, NULL);
+//    L *qq = (L*)malloc(sizeof(L)*10);
+//    HT* table = (HT*)malloc(sizeof(HT)*size);
+//    HT* lastp = (HT*)malloc(sizeof(HT)*size);
+//    HT nodes  = (HT)malloc(sizeof(HT0)*n);
+//    memset(table, 0, sizeof(HT)*size);
+//    gettimeofday(&tv1, NULL);
+//    P("0. Exe. time (ms): %g\n", calcInterval(tv0, tv1));
+//    //DOI(n, {MurmurHash3(val+i, 1, 16807, &out); if(out%size==9348)P("%lld ", val[i]); table[out%size]++;})
+//    gettimeofday(&tv0, NULL);
+//    DOI(n, {out = hash_djb2_n(val+i, sizeof(L));
+//            HT node = nodes+i; node->next = NULL; node->index = i; \
+//            L x=out%size; \
+//            if(table[x]==NULL) lastp[x]=table[x]=node; \
+//            else {lastp[x]->next = node; lastp[x] = node;} \
+//            });
+//    //DOI(n, {out = hash_djb2_n(val+i, sizeof(L)); \
+//    //        HT node = nodes+i; node->next = NULL; node->index = i; \
+//    //        L x=out%size; \
+//    //        if(table[x]==NULL) lastp[x]=table[x]=node; \
+//    //        else {lastp[x]->next = node; lastp[x] = node;} \
+//    //        });
+//    gettimeofday(&tv1, NULL);
+//    P("1. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
+//    P("out = %u\n", out);
+//    gettimeofday(&tv0, NULL);
+//    for(L i=0; i<size;i++){
+//        if(table[i]){
+//            HT t = table[i]; L tot = 0; while(t){ tot++; /*P("%lld ", val[t->index]);*/ t=t->next;} //P("\n");
+//            B *visited = (B*)malloc(sizeof(B)*tot); memset(visited, 0, sizeof(B)*tot);
+//            t = table[i];
+//            DOJ(tot, {if(!visited[j]){ visited[j]=true; HT p = t->next; L cnt = 0; \
+//                L k = j+1; while(p){ if(val[t->index]==val[p->index]){visited[k]=true; cnt++;} p = p->next; k++; } \
+//                /*P("val = %lld, cnt = %lld\n",val[t->index],cnt);*/ } t=t->next;} )
+//            free(visited);
+//        }
+//    } 
+//    gettimeofday(&tv1, NULL);
+//    P("2. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
+//    /*L tot = 0, maxv = 0;
+//    DOI(size, if(table[i]>table[maxv])maxv=i)
+//    L minv = maxv;
+//    DOI(size, if(table[i]>0 && table[i]<table[minv])minv=i)
+//    DOI(size, tot += table[i]>0)
+//    P(">0: %lld, %lld (%lld), %lld (%lld)\n",tot,maxv,table[maxv],minv,table[minv]);
+//    */
+//    free(lastp);
+//    free(table);
+//    free(nodes);
+//}
 
+/* radix sort (experimental) */
+typedef struct poi{L x;int i;}poi;
 
+/*
+ * https://blog.csdn.net/WINCOL/article/details/4799979
+ */
+void radixSort(poi *val, int len){
+    const L size = 255;
+    int *C = (int*)malloc(sizeof(int)<<8);
+    poi *B = (poi*)malloc(sizeof(poi)*len);
+    int  maxSize = 32;
+    const L halfL = 0xffffffff;
+    for(int i=0; i<len; i++){
+        //int numOfDigits = (int)log10(val[i].x) + 1;
+        if((((val[i].x)>>32) & halfL) > 0){
+            maxSize = 64;
+        }
+    }
+    printf("maxSize = %d\n", maxSize);
+    for(int j=0,j2=maxSize; j<j2; j+=8){
+        memset(C, 0, sizeof(int)<<8);
+        for(int i=0;i<len;i++){
+            C[((val[i].x)>>j) & size]++;
+        }
+        for(int i=1; i<=size; i++){
+            C[i] = C[i] + C[i-1];
+        }
+        //printf("j = %d\n", j);
+        for(int i=len-1;i>=0;i--){
+            int k = ((val[i].x)>>j) & size;
+            //printf("val = %lld, k = %d\n", val[i].x,k);
+            C[k]--;
+            B[C[k]] = val[i];
+        }
+        memcpy(val, B, sizeof(poi) * len);
+        //for(int i=0; i<len; i++){
+        //    val[i] = B[i];
+        //}
+    }
+    free(B);
+    free(C);
+}
 
 
 

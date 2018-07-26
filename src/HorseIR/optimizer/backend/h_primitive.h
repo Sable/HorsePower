@@ -179,6 +179,8 @@ L pfnEachItem      (V z, V x, V y, FUNC2(foo));
 L pfnEachLeft      (V z, V x, V y, FUNC2(foo));
 L pfnEachRight     (V z, V x, V y, FUNC2(foo));
 
+L pfnOuter         (V z, V x, V y, FUNC2(foo));
+
 L pfnDictTable     (V z, V x, V y, L op);
 L pfnDict          (V z, V x, V y);
 L pfnTable         (V z, V x, V y);

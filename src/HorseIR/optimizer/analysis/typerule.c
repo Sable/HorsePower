@@ -20,7 +20,7 @@ const char *FUNCTIONS[] = {
     "member", "vector", "match", "index", "column_value", "sub_string",
     /* special 10 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
-    "ktable", "index_a", "list"
+    "ktable", "index_a", "list", "outer"
 };
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
@@ -133,6 +133,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleFetch       NULL
 #define ruleIndexA      propIndexA
 #define ruleList        propList
+#define ruleOuter       NULL
 
 #define isT(t) (t==n->type)
 
@@ -758,6 +759,7 @@ void *fetchTypeRules(char *name, int* num){
             CASE(  loadTableF, ruleLoadTable)
             CASE(      fetchF, ruleFetch)
             CASE(     indexAF, ruleIndexA)
+            CASE(      outerF, ruleOuter)
             CASE(       listF, ruleList)
             default: EP("type rules not defined.: %s\n", name);
         }
@@ -786,6 +788,7 @@ int getValence(pFunc k){
             case       tableF: return 2;
             case      ktableF: return 0;
             case      indexAF: return 3;
+            case       outerF: return 3;
             case        listF: return -1; //any
             default: EP("[getValence] Func (%d) not defined yet.\n",k);
         }

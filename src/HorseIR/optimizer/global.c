@@ -62,6 +62,19 @@ void initBackend(){
     pfnAddFKey(initLiteralSym((S)t0), initLiteralSym((S)c0),\
                initLiteralSym((S)t1), initLiteralSym((S)c1))
 
+static void initQ2(){
+    initTableByName((S)"part");
+    initTableByName((S)"supplier");
+    initTableByName((S)"partsupp");
+    initTableByName((S)"nation");
+    initTableByName((S)"region");
+    addFKey("part", "p_partkey", "partsupp", "ps_partkey");
+    addFKey("supplier", "s_suppkey", "partsupp", "ps_suppkey");
+    addFKey("region", "r_regionkey", "nation", "n_regionkey");
+    addFKey("nation", "n_nationkey", "supplier", "s_nationkey");
+}
+
+
 static void initQ3(){
     initTableByName((S)"customer");
     initTableByName((S)"orders");
@@ -91,6 +104,11 @@ static void initQ14(){
     initTableByName((S)"lineitem");
     initTableByName((S)"part");
     /* no fkey */
+}
+
+static void initQ15(){
+    initTableByName((S)"lineitem");
+    initTableByName((S)"supplier");
 }
 
 static void initQ16(){
@@ -124,12 +142,14 @@ void initTablesByQid(I id){
     if(id>=0 && id<=22){
         switch(id){
             case  1: initQ1 (); break;
+            case  2: initQ2 (); break;
             //case  3: initQ3 (); break;
             case  4: initQ4 (); break;
             case  6: initQ6 (); break;
             case 12: initQ12(); break;
             case 13: initQ13(); break;
             case 14: initQ14(); break;
+            case 15: initQ15(); break;
             case 16: initQ16(); break;
             case 17: initQ17(); break;
             case 18: initQ18(); break;

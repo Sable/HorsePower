@@ -33,7 +33,7 @@ typedef enum FunctionType {
     memberF, vectorF, matchF, indexF, columnValueF, subStringF,
     /* special */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF,
-    ktableF, indexAF, listF,
+    ktableF, indexAF, listF, outerF,
     totalFunc
 }pFunc;
 
