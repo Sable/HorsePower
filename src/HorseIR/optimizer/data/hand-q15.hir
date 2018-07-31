@@ -42,10 +42,9 @@ module default{
       k1:?  = @compress(t18, k0);
       t20:? = @member(t17, c6);
       t21:? = @compress(t20, c6);  // s_suppkey
-      t22:? = @outer(@eq, t19, t21); // type: list<i32>
-      t23:? = @where(t22);           // type: list<i32>
-      t24:? = @index(t23, 0:i32);    // i32
-      t25:? = @index(t23, 1:i32);    // i32
+      t22:? = @join_index(@eq, t19, t21);
+      t24:? = @index(t22, 0:i32);    // i32
+      t25:? = @index(t22, 1:i32);    // i32
       t26:? = @compress(t20, c7);
       t27:? = @compress(t20, c8);
       t28:? = @compress(t20, c9);
