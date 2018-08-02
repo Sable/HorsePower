@@ -1,0 +1,62 @@
+// Question: how to improve the performance of this query
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:? = @load_table(`lineitem:sym);
+      a1:? = @load_table(`part:sym);
+      // lineitem
+      c00:? = check_cast(@column_value(a0, `l_partkey:sym      ), i64);
+      c01:? = check_cast(@column_value(a0, `l_quantity:sym     ), f64);
+      c02:? = check_cast(@column_value(a0, `l_extendedprice:sym), f64);
+      // part
+      c10:? = check_cast(@column_value(a1, `p_partkey:sym      ), i64);
+      c11:? = check_cast(@column_value(a1, `p_brand:sym        ), str);
+      c12:? = check_cast(@column_value(a1, `p_container:sym    ), str);
+      // 0. partkey: p_ and l_
+      t0_0:? = @join_index(@eq, c10, c00);
+      t0_1:? = @index(t0_0, 0:i32);
+      t0_2:? = @index(t0_0, 1:i32);
+      t0_3:? = @index(c10, t0_1);  // p_partkey
+      t0_4:? = @index(c01, t0_2);  // l_quantity
+      // 1. group by
+      t1_0:? = @group(t0_3);
+      t1_1:? = @keys(t1_0);
+      t1_2:? = @values(t1_0);
+      t1_3:? = @each_right(@index, t0_4, t1_2);
+      t1_4:? = @each(@avg, t1_3);
+      t1_5:? = @raze(t1_4);
+      t1_6:? = @mul(0.2:f32, t1_5); // avg_qty
+      t1_7:? = @index(t0_3, t1_1);
+      // result
+      //w0:? = `i_partkey`avg_qty:sym;
+      //w1:? = @list(t1_7, t1_6);
+      //w2:? = @table(w0,w1);
+      // 2. partkey: p_ and xx_
+      t2_0:? = @eq(c11, `"Brand#23":sym);
+      t2_1:? = @eq(c12, `"MED BOX":sym);
+      t2_2:? = @and(t2_0, t2_1);
+      t2_3:? = @compress(t2_2, c10);
+      t2_4:? = @join_index(@eq, t2_3, t1_7);
+      t2_5:? = @index(t2_4, 0:i32);
+      t2_6:? = @index(t2_4, 1:i32);
+      t2_7:? = @index(t1_6, t2_6); // avg_qty
+      t2_8:? = @index(t2_3, t2_5);
+      // 3. partkey: xx_ and l_
+      t3_0:? = @join_index(@eq, t2_8, c00);
+      t3_1:? = @index(t3_0, 0:i32);
+      t3_2:? = @index(t3_0, 1:i32);
+      t3_3:? = @index(t2_7, t3_1); // avg_qty
+      t3_4:? = @index(c01 , t3_2); // l_quantity
+      t3_5:? = @lt(t3_4, t3_3);
+      t3_6:? = @compress(t3_5, t3_2);
+      t3_7:? = @index(c02, t3_6); // l_extendedprice
+      // 4. reduce
+      t4_0:? = @sum(t3_7);
+      t4_1:? = @div(t4_0, 7.0:f32);
+      // result
+      w0:? = `avg_yearly:sym;
+      w1:? = @list(t4_1);
+      w2:? = @table(w0,w1);
+      return w2;
+  }
+}
