@@ -13,14 +13,18 @@ bool -> bool
 i16  -> i16
 i32  -> i32
 i64  -> i64
-f32  -> i64
-f64  -> i64
-_ -> domain error
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-round((5.4,5.6))
-> (5,6):i64
+round((5.4,5.6):f32)
+> (5,6):f32
 ```
+
+### External Links
+
+- Function `round` in C, [link](http://www.cplusplus.com/reference/cmath/round/)

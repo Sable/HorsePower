@@ -61,6 +61,7 @@ void initBackend(){
 #define addFKey(t0,c0,t1,c1) \
     pfnAddFKey(initLiteralSym((S)t0), initLiteralSym((S)c0),\
                initLiteralSym((S)t1), initLiteralSym((S)c1))
+// addFKey(key,fkey)
 
 static void initQ2(){
     initTableByName((S)"part");
@@ -68,10 +69,10 @@ static void initQ2(){
     initTableByName((S)"partsupp");
     initTableByName((S)"nation");
     initTableByName((S)"region");
-    addFKey("part", "p_partkey", "partsupp", "ps_partkey");
-    addFKey("supplier", "s_suppkey", "partsupp", "ps_suppkey");
-    addFKey("region", "r_regionkey", "nation", "n_regionkey");
-    addFKey("nation", "n_nationkey", "supplier", "s_nationkey");
+    addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey" );
+    addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey" );
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
+    addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
 }
 
 
@@ -79,8 +80,69 @@ static void initQ3(){
     initTableByName((S)"customer");
     initTableByName((S)"orders");
     initTableByName((S)"lineitem");
-    addFKey("customer", "c_custkey", "orders", "o_custkey");
-    addFKey("orders", "o_orderkey", "lineitem", "l_orderkey");
+    addFKey("customer", "c_custkey" , "orders"  , "o_custkey" );
+    addFKey("orders"  , "o_orderkey", "lineitem", "l_orderkey");
+}
+
+static void initQ5(){
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"supplier");
+    initTableByName((S)"nation");
+    initTableByName((S)"region");
+    addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
+    addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
+    addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+}
+
+static void initQ7(){
+    initTableByName((S)"supplier");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"orders");
+    initTableByName((S)"customer");
+    initTableByName((S)"nation");
+    addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
+    addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+}
+
+static void initQ8(){
+    initTableByName((S)"part");
+    initTableByName((S)"supplier");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"orders");
+    initTableByName((S)"customer");
+    initTableByName((S)"nation");
+    initTableByName((S)"region");
+    addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
+    addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
+    addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+}
+
+static void initQ9(){
+    initTableByName((S)"part");
+    initTableByName((S)"supplier");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"partsupp");
+    initTableByName((S)"orders");
+    initTableByName((S)"nation");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
+    addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey");
+    addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey");
+    addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+}
+
+static void initQ10(){
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"nation");
+    addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
+    addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
 }
 
 static void initQ6(){
@@ -132,6 +194,15 @@ static void initQ19(){
     initTableByName((S)"part");
 }
 
+static void initQ21(){
+    initTableByName((S)"supplier");
+    initTableByName((S)"orders");
+    initTableByName((S)"nation");
+    initTableByName((S)"lineitem");
+    addFKey("nation", "n_nationkey", "supplier", "s_nationkey");
+    addFKey("orders", "o_orderkey" , "lineitem", "l_orderkey" );
+}
+
 static void initQ22(){
     initTableByName((S)"customer");
     initTableByName((S)"orders");
@@ -143,9 +214,14 @@ void initTablesByQid(I id){
         switch(id){
             case  1: initQ1 (); break;
             case  2: initQ2 (); break;
-            //case  3: initQ3 (); break;
+            case  3: initQ3 (); break;
             case  4: initQ4 (); break;
+            case  5: initQ5 (); break;
             case  6: initQ6 (); break;
+            case  7: initQ7 (); break;
+            case  8: initQ8 (); break;
+            case  9: initQ9 (); break; /* working */
+            case 10: initQ10(); break;
             case 12: initQ12(); break;
             case 13: initQ13(); break;
             case 14: initQ14(); break;
@@ -154,6 +230,7 @@ void initTablesByQid(I id){
             case 17: initQ17(); break;
             case 18: initQ18(); break;
             case 19: initQ19(); break;
+            case 21: initQ21(); break;
             case 22: initQ22(); break;
             default: EP("Pending initTablesByQid: %d\n",id);
         }

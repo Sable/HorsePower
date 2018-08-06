@@ -147,6 +147,17 @@ static V fetchLiteralStr(Node *n){
     R z;
 }
 
+static V fetchLiteralChar(Node *n){
+    char *charS= n->val.charS;
+    L len = strlen(charS);
+    V z = allocNode();
+    initV(z,H_C,len);
+    if(len==1) vc(z) = charS[0];
+    else if(len>1) strcpy(vg(z), charS);
+    else vg(z) = NULL;
+    return z;
+}
+
 V getLiteralFromNode(Node *n){
     Node *paramValue = n->val.nodeS;
     switch(paramValue->kind){
@@ -157,6 +168,7 @@ V getLiteralFromNode(Node *n){
         case   literalSymK: return fetchLiteralSym  (paramValue, literalSymK  );
         case  literalFuncK: return fetchLiteralFunc (paramValue, literalFuncK );
         case   literalStrK: return fetchLiteralStr  (paramValue);
+        case  literalCharK: return fetchLiteralChar (paramValue);
         //default: printNodeKind(paramValue);
         //         EP("[getLiteralFromNode]: kind (%d) not supported yet.\n", paramValue->kind);
     }

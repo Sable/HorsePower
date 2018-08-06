@@ -6,25 +6,37 @@
 
 - `x + y`
 
-### Type rules
+### Type Rules
 
-Pre-requisite
-- Let TypeI = [bool, i16, i32, i64]; //an integer
-- Let TypeN = [bool, char, i16, i32, i64, f32, f64]; //a numerical type
+High-level
 
 ```no-highlight
-Real,Real     -> maxType
-m,Int | Int,m -> m
-m,Int | Int,m -> m
-d,Int | Int,d -> d
-z,Int | Int,z -> z
-u,Int | Int,u -> u
-v,Int | Int,v -> v
-t,Int | Int,t -> t
+Real,Real     -> MaxType
+month ,Int    -> month
+date  ,Int    -> date
+dt    ,Int    -> dt
+hour  ,Int    -> hour
+second,Int    -> second
+time  ,Int    -> time
+Int   ,month  -> month
+Int   ,date   -> date
+Int   ,dt     -> dt
+Int   ,hour   -> hour
+Int   ,second -> second
+Int   ,time   -> time
 _             -> domain error
 ```
 
-**Note:** `bool` and `char` are promoted to `i16` before any operation.
+!!! tip "Note"
+    Types `bool` and `char` are promoted to `i16` before any operation.
+
+Table with details (See [type alias](../types.md))
+
+![plus](../types/plus.png)
+
+### Shape Rules
+
+[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
 
 ### Examples
 

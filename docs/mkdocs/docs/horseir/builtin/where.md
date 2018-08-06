@@ -9,9 +9,14 @@
 ### Type rules
 
 ```no-highlight
-bool -> i64
-_    -> domain error
+bool       -> i64
+list<bool> -> list<int>
+_          -> domain error
 ```
+
+!!! Note "Extension"
+    Treat a list<bool> as a boolean matrix, then return two vectors which
+    contain the x- and y-index of true values separately.
 
 ### Examples
 

@@ -14,7 +14,7 @@ L lib_index_of_E(L* targ, E* src, L sLen, E* val, L vLen);
 L lib_index_of_C(L* targ, C* src, L sLen, C* val, L vLen);
 L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen);
 L lib_index_of_X(L* targ, X* src, L sLen, X* val, L vLen);
-L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen);
+L lib_index_of_G(L* targ, V  src, L sLen, V  val, L vLen);
 
 #define lib_index_of_Q lib_index_of_L
 #define lib_index_of_M lib_index_of_I

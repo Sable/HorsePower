@@ -1,5 +1,7 @@
+!!! tip "Pretty Printer for HorseIR Programs"
+    Pretty printer.
 
-## Principles
+### Principles
 
 We propose a couple of pretty printing modes as follows.
 

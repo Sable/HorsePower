@@ -1,6 +1,7 @@
-# Database related
+!!! danger "Database Related"
+    A collection of database functions and operations. (Currently not maintained)
 
-## <p id="ref">Database functions</p>
+## <p id="ref">Database Functions</p>
 
 MySQL functions
 
@@ -15,7 +16,7 @@ MySQL functions
 See more about [MySQL reference](https://www.w3schools.com/sql/func_date_sub.asp).
 
 
-## <p id="clause">Important database operations</p>
+## <p id="clause">Important Database Operations</p>
 
 A couple of important database operations are listed as follows.
 
@@ -94,7 +95,7 @@ t3:i64 = @add(t2, m);      // addition
 t4:?   = @index(t0, t3);   // indexing
 ```
 
-## <p id="operations">Implementing database operations using array operations</p>
+## <p id="operations">Implementing Database Operations Using Array Operations</p>
 
 References:
 
@@ -105,7 +106,7 @@ References:
   SIGGRAPH Courses (2004).
 
 
-### Scan-like operators
+### Scan-like Operators
 
 Problem description:
 
@@ -324,20 +325,23 @@ FROM Products;
 HorseIR
 
 ```no-highlight
-modeul _default{
-    c0:dict<sym,i32> = column(Products:table, `ProductID:sym);
-    c1:dict<sym,str> = column(Products:table, `ProductName:sym);
-    c2:dict<sym,str> = column(Products:table, `SupplierID:sym);
-    c3:dict<sym,str> = column(Products:table, `CategoryID:sym);
-    c4:dict<sym,str> = column(Products:table, `Unit:sym);
-    c5:dict<sym,str> = column(Products:table, `Price:sym);
+modeul default{
+    import Builtin.*;
+    def main():table{
+        c0:i32 = column(Products:table, `ProductID:sym);
+        c1:str = column(Products:table, `ProductName:sym);
+        c2:i32 = column(Products:table, `SupplierID:sym);
+        c3:i32 = column(Products:table, `CategoryID:sym);
+        c4:str = column(Products:table, `Unit:sym);
+        c5:f64 = column(Products:table, `Price:sym);
 
-    t0:list<f64> = value(c5);
-    t1:list<f64> = min(t0);
-    c6:dict<sym,f64> = dict(`SmallestPrice:sym, t1);
+        t0:f64 = min(c5);
 
-    z0:list<dict<sym,f64>> = list(c6)
-    z:table = createTable(z0); 
+        z0:sym = `SmallestPrice:sym;
+        z1:list<f64> = list(t0)
+        z:table = @table(z0, z1); 
+        return z;
+    }
 }
 ```
 

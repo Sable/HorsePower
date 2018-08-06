@@ -8,22 +8,32 @@
 - if x in y, return true
 - else return false
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
 Real   , Real    -> bool
-Char   , Char    -> bool
-Sym    , Sym     -> bool
-Str    , Str     -> bool
-Complex, Complex -> bool
-m      , m       -> bool
-d      , d       -> bool
-z      , z       -> bool
-u      , u       -> bool
-v      , v       -> bool
-t      , t       -> bool
-_      ,_        -> domain error
+char   , char    -> bool
+symbol , symbol  -> bool
+string , string  -> bool
+complex, complex -> bool
+month  , month   -> bool
+date   , date    -> bool
+dt     , dt      -> bool
+hour   , hour    -> bool
+second , second  -> bool
+time   , time    -> bool
+_      , _       -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![member](../types/member.png)
+
+### Shape Rules
+
+[Shape left rules](../shapes.md#shape-left)
 
 ### Examples
 

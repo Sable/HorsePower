@@ -413,7 +413,18 @@ L printV(V x){
 }
 
 L printV2(V x, L n){
-    DOI(n, {FS(" ");printValueItem(x, i);}); FS("\n"); R 0;
+    if(isTypeGroupBasic(xp)){
+        DOI(n, {FS(" ");printValueItem(x, i);}); FS("\n");
+    }
+    else {
+        switch(xp){
+            caseY printEnumItem(x, -1); break;
+            caseA printTablePretty(x, n); break;
+            caseK printTablePretty(x, n); break;
+            default: EP("the type %d is not supported.\n", xp);
+        }
+    }
+    R 0;
 }
 
 L printTable(V x){

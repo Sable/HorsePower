@@ -7,12 +7,22 @@
 - select from values based on the boolean vector (true values)
 - the boolean vector and values have the same length
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
-bool, Basic -> Basic
-_           -> domain error
+bool, Basic -> MaxType
+_   , _     -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![compression](../types/compress.png)
+
+### Shape Rules
+
+[Shape right rules](../shapes.md#shape-right)
 
 ### Examples
 

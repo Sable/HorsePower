@@ -20,7 +20,7 @@ mkdir -p pcre2
 (cd pcre2 && wget https://ftp.pcre.org/pub/pcre/pcre2-10.30.zip && unzip pcre2-10.30.zip)
 
 ## Install pcre2
-(cd pcre2/pcre2-10.30 && ./configure --disable-shared && make)
+(cd pcre2/pcre2-10.30 && ./configure --disable-shared --enable-jit && make)
 
 mv pcre2/pcre2-10.30/.libs/* lib/
 mv pcre2/pcre2-10.30/src/*.h include/ 

@@ -6,7 +6,9 @@
 
 - initialize a vector based on y with the length x
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
 Int, Basic -> Basic
@@ -14,7 +16,16 @@ Int, List  -> List
 _  , _     -> domain error
 ```
 
-Note: `Int` on the left side must be a non-negative number.
+!!! tip "Note"
+    `Int` on the left side must be a non-negative number.
+
+Table with details (See [type alias](../types.md))
+
+![vector](../types/vector.png)
+
+### Shape Rules
+
+[Shape determined by left value rules](../shapes.md#shape-left-value)
 
 ### Examples
 

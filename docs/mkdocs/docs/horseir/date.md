@@ -218,6 +218,9 @@ Description: return the difference between two times
 > 100:i64
 ```
 
+!!! tip "Note"
+    See function [minus](builtin/minus.md)
+
 ### datetime add
 
 Description: add an interval to a time

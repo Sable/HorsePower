@@ -517,9 +517,11 @@ L setFKey(V x, V colName, V fKey){
 B isOrdered(V x){
     if(isInteger(x)){
         B isOrder = true; L order = -2;
-        DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0; \
-                    if(val!=0) order=val; \
-                    if(order!=-2 && val!=0 && order!=val) { isOrder=false; break; } })
+        DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0;\
+                    if(order==-2 && val!=0) {order=val; break;}})
+         if(order == -2) R true;
+        DOIa(vn(x), {L val=vL(x,i)>vL(x,i-1)?1:vL(x,i)<vL(x,i-1)?-1:0;\
+                    if(val!=0 && order!=val) { isOrder=false; break; } })
         R isOrder;
     }
     else R false;

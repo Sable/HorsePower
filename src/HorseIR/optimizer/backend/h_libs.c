@@ -133,7 +133,7 @@ UI getHashValue(void* val, L valI, L typ){
         caseE R hash_E(toE(val,valI));
         caseX R hash_X(toX(val,valI));
         caseS R hash_S(toS(val,valI));
-        caseV { V x=(V)val; UI c=0; DOI(vn(x), c+=getHashValue(vV(x,i),valI,vp(x))) R c; }
+        caseG { V x=(V)val; UI c=0; DOI(vn(x), c+=getHashValue(sG(vV(x,i)),valI,vp(vV(x,i)))) R c; }
     }
     R 0;
 }
@@ -236,7 +236,7 @@ L profileHash(HN ht, L htSize){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOP(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;})
+    DOI(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;})
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     L flag[2]={-1}; I c=0;
@@ -294,11 +294,10 @@ L lib_index_of_S(L* targ, S* src, L sLen, S* val, L vLen){
     R 0;
 }
 
-L lib_index_of_G(L* targ, G* src, L sLen, G* val, L vLen){
+L lib_index_of_G(L* targ, V src, L sLen, V val, L vLen){
     lib_index_template(H_G);
     R 0;
 }
-
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(isChar(val)) lib_quicksort_char(rtn, val, low, high, isUp, cmp);

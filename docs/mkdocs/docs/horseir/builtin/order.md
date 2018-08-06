@@ -8,26 +8,22 @@
 - asc == true
 - desc == false
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
-bool, bool -> i64
-i16 , bool -> i64
-i32 , bool -> i64
-i64 , bool -> i64
-f32 , bool -> i64
-f64 , bool -> i64
-char, bool -> i64
-sym , bool -> i64
-str , bool -> i64
-m   , bool -> i64
-d   , bool -> i64
-z   , bool -> i64
-u   , bool -> i64
-v   , bool -> i64
-t   , bool -> i64
-_   , _    -> domain error
+Comparable, bool -> int
+_         , _    -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![order](../types/order.png)
+
+### Shape Rules
+
+[Shape left rules](../shapes.md#shape-left)
 
 ### Examples
 

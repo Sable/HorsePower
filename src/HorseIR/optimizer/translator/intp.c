@@ -59,17 +59,18 @@ static V executeIndexA(V *p){
     else {P("[IndexA]"); printErrMsg(status);}
 }
 
+#define executeJoinIndex executeOuter
 static V executeOuter(OuterProduct f, V *p){
     if(H_DEBUG) P("executeOuter\n");
     V z = NEW(V0);
     S funcName = getSymbolStr(vq(p[0]));
     pFunc fIndex = getFuncIndexByName(funcName);
-    if(fIndex >= eachF || fIndex <ltF) EP("[Outer-product] (%s) not supported.\n", funcName);
+    if(fIndex >= eachF || fIndex <ltF) EP("[Product/JoinIndex] (%s) not supported.\n", funcName);
     L valence  = getValence(fIndex);
     if(valence != 2) EP("dyadic op expected for each_left/right, not %s\n", funcName);
     L status = (*f)(z, p[1], p[2], dyaFunc[fIndex-ltF]);
     if(status==0) return z;
-    else {P("[Outer-product]"); printErrMsg(status);}
+    else {printErrMsg(status);}
 }
 
 static V executeEachDya(EachDyadic f, V *p){
@@ -157,6 +158,7 @@ static V processStmtCommon(Node *expr){
                 case        listF: return executeAny(&pfnList       , params, np); break;
                 /* others */
                 case       outerF: return executeOuter(&pfnOuter, params); break;
+                case   joinIndexF: return executeJoinIndex(&pfnJoinIndex, params); break;
                 default: EP("pending ... for %d\n", fIndex);
             }
         }
@@ -219,7 +221,7 @@ static int runMethod(Node *method){
         stmts = stmts->next;
     }
     if(rtn){
-        printTablePretty(rtn, 42);
+        P("Result:\n"); printV2(rtn, 20);
     }
     return 0;
 }

@@ -1,6 +1,18 @@
-# HorseIR Syntax Specification
-
-Hanfeng Chen, May 2017
+<table class="top_table">
+<tr>
+<td width=76%>
+    <div class="left">
+        <todo>To-do</todo>
+        <!--<done>Completed</done>-->
+    </div>
+</td>
+<td>
+    <div class="right">
+        <small> Hanfeng Chen, May 2017 <br> (Updated on July 2018) </small>
+    </div>
+</td>
+</tr>
+</table>
 
 ## 1. Scanner
 
@@ -8,25 +20,33 @@ Hanfeng Chen, May 2017
 
 HorseIR supports ASCII charset, except for string encoding, i.e. strings and symbols.
 
+<todo>
+Support Unicode for strings and symbols.
+</todo>
+
 ### 1.2 Keywords
 
 ```no-highlight
 def   import   return   goto   check_type   check_cast
 ```
 
+<todo>
+Support goto and check_type
+</todo>
+
 ### 1.3 Built-in functions
 
-There is no operator in HorseIR, instead, an equivalent name is assigned to
-each operator.  For example, `add` for `+`.  In our convention, a leading `@`
-is required for  These built-in functions are classified in the following
-groups.
+HorseIR has no operator, but a semantically equivalent name is assigned to
+each operator.  For example, the addition function `add` for the operator `+`.
+A leading character `@` is required for indicating the function in HorseIR.
+These built-in functions are classified in the following groups.
 
 - Arithmetic
-- Logic
-- Datetime
+- Logical
+- Date and time-related
 - Trigonometric
+- Database-related
 - General
-- Database related
 
 See [built-in functions](functions.md).
 
@@ -35,32 +55,39 @@ See [built-in functions](functions.md).
 Both block comments and line comments are supported.
 
 ```no-highlight
-// this is a line comment
+// this is a line comment (style 1)
 ...
 /*
- * this is a block comment
+ * this is a block comment (style 2)
  */
 ```
 
-NB. Unicode is allowed.
+<todo> Support the style 2 </todo>
+<todo> Unicode is allowed </todo>
 
 ### 1.5 Literals
 
 HorseIR has a rich set of literals for each type.
 
-- null
+- <blue>bit</blue>
 - bool
-- char / string
-- integer
-- real
-- complex
+- char
+- string
+- integer: <blue>i8</blue>, i16, i32, and i64
+- real: f32 and f64
+- <blue>complex</blue>
 - symbol
 - date & time
-- function
+- <blue>function</blue>
 - list
 - dictionary
 - table
-- keyed table
+- <blue>keyed table</blue>
+- special: <blue>N/A</blue>, <blue>Inf</blue>, and <blue>NaN</blue>
+
+See [all types](types.md).
+
+<todo> Support the types highlighted. </todo>
 
 ### 1.6 Identifier
 
@@ -100,9 +127,8 @@ is allowed to declare two methods with the same name in different namespace.
 <u>Sample</u>
 
 ```no-highlight
-import Builtin;
-
 def default{      // a module 'default'
+    import Builtin;
     def main(){   // an entry method
     }
 }
@@ -189,7 +215,7 @@ See [types](types.md).
 HorseIR supports basic types as follows.
 
 ```no-highlight
-boolean, byte (optional), short, int, long, float, double and complex numbers.
+boolean, short, int, long, float, double, complex numbers.
 ```
 
 #### Real numbers
@@ -210,10 +236,13 @@ For example,
 
 where `2` is the real number and `3i` is the imagninary unit.
 
+<todo> Not supported yet </todo>
+
 #### String
 
 ```no-highlight
-string and symbol
+"string"  // string
+`symbol   // symbol
 ```
 
 About Unicode
@@ -231,13 +260,13 @@ generic types associated with a list, such as `list<i64>`.
 ```no-highlight
 x0:i64 = 0:i64;
 x1:i64 = 1:i64;
-x2:list<i64> = list(x0,x1); // a list of integers
+x2:list<i64> = @list(x0,x1); // a list of integers
 ```
 
 #### Dictionary
 
-A dictionary is a key to value pair.  Given a key, the dictionary could fetch
-its corresponding value easily.
+A dictionary is a key to value pair.  Given a key, the dictionary is able to
+fetch its stored value directly.
 
 ```no-highlight
 dict<sym, list<i64>>  // a mapping from symbol to a list of integers
@@ -249,7 +278,9 @@ A table is a list of columns.  A column can be represented by a special
 dictionary whose key is a symbol (i.e. a column name).
 
 ```no-highlight
-t:table = list(d0,d1,...,dn);
+column_key:sym = `d0`d1...`dn:sym;
+column_value:list<?> = @list(d0,d1,...,dn);
+t:table = @table(column_key, column_value);
 ```
 
 #### Keyed table
@@ -258,9 +289,8 @@ A keyed table consists of two normal tables (non-keyed).  The two tables must
 have the same number of rows.
 
 ```no-highlight
-kt:ktable = list(t0,t1);
+kt:ktable = @ktable(t0,t1); // t0 and t1 are tables
 ```
-
 
 ### 2.4 Statements
 
@@ -274,7 +304,7 @@ Support.
 
 #### Assignment statements
 
-An assignment statement has an assignment operator `=`.
+An assignment statement has an assignment `=`.
 
 #### Return statements
 
@@ -310,11 +340,9 @@ A function call as an expression should start with a leading `@`.  For example,
 
 #### Type and cast checks
 
-The `check_type` is used to guarantee the types from both sides, lvalue and
+- The `check_type` is used to guarantee the types from both sides, lvalue and
 rvalue, agree.
-
-The `check_cast` checks whether a designated type casting is allowed.
-
+- The `check_cast` checks whether a designated type casting is allowed.
 
 ## 3. Database operations
 
@@ -326,7 +354,7 @@ A normal table
 
 ```no-highlight
 my_meta:list<sym> = {`employee `department; `str`sym}
-my_table:table    = create_table(my_meta);
+my_table:table    = @table(my_meta);
 ```
 
 A keyed table
@@ -334,10 +362,12 @@ A keyed table
 ```no-highlight
 my_meta_key:list<sym> = {`id; `i64}
 my_meta_val:list<sym> = {`employee `department; `str`sym}
-my_table_key:table    = create_table(my_meta_key);
-my_table_val:table    = create_table(my_meta_val);
-    my_table:table    = create_ktable(my_table_key, my_table_val);
+my_table_key:table    = @table(my_meta_key);
+my_table_val:table    = @table(my_meta_val);
+    my_table:table    = @ktable(my_table_key, my_table_val);
 ```
+
+<todo> Not supported yet </todo>
 
 #### Load data to a table
 
@@ -349,12 +379,13 @@ r:i64 = @load_csv(table_name, file_name, file_format);
  ...    @load_txt  ...
 ```
 
+<todo> Not supported yet </todo>
 
 ## Appendix
 
 Grammar
 
-- [EBNF](../../../src/HorseIR/HorseIR.txt)
+- [EBNF](https://github.com/Sable/HorsePower/blob/master/src/HorseIR/optimizer/opt.y)
 
 Basics
 

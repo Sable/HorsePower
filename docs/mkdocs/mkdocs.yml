@@ -1,29 +1,47 @@
 site_name: HorsePower
+#theme: cluster
+#theme: windmill
+#theme: material
 theme: readthedocs
 #theme: cosmo
 #theme: null
 #theme_dir: 'custom_theme'
 extra_css: 
-    - mycss/extra.css
+    - extra/extra.css
+#    - extra/bootstrap.min.css
+extra_javascript:
+    - extra/extra.js
+
+# mdx_math: https://github.com/mitya57/python-markdown-math
+markdown_extensions:
+    - mdx_math
+    - admonition
+    - toc:
+        permalink: True
+copyright: '&copy; 2017-2018, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
 
 pages:
 - Home    : 'index.md'
 - Overview: 'overview.md'
 - SQL2IR  : 'sql2ir.md'
 - HorseIR : 
-    - IR overview  : 'horseir/spec.md'
+    - IR Overview  : 'horseir/spec.md'
     - Naming       : 'horseir/naming.md'
     - Types        : 'horseir/types.md'
+    - Shapes       : 'horseir/shapes.md'
     - Functions    : 'horseir/functions.md'
     - Memory       : 'horseir/memory.md'
     - Database     : 'horseir/database.md'
-    - Pretty print : 'horseir/pretty.md'
+    - Pretty Print : 'horseir/pretty.md'
 #- HorseSQL: []
 #- HorseDB : []
 - Research  :
+    - HyPer        : 'research/hyper.md'
+    - MonetDB      : 'research/monetdb.md'
     - PL           : 'research/pl.md'
     - MMDB         : 'research/mmdb.md'
     - SQL          : 'research/sql.md'
+    - Venue        : 'conf/venue.md'
 - Summary  : 
     - Lesson       : 'lesson.md'
 
@@ -44,7 +62,6 @@ pages:
     - "___": horseir/builtin/geq.md
     - "___": horseir/builtin/group.md
     - "___": horseir/builtin/gt.md
-    - "___": horseir/builtin/hyper.md
     - "___": horseir/builtin/indexing.md
     - "___": horseir/builtin/indexof.md
     - "___": horseir/builtin/len.md
@@ -76,4 +93,5 @@ pages:
     - "___": horseir/builtin/unique.md
     - "___": horseir/builtin/vector.md
     - "___": horseir/builtin/where.md
+    - "___": horseir/builtin/outer.md
 

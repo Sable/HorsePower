@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set(ANTLR4CPP_JAR_LOCATION "${PROJECT_SOURCE_DIR}/jar/antlr-4.7-complete.jar")
 
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules")
 find_package(ANTLR4CPP)
 if (NOT ANTLR4CPP_FOUND)
     message(FATAL_ERROR "require antlr4-cpp-runtime")

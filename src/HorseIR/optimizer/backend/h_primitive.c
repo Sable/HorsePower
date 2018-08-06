@@ -204,6 +204,7 @@ L pfnValues(V z, V x){
 }
 
 L pfnFetch(V z, V x){
+    P("typ = %lld\n", xp);
     if(isEnum(x)){
         V targ = (V)getEnumTarget(x);
         L typZ = vp(targ);
@@ -571,6 +572,8 @@ L pfnLog(V z, V x){
 }
 
 L pfnLen(V z, V x){
+    P("len: x = %lld\n", xn);
+    printV2(x, 20);
     initV(z,H_L,1);
     vl(z)= isTable(x)?tableRow(x):vn(x);
     R 0;
@@ -882,6 +885,7 @@ L pfnToIndex(V z, V x){
 
 L pfnGroup(V z, V x){
     P("Input len = %lld, type = %lld\n", xn,xp);
+    //printV2(x,100);
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
     V t = allocNode();
@@ -1327,6 +1331,7 @@ L pfnMod(V z, V x, V y){
 }
 
 L pfnCompress(V z, V x, V y){
+    //P("typ: x = %lld, y = %lld\n", vp(x),vp(y));
     if(isBool(x)){
         if(!isEqualLength(x,y)) R E_LENGTH;
         L lenX = vn(x);
@@ -1352,6 +1357,7 @@ L pfnCompress(V z, V x, V y){
                 caseS DOT(lenX, if(vB(x,i))vS(z,offset[tid]++)=vS(y,i)) break;
                 caseY {vy(z) = vy(y);\
                       DOT(lenX, if(vB(x,i))vY(z,offset[tid]++)=vY(y,i)) break;}
+                caseD DOT(lenX, if(vB(x,i))vD(z,offset[tid]++)=vD(y,i)) break;
                 default: R E_NOT_IMPL;
             }
         }
@@ -1365,10 +1371,10 @@ L pfnCompress(V z, V x, V y){
 }
 
 #define INDEXOF(p,z,x,y) lib_index_of_##p(sL(z),s##p(x),vn(x),s##p(y),vn(y))
-#define INDEXOFG(z,x,lenX,y,lenY) lib_index_of_G(sL(z),sG(x),lenX,sG(y),lenY)
+#define INDEXOFG(z,x,lenX,y,lenY) lib_index_of_G(sL(z),x,lenX,y,lenY)
 L pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-        if(false && isOrdered(x)){
+        if(isOrdered(x)){
             if(H_DEBUG) P("Ordered data found in index_of\n");
             R searchOrdered(z,x,y);
         }
@@ -1407,7 +1413,6 @@ L pfnIndexOf(V z, V x, V y){
                 caseU INDEXOF(U, z, x, y); break;
                 caseW INDEXOF(W, z, x, y); break;
                 caseT INDEXOF(T, z, x, y); break;
-                caseG INDEXOF(G, z, x, y); break;
             }
             R 0;
         }
@@ -1687,18 +1692,19 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
+        P("total size = %lld\n", lenX * lenY);
         initV(z,H_G,lenX);
         DOI(lenX, initV(vV(z,i),typCell,lenY))
         switch(typCell){
             caseB {
                 switch(typMax){
                     caseB DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vB(tempX,i),vB(tempY,j)))}) break;
-                    caseH DOI(lenX, {V t=vV(z,i); DOJ(lenY, vH(t,j)=OuterOp(op,vH(tempX,i),vH(tempY,j)))}) break;
-                    caseI DOI(lenX, {V t=vV(z,i); DOJ(lenY, vI(t,j)=OuterOp(op,vI(tempX,i),vI(tempY,j)))}) break;
-                    caseL DOI(lenX, {V t=vV(z,i); DOJ(lenY, vL(t,j)=OuterOp(op,vL(tempX,i),vL(tempY,j)))}) break;
-                    caseF DOI(lenX, {V t=vV(z,i); DOJ(lenY, vF(t,j)=OuterOp(op,vF(tempX,i),vF(tempY,j)))}) break;
-                    caseE DOI(lenX, {V t=vV(z,i); DOJ(lenY, vE(t,j)=OuterOp(op,vE(tempX,i),vE(tempY,j)))}) break;
-                    caseC DOI(lenX, {V t=vV(z,i); DOJ(lenY, vC(t,j)=OuterOp(op,vC(tempX,i),vC(tempY,j)))}) break;
+                    caseH DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vH(tempX,i),vH(tempY,j)))}) break;
+                    caseI DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vI(tempX,i),vI(tempY,j)))}) break;
+                    caseL DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vL(tempX,i),vL(tempY,j)))}) break;
+                    caseF DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vF(tempX,i),vF(tempY,j)))}) break;
+                    caseE DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vE(tempX,i),vE(tempY,j)))}) break;
+                    caseC DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vC(tempX,i),vC(tempY,j)))}) break;
                     default: R E_DOMAIN;
                 }
             } break;
@@ -1706,6 +1712,97 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
         }
     }
     else R E_DOMAIN;
+    R 0;
+}
+
+L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
+    P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
+    L typCell = -1, op = -1;
+    if(foo == &pfnEq){ typCell = H_B; op = 0; }
+    else R E_DOMAIN;
+    P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
+    if(isOrdered(x)){
+        R joinIndexHash(z,x,y,'l');
+    }
+    else if(isOrdered(y)){
+        R joinIndexHash(z,x,y,'r');
+    }
+    else {
+        L lenZ = 2;
+        if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+            P("2\n");
+            printV2(x, 20);
+            printV2(y, 20);
+            L lenX    = vn(x), lenY = vn(y);
+            L typMax  = MAX(vp(x),vp(y));
+            V tempX = allocNode();
+            V tempY = allocNode();
+            CHECKE(promoteValue(tempX, x, typMax));
+            CHECKE(promoteValue(tempY, y, typMax));
+            initV(z,H_G,lenZ);
+            // fetch length
+            L c = 0;
+            P("3,x=%lld, y=%lld\n",lenX,lenY);
+            switch(typCell){
+                caseB {
+                    switch(typMax){
+                        caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j)))c++)); break;
+                        caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j)))c++)); break;
+                        caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j)))c++)); break;
+                        caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j)))c++)); break;
+                        caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j)))c++)); break;
+                        caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j)))c++)); break;
+                        caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j)))c++)); break;
+                        default: EP("add more types for %lld\n", vp(x), vp(y));
+                    }
+                } break;
+                default: R E_DOMAIN;
+            }
+            P("4, c = %lld\n",c);
+            DOI(lenZ, initV(vV(z,i),H_L,c))
+                // assign value
+                c = 0;
+            switch(typCell){
+                caseB {
+                    switch(typMax){
+                        caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                    }
+                } break;
+                default: R E_DOMAIN;
+            }
+        }
+        else if(isSameType(x,y)){
+            L typ  = vp(x);
+            L lenX = vn(x), lenY = vn(y);
+            initV(z,H_G,lenZ);
+            L c = 0;
+            switch(typCell){
+                caseB {
+                    switch(typ){
+                        caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j)))c++)); break;
+                        default: EP("add more types for %lld\n", vp(x), vp(y));
+                    }
+                } break;
+                default: R E_DOMAIN;
+            }
+            DOI(lenZ, initV(vV(z,i),H_L,c))
+            switch(typCell){
+                caseB {
+                    switch(typ){
+                        caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j))){vL(vV(z,0),c)=i; vL(vV(z,1),c)=j; c++;})); break;
+                    }
+                } break;
+                default: R E_DOMAIN;
+            }
+        }
+        else R E_TYPE;
+    }
     R 0;
 }
 

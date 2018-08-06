@@ -101,7 +101,7 @@ V literalStrVector(L n, S b[]){
         P("[Profiling] Line %d: %g ms\n", n,calcInterval(tt_0,tt_1)/1000.0); }
 
 B isOptimized = false;  // default: opt off
-C CSV_FILE_ROOT[] = "data/tpch/db";
+C CSV_FILE_ROOT[] = "../data/tpch/db";
 L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
 E times[999];

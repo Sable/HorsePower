@@ -69,6 +69,7 @@ E simulateQ3(){
     // group by
     V group1[] = {p2, p3, p4};
     PROFILE(31, pfnList(g1, 3, group1));
+    // P("len = %lld\n",vn(p2)); getchar();  // 30519
     PROFILE(32, pfnGroup(g2, g1));                    // <--- slow, fixed
     PROFILE(33, pfnValues(g3, g2)); // values (index)
     PROFILE(34, pfnKeys(g4, g2));   // keys   (index)

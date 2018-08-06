@@ -10,6 +10,7 @@ extern ChainList *chain_list;
 B isUsage   = false;
 B isVersion = false;
 B isQuery   = false;
+B isQFile   = false;
 B isOpt     = false;
 B isCompiler= false;
 B isInterp  = false;
@@ -21,12 +22,16 @@ I qid       = -1;
 I qscale    = 1;
 C delimiter = '|';
 S optName   = NULL;
+S qfile     = NULL;
 
 static void usage();
 static int  getOption(int argc, char *argv[]);
-static void parseInput(I qid);
+static void parseInputWithQid(I qid);
+static void parseInput(S file_path);
 static void runCompileWithOpt(char *optName);
-static void runInterpreter(I qid);
+static void runInterpreterWithQid(I qid);
+static void runInterpreter();
+static void runInterpreterCore();
 static void runExperiment();
 static void validateParameters();
 
@@ -47,18 +52,29 @@ int main(int argc, char *argv[]){
         usage(); exit(1);
     }
     else if(isCompiler) {
-        parseInput(qid);
-        runCompileWithOpt(isOpt?optName:NULL);
+        if(isQuery){
+            parseInputWithQid(qid);
+            runCompileWithOpt(isOpt?optName:NULL);
+        }
+        else if(isQFile){
+            EP("TODO: -t + -n <filename>");
+        }
     }
     else if(isInterp){
-        parseInput(qid);
-        runInterpreter(qid);
+        if(isQuery){
+            parseInputWithQid(qid);
+            runInterpreterWithQid(qid);
+        }
+        else if(isQFile){
+            parseInput(qfile);
+            runInterpreter();
+        }
     }
     else if(isExp){
         runExperiment();
     }
     else if(isPretty){
-        parseInput(qid);
+        parseInputWithQid(qid);
         prettyProg(root);
     }
     else if(isUsage)   { usage();   exit(1); }
@@ -71,13 +87,15 @@ int main(int argc, char *argv[]){
 
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvtq:s:co:d:r:x:p")) != -1){
+    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:p")) != -1){
         switch(c){
             case 'h': isUsage   = true;            break;
             case 'v': isVersion = true;            break;
             case 't': isInterp  = true;            break;
             case 'q': isQuery   = true; \
                       qid       = atoi(optarg);    break;
+            case 'n': isQFile   = true; \
+                      qfile     = strdup(optarg);  break;
             case 's': qscale    = atoi(optarg);    break;
             case 'c': isCompiler= true;            break;
             case 'o': isCompiler= true; \
@@ -97,21 +115,26 @@ static int getOption(int argc, char *argv[]){
 
 static void usage(){
     WP("Usage: ./horse <option> [parameter]  \n");
-    WP("  -h           Print this information\n");
-    WP("  -v           Print HorseIR version\n" );
-    WP("  -t           Enable interpreter\n"    );
-    WP("  -c           Enable compiler\n"       );
-    WP("  -q <qid>     TPC-H query id\n"        );
-    WP("  -s <sid>     TPC-H query scale\n"     );
-    WP("  -o <name>    Query opt. [fe/fp]\n"    );
-    WP("  -d 'del'     CSV del. (default '|')\n");
-    WP("  -r <runs>    Number of runs\n"        );
+    WP("  -h            Print this information\n");
+    WP("  -v            Print HorseIR version\n" );
+    WP("  -t            Enable interpreter\n"    );
+    WP("  -c            Enable compiler\n"       );
+    WP("  -q <qid>      TPC-H query id (data/)\n");
+    WP("  -n <filename> Set a query file\n"      );
+    WP("  -s <sid>      TPC-H query scale\n"     );
+    WP("  -o <name>     Query opt. [fe/fp]\n"    );
+    WP("  -d 'del'      CSV del. (default '|')\n");
+    WP("  -r <runs>     Number of runs\n"        );
 }
 
-static void parseInput(I qid){
+static void parseInputWithQid(I qid){
     char file_path[128];
-    struct timeval tv0, tv1;
     SP(file_path, "data/q%d.hir", qid);
+    parseInput(file_path);
+}
+
+static void parseInput(S file_path){
+    struct timeval tv0, tv1;
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s\n", file_path);
     }
@@ -155,10 +178,19 @@ static void runCompileWithOpt(char *optName){
     P("Compile time: %g ms\n", calcInterval(tv0, tv1));
 }
 
-static void runInterpreter(I qid){
-    struct timeval tv0, tv1;
+static void runInterpreterWithQid(I qid){
     initBackend();
     initTablesByQid(qid);
+    runInterpreterCore();
+}
+
+static void runInterpreter(){
+    initBackend();
+    runInterpreterCore();
+}
+
+static void runInterpreterCore(){
+    struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
     HorseInterpreter(root);
     gettimeofday(&tv1, NULL);
@@ -166,28 +198,36 @@ static void runInterpreter(I qid){
 }
 
 static void validateParameters(){
-    if(isQuery){
-        if(qid<0 || qid>22)
-            EP("> qid must be [1,22], but %d found.\n", qid);
-        if(!isInterp && !isCompiler && !isPretty)
-            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
-    }
-    if(qscale < 0){
-        EP("> qscale must > 0, but %d found.\n", qscale);
-    }
-    if(runs < 0){
-        EP("> # of runs must > 0, but %d found.\n", runs);
-    }
     if(isInterp && isCompiler){
         EP("> choose one mode: interpreter (-t) or compiler (-c), not both.\n");
     }
     else if(isInterp || isCompiler){
-        if(!isQuery){
-            EP("> query must be specified (-q <id>).\n");
+        if(!isQuery && !isQFile){
+            EP("> query must be specified (-q <id> or -n <filename>).\n");
         }
     }
-    if(isPretty && !isQuery){
-        EP("> pretty printer needs a query specified (-q <id>).\n");
+    if(isQuery){
+        if(qid<0 || qid>22)
+            EP("> qid must be [1,22], but %d found.\n", qid);
+        if(isQFile)
+            EP("> choose either '-q <qid>' or '-n <filename>'\n");
+        if(!isInterp && !isCompiler && !isPretty)
+            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
+        if(qscale < 0){
+            EP("> qscale must > 0, but %d found.\n", qscale);
+        }
+    }
+    else if(isQFile){
+        if(!isInterp && !isCompiler && !isPretty)
+            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
+    }
+    else { // isQuery: false; isQFile: false
+        if(isPretty) {
+            EP("> pretty printer needs a query specified (-q <id> or -n <filename>).\n");
+        }
+    }
+    if(runs < 0){
+        EP("> # of runs must > 0, but %d found.\n", runs);
     }
 }
 

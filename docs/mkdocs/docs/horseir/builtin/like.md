@@ -8,7 +8,7 @@
 - x: a string, a list of strings, a symbol, or a list of symbols
 - y: a string pattern
 
-### Pattern conversion
+### Pattern Conversion
 
 In [SQL like](https://www.w3schools.com/sql/sql_like.asp),
 
@@ -23,14 +23,23 @@ In [PCRE](https://www.debuggex.com/cheatsheet/regex/pcre),
 A conversion is required to generate corresponding pattern string.
 (The heading sign `^` and the last sign `$` should be appended.)
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
-Char, (Char | Str) -> bool
-Str , (Char | Str) -> bool
-Sym , (Char | Str) -> bool
-_   , _   -> domain error
+String, String -> bool
+_     , _      -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![any](../types/like.png)
+
+### Shape Rules
+
+[Shape left rules](../shapes.md#shape-left)
+
 
 ### Examples
 

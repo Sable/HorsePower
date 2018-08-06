@@ -10,17 +10,22 @@
 
 ```no-highlight
 bool -> bool
-i16 -> i16
-i32 -> i32
-i64 -> i64
-f32 -> i64
-f64 -> i64
-_ -> domain error
+i16  -> i16
+i32  -> i32
+i64  -> i64
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-floor((-1.2,0,1.2))
-> (-2,0,1):i64
+floor((-1.2,0,1.2):f32)
+> (-2,0,1):f32
 ```
+
+### External Links
+
+- Function `floor` in C, [link](http://www.cplusplus.com/reference/cmath/floor/)
+

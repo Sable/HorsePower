@@ -118,12 +118,12 @@ tolist((-1,2,3))
 
 ## each operations
 
-- each_item(func, list): operate *func* on each element in *list*
-- each(func, list1, list2): operate *func* on each pair of elements in *list1* and *list2*
+- each(func, list): operate *func* on each element in *list*
+- each_item(func, list1, list2): operate *func* on each pair of elements in *list1* and *list2*
 - each_left(func, list1, list2): operate *func* on each pair of each element in *list1* and total of *list2*
 - each_right(func, list1, list2): operate *func* on each pair of total of *list1* and each element in *list2*
 
-### each_item
+### each
 
 ```no-highlight
 each(func, [a0;a1;...])
@@ -135,10 +135,10 @@ Result:
 [func(a0);func(a1);...]
 ```
 
-### each
+### each_item
 
 ```no-highlight
-eachitem(func,[a0;a1;...],[b0;b1;...])
+each_item(func,[a0;a1;...],[b0;b1;...])
 ```
 
 Result:
@@ -150,7 +150,7 @@ Result:
 ### each_left
 
 ```no-highlight
-func([a0;a1;...],[b0;b1;...])
+each_left(func,[a0;a1;...],[b0;b1;...])
 ```
 
 Result:
@@ -162,7 +162,7 @@ Result:
 ### each_right
 
 ```no-highlight
-func([a0;a1;...],[b0;b1;...])
+each_right(func,[a0;a1;...],[b0;b1;...])
 ```
 
 Result:

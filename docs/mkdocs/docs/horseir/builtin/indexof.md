@@ -10,19 +10,28 @@
 
 Note: index starts from 0
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
-B, B -> L
-H, H -> L
-I, I -> L
-L, L -> L
-F, F -> L
-E, E -> L
-C, C -> L
-S, S -> L
+Real   , Real   -> I
+char   , char   -> I
+string , string -> I
+symbol , symbol -> I
 _, _ -> domain error
 ```
+
+!!! danger "Future Work"
+    Support the search between three string types: char, symbol, and string
+
+Table with details (See [type alias](../types.md))
+
+![index of](../types/indexof.png)
+
+### Shape Rules
+
+[Shape right rules](../shapes.md#shape-right)
 
 ### Examples
 

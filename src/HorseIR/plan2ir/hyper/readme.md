@@ -25,12 +25,30 @@
 | 21 | Pass*  |         |     | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
 | 22 | Pass   |  V      | Y   | 1 join,  1 leftantijoin                  | bnl
 
+Note (July 25)
 
-Note (Jun 15)
+- Passed: 1,4,6,12,13,14,16,19,22
+- Pending: 15,2,3,5,7,8,10,17,18
+- List: 9,11,20,21
+
+Grouped Queries
+
+- 7,8,9: a subquery for creating a tempory table
+    + q9 needs the extension of join_index for lists
+- 18, 20: `xx in (subquery)`
+
+Note (June 25) Not handled cases
+
+- Group join: q3, q17
+    + Need: `leftExpressions`, `rightExpressions`, ...
+- General join: q2, q5, q7, q8, q9, q10, q11, q15, q17, q18, q21
+- Multiple column joins: q20
+
+Note (June 15)
 
 - No join : 1,6
 - 1  join : 4,12,13,14
-- 2  joins: 16 (17,19,22)
+- 2  joins: 16,19,22 (17)
 
 Testing: 3,18
 
@@ -125,28 +143,28 @@ What is early probe?
 - Currently, we treat it as a normal table scan.
 
 
- 16K q8   I
- 14K q2   I
- 13K q21  .
- 13K q9   I
- 12K q7   I <-- Incomplete
- 11K q5   Y
- 11K q19  F <-- Fail, join condition and + or
- 10K q20  .
-9.7K q11  Y
-9.6K q18  Y
-9.2K q22  Y
-9.0K q17  .
-8.4K q10  Y
-7.2K q16  Y
-6.9K q12  Y
-6.5K q3   Y
-6.3K q15  Y
-5.8K q14  Y
-4.9K q1   Y
-4.4K q4   Y
-4.3K q13  Y
-2.9K q6   Y
+ 16K q8   N   I
+ 14K q2   N   I
+ 13K q21  N   .
+ 13K q9   N   I
+ 12K q7   N   I <-- Incomplete
+ 11K q5   N   Y
+ 11K q19  Y   F <-- Fail, join condition and + or
+ 10K q20  N   .
+9.7K q11  N   Y
+9.6K q18  N   Y
+9.2K q22  Y   Y
+9.0K q17  N   .
+8.4K q10  N   Y
+7.2K q16  Y   Y
+6.9K q12  Y   Y
+6.5K q3   N   Y
+6.3K q15  N   Y
+5.8K q14  Y   Y
+4.9K q1   Y   Y
+4.4K q4   Y   Y
+4.3K q13  Y   Y
+2.9K q6   Y   Y
 
 
 How block nested loop (bnl) join works?

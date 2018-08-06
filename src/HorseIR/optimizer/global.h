@@ -26,8 +26,9 @@ void error(const char* s);
 #define FP fprintf
 #define PN(x) P("%s\n",x)
 #define newLine() P("\n")
+#define INFO() FP(stderr, "ERROR in [%s:%d:%s] ", __FILE__, __LINE__, __func__)
 #define WP(...) FP(stderr,__VA_ARGS__)  // warning
-#define EP(...) do{FP(stderr,__VA_ARGS__);exit(1);}while(0)  // error
+#define EP(...) do{INFO(); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 

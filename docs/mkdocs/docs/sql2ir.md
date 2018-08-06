@@ -1,33 +1,34 @@
-# Translating SQL to HorseIR
+!!! tip "Note (Updated Frequently!)"
+    This page is maintained to keep track of the translation from SQL queries to HorseIR programs.
 
 ## TPC-H benchmarks
 
-Query profile (<u>Total 22</u>: **Pass** 10; <blue>Testing</blue>: 0; <red>Working</red>: 1)
+Query profile (<u>Total 22</u>: **Pass** X; <blue>Testing</blue>: X; <red>Working</red>: X)
 
 | ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return | Comment                       |
 | :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: | :---------------------------: |
-| [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     | **Pass**                      |
+| [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     | <blue>Pass</blue>             |
 | [2][q2]  | P,S,PS,N,R  | 13    | 8    | 1     | 0     | 4     | 9      |                               |
-| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      | **Pass**                      |
-| [4][q4]  | O,L         | 5     | 1    | 1     | 1     | 1     | 3      | **Pass**                      |
+| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      | <red>Working</red>            |
+| [4][q4]  | O,L         | 5     | 1    | 1     | 1     | 1     | 3      | <blue>Pass</blue>             |
 | [5][q5]  | C,O,L,S,N,R | 9     | 6    | 1     | 1     | 1     | 2      |                               |
-| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | **Pass**, ready               |
+| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | <blue>Pass</blue>             |
 | [7][q7]  | S,L,O,C,N   | 9     | 5    | 1     | 3     | 3     | 8      |                               |
 | [8][q8]  |P,S,L,O,C,N,R| 10    | 7    | 1     | 1     | 1     | 5      |                               |
 | [9][q9]  |P,S,L,PS,O,N | 7     | 6    | 1     | 2     | 2     | 6      | <red>Working</red>            |
 | [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |                               |
 | [11][q11]| PS,S,N      | 6     | 4    | 2     | 1(big)| 1     | 3      |                               |
-| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      |                               |
-| [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | (Nested)                      |
-| [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      | **Pass**                      |
+| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | <blue>Pass</blue>             |
+| [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | <blue>Pass</blue>             |
+| [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      | <blue>Pass</blue>             |
 | [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
-| [16][q16]| PS,P,S      | 6     | 1    | 1     | 3     | 4     | 5      | **Pass**                      |
-| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | **Pass**, ready               |
-| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | **Pass**                      |
-| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | **Pass**, ready               |
+| [16][q16]| PS,P,S      | 6     | 2    | 1     | 3     | 4     | 5      | <blue>Pass</blue>             |
+| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | <red>Working</red>            |
+| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | <red>Working</red>            |
+| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | <blue>Pass<blue>              |
 | [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
 | [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |
-| [22][q22]| C,O         | 6     | 1    | 3     | 1     | 1     | 7      | **pass**, ready               |
+| [22][q22]| C,O         | 6     | 2    | 3     | 1     | 1     | 7      | <blue>Pass<blue>              |
 
 
 \* List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md))
@@ -37,7 +38,24 @@ Query profile (<u>Total 22</u>: **Pass** 10; <blue>Testing</blue>: 0; <red>Worki
 | (PS) PartSupp | (C) Customer | (O) Orders | (L) Lineitem |
 ```
 
-## Manual translation
+Basic classification of queries
+
+- 0 join : 6,1
+- 1 join : 4,12,13,14
+- 2 joins: 3,16,17,18,22
+- 3 joins: 10,19,20
+- 4 joins: 11
+- 5 joins: 7,21
+- Others : 2,5,8,9 (\>5)
+- Pending: 15
+
+## Translation
+
+### Automatic Translation (Under Development)
+
+- To be updated soon.
+
+### Manual Translation (Expired)
 
 The translation from SQL to HorseIR can be done in the following steps.
 
@@ -88,9 +106,6 @@ Loop fusion
 
 - Place 1: line [6, 17] return t15 (good)
 - Place 2: line [18,20] return t18 (optional)
-
-### Q1
-### Q1
 
 
 ## Formal methods

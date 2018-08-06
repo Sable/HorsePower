@@ -39,10 +39,10 @@ def isArithOps(op):
     }.get(op, False)
 
 def isLogicOps(op):
-	return {
-		'and': True,
-		'or' : True
-	}.get(op, False)
+    return {
+        'and': True,
+        'or' : True
+    }.get(op, False)
 
 def isUnaryOps(op):
     return {
@@ -220,10 +220,10 @@ def unexpected(msg):
     errorMsg(msg, 'Unexpected')
 
 def warning(msg):
-	errorMsg(msg, 'Warning')
+    errorMsg(msg, 'Warning')
 
 def wrong(msg):
-	errorMsg(msg, 'Wrong')
+    errorMsg(msg, 'Wrong')
 
 def todo(msg):
     debug('[TODO]: %s' % msg)

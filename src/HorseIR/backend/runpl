@@ -12,12 +12,12 @@ if [ "$2" = "opt" ]; then
 fi
 id=$3
 sid=$4
-# cmd="./horse -p $id -o -r 10"
 cmd="./horse -p $id -u $sid $opt"
+# cmd="./horse -p $id -u $sid $opt -r 10"
 if [ "debug" == "$1" ]; then
     (cd ../ && make debug   && time $cmd -d ' ')
 elif [ "release" == "$1" ]; then
-    (cd ../ && make release && time $cmd -d ' ')
+    (cd ../ && make TPCH="-DSORT_MERGE" release && time $cmd -d ' ')
 else
     (cd ../ && time $cmd -d ' ')
 fi

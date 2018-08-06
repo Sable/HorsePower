@@ -61,6 +61,7 @@ L isListIndexOf         (V x, V y, L *sizeX, L *sizeY);
 L setFKey               (V x, V colName, V fKey);
 B isOrdered             (V x);
 L searchOrdered         (V z, V x, V y);
+L joinIndexHash         (V z, V x, V y, C op);
 
 
 B isTypeGroupInt        (L t);

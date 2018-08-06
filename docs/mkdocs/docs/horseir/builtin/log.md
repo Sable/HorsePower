@@ -20,18 +20,67 @@ _    -> domain error
 
 Logarithm
 
-- `log(base, number)`
+- `log(value)`
+- base is 2
 
 ### Type rules
 
 ```no-highlight
-Real, Real -> f32 / f64 / Complex
-_          -> domain error
+bool -> f32
+char -> f32 / complex
+i16  -> f32 / complex
+i32  -> f32 / complex
+i64  -> f64 / complex
+f32  -> f32 / complex
+f64  -> f64 / complex
 ```
 
 ### Examples
 
 ```no-highlight
-log(2, (4,9,16))
-> (2,3,4):f64
+log2((4,9,16):i32)
+> (2,3,4):f32
+```
+
+## log10
+
+### Description
+
+Logarithm
+
+- `log10(value)`
+- base is 10
+
+### Type rules
+
+```no-highlight
+bool -> f32
+char -> f32 / complex
+i16  -> f32 / complex
+i32  -> f32 / complex
+i64  -> f64 / complex
+f32  -> f32 / complex
+f64  -> f64 / complex
+```
+
+### Examples
+
+```no-highlight
+log10((10,100,1000):i32)
+> (1,2,3):f32
+```
+
+## logb
+
+### Description
+
+Natural logarithm
+
+- `logb(base, number)`
+
+### Type rules
+
+```no-highlight
+Real, Real -> f32 / f64 / Complex
+_   , _    -> domain error
 ```

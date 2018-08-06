@@ -10,9 +10,9 @@
 ### Type rules
 
 ```no-highlight
-bool    -> f64
-i16     -> f64
-i32     -> f64
+bool    -> f32
+i16     -> f32
+i32     -> f32
 i64     -> f64
 f32     -> f32
 f64     -> f64
@@ -23,6 +23,6 @@ _       -> domain error
 ### Examples
 
 ```no-highlight
-pi((0,1))
-> (0,3.1415926)
+pi((0,1):i32)
+> (0,3.1415926):f32
 ```

@@ -91,7 +91,7 @@ E simulateQ19(){
         PROFILE(41, pfnCompress(d1, p2, t4)); // l_
         PROFILE(45, pfnWhere(d7, p2));
     }
-    else {
+    else { // loop fusion
         PROFILE(45, optLoopFusionQ19_5(d1, d7, p2, t4));
     }
     PROFILE(42, pfnIndexOf(d2, d0, d1));
@@ -138,7 +138,7 @@ E simulateQ19(){
     // PROFILE(71, pfnEq(k0, d9, literalSym((S)"Brand#23")));
     S group5[] = {(S)"MED BAG", (S)"MED BOX", (S)"MED PKG", (S)"MED PACK"};
     PROFILE(72, pfnMember(k1, literalSymVector(4, group5), d10));
-    if(isOptimized){
+    if(!isOptimized){
         PROFILE(71, pfnEq(k0, d9, literalSym((S)"Brand#23")));
         PROFILE(73, pfnGeq(k2, d12, literalI64(10))); 
         PROFILE(74, pfnLeq(k3, d12, literalI64(20)));
@@ -158,7 +158,7 @@ E simulateQ19(){
     // PROFILE(82, pfnEq(h0, d9, literalSym((S)"Brand#34")));
     S group6[] = {(S)"LG CASE", (S)"LG BOX", (S)"LG PACK", (S)"LG PKG"};
     PROFILE(83, pfnMember(h1, literalSymVector(4, group6), d10));
-    if(isOptimized){
+    if(!isOptimized){
         PROFILE(82, pfnEq(h0, d9, literalSym((S)"Brand#34")));
         PROFILE(84, pfnGeq(h2, d12, literalI64(20))); 
         PROFILE(85, pfnLeq(h3, d12, literalI64(30)));
@@ -175,7 +175,7 @@ E simulateQ19(){
     }
 
     PROFILE(93, pfnOr(m0, r10, k10));
-    PROFILE(94, pfnOr(m1, m0 , h10));
+    PROFILE(94, pfnOr(m1, m0, h10));
     PROFILE(95, pfnCompress(m2, m1, d15));
     PROFILE(96, pfnCompress(m3, m1, d16));
     PROFILE(97, pfnMinus(m4, literalF64(1), m3));

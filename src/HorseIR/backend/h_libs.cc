@@ -842,7 +842,42 @@ L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen){
 }
 
 
+/*
+ Call external shared libraries
+*/
+#include <dlfcn.h>
+#include <unistd.h>
 
+void *load_shared_lib(S name){
+    void *handle=NULL;
+    handle=dlopen(name, RTLD_NOW | RTLD_GLOBAL);
+    if(!handle){
+        printf("Load lib %s fail: %s\n", name,dlerror());
+        exit(1);
+    }
+    return handle;
+}
+
+void *load_shared_func(S fn, S name, void *handle){
+    void *func = dlsym(handle, fn);
+    if(!func){
+        fprintf(stderr, "Can't find func %s in %s: %s\n", fn,name,dlerror());
+        dlclose(handle);
+        exit(1);
+    }
+    return func;
+}
+
+/* a helper function */
+void get_current_path(){
+    char szTmp[32], pBuf[128];
+    int len = 128; 
+    sprintf(szTmp, "/proc/%d/exe", getpid());
+    int bytes = MIN(readlink(szTmp, pBuf, len), len - 1);
+    if(bytes >= 0)
+        pBuf[bytes] = '\0';
+    P("current path: %s\n", pBuf);
+}
 
 
 

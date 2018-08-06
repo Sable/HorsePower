@@ -1,26 +1,58 @@
+!!! Note "Math Support Available"
+    This website is going to provide examples in math, such as \( y = \sqrt{x^2-1} \).  Please come back to check later.
+
 ## abs
 
-### Description
+| Invocation      |  # of parameters | # of returns | isElementwise | Note                 |
+|:---------------:|:----------------:|:------------:|:-------------:|:--------------------:|
+| z:? = @abs(x)   | 1                | 1            | Yes           | Return absolute value|
 
-`abs(x)`
 
-- absolute value of numerical x
+### Type Rules
 
-### Type rules
+<table class="typetable">
+<tr>
+    <th>Input</th>
+    <th>Output</th>
+</tr>
+<tr>
+    <td><script>hgType('B', 'bool')</script></td>
+    <td><script>hgType('B', 'bool')</script></td>
+</tr>
+<tr>
+    <td><script>hgType('H', 'short')</script></td>
+    <td><script>hgType('H', 'short')</script></td>
+</tr>
+<tr>
+    <td><script>hgType('I', 'int (i32)')</script></td>
+    <td><script>hgType('I', 'int (i32)')</script></td>
+</tr>
+<tr>
+    <td><script>hgType('L', 'int (i64)')</script></td>
+    <td><script>hgType('L', 'int (i64)')</script></td>
+</tr>
+<tr>
+    <td><script>hgType('F', 'float (f32)')</script></td>
+    <td><script>hgType('F', 'float (f32)')</script></td>
+</tr>
+<tr>
+    <td><script>hgType('E', 'float (f64)')</script></td>
+    <td><script>hgType('E', 'float (f64)')</script></td>
+</tr>
+<tr>
+    <td>Others</td>
+    <td>Domain Error</td>
+</tr>
+</table>
 
-```no-highlight
-bool -> bool
-i16  -> i16
-i32  -> i32
-i64  -> i64
-f32  -> f32
-f64  -> f64
-_    -> domain error
-```
+### Shape Rules
+
+[Monadic elementwise shape rules](../shapes.md#monadic-elementwise)
+
 
 ### Examples
 
 ```no-highlight
-abs((-1,2,3))
-> (1,2,3):i64
+    abs((-1,2,3))
+(1,2,3):i64
 ```

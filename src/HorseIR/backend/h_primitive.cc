@@ -1328,6 +1328,7 @@ L pfnCompress(V z, V x, V y){
         else if(lenZ > 0){ // copy all of items
             CHECKE(copyV(z,y));
         }
+        P("compress result: %lld\n", vn(z)); 
         R 0;
     }
     else R E_DOMAIN;
@@ -1450,6 +1451,11 @@ L pfnAppend(V z, V x, V y){
  * x: string
  * y: string (done), symbol, list of string and symbol (pending)
  */
+#define LIKEMATCH(src,slen,re,matchData) \
+    pcre2_match(re,\
+        reinterpret_cast<unsigned char*>(src),\
+        slen,0,PCRE2_ANCHORED,matchData,NULL\
+    )<0?0:1
 L pfnLike(V z, V x, V y){
     if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
         B t;
@@ -1467,8 +1473,10 @@ L pfnLike(V z, V x, V y){
             // P("Entering pfnLike\n");
             switch(vp(x)){
                 caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
-                caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
-                caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
+                caseQ DOP(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vL(x,i)),getSymbolSize(vL(x,i)),re,match);}) break;
+                caseS DOP(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
+                // caseQ DOI(vn(x), {vB(z,i)=getLikeMatch(getSymbolStr(vL(x,i)),re,match); }) break;
+                // caseS DOI(vn(x), {vB(z,i)=getLikeMatch(vS(x,i),re,match); })               break;
             }
             pcre2_code_free(re);
             pcre2_match_data_free(match);
@@ -2090,6 +2098,12 @@ L optLoopFusionQ19_5(V d1, V d7, V p2, V t4){
     initV(d7,H_L,lenZ); // where
     DOT(lenX, if(vB(p2,i)){L c=offset[tid]++; \
                           vL(d1,c)=vL(t4,i); vL(d7,c)=i; })
+    R 0;
+}
+
+L optLoopFusionQ22_1(V w3, L r0, V w1, V t0, V sub2){
+    initV(w3,H_B,r0);
+    DOI(r0, vB(w3,i)=vB(w1,i)&&(vE(t0,i)>vE(sub2,0)))
     R 0;
 }
 

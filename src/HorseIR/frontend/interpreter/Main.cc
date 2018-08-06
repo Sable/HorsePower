@@ -148,22 +148,22 @@ int main (int argc, const char *argv[])
 
 
       V xTableNode = allocNode (); initV (xTableNode, H_Q, 1);
-      V xKeyNode = allocNode (); initV (xKeyNode, H_Q, 1);
+      V xKeyNode   = allocNode (); initV (xKeyNode  , H_Q, 1);
       V yTableNode = allocNode (); initV (yTableNode, H_Q, 1);
-      V yKeyNode = allocNode (); initV (yKeyNode, H_Q, 1);
+      V yKeyNode   = allocNode (); initV (yKeyNode  , H_Q, 1);
 
       vq (xTableNode) = getSymbol ((S) xTable.c_str ());
-      vq (xKeyNode) = getSymbol ((S) xKey.c_str ());
+      vq (xKeyNode)   = getSymbol ((S) xKey.c_str   ());
       vq (yTableNode) = getSymbol ((S) yTable.c_str ());
-      vq (yKeyNode) = getSymbol ((S) yKey.c_str ());
+      vq (yKeyNode)   = getSymbol ((S) yKey.c_str   ());
 
       pfnAddFKey (xTableNode, xKeyNode, yTableNode, yKeyNode);
     }
 
-  antlr4::ANTLRInputStream inputStream (std::cin);
-  horseIR::HorseIRLexer lexer (&inputStream);
+  antlr4::ANTLRInputStream  inputStream (std::cin);
+  horseIR::HorseIRLexer     lexer       (&inputStream);
   antlr4::CommonTokenStream tokenStream (&lexer);
-  horseIR::HorseIRParser parser (&tokenStream);
+  horseIR::HorseIRParser    parser      (&tokenStream);
 
   horseIR::ast::ASTNode::ASTNodeMemory memory;
 

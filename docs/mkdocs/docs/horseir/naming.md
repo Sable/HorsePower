@@ -1,9 +1,8 @@
 <!--## Naming-->
 
-## Rules
-
-There are a couple of naming rules we need to consider: 1) *module names*, 2)
-*method names*, 3) *variable names*, and 4) *type names*.
+!!! note "Naming Rules"
+    There are a couple of naming rules we need to consider: 1) *module names*, 2)
+    *method names*, 3) *variable names*, and 4) *type names*.
 
 ### 1. Module names
 

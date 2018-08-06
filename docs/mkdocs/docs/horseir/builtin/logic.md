@@ -2,6 +2,10 @@
 
 All logic operations are defined with the following type rules.
 
+### Type Rules
+
+High-level
+
 ```no-highlight
 // dyadic
 bool,bool -> bool
@@ -11,6 +15,14 @@ _         -> domain error
 bool -> bool
 _    -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![logic](../types/logic.png)
+
+### Shape Rules
+
+[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
 
 ## and
 

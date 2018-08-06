@@ -6,12 +6,22 @@ Modulo
 
 - `mod(divisor, dividend)`  (dividend | divisor)
 
-### Type rules
+### Type Rules
+
+High-level
 
 ```no-highlight
-Real, Real -> maxType (Except: Bool, Bool -> L)
+Real, Real -> MaxType (Except: bool, bool -> i32; i16, i16 -> i32)
 _          -> domain error
 ```
+
+Table with details (See [type alias](../types.md))
+
+![mod](../types/mod.png)
+
+### Shape Rules
+
+[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
 
 ### Examples
 

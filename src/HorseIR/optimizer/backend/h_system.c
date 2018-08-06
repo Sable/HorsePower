@@ -99,7 +99,7 @@ L copyByIndexSimple(V z, L p, V x, L q){
 //     }
 //     else {
 //         switch(xp){
-//             caseG DOI(xn, CHECKE(copyV(vV(z,i),vV(x,i)))) break;
+//             caseV DOI(xn, CHECKE(copyV(vV(z,i),vV(x,i)))) break;
 //         }
 //     }
 //     R 0;
@@ -209,7 +209,7 @@ B checkZero(V x){
 
 B checkMatch(V x){
     switch(xp){
-        caseG if(xn>0){L n=vn(vV(x,0)); DOI(xn,if(n!=vn(vV(x,i)))R 0)} break; /* List */
+        caseV if(xn>0){L n=vn(vV(x,0)); DOI(xn,if(n!=vn(vV(x,i)))R 0)} break; /* List */
     }
     R 1;
 }
@@ -478,7 +478,7 @@ B isAssignableType(L x, L y){
 /*
  * x[ax] == y[ay]
  */
-B compareTuple(V x, L ax, V y, L ay){
+B compareTupleItem(V x, L ax, V y, L ay){
     if(isSameType(x,y)){
         switch(vp(x)){
             caseH R vH(x,ax)==vH(y,ay);
@@ -488,11 +488,17 @@ B compareTuple(V x, L ax, V y, L ay){
             caseE R vE(x,ax)==vE(y,ay);
             caseS R !strcmp(vS(x,ax),vS(y,ay));
             caseX R xEqual(vX(x,ax),vX(y,ay));
-            caseG DOI(vn(x), if(!compareTuple(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
-            default: R 0;
+            /* logic here is buggy: need to check if they are the same Lists */
+            //caseG DOI(vn(x), if(!compareTuple(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
+            caseG EP("Need to compare the whole cell\n");
+            default: EP("the type %lld not supported\n", vp(x));
         }
     }
     else R 0;
+}
+
+B compareTuple(V x, L ax, V y, L ay){
+    DOI(vn(x), if(!compareTupleItem(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
 }
 
 L isListIndexOf(V x, V y, L *sizeX, L *sizeY){
@@ -508,6 +514,50 @@ L isListIndexOf(V x, V y, L *sizeX, L *sizeY){
     }
     else R E_DOMAIN;
 }
+
+static L isSameValueItem(V x, L a, L b){
+    switch(xp){
+        caseB R vB(x,a) == vB(x,b); 
+        caseH R vH(x,a) == vH(x,b); 
+        caseI R vI(x,a) == vI(x,b); 
+        caseL R vL(x,a) == vL(x,b); 
+        caseE R vE(x,a) == vE(x,b); 
+        caseF R vF(x,a) == vF(x,b); 
+        caseC R vC(x,a) == vC(x,b); 
+        caseQ R vQ(x,a) == vQ(x,b); 
+        caseS R !strcmp(vS(x,a), vS(x,b));
+        default: EP("isSameValueItem: support more types.\n");
+    }
+}
+
+/*
+ * Search on an ordered vector, may contain duplicated values
+ */
+L joinIndexHashValue(V z0, V z1, V x, V y){
+    V0 t0; V t = &t0; L c;
+    CHECKE(pfnIndexOf(t, x, y));
+    c = 0; DOI(vn(t), {L pos=vL(t,i);L j=pos;while(j<vn(x)&&isSameValueItem(x,pos,j++))c++;})
+    P("[joinIndex] c = %lld\n",c);
+    initV(z0,H_L,c);
+    initV(z1,H_L,c);
+    c = 0; DOI(vn(t), {L pos=vL(t,i);L j=pos;while(j<vn(x)&&isSameValueItem(x,pos,j)){vL(z0,c)=j++;vL(z1,c)=i;c++;}})
+    R 0;
+}
+
+L joinIndexHash(V z, V x, V y, C op){
+    P("len: x = %lld, y = %lld\n",vn(x),vn(y));
+    P("typ: x = %lld, y = %lld\n",vp(x),vp(y));
+    if(op == 'l'){ // left
+        initV(z, H_G, 2);
+        R joinIndexHashValue(vV(z,0),vV(z,1),x,y);
+    }
+    else if(op == 'r'){ // right
+        initV(z, H_G, 2);
+        R joinIndexHashValue(vV(z,1),vV(z,0),y,x);
+    }
+    else R E_DOMAIN;
+}
+
 
 /*
  * x: a table

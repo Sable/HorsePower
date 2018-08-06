@@ -136,7 +136,7 @@ V mybs_udf0(V sptprice, V strike, V rate, V divq, V volatility, V time, V option
 }
 
 /*
-    -- query 2: filter
+    -- query 1: filter
     SELECT
         *
     FROM

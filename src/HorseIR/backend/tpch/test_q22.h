@@ -44,8 +44,13 @@ V simulateQ22_sub1(){
     S group2[] = {(S)"13", (S)"31", (S)"23", (S)"29", (S)"30", (S)"18", (S)"17"};
     PROFILE( 5, pfnMember(w1, literalStrVector(7, group2), w0));
     V sub2 = simulateQ22_sub2();
-    PROFILE( 6, pfnGt(w2, t0, sub2));
-    PROFILE( 7, pfnAnd(w3, w1, w2)); // boolean
+    if(!isOptimized){
+        PROFILE( 6, pfnGt(w2, t0, sub2));
+        PROFILE( 7, pfnAnd(w3, w1, w2)); // boolean
+    }
+    else {
+        PROFILE( 6, optLoopFusionQ22_1(w3, vn(w1), w1, t0, sub2));
+    }
 
     PROFILE( 8, pfnColumnValue(t2, a1, literalSym((S)"o_custkey")));
     PROFILE( 9, pfnValues     (w4, t2));
