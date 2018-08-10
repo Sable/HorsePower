@@ -1,6 +1,5 @@
 ## Standard Results for Different Scale Factors
 
-
 | ID | SF1                    | SF2                      |
 |:--:|:----------------------:|:------------------------:|
 | 1  | [4x10](sf1/q1.txt)     |                          |
@@ -32,7 +31,20 @@ Execution plans can be found at:
 HorsePower/src/HorseIR/plan2ir/hyper/fig/
 ```
 
-## HyPer Online Rough Time
+**Table size**
+
+| Table    | SF1       | SF10       |
+|:--------:|:---------:|:----------:|
+| nation   | 25        | 25         |
+| supplier | 10,000    | 100,000    |
+| customer | 150,000   | 1,500,000  |
+| part     | 200,000   | 2,000,000  |
+| partsupp | 800,000   | 8,000,000  |
+| orders   | 1,500,000 | 15,000,000 |
+| lineitem | 6,001,215 | 59,986,052 |
+
+
+## HyPer Online Execution Time
 
 Time: ms  (single thread)
 
