@@ -4,7 +4,7 @@
 
 | Name          | CPU (GFlops)                | Inst.(Up to)| Threads     | RAM      | GPU                                   | Cores   |
 | :-------------| :-------------------------: | :---------: | :-----------| :------- | :------------------------------------:| :-----: |
-| sable-tigger  | i7-8700K  @ 3.70GHz (320GF) | AVX2        | 12  (1x12)  | 32  GB   | [GeForce GTX 1080 Ti][gtx1080]        | 3584    |
+| sable-tigger  | i7-8700K  @ 3.70GHz (320GF) | AVX2        | 12  (1x12)  | 32  GB   | [GeForce GTX 1080 Ti (c6.1)][gtx1080] | 3584    |
 | sable-beaver  | i7-4770   @ 3.40GHz (177GF) | AVX2        | 4  (1x4)    | 16  GB   | (See below)                           | ...     |
 | sable-lynx    | i7-3820   @ 3.60GHz (105GF) | AVX         | 8  (1x8)    | 8   GB   | [GeForce GTX 560 Ti (c2.1)][gtx560]   | 384     |
 | sable-deer    | i7-3820   @ 3.60GHz (105GF) | AVX         | 8  (1x8)    | 16  GB   | [GeForce GTX 560 Ti (c2.1)][gtx560]   | 384     |
@@ -15,9 +15,9 @@
 
 New GPUs We Already Purchased
 
-- [GeForce GTX 1070Ti][gtx1070]: 2432 cores      (sable-beaver)
-- [Radeon Vega 64][radeon64]   : 4096 processors (sable-beaver)
-- [GeForce GTX 1080Ti][gtx1080]: 3584 cores      (sable-tigger)
+- [GeForce GTX 1070Ti (c6.1)][gtx1070]: 2432 cores      (sable-beaver,card 1)
+- [Radeon Vega 64][radeon64]          : 4096 processors (sable-beaver,card 2)
+- [GeForce GTX 1080Ti (c6.1)][gtx1080]: 3584 cores      (sable-tigger)
 
 [gt630]: https://www.geforce.com/hardware/notebook-gpus/geforce-gt-630m/specifications
 [gt720]: https://www.geforce.com/hardware/desktop-gpus/geforce-gt-720/specifications

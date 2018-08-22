@@ -13,6 +13,10 @@
  *    in-lining + CSE
  */
 
+#define inferLog inferRecip
+#define inferTrig inferRecip
+#define inferPowerLog inferRecip
+
 L pfnLoadTable(V z, V x){
     if(isSymbol(x)){
         initTableByName(getSymbolStr(vq(x))); // register table
@@ -230,17 +234,63 @@ L pfnFetch(V z, V x){
     else R E_DOMAIN;
 }
 
-L pfnColumnValue(V z, V x, V y){
-    if(H_DEBUG) P("-> Entering column_value\n");
-    if(isTable2(x) && isOneSymbol(y)){
-        L colId = vq(y);
-        L colIndex = findColFromTable(x,colId);
-        if(colIndex >= 0){
-            R copyColumnValue(z, getTableCol(getTableVals(x),colIndex));
+
+V fetchTableByName(V x){
+    if(isSymbol(x) && isOne(x)){
+        R findTableByName(vq(x));
+    }
+    R NULL;
+}
+
+V fetchFKeyByName(V x, V m){
+    if(isTable(x) && isSymbol(m)){
+        ListY *y = x->a.fkey;
+        while(y){
+            V col = (V)(y->cn);
+            if(vp(m) == vp(col) && vn(m) == vn(col)){
+                B f = 1;
+                DOI(vn(m), if(vQ(m,i)!=vQ(col,i)){f=0;break;})
+                if(f) {
+                    //P(" matched!\n"); printV(m); getchar();
+                    R (V)(y->y);
+                }
+            }
+            y = y->next;
         }
-        else R E_COL_NOT_FOUND;
+    }
+    R NULL;
+}
+
+L fetchColumnValue(V z, V x, V y, B f){
+    if(isTable2(x) && isSymbol(y)){
+        if(f){ // load enumeration
+            V e0 = fetchFKeyByName(x,y);
+            if(e0) R copyColumnValue(z, e0);
+        }
+        if(isOne(y)){
+            Q colId = vq(y);
+            L colIndex = findColFromTable(x,colId);
+            if(colIndex < 0) { EP("1. col not found\n"); R E_COL_NOT_FOUND; }
+            else R copyColumnValue(z, getTableCol(getTableVals(x),colIndex));
+        }
+        else {
+            L lenZ = vn(y);
+            initV(z, H_G, lenZ);
+            P("lenZ = %lld\n", lenZ);
+            DOI(lenZ, { \
+               L colIndex = findColFromTable(x, vQ(y,i)); \
+               P("colIndex = %lld, %s\n", colIndex,getSymbolStr(vQ(y,i))); \
+               if(colIndex < 0) R E_COL_NOT_FOUND; \
+               CHECKE(copyColumnValue(vV(z,i), getTableCol(getTableVals(x), colIndex));)})
+            R 0 ;
+        }
     }
     else R E_DOMAIN;
+}
+
+L pfnColumnValue(V z, V x, V y){
+    if(H_DEBUG) P("-> Entering column_value\n");
+    R fetchColumnValue(z,x,y,1);
 }
 
 L pfnIsValidBranch(V z, V x){
@@ -273,7 +323,9 @@ const E PI = acos(-1);
 #define PIMUL(x) (PI*x)
 #define NOT(x) (!x)
 #define EXP(x) exp(x)
-#define LOGN(x) log(x)
+#define LOGE(x) log(x)
+#define LOG2(x) log2(x)
+#define LOG10(x) log10(x)
 #define POWER(x,y) pow(x,y)
 #define LOG(x,y) (log(y)/log(x))
 #define MODI(x,y) ((x)%(y))
@@ -285,12 +337,14 @@ L pfnAbs(V z, V x){
     if(isTypeGroupReal(vp(x))){
         initV(z,vp(x),vn(x));  // Step 1: initialize z
         switch(vp(x)){         // Step 2: based on x
-            caseB DOP(vn(x), vB(z,i)=vB(x,i))      break; //opt
+            caseB DOP(vn(x), vH(z,i)=vB(x,i))      break; //opt
+            caseC DOP(vn(x), vC(z,i)=ABS(vC(x,i))) break; //opt
             caseH DOP(vn(x), vH(z,i)=ABS(vH(x,i))) break;
             caseI DOP(vn(x), vI(z,i)=ABS(vI(x,i))) break;
             caseL DOP(vn(x), vL(z,i)=ABS(vL(x,i))) break;
             caseF DOP(vn(x), vF(z,i)=ABS(vF(x,i))) break;
             caseE DOP(vn(x), vE(z,i)=ABS(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -305,11 +359,13 @@ L pfnNeg(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){       
             caseB DOP(lenZ, vB(z,i)=NEG(vB(x,i))) break;
+            caseC DOP(lenZ, vC(z,i)=NEG(vC(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=NEG(vH(x,i))) break;
             caseI DOP(lenZ, vI(z,i)=NEG(vI(x,i))) break;
             caseL DOP(lenZ, vL(z,i)=NEG(vL(x,i))) break;
             caseF DOP(lenZ, vF(z,i)=NEG(vF(x,i))) break;
             caseE DOP(lenZ, vE(z,i)=NEG(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -318,16 +374,18 @@ L pfnNeg(V z, V x){
 
 L pfnCeil(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = inferReal2Int(vp(x));
+        L typZ = vp(x); // inferReal2Int
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
+            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
-            caseF DOP(lenZ, vL(z,i)=CEIL(vF(x,i))) break;
-            caseE DOP(lenZ, vL(z,i)=CEIL(vE(x,i))) break;
+            caseF DOP(lenZ, vF(z,i)=CEIL(vF(x,i))) break;
+            caseE DOP(lenZ, vE(z,i)=CEIL(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -336,16 +394,18 @@ L pfnCeil(V z, V x){
 
 L pfnFloor(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = inferReal2Int(vp(x));
+        L typZ = vp(x); // inferReal2Int
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
+            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
-            caseF DOP(lenZ, vL(z,i)=FLOOR(vF(x,i))) break;
-            caseE DOP(lenZ, vL(z,i)=FLOOR(vE(x,i))) break;
+            caseF DOP(lenZ, vF(z,i)=FLOOR(vF(x,i))) break;
+            caseE DOP(lenZ, vE(z,i)=FLOOR(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -354,39 +414,37 @@ L pfnFloor(V z, V x){
 
 L pfnRound(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = inferReal2Int(vp(x));
+        L typZ = vp(x); // inferReal2Int
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
+            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
-            caseF DOP(lenZ, vL(z,i)=ROUND(vF(x,i))) break;
-            caseE DOP(lenZ, vL(z,i)=ROUND(vE(x,i))) break;
+            caseF DOP(lenZ, vF(z,i)=ROUND(vF(x,i))) break;
+            caseE DOP(lenZ, vE(z,i)=ROUND(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
     else R E_DOMAIN;
 }
 
-#define TRIG(op,x) (2>op?TRIGSIN(op,x):4>op?TRIGCOS(op,x):TRIGTAN(op,x))
-#define TRIGSIN(op,x) (0==op?sin(x):asin(x))
-#define TRIGCOS(op,x) (2==op?cos(x):acos(x))
-#define TRIGTAN(op,x) (4==op?tan(x):atan(x))
-
-L pfnTrig(V z, V x, L op){
+static L pfnTrig(V z, V x, E (*fn_e)(E), F (*fn_f)(F)){
     if(isTypeGroupReal(vp(x))){
-        L typZ = H_E;
+        L typZ = inferTrig(vp(x));
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
-            caseB DOP(lenZ, vE(z,i)=TRIG(op,vB(x,i))) break;
-            caseH DOP(lenZ, vE(z,i)=TRIG(op,vH(x,i))) break;
-            caseI DOP(lenZ, vE(z,i)=TRIG(op,vI(x,i))) break;
-            caseL DOP(lenZ, vE(z,i)=TRIG(op,vL(x,i))) break;
-            caseF DOP(lenZ, vE(z,i)=TRIG(op,vF(x,i))) break;
-            caseE DOP(lenZ, vE(z,i)=TRIG(op,vE(x,i))) break;
+            caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(x,i))) break;
+            caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(x,i))) break;
+            caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(x,i))) break;
+            caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(x,i))) break;
+            caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(x,i))) break;
+            caseF DOP(lenZ, vF(z,i)=(*fn_f)(vF(x,i))) break;
+            caseE DOP(lenZ, vE(z,i)=(*fn_e)(vE(x,i))) break;
             default: R E_NOT_IMPL;
         }
         R 0;
@@ -395,75 +453,53 @@ L pfnTrig(V z, V x, L op){
 }
 
 L pfnTrigSin(V z, V x){
-    R pfnTrig(z,x,0);
+    R pfnTrig(z,x,&sin,&sinf);
 }
 
 L pfnTrigAsin(V z, V x){
-    R pfnTrig(z,x,1);
+    R pfnTrig(z,x,&asin,&asinf);
 }
 
 L pfnTrigCos(V z, V x){
-    R pfnTrig(z,x,2);
+    R pfnTrig(z,x,&cos,&cosf);
 }
 
 L pfnTrigAcos(V z, V x){
-    R pfnTrig(z,x,3);
+    R pfnTrig(z,x,&acos,&acosf);
 }
 
 L pfnTrigTan(V z, V x){
-    R pfnTrig(z,x,4);
+    R pfnTrig(z,x,&tan,&tanf);
 }
 
 L pfnTrigAtan(V z, V x){
-    R pfnTrig(z,x,5);
+    R pfnTrig(z,x,&atan,&atanf);
 }
 
-#define HYPER(op,x) (2>op?HYPERSIN(op,x):4>op?HYPERCOS(op,x):HYPERTAN(op,x))
-#define HYPERSIN(op,x) (0==op?sinh(x):asinh(x))
-#define HYPERCOS(op,x) (2==op?cosh(x):acosh(x))
-#define HYPERTAN(op,x) (4==op?tanh(x):atanh(x))
-
-L pfnHyper(V z, V x, L op){
-    if(isTypeGroupReal(vp(x))){
-        L typZ = H_E;
-        L lenZ = vn(x);
-        initV(z,typZ,lenZ);
-        switch(vp(x)){
-            caseB DOP(lenZ, vE(z,i)=HYPER(op,vB(x,i))) break;
-            caseH DOP(lenZ, vE(z,i)=HYPER(op,vH(x,i))) break;
-            caseI DOP(lenZ, vE(z,i)=HYPER(op,vI(x,i))) break;
-            caseL DOP(lenZ, vE(z,i)=HYPER(op,vL(x,i))) break;
-            caseF DOP(lenZ, vE(z,i)=HYPER(op,vF(x,i))) break;
-            caseE DOP(lenZ, vE(z,i)=HYPER(op,vE(x,i))) break;
-            default: R E_NOT_IMPL;
-        }
-        R 0;
-    }
-    else R E_DOMAIN;
-}
+#define pfnHyper pfnTrig
 
 L pfnHyperSinh(V z, V x){
-    R pfnHyper(z,x,0);
+    R pfnHyper(z,x,&sinh,&sinhf);
 }
 
 L pfnHyperAsinh(V z, V x){
-    R pfnHyper(z,x,1);
+    R pfnHyper(z,x,&asinh,&asinhf);
 }
 
 L pfnHyperCosh(V z, V x){
-    R pfnHyper(z,x,2);
+    R pfnHyper(z,x,&cosh,&coshf);
 }
 
 L pfnHyperAcosh(V z, V x){
-    R pfnHyper(z,x,3);
+    R pfnHyper(z,x,&acosh,&acoshf);
 }
 
 L pfnHyperTanh(V z, V x){
-    R pfnHyper(z,x,4);
+    R pfnHyper(z,x,&tanh,&tanhf);
 }
 
 L pfnHyperAtanh(V z, V x){
-    R pfnHyper(z,x,5);
+    R pfnHyper(z,x,&atanh,&atanhf);
 }
 
 L pfnConj(V z, V x){
@@ -484,12 +520,14 @@ L pfnRecip(V z, V x){
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
-            caseB {E t=0; recipSum(t,vB); DOP(lenZ, vE(z,i)=DIVDE(vB(x,i),t)); } break;
-            caseH {E t=0; recipSum(t,vH); DOP(lenZ, vE(z,i)=DIVDE(vH(x,i),t)); } break;
-            caseI {E t=0; recipSum(t,vI); DOP(lenZ, vE(z,i)=DIVDE(vI(x,i),t)); } break;
+            caseB {F t=0; recipSum(t,vB); DOP(lenZ, vF(z,i)=DIVDE(vB(x,i),t)); } break;
+            caseC {F t=0; recipSum(t,vC); DOP(lenZ, vF(z,i)=DIVDE(vC(x,i),t)); } break;
+            caseH {F t=0; recipSum(t,vH); DOP(lenZ, vF(z,i)=DIVDE(vH(x,i),t)); } break;
+            caseI {F t=0; recipSum(t,vI); DOP(lenZ, vF(z,i)=DIVDE(vI(x,i),t)); } break;
             caseL {E t=0; recipSum(t,vL); DOP(lenZ, vE(z,i)=DIVDE(vL(x,i),t)); } break;
             caseF {F t=0; recipSum(t,vF); DOP(lenZ, vF(z,i)=DIVDE(vF(x,i),t)); } break; //F
             caseE {E t=0; recipSum(t,vE); DOP(lenZ, vE(z,i)=DIVDE(vE(x,i),t)); } break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -499,16 +537,18 @@ L pfnRecip(V z, V x){
 /* 1 -1 0 */
 L pfnSignum(V z, V x){
     if(isTypeGroupReal(vp(x))){
-        L typZ = inferSignum(vp(x));
+        L typZ = H_H; // inferSignum(vp(x))
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
-            caseB DOP(lenZ, vL(z,i)=vB(x,i))         break; //opt, no -1
+            caseB DOP(lenZ, vH(z,i)=vB(x,i))         break; //opt, no -1
+            caseC DOP(lenZ, vH(z,i)=SIGNUM(vC(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=SIGNUM(vH(x,i))) break;
-            caseI DOP(lenZ, vI(z,i)=SIGNUM(vI(x,i))) break;
-            caseL DOP(lenZ, vL(z,i)=SIGNUM(vL(x,i))) break;
-            caseF DOP(lenZ, vL(z,i)=SIGNUM(vF(x,i))) break;
-            caseE DOP(lenZ, vL(z,i)=SIGNUM(vE(x,i))) break;
+            caseI DOP(lenZ, vH(z,i)=SIGNUM(vI(x,i))) break;
+            caseL DOP(lenZ, vH(z,i)=SIGNUM(vL(x,i))) break;
+            caseF DOP(lenZ, vH(z,i)=SIGNUM(vF(x,i))) break;
+            caseE DOP(lenZ, vH(z,i)=SIGNUM(vE(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -521,9 +561,10 @@ L pfnPi(V z, V x){
         L lenZ = vn(x);
         initV(z,typZ,lenZ);
         switch(vp(x)){
-            caseB DOP(lenZ, vE(z,i)=PIMUL(vB(x,i))) break;
-            caseH DOP(lenZ, vE(z,i)=PIMUL(vH(x,i))) break;
-            caseI DOP(lenZ, vE(z,i)=PIMUL(vI(x,i))) break;
+            caseB DOP(lenZ, vF(z,i)=PIMUL(vB(x,i))) break;
+            caseC DOP(lenZ, vF(z,i)=PIMUL(vC(x,i))) break;
+            caseH DOP(lenZ, vF(z,i)=PIMUL(vH(x,i))) break;
+            caseI DOP(lenZ, vF(z,i)=PIMUL(vI(x,i))) break;
             caseL DOP(lenZ, vE(z,i)=PIMUL(vL(x,i))) break;
             caseF DOP(lenZ, vF(z,i)=PIMUL(vF(x,i))) break; //F
             caseE DOP(lenZ, vE(z,i)=PIMUL(vE(x,i))) break;
@@ -545,18 +586,18 @@ L pfnNot(V z, V x){
     else R E_DOMAIN;
 }
 
-#define EXPLOG(op, x) (0==op?EXP(x):LOGN(x))
-L pfnExpLog(V z, V x, L op){
+static L pfnExpLog(V z, V x, E (*fn_e)(E), F (*fn_f)(F)){
     if(isTypeGroupReal(xp)){
-        L typZ = isFloat(x)?H_F:H_E;
+        L typZ = inferLog(vp(x));
         initV(z, typZ, vn(x));
         switch(xp){
-            caseB DOP(xn, vE(z,i)=EXPLOG(op,vB(x,i))) break;
-            caseH DOP(xn, vE(z,i)=EXPLOG(op,vH(x,i))) break;
-            caseI DOP(xn, vE(z,i)=EXPLOG(op,vI(x,i))) break;
-            caseL DOP(xn, vE(z,i)=EXPLOG(op,vL(x,i))) break;
-            caseF DOP(xn, vF(z,i)=EXPLOG(op,vF(x,i))) break;
-            caseE DOP(xn, vE(z,i)=EXPLOG(op,vE(x,i))) break;
+            caseB DOP(xn, vF(z,i)=(*fn_f)(vB(x,i))) break;
+            caseC DOP(xn, vF(z,i)=(*fn_f)(vC(x,i))) break;
+            caseH DOP(xn, vF(z,i)=(*fn_f)(vH(x,i))) break;
+            caseI DOP(xn, vF(z,i)=(*fn_f)(vI(x,i))) break;
+            caseL DOP(xn, vE(z,i)=(*fn_e)(vL(x,i))) break;
+            caseF DOP(xn, vF(z,i)=(*fn_f)(vF(x,i))) break;
+            caseE DOP(xn, vE(z,i)=(*fn_e)(vE(x,i))) break;
             default: R E_NOT_IMPL;
         }
         R 0;
@@ -565,10 +606,23 @@ L pfnExpLog(V z, V x, L op){
 }
 
 L pfnExp(V z, V x){
-    R pfnExpLog(z,x,0);
+    R pfnExpLog(z,x,&exp,&expf);
 }
+
 L pfnLog(V z, V x){
-    R pfnExpLog(z,x,1);
+    R pfnExpLog(z,x,&log,&logf);
+}
+
+L pfnLog2(V z, V x){
+    R pfnExpLog(z,x,&log2,&log2f);
+}
+
+L pfnLog10(V z, V x){
+    R pfnExpLog(z,x,&log10,&log10f);
+}
+
+L pfnSqrt(V z, V x){
+    R pfnExpLog(z,x,&sqrt,&sqrtf);
 }
 
 L pfnLen(V z, V x){
@@ -594,9 +648,11 @@ L pfnFact(V z, V x){
         initV(z,H_L,xn);
         switch(xp){
             caseB DOP(xn, vL(z,i)=FACT(vB(x,i))) break;
+            caseC DOP(xn, vL(z,i)=FACT(vC(x,i))) break;
             caseH DOP(xn, vL(z,i)=FACT(vH(x,i))) break;
             caseI DOP(xn, vL(z,i)=FACT(vI(x,i))) break;
             caseL DOP(xn, vL(z,i)=FACT(vL(x,i))) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -755,11 +811,11 @@ L pfnMax(V z, V x){
 /* Date & Time */
 L pfnChopDate(V z, V x, L op){
     if(isTypeGroupDate(vp(x))){
-        initV(z,H_L,vn(x));
+        initV(z,H_H,vn(x));
         switch(vp(x)){
-            caseM DOP(vn(x), vL(z,i)=CHOPM(op,vM(x,i))) break;
-            caseD DOP(vn(x), vL(z,i)=CHOPD(op,vD(x,i))) break;
-            caseZ DOP(vn(x), CHOPZ(op,vL(z,i),vZ(x,i))) break;
+            caseM DOP(vn(x), vH(z,i)=CHOPM(op,vM(x,i))) break;
+            caseD DOP(vn(x), vH(z,i)=CHOPD(op,vD(x,i))) break;
+            caseZ DOP(vn(x), CHOPZ(op,vH(z,i),vZ(x,i))) break;
             default: R E_NOT_IMPL;
         }
         R 0;
@@ -791,12 +847,12 @@ L pfnDate(V z, V x){
 
 L pfnChopTime(V z, V x, L op){
     if(isTypeGroupTime(vp(x))){
-        initV(z,H_L,vn(x));
+        initV(z,H_H,vn(x));
         switch(vp(x)){
-            caseU DOP(vn(x), vL(z,i)= CHOPU(op,vU(x,i))) break;
-            caseW DOP(vn(x), vL(z,i)= CHOPW(op,vW(x,i))) break;
-            caseT DOP(vn(x), CHOPT (op,vL(z,i),vT(x,i))) break;
-            caseZ DOP(vn(x), CHOPZT(op,vL(z,i),vZ(x,i))) break;
+            caseU DOP(vn(x), vH(z,i)= CHOPU(op,vU(x,i))) break;
+            caseW DOP(vn(x), vH(z,i)= CHOPW(op,vW(x,i))) break;
+            caseT DOP(vn(x), CHOPT (op,vH(z,i),vT(x,i))) break;
+            caseZ DOP(vn(x), CHOPZT(op,vH(z,i),vZ(x,i))) break;
             default: R E_NOT_IMPL;
         }
         R 0;
@@ -960,6 +1016,7 @@ L pfnCompare(V z, V x, V y, L op){
             if(isOne(x)) {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,0),vC(tempY,i))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
@@ -970,6 +1027,7 @@ L pfnCompare(V z, V x, V y, L op){
             else if(isOne(y)) {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,i),vC(tempY,0))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
@@ -980,6 +1038,7 @@ L pfnCompare(V z, V x, V y, L op){
             else {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,i),vC(tempY,i))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
@@ -994,7 +1053,6 @@ L pfnCompare(V z, V x, V y, L op){
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,0),vS(y,i),strcmp))        break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,0),vZ(y,i))) break;
@@ -1007,7 +1065,6 @@ L pfnCompare(V z, V x, V y, L op){
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,0),strcmp))        break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,0))) break;
@@ -1020,7 +1077,6 @@ L pfnCompare(V z, V x, V y, L op){
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,i),strcmp))        break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,i))) break;
@@ -1171,23 +1227,23 @@ L pfnDiv(V z, V x, V y){
     R pfnArith(z,x,y,3);
 }
 
-#define LOGIC(op,x,y) (2>op?LOGICAND(op,x,y):4>op?LOGICOR(op,x,y):(x^y))
-#define LOGICAND(op,x,y) (0==op?(x&y):~(x&y))
-#define LOGICOR(op,x,y)  (2==op?(x||y):~(x|y))
+//#define LOGIC(op,x,y) (2>op?LOGICAND(op,x,y):4>op?LOGICOR(op,x,y):(x^y))
+//#define LOGICAND(op,x,y) (0==op?(x&y):~(x&y))
+//#define LOGICOR(op,x,y)  (2==op?(x||y):~(x|y))
 
-L pfnLogic(V z, V x, V y, L op){
+L pfnLogic(V z, V x, V y, B (*fn_b)(B,B)){
     if(isBool(x) && isBool(y)){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ = isOne(x)?vn(y):vn(x), typZ = H_B;
         initV(z,typZ,lenZ);
         if(isOne(x)) {
-            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,0),vB(y,i)))
+            DOP(lenZ, vB(z,i)=(*fn_b)(vB(x,0),vB(y,i)))
         }
         else if(isOne(y)) {
-            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,0)))
+            DOP(lenZ, vB(z,i)=(*fn_b)(vB(x,i),vB(y,0)))
         }
         else {
-            DOP(lenZ, vB(z,i)=LOGIC(op,vB(x,i),vB(y,i)))
+            DOP(lenZ, vB(z,i)=(*fn_b)(vB(x,i),vB(y,i)))
         }
         R 0;
     }
@@ -1196,35 +1252,35 @@ L pfnLogic(V z, V x, V y, L op){
 
 /* and: 0 */
 L pfnAnd(V z, V x, V y){
-    R pfnLogic(z,x,y,0);
+    R pfnLogic(z,x,y,&logicAnd);
 }
 
 /* nand: 1 */
 L pfnNand(V z, V x, V y){
-    R pfnLogic(z,x,y,1);
+    R pfnLogic(z,x,y,&logicNand);
 }
 
 /* or: 2 */
 L pfnOr(V z, V x, V y){
-    R pfnLogic(z,x,y,2);
+    R pfnLogic(z,x,y,&logicOr);
 }
 
 /* nor: 3 */
 L pfnNor(V z, V x, V y){
-    R pfnLogic(z,x,y,3);
+    R pfnLogic(z,x,y,&logicNor);
 }
 
 /* xor: 4 */
 L pfnXor(V z, V x, V y){
-    R pfnLogic(z,x,y,4);
+    R pfnLogic(z,x,y,&logicXor);
 }
 
-#define POWERLOG(op,x,y) (0==op?POWER(x,y):LOG(x,y))
-L pfnPowerLog(V z, V x, V y, L op){
+L pfnPowerLog(V z, V x, V y, E (*fn_e)(E,E), F (*fn_f)(F,F)){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(!isValidLength(x,y)) R E_LENGTH;
-        L lenZ  = isOne(x)?vn(y):vn(x), typZ = H_E; // default: E
+        L lenZ  = isOne(x)?vn(y):vn(x);
         L typMax= MAX(vp(x),vp(y));
+        L typZ  = inferPowerLog(typMax);
         V tempX = allocNode();
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
@@ -1232,34 +1288,37 @@ L pfnPowerLog(V z, V x, V y, L op){
         initV(z,typZ,lenZ);
         if(isOne(x)){
             switch(typMax){
-                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,0),vB(tempY,i))) break;
-                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,0),vH(tempY,i))) break;
-                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,0),vI(tempY,i))) break;
-                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,0),vL(tempY,i))) break;
-                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,0),vF(tempY,i))) break;
-                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,0),vE(tempY,i))) break;
+                caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,0),vB(tempY,i))) break;
+                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,0),vC(tempY,i))) break;
+                caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,0),vH(tempY,i))) break;
+                caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,0),vI(tempY,i))) break;
+                caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,0),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=(*fn_f)(vF(tempX,0),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=(*fn_e)(vE(tempX,0),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else if(isOne(y)){
             switch(typMax){
-                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,0))) break;
-                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,0))) break;
-                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,0))) break;
-                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,0))) break;
-                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,0))) break;
-                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,0))) break;
+                caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,i),vB(tempY,0))) break;
+                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,i),vC(tempY,0))) break;
+                caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,i),vH(tempY,0))) break;
+                caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,i),vI(tempY,0))) break;
+                caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,i),vL(tempY,0))) break;
+                caseF DOP(lenZ, vF(z,i)=(*fn_f)(vF(tempX,i),vF(tempY,0))) break;
+                caseE DOP(lenZ, vE(z,i)=(*fn_e)(vE(tempX,i),vE(tempY,0))) break;
                 default: R E_NOT_IMPL;
             }
         }
         else {
             switch(typMax){
-                caseB DOP(lenZ, vE(z,i)=POWERLOG(op,vB(tempX,i),vB(tempY,i))) break;
-                caseH DOP(lenZ, vE(z,i)=POWERLOG(op,vH(tempX,i),vH(tempY,i))) break;
-                caseI DOP(lenZ, vE(z,i)=POWERLOG(op,vI(tempX,i),vI(tempY,i))) break;
-                caseL DOP(lenZ, vE(z,i)=POWERLOG(op,vL(tempX,i),vL(tempY,i))) break;
-                caseF DOP(lenZ, vE(z,i)=POWERLOG(op,vF(tempX,i),vF(tempY,i))) break;
-                caseE DOP(lenZ, vE(z,i)=POWERLOG(op,vE(tempX,i),vE(tempY,i))) break;
+                caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,i),vB(tempY,i))) break;
+                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,i),vC(tempY,i))) break;
+                caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,i),vH(tempY,i))) break;
+                caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,i),vI(tempY,i))) break;
+                caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,i),vL(tempY,i))) break;
+                caseF DOP(lenZ, vF(z,i)=(*fn_f)(vF(tempX,i),vF(tempY,i))) break;
+                caseE DOP(lenZ, vE(z,i)=(*fn_e)(vE(tempX,i),vE(tempY,i))) break;
                 default: R E_NOT_IMPL;
             }
         }
@@ -1274,11 +1333,11 @@ L pfnPowerLog(V z, V x, V y, L op){
 }
 
 L pfnPower(V z, V x, V y){
-    R pfnPowerLog(z,x,y,0);
+    R pfnPowerLog(z,x,y,&pow,&powf);
 }
 
-L pfnLog2(V z, V x, V y){
-    R pfnPowerLog(z,x,y,1);
+L pfnLogBase(V z, V x, V y){
+    R pfnPowerLog(z,x,y,&logBaseE,&logBaseF);
 }
 
 /*
@@ -1289,7 +1348,7 @@ L pfnMod(V z, V x, V y){
         if(!isValidLength(x,y)) R E_LENGTH;
         L lenZ   = isOne(x)?vn(y):vn(x);
         L typMax = MAX(vp(x),vp(y));
-        L typZ   = H_B==typMax?H_L:typMax;
+        L typZ   = H_B==typMax?H_H:typMax;
         V tempX = allocNode();
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
@@ -1297,32 +1356,38 @@ L pfnMod(V z, V x, V y){
         initV(z,typZ,lenZ);
         if(isOne(x)){
             switch(typMax){
-                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,0),vB(tempY,i))) break;
+                caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,0),vB(tempY,i))) break;
+                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,0),vC(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,0),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,0),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,0),vL(tempY,i))) break;
                 caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,0),vF(tempY,i))) break;
                 caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,0),vE(tempY,i))) break;
+                default: R E_NOT_IMPL;
             }
         }
         else if(isOne(y)){
             switch(typMax){
-                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,i),vB(tempY,0))) break;
+                caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,i),vB(tempY,0))) break;
+                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,i),vC(tempY,0))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,0))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,0))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,0))) break;
                 caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,i),vF(tempY,0))) break;
                 caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,i),vE(tempY,0))) break;
+                default: R E_NOT_IMPL;
             }
         }
         else {
             switch(typMax){
-                caseB DOP(lenZ, vL(z,i)=MODI(vB(tempX,i),vB(tempY,i))) break;
+                caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,i),vB(tempY,i))) break;
+                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,i),vC(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,i))) break;
                 caseF DOP(lenZ, vF(z,i)=MODF(vF(tempX,i),vF(tempY,i))) break;
                 caseE DOP(lenZ, vE(z,i)=MODF(vE(tempX,i),vE(tempY,i))) break;
+                default: R E_NOT_IMPL;
             }
         }
         R 0;
@@ -1388,6 +1453,7 @@ L pfnIndexOf(V z, V x, V y){
             initV(z,H_L,lenZ);
             switch(typMax){
                 caseB INDEXOF(B, z, tempX, tempY); break;
+                caseC INDEXOF(C, z, tempX, tempY); break;
                 caseH INDEXOF(H, z, tempX, tempY); break;
                 caseI INDEXOF(I, z, tempX, tempY); break;
                 caseL INDEXOF(L, z, tempX, tempY); break;
@@ -1404,7 +1470,6 @@ L pfnIndexOf(V z, V x, V y){
             initV(z,H_L,lenZ);
             switch(xp){
                 caseX INDEXOF(X, z, x, y); break;
-                caseC INDEXOF(C, z, x, y); break;
                 caseQ INDEXOF(Q, z, x, y); break;
                 caseS INDEXOF(S, z, x, y); break;
                 caseM INDEXOF(M, z, x, y); break;
@@ -1717,7 +1782,7 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
 
 L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
     P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
-    L typCell = -1, op = -1;
+    L typCell = -1, op = -1, lenZ = 2;
     if(foo == &pfnEq){ typCell = H_B; op = 0; }
     else R E_DOMAIN;
     P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
@@ -1728,11 +1793,7 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
         R joinIndexHash(z,x,y,'r');
     }
     else {
-        L lenZ = 2;
         if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-            P("2\n");
-            printV2(x, 20);
-            printV2(y, 20);
             L lenX    = vn(x), lenY = vn(y);
             L typMax  = MAX(vp(x),vp(y));
             V tempX = allocNode();
@@ -1740,41 +1801,52 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,H_G,lenZ);
-            // fetch length
-            L c = 0;
-            P("3,x=%lld, y=%lld\n",lenX,lenY);
-            switch(typCell){
-                caseB {
-                    switch(typMax){
-                        caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j)))c++)); break;
-                        caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j)))c++)); break;
-                        caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j)))c++)); break;
-                        caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j)))c++)); break;
-                        caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j)))c++)); break;
-                        caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j)))c++)); break;
-                        caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j)))c++)); break;
-                        default: EP("add more types for %lld\n", vp(x), vp(y));
-                    }
-                } break;
-                default: R E_DOMAIN;
+            if(foo == &pfnEq){
+                switch(typMax){
+                    caseH
+                    caseI
+                    caseL
+                    caseF
+                    caseE R lib_join_index_hash(vV(z,0),vV(z,1),tempX,tempY);
+                    default: R E_NOT_IMPL;
+                }
             }
-            P("4, c = %lld\n",c);
-            DOI(lenZ, initV(vV(z,i),H_L,c))
-                // assign value
+            else { // brutal force
+                L c = 0;
+                P("3,x=%lld, y=%lld\n",lenX,lenY);
+                switch(typCell){
+                    caseB {
+                        switch(typMax){
+                            caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j)))c++)); break;
+                            caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j)))c++)); break;
+                            caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j)))c++)); break;
+                            caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j)))c++)); break;
+                            caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j)))c++)); break;
+                            caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j)))c++)); break;
+                            caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j)))c++)); break;
+                            default: EP("add more types for %lld\n", vp(x), vp(y));
+                        }
+                    } break;
+                    default: R E_DOMAIN;
+                }
+                P("4, c = %lld\n",c);
+                DOI(lenZ, initV(vV(z,i),H_L,c))
+                    // assign value
                 c = 0;
-            switch(typCell){
-                caseB {
-                    switch(typMax){
-                        caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                        caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
-                    }
-                } break;
-                default: R E_DOMAIN;
+                switch(typCell){
+                    caseB {
+                        switch(typMax){
+                            caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                        }
+                    } break;
+                    default: R E_DOMAIN;
+                }
             }
         }
         else if(isSameType(x,y)){
@@ -1782,23 +1854,31 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             L lenX = vn(x), lenY = vn(y);
             initV(z,H_G,lenZ);
             L c = 0;
-            switch(typCell){
-                caseB {
-                    switch(typ){
-                        caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j)))c++)); break;
-                        default: EP("add more types for %lld\n", vp(x), vp(y));
-                    }
-                } break;
-                default: R E_DOMAIN;
+            if(foo == &pfnEq){
+                switch(typ){
+                    caseQ R lib_join_index_hash(vV(z,0),vV(z,1),x,y);
+                    default: R E_NOT_IMPL;
+                }
             }
-            DOI(lenZ, initV(vV(z,i),H_L,c))
-            switch(typCell){
-                caseB {
-                    switch(typ){
-                        caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j))){vL(vV(z,0),c)=i; vL(vV(z,1),c)=j; c++;})); break;
-                    }
-                } break;
-                default: R E_DOMAIN;
+            else { // brutal force
+                switch(typCell){
+                    caseB {
+                        switch(typ){
+                            caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j)))c++)); break;
+                            default: EP("add more types for %lld\n", vp(x), vp(y));
+                        }
+                    } break;
+                    default: R E_DOMAIN;
+                }
+                DOI(lenZ, initV(vV(z,i),H_L,c))
+                switch(typCell){
+                    caseB {
+                        switch(typ){
+                            caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j))){vL(vV(z,0),c)=i; vL(vV(z,1),c)=j; c++;})); break;
+                        }
+                    } break;
+                    default: R E_DOMAIN;
+                }
             }
         }
         else R E_TYPE;
@@ -2059,23 +2139,40 @@ L pfnDatetimeSub(V z, V x, V y, V m){
  * yKey: foreign key
  */
 L pfnAddFKey(V x, V xKey, V y, V yKey){
-    V tableX = allocNode();  V xCol = allocNode();
-    V tableY = allocNode();  V yCol = allocNode();
+    V xCol   = allocNode();
+    V yCol   = allocNode();
     V fKey   = allocNode();
-    CHECKE(pfnLoadTable(tableX, x));
-    CHECKE(pfnLoadTable(tableY, y));
-    B testing = true;
-    if(isSymbol(x) && isSameType(x,y) && isEqualLength(x,y)){
-        if(isOne(x)){
-            CHECKE(pfnColumnValue(xCol, tableX, xKey));
-            CHECKE(pfnColumnValue(yCol, tableY, yKey));
-            CHECKE(pfnEnum(fKey, xCol, yCol));
-            CHECKE(setFKey(tableY, yKey, fKey));
-            P("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
-                getSymbolStr(vq(x)), getSymbolStr(vq(xKey)),\
-                getSymbolStr(vq(y)), getSymbolStr(vq(yKey)));
+    V tableX = fetchTableByName(x); // pfnLoadTable: copy item
+    CHECKE(tableX==NULL);
+    V tableY = fetchTableByName(y); // fetchTableByName: return alias
+    CHECKE(tableY==NULL);
+    if(isSymbol(xKey) && isSameType(xKey,yKey) && isEqualLength(xKey,yKey)){
+        CHECKE(fetchColumnValue(xCol, tableX, xKey, 0));
+        CHECKE(fetchColumnValue(yCol, tableY, yKey, 0));
+        if(vn(xKey) > 1){
+            P(" keys: \n");
+            printV(xKey);
+            printV(yKey);
+            P(" values: \n");
+            printV(xCol);
+            printV(yCol);
+            getchar();
         }
-        else R E_NOT_IMPL;
+        CHECKE(pfnEnum(fKey, xCol, yCol));
+        CHECKE(setFKey(tableY, yKey, fKey));
+        if(isOne(xKey)){
+            P("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
+                    getSymbolStr(vq(x)), getSymbolStr(vq(xKey)),\
+                    getSymbolStr(vq(y)), getSymbolStr(vq(yKey)));
+        }
+        else if(vn(xKey)>1) {
+            P("Added fkeys successfully: %s.", getSymbolStr(vq(x)));
+            printValue(xKey);
+            P(" (key) -> %s.", getSymbolStr(vq(y)));
+            printValue(yKey);
+            P(" (fkey)\n");
+        }
+        //else R E_NOT_IMPL;
     }
     else R E_DOMAIN;
     R 0;

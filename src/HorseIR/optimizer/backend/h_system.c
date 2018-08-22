@@ -3,6 +3,7 @@
  */
 
 #include "../global.h"
+#include <math.h>
 
 const L NUM_LIST_TABLE = 100;
 E H_EPSILON = 1E-13;
@@ -142,9 +143,15 @@ L promoteValue(V z, V x, L typMax){
     else{
         initV(z, typMax, xn); //opt?
         switch(vp(z)){
+            caseC {
+                switch(vp(x)){
+                    caseB DOP(xn, vC(z,i)=vB(x,i)) break;
+                }
+            } break;
             caseH {
                 switch(vp(x)){
                     caseB DOP(xn, vH(z,i)=vB(x,i)) break;
+                    caseC DOP(xn, vH(z,i)=vC(x,i)) break;
                 }
             } break;
             caseI {
@@ -218,7 +225,7 @@ L getSingleIntValue(V x){
     R (1==xn)?(H_B==xp?xb:H_H==xp?xh:H_I==xp?xi:H_L==xp?xl:-1):-1;
 }
 
-L calcFact(L n){
+inline L calcFact(L n){
     if(n>=0){
         L z = 1; DOI(n, z*=(i+1)) R z;
     }
@@ -559,17 +566,29 @@ L joinIndexHash(V z, V x, V y, C op){
 }
 
 
+static void insertFKey(V x, ListY *val){
+    ListY *t = x->a.fkey;
+    if(!t){
+        x->a.fkey = val;
+    }
+    else {
+        while(t->next) t=t->next;
+        t->next = val;
+    }
+}
+
 /*
  * x: a table
  * colName: column name (symbol)
  */
 L setFKey(V x, V colName, V fKey){
-    L fid = findColFromTable(x,vq(colName));
-    if(fid>=0){
-        *getTableCol(getTableVals(x),fid) = *fKey;
-        R 0;
-    }
-    else R E_DOMAIN;
+    //*getTableCol(getTableVals(x),fid) = *fKey;
+    ListY *node = (ListY*)malloc(sizeof(ListY));
+    node->y     = (S)fKey;
+    node->cn    = (S)colName;
+    node->next  = NULL;
+    insertFKey(x, node);
+    R 0;
 }
 
 /* x must be both integers */
@@ -611,12 +630,40 @@ L searchOrdered(V z, V x, V y){
 //    R 0;
 //}
 
+inline F logBaseF(F b, F x){
+    R logf(x)/logf(b);
+}
+
+inline E logBaseE(E b, E x){
+    R log(x)/log(b);
+}
+
+inline B logicAnd(B x, B y){
+    R x&y;
+}
+
+inline B logicNand(B x, B y){
+    R ~(x&y);
+}
+
+inline B logicOr(B x, B y){
+    R x|y;
+}
+
+inline B logicNor(B x, B y){
+    R ~(x|y);
+}
+
+inline B logicXor(B x, B y){
+    R x^y;
+}
+
 
 /* Checking types */
 
 /* 1-level */
 B isTypeGroupInt(L t){
-    R (H_B==t || H_H==t || H_I==t || H_L==t);
+    R (H_B==t || H_C==t || H_H==t || H_I==t || H_L==t);
 }
 
 B isTypeGroupFloat(L t){
@@ -678,23 +725,23 @@ B isListSameType(V x, L typ){
 /* Type inference */
 
 L inferNeg(L t){
-    R (H_B==t?H_L:t);
+    R (H_B==t?H_H:t);
 }
 
-L inferReal2Int(L t){
+L inferReal2Int(L t){ // deprecated
     R isTypeGroupFloat(t)?H_L:t;
 }
 
 L inferRecip(L t){
-    R (H_F==t?H_F:H_E);
+    R (H_L==t||H_E==t?H_E:H_F);
 }
 
-L inferSignum(L t){
+L inferSignum(L t){ // deprecated
     R (H_H==t||H_I==t)?t:H_L;
 }
 
 L inferPi(L t){
-    R (H_F==t||H_X==t)?t:H_E;
+    R (H_X==t)?t:(H_E==t||H_L==t)?H_E:H_F;
 }
 
 /* Error messages */

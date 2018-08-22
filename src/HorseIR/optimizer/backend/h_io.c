@@ -9,6 +9,7 @@
 L LINE_MAX_CHAR = 1024;
 C LINE_SEP      = '|';
 L BUFF_SIZE     = 256;
+const L OUTPUT_SIZE = 100;
 
 /*
  * 1: csv
@@ -328,7 +329,11 @@ L printBasicValue(V x, L k, B hasTag){
     if(0>k){
         if(xn==1) printBasicItem(x,0);
         else {
-            FS("("); DOI(xn, {if(i>0)FS(","); printBasicItem(x,i);}); FS(")");
+            L size= xn>OUTPUT_SIZE?OUTPUT_SIZE:xn;
+            FS("(");
+            DOI(size, {if(i>0)FS(","); printBasicItem(x,i);});
+            if(xn > OUTPUT_SIZE) FT(",<... %lld more>", xn-OUTPUT_SIZE);
+            FS(")");
         }
     }
     else {
@@ -413,18 +418,15 @@ L printV(V x){
 }
 
 L printV2(V x, L n){
-    if(isTypeGroupBasic(xp)){
-        DOI(n, {FS(" ");printValueItem(x, i);}); FS("\n");
+    switch(xp){
+        caseA printTablePretty(x, n); break;
+        caseK printTablePretty(x, n); break;
+        caseG printListItem(x, -1);   break;
+        default: { B f = 0;
+          DOI(n, {FS(" ");if(printValueItem(x, i)){f=1;break;};});
+          if(f) EP("the type %d is not supported.\n", xp); }
     }
-    else {
-        switch(xp){
-            caseY printEnumItem(x, -1); break;
-            caseA printTablePretty(x, n); break;
-            caseK printTablePretty(x, n); break;
-            default: EP("the type %d is not supported.\n", xp);
-        }
-    }
-    R 0;
+    FS("\n"); R 0;
 }
 
 L printTable(V x){

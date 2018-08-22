@@ -18,8 +18,8 @@
 typedef enum FunctionType {
     /* unary */
     absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
-    logF, expF,  cosF,   sinF,   tanF, acosF,  asinF,   atanF, coshF, sinhF,
-    tanhF, acoshF, asinhF, atanhF,
+    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
+    atanF, coshF, sinhF, tanhF, acoshF, asinhF, atanhF,
     dateF, yearF, monthF, dayF,
     timeF, hourF, minuteF, secondF, millF,
     uniqueF, strF, lenF, rangeF, factF, randF, seedF, flipF, reverseF,
@@ -27,7 +27,7 @@ typedef enum FunctionType {
     formatF, keysF, valuesF, metaF, loadTableF, fetchF,
     /* binary */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
-    powerF, log2F, modF, andF, orF, nandF, norF, xorF,
+    powerF, logBF, modF, andF, orF, nandF, norF, xorF,
     dtdiffF, dtaddF, dtsubF,
     appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
     memberF, vectorF, matchF, indexF, columnValueF, subStringF,

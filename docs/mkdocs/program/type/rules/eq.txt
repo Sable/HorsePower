@@ -1,6 +1,5 @@
 Real, Real -> B
 X, X -> B
-C, C -> B
 Q, Q -> B
 S, S -> B
 M, M -> B

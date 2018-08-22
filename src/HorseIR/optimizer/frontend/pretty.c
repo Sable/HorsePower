@@ -95,9 +95,10 @@ static void printCastStmtBuff(char *b, Node *n){
 static void printMethodBuff(char *b, Node *n){
     resetBuff(b);
     depth++;
-    strcat(b, "def "); prettyNodeBuff(b,n->val.method.name); strcat(b, "() : ");
+    strcat(b, "def "); prettyNodeBuff(b,n->val.method.name);
+    strcat(b, "("); prettyListBuff(b, n->val.method.param, comma); strcat(b, ") : ");
     prettyNodeBuff(b,n->val.method.type);
-    strcat(b, "{\n");
+    strcat(b, " {\n");
     prettyListBuff(b,n->val.method.list, nospace);
     depth--;
     printDepth(b);
@@ -110,6 +111,11 @@ static void printModuleBuff(char* b, Node *n){
     strcat(b,"module "); prettyNodeBuff(b, n->val.module.name); strcat(b," {\n");
     prettyListBuff(b, n->val.module.body, nospace); strcat(b,"}\n");
     depth--;
+}
+static void printNameTypeBuff(char* b, Node *n){
+    prettyNodeBuff(b,n->val.nameType.name);
+    strcat(b,":");
+    prettyNodeBuff(b,n->val.nameType.type);
 }
 
 void prettyNodeBuff(char *b, Node *n){
@@ -148,6 +154,7 @@ void prettyNodeBuff(char *b, Node *n){
         case       importK: printImportStmt      (b,n); break;
         case       methodK: printMethodBuff      (b,n); break;
         case       moduleK: printModuleBuff      (b,n); break;
+        case     nameTypeK: printNameTypeBuff    (b,n); break;
         default: EP("[prettyNodeBuff] unexpected node type: %d\n", n->kind);
     }
 }
@@ -164,7 +171,7 @@ void prettyListBuff(char *b, List *list, char sep){
             ptr = ptr->next;
         }
     }
-    else { strcat(b, "<NULL list found>"); }
+    //else { strcat(b, "<NULL list found>"); }
 }
 
 /* TODO: check TypeNames in tree.c */
@@ -173,7 +180,6 @@ void printTypeBuff(char *b, pType p){
     switch(p){
         case unknownT: echo(b, "?");    break;
         case    boolT: echo(b, "bool"); break;
-        case      i8T: echo(b, "i8");   break;
         case     i16T: echo(b, "i16");  break;
         case     i32T: echo(b, "i32");  break;
         case     i64T: echo(b, "i64");  break;

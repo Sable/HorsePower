@@ -7,28 +7,29 @@ Reverse a list
 ### Type rules
 
 ```no-highlight
-B -> B
-H -> H
-I -> I
-L -> L
-F -> F
-E -> E
-C -> C
-S -> S
-X -> X
-M -> M
-D -> D
-Z -> Z
-U -> U
-W -> W
-T -> T
-_ -> domain error
+bool    -> bool
+i8      -> i8
+i16     -> i16
+i32     -> i32
+i64     -> i64
+f32     -> f32
+f64     -> f64
+str     -> str
+sym     -> sym
+complex -> complex
+month   -> month
+date    -> date
+dt      -> dt
+minute  -> minute
+second  -> second
+time    -> time
+_       -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-reverse((4,9,16))
+reverse((4,9,16):i64)
 > (16,9,4):i64
 ```
 

@@ -38,6 +38,7 @@ void error(const char* s);
 
 #include "frontend/tree.h"
 #include "frontend/pretty.h"
+#include "frontend/weed.h"
 #include "analysis/common.h"
 #include "analysis/udchain.h"
 #include "analysis/typeshape.h"

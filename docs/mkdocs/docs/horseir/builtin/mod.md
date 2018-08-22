@@ -11,7 +11,7 @@ Modulo
 High-level
 
 ```no-highlight
-Real, Real -> MaxType (Except: bool, bool -> i32; i16, i16 -> i32)
+Real, Real -> MaxType (Except: bool, bool -> i16)
 _          -> domain error
 ```
 

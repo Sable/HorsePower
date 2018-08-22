@@ -2,9 +2,11 @@
 
 ### Description
 
-`vector(x,y)`
+```no-highlight
+vector(n,x)
+```
 
-- initialize a vector based on y with the length x
+- initialize a vector based on `x` with the length `n`
 
 ### Type Rules
 
@@ -12,7 +14,7 @@ High-level
 
 ```no-highlight
 Int, Basic -> Basic
-Int, List  -> List
+Int, list  -> list
 _  , _     -> domain error
 ```
 
@@ -30,8 +32,8 @@ Table with details (See [type alias](../types.md))
 ### Examples
 
 ```no-highlight
-vector(2,(-1,2,3))
-> (-1,2)
-vector(5,(-1,2,3))
-> (-1,2,3,-1,2)
+vector(2:i32,(-1,2,3):i32)
+> (-1,2):i32
+vector(5:i32,(-1,2,3):i32)
+> (-1,2,3,-1,2):i32
 ```

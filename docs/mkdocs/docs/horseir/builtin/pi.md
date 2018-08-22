@@ -11,6 +11,7 @@
 
 ```no-highlight
 bool    -> f32
+i8      -> f32
 i16     -> f32
 i32     -> f32
 i64     -> f64

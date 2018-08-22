@@ -14,35 +14,36 @@ typedef long long  L,Q,Z;
 typedef float      F;
 typedef double     E;
 typedef struct { F real,imag; } X;
-typedef struct { Q name; S target; } Y;  //target: V
-typedef struct { I row, col; } A;
+typedef struct { Q source; G target; } Y;  //target: V
+typedef struct ListY { G y,cn;  struct ListY *next; } ListY; // cn: column node
+typedef struct { I row, col; ListY *fkey; } A;
 
 /* unsigned types */
 typedef uint64_t UL;
 typedef uint32_t UI;
 
-/* size: 3 * 8 + 8 = 32 */
+/* size: 3 * 8 + 16 = 40 */
 typedef struct node_value{
     L typ,len; G g;
     union{
-        B b;   //boolean   1 byte
-        H h;   //short     2 bytes
-        I i32; //int       4 bytes
-        L i64; //long      8 bytes
-        F f32; //float     4 bytes
-        E f64; //double    8 bytes
-        C c;   //char      1 byte
-        Q q;   //symbol    8 bytes
-        S s;   //string    8 bytes
-        M m;   //month     4 bytes
-        D d;   //date      4 bytes
-        Z z;   //date time 8 bytes
-        U u;   //minute    4 bytes
-        W w;   //second    4 bytes
-        T t;   //time      4 bytes
-        X x;   //complex   8 bytes
-        Y y;   //enum      8 bytes
-        A a;   //table     8 bytes
+        B b;   //boolean   1  byte
+        H h;   //short     2  bytes
+        I i32; //int       4  bytes
+        L i64; //long      8  bytes
+        F f32; //float     4  bytes
+        E f64; //double    8  bytes
+        C c;   //char      1  byte
+        Q q;   //symbol    8  bytes
+        S s;   //string    8  bytes
+        M m;   //month     4  bytes
+        D d;   //date      4  bytes
+        Z z;   //date time 8  bytes
+        U u;   //minute    4  bytes
+        W w;   //second    4  bytes
+        T t;   //time      4  bytes
+        X x;   //complex   8  bytes
+        Y y;   //enum      16 bytes
+        A a;   //table     16 bytes
     };
 }V0,*V;
 

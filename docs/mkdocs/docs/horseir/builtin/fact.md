@@ -17,6 +17,6 @@ _   -> domain error
 ### Examples
 
 ```no-highlight
-fact((2,3,4))
+fact((2,3,4):i16)
 > (2,6,24):i64
 ```

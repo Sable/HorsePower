@@ -7,15 +7,15 @@ typedef L (*AnyadicFunc)(V,L,V[]);
 typedef L (*EachMonadic)(V,V,MonadicFunc);
 typedef L (*EachDyadic)(V,V,V,DyadicFunc);
 
-#define MonFuncSize 58
+#define MonFuncSize 60
 #define DyaFuncSize 35
 #define OuterProduct EachDyadic
 
 /* pfnRand, pfnSeed, pfnCount */
 MonadicFunc monFunc[MonFuncSize] = {
     pfnAbs, pfnNeg, pfnCeil, pfnFloor, pfnRound, pfnConj, pfnRecip, pfnSignum, pfnPi  , pfnNot ,
-    pfnLog, pfnExp, pfnTrigCos, pfnTrigSin, pfnTrigTan, pfnTrigAcos, pfnTrigAsin, pfnTrigAtan, pfnHyperCosh, pfnHyperSinh,
-    pfnHyperTanh, pfnHyperAcosh, pfnHyperAsinh, pfnHyperAtanh,
+    pfnLog, pfnLog2, pfnLog10, pfnExp, pfnTrigCos, pfnTrigSin, pfnTrigTan, pfnTrigAcos, pfnTrigAsin,
+    pfnTrigAtan, pfnHyperCosh, pfnHyperSinh, pfnHyperTanh, pfnHyperAcosh, pfnHyperAsinh, pfnHyperAtanh,
     pfnDate, pfnDateYear, pfnDateMonth, pfnDateDay,
     pfnTime, pfnTimeHour, pfnTimeMinute, pfnTimeSecond, pfnTimeMill,
     pfnUnique, NULL, pfnLen, pfnRange, pfnFact, NULL, NULL, pfnFlip, pfnReverse,
@@ -26,7 +26,7 @@ MonadicFunc monFunc[MonFuncSize] = {
 /* pfnRandk, pfnDrop, pfnTake, pfnDatetimeAdd, pfnDatetimeSub */
 DyadicFunc  dyaFunc[DyaFuncSize] = {
     pfnLt, pfnGt, pfnLeq, pfnGeq, pfnEq, pfnNeq, pfnPlus, pfnMinus, pfnMul, pfnDiv,
-    pfnPower, pfnLog2, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor, pfnXor,
+    pfnPower, pfnLogBase, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor, pfnXor,
     NULL, NULL, NULL,
     pfnAppend, pfnLike, pfnCompress, NULL, pfnIndexOf, NULL, NULL, pfnOrderBy,
     pfnMember, pfnVector, pfnMatch, pfnIndex, pfnColumnValue, pfnSubString

@@ -2,18 +2,20 @@
 
 ### Description
 
-`oder(x,y)`
+```no-highlight
+oder(x,b)
+```
 
-- ascending/descending (based on y) order of x, return index
-- asc == true
-- desc == false
+- ascending/descending (based on b) order of x, return indices
+- asc (true) / desc (false)
 
 ### Type Rules
 
 High-level
 
 ```no-highlight
-Comparable, bool -> int
+Comparable, bool -> i64
+list      , bool -> i64
 _         , _    -> domain error
 ```
 

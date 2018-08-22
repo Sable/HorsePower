@@ -42,7 +42,6 @@ LETTER          [a-zA-Z_]
  /* keywords */
 "bool"        {addStr(); return kBOOL;}
 "char"        {addStr(); return kCHAR;}
-"i8"          {addStr(); return kI8;}
 "i16"         {addStr(); return kI16;}
 "i32"         {addStr(); return kI32;}
 "i64"         {addStr(); return kI64;}

@@ -9,8 +9,8 @@
 ### Type rules
 
 ```no-highlight
-complex -> complex
-_       -> domain error
+clex -> clex
+_    -> domain error
 ```
 
 ### Examples

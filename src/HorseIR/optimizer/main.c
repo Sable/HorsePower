@@ -15,6 +15,7 @@ B isOpt     = false;
 B isCompiler= false;
 B isInterp  = false;
 B isExp     = false;
+B isFront   = false;
 B isW       = false;
 B isPretty  = false;
 I runs      = 1;
@@ -73,6 +74,10 @@ int main(int argc, char *argv[]){
     else if(isExp){
         runExperiment();
     }
+    else if(isFront){
+        if(isQuery) parseInputWithQid(qid);
+        else if(isQFile) parseInput(qfile);
+    }
     else if(isPretty){
         parseInputWithQid(qid);
         prettyProg(root);
@@ -87,7 +92,7 @@ int main(int argc, char *argv[]){
 
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:p")) != -1){
+    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:fp")) != -1){
         switch(c){
             case 'h': isUsage   = true;            break;
             case 'v': isVersion = true;            break;
@@ -105,6 +110,7 @@ static int getOption(int argc, char *argv[]){
             case 'r': runs      = atoi(optarg);    break;
             case 'x': isExp     = true; \
                       isW       = 0==atoi(optarg); break;
+            case 'f': isFront   = true;            break;
             case 'p': isPretty  = true;            break;
             default : return 1;
         }
@@ -115,16 +121,21 @@ static int getOption(int argc, char *argv[]){
 
 static void usage(){
     WP("Usage: ./horse <option> [parameter]  \n");
-    WP("  -h            Print this information\n");
-    WP("  -v            Print HorseIR version\n" );
-    WP("  -t            Enable interpreter\n"    );
-    WP("  -c            Enable compiler\n"       );
-    WP("  -q <qid>      TPC-H query id (data/)\n");
-    WP("  -n <filename> Set a query file\n"      );
-    WP("  -s <sid>      TPC-H query scale\n"     );
-    WP("  -o <name>     Query opt. [fe/fp]\n"    );
-    WP("  -d 'del'      CSV del. (default '|')\n");
-    WP("  -r <runs>     Number of runs\n"        );
+    WP("\nRun with an interpreter:\n");
+    WP("  -t             Enable interpreter\n"    );
+    WP("  -q <qid>       TPC-H query id `data/` (-q or -n)\n");
+    WP("  -n <filename>  Set a query file (-q or -n)\n"      );
+    WP("  -s <sid>       TPC-H query scale (default 1)\n"    );
+    WP("  -r <runs>      Number of runs (default 1)\n"       );
+    WP("\nRun with a compiler:\n");
+    WP("  -c             Enable compiler\n"       );
+    WP("  -q <qid>       TPC-H query id `data/` (-q or -n)\n");
+    WP("  -n <filename>  Set a query file (-q or -n)\n"      );
+    WP("  -o <name>      Query opt. (fe or fp)\n"    );
+    WP("\nOthers:\n");
+    WP("  -h             Print this information\n");
+    WP("  -v             Print HorseIR version\n" );
+    WP("  -d 'del'       CSV del. (default '|')\n");
 }
 
 static void parseInputWithQid(I qid){
@@ -138,6 +149,7 @@ static void parseInput(S file_path){
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s\n", file_path);
     }
+    P("parsing ....\n");
     gettimeofday(&tv0, NULL);
     int ret = yyparse();
     fclose(yyin);
@@ -145,6 +157,7 @@ static void parseInput(S file_path){
     else { EP("Parsing failed: %s\n",file_path);}
     gettimeofday(&tv1, NULL);
     WP("Parsing time (ms): %g\n", calcInterval(tv0, tv1));
+    weedProg(root);
 }
 
 static void runCompileWithOpt(char *optName){
@@ -198,6 +211,7 @@ static void runInterpreterCore(){
 }
 
 static void validateParameters(){
+    if(isFront || isExp) return; //skip on tests
     if(isInterp && isCompiler){
         EP("> choose one mode: interpreter (-t) or compiler (-c), not both.\n");
     }

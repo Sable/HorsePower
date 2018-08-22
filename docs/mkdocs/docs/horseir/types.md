@@ -10,7 +10,7 @@
 | Name      | Alias    | Short | Byte   | Description                   |
 | :---------| :--------| :-----| :------| :-----------------------------|
 | boolean   | bool     | B     | 1\*    | `0` (false) and `1` (true)    |
-| char      | i8       | C     | 1      | Basic unit                    |
+| char      | i8       | C     | 1      | Half short integer or char    |
 | short     | i16      | H     | 2      | Short integer                 |
 | int       | i32      | I     | 4      | Integer                       |
 | long      | i64      | L     | 8      | Long integer (default, x64)   |
@@ -19,12 +19,12 @@
 | complex   | complex  | X     | 16     | Complex number                |
 | symbol    | sym      | Q     | 8      | Symbol, but stored in integer |
 | string    | str      | S     | 8      | String                        |
-| month     | m        | M     | 4      | Month (YYYY.MM)               |
-| date      | d        | D     | 4      | Date (YYYY.MM.DD)             |
-| date time | z        | Z     | 8      | Date time                     |
-| minute    | w        | W     | 4      | Minute (hh:mm)                |
-| second    | v        | V     | 4      | Second (hh:mm:ss)             |
-| time      | t        | T     | 4      | Time (hh:mm:ss.ll)            |
+| month     | month    | M     | 4      | Month (YYYY.MM)               |
+| date      | date     | D     | 4      | Date (YYYY.MM.DD)             |
+| date time | dt       | Z     | 8      | Date time                     |
+| minute    | minute   | W     | 4      | Minute (hh:mm)                |
+| second    | second   | V     | 4      | Second (hh:mm:ss)             |
+| time      | time     | T     | 4      | Time (hh:mm:ss.ll)            |
 | function  | func     |       | 8      | Function literal              |
 
 <small>\* In future, 1-bit bool will be supported.</small>

@@ -1,72 +1,79 @@
-# Array indexing
+!!! note "Array Indexing"
+    Include **index** and **index_a**
 
-## Index
+## index
 
 ### Description
 
-`index(x,k)`
+```no-highlight
+index(x,k)
+```
 
-- `x[k]`: fetch value from x based on k
+- `x[k]`: fetch value from `x` with a given index `k`
 
-### Type rules
+### Type Rules
 
 Basic types
 
 ```no-highlight
-B, (Int|List<Int>) -> (B|List<B>)
-H, (Int|List<Int>) -> (H|List<H>)
-I, (Int|List<Int>) -> (I|List<I>)
-L, (Int|List<Int>) -> (L|List<L>)
-F, (Int|List<Int>) -> (F|List<F>)
-E, (Int|List<Int>) -> (E|List<E>)
-X, (Int|List<Int>) -> (E|List<X>)
-C  (Int|List<Int>) -> (E|List<C>)
-Q  (Int|List<Int>) -> (E|List<Q>)
-S  (Int|List<Int>) -> (E|List<S>)
-M  (Int|List<Int>) -> (E|List<M>)
-D  (Int|List<Int>) -> (E|List<D>)
-Z  (Int|List<Int>) -> (E|List<Z>)
-U  (Int|List<Int>) -> (E|List<U>)
-W  (Int|List<Int>) -> (E|List<W>)
-T  (Int|List<Int>) -> (E|List<T>)
+bool   , (Int|list<Int>) -> (bool   |list<bool   >)
+i8     , (Int|list<Int>) -> (i8     |list<i8     >)
+i16    , (Int|list<Int>) -> (i16    |list<i16    >)
+i32    , (Int|list<Int>) -> (i32    |list<i32    >)
+i64    , (Int|list<Int>) -> (i64    |list<i64    >)
+f32    , (Int|list<Int>) -> (f32    |list<f32    >)
+f64    , (Int|list<Int>) -> (f64    |list<f64    >)
+complex, (Int|list<Int>) -> (complex|list<complex>)
+sym    , (Int|list<Int>) -> (sym    |list<sym    >)
+str    , (Int|list<Int>) -> (str    |list<str    >)
+month  , (Int|list<Int>) -> (month  |list<month  >)
+date   , (Int|list<Int>) -> (date   |list<date   >)
+dt     , (Int|list<Int>) -> (dt     |list<dt     >)
+minute , (Int|list<Int>) -> (minute |list<minute >)
+second , (Int|list<Int>) -> (second |list<second >)
+time   , (Int|list<Int>) -> (time   |list<time   >)
+list<?>, Int             -> list<?>
+_      , _               -> domain error
 ```
 
 
 ### Examples
 
 ```no-highlight
-index((-1,2,3),(2,1))
-> (3,2):i64
+    index((-1,2,3):i32,(2,1):i32)
+> (3,2):i32
 ```
 
-## IndexA
+## index_a
 
-`indexa(x,k,m)`
+```no-highlight
+index_a(x,k,m)
+```
 
 - is equivalent to `x[k]=m`
 - returns the same type of m
 
-### Type rules
+### Type Rules
 
-Basic types (x,k,m -> m)
+Basic types (x,k,m -> x)
 
 ```no-highlight
-B, Int , B
-H, Int , (B|H)
-I, Int , (B|H|I)
-L, Int , (B|H|I|L)
-F, Int , (B|H|I|L|F)
-E, Int , (B|H|I|L|F|E)
-X, Int , (B|H|I|L|F|E|X)
-C, Int , C
-Q, Int , Q
-S, Int , S
-M, Int , M
-D, Int , D
-Z, Int , Z
-U, Int , U
-W, Int , W
-T, Int , T
+bool   , Int , bool 
+i8     , Int , (bool|i8)
+i16    , Int , (bool|i8|i16)
+i32    , Int , (bool|i8|i16|i32)
+i64    , Int , (bool|i8|i16|i32|64)
+f32    , Int , (bool|i8|i16|i32|64|f32)
+f64    , Int , (bool|i8|i16|i32|64|f32|f64)
+complex, Int , (bool|i8|i16|i32|64|f32|f64|complex)
+sym    , Int , sym    
+str    , Int , str    
+month  , Int , month  
+date   , Int , date   
+dt     , Int , dt     
+minute , Int , minute 
+second , Int , second 
+time   , Int , time   
 ```
 
 **Note:**
@@ -77,10 +84,8 @@ T, Int , T
 ### Examples
 
 ```no-highlight
-    x = (-1,2,3)
-    indexa(x,(2,1),(0))
-> (0)
-    x
-> (-1,0,0)
+    x:i32 = (-1,2,3):i32
+    index_a(x,(2,1):i32,0:i32)
+> (-1,0,0):i32  // value: x
 ```
 

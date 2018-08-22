@@ -28,8 +28,9 @@ A conversion is required to generate corresponding pattern string.
 High-level
 
 ```no-highlight
-String, String -> bool
-_     , _      -> domain error
+str , (str,sym) -> bool
+sym , (str,sym) -> bool
+_   , _         -> domain error
 ```
 
 Table with details (See [type alias](../types.md))

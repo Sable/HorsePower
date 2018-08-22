@@ -13,7 +13,6 @@ High-level (Same as [eq](eq.md))
 ```no-highlight
 Real   , Real    -> bool
 complex, complex -> bool
-char   , char    -> bool
 sym    , sym     -> bool
 str    , str     -> bool
 month  , month   -> bool

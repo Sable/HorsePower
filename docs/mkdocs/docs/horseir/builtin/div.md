@@ -11,12 +11,14 @@
 High-level (Same as [mul](mul.md))
 
 ```no-highlight
-Realx,Realy -> (f32==max(Realx,Realy)?f32:f64)
-_           -> domain error
+Real    ,Real    -> MaxType
+complex ,Real    -> complex
+Real    ,complex -> complex
+_       ,_       -> domain error
 ```
 
 !!! tip "Note"
-    1) `bool` and `char` are promoted to `f32` or `f64` before any operation. <br>
+    1) `bool` is promoted to `i16` before any operation. <br>
     2) `div(0,0)` is an error (in APL, it returns 1)
 
 Table with details (See [type alias](../types.md))

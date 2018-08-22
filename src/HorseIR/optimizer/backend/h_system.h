@@ -9,7 +9,7 @@ extern "C" {
 
 #define copyColumnValue(z,x) copyV(z,x)
 
-#define getEnumName(x)   (vy(x).name)
+#define getEnumName(x)   (vy(x).source)
 #define getEnumTarget(x) (vy(x).target)
 
 /* methods */
@@ -62,6 +62,14 @@ L setFKey               (V x, V colName, V fKey);
 B isOrdered             (V x);
 L searchOrdered         (V z, V x, V y);
 L joinIndexHash         (V z, V x, V y, C op);
+
+F logBaseF              (F b, F x);
+E logBaseE              (E b, E x);
+B logicAnd              (B x, B y);
+B logicNand             (B x, B y);
+B logicOr               (B x, B y);
+B logicNor              (B x, B y);
+B logicXor              (B x, B y);
 
 
 B isTypeGroupInt        (L t);

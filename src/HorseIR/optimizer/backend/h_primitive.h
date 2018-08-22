@@ -86,7 +86,6 @@ L pfnCeil          (V z, V x);
 L pfnFloor         (V z, V x);
 L pfnRound         (V z, V x);
 
-L pfnTrig          (V z, V x, L op);
 L pfnTrigSin       (V z, V x);
 L pfnTrigAsin      (V z, V x);
 L pfnTrigCos       (V z, V x);
@@ -94,7 +93,6 @@ L pfnTrigAcos      (V z, V x);
 L pfnTrigTan       (V z, V x);
 L pfnTrigAtan      (V z, V x);
 
-L pfnHyper         (V z, V x, L op);
 L pfnHyperSinh     (V z, V x);
 L pfnHyperAsinh    (V z, V x);
 L pfnHyperCosh     (V z, V x);
@@ -107,9 +105,10 @@ L pfnRecip         (V z, V x);
 L pfnSignum        (V z, V x);
 L pfnPi            (V z, V x);
 L pfnNot           (V z, V x);
-L pfnExpLog        (V z, V x, L op);
 L pfnExp           (V z, V x);
 L pfnLog           (V z, V x);
+L pfnLog2          (V z, V x);
+L pfnLog10         (V z, V x);
 L pfnLen           (V z, V x);
 L pfnRange         (V z, V x);
 L pfnFact          (V z, V x);
@@ -156,16 +155,14 @@ L pfnMinus         (V z, V x, V y);
 L pfnMul           (V z, V x, V y);
 L pfnDiv           (V z, V x, V y);
 
-L pfnLogic         (V z, V x, V y, L op);
 L pfnAnd           (V z, V x, V y);
 L pfnNand          (V z, V x, V y);
 L pfnOr            (V z, V x, V y);
 L pfnNor           (V z, V x, V y);
 L pfnXor           (V z, V x, V y);
 
-L pfnPowerLog      (V z, V x, V y, L op);
 L pfnPower         (V z, V x, V y);
-L pfnLog2          (V z, V x, V y);
+L pfnLogBase       (V z, V x, V y);
 L pfnMod           (V z, V x, V y);
 L pfnCompress      (V z, V x, V y);
 

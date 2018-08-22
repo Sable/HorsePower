@@ -2,28 +2,33 @@
 
 ### Description
 
-`append(x,y)`
+```no-highlight
+append(x,y)
+```
 
-- append all items in y to x
+Append all items in y to x and return a new list
+
 - if x is a list and y is not a list, y is enlisted and later appended
-- if x is a list and y is a list, all cells in x and y are formed into a new list
+- if x is a list and y is a list, all cells in y are concatenated to x
 
 ### Type Rules
 
 High-level
 
 ```no-highlight
-Real   , Real   -> Real
-complex, complex-> Clex
-symbol , Sym    -> Sym
-char   , char   -> Char
-string , string -> Char
-List   , Any    -> List
-Any    , List   -> List
-Enum   , Basic  -> Enum
-Basic  , Enum   -> Enum
-_      , _      -> domain error
+Real   , Real    -> MaxType
+complex, complex -> complex
+sym    , sym     -> sym
+str    , str     -> str
+list   , Any     -> list
+Any    , list    -> list
+enum   , Basic   -> enum
+Basic  , enum    -> enum
+_      , _       -> domain error
 ```
+
+!!! note "Append with enum"
+    append(enum<k0,v>, k1) is valid when 1) k0 and k1 are Real; or 2) k0 and k1 are the same type
 
 Table with details (See [type alias](../types.md))
 
@@ -36,6 +41,6 @@ Table with details (See [type alias](../types.md))
 ### Examples
 
 ```no-highlight
-append(0, (-1,2,3))
+append(0:i32, (-1,2,3):i32)
 > (0,-1,2,3):i32
 ```

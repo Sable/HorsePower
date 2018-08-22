@@ -14,7 +14,7 @@ typedef struct Program {
 
 /* TODO: add listT */
 typedef enum pType {
-    unknownT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT, strT,
+    unknownT, boolT, i16T, i32T, i64T, f32T, f64T, charT, clexT, symT, strT,
     monthT, dateT, dtT, hourT, minuteT, timeT,
     tableT, ktableT, listT, enumT, dictT, funcT,
     totalT
@@ -24,7 +24,7 @@ typedef enum Kind {
     idK, floatK, intK, typeK, compoundK, dateK, symK, strK,
     literalFloatK, literalSymK, literalDateK, literalCharK, literalStrK,
     literalBoolK, literalParamK, literalIntK, literalFuncK,
-    funcK, exprK, paramExprK,
+    funcK, exprK, paramExprK, nameTypeK,
     simpleStmtK, castStmtK, returnK, importK, methodK, moduleK
 }Kind;
 
@@ -33,9 +33,10 @@ typedef struct Node {
         struct compoundID{char *name1,*name2;} compoundID;
         struct expression{struct Node *func,*param;} expr;
         struct simpleStmt{struct Node *name,*type,*expr;} simpleStmt;
-        struct castStmt{struct Node *name,*type,*expr,*cast;} castStmt;
-        struct method{struct Node *name,*type; List *list;} method;
-        struct module{struct Node *name; List *body;} module;
+        struct castStmt  {struct Node *name,*type,*expr,*cast;} castStmt;
+        struct method    {struct Node *name,*type; List *list,*param;} method;
+        struct module    {struct Node *name; List *body;} module;
+        struct nameType  {struct Node *name,*type;} nameType;
         struct Node *nodeS;
         bool   boolS;
         int    intS, dateS, monthS;
@@ -55,8 +56,9 @@ List *makeList (Node *val, List *next);
 Node *makeNodeID           (char *id);
 Node *makeNodeKind         (Node *d, Kind k);
 Node *makeListKind         (List *t, Kind k);
-Node *makeNodeModule       (Node *name, List *body);
-Node *makeNodeModuleMethod (Node *name, Node *type, List *stmt);
+Node *makeNodeModule       (Node *name, Node *content);
+Node *makeNodeModuleContent(List *body);
+Node *makeNodeModuleMethod (Node *name, List *param, Node *type, List *stmt);
 Node *makeNodeImport       (Node *cID);
 Node *makeNodeSimpleStmt1  (Node *name, Node *type, Node *expr);
 Node *makeNodeSimpleStmt2  (Node *name, Node *type, Node *expr, Node *cast_type);
@@ -83,5 +85,6 @@ Node *makeNodeStringValue  (char *str);
 Node *makeNodeConstSymbol  (char *value);
 Node *makeNodeConstDate    (int value);
 Node *makeNodeParamExpr    (List *param_list);
+Node *makeNodeNameType     (Node *name, Node *type);
 
 #endif

@@ -3,9 +3,9 @@
 
 /* constants */
 const char *FUNCTIONS[] = {
-    /* unary 58 */
+    /* unary 60 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" , "not",
-    "log", "exp",  "cos",   "sin",   "tan", "acos",  "asin",  "atan", "cosh", "sinh",
+    "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",  "asin",  "atan", "cosh", "sinh",
     "tanh", "acosh", "asinh", "atanh",
     "date", "date_year", "date_month", "date_day",
     "time", "time_hour", "time_minute", "time_second", "time_mill",
@@ -14,7 +14,7 @@ const char *FUNCTIONS[] = {
     "format", "keys", "values", "meta", "load_table", "fetch",
     /* binary 35 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul", "div",
-    "power", "log2", "mod", "and", "or", "nand", "nor" , "xor",
+    "power", "logb", "mod", "and", "or", "nand", "nor" , "xor",
     "datetime_diff", "datetime_add", "datetime_sub",
     "append", "like", "compress", "randk", "index_of", "take", "drop", "order",
     "member", "vector", "match", "index", "column_value", "sub_string",
@@ -39,6 +39,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define rulePi      NULL
 #define ruleNot     commonBool1
 #define ruleLog     NULL
+#define ruleLog2    NULL
+#define ruleLog10   NULL
 #define ruleExp     NULL
 #define ruleCos     commonTrig
 #define ruleSin     commonTrig
@@ -93,7 +95,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleMul      commonArith2
 #define ruleDiv      commonArith2
 #define rulePower    commonArith2
-#define ruleLog2     NULL
+#define ruleLogBase  NULL
 #define ruleMod      commonArith2
 #define ruleAnd      commonBool2
 #define ruleOr       commonBool2
@@ -139,7 +141,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define isT(t) (t==n->type)
 
 #define isBT isT(boolT)
-#define isIT isT(i64T)||isT(i32T)||isT(i16T)||isT(i8T)
+#define isIT isT(i64T)||isT(i32T)||isT(i16T)
 #define isFT isT(f64T)||isT(f32T)
 #define isCT isT(charT)
 #define isST isT(symT)||isT(strT)
@@ -668,6 +670,8 @@ void *fetchTypeRules(char *name, int* num){
             CASE(     piF, rulePi)
             CASE(    notF, ruleNot)
             CASE(    logF, ruleLog)
+            CASE(   log2F, ruleLog2)
+            CASE(  log10F, ruleLog10)
             CASE(    expF, ruleExp)
             CASE(    cosF, ruleCos)
             CASE(    sinF, ruleSin)
@@ -721,7 +725,7 @@ void *fetchTypeRules(char *name, int* num){
             CASE(     mulF, ruleMul)
             CASE(     divF, ruleDiv)
             CASE(   powerF, rulePower)
-            CASE(    log2F, ruleLog2)
+            CASE(    logBF, ruleLogBase)
             CASE(     modF, ruleMod)
             CASE(     andF, ruleAnd)
             CASE(      orF, ruleOr)

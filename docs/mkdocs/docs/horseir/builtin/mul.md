@@ -11,16 +11,22 @@
 High-level
 
 ```no-highlight
-Real_x,Real_y -> (f32==max(Real_x,Real_y)?f32:f64)
-_             -> domain error
+Real    ,Real    -> MaxType
+complex ,Real    -> complex
+Real    ,complex -> complex
+_       ,_       -> domain error
 ``` 
 
 !!! tip "Note"
-    Types `bool` and `char` are promoted to `f32` or `f64` before any operation.
+    Type `bool` is promoted to `i16` before any operation.
 
 Table with details (See [type alias](../types.md))
 
 ![multiplication](../types/mul.png)
+
+!!! danger "Future Work"
+    1) mul(i32, i32) should return `i64` <br>
+    2) mul(i64, i64) should return `f64`
 
 ### Shape Rules
 

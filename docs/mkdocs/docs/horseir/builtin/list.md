@@ -1,82 +1,112 @@
 # List related operations
 
+## list
+
+### Description
+
+```no-highlight
+list(...)
+```
+
+- Return a list with a given arbitrary number of arguments
+
+### Type Rules
+
+```no-highlight
+(Any;...) -> list
+```
+
+### Examples
+
+```no-highlight
+list(`a`b`c:sym,(4,5,6):i32)
+> (`a`b`c:sym, (-1,2,3):i32):list
+```
+
 ## enlist
 
 ### Description
 
-`enlist(x)`
+```no-highlight
+enlist(x)
+```
 
 - Return a list enclose `x`
 - Increase the depth of `x` by 1
 
-### Type rules
+### Type Rules
 
 ```no-highlight
-bool   -> list
-i16    -> list 
-i32    -> list 
-i64    -> list 
-f32    -> list 
-f64    -> list 
-complex-> list 
-sym    -> list 
-str    -> list 
-m      -> list
-d      -> list
-z      -> list
-u      -> list
-v      -> list
-t      -> list
-list   -> list
-dict   -> list
-enum   -> list
-table  -> list
-ktable -> list
+bool   -> list<bool>
+i8     -> list<i8>
+i16    -> list<i16>     
+i32    -> list<i32>
+i64    -> list<i64>
+f32    -> list<f32>
+f64    -> list<f64>
+complex-> list<complex>
+sym    -> list<sym>
+str    -> list<str>
+month  -> list<month>
+date   -> list<date>
+dt     -> list<dt>
+minute -> list<minute>
+second -> list<second>
+time   -> list<time>
+list   -> list<list>
+dict   -> list<dict>
+enum   -> list<enum>
+table  -> list<table>
+ktable -> list<ktable>
 _      -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-enlist((-1,2,3))
-> [(-1,2,3)]:list
+enlist((-1,2,3):i32)
+> ((-1,2,3):i32):list
 ```
 
 ## raze
 
 ### Description
 
-`raze(x)`
+```no-highlight
+raze(x)
+```
 
 - Return a vector if all items in `x` can be safely placed in a vector
 - All items in the list `x` are "freed"
 
-### Type rules
+### Type Rules
 
 ```no-highlight
-list -> bool
-list -> i16
-list -> i32
-list -> i64
-list -> f32
-list -> f64
-list -> complex
-list -> sym
-list -> str
-list -> m
-list -> d
-list -> z
-list -> u
-list -> v
-list -> t
+list<bool>    -> bool
+list<i8>      -> i8
+list<i16>     -> i16
+list<i32>     -> i32
+list<i64>     -> i64
+list<f32>     -> f32
+list<f64>     -> f64
+list<complex> -> complex
+list<sym>     -> sym
+list<str>     -> str
+list<month>   -> month
+list<date>    -> date
+list<dt>      -> dt
+list<minute>  -> minute
+list<second>  -> second
+list<time>    -> time
+list<?>       -> ?
 _    -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-raze(enlist((-1,2,3)))
-> (-1,2,3)
+raze(enlist((-1,2,3):i32))
+> (-1,2,3):i32
 ```
 
 ## tolist
@@ -88,24 +118,25 @@ raze(enlist((-1,2,3)))
 - Converting a vector to a list
 - Each item in the vector becomes a cell in the list
 
-### Type rules
+### Type Rules
 
 ```no-highlight
-bool   -> list
-i16    -> list 
-i32    -> list 
-i64    -> list 
-f32    -> list 
-f64    -> list 
-complex-> list 
-sym    -> list 
-str    -> list 
-m      -> list
-d      -> list
-z      -> list
-u      -> list
-v      -> list
-t      -> list
+bool   -> list<bool>
+i8     -> list<i8>
+i16    -> list<i16>     
+i32    -> list<i32>
+i64    -> list<i64>
+f32    -> list<f32>
+f64    -> list<f64>
+complex-> list<complex>
+sym    -> list<sym>
+str    -> list<str>
+month  -> list<month>
+date   -> list<date>
+dt     -> list<dt>
+minute -> list<minute>
+second -> list<second>
+time   -> list<time>
 _      -> domain error
 ```
 

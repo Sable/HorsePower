@@ -31,14 +31,14 @@
 }
 
 %token <stringconst> kMODULE kIMPORT kDEF kCKCAST kRETURN
-%token <stringconst> kBOOL kCHAR kI8 kI16 kI32 kI64 kF32 kF64 kCLEX kSYM kSTR kMONTH kDATE kTZ kTU kTV kTT
+%token <stringconst> kBOOL kCHAR kI16 kI32 kI64 kF32 kF64 kCLEX kSYM kSTR kMONTH kDATE kTZ kTU kTV kTT
 %token <stringconst> tID tSTRING tCHAR
 %token <intconst>    tINT tDATE
 %token <floatconst>  tFLOAT
 
 %type <prog> program 
-%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list string_list
-%type <node> module moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr symbol_single
+%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list string_list paramType_list paramType_list1
+%type <node> module moduleContent moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr symbol_single nameType method
 %type <stringconst> symbol_name
 
 %start program
@@ -48,24 +48,53 @@
 program         : module_list
                   { root = makeProg($1); }
 ;
+
 module_list     :
                   { $$ = NULL; }
                 | module module_list
                   { $$ = makeList($1, $2); }
 ;
-module          : kMODULE name '{' module_body_list '}'
+
+module          : kMODULE name '{' moduleContent '}'
                   { $$ = makeNodeModule($2, $4); }
+                | method
+                  { $$ = makeNodeModule(NULL, makeNodeModuleContent(makeList($1,NULL))); }
 ;
+
+moduleContent   : module_body_list
+                  { $$ = makeNodeModuleContent($1); }
+;
+
 module_body_list:
                   { $$ = NULL; }
                 | moduleBody module_body_list
                   { $$ = makeList($1, $2); }
 ;
 
-moduleBody      : kDEF name '(' ')' ':' type '{' stmt_list '}'
-                  { $$ = makeNodeModuleMethod($2, $6, $8); }
+moduleBody      : method
+                  { $$ = $1; }
                 | kIMPORT compoundID ';'
                   { $$ = makeNodeImport($2); }
+;
+
+method         : kDEF name '(' paramType_list ')' ':' type '{' stmt_list '}'
+                  { $$ = makeNodeModuleMethod($2, $4, $7, $9); }
+;
+
+paramType_list  :
+                 { $$ = NULL; }
+                | paramType_list1
+                 { $$ = $1; }
+;
+
+paramType_list1 : nameType
+                 { $$ = makeList($1, NULL); }
+                | nameType ',' paramType_list1
+                 { $$ = makeList($1, $3); }
+;
+
+nameType        : name ':' type
+                 { $$ = makeNodeNameType($1, $3); }
 ;
 
 stmt_list       :
@@ -78,7 +107,7 @@ stmt            : simple_stmt
                  { $$ = $1; }
                 | return_stmt
                  { $$ = $1; }
-
+;
 simple_stmt     : name ':' type '=' expression ';'
                  { $$ = makeNodeSimpleStmt1($1, $3, $5); }
                 | name ':' type '=' kCKCAST '(' expression ',' type ')' ';'
@@ -87,7 +116,6 @@ simple_stmt     : name ':' type '=' expression ';'
 return_stmt     : kRETURN param ';'
                  { $$ = makeNodeReturnStmt($2); }
 ;
-
 expression      : literalFunction '(' paramExpr ')'
                  { $$ = makeNodeExpr($1, $3); }
                 | param
@@ -149,15 +177,15 @@ literalString   : string_list  ':' kSTR
                  { $$ = makeNodeLiteralString($1); }
                 | '(' string_list ')' ':' kSTR
                  { $$ = makeNodeLiteralString($2); }
+;
 
 literalInteger  : int_list ':' intType
                  { $$ = makeNodeLiteralInt($1, $3); }
                 | '(' int_list ')' ':' intType
                  { $$ = makeNodeLiteralInt($2, $5); }
 ;
-intType         : kI8
-                 { $$ = makeNodeIntType(i8T); }
-                | kI16
+
+intType         : kI16
                  { $$ = makeNodeIntType(i16T); }
                 | kI32
                  { $$ = makeNodeIntType(i32T); }
@@ -229,8 +257,6 @@ type            : '?'
                  { $$ = makeNodeType(boolT); }
                 | kCHAR
                  { $$ = makeNodeType(charT); }
-                | kI8
-                 { $$ = makeNodeType(i8T); }
                 | kI16
                  { $$ = makeNodeType(i16T); }
                 | kI32

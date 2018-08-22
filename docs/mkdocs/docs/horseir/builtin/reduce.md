@@ -20,14 +20,14 @@ $$ \sum_{i=0}^{n-1} x_i $$
 ### Type Rules
 
 ```no-highlight
-B -> I
-H -> I
-I -> I
-C -> I
-L -> L
-F -> F
-E -> E
-_ -> domain error
+bool -> i32
+i8   -> i32
+i16  -> i32
+i32  -> i32
+i64  -> i64
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ## avg
@@ -41,14 +41,14 @@ $$ \frac{1}{n} * \sum_{i=0}^{n-1} x_i $$
 ### Type Rules
 
 ```no-highlight
-B -> F
-H -> F
-I -> F
-C -> F
-L -> E
-F -> F
-E -> E
-_ -> domain error
+bool -> f32
+i8   -> f32
+i16  -> f32
+i32  -> f32
+i64  -> f64
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ## min
@@ -61,14 +61,14 @@ _ -> domain error
 ### Type Rules
 
 ```no-highlight
-B -> B
-H -> H
-I -> I
-C -> C
-L -> L
-F -> F
-E -> E
-_ -> domain error
+bool -> bool
+i8   -> i8 
+i16  -> i16
+i32  -> i32
+i64  -> i64
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ### Examples
@@ -88,14 +88,14 @@ min((4,9,16):i32)
 ### Type Rules
 
 ```no-highlight
-B -> B
-H -> H
-I -> I
-C -> C
-L -> L
-F -> F
-E -> E
-_ -> domain error
+bool -> bool
+i8   -> i8 
+i16  -> i16
+i32  -> i32
+i64  -> i64
+f32  -> f32
+f64  -> f64
+_    -> domain error
 ```
 
 ### Examples

@@ -11,7 +11,7 @@
 High-level
 
 ```no-highlight
-Real,Real     -> MaxType
+Real  ,Real   -> MaxType
 month ,Int    -> month
 date  ,Int    -> date
 dt    ,Int    -> dt
@@ -28,7 +28,7 @@ _             -> domain error
 ```
 
 !!! tip "Note"
-    Types `bool` and `char` are promoted to `i16` before any operation.
+    Type `bool` is promoted to `i16` before any operation.
 
 Table with details (See [type alias](../types.md))
 

@@ -16,6 +16,6 @@ _   -> domain error
 ### Examples
 
 ```no-highlight
-range(3)
+range(3:i16)
 > (0,1,2):i64
 ```

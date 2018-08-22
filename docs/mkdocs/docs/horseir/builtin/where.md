@@ -10,7 +10,7 @@
 
 ```no-highlight
 bool       -> i64
-list<bool> -> list<int>
+list<bool> -> list<i64>
 _          -> domain error
 ```
 

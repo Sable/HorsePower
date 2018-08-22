@@ -2,24 +2,26 @@
 
 ### Description
 
-`index_of(x, y)`
+```no-highlight
+index_of(x, y)
+```
 
-- find items from y in x; and
-- return indices, if found
-- return the length of x, if not found
+find each item from y in x:
 
-Note: index starts from 0
+1. return index, if <blue>found</blue>
+1. return the length of x, if <red>not found</red>
+
+*Note: Indexing starts from 0*
 
 ### Type Rules
 
 High-level
 
 ```no-highlight
-Real   , Real   -> I
-char   , char   -> I
-string , string -> I
-symbol , symbol -> I
-_, _ -> domain error
+Real , Real -> i64
+str  , str  -> i64
+sym  , sym  -> i64
+_    , _    -> domain error
 ```
 
 !!! danger "Future Work"

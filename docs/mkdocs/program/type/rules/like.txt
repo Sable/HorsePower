@@ -1,1 +1,4 @@
-String, String -> B
+Q, Q -> B
+Q, S -> B
+S, S -> B
+S, Q -> B

@@ -29,10 +29,10 @@ E calcInterval(struct timeval t0, struct timeval t1){
  *   the list below may be updated as well
  */
 const pFunc ElementWiseFunc[] = {
-    /* unary 30 */
+    /* unary 32 */
     absF, negF, ceilF, floorF, roundF, piF, notF,
-    logF, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF, sinhF,
-    tanhF, acoshF, asinhF, atanhF,
+    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
+    atanF, coshF, sinhF, tanhF, acoshF, asinhF, atanhF,
     dateF, yearF, monthF, dayF,
     timeF, hourF, minuteF, secondF, millF,
     /* binary 17 */
@@ -61,6 +61,9 @@ void initBackend(){
 #define addFKey(t0,c0,t1,c1) \
     pfnAddFKey(initLiteralSym((S)t0), initLiteralSym((S)c0),\
                initLiteralSym((S)t1), initLiteralSym((S)c1))
+#define addFKey2(t0,c0,t1,c1,n) \
+    pfnAddFKey(initLiteralSym((S)t0), initLiteralSymVector(n, c0),\
+               initLiteralSym((S)t1), initLiteralSymVector(n, c1))
 // addFKey(key,fkey)
 
 static void initQ2(){
@@ -133,6 +136,8 @@ static void initQ9(){
     addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey");
     addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey");
     addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+    //addFKey2("partsupp", ((S []){"ps_partkey", "ps_suppkey"}),
+    //         "lineitem", ((S []){"l_partkey" , "l_suppkey" }), 2);
 }
 
 static void initQ10(){

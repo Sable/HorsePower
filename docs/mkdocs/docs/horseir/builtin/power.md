@@ -15,11 +15,17 @@ Power with base and exponent
 
 ### Type Rules
 
-High-level
+High-level (without complex)
 
 ```no-highlight
-Real, Real -> f32 / f64 / complex
-_          -> domain error
+Real ,Real -> MaxType -> bool -> f32
+                         i8   -> f32
+                         i16  -> f32
+                         i32  -> f32
+                         i64  -> f64
+                         f32  -> f32
+                         f64  -> f64
+_    ,_    -> domain error
 ```
 
 !!! tip "Note"

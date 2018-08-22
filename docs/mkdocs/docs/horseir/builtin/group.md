@@ -19,12 +19,12 @@ f64     -> dict<i64, list<i64>>
 sym     -> dict<i64, list<i64>>
 str     -> dict<i64, list<i64>>
 complex -> dict<i64, list<i64>>
-m       -> dict<i64, list<i64>>
-d       -> dict<i64, list<i64>>
-z       -> dict<i64, list<i64>>
-u       -> dict<i64, list<i64>>
-w       -> dict<i64, list<i64>>
-t       -> dict<i64, list<i64>>
+month   -> dict<i64, list<i64>>
+date    -> dict<i64, list<i64>>
+dt      -> dict<i64, list<i64>>
+minute  -> dict<i64, list<i64>>
+second  -> dict<i64, list<i64>>
+time    -> dict<i64, list<i64>>
 list    -> dict<i64, list<i64>>
 _    -> domain error
 ```

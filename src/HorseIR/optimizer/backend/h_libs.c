@@ -3,8 +3,14 @@
 const I HASH_A = 1223106847;
 const I HASH_M = (1LL << 32)-5;
 
+typedef struct hash_index_node {
+    I ival;
+    struct hash_index_node *inext;
+}HI0, *HI;
+
 typedef struct hash_node {
     I h_index;
+    HI h_index_other;
     union {
         /* no boolean or char */
         H h_h;
@@ -27,6 +33,7 @@ typedef struct hash_node {
 #define hS(x) x->h_s
 
 #define hD(x) x->h_index
+#define hT(x) x->h_index_other
 #define hN(x) x->next
 #define hV(x,k) ((x)+(k))
 
@@ -39,7 +46,8 @@ typedef struct hash_node {
 #define hash_X hash_clex
 #define hash_S hash_djb2
 #define hash_S_n hash_djb2_n
-#define init_H(x) {hI(x)=-1;hN(x)=NULL;}
+#define init_H(x) {hI(x)=-1;hN(x)=NULL;hT(x)=NULL;}
+#define init_I(x) {x->ival=-1; x->inext=NULL;}
 
 #define toBase(t,v,f) (*((t*)(v)+f))
 #define toB(v,f) toBase(B,v,f)
@@ -154,20 +162,43 @@ HN newHashNode(){
     R x;
 }
 
-L insert_hash(HN ht, L htSize, void* src, L srcI, L typ){
+HI newIndexNode(){
+    HI x = (HI) malloc(sizeof(HI0)); init_I(x);
+    R x;
+}
+
+L insert_index(HN t, L td){
+    HI t0 = newIndexNode();
+    t0->ival = td;
+    if(hT(t)){
+        HI p = hT(t);
+        while(p->inext) p=p->inext;
+        p->inext = t0;
+    }
+    else {
+        hT(t) = t0;
+    }
+    R td;
+}
+
+// isU: isUnique
+static L insert_hash(HN ht, L htSize, void* src, L srcI, L typ, B isU){
     L hashKey = getHashValue(src,srcI,typ) % htSize;
     HN t = hV(ht,hashKey);
     while(hN(t)){
         t = hN(t); L td = hD(t);
         switch(typ){
-            caseH if(toH(src,td)==toH(src,srcI)) R td; break;
-            caseI if(toI(src,td)==toI(src,srcI)) R td; break;
-            caseL if(toL(src,td)==toL(src,srcI)) R td; break;
-            caseF if(toF(src,td)==toF(src,srcI)) R td; break;
-            caseE if(toE(src,td)==toE(src,srcI)) R td; break;
-            caseX if(xEqual(toX(src,td),toX(src,srcI)))  R td; break;
-            caseS if(!strcmp(toS(src,td),toS(src,srcI))) R td; break;
-            caseG if(compareTuple((V)src,td,(V)src,srcI))R td; break;
+            caseH if(toH(src,td)==toH(src,srcI)) R isU?td:insert_index(t,srcI); break;
+            caseI if(toI(src,td)==toI(src,srcI)) R isU?td:insert_index(t,srcI); break;
+            caseL if(toL(src,td)==toL(src,srcI)) R isU?td:insert_index(t,srcI); break;
+            caseF if(toF(src,td)==toF(src,srcI)) R isU?td:insert_index(t,srcI); break;
+            caseE if(toE(src,td)==toE(src,srcI)) R isU?td:insert_index(t,srcI); break;
+            caseX if(xEqual(toX(src,td),toX(src,srcI)))
+                     R isU?td:insert_index(t,srcI); break;
+            caseS if(!strcmp(toS(src,td),toS(src,srcI)))
+                     R isU?td:insert_index(t,srcI); break;
+            caseG if(compareTuple((V)src,td,(V)src,srcI))
+                     R isU?td:insert_index(t,srcI); break;
             default: R -1; /* ... */
         }
     }
@@ -177,7 +208,7 @@ L insert_hash(HN ht, L htSize, void* src, L srcI, L typ){
     R srcI;
 }
 
-L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
+static L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
     L hashKey = getHashValue(val,valI,typ) % htSize;
     HN t = hV(ht,hashKey);
     while(hN(t)){
@@ -197,12 +228,37 @@ L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
     R -1;
 }
 
-L findHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
-    R find_hash(ht,htSize,src,val,valI,typ);
+static L find_hash_many(HN ht, L htSize, void* src, void* val, L valI, L typ, HI *other){
+    L hashKey = getHashValue(val,valI,typ) % htSize;
+    HN t = hV(ht,hashKey);
+    *other = NULL; // default
+    while(hN(t)){
+        t = hN(t); L td = hD(t);
+        switch(typ){
+            caseH if(toH(src,td)==toH(val,valI)) {*other=hT(t);R td;} break;
+            caseI if(toI(src,td)==toI(val,valI)) {*other=hT(t);R td;} break;
+            caseL if(toL(src,td)==toL(val,valI)) {*other=hT(t);R td;} break;
+            caseF if(toF(src,td)==toF(val,valI)) {*other=hT(t);R td;} break;
+            caseE if(toE(src,td)==toE(val,valI)) {*other=hT(t);R td;} break;
+            caseX if(xEqual(toX(src,td),toX(val,valI)))  {*other=hT(t);R td;} break;
+            caseS if(!strcmp(toS(src,td),toS(val,valI))) {*other=hT(t);R td;} break;
+            caseG if(compareTuple((V)src,td,(V)val,valI)){*other=hT(t);R td;} break;
+            default: R -1;
+        }
+    }
+    R -1;
 }
 
+//L findHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
+//    R find_hash(ht,htSize,src,val,valI,typ);
+//}
+
 L insertHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
-    R insert_hash(ht,htSize,src,srcI,typ);
+    R insert_hash(ht,htSize,src,srcI,typ,true);
+}
+
+L insertHashMany(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
+    R insert_hash(ht,htSize,src,srcI,typ,false);
 }
 
 L profileHash(HN ht, L htSize){
@@ -236,7 +292,7 @@ L profileHash(HN ht, L htSize){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOI(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;})
+    DOI(vLen, {L t=find_hash(hashT,hashLen,src,val,i,typ);targ[i]=t<0?sLen:t;})
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     L flag[2]={-1}; I c=0;
@@ -879,7 +935,7 @@ B lib_member_fast2(void* src, void* val, L valI, L typ){
     L hashLen = getHashTableSize(sLen); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOP(vLen, targ[i]=(0<=findHash(hashT,hashLen,src,-1,val,i,typ)))
+    DOP(vLen, targ[i]=(0<=find_hash(hashT,hashLen,src,val,i,typ)))
     // profileHash(hashT,hashLen);
 
 
@@ -1136,9 +1192,69 @@ void radixSort(poi *val, int len){
     free(C);
 }
 
+/* index for join index*/
 
-
-
+L lib_join_index_hash(V z0, V z1, V x, V y){
+    L sLen=vn(x), vLen=vn(y), typ=vp(x);
+    void *src=sG(x), *val=sG(y);
+    HN hashT;
+    L hashLen = getHashTableSize(sLen);
+    CHECKE(createHash(&hashT,hashLen));
+    struct timeval tv0, tv1;
+    gettimeofday(&tv0, NULL);
+    DOI(sLen, insertHashMany(hashT,hashLen,src,i,NULL,-1,typ))
+    gettimeofday(&tv1, NULL);
+    P("Time 1 (ms): %g\n", calcInterval(tv0,tv1));
+    gettimeofday(&tv0, NULL);
+    L c = 0;
+    L *tempK = (L*)malloc(sizeof(L)*vLen);
+    HI *tempH = (HI*)malloc(sizeof(HI)*vLen);
+    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0); \
+               tempK[i]=k; tempH[i]=t0;\
+               if(k>=0){c++;while(t0){c++;t0=t0->inext;}}}, \
+       reduction(+:c))
+    DOP(vLen, tempK[i]=find_hash_many(hashT,hashLen,src,val,i,typ,&tempH[i]))
+    gettimeofday(&tv1, NULL);
+    P("Time 2 (ms): %g\n", calcInterval(tv0,tv1));
+    L parZ[H_CORE], offset[H_CORE]; 
+    memset(parZ, 0, sizeof(L)*H_CORE);
+    memset(offset, 0, sizeof(L)*H_CORE);
+    DOT(vLen, if(tempK[i]>=0) {parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;} })
+    DOI(H_CORE, P("%lld ",parZ[i])) P("\n");
+    DOI(H_CORE, c+=parZ[i])
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    initV(z0, H_L, c);
+    initV(z1, H_L, c);
+    //c = 0; L tt=0;
+    gettimeofday(&tv0, NULL);
+    DOT(vLen, if(tempK[i]>=0){L p=offset[tid];\
+                             vL(z0,p)=tempK[i];vL(z1,p)=i; \
+                             HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
+//#pragma omp parallel for
+//    for(L i=0;i<vLen;i++){
+//        HI t0=tempH[i];L k=tempK[i];
+//#pragma omp critical
+//        {
+//        if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;tt++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}
+//        }
+//    }
+    gettimeofday(&tv1, NULL);
+    P("Time 3 (ms): %g\n", calcInterval(tv0,tv1));
+    P("size = %lld\n",c);
+    //P("size = %lld, tt = %lld\n",c,tt);
+    // parallel - error (race condition)
+    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
+               if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}},\
+        reduction(+:c))
+    // serial
+    //DOI(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
+               if(k>=0){P("i=%lld, k=%lld\n",i,k);vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}})
+    // free hashT
+    profileHash(hashT, hashLen);
+    free(tempK);
+    free(tempH);
+    R 0;
+}
 
 
 

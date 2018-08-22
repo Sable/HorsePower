@@ -26,7 +26,7 @@ _         -> domain error
 ```
 
 !!! tip "Note"
-    Types `bool` and `char` are promoted to `i16` before any operation.
+    Type `bool` is promoted to `i16` before any operation.
 
 Table with details (See [type alias](../types.md))
 

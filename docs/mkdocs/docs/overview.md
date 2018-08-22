@@ -11,7 +11,7 @@ fine-grained parallelism.
 <!--<p align="center">Figure 1. The workflow of HorsePower.</p>-->
 ![Horse flow](./images/horse-flow.png)
 
-### Research ideas
+### Research Ideas
 
 At current stage, we focus on the research ideas as follows.
 
@@ -25,10 +25,11 @@ At current stage, we focus on the research ideas as follows.
 
 - Platform       : Cross-platform
 - Languages      : C/C++
-- Auto tool      : ANTLR4
-- Parallelism    : OpenMP/Pthread/CUDA/OpenCL
+- Auto tool      : Flex \& Bison
+- Parallelism    : CUDA/OpenMP/OpenACC
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
 ### Experiments
 
 - [Configurations](eval/settings.md)
+

@@ -32,7 +32,7 @@ Without complex numbers
 
 ```no-highlight
 bool -> f32
-char -> f32
+i8   -> f32
 i16  -> f32
 i32  -> f32
 i64  -> f64
@@ -45,7 +45,7 @@ With complex numbers
 
 ```no-highlight
 bool    -> f32
-char    -> f32 / complex
+i8      -> f32 / complex
 i16     -> f32 / complex
 i32     -> f32 / complex
 i64     -> f64 / complex

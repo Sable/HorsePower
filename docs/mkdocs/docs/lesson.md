@@ -5,6 +5,11 @@
 
 ### Common
 
+**Search for gcc include directories**
+
+- `echo | gcc -E -Wp,-v -`
+    + For example, math.h : `/usr/local/lib/gcc/x86_64-apple-darwin15.6.0/7.2.0/include-fixed/math.h`
+
 **Hash functions**
 
 - [MurmurHash3](https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp): see [wiki](https://en.wikipedia.org/wiki/MurmurHash)

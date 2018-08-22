@@ -10,7 +10,7 @@
 </tr>
 <tr>
     <td>Int</td>
-    <td>B, H, I, L</td>
+    <td>B, C, H, I, L</td>
 </tr>
 <tr>
     <td>Float</td>
@@ -52,7 +52,7 @@
     <td>Real, Complex</td>
 </tr>
 <tr>
-    <td>Datetime</td>
+    <td>Calendar</td>
     <td>Date, Time</td>
 </tr>
 <tr>
@@ -137,15 +137,15 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 13 | <script>hgFunc('log10(x)'        ,'log base 10            ');</script> | Real                | Number                        | [link](builtin/log.md#log10) |P       | Y        |
 | 14 | <script>hgFunc('sqrt(x)'         ,'Sqrt root              ');</script> | Real                | Number                        | [link](builtin/power.md#sqrt)|P       | Y        |
 | 15 | <script>hgFunc('exp(x)'          ,'Exponential            ');</script> | Real                | Number                        | [link](builtin/power.md#exp) |P       | Y        |
-| 16 | <script>hgFunc('date(x)'         ,'Time: date             ');</script> | Z                   | D                             | [link](date.md#date)         |&#10004;| Y        |
-| 17 | <script>hgFunc('date\_year(x)'   ,'Time: year             ');</script> | Date                | L                             | [link](date.md#date-year)    |&#10004;| Y        |
-| 18 | <script>hgFunc('date\_month(x)'  ,'Time: month            ');</script> | Date                | L                             | [link](date.md#date-month)   |&#10004;| Y        |
-| 19 | <script>hgFunc('date\_day(x)'    ,'Time: day              ');</script> | D,Z                 | L                             | [link](date.md#date-day)     |&#10004;| Y        |
-| 20 | <script>hgFunc('time(x)'         ,'Time: time             ');</script> | Z                   | T                             | [link](date.md#time)         |&#10004;| Y        |
-| 21 | <script>hgFunc('time\_hour(x)'   ,'Time: hour             ');</script> | Time                | L                             | [link](date.md#time-hour)    |&#10004;| Y        |
-| 22 | <script>hgFunc('time\_minute(x)' ,'Time: minute           ');</script> | Time                | L                             | [link](date.md#time-minute)  |&#10004;| Y        |
-| 23 | <script>hgFunc('time\_second(x)' ,'Time: second           ');</script> | W,T,Z               | L                             | [link](date.md#time-second)  |&#10004;| Y        |
-| 24 | <script>hgFunc('time\_mill(x)'   ,'Time: millisecond      ');</script> | T,Z                 | L                             | [link](date.md#time-mill)    |&#10004;| Y        |
+| 16 | <script>hgFunc('date(x)'         ,'Time: date             ');</script> | Z                   | D                             | [link](builtin/date.md#date)        |&#10004;| Y        |
+| 17 | <script>hgFunc('date\_year(x)'   ,'Time: year             ');</script> | Date                | L                             | [link](builtin/date.md#date-year)   |&#10004;| Y        |
+| 18 | <script>hgFunc('date\_month(x)'  ,'Time: month            ');</script> | Date                | L                             | [link](builtin/date.md#date-month)  |&#10004;| Y        |
+| 19 | <script>hgFunc('date\_day(x)'    ,'Time: day              ');</script> | D,Z                 | L                             | [link](builtin/date.md#date-day)    |&#10004;| Y        |
+| 20 | <script>hgFunc('time(x)'         ,'Time: time             ');</script> | Z                   | T                             | [link](builtin/date.md#time)        |&#10004;| Y        |
+| 21 | <script>hgFunc('time\_hour(x)'   ,'Time: hour             ');</script> | Time                | L                             | [link](builtin/date.md#time-hour)   |&#10004;| Y        |
+| 22 | <script>hgFunc('time\_minute(x)' ,'Time: minute           ');</script> | Time                | L                             | [link](builtin/date.md#time-minute) |&#10004;| Y        |
+| 23 | <script>hgFunc('time\_second(x)' ,'Time: second           ');</script> | W,T,Z               | L                             | [link](builtin/date.md#time-second) |&#10004;| Y        |
+| 24 | <script>hgFunc('time\_mill(x)'   ,'Time: millisecond      ');</script> | T,Z                 | L                             | [link](builtin/date.md#time-mill)   |&#10004;| Y        |
 | 25 | <script>hgFunc('cos(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#cos)  |&#10004;| Y        |
 | 26 | <script>hgFunc('sin(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#sin)  |&#10004;| Y        |
 | 27 | <script>hgFunc('tan(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#tan)  |&#10004;| Y        |
@@ -183,22 +183,22 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 16 | <script>hgFunc('nand(x,y)            ','NAND          ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#nand)|&#10004;| Y        |
 | 17 | <script>hgFunc('nor(x,y)             ','NOR           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#nor) |&#10004;| Y        |
 | 18 | <script>hgFunc('xor(x,y)             ','XOR           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#xor) |&#10004;| Y        |
-| 19 | <script>hgFunc('datetime\_diff(x,y)\*','Datetime diff ');</script>   | (Datetime;Datetime) | I or L                        | [link](date.md#datetime-diff)|        |         |
+| 19 | <script>hgFunc('datetime\_diff(x,y)\*','Date time diff ');</script>   | (Calendar;Calendar) | I or L                        | [link](builtin/date.md#datetime-diff)|        |         |
 
 \* [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp) | 
 \*\* CP: Comparable
 
-## 3. Algebraic related
+## 3. Algebraic Related
 
 ### 3.1 Unary
 
 | No.| Function                                                              | Type of Arg(s)\*            | Type of Value        | Details                       | Status | Parallel |
 | :-:| :-------------------------------------------------------------------- | :---------------------------| :------------------- | :---------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('unique(x)  ','Unique values          ');</script>     | Basic                       | L                    | [link](builtin/unique.md)     |&#10004;| P        |
-| 2  | <script>hgFunc('str(x)     ','Format                 ');</script>     | Any                         | C                    | [link](builtin/str.md)        |P       |         |
+| 2  | <script>hgFunc('str(x)     ','Format                 ');</script>     | Any                         | S                    | [link](builtin/str.md)        |        |         |
 | 3  | <script>hgFunc('len(x)     ','Length                 ');</script>     | Any                         | L                    | [link](builtin/len.md)        |&#10004;| N        |
-| 4  | <script>hgFunc('range(x)   ','Iota                   ');</script>     | Int                         | List                 | [link](builtin/range.md)      |&#10004;| Y        |
-| 5  | <script>hgFunc('fact(x)    ','Factorial              ');</script>     | Real                        | E                    | [link](builtin/fact.md)       |&#10004;| Y        |
+| 4  | <script>hgFunc('range(x)   ','Iota                   ');</script>     | Int                         | L                    | [link](builtin/range.md)      |&#10004;| Y        |
+| 5  | <script>hgFunc('fact(x)    ','Factorial              ');</script>     | Int                         | L                    | [link](builtin/fact.md)       |&#10004;| Y        |
 | 6  | <script>hgFunc('rand(x)    ','Random number generator');</script>     | Int                         | Same as argument     | link                          |        |         |
 | 7  | <script>hgFunc('seed(x)    ','Random seed            ');</script>     | Int                         | L                    | link                          |        |         |
 | 8  | <script>hgFunc('flip(x)    ','Convert a dict to a table and vice versa');</script>   | Dict, Table  | Table or Dict        | link                          |        | Y        |
@@ -211,7 +211,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 | No.| Function                                                                | Type of Arg(s)\*            | Type of Value            | Details                      | Status | Parallel |
 | :-:| :---------------------------------------------------------------------- | :-------------------------- | :----------------------- | :--------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('append(x,y)    ','Append to a list          ');</script>| (Basic, List; Basic, List)  | Basic or List            | [link](builtin/append.md)    |&#10004;| Y        |
+| 1  | <script>hgFunc('append(x,y)    ','Append to a list          ');</script>| Various                     | Various                  | [link](builtin/append.md)    |&#10004;| Y        |
 | 2  | <script>hgFunc('like(x,y)      ','Patten x matches y        ');</script>| (String; String)            | B                        | [link](builtin/like.md)      |P       | ?(CHECKE)|
 | 3  | <script>hgFunc('compress(x,y)  ','Compress on y based on x  ');</script>| (B;Basic)                   | Same as the 2nd argument | [link](builtin/compress.md)  |&#10004;| ?        |
 | 4  | <script>hgFunc('randk(x,k)     ','rand(x) in k times        ');</script>| Pending                     | Pending                  | link                         |        |         |
@@ -237,46 +237,43 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | No.| Function                                                                    | Type of Arg(s)\*    | Type of Value        | Details                           | Status | Parallel |
 | :-:| :-------------------------------------------------------------------------- | :------------------ | :------------------- | :-------------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;|         |
-| 2  | <script>hgFunc('enlist(x)            ','Return a list           ');</script>| Any                 | List                 | [link](builtin/list.md#enlist)    |&#10004;|         |
-| 3  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
-| 4  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
-| 5  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List)        | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
-| 6  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
-| 7  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
-| 8  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | link                              |&#10004;| N        |
-| 9  | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
+| 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Anyl,...)          | List                 | [link](builtin/list.md#list)      |&#10004;|         |
+| 3  | <script>hgFunc('enlist(x)            ','Return a list (1-cell)  ');</script>| Any                 | List                 | [link](builtin/list.md#enlist)    |&#10004;|         |
+| 4  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
+| 5  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List)        | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
+| 6  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
+| 7  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
+| 8  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
+| 9  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | link                              |&#10004;| N        |
+| 10 | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
 
 ## 4. Database Related
 
-| No.| Function                                                                | Type of Arg(s)\*            | Type of Value        | Details                      | Status | Parallel |
-| :-:| :---------------------------------------------------------------------- | :---------------------------| :------------------- | :--------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('enum          ','enum(variable, values)   ');</script>  | (Symol;Any)                 | Enum                 | [link](builtin/liter.md#enum)|&#10004;| N        |
-| 2  | <script>hgFunc('dict          ','dict(keys, values)       ');</script>  | (Any;Any)                   | Dict                 | link                         |&#10004;| ?        |
-| 3  | <script>hgFunc('table         ','table(col\_names, values)');</script>  | (List;Column)               | Table                | link                         |&#10004;| ?        |
-| 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable               | link                         |&#10004;| N        |
-| 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List                 | link                         |&#10004;| ?(CHECKE)|
-| 6  | <script>hgFunc('values        ','                         ');</script>  | Pending                     | Pending              | link                         |&#10004;| N        |
-| 7  | <script>hgFunc('meta          ','                         ');</script>  | Pending                     | Pending              | link                         |        |         |
-| 8  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various              | link                         |&#10004;| N        |
-| 9  | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable        | link                         |&#10004;| N        |
-| 10 | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various              | link                         |&#10004;| Y        |
-| 11 | <script>hgFunc('datetime\_add(x,y,m) ','Datetime add      ');</script>  | (Date;Int;Sym)              | Date                 | [link](date.md#datetime-add) |&#10004;| Y        |
-| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Datetime sub      ');</script>  | (Date;Int;Sym)              | Date                 | [link](date.md#datetime-sub) |        |         |
+| No.| Function                                                                | Type of Arg(s)\*            | Type of Value        | Details                           | Status | Parallel |
+| :-:| :---------------------------------------------------------------------- | :---------------------------| :------------------- | :-------------------------------: | :----- | :------: |
+| 1  | <script>hgFunc('enum          ','enum(key, value)         ');</script>  | (Basic;Basic),(list;list)   | Enum                 | [link](builtin/advanced.md#enum)  |&#10004;| N        |
+| 2  | <script>hgFunc('dict          ','dict(keys, values)       ');</script>  | (Any;Any)                   | Dict                 | [link](builtin/advanced.md#dict)  |&#10004;| ?        |
+| 3  | <script>hgFunc('table         ','table(col\_names, values)');</script>  | (List;Column)               | Table                | [link](builtin/advanced.md#table) |&#10004;| ?        |
+| 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable               | [link](builtin/advanced.md#ktable)|&#10004;| N        |
+| 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List                 | [link](builtin/dbhelper.md#keys)  |&#10004;| ?(CHECKE)|
+| 6  | <script>hgFunc('values        ','Return value part        ');</script>  | Various                     | Various              | [link](builtin/dbhelper.md#values)|&#10004;| N        |
+| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table                | [link](builtin/dbhelper.md#meta)  |        |         |
+| 8  | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various              | [link](builtin/dbhelper.md#fetch) |&#10004;| Y        |
+| 9  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various              | [link](builtin/dbhelper.md#column_value)|&#10004;| N        |
+| 10 | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable        | [link](builtin/dbhelper.md#load_table)  |&#10004;| N        |
+| 11 | <script>hgFunc('datetime\_add(x,y,m) ','Date time add     ');</script>  | (Calendar;Int;Sym)          | Calendar             | [link](builtin/date.md#datetime-add) |&#10004;| Y        |
+| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Date time sub     ');</script>  | (Calendar;Int;Sym)          | Calendar             | [link](builtin/date.md#datetime-sub) |        |         |
+| 13 | <script>hgFunc('join\_index   ','General join index       ');</script>  | (func;Real;Real)            | List                 | [link](builtin/join.md#join_index)   |&#10004;| ?        |
 
-## 5. Indexing
+## 5. Misc
 
-| No.| Function                                                                | Type of Arg(s)\*   | Type of Value        | Details                            | Status | Parallel |
-| :-:| :---------------------------------------------------------------------- | :----------------- | :------------------- | :--------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('index(x,y)     ','List indexing (x[y])    ');</script>  | Various            | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
-| 2  | <script>hgFunc('index\_a(x,y,m)','List indexing assignment');</script>  | BasicA[Int]=BasicB | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
-
-## 6. Others
-
-| No.| Function                                                             | Type of Arg(s)\*   | Type of Value        | Details                            | Status | Parallel |
-| :-:| :------------------------------------------------------------------- | :----------------- | :------------------- | :--------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('load\_csv ','Load a csv file             ');</script>| String             | Table                | link                               |&#10004;| N        |
-| 2  | <script>hgFunc('print     ','Output                      ');</script>| Any                | Long (exit code)     | link                               |        | N        |
-| 3  | <script>hgFunc('format(x) ','Format output (print(str(x))');</script>| Any                | String               | link                               |        | N        |
-
+| No.| Function                                                                     | Type of Arg(s)\*     | Type of Value        | Details                            | Status | Parallel |
+| :-:| :--------------------------------------------------------------------------- | :------------------- | :------------------- | :--------------------------------: | :----- | :------: |
+| 1  | <script>hgFunc('index(x,y)       ','List indexing (x[y])        ');</script> | Various              | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
+| 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
+| 3  | <script>hgFunc('load\_csv        ','Load a csv file             ');</script> | String               | Table                | link                               |&#10004;| N        |
+| 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | Long (exit code)     | link                               |        | N        |
+| 5  | <script>hgFunc('format(x)        ','Format output (print(str(x))');</script> | Any                  | String               | link                               |        | N        |
+| 6  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
 
 

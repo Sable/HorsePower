@@ -2,6 +2,7 @@
 
 extern Prog *root;
 extern int yylineno;
+const char FN_DEFAULT[] = "default";
 
 Prog *makeProg(List *module_list){
     Prog *p  = NEW(Prog);
@@ -40,23 +41,31 @@ Node *makeNodeKind(Node *d, Kind k){
     n->lineno   = yylineno;
     return n;
 }
+
 // non-terminals
 
-Node *makeNodeModule(Node *name, List *body){
+Node *makeNodeModule(Node *name, Node *content){
+    content->val.module.name = name?name:makeNodeID((char*)FN_DEFAULT); // DefaultName
+    //saveModule(content);
+    return content;
+}
+
+Node *makeNodeModuleContent(List *body){
     Node *n     = NEW(Node);
     n->kind     = moduleK;
-    n->val.module.name = name;
-    n->val.module.body = body;
+    n->val.module.name   = NULL;
+    n->val.module.body   = body;
     n->lineno   = yylineno;
     return n;
 }
 
-Node *makeNodeModuleMethod(Node *name, Node *type, List *stmt){
+Node *makeNodeModuleMethod(Node *name, List *param, Node *type, List *stmt){
     Node *n     = NEW(Node);
     n->kind     = methodK;
-    n->val.method.name = name;
-    n->val.method.type = type;
-    n->val.method.list = stmt;
+    n->val.method.name  = name;
+    n->val.method.type  = type;
+    n->val.method.param = param;
+    n->val.method.list  = stmt;
     n->lineno   = yylineno;
     return n;
 }
@@ -183,7 +192,7 @@ Node *makeNodeType(pType typ){
 }
 
 char *TypeNames[] = {
-    "bool", "i8", "i16", "i32", "i64", "f32", "f64", "char", "complex", "sym", "str",
+    "bool", "i16", "i32", "i64", "f32", "f64", "char", "complex", "sym", "str",
     "m", "d", "z", "u", "v", "t",
     "table", "ktable", "list", "enum"
 };
@@ -247,4 +256,14 @@ Node *makeNodeConstDate(int value){
 Node *makeNodeParamExpr(List *param_list){
     return makeListKind(param_list, paramExprK);
 }
+
+Node *makeNodeNameType(Node *name, Node *type){
+    Node *n     = NEW(Node);
+    n->kind     = nameTypeK;
+    n->val.nameType.name = name;
+    n->val.nameType.type = type;
+    n->lineno   = yylineno;
+    return n;
+}
+
 

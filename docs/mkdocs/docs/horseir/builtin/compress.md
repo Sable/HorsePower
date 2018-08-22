@@ -2,7 +2,9 @@
 
 ### Description
 
-`compress(bool_vector, values)`
+```no-highlight
+compress(boolean_vector, values)
+```
 
 - select from values based on the boolean vector (true values)
 - the boolean vector and values have the same length

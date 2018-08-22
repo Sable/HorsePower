@@ -12,7 +12,6 @@ High-level
 
 ```no-highlight
 Real  , Real   -> bool
-char  , char   -> bool
 sym   , sym    -> bool
 str   , str    -> bool
 month , month  -> bool

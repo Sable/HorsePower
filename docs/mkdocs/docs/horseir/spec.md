@@ -97,10 +97,6 @@ HorseIR only uses the ASCII charset.
 id ::= [a-zA-Z_][a-zA-Z0-9_]*
 ```
 
-### 1.7 Semicolons
-
-A semicolon must be found at the end of a statement.
-
 ## 2. Parser
 
 ### 2.1 Program structure
@@ -118,17 +114,36 @@ is allowed to declare two methods with the same name in different namespace.
 
 <u>Conventions</u>
 
+<dl>
+    <dt>module</dt>
+    <dd>zero or more methods and global variables</dd>
+    
+    <dt>method</dt>
+    <dd>zero or more parameters and local variables</dd>
+
+    <dt>entry method</dt>
+    <dd>the method <u>main</u> defines the entry of a program</dt>
+
+    <dt>global variable</dt>
+    <dd>declaration must be placed inside a module</dd>
+</dl>
+
+*Note:* If there is no module declaration top of a method, this method is
+included into a default module (i.e. the method name <u>default</u>).
+
+<!--
 - A **module** has zero or more methods and global variables
 - A **method** has zero or more parameters and local variables
 - A **gloabl variable** declaration must be placed inside a module
 - An **entry method** `main` defines the entry of a program
 - If there is no module declaration top of a method, this method is included into a default module (i.e. `default`)
+-->
 
 <u>Sample</u>
 
 ```no-highlight
 def default{      // a module 'default'
-    import Builtin;
+    import Builtin.*;
     def main(){   // an entry method
     }
 }
@@ -294,6 +309,9 @@ kt:ktable = @ktable(t0,t1); // t0 and t1 are tables
 
 ### 2.4 Statements
 
+!!! note "Semicolon"
+    A semicolon must be found at the end of a statement.
+
 #### Empty statements
 
 Support.
@@ -391,7 +409,7 @@ Basics
 
 - [Names](naming.md)
 - [Types](types.md)
-- [Date time](date.md)
+- [Date time](builtin/date.md)
 - [Built-in functions](functions.md)
 
 Database operations
