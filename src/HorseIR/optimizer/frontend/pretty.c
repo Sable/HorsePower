@@ -4,6 +4,9 @@ int depth;
 static bool withAttr = true;
 static bool toC      = false;
 
+#define BUFF_SIZE 10240
+static char buff[BUFF_SIZE];
+
 #define comma ','
 #define nospace 0
 
@@ -14,10 +17,12 @@ static bool toC      = false;
 #define printFloat(b,n)  SP(b,"%g", n->val.floatS)
 #define printInt(b,n)    SP(b,"%d", n->val.intS)
 #define printString(b,n) SP(b,"\"%s\"", n->val.strS)
-#define printComp(b,n)   SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
+#define printComp1(b,n)  SP(b,"%s",n->val.compoundID.name2)
+#define printComp2(b,n)  SP(b,"%s.%s" , n->val.compoundID.name1, n->val.compoundID.name2)
+#define printComp(b,n)   {if(n->val.compoundID.name1)printComp2(b,n);else printComp1(b,n);}
 #define printDate(b,n)   {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
 #define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else printSymCommon(b,n->val.charS);}
-#define printFunc(b,n)   echo(b,n->val.idS)
+#define printFunc(b,n)   prettyNodeBuff(b,n->val.nodeS)
 
 #define printPlainList(b,n)  {L x=countList(n->val.listS); \
                               if(x>1)printChar('('); prettyListBuff(b, n->val.listS, comma); if(x>1)printChar(')');}
@@ -254,9 +259,6 @@ void prettyNodeBuff2C(char *b, Node *n){
     toC = false;
 }
 
-#define BUFF_SIZE 10240
-static char buff[BUFF_SIZE];
-
 void prettyNode(Node *n){
     buff[0]=0;
     prettyNodeBuff(buff, n);
@@ -290,6 +292,6 @@ void prettyProg(Prog *root){
     printBanner("Pretty Printer");
     depth = 0;
     prettyListBuff(buff, root->module_list, nospace);
-    P(buff);
+    P("%s\n", buff);
 }
 

@@ -6,16 +6,16 @@ module default{
     a2:? = @load_table(`lineitem:sym);
     // customer
     c00:? = check_cast(@column_value(a0,`c_mktsegment:sym   ), sym );
-    c01:? = check_cast(@column_value(a0,`c_custkey:sym      ), i32 );
+    c01:? = check_cast(@column_value(a0,`c_custkey:sym      ), i64 );
     // orders
     c10:? = check_cast(@column_value(a1,`o_orderdate:sym    ), d   );
-    c11:? = check_cast(@column_value(a1,`o_shippriority:sym ), i32 );
-    c12:? = check_cast(@column_value(a1,`o_custkey:sym      ), enum); //i32
-    c13:? = check_cast(@column_value(a1,`o_orderkey:sym     ), i32 );
+    c11:? = check_cast(@column_value(a1,`o_shippriority:sym ), i64 );
+    c12:? = check_cast(@column_value(a1,`o_custkey:sym      ), enum); //i64
+    c13:? = check_cast(@column_value(a1,`o_orderkey:sym     ), i64 );
     // lineitem
     c20:? = check_cast(@column_value(a2,`l_orderkey:sym     ), enum);
-    c21:? = check_cast(@column_value(a2,`l_extendedprice:sym), f32 );
-    c22:? = check_cast(@column_value(a2,`l_discount:sym     ), f32 );
+    c21:? = check_cast(@column_value(a2,`l_extendedprice:sym), f64 );
+    c22:? = check_cast(@column_value(a2,`l_discount:sym     ), f64 );
     c23:? = check_cast(@column_value(a2,`l_shipdate:sym     ), d   );
     // custkey: c_ (key) and o_ (fkey)
     t0_0:? = @eq(c00, `"BUILDING":sym); // k_mask
@@ -34,8 +34,8 @@ module default{
     t1_1:? = @compress(t1_0, c20);
     t1_2:? = @fetch(t1_1);
     t1_3:? = @join_index(@eq, t0_8, t1_2);
-    t1_4:? = @index(t1_3, 0:i32);
-    t1_5:? = @index(t1_3, 1:i32);
+    t1_4:? = @index(t1_3, 0:i64);
+    t1_5:? = @index(t1_3, 1:i64);
     t1_6:? = @index(t1_2, t1_5 ); // l_orderkey
     t1_7:? = @index(t0_9, t1_4 ); // o_orderdate
     t1_8:? = @index(t0_10, t1_4 );// o_shippriority
@@ -44,7 +44,7 @@ module default{
     t1_11:? = @index(t1_9, t1_5);  // l_extendedprice
     t1_12:? = @index(t1_10, t1_5); // l_discount
     // materialize
-    t2_0:? = @minus(1:i32, t1_12);
+    t2_0:? = @minus(1:i64, t1_12);
     t2_1:? = @mul(t1_11, t2_0);    // revenue
     // group
     t3_0:? = @list(t1_6, t1_7, t1_8);

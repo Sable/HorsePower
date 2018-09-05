@@ -8,6 +8,7 @@ extern "C" {
 /* all types */ 
 typedef bool       B;
 typedef char       C,*S,*G;
+typedef int8_t     J;
 typedef int16_t    H;
 typedef int32_t    I,M,D,U,W,T;
 typedef long long  L,Q,Z;
@@ -27,6 +28,7 @@ typedef struct node_value{
     L typ,len; G g;
     union{
         B b;   //boolean   1  byte
+        J j;   //small     1  byte
         H h;   //short     2  bytes
         I i32; //int       4  bytes
         L i64; //long      8  bytes
@@ -57,7 +59,7 @@ typedef struct list_table{
     V table;
 }ListT0, *ListT;
 
-#include "h_global_type.h"
+#include "h_type.h"
 
 /* macros */ 
 #define DOI(n, x) {for(L i=0,i2=n;i<i2;i++)x;}
@@ -65,6 +67,7 @@ typedef struct list_table{
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;} 
 
 #define DOIa(n, x) {for(L i=1,i2=n;i<i2;i++)x;}
+#define DOJa(n, x) {for(L j=1,j2=n;j<j2;j++)x;}
 
 /* parallel DOI */
 #define STRINGIFY(x) #x

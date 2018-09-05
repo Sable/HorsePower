@@ -63,6 +63,7 @@ static int getVarShortByName(char *name, char *rtnShort){
     ShapeNode *sn = in->shape;
     switch(k){
         case  boolT: strcpy(rtnShort, "vB"); break;
+        case   i32T: strcpy(rtnShort, "vI"); break;
         case   i64T: strcpy(rtnShort, "vL"); break;
         case   f32T: strcpy(rtnShort, "vF"); break;
         case   f64T: strcpy(rtnShort, "vE"); break;
@@ -70,7 +71,8 @@ static int getVarShortByName(char *name, char *rtnShort){
         case  charT: strcpy(rtnShort, "vC"); break;
         case   symT: strcpy(rtnShort, "vQ"); break;
         case   strT: strcpy(rtnShort, "vS"); break;
-        default: printInfoNode(in); EP("type %d not supported yet.\n", k);
+        case  dateT: strcpy(rtnShort, "vD"); break;
+        default: printInfoNode(in); EP("type %s not supported yet.\n", getpTypeName(k));
     }
     return 0;
 }
@@ -80,22 +82,25 @@ static char getTypeCodeByName(char *name){
     pType k = in->type;
     ShapeNode *sn = in->shape;
     switch(k){
-        case  boolT: return 'B'; break;
-        case   i64T: return 'L'; break;
-        case   f32T: return 'F'; break;
-        case   f64T: return 'E'; break;
-        case monthT: return 'M'; break;
-        case  charT: return 'C'; break;
-        case   symT: return 'Q'; break;
-        case   strT: return 'S'; break;
-        case  dateT: return 'D'; break;
-        default: printInfoNode(in); EP("[getTypeCodeByName] type %d not supported yet.\n", k);
+        case  boolT: return 'B';
+        case   i32T: return 'I';
+        case   i64T: return 'L';
+        case   f32T: return 'F';
+        case   f64T: return 'E';
+        case monthT: return 'M';
+        case  charT: return 'C';
+        case   symT: return 'Q';
+        case   strT: return 'S';
+        case  dateT: return 'D';
+        default:
+              printInfoNode(in);
+              EP("type %s not supported yet.\n", getpTypeName(k));
     }
     return 0;
 }
 
 static S phNameString(char *invc, char **targ, char *lval, char **rval, int n){
-    char tmp[99]; SP(tmp, "%s((V []){", invc);
+    char tmp[999]; SP(tmp, "%s((V []){", invc);
     DOI(n, {if(i>0)strcat(tmp,","); strcat(tmp,targ[i]);})
     SP(tmp+strlen(tmp),"},%s,(V []){",lval);
     DOI(n, {if(i>0)strcat(tmp,","); strcat(tmp,rval[i]);})
@@ -484,11 +489,21 @@ static void genPattern4(PatternTree *ptree){
     setAllChainVisited(ptree);
 }
 
+static void genPattern5(PatternTree *ptree){
+    // TODO: add code template for this pattern
+}
+
+/*
+ * Planned
+ *   P5 -> q2
+ *   P6 -> q3
+ */
 static void genPattern(PatternTree *ptree, I pid){
     //P("gen pattern pid = %d\n", pid);
     switch(pid){
         case 3: genPattern3(ptree); break;
         case 4: genPattern4(ptree); break;
+        case 5: genPattern5(ptree); break; // q2
         default: EP("Pattern not supported yet: %d\n", pid);
     }
 }
@@ -548,6 +563,13 @@ static PatternTree *createFP4(){
     return rt;
 }
 
+static PatternTree *createFP5(){
+    PatternTree *rt = initPatternTree("raze", NULL, 1);
+    rt->child[0] = initPatternTree("each", "min", 1);
+    rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
+    return rt;
+}
+
 /* main */
 
 static void analyzeChainList(ChainList *list){
@@ -559,6 +581,8 @@ static void analyzeChainList(ChainList *list){
     PatternTree *fp4 = createFP4();
     //prettyPatternTree(fp4); P("\n");
     findPattern(list, fp4, 4);
+    PatternTree *fp5 = createFP5();
+    findPattern(list, fp5, 5);
     // clean up
     revokePatternTree(fp3);
     revokePatternTree(fp4);
@@ -566,7 +590,7 @@ static void analyzeChainList(ChainList *list){
 
 /* entry */
 void analyzePeephole(){
-    printBanner("Peephole");
+    printBanner("FP: Loop fusion with patterns");
     //printChainList();
     analyzeChainList(chain_list);
     //printChainList();

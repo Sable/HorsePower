@@ -1,7 +1,7 @@
 #include "../global.h"
 
 // The two numbers below must be the same as intp.c's
-#define MonFuncSize 58
+#define MonFuncSize 60
 #define DyaFuncSize 35
 
 extern I qid; // ../main.c
@@ -12,10 +12,11 @@ extern PeepholeNode PhList[99];
 extern I            PhTotal;
 static I lineNo = 0;
 static I depth = 0;
+static I totalDefs = 0;
 
 char *monFnName[] = {
     "pfnAbs", "pfnNeg", "pfnCeil", "pfnFloor", "pfnRound", "pfnConj", "pfnRecip", "pfnSignum", "pfnPi"  , "pfnNot" ,
-    "pfnLog", "pfnExp", "pfnTrigCos", "pfnTrigSin", "pfnTrigTan", "pfnTrigAcos", "pfnTrigAsin", "pfnTrigAtan", "pfnHyperCosh", "pfnHyperSinh",
+    "pfnLog", "pfnLog2", "pfnLog10", "pfnExp", "pfnTrigCos", "pfnTrigSin", "pfnTrigTan", "pfnTrigAcos", "pfnTrigAsin", "pfnTrigAtan", "pfnHyperCosh", "pfnHyperSinh",
     "pfnHyperTanh", "pfnHyperAcosh", "pfnHyperAsinh", "pfnHyperAtanh",
     "pfnDate", "pfnDateYear", "pfnDateMonth", "pfnDateDay",
     "pfnTime", "pfnTimeHour", "pfnTimeMinute", "pfnTimeSecond", "pfnTimeMill",
@@ -38,18 +39,18 @@ char *dyaFnName[] = {
 #define genStmt(n, stmt) {genIndent(); FP(outF,"PROFILE(%3d, %-3s, ",lineNo++,n); stmt; FP(outF,");\n");}
 #define genOther(stmt) {genIndent(); stmt;}
 
-static void compileMon(S f, S n, S *p){
+static void genMon(S f, S n, S *p){
     genStmt(n, FP(outF, "%s(%s, %s)",f,n,p[0]))
 }
-static void compileDya(S f, S n, S *p){
+static void genDya(S f, S n, S *p){
     genStmt(n, FP(outF, "%s(%s, %s, %s)",f,n,p[0],p[1]))
 }
 
-static void compileAny(S f, S n, S *p, L tot){
-    genStmt(n, {FP(outF, "%s(%s, %lld, {",f,n,tot); DOI(tot, {if(i>0)FP(outF," ,");FP(outF, "%s", p[i]);}) FP(outF, "})");})
+static void genAny(S f, S n, S *p, L tot){
+    genStmt(n, {FP(outF, "%s(%s, %lld, (V []){",f,n,tot); DOI(tot, {if(i>0)FP(outF," ,");FP(outF, "%s", p[i]);}) FP(outF, "})");})
 }
 
-static void compileIndexA(S n, S *p){
+static void genIndexA(S n, S *p){
     genStmt(n, FP(outF, "pfnIndexA(%s, %s, %s)",p[0],p[1],p[2]))
 }
 
@@ -74,26 +75,28 @@ void getRealFuncName(S func, S x){
     else if(!strcmp(x, "avg"))   strcpy(func, "pfnAvg");
     else if(!strcmp(x, "len"))   strcpy(func, "pfnLen");
     else if(!strcmp(x, "unique"))strcpy(func, "pfnUnique");
-    else func[0]=0;
+    else if(!strcmp(x, "eq"))    strcpy(func, "pfnEq");
+    else if(!strcmp(x, "min"))   strcpy(func, "pfnMin");
+    else { EP("Func. not supported: %s\n", x); }
 }
 
-static void compileEachDya(S f, S n, S *p){
+static void genStmtArg3(S f, S n, S *p){
     char func[99];
     fetchFuncName(p[0], func);
     getRealFuncName(func, func);
-    if(func[0]==0)
-        EP("[compileEachDya] add more func %s\n", func);
     genStmt(n, FP(outF, "%s(%s,%s,%s,%s)",f,n,p[1],p[2],func))
 }
 
-static void compileEachMon(S f,S n, S *p){
+static void genStmtArg2(S f,S n, S *p){
     char func[99];
     fetchFuncName(p[0], func);
     getRealFuncName(func, func);
-    if(func[0]==0)
-        EP("[compileEachMon] add more func %s\n", func);
     genStmt(n, FP(outF, "%s(%s,%s,%s)",f,n,p[1],func))
 }
+
+#define genEachMon genStmtArg2
+#define genEachDya genStmtArg3
+#define genJoinIndex genStmtArg3
 
 static void genAssignment(S n, S p){
     genStmt(n, FP(outF, "copyV(%s, %s)",n,p))
@@ -110,7 +113,8 @@ static char *stringifyLiteral(V x){
             caseD {I d=xd;SP(t,"initLiteralDate(%d%02d%02d)", d/10000,d%10000/100,d%100);} break;
             caseF SP(t,"initLiteralF32(%g)", xf); break;
             caseE SP(t,"initLiteralF64(%g)", xe); break;
-            default: EP("adding more types: %d\n",xp);
+            caseC SP(t,"initLiteralChar('%c')", xc); break;
+            default: EP("Adding more types: %s\n",getpTypeName(xp));
         }
     }
     else {
@@ -128,7 +132,7 @@ static char *stringifyLiteral(V x){
             caseS str+=SP(str,"initLiteralStrVector(%lld, (S []){",xn);
                   DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"\"%s\"",xS(i));})
                   str+=SP(str, "})"); break;
-            default: EP("adding more types: %d (%lld)\n",xp,xn);
+            default: EP("Adding more types: %s (%lld)\n",getpTypeName(xp),xn);
         }
     }
     return strdup(t);
@@ -172,28 +176,30 @@ static void processStmtCommon(S writeName, Node *expr){
         if(fIndex < eachF) {
             if(valence == 1){
                 //P("monadic %d\n", fIndex);
-                return compileMon(monFnName[fIndex], writeName, params);
+                return genMon(monFnName[fIndex], writeName, params);
             }
             else if(valence == 2){
                 //P("dyadic %d\n", fIndex-ltF);
-                return compileDya(dyaFnName[fIndex-ltF], writeName, params);
+                return genDya(dyaFnName[fIndex-ltF], writeName, params);
             }
             else EP("valence == %d not expected\n", valence);
         }
         else {
+            //P("three: %s, %s, %s\n", params[0],params[1],params[2]);
             switch(fIndex){
                 /* monadic */
-                case        eachF: return compileEachMon("pfnEach"   , writeName, params); break;
+                case        eachF: return genEachMon("pfnEach"   , writeName, params);
                 /* dyadic */
-                case        enumF: return compileDya("pfnEnum"       , writeName, params); break;
-                case       tableF: return compileDya("pfnTable"      , writeName, params); break;
-                case   eachRightF: return compileEachDya("pfnEachRight" , writeName, params); break;
-                case    eachLeftF: return compileEachDya("pfnEachLeft"  , writeName, params); break;
-                case    eachItemF: return compileEachDya("pfnEachItem"  , writeName, params); break;
-                case      indexAF: return compileIndexA(writeName, params); break;
+                case        enumF: return genDya("pfnEnum"       , writeName, params);
+                case       tableF: return genDya("pfnTable"      , writeName, params);
+                case   eachRightF: return genEachDya("pfnEachRight" , writeName, params);
+                case    eachLeftF: return genEachDya("pfnEachLeft"  , writeName, params);
+                case    eachItemF: return genEachDya("pfnEachItem"  , writeName, params);
+                case      indexAF: return genIndexA(writeName, params);
                 /* anyadic */
-                case        listF: return compileAny("pfnList"       , writeName, params, np); break;
-                default: EP("pending ... for %d\n", fIndex);
+                case        listF: return genAny("pfnList"       , writeName, params, np);
+                case   joinIndexF: return genJoinIndex("pfnJoinIndex", writeName, params);
+                default: EP("pending ... for %s\n", getpFuncName(fIndex));
             }
         }
     }
@@ -214,7 +220,7 @@ static void compileSimpleStmt(Node *stmt){
 }
 
 static void compileCastStmt(Node *stmt){
-    char *writeName = fetchName(stmt->val.simpleStmt.name);
+    char *writeName = fetchName(stmt->val.castStmt.name);
     Node *expr = stmt->val.castStmt.expr;
     processStmtCommon(writeName, expr);
 }
@@ -262,6 +268,33 @@ static int findTargInList(OptNode *list, S s, I n){
     DOI(n, if(!strcmp(s, list[i].targ)) return i) R -1;
 }
 
+static void collectName(char *name){
+    if(totalDefs==0) genIndent();
+    P("V %-6s = allocNode(); ", name);
+    totalDefs++;
+    if(totalDefs == 4){ totalDefs = 0; FP(outF,"\n"); }
+}
+
+static int collectSingleDef(Node *stmt){
+    switch(stmt->kind){
+        case simpleStmtK: collectName(fetchName(stmt->val.simpleStmt.name)); break;
+        case   castStmtK: collectName(fetchName(stmt->val.castStmt.name)); break;
+    }
+    return 0;
+}
+
+static void collectDefs(ChainList *list){
+    totalDefs = 0;
+    ChainList *p = list;
+    while(p->next){
+        p = p->next;
+        Node *stmt = p->chain->cur;
+        collectSingleDef(stmt);
+        if(instanceOf(stmt, returnK)) break;
+    }
+    if(totalDefs!=0) FP(outF,"\n");
+}
+
 static bool identifyStmt(Node *stmt, OptNode *OptList, I OptTotal){
     S writeName = NULL;
     if(instanceOf(stmt, simpleStmtK))
@@ -291,6 +324,7 @@ static void compileChain(ChainList *list){
     depth++; lineNo = 0; 
     genMethodHead();
     genOther(FP(outF, "E elapsed=0;\n"));
+    collectDefs(list);
     genOther(FP(outF, "tic;\n"));
     while(p->next){
         p = p->next;

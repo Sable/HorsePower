@@ -149,6 +149,8 @@ FILE* openFile(S s){
 void loadItem(V x, L k, L typ, S s){
     switch(typ){
         caseB xB(k) = atoi(s); break;
+        caseJ xJ(k) = atoi(s); break;
+        caseH xH(k) = atoi(s); break;
         caseI xI(k) = atoi(s); break;
         caseL xL(k) = atol(s); break;
         caseF xF(k) = atof(s); break;
@@ -204,6 +206,7 @@ L getTypeStr(L x, S buff){
     L c = 0;
     switch(x){
         caseB c=SP(buff, "bool");          break;
+        caseJ c=SP(buff, "i8");            break;
         caseH c=SP(buff, "i16");           break;
         caseI c=SP(buff, "i32");           break;
         caseL c=SP(buff, "i64");           break;
@@ -267,6 +270,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
     L c = 0;
     switch(xp){
         caseB c=SP(buff, "%d"   , xB(k));   break;
+        caseJ c=SP(buff, "%d"   , xJ(k));   break;
         caseH c=SP(buff, "%d"   , xH(k));   break;
         caseI c=SP(buff, "%d"   , xI(k));   break;
         caseL c=SP(buff, "%lld" , xL(k));   break;
@@ -617,6 +621,7 @@ void serializeV(V x, FILE *fp){
     // check if size > 1 => xg is not NULL
     switch(xp){
         caseB serializeBasic(x, fp); break;
+        caseJ serializeBasic(x, fp); break;
         caseH serializeBasic(x, fp); break;
         caseI serializeBasic(x, fp); break;
         caseL serializeBasic(x, fp); break;
@@ -687,6 +692,7 @@ void readSerializeV(V x, FILE *fp){
     initV(x, xp, xn);
     switch(xp){
         caseB readSerializeBasic(x, fp); break; 
+        caseJ readSerializeBasic(x, fp); break; 
         caseH readSerializeBasic(x, fp); break; 
         caseI readSerializeBasic(x, fp); break; 
         caseL readSerializeBasic(x, fp); break; 

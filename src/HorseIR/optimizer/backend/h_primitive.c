@@ -52,6 +52,7 @@ L pfnIndex(V z, V x, V y){
             #define INDEX_BASIC(p) case##p DOP(lenZ, v##p(z,i)=v##p(x,vL(y,i))) break
             switch(vp(x)){
                 INDEX_BASIC(B);
+                INDEX_BASIC(J);
                 INDEX_BASIC(H);
                 INDEX_BASIC(I);
                 INDEX_BASIC(L);
@@ -76,6 +77,7 @@ L pfnIndex(V z, V x, V y){
                 L k = 0;
                 switch(vp(y)){
                     caseB k = vb(y); break;
+                    caseJ k = vj(y); break;
                     caseH k = vh(y); break;
                     caseI k = vi(y); break;
                     caseL k = vl(y); break;
@@ -106,6 +108,7 @@ L pfnIndexA(V x, V y, V m){
                     if(isEqualLength(y,m)){
                         switch(vp(x)){
                             caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,i)) break;
+                            caseJ DOI(vn(y), vJ(x,vL(tempY,i))=vJ(tempM,i)) break;
                             caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,i)) break;
                             caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,i)) break;
                             caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,i)) break;
@@ -120,6 +123,7 @@ L pfnIndexA(V x, V y, V m){
                     else{
                         switch(vp(x)){
                             caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,0)) break;
+                            caseJ DOI(vn(y), vJ(x,vL(tempY,i))=vJ(tempM,0)) break;
                             caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,0)) break;
                             caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,0)) break;
                             caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,0)) break;
@@ -218,6 +222,7 @@ L pfnFetch(V z, V x){
         // P("2."); DOI(20, P(" %lld",vL(targ, vY(x,i)))) P("\n"); getchar();
         switch(typZ){
             caseB DOP(lenZ, vB(z,i)=vB(targ,vY(x,i))) break;
+            caseJ DOP(lenZ, vJ(z,i)=vJ(targ,vY(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=vH(targ,vY(x,i))) break;
             caseI DOP(lenZ, vI(z,i)=vI(targ,vY(x,i))) break;
             caseL DOP(lenZ, vL(z,i)=vL(targ,vY(x,i))) break;
@@ -299,6 +304,7 @@ L pfnIsValidBranch(V z, V x){
     if(isOne(x)){
         switch(xp){
             caseB t = xb; break;
+            caseJ t = 0!=xj; break;
             caseI t = 0!=xi; break;
             caseL t = 0!=xl; break;
             caseF t = 0!=xf; break; // precision ?
@@ -338,7 +344,7 @@ L pfnAbs(V z, V x){
         initV(z,vp(x),vn(x));  // Step 1: initialize z
         switch(vp(x)){         // Step 2: based on x
             caseB DOP(vn(x), vH(z,i)=vB(x,i))      break; //opt
-            caseC DOP(vn(x), vC(z,i)=ABS(vC(x,i))) break; //opt
+            caseJ DOP(vn(x), vJ(z,i)=ABS(vJ(x,i))) break; //opt
             caseH DOP(vn(x), vH(z,i)=ABS(vH(x,i))) break;
             caseI DOP(vn(x), vI(z,i)=ABS(vI(x,i))) break;
             caseL DOP(vn(x), vL(z,i)=ABS(vL(x,i))) break;
@@ -359,7 +365,7 @@ L pfnNeg(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){       
             caseB DOP(lenZ, vB(z,i)=NEG(vB(x,i))) break;
-            caseC DOP(lenZ, vC(z,i)=NEG(vC(x,i))) break;
+            caseJ DOP(lenZ, vJ(z,i)=NEG(vJ(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=NEG(vH(x,i))) break;
             caseI DOP(lenZ, vI(z,i)=NEG(vI(x,i))) break;
             caseL DOP(lenZ, vL(z,i)=NEG(vL(x,i))) break;
@@ -379,7 +385,7 @@ L pfnCeil(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
-            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
+            caseJ DOP(lenZ, vJ(z,i)=vJ(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
@@ -399,7 +405,7 @@ L pfnFloor(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
-            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
+            caseJ DOP(lenZ, vJ(z,i)=vJ(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
@@ -419,7 +425,7 @@ L pfnRound(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vB(z,i)=vB(x,i)) break; //merely copy (opt)
-            caseC DOP(lenZ, vC(z,i)=vC(x,i)) break;
+            caseJ DOP(lenZ, vJ(z,i)=vJ(x,i)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,i)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,i)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,i)) break;
@@ -439,7 +445,7 @@ static L pfnTrig(V z, V x, E (*fn_e)(E), F (*fn_f)(F)){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(x,i))) break;
-            caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(x,i))) break;
+            caseJ DOP(lenZ, vF(z,i)=(*fn_f)(vJ(x,i))) break;
             caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(x,i))) break;
             caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(x,i))) break;
             caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(x,i))) break;
@@ -521,7 +527,7 @@ L pfnRecip(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB {F t=0; recipSum(t,vB); DOP(lenZ, vF(z,i)=DIVDE(vB(x,i),t)); } break;
-            caseC {F t=0; recipSum(t,vC); DOP(lenZ, vF(z,i)=DIVDE(vC(x,i),t)); } break;
+            caseJ {F t=0; recipSum(t,vJ); DOP(lenZ, vF(z,i)=DIVDE(vJ(x,i),t)); } break;
             caseH {F t=0; recipSum(t,vH); DOP(lenZ, vF(z,i)=DIVDE(vH(x,i),t)); } break;
             caseI {F t=0; recipSum(t,vI); DOP(lenZ, vF(z,i)=DIVDE(vI(x,i),t)); } break;
             caseL {E t=0; recipSum(t,vL); DOP(lenZ, vE(z,i)=DIVDE(vL(x,i),t)); } break;
@@ -542,7 +548,7 @@ L pfnSignum(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vH(z,i)=vB(x,i))         break; //opt, no -1
-            caseC DOP(lenZ, vH(z,i)=SIGNUM(vC(x,i))) break;
+            caseJ DOP(lenZ, vH(z,i)=SIGNUM(vJ(x,i))) break;
             caseH DOP(lenZ, vH(z,i)=SIGNUM(vH(x,i))) break;
             caseI DOP(lenZ, vH(z,i)=SIGNUM(vI(x,i))) break;
             caseL DOP(lenZ, vH(z,i)=SIGNUM(vL(x,i))) break;
@@ -562,7 +568,7 @@ L pfnPi(V z, V x){
         initV(z,typZ,lenZ);
         switch(vp(x)){
             caseB DOP(lenZ, vF(z,i)=PIMUL(vB(x,i))) break;
-            caseC DOP(lenZ, vF(z,i)=PIMUL(vC(x,i))) break;
+            caseJ DOP(lenZ, vF(z,i)=PIMUL(vJ(x,i))) break;
             caseH DOP(lenZ, vF(z,i)=PIMUL(vH(x,i))) break;
             caseI DOP(lenZ, vF(z,i)=PIMUL(vI(x,i))) break;
             caseL DOP(lenZ, vE(z,i)=PIMUL(vL(x,i))) break;
@@ -592,7 +598,7 @@ static L pfnExpLog(V z, V x, E (*fn_e)(E), F (*fn_f)(F)){
         initV(z, typZ, vn(x));
         switch(xp){
             caseB DOP(xn, vF(z,i)=(*fn_f)(vB(x,i))) break;
-            caseC DOP(xn, vF(z,i)=(*fn_f)(vC(x,i))) break;
+            caseJ DOP(xn, vF(z,i)=(*fn_f)(vJ(x,i))) break;
             caseH DOP(xn, vF(z,i)=(*fn_f)(vH(x,i))) break;
             caseI DOP(xn, vF(z,i)=(*fn_f)(vI(x,i))) break;
             caseL DOP(xn, vE(z,i)=(*fn_e)(vL(x,i))) break;
@@ -626,8 +632,8 @@ L pfnSqrt(V z, V x){
 }
 
 L pfnLen(V z, V x){
-    P("len: x = %lld\n", xn);
-    printV2(x, 20);
+    //P("len: x = %lld\n", xn);
+    //printV2(x, 20);
     initV(z,H_L,1);
     vl(z)= isTable(x)?tableRow(x):vn(x);
     R 0;
@@ -648,7 +654,7 @@ L pfnFact(V z, V x){
         initV(z,H_L,xn);
         switch(xp){
             caseB DOP(xn, vL(z,i)=FACT(vB(x,i))) break;
-            caseC DOP(xn, vL(z,i)=FACT(vC(x,i))) break;
+            caseJ DOP(xn, vL(z,i)=FACT(vJ(x,i))) break;
             caseH DOP(xn, vL(z,i)=FACT(vH(x,i))) break;
             caseI DOP(xn, vL(z,i)=FACT(vI(x,i))) break;
             caseL DOP(xn, vL(z,i)=FACT(vL(x,i))) break;
@@ -665,6 +671,7 @@ L pfnReverse(V z, V x){
         initV(z,typZ,lenZ);
         switch(typZ){
             caseB DOP(lenZ, vB(z,i)=vB(x,lenZ-i-1)) break;
+            caseJ DOP(lenZ, vJ(z,i)=vJ(x,lenZ-i-1)) break;
             caseH DOP(lenZ, vH(z,i)=vH(x,lenZ-i-1)) break;
             caseI DOP(lenZ, vI(z,i)=vI(x,lenZ-i-1)) break;
             caseL DOP(lenZ, vL(z,i)=vL(x,lenZ-i-1)) break;
@@ -738,6 +745,7 @@ L pfnSum(V z, V x){
         initV(z,typZ,1);
         switch(vp(x)){
             caseB {L t=0; DOP(vn(x), t+=vB(x,i), reduction(+:t)) vl(z)=t;} break;
+            caseJ {L t=0; DOP(vn(x), t+=vJ(x,i), reduction(+:t)) vl(z)=t;} break;
             caseH {L t=0; DOP(vn(x), t+=vH(x,i), reduction(+:t)) vl(z)=t;} break;
             caseI {L t=0; DOP(vn(x), t+=vI(x,i), reduction(+:t)) vl(z)=t;} break;
             caseL {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vl(z)=t;} break;
@@ -787,6 +795,7 @@ L pfnReduce(V z, V x, L op){
             initV(z,typZ,lenZ);
             switch(typZ){
                 caseB REDUCELINE(B,op,x); break;
+                caseJ REDUCELINE(J,op,x); break;
                 caseH REDUCELINE(H,op,x); break;
                 caseI REDUCELINE(I,op,x); break;
                 caseL REDUCELINE(L,op,x); break;
@@ -914,6 +923,7 @@ L pfnToList(V z, V x){
         initV(z,H_G,xn);
         switch(xp){
             caseB DOP(xn, {V t=vV(z,i); initV(t,xp,1); vb(t)=vB(x,i);}) break;
+            caseJ DOP(xn, {V t=vV(z,i); initV(t,xp,1); vj(t)=vJ(x,i);}) break;
             caseH DOP(xn, {V t=vV(z,i); initV(t,xp,1); vh(t)=vH(x,i);}) break;
             caseI DOP(xn, {V t=vV(z,i); initV(t,xp,1); vi(t)=vI(x,i);}) break;
             caseL DOP(xn, {V t=vV(z,i); initV(t,xp,1); vl(t)=vL(x,i);}) break;
@@ -957,6 +967,8 @@ L pfnGroup(V z, V x){
     if(isOrdered(x)){
         if(H_DEBUG) P("Ordered data found in pfnGroup\n");
         order_list = NULL;
+    }
+    else if(isInteger(x)){ // H_L
     }
     else {
         DOP(lenZ,vB(y,i)=1)
@@ -1016,7 +1028,7 @@ L pfnCompare(V z, V x, V y, L op){
             if(isOne(x)) {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,0),vB(tempY,i))) break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,0),vC(tempY,i))) break;
+                    caseJ DOP(lenZ, vB(z,i)=COMP(op,vJ(tempX,0),vJ(tempY,i))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,0),vH(tempY,i))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,0),vI(tempY,i))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
@@ -1027,7 +1039,7 @@ L pfnCompare(V z, V x, V y, L op){
             else if(isOne(y)) {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,0))) break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,i),vC(tempY,0))) break;
+                    caseJ DOP(lenZ, vB(z,i)=COMP(op,vJ(tempX,i),vJ(tempY,0))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,0))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,0))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
@@ -1038,7 +1050,7 @@ L pfnCompare(V z, V x, V y, L op){
             else {
                 switch(typMax){
                     caseB DOP(lenZ, vB(z,i)=COMP(op,vB(tempX,i),vB(tempY,i))) break;
-                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(tempX,i),vC(tempY,i))) break;
+                    caseJ DOP(lenZ, vB(z,i)=COMP(op,vJ(tempX,i),vJ(tempY,i))) break;
                     caseH DOP(lenZ, vB(z,i)=COMP(op,vH(tempX,i),vH(tempY,i))) break;
                     caseI DOP(lenZ, vB(z,i)=COMP(op,vI(tempX,i),vI(tempY,i))) break;
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
@@ -1163,6 +1175,7 @@ L pfnArith(V z, V x, V y, L op){
         if(isOne(x)) {
             switch(typMax){
                 caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,0),vB(tempY,i))) break;
+                caseJ DOP(lenZ, vJ(z,i)=ARITH2(op,vJ(tempX,0),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,0),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,0),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,0),vL(tempY,i))) break;
@@ -1174,6 +1187,7 @@ L pfnArith(V z, V x, V y, L op){
         else if(isOne(y)) {
             switch(typMax){
                 caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,0))) break;
+                caseJ DOP(lenZ, vJ(z,i)=ARITH2(op,vJ(tempX,i),vJ(tempY,0))) break;
                 caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,0))) break;
                 caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,0))) break;
                 caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,0))) break;
@@ -1185,6 +1199,7 @@ L pfnArith(V z, V x, V y, L op){
         else {
             switch(typMax){
                 caseB DOP(lenZ, vB(z,i)=ARITH2(op,vB(tempX,i),vB(tempY,i))) break;
+                caseJ DOP(lenZ, vJ(z,i)=ARITH2(op,vJ(tempX,i),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=ARITH2(op,vH(tempX,i),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=ARITH2(op,vI(tempX,i),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=ARITH2(op,vL(tempX,i),vL(tempY,i))) break;
@@ -1289,7 +1304,7 @@ L pfnPowerLog(V z, V x, V y, E (*fn_e)(E,E), F (*fn_f)(F,F)){
         if(isOne(x)){
             switch(typMax){
                 caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,0),vB(tempY,i))) break;
-                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,0),vC(tempY,i))) break;
+                caseJ DOP(lenZ, vF(z,i)=(*fn_f)(vJ(tempX,0),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,0),vH(tempY,i))) break;
                 caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,0),vI(tempY,i))) break;
                 caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,0),vL(tempY,i))) break;
@@ -1301,7 +1316,7 @@ L pfnPowerLog(V z, V x, V y, E (*fn_e)(E,E), F (*fn_f)(F,F)){
         else if(isOne(y)){
             switch(typMax){
                 caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,i),vB(tempY,0))) break;
-                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,i),vC(tempY,0))) break;
+                caseJ DOP(lenZ, vF(z,i)=(*fn_f)(vJ(tempX,i),vJ(tempY,0))) break;
                 caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,i),vH(tempY,0))) break;
                 caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,i),vI(tempY,0))) break;
                 caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,i),vL(tempY,0))) break;
@@ -1313,7 +1328,7 @@ L pfnPowerLog(V z, V x, V y, E (*fn_e)(E,E), F (*fn_f)(F,F)){
         else {
             switch(typMax){
                 caseB DOP(lenZ, vF(z,i)=(*fn_f)(vB(tempX,i),vB(tempY,i))) break;
-                caseC DOP(lenZ, vF(z,i)=(*fn_f)(vC(tempX,i),vC(tempY,i))) break;
+                caseJ DOP(lenZ, vF(z,i)=(*fn_f)(vJ(tempX,i),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vF(z,i)=(*fn_f)(vH(tempX,i),vH(tempY,i))) break;
                 caseI DOP(lenZ, vF(z,i)=(*fn_f)(vI(tempX,i),vI(tempY,i))) break;
                 caseL DOP(lenZ, vE(z,i)=(*fn_e)(vL(tempX,i),vL(tempY,i))) break;
@@ -1357,7 +1372,7 @@ L pfnMod(V z, V x, V y){
         if(isOne(x)){
             switch(typMax){
                 caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,0),vB(tempY,i))) break;
-                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,0),vC(tempY,i))) break;
+                caseJ DOP(lenZ, vJ(z,i)=MODI(vJ(tempX,0),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,0),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,0),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,0),vL(tempY,i))) break;
@@ -1369,7 +1384,7 @@ L pfnMod(V z, V x, V y){
         else if(isOne(y)){
             switch(typMax){
                 caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,i),vB(tempY,0))) break;
-                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,i),vC(tempY,0))) break;
+                caseJ DOP(lenZ, vJ(z,i)=MODI(vJ(tempX,i),vJ(tempY,0))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,0))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,0))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,0))) break;
@@ -1381,7 +1396,7 @@ L pfnMod(V z, V x, V y){
         else {
             switch(typMax){
                 caseB DOP(lenZ, vH(z,i)=MODI(vB(tempX,i),vB(tempY,i))) break;
-                caseC DOP(lenZ, vC(z,i)=MODI(vC(tempX,i),vC(tempY,i))) break;
+                caseJ DOP(lenZ, vJ(z,i)=MODI(vJ(tempX,i),vJ(tempY,i))) break;
                 caseH DOP(lenZ, vH(z,i)=MODI(vH(tempX,i),vH(tempY,i))) break;
                 caseI DOP(lenZ, vI(z,i)=MODI(vI(tempX,i),vI(tempY,i))) break;
                 caseL DOP(lenZ, vL(z,i)=MODI(vL(tempX,i),vL(tempY,i))) break;
@@ -1412,6 +1427,7 @@ L pfnCompress(V z, V x, V y){
         if(k != lenZ){
             switch(typZ){
                 caseB DOT(lenX, if(vB(x,i))vB(z,offset[tid]++)=vB(y,i)) break;
+                caseJ DOT(lenX, if(vB(x,i))vJ(z,offset[tid]++)=vJ(y,i)) break;
                 caseH DOT(lenX, if(vB(x,i))vH(z,offset[tid]++)=vH(y,i)) break;
                 caseI DOT(lenX, if(vB(x,i))vI(z,offset[tid]++)=vI(y,i)) break;
                 caseL DOT(lenX, if(vB(x,i))vL(z,offset[tid]++)=vL(y,i)) break;
@@ -1453,7 +1469,7 @@ L pfnIndexOf(V z, V x, V y){
             initV(z,H_L,lenZ);
             switch(typMax){
                 caseB INDEXOF(B, z, tempX, tempY); break;
-                caseC INDEXOF(C, z, tempX, tempY); break;
+                caseJ INDEXOF(J, z, tempX, tempY); break;
                 caseH INDEXOF(H, z, tempX, tempY); break;
                 caseI INDEXOF(I, z, tempX, tempY); break;
                 caseL INDEXOF(L, z, tempX, tempY); break;
@@ -1503,12 +1519,14 @@ L pfnAppend(V z, V x, V y){
         CHECKE(promoteValue(tempY, y, typMax));
         initV(z,typMax,lenZ);
         switch(typMax){
-            caseB DOP(vn(x),vB(z,i)=vB(x,i)) DOP(vn(y),vB(z,c+i)=vB(y,i)) break;
-            caseH DOP(vn(x),vH(z,i)=vB(x,i)) DOP(vn(y),vH(z,c+i)=vH(y,i)) break;
-            caseI DOP(vn(x),vI(z,i)=vB(x,i)) DOP(vn(y),vI(z,c+i)=vI(y,i)) break;
-            caseL DOP(vn(x),vL(z,i)=vB(x,i)) DOP(vn(y),vL(z,c+i)=vL(y,i)) break;
-            caseF DOP(vn(x),vF(z,i)=vB(x,i)) DOP(vn(y),vF(z,c+i)=vF(y,i)) break;
-            caseE DOP(vn(x),vE(z,i)=vB(x,i)) DOP(vn(y),vE(z,c+i)=vE(y,i)) break;
+            caseB DOP(vn(x),vB(z,i)=vB(tempX,i)) DOP(vn(y),vB(z,c+i)=vB(tempY,i)) break;
+            caseJ DOP(vn(x),vJ(z,i)=vJ(tempX,i)) DOP(vn(y),vJ(z,c+i)=vJ(tempY,i)) break;
+            caseH DOP(vn(x),vH(z,i)=vH(tempX,i)) DOP(vn(y),vH(z,c+i)=vH(tempY,i)) break;
+            caseI DOP(vn(x),vI(z,i)=vI(tempX,i)) DOP(vn(y),vI(z,c+i)=vI(tempY,i)) break;
+            caseL DOP(vn(x),vL(z,i)=vL(tempX,i)) DOP(vn(y),vL(z,c+i)=vL(tempY,i)) break;
+            caseF DOP(vn(x),vF(z,i)=vF(tempX,i)) DOP(vn(y),vF(z,c+i)=vF(tempY,i)) break;
+            caseE DOP(vn(x),vE(z,i)=vE(tempX,i)) DOP(vn(y),vE(z,c+i)=vE(tempY,i)) break;
+            default: R E_NOT_IMPL;
         }
         R 0;
     }
@@ -1733,9 +1751,13 @@ L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
 
 L pfnEachRight(V z, V x, V y, FUNC2(foo)){
     if(isList(y)){
+        P("len(x) = %lld, len(y) = %lld\n", vn(x),vn(y));
         L lenZ = vn(y);
         initV(z,H_G,lenZ);
         // P("pfnEachRight: size(z) = %lld\n", lenZ);
+        // L minVal = 999999, maxVal = -1;
+        // DOI(lenZ, {V tt=vV(y,i); if(minVal>vn(tt)) minVal=vn(tt); if(maxVal<vn(tt)) maxVal=vn(tt);})
+        // P("lenZ = %lld, minVal = %lld, maxVal = %lld\n", lenZ, minVal, maxVal); getchar();
         DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))  // seg fault after DOI -> DOP
     }
     else {
@@ -1764,6 +1786,7 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
             caseB {
                 switch(typMax){
                     caseB DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vB(tempX,i),vB(tempY,j)))}) break;
+                    caseJ DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vJ(tempX,i),vJ(tempY,j)))}) break;
                     caseH DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vH(tempX,i),vH(tempY,j)))}) break;
                     caseI DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vI(tempX,i),vI(tempY,j)))}) break;
                     caseL DOI(lenX, {V t=vV(z,i); DOJ(lenY, vB(t,j)=OuterOp(op,vL(tempX,i),vL(tempY,j)))}) break;
@@ -1818,6 +1841,7 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
                     caseB {
                         switch(typMax){
                             caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j)))c++)); break;
+                            caseJ DOI(lenX, DOJ(lenY, if(OuterOp(op,vJ(tempX,i),vJ(tempY,j)))c++)); break;
                             caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j)))c++)); break;
                             caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j)))c++)); break;
                             caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j)))c++)); break;
@@ -1837,6 +1861,7 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
                     caseB {
                         switch(typMax){
                             caseB DOI(lenX, DOJ(lenY, if(OuterOp(op,vB(tempX,i),vB(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
+                            caseJ DOI(lenX, DOJ(lenY, if(OuterOp(op,vJ(tempX,i),vJ(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
                             caseH DOI(lenX, DOJ(lenY, if(OuterOp(op,vH(tempX,i),vH(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
                             caseI DOI(lenX, DOJ(lenY, if(OuterOp(op,vI(tempX,i),vI(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
                             caseL DOI(lenX, DOJ(lenY, if(OuterOp(op,vL(tempX,i),vL(tempY,j))){vL(vV(z,0),c)=i;vL(vV(z,1),c)=j;c++;})); break;
@@ -2062,13 +2087,14 @@ L pfnVector(V z, V x, V y){
         L typZ = vp(y), lenZ = 0, lenY = vn(y);
         switch(vp(x)){
             caseB lenZ=xb; break;
+            caseJ lenZ=xj; break;
             caseH lenZ=xh; break;
             caseI lenZ=xi; break;
             caseL lenZ=xl; break;
         }
         initV(z,typZ,lenZ);
         switch(typZ){
-            RHO(B); RHO(H); RHO(I); RHO(L);
+            RHO(B); RHO(J); RHO(H); RHO(I); RHO(L);
             RHO(F); RHO(E); RHO(X);
             RHO(S); RHO(Q); RHO(C);
             RHO(M); RHO(D); RHO(Z); RHO(U); RHO(W); RHO(T);
@@ -2196,375 +2222,163 @@ L pfnSubString(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-/* handcraft loop fusion optimization */
-
-L optLoopFusionQ1_all(V s19, V s20, V s21, V s22, V s23, V s24, V s25, L r0, V t0, V t1, V t3, V t6, V g5, V g6){
-    initV(s19,H_E,r0);
-    initV(s20,H_E,r0);
-    initV(s21,H_E,r0);
-    initV(s22,H_E,r0);
-    initV(s23,H_E,r0);
-    initV(s24,H_E,r0);
-    initV(s25,H_E,r0);
-    DOJ(r0, {V t=vV(g5,j); E c0=0; E c1=0; E c2=0; E c3=0; E c4=0; \
-            DOP(vn(t), \
-                {L k=vL(g6, vL(t,i)); c0+=vE(t3, k); c1+=vE(t0, k); c2+=vE(t1, k);\
-                 E val=vE(t0,k)*(1-vE(t1,k)); c3+=val; c4+=val*(1+vE(t6,k)); \
-                }, \
-                reduction(+:c0,c1,c2,c3,c4)) \
-            vE(s19,j)=c0; vE(s23,j)=c0/vn(t); \
-            vE(s20,j)=c1; vE(s24,j)=c1/vn(t); \
-            vE(s25,j)=c2/vn(t); \
-            vE(s21,j)=c3; vE(s22,j)=c4; })
-
-     // DO(vn(t), {L k=vL(g6, vL(t,j)); c0+=vE(t3, k); c1+=vE(t0, k); c2+=vE(t1, k);}) \
-     vE(s19,i)=c0; vE(s23,i)=c0/vn(t); \
-     vE(s20,i)=c1; vE(s24,i)=c1/vn(t); \
-     vE(s25,i)=c2/vn(t); })
-    R 0;
-}
-
-L optLoopFusionQ1_1(V z0, V z1, L r0, V t3, V g6, V g5){
-    initV(z0,H_E,r0);
-    initV(z1,H_E,r0);
-    DOP(r0, {V t=vV(g5,i); E c=0; DOJ(vn(t), c+=vE(t3, vL(g6, vL(t,j)))) \
-            vE(z0,i)=c; vE(z1,i)=c/vn(t); })
-    R 0;
-}
-
-L optLoopFusionQ1_2(V z, L r0, V g6, V g5){
-    initV(z,H_L,r0);
-    DOP(r0, vL(z,i)=vn(vV(g5,i)))
-    R 0;
-}
-
-L optLoopFusionQ1_3(V z, L r0, V t1, V g6, V g5){
-    initV(z,H_E,r0);
-    DOP(r0,{V t=vV(g5,i); E c=0; DOJ(vn(t), c+=vE(t1, vL(g6, vL(t,j)))) vE(z,i)=c/vn(t);})
-    R 0;
-}
-
-// opt inner loop
-L optLoopFusionQ1_4(V z0, V z1, L r0, V t0, V t1, V t6, V g6, V g5){
-    initV(z0,H_E,r0);
-    initV(z1,H_E,r0);
-    DOJ(r0,{V t=vV(g5,j); E c0=0; E c1=0; \
-           DOP(vn(t), \
-               {L k=vL(g6, vL(t,i)); E val=vE(t0,k)*(1-vE(t1,k)); c0+=val; c1+=val*(1+vE(t6,k));},
-               reduction(+:c0,c1)) \
-           vE(z0,j)=c0; vE(z1,j)=c1;})
-    R 0;
-}
-
-L optLoopFusionQ3_1(V z, L r0, V p8, V g3){
-    initV(z,H_E,r0);
-    DOP(r0, { V t=vV(g3,i); E c=0; DOJ(vn(t), c+=vE(p8, vL(t,j))) vE(z,i)=c; })
-    R 0;
-}
-
-L optLoopFusionQ4_1(V z, L r0, V t2, V t3, V w2, V w3){
-    initV(z, H_B, r0);
-    memset(sB(z), 0, sizeof(B)*r0);
-    DOP(vn(w2), if(vD(t2,i)<vD(t3,i))vB(z,vL(w2,i))=1)
-    R 0;
-}
+/* handcraft optimization for UDFs: BS and PR */
 /* status: on */
-L optLoopFusionQ6_1(V z, L r0, V t1, V t2, V t3){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=((vE(t1,i)>=0.05&&vE(t1,i)<=0.07)\
-        &&(vD(t2,i)>=19940101&&vD(t2,i)<19950101)\
-        &&(vE(t3,i)<24)))
-    R 0;
-}
+// L optLoopFusionBS_1(V z, L r0, V volatility, V time){
+//     initV(z,H_E,r0);
+//     DOP(r0, vE(z,i)=vE(volatility,i)*sqrt(vE(time,i)))
+//     R 0;
+// }
+// 
+// L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility){
+//     initV(z,H_E,r0);
+//     DOP(r0, vE(z,i)=log(vE(sptprice,i)/vE(strike,i)) \
+//         + vE(time,i)*(vE(rate,i) + vE(volatility,i)*vE(volatility,i)*0.5))
+//     R 0;
+// }
+// 
+// L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
+//     initV(z,H_B,r0);
+//     if(id <= 3){
+//         DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
+//     }
+//     else if(id <= 6){
+//         DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
+//     }
+//     else {
+//         DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
+//     }
+//     R 0;
+// }
+// 
+// L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice){
+//     initV(z,H_B,r0);
+//     // DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
+//     DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
+//     R 0;
+// }
+// 
+// L optLoopFusionPR_1(V m0, V m1, L r0, V web){
+//     initV(m0, H_L, r0);
+//     initV(m1, H_L, r0);
+//     memset(sL(m1), 0 , sizeof(L)*r0);
+//     DOJ(r0, {V x=vV(web,j); {L t=0; DOI(vn(x), t+=vL(x,i)) vL(m0,j)=t;\
+//              DOI(vn(x), vL(m1,i)+=vL(x,i))} })
+//     // DOJ(r0, {V x=vV(web,j); {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vL(m0,j)=t;\
+//     //          DOI(vn(x), vL(m1,i)+=vL(x,i))} }) // slow with DOP
+//     R 0;
+// }
+// 
+// L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id){
+//     L *cnt = (L*)malloc(sizeof(L)*r0); memset(cnt, 0, sizeof(L)*r0);
+//     L *indx= (L*)malloc(sizeof(L)*r0); memset(indx,0, sizeof(L)*r0);
+//     DOI(r0, { DOJ(r0, cnt[j] +=vL(vV(web,i),j)) } )
+//     L tot = 0;
+//     if(id<=3) {
+//         DOI(r0, if(cnt[i]>70)indx[tot++]=i)
+//     }
+//     else if(id<=6){
+//         DOI(r0, if(cnt[i]<=70)indx[tot++]=i)
+//     }
+//     else {
+//         DOI(r0, if(cnt[i]>54)indx[tot++]=i)
+//     }
+//     initV(m0, H_L, tot);
+//     initV(m1, H_L, tot);
+//     initV(m2, H_L, tot);
+//     DOI(tot, vL(m0,i)=indx[i])
+//     DOI(tot, vL(m2,i)=cnt[indx[i]])
+//     DOI(tot, {V x=vV(web,indx[i]); {L t=0; DOJ(vn(x), t+=vL(x,j)) vL(m1,i)=t;}})
+//     free(cnt);
+//     free(indx);
+//     R 0;
+// }
+// 
+// 
+// L optLoopFusionPR_4(V w5, L r0, V w2){
+//     initV(w5, H_L, r0);
+//     DOI(r0, vL(w5,vL(w2,i))=i)
+//     R 0;
+// }
+// 
+// L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
+//     initV(w8, H_B, r0);
+//     if(id <= 3){
+//         DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<100)
+//     }
+//     else {
+//         // DOI(r0, vB(w8,i)=vL(w1,i)<=70&&vL(w5,i)<100)
+//         DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=100)
+//     }
+//     R 0;
+// }
+// 
+// L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
+//     initV(m2, H_L, r0);
+//     DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
+//     R 0;
+// }
 
-/* status: off */
-L optLoopFusionQ6_2(V z, L r0, V t15, V t0, V t1){
-    V temp = allocNode();
-    initV(temp,H_E,r0);
-    // memset(vS(temp),0,sizeof(E)*r0);
-    DOP(r0, vE(temp,i)=vE(t0,i)*vE(t1,i))
-    CHECKE(pfnCompress(z,t15,temp));
-    R 0;
-}
-
-/* similar to optLoopFusionQ14_3 */
-L optLoopFusionQ6_3(V t16, V t17, V t15, V t0, V t1){
-    if(!isEqualLength(t15,t0) || !isEqualLength(t15,t1)) R E_LENGTH;
-    L lenX = vn(t15);
-    L k    = 0;
-    L lenZ = 0, parZ[H_CORE], offset[H_CORE];
-    memset(parZ  , 0, sizeof(L)*H_CORE);
-    memset(offset, 0, sizeof(L)*H_CORE);
-    CHECKE(getNumOfNonZero(t15,parZ));
-    DOI(H_CORE, lenZ += parZ[i])
-    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
-    initV(t16,vp(t0),lenZ); // H_E
-    initV(t17,vp(t1),lenZ); // H_E
-    DOT(lenX, if(vB(t15,i)){L c=offset[tid]++; \
-                          vE(t16,c)=vE(t0,i); vE(t17,c)=vE(t1,i);})
-    R 0;
-}
-
-L optLoopFusionQ14_1(V z, L r0, V t0){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=(vD(t0,i)>=19950901 && vD(t0,i)<19951001))
-    R 0;
-}
-
-L optLoopFusionQ14_2(V z, L r0, V p2, V p4, V p5){
-    initV(z,H_E,r0);
-    DOP(r0, vE(z,i)=vB(p4,i)?vE(p2,i)*vE(p5,i):0)
-    R 0;
-}
-
-L optLoopFusionQ14_3(V w4, V p2, V p3, V w3, V t1, V t4, V t5){
-    if(!isEqualLength(w3,t1) || !isEqualLength(w3,t4) || !isEqualLength(w3,t5)) R E_LENGTH;
-    L lenX = vn(w3);
-    L k    = 0;
-    L lenZ = 0, parZ[H_CORE], offset[H_CORE];
-    memset(parZ  , 0, sizeof(L)*H_CORE);
-    memset(offset, 0, sizeof(L)*H_CORE);
-    CHECKE(getNumOfNonZero(w3,parZ));
-    DOI(H_CORE, lenZ += parZ[i])
-    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
-    initV(w4,vp(t1),lenZ); // H_L
-    initV(p2,vp(t4),lenZ); // H_E
-    initV(p3,vp(t5),lenZ); // H_E
-    DOT(lenX, if(vB(w3,i)){L c=offset[tid]++; \
-                          vL(w4,c)=vL(t1,i); vE(p2,c)=vE(t4,i); vE(p3,c)=vE(t5,i); })
-    R 0;
-}
-
-L optLoopFusionQ16_1(V z, L r0, V g3, V g6){
-    initV(z,H_L,r0);
-    DOP(r0, {V t=vV(g6,i); L len=vn(t); L tot=0; B f[199]={0}; \
-            DOJ(len, if(!f[j]){ \
-                DOK(len, if(k!=j && vL(g3,vL(t,j)) == vL(g3,vL(t,k))) f[k]=1) \
-                f[j]=1; tot++;}) vL(z,i)=tot; })
-    R 0;
-}
-
-L optLoopFusionQ17_1(V z, L r0, V t2, V c2, V t3, V c3){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=(vQ(t2,i)==vq(c2) && vQ(t3,i)==vq(c3)))
-    R 0;
-}
-
-L optLoopFusionQ19_1(V z, L r0, V t3, V w0, V w1){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)=vB(w0,i)&&vB(w1,i)&&(vL(t3,i)>=1)&&(vL(t3,i)<=15))
-    R 0;
-}
-
-L optLoopFusionQ19_2(V z, L r0, V d9, V c9, V d11, V d12, V r1){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
-                     && vB(r1,i) \
-                     &&vE(d12,i)>=1&&vE(d12,i)<=11 \
-                     &&vL(d11,i)>=1&&vL(d11,i)<=5 ))
-    R 0;
-}
-
-L optLoopFusionQ19_3(V z, L r0, V d9, V c9, V d11, V d12, V k1){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
-                     && vB(k1,i) \
-                     &&vE(d12,i)>=10&&vE(d12,i)<=20 \
-                     &&vL(d11,i)>=1&&vL(d11,i)<=10 ))
-    R 0;
-}
-
-L optLoopFusionQ19_4(V z, L r0, V d9, V c9, V d11, V d12, V h1){
-    initV(z,H_B,r0);
-    DOP(r0, vB(z,i)= (vQ(d9,i)==vq(c9) \
-                     && vB(h1,i) \
-                     &&vE(d12,i)>=20&&vE(d12,i)<=30 \
-                     &&vL(d11,i)>=1&&vL(d11,i)<=15 ))
-    R 0;
-}
-
-
-/* similar to optLoopFusionQ14_3 */
-L optLoopFusionQ19_5(V d1, V d7, V p2, V t4){
-    if(!isEqualLength(p2,t4)) R E_LENGTH;
-    L lenX = vn(p2);
-    L k    = 0;
-    L lenZ = 0, parZ[H_CORE], offset[H_CORE];
-    memset(parZ  , 0, sizeof(L)*H_CORE);
-    memset(offset, 0, sizeof(L)*H_CORE);
-    CHECKE(getNumOfNonZero(p2,parZ));
-    DOI(H_CORE, lenZ += parZ[i])
-    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
-    initV(d1,H_L,lenZ); // vp(t4)
-    initV(d7,H_L,lenZ); // where
-    DOT(lenX, if(vB(p2,i)){L c=offset[tid]++; \
-                          vL(d1,c)=vL(t4,i); vL(d7,c)=i; })
-    R 0;
-}
-
-L optLoopFusionQ22_1(V w3, L r0, V w1, V t0, V sub2){
-    initV(w3,H_B,r0);
-    DOI(r0, vB(w3,i)=vB(w1,i)&&(vE(t0,i)>vE(sub2,0)))
-    R 0;
-}
-
-/* status: on */
-L optLoopFusionBS_1(V z, L r0, V volatility, V time){
-    initV(z,H_E,r0);
-    DOP(r0, vE(z,i)=vE(volatility,i)*sqrt(vE(time,i)))
-    R 0;
-}
-
-L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility){
-    initV(z,H_E,r0);
-    DOP(r0, vE(z,i)=log(vE(sptprice,i)/vE(strike,i)) \
-        + vE(time,i)*(vE(rate,i) + vE(volatility,i)*vE(volatility,i)*0.5))
-    R 0;
-}
-
-L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
-    initV(z,H_B,r0);
-    if(id <= 3){
-        DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
-    }
-    else if(id <= 6){
-        DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
-    }
-    else {
-        DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
-    }
-    R 0;
-}
-
-L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice){
-    initV(z,H_B,r0);
-    // DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
-    DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
-    R 0;
-}
-
-L optLoopFusionPR_1(V m0, V m1, L r0, V web){
-    initV(m0, H_L, r0);
-    initV(m1, H_L, r0);
-    memset(sL(m1), 0 , sizeof(L)*r0);
-    DOJ(r0, {V x=vV(web,j); {L t=0; DOI(vn(x), t+=vL(x,i)) vL(m0,j)=t;\
-             DOI(vn(x), vL(m1,i)+=vL(x,i))} })
-    // DOJ(r0, {V x=vV(web,j); {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vL(m0,j)=t;\
-    //          DOI(vn(x), vL(m1,i)+=vL(x,i))} }) // slow with DOP
-    R 0;
-}
-
-L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id){
-    L *cnt = (L*)malloc(sizeof(L)*r0); memset(cnt, 0, sizeof(L)*r0);
-    L *indx= (L*)malloc(sizeof(L)*r0); memset(indx,0, sizeof(L)*r0);
-    DOI(r0, { DOJ(r0, cnt[j] +=vL(vV(web,i),j)) } )
-    L tot = 0;
-    if(id<=3) {
-        DOI(r0, if(cnt[i]>70)indx[tot++]=i)
-    }
-    else if(id<=6){
-        DOI(r0, if(cnt[i]<=70)indx[tot++]=i)
-    }
-    else {
-        DOI(r0, if(cnt[i]>54)indx[tot++]=i)
-    }
-    initV(m0, H_L, tot);
-    initV(m1, H_L, tot);
-    initV(m2, H_L, tot);
-    DOI(tot, vL(m0,i)=indx[i])
-    DOI(tot, vL(m2,i)=cnt[indx[i]])
-    DOI(tot, {V x=vV(web,indx[i]); {L t=0; DOJ(vn(x), t+=vL(x,j)) vL(m1,i)=t;}})
-    free(cnt);
-    free(indx);
-    R 0;
-}
-
-
-L optLoopFusionPR_4(V w5, L r0, V w2){
-    initV(w5, H_L, r0);
-    DOI(r0, vL(w5,vL(w2,i))=i)
-    R 0;
-}
-
-L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
-    initV(w8, H_B, r0);
-    if(id <= 3){
-        DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<100)
-    }
-    else {
-        // DOI(r0, vB(w8,i)=vL(w1,i)<=70&&vL(w5,i)<100)
-        DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=100)
-    }
-    R 0;
-}
-
-L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
-    initV(m2, H_L, r0);
-    DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
-    R 0;
-}
-
-/* q18: bucket group by */
-
-L pfnGroupBucket(V z, V x){
-    if(isInteger(x)){
-        L lenX = -1;
-        DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-        // P("lenX 1 = %lld\n", lenX);
-        L *temp  = (L*)malloc(sizeof(L)*lenX);
-        L *count = (L*)malloc(sizeof(L)*lenX);
-        L *maps  = (L*)malloc(sizeof(L)*lenX);
-        memset(temp , 0, sizeof(L)*lenX);
-        memset(count, 0, sizeof(L)*lenX);
-        memset(maps ,-1, sizeof(L)*lenX);
-        DOI(vn(x), temp[vL(x,i)]++)
-        L cnt = 0;
-        DOI(lenX, cnt+= temp[i]!=0)
-        initV(z, H_N, 2);
-        V keys = getDictKeys(z);
-        V vals = getDictVals(z);
-        // P("size of keys: %lld\n", cnt);
-        initV(keys, H_L, cnt); cnt = 0;
-        DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
-        initV(vals, H_G, cnt);
-        DOI(vn(x), {L k=vL(x,i); V v0=vV(vals,maps[k]); if(count[k]==0) initV(v0,H_L,temp[k]); vL(v0,count[k]++)=i; })
-        free(temp);
-        free(count);
-        free(maps);
-        R 0;
-    }
-    else R E_DOMAIN;
-}
-
-
-L optLoopFusionQ18_1(V z, V x, V t1){
-    if(isInteger(x)){
-        L lenX = -1;
-        // lenX = vn(x);
-        DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-        // P("lenX 2 = %lld\n", lenX);
-        L *temp  = (L*)malloc(sizeof(L)*lenX);
-        L *maps  = (L*)malloc(sizeof(L)*lenX);
-        memset(temp , 0, sizeof(L)*lenX);
-        memset(maps ,-1, sizeof(L)*lenX);
-        DOI(vn(x), temp[vL(x,i)]++)
-        L cnt = 0;
-        DOI(lenX, cnt+= temp[i]!=0)
-        initV(z, H_N, 2);
-        V keys = getDictKeys(z);
-        V vals = getDictVals(z);
-        // P("size of keys: %lld\n", cnt);
-        initV(keys, H_L, cnt); cnt = 0;
-        DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
-        initV(vals, H_E, cnt);
-        memset(sE(vals), 0, sizeof(E)*cnt);  // clean before sum up
-        DOI(vn(x), {L k=vL(x,i); L c=maps[k]; vE(vals,c)+=vE(t1,i); })
-        free(temp);
-        free(maps);
-        R 0;
-    }
-    else R E_DOMAIN;
-}
+// /* q18: bucket group by */
+// L pfnGroupBucket(V z, V x){
+//     if(isInteger(x)){
+//         L lenX = -1;
+//         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
+//         // P("lenX 1 = %lld\n", lenX);
+//         L *temp  = (L*)malloc(sizeof(L)*lenX);
+//         L *count = (L*)malloc(sizeof(L)*lenX);
+//         L *maps  = (L*)malloc(sizeof(L)*lenX);
+//         memset(temp , 0, sizeof(L)*lenX);
+//         memset(count, 0, sizeof(L)*lenX);
+//         memset(maps ,-1, sizeof(L)*lenX);
+//         DOI(vn(x), temp[vL(x,i)]++)
+//         L cnt = 0;
+//         DOI(lenX, cnt+= temp[i]!=0)
+//         initV(z, H_N, 2);
+//         V keys = getDictKeys(z);
+//         V vals = getDictVals(z);
+//         // P("size of keys: %lld\n", cnt);
+//         initV(keys, H_L, cnt); cnt = 0;
+//         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
+//         initV(vals, H_G, cnt);
+//         DOI(vn(x), {L k=vL(x,i); V v0=vV(vals,maps[k]); if(count[k]==0) initV(v0,H_L,temp[k]); vL(v0,count[k]++)=i; })
+//         free(temp);
+//         free(count);
+//         free(maps);
+//         R 0;
+//     }
+//     else R E_DOMAIN;
+// }
+// 
+// 
+// L optLoopFusionQ18_1(V z, V x, V t1){
+//     if(isInteger(x)){
+//         L lenX = -1;
+//         // lenX = vn(x);
+//         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
+//         // P("lenX 2 = %lld\n", lenX);
+//         L *temp  = (L*)malloc(sizeof(L)*lenX);
+//         L *maps  = (L*)malloc(sizeof(L)*lenX);
+//         memset(temp , 0, sizeof(L)*lenX);
+//         memset(maps ,-1, sizeof(L)*lenX);
+//         DOI(vn(x), temp[vL(x,i)]++)
+//         L cnt = 0;
+//         DOI(lenX, cnt+= temp[i]!=0)
+//         initV(z, H_N, 2);
+//         V keys = getDictKeys(z);
+//         V vals = getDictVals(z);
+//         // P("size of keys: %lld\n", cnt);
+//         initV(keys, H_L, cnt); cnt = 0;
+//         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
+//         initV(vals, H_E, cnt);
+//         memset(sE(vals), 0, sizeof(E)*cnt);  // clean before sum up
+//         DOI(vn(x), {L k=vL(x,i); L c=maps[k]; vE(vals,c)+=vE(t1,i); })
+//         free(temp);
+//         free(maps);
+//         R 0;
+//     }
+//     else R E_DOMAIN;
+// }
 
 /*
  * two columns: (row 650K)

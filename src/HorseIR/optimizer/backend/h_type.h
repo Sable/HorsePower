@@ -1,28 +1,29 @@
-
 #define H_B 0
-#define H_H 1
-#define H_I 2
-#define H_L 3
-#define H_F 4
-#define H_E 5
-#define H_X 6
-#define H_C 7  //char
-#define H_Q 8  //sym
-#define H_S 9  //str
-#define H_M 10
-#define H_D 11
-#define H_Z 12
-#define H_U 13
-#define H_W 14
-#define H_T 15
-#define H_G 16 //list
-#define H_N 17 //dict
-#define H_Y 18 //enum
+#define H_J 1
+#define H_H 2
+#define H_I 3
+#define H_L 4
+#define H_F 5
+#define H_E 6
+#define H_X 7
+#define H_C 8  //char
+#define H_Q 9  //sym
+#define H_S 10 //str
+#define H_M 11
+#define H_D 12
+#define H_Z 13
+#define H_U 14
+#define H_W 15
+#define H_T 16
+#define H_G 17 //list
+#define H_N 18 //dict
+#define H_Y 19 //enum
 #define H_A 90 //table
 #define H_K 91 //ktable
 #define H_V 93 //value item
 
 #define caseB case H_B:
+#define caseJ case H_J:
 #define caseH case H_H:
 #define caseI case H_I:
 #define caseL case H_L:
@@ -49,6 +50,7 @@
 #define vn(x)  x->len
 
 #define vb(x)  x->b
+#define vj(x)  x->j
 #define vh(x)  x->h
 #define vi(x)  x->i32
 #define vl(x)  x->i64
@@ -69,6 +71,7 @@
 #define vg(x)  x->g
 
 #define sB(x) ((B*)(vg(x)))
+#define sJ(x) ((J*)(vg(x)))
 #define sH(x) ((H*)(vg(x)))
 #define sI(x) ((I*)(vg(x)))
 #define sL(x) ((L*)(vg(x)))
@@ -89,6 +92,7 @@
 #define sV(x) ((V )(vg(x)))
 
 #define vB(x,i) sB(x)[i]
+#define vJ(x,i) sJ(x)[i]
 #define vH(x,i) sH(x)[i]
 #define vI(x,i) sI(x)[i]
 #define vL(x,i) sL(x)[i]
@@ -113,6 +117,7 @@
 #define xn  vn(x)
 
 #define xb  vb(x)
+#define xj  vj(x)
 #define xh  vh(x)
 #define xi  vi(x)
 #define xl  vl(x)
@@ -131,6 +136,7 @@
 #define xg  vg(x)
 
 #define xB(k) vB(x,k)
+#define xJ(k) vJ(x,k)
 #define xH(k) vH(x,k)
 #define xI(k) vI(x,k)
 #define xL(k) vL(x,k)

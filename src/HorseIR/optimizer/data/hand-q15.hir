@@ -4,9 +4,9 @@ module default{
       // Create view: revenue0
       a0:? = @load_table(`lineitem:sym);
       c0:? = check_cast(@column_value(a0, `l_shipdate:sym     ),   d);
-      c1:? = check_cast(@column_value(a0, `l_suppkey:sym      ), i32);
-      c2:? = check_cast(@column_value(a0, `l_extendedprice:sym), f32);
-      c3:? = check_cast(@column_value(a0, `l_discount:sym     ), f32);
+      c1:? = check_cast(@column_value(a0, `l_suppkey:sym      ), i64);
+      c2:? = check_cast(@column_value(a0, `l_extendedprice:sym), f64);
+      c3:? = check_cast(@column_value(a0, `l_discount:sym     ), f64);
       t0:? = @geq(c0, 1996.01.01:d);
       t1:? = @lt(c0, 1996.04.01:d);
       t2:? = @and(t0, t1);
@@ -16,7 +16,7 @@ module default{
       g2:? = @values(g0);
       t4:? = @compress(t2, c2);
       t5:? = @compress(t2, c3);
-      t6:? = @minus(1:i32, t5);
+      t6:? = @minus(1:i64, t5);
       t7:? = @mul(t4, t6);
       t8:? = @each_right(@index,t7,g2);
       t9:? = @each(@sum, t8);
@@ -26,12 +26,12 @@ module default{
       t13:? = @list(t11, t10);
       t14:? = @table(t12, t13);
       // return t14;
-      c4:? = check_cast(@column_value(t14, `supplier_no:sym), i32);
-      c5:? = check_cast(@column_value(t14, `total_revenue:sym), f32);
+      c4:? = check_cast(@column_value(t14, `supplier_no:sym), i64);
+      c5:? = check_cast(@column_value(t14, `total_revenue:sym), f64);
       t15:? = @max(c5);
       t16:? = @eq(c5, t15);
       a1:? = @load_table(`supplier:sym);
-      c6:? = check_cast(@column_value(a1, `s_suppkey:sym), i32);
+      c6:? = check_cast(@column_value(a1, `s_suppkey:sym), i64);
       c7:? = check_cast(@column_value(a1, `s_name:sym   ), str);
       c8:? = check_cast(@column_value(a1, `s_address:sym), str);
       c9:? = check_cast(@column_value(a1, `s_phone:sym  ), str);
@@ -43,8 +43,8 @@ module default{
       t20:? = @member(t17, c6);
       t21:? = @compress(t20, c6);  // s_suppkey
       t22:? = @join_index(@eq, t19, t21);
-      t24:? = @index(t22, 0:i32);    // i32
-      t25:? = @index(t22, 1:i32);    // i32
+      t24:? = @index(t22, 0:i64);    // i64
+      t25:? = @index(t22, 1:i64);    // i64
       t26:? = @compress(t20, c7);
       t27:? = @compress(t20, c8);
       t28:? = @compress(t20, c9);

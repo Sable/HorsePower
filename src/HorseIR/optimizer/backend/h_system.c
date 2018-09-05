@@ -82,6 +82,7 @@ L copyByIndexSimple(V z, L p, V x, L q){
     else if(isTypeGroupBasic(vp(x))) {
         switch(vp(x)){
             caseB vB(z,p) = vB(x,q); break;
+            caseJ vJ(z,p) = vJ(x,q); break;
             caseH vH(z,p) = vH(x,q); break;
             caseI vI(z,p) = vI(x,q); break;
             caseL vL(z,p) = vL(x,q); break;
@@ -143,26 +144,28 @@ L promoteValue(V z, V x, L typMax){
     else{
         initV(z, typMax, xn); //opt?
         switch(vp(z)){
-            caseC {
+            caseJ {
                 switch(vp(x)){
-                    caseB DOP(xn, vC(z,i)=vB(x,i)) break;
+                    caseB DOP(xn, vJ(z,i)=vB(x,i)) break;
                 }
             } break;
             caseH {
                 switch(vp(x)){
                     caseB DOP(xn, vH(z,i)=vB(x,i)) break;
-                    caseC DOP(xn, vH(z,i)=vC(x,i)) break;
+                    caseJ DOP(xn, vH(z,i)=vJ(x,i)) break;
                 }
             } break;
             caseI {
                 switch(vp(x)){
                     caseB DOP(xn, vI(z,i)=vB(x,i)) break;
+                    caseJ DOP(xn, vI(z,i)=vJ(x,i)) break;
                     caseH DOP(xn, vI(z,i)=vH(x,i)) break;
                 }
             } break;
             caseL {
                 switch(vp(x)){
                     caseB DOP(xn, vL(z,i)=vB(x,i)) break;
+                    caseJ DOP(xn, vL(z,i)=vJ(x,i)) break;
                     caseH DOP(xn, vL(z,i)=vH(x,i)) break;
                     caseI DOP(xn, vL(z,i)=vI(x,i)) break;
                 }
@@ -170,6 +173,7 @@ L promoteValue(V z, V x, L typMax){
             caseF {
                 switch(vp(x)){
                     caseB DOP(xn, vF(z,i)=(F)vB(x,i)) break;
+                    caseJ DOP(xn, vF(z,i)=(F)vJ(x,i)) break;
                     caseH DOP(xn, vF(z,i)=(F)vH(x,i)) break;
                     caseI DOP(xn, vF(z,i)=(F)vI(x,i)) break;
                     caseL DOP(xn, vF(z,i)=(F)vL(x,i)) break;
@@ -178,6 +182,7 @@ L promoteValue(V z, V x, L typMax){
             caseE {
                 switch(vp(x)){
                     caseB DOP(xn, vE(z,i)=(E)vB(x,i)) break;
+                    caseJ DOP(xn, vE(z,i)=(E)vJ(x,i)) break;
                     caseH DOP(xn, vE(z,i)=(E)vH(x,i)) break;
                     caseI DOP(xn, vE(z,i)=(E)vI(x,i)) break;
                     caseL DOP(xn, vE(z,i)=(E)vL(x,i)) break;
@@ -187,6 +192,7 @@ L promoteValue(V z, V x, L typMax){
             caseX {
                 switch(vp(x)){
                     caseB DOP(xn, xCopy(vX(z,i),vB(x,i),0)) break;
+                    caseJ DOP(xn, xCopy(vX(z,i),vJ(x,i),0)) break;
                     caseH DOP(xn, xCopy(vX(z,i),vH(x,i),0)) break;
                     caseI DOP(xn, xCopy(vX(z,i),vI(x,i),0)) break;
                     caseL DOP(xn, xCopy(vX(z,i),vL(x,i),0)) break;
@@ -205,6 +211,7 @@ B checkZero(V x){
     #define NOTFOUND 0
     switch(xp){
         caseB DOI(xn, if(0==xB(i)) R FOUND); break;
+        caseJ DOI(xn, if(0==xJ(i)) R FOUND); break;
         caseH DOI(xn, if(0==xH(i)) R FOUND); break;
         caseI DOI(xn, if(0==xI(i)) R FOUND); break;
         caseL DOI(xn, if(0==xL(i)) R FOUND); break;
@@ -307,26 +314,34 @@ L fillRaze(V z, L *n0, V x){
         L n = *n0;
         switch(vp(z)){
              caseB DOI(xn, vB(z,n++)=vB(x,i)); break;
+             caseJ { switch(xp){
+                     caseB DOI(xn, vJ(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vJ(z,n++)=vH(x,i)); break; } } break;
              caseH { switch(xp){
                      caseB DOI(xn, vH(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vH(z,n++)=vJ(x,i)); break;
                      caseH DOI(xn, vH(z,n++)=vH(x,i)); break; } } break;
              caseI { switch(xp){
                      caseB DOI(xn, vI(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vI(z,n++)=vJ(x,i)); break;
                      caseH DOI(xn, vI(z,n++)=vH(x,i)); break;
                      caseI DOI(xn, vI(z,n++)=vI(x,i)); break; } } break;
              caseL { switch(xp){
                      caseB DOI(xn, vL(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vL(z,n++)=vJ(x,i)); break;
                      caseH DOI(xn, vL(z,n++)=vH(x,i)); break;
                      caseI DOI(xn, vL(z,n++)=vI(x,i)); break;
                      caseL DOI(xn, vL(z,n++)=vL(x,i)); break; } } break;
              caseF { switch(xp){
                      caseB DOI(xn, vF(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vF(z,n++)=vJ(x,i)); break;
                      caseH DOI(xn, vF(z,n++)=vH(x,i)); break;
                      caseI DOI(xn, vF(z,n++)=vI(x,i)); break;
                      caseL DOI(xn, vF(z,n++)=vL(x,i)); break;
                      caseF DOI(xn, vF(z,n++)=vF(x,i)); break; } } break;
              caseE { switch(xp){
                      caseB DOI(xn, vE(z,n++)=vB(x,i)); break;
+                     caseJ DOI(xn, vE(z,n++)=vJ(x,i)); break;
                      caseH DOI(xn, vE(z,n++)=vH(x,i)); break;
                      caseI DOI(xn, vE(z,n++)=vI(x,i)); break;
                      caseL DOI(xn, vE(z,n++)=vL(x,i)); break;
@@ -350,6 +365,7 @@ L matchPair(B *t, V x, V y){
         if(isTypeGroupBasic(vp(x))){
             switch(vp(x)){
                 caseB DOI(vn(x), if(vB(x,i)!=vB(y,i))R 0) break;
+                caseJ DOI(vn(x), if(vJ(x,i)!=vJ(y,i))R 0) break;
                 caseH DOI(vn(x), if(vH(x,i)!=vH(y,i))R 0) break;
                 caseI DOI(vn(x), if(vI(x,i)!=vI(y,i))R 0) break;
                 caseL DOI(vn(x), if(vL(x,i)!=vL(y,i))R 0) break;
@@ -472,12 +488,13 @@ void printFloat(E x){
 
 B isAssignableType(L x, L y){
     switch(x){
-        caseH R (H_B==y||H_H==y);
-        caseI R (H_B==y||H_H==y||H_I==y);
-        caseL R (H_B==y||H_H==y||H_I==y||H_L==y);
-        caseF R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y);
-        caseE R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y);
-        caseX R (H_B==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y||H_X==y);
+        caseJ R (H_B==y||H_J==y);
+        caseH R (H_B==y||H_J==y||H_H==y);
+        caseI R (H_B==y||H_J==y||H_H==y||H_I==y);
+        caseL R (H_B==y||H_J==y||H_H==y||H_I==y||H_L==y);
+        caseF R (H_B==y||H_J==y||H_H==y||H_I==y||H_L==y||H_F==y);
+        caseE R (H_B==y||H_J==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y);
+        caseX R (H_B==y||H_J==y||H_H==y||H_I==y||H_L==y||H_F==y||H_E==y||H_X==y);
         default: R x==y;
     }
 }
@@ -488,6 +505,7 @@ B isAssignableType(L x, L y){
 B compareTupleItem(V x, L ax, V y, L ay){
     if(isSameType(x,y)){
         switch(vp(x)){
+            caseJ R vJ(x,ax)==vJ(y,ay);
             caseH R vH(x,ax)==vH(y,ay);
             caseI R vI(x,ax)==vI(y,ay);
             caseL R vL(x,ax)==vL(y,ay);
@@ -525,6 +543,7 @@ L isListIndexOf(V x, V y, L *sizeX, L *sizeY){
 static L isSameValueItem(V x, L a, L b){
     switch(xp){
         caseB R vB(x,a) == vB(x,b); 
+        caseJ R vJ(x,a) == vJ(x,b); 
         caseH R vH(x,a) == vH(x,b); 
         caseI R vI(x,a) == vI(x,b); 
         caseL R vL(x,a) == vL(x,b); 
@@ -663,7 +682,7 @@ inline B logicXor(B x, B y){
 
 /* 1-level */
 B isTypeGroupInt(L t){
-    R (H_B==t || H_C==t || H_H==t || H_I==t || H_L==t);
+    R (H_B==t || H_J==t || H_H==t || H_I==t || H_L==t);
 }
 
 B isTypeGroupFloat(L t){

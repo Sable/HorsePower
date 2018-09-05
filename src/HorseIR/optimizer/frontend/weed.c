@@ -160,5 +160,5 @@ static void validateMain(){
 void weedProg(Prog *root){
     weedModuleList(root->module_list);
     validateMain();
-    prettyProg(root);
+    //prettyProg(root);
 }

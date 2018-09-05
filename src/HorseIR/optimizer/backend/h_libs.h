@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen);
+L lib_index_of_J(L* targ, J* src, L sLen, J* val, L vLen);
 L lib_index_of_H(L* targ, H* src, L sLen, H* val, L vLen);
 L lib_index_of_I(L* targ, I* src, L sLen, I* val, L vLen);
 L lib_index_of_L(L* targ, L* src, L sLen, L* val, L vLen);
@@ -38,6 +39,7 @@ void lib_order_by_list      (L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(
 void lib_quicksort_list     (L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CMP(cmp));
 void lib_order_by_vector    (L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp));
 L    lib_get_group_by       (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
+void lib_radixsort_long     (L *rtn, V val, L len, B *isUp, B isRtnIndex);
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen);
 L lib_member_H(B* targ, H* src, L sLen, H* val, L vLen);

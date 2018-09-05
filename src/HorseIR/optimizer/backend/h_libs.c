@@ -13,6 +13,7 @@ typedef struct hash_node {
     HI h_index_other;
     union {
         /* no boolean or char */
+        J h_j;
         H h_h;
         I h_i;
         L h_l;
@@ -24,6 +25,7 @@ typedef struct hash_node {
     struct hash_node *next;
 }HN0,*HN;
 
+#define hJ(x) x->h_j
 #define hH(x) x->h_h
 #define hI(x) x->h_i
 #define hL(x) x->h_l
@@ -38,6 +40,7 @@ typedef struct hash_node {
 #define hV(x,k) ((x)+(k))
 
 #define hash_B /* empty */
+#define hash_J hash_i32
 #define hash_H hash_i32
 #define hash_I hash_i32
 #define hash_L hash_i64
@@ -51,6 +54,7 @@ typedef struct hash_node {
 
 #define toBase(t,v,f) (*((t*)(v)+f))
 #define toB(v,f) toBase(B,v,f)
+#define toJ(v,f) toBase(J,v,f)
 #define toH(v,f) toBase(H,v,f)
 #define toI(v,f) toBase(I,v,f)
 #define toL(v,f) toBase(L,v,f)
@@ -134,6 +138,7 @@ UI getHashTableSize(L x){
 
 UI getHashValue(void* val, L valI, L typ){
     switch(typ){
+        caseJ R hash_J(toJ(val,valI));
         caseH R hash_H(toH(val,valI));
         caseI R hash_I(toI(val,valI));
         caseL R hash_L(toL(val,valI));
@@ -188,6 +193,7 @@ static L insert_hash(HN ht, L htSize, void* src, L srcI, L typ, B isU){
     while(hN(t)){
         t = hN(t); L td = hD(t);
         switch(typ){
+            caseJ if(toJ(src,td)==toJ(src,srcI)) R isU?td:insert_index(t,srcI); break;
             caseH if(toH(src,td)==toH(src,srcI)) R isU?td:insert_index(t,srcI); break;
             caseI if(toI(src,td)==toI(src,srcI)) R isU?td:insert_index(t,srcI); break;
             caseL if(toL(src,td)==toL(src,srcI)) R isU?td:insert_index(t,srcI); break;
@@ -214,6 +220,7 @@ static L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
     while(hN(t)){
         t = hN(t); L td = hD(t);
         switch(typ){
+            caseJ if(toJ(src,td)==toJ(val,valI)) R td; break;
             caseH if(toH(src,td)==toH(val,valI)) R td; break;
             caseI if(toI(src,td)==toI(val,valI)) R td; break;
             caseL if(toL(src,td)==toL(val,valI)) R td; break;
@@ -235,6 +242,7 @@ static L find_hash_many(HN ht, L htSize, void* src, void* val, L valI, L typ, HI
     while(hN(t)){
         t = hN(t); L td = hD(t);
         switch(typ){
+            caseJ if(toJ(src,td)==toJ(val,valI)) {*other=hT(t);R td;} break;
             caseH if(toH(src,td)==toH(val,valI)) {*other=hT(t);R td;} break;
             caseI if(toI(src,td)==toI(val,valI)) {*other=hT(t);R td;} break;
             caseL if(toL(src,td)==toL(val,valI)) {*other=hT(t);R td;} break;
@@ -301,6 +309,11 @@ L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     R 0;
 }
 
+L lib_index_of_J(L* targ, J* src, L sLen, J* val, L vLen){
+    lib_index_template(H_J);
+    R 0;
+}
+
 L lib_index_of_H(L* targ, H* src, L sLen, H* val, L vLen){
     lib_index_template(H_H);
     R 0;
@@ -356,8 +369,11 @@ L lib_index_of_G(L* targ, V src, L sLen, V val, L vLen){
 }
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    if(isChar(val)) lib_quicksort_char(rtn, val, low, high, isUp, cmp);
-    else lib_quicksort_other(rtn, val, low, high, isUp, cmp);
+    switch(vp(val)){
+        caseC lib_quicksort_char(rtn, val, low, high, isUp, cmp); break;
+        caseL lib_radixsort_long(rtn, val, high, isUp, true); break;
+        default: lib_quicksort_other(rtn, val, low, high, isUp, cmp); break;
+    }
 }
 
 #define DOI3(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
@@ -431,6 +447,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
     #define SORT_CMP(q) case##q if(v##q(t,a)!=v##q(t,b)) R v##q(t,a)<v##q(t,b)?cmp_switch(f); break
     switch(vp(t)){ \
         SORT_CMP(B); \
+        SORT_CMP(J); \
         SORT_CMP(H); \
         SORT_CMP(I); \
         SORT_CMP(L); \
@@ -886,6 +903,7 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
 B lib_member_fast1(void* src, void* val, L valI, L typ){
     switch(typ){
         LIB_MEMBER_F1(B);
+        LIB_MEMBER_F1(J);
         LIB_MEMBER_F1(H);
         LIB_MEMBER_F1(I);
         LIB_MEMBER_F1(L);
@@ -911,6 +929,7 @@ B lib_member_fast2(void* src, void* val, L valI, L typ){
     // getchar();
     switch(typ){
         LIB_MEMBER_F2(B);
+        LIB_MEMBER_F2(J);
         LIB_MEMBER_F2(H);
         LIB_MEMBER_F2(I);
         LIB_MEMBER_F2(L);
@@ -1150,46 +1169,58 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //}
 
 /* radix sort (experimental) */
-typedef struct poi{L x;int i;}poi;
+typedef struct Pos{L x;I i;}Pos;
 
 /*
  * https://blog.csdn.net/WINCOL/article/details/4799979
  */
-void radixSort(poi *val, int len){
+static void lib_radixsort_basic(Pos *val, I len){
     const L size = 255;
-    int *C = (int*)malloc(sizeof(int)<<8);
-    poi *B = (poi*)malloc(sizeof(poi)*len);
+    int *tempC = (int*)malloc(sizeof(int)<<8);
+    Pos *tempB = (Pos*)malloc(sizeof(Pos)*len);
     int  maxSize = 32;
     const L halfL = 0xffffffff;
-    for(int i=0; i<len; i++){
+    for(I i=0; i<len; i++){
         //int numOfDigits = (int)log10(val[i].x) + 1;
         if((((val[i].x)>>32) & halfL) > 0){
             maxSize = 64;
         }
     }
     printf("maxSize = %d\n", maxSize);
-    for(int j=0,j2=maxSize; j<j2; j+=8){
-        memset(C, 0, sizeof(int)<<8);
-        for(int i=0;i<len;i++){
-            C[((val[i].x)>>j) & size]++;
-        }
-        for(int i=1; i<=size; i++){
-            C[i] = C[i] + C[i-1];
-        }
+    for(I j=0,j2=maxSize; j<j2; j+=8){
+        memset(tempC, 0, sizeof(int)<<8);
+        DOI(len, tempC[((val[i].x)>>j) & size]++)
+        DOIa(size+1, tempC[i] = tempC[i] + tempC[i-1])
         //printf("j = %d\n", j);
-        for(int i=len-1;i>=0;i--){
+        for(I i=len-1;i>=0;i--){
             int k = ((val[i].x)>>j) & size;
             //printf("val = %lld, k = %d\n", val[i].x,k);
-            C[k]--;
-            B[C[k]] = val[i];
+            tempC[k]--;
+            tempB[tempC[k]] = val[i];
         }
-        memcpy(val, B, sizeof(poi) * len);
+        memcpy(val, tempB, sizeof(Pos) * len);
         //for(int i=0; i<len; i++){
         //    val[i] = B[i];
         //}
     }
-    free(B);
-    free(C);
+    free(tempB);
+    free(tempC);
+}
+
+void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
+    B f0 = isUp?1:*isUp;
+    Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
+    DOI(len, {pos[i].x=vL(val,i); pos[i].i=i;})
+    lib_radixsort_basic(pos, len);
+    if(isRtnIndex){ // return index
+        if(f0) DOP(len, rtn[i]=pos[i].i)
+        else DOP(len, rtn[i]=pos[len-i-1].i)
+    }
+    else { // return value
+        if(f0) DOP(len, rtn[i]=pos[i].x)
+        else DOP(len, rtn[i]=pos[len-i-1].x)
+    }
+    free(pos);
 }
 
 /* index for join index*/

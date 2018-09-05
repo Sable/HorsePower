@@ -21,11 +21,20 @@ static E runOpt(int id){
         case  4: R compiledQ4(); break;
         case  6: R compiledQ6(); break;
         case 12: R compiledQ12(); break;
-        case 13: R compiledQ13(); break;
         case 14: R compiledQ14(); break;
         case 16: R compiledQ16(); break;
         case 19: R compiledQ19(); break;
         case 22: R compiledQ22(); break;
+        /* testing */
+        case  2: R compiledQ2(); break;
+        case  3: R compiledQ3(); break;
+        case  5: R compiledQ5(); break;
+        case  7: R compiledQ7(); break;
+        case  8: R compiledQ8(); break;
+        case 10: R compiledQ10(); break;
+        case 13: R compiledQ13(); break;
+        case 15: R compiledQ15(); break;
+        case 18: R compiledQ18(); break;
         default: R -1;
     }
 }

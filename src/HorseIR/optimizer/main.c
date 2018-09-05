@@ -18,6 +18,8 @@ B isExp     = false;
 B isFront   = false;
 B isW       = false;
 B isPretty  = false;
+B isServer  = false;
+B isClient  = false;
 I runs      = 1;
 I qid       = -1;
 I qscale    = 1;
@@ -82,6 +84,12 @@ int main(int argc, char *argv[]){
         parseInputWithQid(qid);
         prettyProg(root);
     }
+    else if(isServer){
+        runModeServer();
+    }
+    else if(isClient){
+        runModeClient();
+    }
     else if(isUsage)   { usage();   exit(1); }
     else if(isVersion) { version(); exit(1); }
     else {
@@ -90,9 +98,10 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
+// TODO: getopt_long
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:fp")) != -1){
+    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:fpz:")) != -1){
         switch(c){
             case 'h': isUsage   = true;            break;
             case 'v': isVersion = true;            break;
@@ -112,6 +121,8 @@ static int getOption(int argc, char *argv[]){
                       isW       = 0==atoi(optarg); break;
             case 'f': isFront   = true;            break;
             case 'p': isPretty  = true;            break;
+            case 'z': isServer  = 0==atoi(optarg);
+                      isClient  = 1==atoi(optarg); break;
             default : return 1;
         }
     }
@@ -120,18 +131,26 @@ static int getOption(int argc, char *argv[]){
 }
 
 static void usage(){
+#define usage_q() WP("  -q <qid>       TPC-H query id `data/` (-q or -n)\n")
+#define usage_n() WP("  -n <filename>  Set a query file (-q or -n)\n"      )
     WP("Usage: ./horse <option> [parameter]  \n");
     WP("\nRun with an interpreter:\n");
-    WP("  -t             Enable interpreter\n"    );
-    WP("  -q <qid>       TPC-H query id `data/` (-q or -n)\n");
-    WP("  -n <filename>  Set a query file (-q or -n)\n"      );
+    WP("  -t             Enable interpreter\n"  );
+    usage_q();
+    usage_n();
     WP("  -s <sid>       TPC-H query scale (default 1)\n"    );
     WP("  -r <runs>      Number of runs (default 1)\n"       );
     WP("\nRun with a compiler:\n");
-    WP("  -c             Enable compiler\n"       );
-    WP("  -q <qid>       TPC-H query id `data/` (-q or -n)\n");
-    WP("  -n <filename>  Set a query file (-q or -n)\n"      );
+    WP("  -c             Enable compiler\n"          );
+    usage_q();
+    usage_n();
     WP("  -o <name>      Query opt. (fe or fp)\n"    );
+    WP("\nRun with a pretty printer:\n");
+    WP("  -p             Enable pretty printer\n"    );
+    usage_q();
+    usage_n();
+    WP("\nRun with server/client:\n");
+    WP("  -z 0/1         Enable server/client mode\n");
     WP("\nOthers:\n");
     WP("  -h             Print this information\n");
     WP("  -v             Print HorseIR version\n" );
@@ -140,7 +159,7 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    SP(file_path, "data/q%d.hir", qid);
+    SP(file_path, "data/hand-q%d.hir", qid);
     parseInput(file_path);
 }
 
@@ -149,11 +168,11 @@ static void parseInput(S file_path){
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s\n", file_path);
     }
-    P("parsing ....\n");
+    WP("parsing ....\n");
     gettimeofday(&tv0, NULL);
     int ret = yyparse();
     fclose(yyin);
-    if(ret == 0) P("Successfully parsed: %s!\n",file_path);
+    if(ret == 0) WP("Successfully parsed: %s!\n",file_path);
     else { EP("Parsing failed: %s\n",file_path);}
     gettimeofday(&tv1, NULL);
     WP("Parsing time (ms): %g\n", calcInterval(tv0, tv1));
@@ -188,7 +207,7 @@ static void runCompileWithOpt(char *optName){
         HorseCompiler(chain_list);
     }
     gettimeofday(&tv1, NULL);
-    P("Compile time: %g ms\n", calcInterval(tv0, tv1));
+    WP("Compile time: %g ms\n", calcInterval(tv0, tv1));
 }
 
 static void runInterpreterWithQid(I qid){

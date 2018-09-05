@@ -98,6 +98,7 @@ L getTypeSize(L typ, L len){
     L r = -1, k = 0;
     switch(typ){
         case H_B  : r = sizeof(B);     break;
+        case H_J  : r = sizeof(J);     break;
         case H_C  : r = sizeof(C); k=1;break;
         case H_H  : r = sizeof(H);     break;
         case H_I  : r = sizeof(I);     break;

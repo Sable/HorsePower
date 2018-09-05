@@ -64,7 +64,7 @@ Node *makeNodeSimpleStmt1  (Node *name, Node *type, Node *expr);
 Node *makeNodeSimpleStmt2  (Node *name, Node *type, Node *expr, Node *cast_type);
 Node *makeNodeReturnStmt   (Node *rtn);
 Node *makeNodeExpr         (Node *func, Node *paramExpr);
-Node *makeNodeFunction     (char *name);
+Node *makeNodeFunction     (Node *name);
 Node *makeNodeParamLiteral (Node *paramValue);
 Node *makeNodeLiteralBool  (List *int_list);
 Node *makeNodeLiteralChar  (char *charValue);

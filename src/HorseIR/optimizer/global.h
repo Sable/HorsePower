@@ -24,15 +24,15 @@ void error(const char* s);
 #define R return
 #define SP sprintf
 #define FP fprintf
-#define PN(x) P("%s\n",x)
+#define PN(x)     P("%s\n",x)
 #define newLine() P("\n")
-#define INFO() FP(stderr, "ERROR in [%s:%d:%s] ", __FILE__, __LINE__, __func__)
-#define WP(...) FP(stderr,__VA_ARGS__)  // warning
-#define EP(...) do{INFO(); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
+#define INFO()    FP(stderr, "[ERROR] [%s:%d:%s]:\n\t", __FILE__, __LINE__, __func__)
+#define WP(...)   FP(stderr,__VA_ARGS__)  // warning
+#define EP(...)   do{INFO(); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 
-#define printBanner(s) P("/*===="s"====*/\n")
+#define printBanner(s) P("/*==== "s" ====*/\n")
 
 #include "backend/common.h"
 
@@ -67,5 +67,11 @@ E calcInterval(struct timeval t0, struct timeval t1); /* util/mics.c*/
 /* util/nametable.c */
 void saveToNameTable(char *str, V val);
 V getValueFromNameTable(char *str);
+/* util/connect.c */
+int runModeServer();
+int runModeClient();
+/* util/info.c */
+const char *getpTypeName(pType x);
+const char *getpFuncName(pFunc x);
 
 #endif

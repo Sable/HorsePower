@@ -14,7 +14,7 @@ module default{
       c13:? = check_cast(@column_value(a1, `o_custkey:sym   ), enum);
       // lineitem
       c20:? = check_cast(@column_value(a2, `l_orderkey:sym  ), enum);
-      c21:? = check_cast(@column_value(a2, `l_quantity:sym  ), i64);
+      c21:? = check_cast(@column_value(a2, `l_quantity:sym  ), f64);
       // 0. group by
       t0_k:? = @fetch(c20);
       t0_0:? = @group(t0_k);

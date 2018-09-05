@@ -55,7 +55,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleAsinh   commonTrig
 #define ruleAtanh   commonTrig
 #define ruleDate    NULL
-#define ruleYear    NULL
+#define ruleYear    propYear
 #define ruleMonth   NULL
 #define ruleDay     NULL
 #define ruleTime    NULL
@@ -77,8 +77,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleCount   reductionCount
 #define ruleSum     reductionSum
 #define ruleAvg     propAvg
-#define ruleMin     NULL
-#define ruleMax     NULL
+#define ruleMin     propMaxMin
+#define ruleMax     propMaxMin
 #define ruleRaze    propRaze
 #define ruleEnlist  specialEnlist
 #define ruleTolist  NULL
@@ -132,11 +132,11 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleValues      propValues
 #define ruleMeta        NULL
 #define ruleLoadTable   specialLoadTable
-#define ruleFetch       NULL
+#define ruleFetch       propFetch
 #define ruleIndexA      propIndexA
 #define ruleList        propList
 #define ruleOuter       NULL
-#define ruleJoinIndex   NULL
+#define ruleJoinIndex   propJoinIndex
 
 #define isT(t) (t==n->type)
 
@@ -164,6 +164,7 @@ bool isFuncIN  (InfoNode *n) {return isT(funcT);}
 bool isTableIN (InfoNode *n) {return isTT;}
 #define isU(n) (unknownT==(n)->type)
 #define isListT(n) (listT==(n)->type)
+#define isListS(n) (listT==(n)->subtype)
 #define isEnumT(n) (enumT==(n)->type)
 
 #define isS(n, t) (t == n->type)
@@ -172,6 +173,7 @@ bool isTableIN (InfoNode *n) {return isTT;}
 #define isShapeL(n) isS(n,    listH)
 #define isShapeT(n) isS(n,   tableH)
 #define sameH(x,y) ((x)->type==(y)->type)
+#define isShapeScalar(n) (isShapeV(n) && !(n->isId) && n->size==1)
 
 #define decideShapeLeft(x,y) x->shape
 #define decideShapeRight(x,y) y->shape
@@ -297,6 +299,25 @@ static InfoNode *propAvg(InfoNode *x){
     return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
 }
 
+static InfoNode *propMaxMin(InfoNode *x){
+    pType rtnType;
+    if(isRealIN(x)){
+        rtnType = x->type;
+    }
+    else if(isU(x)){
+        rtnType = unknownT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, false, 1));
+}
+
+static InfoNode *propYear(InfoNode *x){
+    if(isDateIN(x)){
+        return newInfoNode(i64T, x->shape);
+    }
+    else return NULL;
+}
+
 /* dyadic */
 static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
     pType rtnType;
@@ -404,7 +425,7 @@ static InfoNode *commonCompare2(InfoNode *x, InfoNode *y){
 }
 
 static InfoNode *propOrder(InfoNode *x, InfoNode *y){
-    if(isListT(x) && isBoolIN(y)){
+    if(isBoolIN(y) && (isListT(x) || isBasicIN(x))){
         return newInfoNode(i64T, newShapeNode(vectorH, true, -1));
     }
     else return NULL;
@@ -549,9 +570,18 @@ static InfoNode *propKeys(InfoNode *x){
 
 static InfoNode *propIndex(InfoNode *x, InfoNode *y){
     if(isIntIN(y)){
-        return newInfoNode(x->type, y->shape);
+        if(isListT(x) && isShapeScalar(y->shape)){
+            return newInfoNode(x->subtype, newShapeNode(isListS(x)?listH:vectorH, true, -1)); // S: subtype
+        }
+        else return newInfoNode(x->type, y->shape);
     }
     else return NULL;
+}
+
+/* TODO: all return i64 */
+static InfoNode *propFetch(InfoNode *x){
+    WP("fetch: all return i64\n");
+    return newInfoNode(i64T, x->shape);
 }
 
 /* copy from typeshape.c, TODO: combine later */
@@ -631,6 +661,20 @@ static InfoNode *propIndexA(InfoNodeList *in_list){
     else return NULL;
 }
 
+static InfoNode *propJoinIndex(InfoNodeList *in_list){
+    InfoNode *v = getNode(in_list, 0);
+    InfoNode *x = getNode(in_list, 1);
+    InfoNode *y = getNode(in_list, 2);
+    pType rtnType;
+    if(isU(x)||isU(y)){
+        rtnType = unknownT;
+    }
+    else {
+        rtnType = listT;
+    }
+    return newInfoNodeList(listT, i64T, newShapeNode(vectorH, false, 2)); // length: 2
+}
+
 /* main */ 
 static int findInBuiltinSet(char *funcName, const char *set[]){
     DOI(totalFunc, if(!strcmp(funcName, set[i])) return i)
@@ -653,6 +697,7 @@ int getFuncIndexByName(char *name){
 }
 
 void *fetchTypeRules(char *name, int* num){
+    // P("fetch name = %s\n", name); getchar();
     int k = getFuncIndexByName(name);
     if(k>=0){
         *num = getValence(k);
@@ -725,7 +770,7 @@ void *fetchTypeRules(char *name, int* num){
             CASE(     mulF, ruleMul)
             CASE(     divF, ruleDiv)
             CASE(   powerF, rulePower)
-            CASE(    logBF, ruleLogBase)
+            CASE(    logbF, ruleLogBase)
             CASE(     modF, ruleMod)
             CASE(     andF, ruleAnd)
             CASE(      orF, ruleOr)

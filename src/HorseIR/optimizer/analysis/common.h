@@ -27,7 +27,7 @@ typedef enum FunctionType {
     formatF, keysF, valuesF, metaF, loadTableF, fetchF,
     /* binary */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
-    powerF, logBF, modF, andF, orF, nandF, norF, xorF,
+    powerF, logbF, modF, andF, orF, nandF, norF, xorF,
     dtdiffF, dtaddF, dtsubF,
     appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
     memberF, vectorF, matchF, indexF, columnValueF, subStringF,

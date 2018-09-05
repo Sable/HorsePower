@@ -206,7 +206,7 @@ static int runSingleStmt(Node *stmt, V *rtn){
     }
 #ifdef PROFILE
     gettimeofday(&tv1, NULL);
-    P(">> Time (ms): %g ms\n\n", calcInterval(tv0, tv1));
+    P(">> Time (ms): %g\n\n", calcInterval(tv0, tv1));
 #endif
     return 0;
 }

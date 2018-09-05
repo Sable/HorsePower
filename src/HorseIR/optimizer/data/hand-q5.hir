@@ -8,20 +8,20 @@ module default{
       a4:? = @load_table(`nation:sym);
       a5:? = @load_table(`region:sym);
       // customer
-      c00:? = check_cast(@column_value(a0, `c_custkey:sym  ), i32);
+      c00:? = check_cast(@column_value(a0, `c_custkey:sym  ), i64);
       c01:? = check_cast(@column_value(a0, `c_nationkey:sym), enum);
       // orders
       c10:? = check_cast(@column_value(a1, `o_custkey:sym  ), enum);
-      c11:? = check_cast(@column_value(a1, `o_orderkey:sym ), i32);
+      c11:? = check_cast(@column_value(a1, `o_orderkey:sym ), i64);
       c12:? = check_cast(@column_value(a1, `o_orderdate:sym), d  );
       // lineitem
       c20:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum);
-      c21:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i32);
-      c22:? = check_cast(@column_value(a2, `l_extendedprice:sym), f32);
-      c23:? = check_cast(@column_value(a2, `l_discount:sym     ), f32);
+      c21:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
+      c22:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
+      c23:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);
       // supplier
-      c30:? = check_cast(@column_value(a3, `s_suppkey:sym  ), i32);
-      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), i32);
+      c30:? = check_cast(@column_value(a3, `s_suppkey:sym  ), i64);
+      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), i64);
       // nation
       c40:? = check_cast(@column_value(a4, `n_name:sym     ), sym);
       c41:? = check_cast(@column_value(a4, `n_nationkey:sym), i64);
@@ -61,8 +61,8 @@ module default{
       t3_11:? = @index(t3_10, t3_6); // c_nationkey
       // 4. suppkey, nationkey: s_ and 0+1+2+3
       t4_0:? = @join_index(@eq, c30, t3_2);
-      t4_1:? = @index(t4_0, 0:i32);
-      t4_2:? = @index(t4_0, 1:i32);
+      t4_1:? = @index(t4_0, 0:i64);
+      t4_2:? = @index(t4_0, 1:i64);
       t4_3:? = @index(c31  , t4_1); // s_nationkey
       t4_4:? = @index(t3_11, t4_2); // c_nationkey
       t4_5:? = @index(t3_9 , t4_2); // n_nationkey
@@ -73,7 +73,7 @@ module default{
       // materialize
       t5_0:? = @index(t3_3, t4_9);
       t5_1:? = @index(t3_4, t4_9);
-      t5_2:? = @minus(1:i32, t5_1);
+      t5_2:? = @minus(1:i64, t5_1);
       t5_3:? = @mul(t5_0, t5_2);   // revenue
       t5_4:? = @index(t3_8, t4_9); // n_name
       // group by

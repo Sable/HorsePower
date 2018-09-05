@@ -122,6 +122,8 @@ expression      : literalFunction '(' paramExpr ')'
                  { $$ = makeNodeExpr(NULL, $1); }
 ;
 literalFunction : '@' tID
+                 { $$ = makeNodeFunction(makeNodeCompoundID1(NULL,$2)); }
+                | '@' compoundID
                  { $$ = makeNodeFunction($2); }
 ;
 paramExpr       :

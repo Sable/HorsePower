@@ -59,7 +59,7 @@ module default{
       t4_1:? = @group(t4_0);
       t4_2:? = @keys(t4_1);
       t4_3:? = @values(t4_1);
-      t4_4:? = @minus(1:i32, t3_10);
+      t4_4:? = @minus(1:i64, t3_10);
       t4_5:? = @mul(t3_9, t4_4);
       t4_6:? = @each_right(@index, t4_5, t4_3);
       t4_7:? = @each(@sum, t4_6);

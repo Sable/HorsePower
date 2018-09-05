@@ -100,7 +100,7 @@ Node *makeNodeSimpleStmt2(Node *name, Node *type, Node *expr, Node *cast_type){
 Node *makeNodeReturnStmt(Node *rtn){
     Node *n     = NEW(Node);
     n->kind     = returnK;
-    n->val.nodeS =rtn;
+    n->val.nodeS= rtn;
     n->lineno   = yylineno;
 }
 
@@ -112,10 +112,10 @@ Node *makeNodeExpr(Node *func, Node *paramExpr){
     n->lineno   = yylineno;
 }
 
-Node *makeNodeFunction(char *name){
+Node *makeNodeFunction(Node *name){
     Node *n     = NEW(Node);
     n->kind     = funcK;
-    n->val.idS  = strdup(name);
+    n->val.nodeS= name;
     n->lineno   = yylineno;
     return n;
 }
@@ -171,8 +171,8 @@ Node *makeNodeLiteralDate(List *date_list){
 Node *makeNodeCompoundID1(char *name1, char *name2){
     Node *n     = NEW(Node);
     n->kind     = compoundK;
-    n->val.compoundID.name1 = strdup(name1);
-    n->val.compoundID.name2 = strdup(name2);
+    n->val.compoundID.name1 = name1?strdup(name1):NULL;
+    n->val.compoundID.name2 = name2?strdup(name2):NULL;
     n->lineno   = yylineno;
     return n;
 }

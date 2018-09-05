@@ -36,7 +36,11 @@ void addToNameList(NameList *n, char *str){
 
 char *fetchName(Node *n){
     if(n->kind == idK) return n->val.idS;
-    else if(n->kind == funcK) return n->val.idS;
+    else if(n->kind == funcK) {
+        Node *x = n->val.nodeS;
+        if(x->val.compoundID.name1) EP("Not a built-in function\n");
+        return x->val.compoundID.name2;
+    }
     else if(n->kind == literalFuncK) return fetchName(n->val.nodeS); // next: idK
     else {
         P("id found: %d not %d\n", n->kind, idK);

@@ -3,11 +3,20 @@
     #include "opt/q4.h"
     #include "opt/q6.h"
     #include "opt/q12.h"
-    #include "opt/q13.h"
     #include "opt/q14.h"
     #include "opt/q16.h"
     #include "opt/q19.h"
     #include "opt/q22.h"
+/* testing */
+    #include "opt/q2.h"
+    #include "opt/q3.h"
+    #include "opt/q5.h"
+    #include "opt/q7.h"
+    #include "opt/q8.h"
+    #include "opt/q10.h"
+    #include "opt/q13.h"
+    #include "opt/q15.h"
+    #include "opt/q18.h"
 #endif
 
 //#ifdef QALL
@@ -91,7 +100,7 @@
 #endif
 
 #ifdef Q18
-    #include "q18.out"
+    #include "opt/q18.h"
 #endif
 
 #ifdef Q19
