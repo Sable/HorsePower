@@ -202,7 +202,7 @@ static int runSingleStmt(Node *stmt, V *rtn){
         case   castStmtK: runCastStmt(stmt);   break;
         case     returnK: *rtn = runReturnStmt(stmt); break;
         default: printNodeKind(stmt);
-                 EP("[runSingleStmt: kind %d not supported yet.\n", stmt->kind);
+                 EP("Kind not supported yet: %s\n", getKindName(stmt->kind));
     }
 #ifdef PROFILE
     gettimeofday(&tv1, NULL);

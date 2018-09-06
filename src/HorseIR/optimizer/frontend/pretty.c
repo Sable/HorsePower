@@ -217,36 +217,6 @@ void printNodeType(Node *n){
     printType(k);
 }
 
-void printKindBuff(char *b, Kind k){
-    resetBuff(b);
-    switch(k){
-        case           idK: echo(b, "idK"          ); break;
-        case        floatK: echo(b, "floatK"       ); break;
-        case          intK: echo(b, "intK"         ); break;
-        case         typeK: echo(b, "typeK"        ); break;
-        case     compoundK: echo(b, "compoundK"    ); break;
-        case         dateK: echo(b, "dateK"        ); break;
-        case          symK: echo(b, "symK"         ); break;
-        case         funcK: echo(b, "funcK"        ); break;
-        case         exprK: echo(b, "exprK"        ); break;
-        case    paramExprK: echo(b, "paramExprK"   ); break;
-        case       importK: echo(b, "importK"      ); break;
-        case       methodK: echo(b, "moduleK"      ); break;
-        case   simpleStmtK: echo(b, "simpleStmtK"  ); break;
-        case     castStmtK: echo(b, "castStmtK"    ); break;
-        case literalFloatK: echo(b, "literalFloatK"); break;
-        case   literalSymK: echo(b, "literalSymK"  ); break;
-        case  literalDateK: echo(b, "literalDateK" ); break;
-        case  literalCharK: echo(b, "literalCharK" ); break;
-        case   literalStrK: echo(b, "literalStrK"  ); break;
-        case  literalBoolK: echo(b, "literalBoolK" ); break;
-        case literalParamK: echo(b, "literalParamK"); break;
-        case   literalIntK: echo(b, "literalIntK"  ); break;
-        case  literalFuncK: echo(b, "literalFuncK" ); break;
-        default: EP("[printKindBuff] kind (%d) not supported\n", k);
-    }
-}
-
 void prettyNodeBuffNoAttr(char *b, Node *n){
     withAttr = false;
     prettyNodeBuff(b,n);
@@ -266,9 +236,7 @@ void prettyNode(Node *n){
 }
 
 void printKind(Kind k){
-    buff[0]=0;
-    printKindBuff(buff, k);
-    P("%s\n",buff);
+    P("%s\n",getKindName(k));
 }
 
 void prettyList(List *list, char sep){

@@ -13,7 +13,6 @@ void prettyNodeBuffNoAttr(char *b, Node *n);
 void prettyNodeBuff2C    (char *b, Node *n);  /* loop fusion */
 void prettyListBuff      (char *b, List *list, char sep);
 void printTypeBuff       (char *b, pType p);
-void printKindBuff       (char *b, Kind k);
 void printNodeTypeBuff   (char *b, Node *n);
 
 #endif

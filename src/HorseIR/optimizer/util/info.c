@@ -1,33 +1,32 @@
 #include "../global.h"
 
 #define CS(x) case x: return #x
+#define DF(x) default: EP("Type not defined: %d\n",x)
 
 const char *getpTypeName(pType x){
     if(x >= totalT){
         EP("pType not defined: %d (total %d)\n", x, totalT);
     }
     switch(x){
-        CS(unknownT);
-        CS(boolT);
-        CS(i16T);
-        CS(i32T);
-        CS(i64T);
-        CS(charT);
-        CS(clexT);
-        CS(symT);
-        CS(strT);
-        CS(monthT);
-        CS(dateT);
-        CS(dtT);
-        CS(hourT);
-        CS(minuteT);
-        CS(timeT);
-        CS(tableT);
-        CS(ktableT);
-        CS(listT);
-        CS(enumT);
-        CS(dictT);
-        CS(funcT);
+        CS(unknownT); CS(boolT); CS(i16T); CS(i32T); CS(i64T);
+        CS(charT); CS(clexT); CS(symT); CS(strT);
+        CS(monthT); CS(dateT); CS(dtT); CS(hourT); CS(minuteT); CS(timeT);
+        CS(tableT); CS(ktableT); CS(listT); CS(enumT); CS(dictT); CS(funcT);
+        DF(x);
+    } R 0;
+}
+
+const char *getKindName(Kind x){
+    if(x >= totalK){
+        EP("Kind not defined: %d (total %d)\n", x,totalK);
+    }
+    switch(x){
+        CS(idK);  CS(floatK); CS(intK); CS(typeK); CS(compoundK); CS(dateK); CS(symK); CS(strK);
+        CS(literalFloatK); CS(literalSymK); CS(literalDateK); CS(literalCharK); CS(literalStrK);
+        CS(literalBoolK); CS(literalParamK); CS(literalIntK); CS(literalFuncK);
+        CS(funcK); CS(exprK); CS(paramExprK); CS(nameTypeK);
+        CS(simpleStmtK); CS(castStmtK); CS(returnK); CS(importK); CS(methodK); CS(moduleK);
+        DF(x);
     } R 0;
 }
 

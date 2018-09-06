@@ -25,7 +25,8 @@ typedef enum Kind {
     literalFloatK, literalSymK, literalDateK, literalCharK, literalStrK,
     literalBoolK, literalParamK, literalIntK, literalFuncK,
     funcK, exprK, paramExprK, nameTypeK,
-    simpleStmtK, castStmtK, returnK, importK, methodK, moduleK
+    simpleStmtK, castStmtK, returnK, importK, methodK, moduleK,
+    totalK
 }Kind;
 
 typedef struct Node {

@@ -72,6 +72,7 @@ int runModeServer();
 int runModeClient();
 /* util/info.c */
 const char *getpTypeName(pType x);
+const char *getKindName(Kind x);
 const char *getpFuncName(pFunc x);
 
 #endif

@@ -968,8 +968,8 @@ L pfnGroup(V z, V x){
         if(H_DEBUG) P("Ordered data found in pfnGroup\n");
         order_list = NULL;
     }
-    else if(isInteger(x)){ // H_L
-    }
+    //else if(isInteger(x)){ // TODO: H_L
+    //}
     else {
         DOP(lenZ,vB(y,i)=1)
         CHECKE(pfnOrderBy(t,x,y));

@@ -857,7 +857,7 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     // #else
        if(index == NULL)
            R lib_get_group_by_order(z, val, index, iLen, cmp);
-       else
+       else 
            R lib_get_group_by_other(z, val, index, iLen, cmp);
     // #endif
 }
