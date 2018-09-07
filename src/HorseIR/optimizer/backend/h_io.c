@@ -362,11 +362,28 @@ L printStrItem(V x, L k){
     FS("):str"); R 0;
 }
 
-L printListItem(V x, L k){
+static L printListFlatItem(V x, L k){
+    L a0=0;
+    FS("(");
+    if(k<0) {
+        DOI(xn, {if(i>0)FS(","); \
+            V g2=vg2(x); L a1=a0+vL(x,i); \
+            P("("); printV3(g2,a0,a1,false); P(")"); a0=a1;})
+    }
+    else { EP("Pending flat list print\n"); }
+    FS("):list"); R 0;
+}
+
+static L printListNormalItem(V x, L k){
     FS("(");
     if(k<0) { DOI(xn, {if(i>0)FS(","); printValue(xV(i));}) }
     else { printValue(xV(k)); }
     FS("):list"); R 0;
+}
+
+L printListItem(V x, L k){
+    if(vg2(x)) printListFlatItem(x, k);
+    else printListNormalItem(x, k);
 }
 
 L printDictItem(V x, L k){
@@ -422,15 +439,19 @@ L printV(V x){
 }
 
 L printV2(V x, L n){
+    printV3(x, 0, n, true); R 0;
+}
+
+L printV3(V x, L k0, L k1, B isR){
     switch(xp){
-        caseA printTablePretty(x, n); break;
-        caseK printTablePretty(x, n); break;
-        caseG printListItem(x, -1);   break;
+        caseA printTablePretty(x, -1); break;
+        caseK printTablePretty(x, -1); break;
+        caseG printListItem(x, -1);    break;
         default: { B f = 0;
-          DOI(n, {FS(" ");if(printValueItem(x, i)){f=1;break;};});
-          if(f) EP("the type %d is not supported.\n", xp); }
+          DOI3(k0, k1, {if(i>k0)FS(" ");if(printValueItem(x, i)){f=1;break;};});
+          if(f) EP("Type is not supported: %s\n", getpTypeName(xp)); } break;
     }
-    FS("\n"); R 0;
+    if(isR) FS("\n"); R 0;
 }
 
 L printTable(V x){

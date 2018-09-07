@@ -48,6 +48,7 @@ L printEnumItem       (V x, L k);
 L printValueItem      (V x, L k);
 L printV              (V x);
 L printV2             (V x, L n);
+L printV3             (V x, L a, L b, B isR);
 L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);

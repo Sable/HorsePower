@@ -376,8 +376,6 @@ void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     }
 }
 
-#define DOI3(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
-#define DOJ3(m, n, x) {for(L j=m,j2=n;j<j2;j++)x;}
 void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     S str = sC(val);  L len = high-low;  B f0 = isUp?1:*isUp;
     if(len < 10){
@@ -614,10 +612,6 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     if(colId >= vn(val)) R;
     V curV = vV(val,colId);
     B* curB = isUp+colId;
-    // if(*curB == 0)
-    //     { P("id = %lld, bool = %lld\n", colId, *curB); getchar(); }
-    // if(colId == 2 && low == 29)
-    // P("low = %lld, high = %lld, colId = %lld, val=%lld\n", low, high, colId, *curB); // getchar();
     //struct timeval tv0, tv1;
     // gettimeofday(&tv0, NULL);
     if(lib_order_by_sorted(targ,curV,curB,low,high,cmp)){
@@ -627,20 +621,20 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     }
     else {
         // if(colId == 2 && low == 29 && high == 33){
-        //     P("hahahahahah\n");
+        //     P("xxxxx\n");
         // }
-        #ifdef OPT_Q16
-            LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
-            lib_mergesort(targ, curV, low, high, curB, cmp);
-            free(LARGE_BUFF);
-        #else
+        //#ifdef OPT_Q16
+        //    LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
+        //    lib_mergesort(targ, curV, low, high, curB, cmp);
+        //    free(LARGE_BUFF);
+        //#else
             if(isInteger(curV)) {
                 LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
                 lib_mergesort(targ, curV, low, high, curB, cmp);
                 free(LARGE_BUFF);
             }
             else lib_quicksort(targ, curV, low, high, curB, cmp);
-        #endif
+        //#endif
     }
     // gettimeofday(&tv1, NULL);
     // if(colId == 0)
@@ -665,10 +659,7 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
                 pos = high;
             }
             else {
-                // if(colId == 0)
-                //     P("start = %lld, end = %lld, len = %lld\n", start, end, end - start);
                 L pivot = start;
-                // P("pivot char: %c\n", vC(curV, targ[pivot]));
                 do{
                     if(0 != (*cmp)(curV,targ[pivot],targ[end-1],curB)) {
                         L mid = (start + end) >> 1;
@@ -684,20 +675,6 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
             }
         }while(pos < high);
     }
-    // gettimeofday(&tv1, NULL);
-    // if(colId == 0){
-    //     P("2. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
-    //     P("size = %lld (%lld, %lld),  colId = %lld\n", high-low, low, high, colId);
-    //     if(isInteger(curV)){
-    //         P("1. type = %lld |", vp(curV)); DOI(100, P(" %lld",vL(curV,i))) P("\n");
-    //         L temp_max = -1; L temp_min = 99999;
-    //         DOI(vn(curV), {if(temp_min>vL(curV,i))temp_min=vL(curV,i); \
-    //                        if(temp_max<vL(curV,i))temp_max=vL(curV,i);})
-    //         P("min = %lld, max = %lld\n", temp_min, temp_max);
-    //         P("2. type = %lld |", vp(curV)); DOI(100, P(" %lld",vL(curV,targ[i]))) P("\n");
-    //         // getchar();
-    //     }
-    // }
 }
 
 /*
@@ -732,7 +709,7 @@ void lib_order_vector(L *targ, V val, L vLen, B *isUp){
 }
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
-    DOP(tLen, targ[i]=i)
+    if(vp(val) != H_L) DOP(tLen, targ[i]=i)
     // P("tLen = %lld\n", tLen);
     lib_quicksort(targ, val, 0, tLen, isUp, cmp);
     //lib_order_vector(targ, val, tLen, isUp); // experimental
@@ -812,6 +789,32 @@ L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     R 0;
 }
 
+L lib_group_by_flat(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
+    L k, c, cz; V d,t;
+    /* 1. get the total number of cells: lenZ */
+    // P("step 1\n");
+    L lenZ=iLen>0?1:0;
+    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
+    /* 2. allocate list and get the info of each cell */
+    // P("step 2\n");
+    // initV(z, H_N, lenZ);
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initV(zKey, H_L, lenZ);
+    initFlatList(zVal, lenZ);
+    vg2(zVal) = val;
+    /* 3. fill indices into each cell */
+    // P("step 3\n");
+    k=0, c=iLen>0?1:0;
+    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
+                  vL(zVal,k++)=c; c=1; } \
+               else c++)
+    if(c>0) vL(zVal,k)=c;
+    // P("exit\n");
+    R 0;
+}
+
 /* 
  * copy from lib_get_group_by_other
  * index[x] => x
@@ -858,7 +861,8 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
        if(index == NULL)
            R lib_get_group_by_order(z, val, index, iLen, cmp);
        else 
-           R lib_get_group_by_other(z, val, index, iLen, cmp);
+           R lib_group_by_flat(z, val, index, iLen, cmp);
+           //R lib_get_group_by_other(z, val, index, iLen, cmp);
     // #endif
 }
 
@@ -1186,7 +1190,7 @@ static void lib_radixsort_basic(Pos *val, I len){
             maxSize = 64;
         }
     }
-    printf("maxSize = %d\n", maxSize);
+    WP("maxSize = %d\n", maxSize);
     for(I j=0,j2=maxSize; j<j2; j+=8){
         memset(tempC, 0, sizeof(int)<<8);
         DOI(len, tempC[((val[i].x)>>j) & size]++)
@@ -1210,7 +1214,7 @@ static void lib_radixsort_basic(Pos *val, I len){
 void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
     B f0 = isUp?1:*isUp;
     Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
-    DOI(len, {pos[i].x=vL(val,i); pos[i].i=i;})
+    DOP(len, {pos[i].x=vL(val,i); pos[i].i=i;})
     lib_radixsort_basic(pos, len);
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)

@@ -69,6 +69,7 @@
 #define vy(x)  x->y
 #define va(x)  x->a
 #define vg(x)  x->g
+#define vg2(x) x->g2
 
 #define sB(x) ((B*)(vg(x)))
 #define sJ(x) ((J*)(vg(x)))

@@ -1587,7 +1587,7 @@ L pfnAppend(V z, V x, V y){
     _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
     { \
         pcre2_match_context *mcontext = pcre2_match_context_create(NULL); \
-        pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(64*1024, 512*1024, NULL);\
+        pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(128*1024, 512*1024, NULL);\
         pcre2_jit_stack_assign(mcontext, NULL, jit_stack);\
         pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);\
         L tid = omp_get_thread_num(); \
@@ -1605,6 +1605,7 @@ L pfnLike(V z, V x, V y){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):vs(y);
             pcre2_code *re = getLikePatten(strY);
+            P("input size: %lld\n", vn(x));
             /* jit facilities */
             I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
             B case1 = false;
@@ -1695,17 +1696,21 @@ L pfnOrderBy(V z, V x, V y){
 
 L pfnEach(V z, V x, FUNC1(foo)){
     if(isList(x)){
-        initV(z,H_G,vn(x));
-        //P("Each: input size = %lld\n", vn(x));
-        L total = 0;
-        //DOI(xn, total += vn(vV(x,i))) P("avg = %g\n", total*1.0/vn(x));
-        DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
+        if(vg2(x)) EP("TODO: flat list\n");
+        else {
+            initV(z,H_G,vn(x));
+            //P("Each: input size = %lld\n", vn(x));
+            L total = 0;
+            //DOI(xn, total += vn(vV(x,i))) P("avg = %g\n", total*1.0/vn(x));
+            DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
+        }
         R 0;
     }
     else R E_DOMAIN;
 }
 
 L pfnEachItem(V z, V x, V y, FUNC2(foo)){
+    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     L lenX = isList(x)?vn(x):1;
     L lenY = isList(y)?vn(y):1;
     if(isList(x) && isList(y)){
@@ -1738,6 +1743,7 @@ L pfnEachItem(V z, V x, V y, FUNC2(foo)){
 }
 
 L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
+    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     if(isList(x)){
         L lenZ = vn(x);
         initV(z,H_G,lenZ);
@@ -1750,6 +1756,7 @@ L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
 }
 
 L pfnEachRight(V z, V x, V y, FUNC2(foo)){
+    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     if(isList(y)){
         P("len(x) = %lld, len(y) = %lld\n", vn(x),vn(y));
         L lenZ = vn(y);

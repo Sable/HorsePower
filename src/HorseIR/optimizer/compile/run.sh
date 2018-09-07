@@ -8,6 +8,6 @@ gcc -O3 -o testAll main.c -DQALL -std=c99 -fopenmp ../backend/*.c ../util/*.c ..
 
 # 2 3 5 7 8 10 13 15 18
 id=13
-nn=1
+nn=10
 (cd ../ && ./compile/testAll 1 3 $nn $id)
 

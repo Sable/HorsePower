@@ -38,6 +38,7 @@ V initV             (V x, L typ, L len);
 V initTableDict     (V x, L typ, L numCols);
 V initSymbol        (V x, L val);
 V initList          (V x, L numItems);
+V initFlatList      (V x, L numItems);
 V initValue         (V x, L typ, L len);
 V initDict          (V x, L numCols);
 V initTable         (V x, L numCols);

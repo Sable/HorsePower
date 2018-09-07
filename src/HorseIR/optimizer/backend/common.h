@@ -46,6 +46,7 @@ typedef struct node_value{
         X x;   //complex   8  bytes
         Y y;   //enum      16 bytes
         A a;   //table     16 bytes
+        struct node_value *g2;
     };
 }V0,*V;
 
@@ -65,6 +66,8 @@ typedef struct list_table{
 #define DOI(n, x) {for(L i=0,i2=n;i<i2;i++)x;}
 #define DOJ(n, y) {for(L j=0,j2=n;j<j2;j++)y;}
 #define DOK(n, z) {for(L k=0,k2=n;k<k2;k++)z;} 
+#define DOI3(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
+#define DOJ3(m, n, x) {for(L j=m,j2=n;j<j2;j++)x;}
 
 #define DOIa(n, x) {for(L i=1,i2=n;i<i2;i++)x;}
 #define DOJa(n, x) {for(L j=1,j2=n;j<j2;j++)x;}

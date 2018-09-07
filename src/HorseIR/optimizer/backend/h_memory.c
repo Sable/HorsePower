@@ -171,8 +171,18 @@ V initSymbol(V x, L val){
 }
 
 V initList(V x, L numItems){
-    R initV(x, H_G, numItems);
+    initV(x, H_G, numItems);
+    vg2(x) = NULL;
+    R x;
 }
+
+V initFlatList(V x, L numItems){
+    initV(x, H_L, numItems);
+    vp(x) = H_G;
+    vg2(x) = NULL;
+    R x;
+}
+
 
 V initValue(V x, L typ, L len){
     R initV(x,typ,len);
