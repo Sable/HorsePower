@@ -1,5 +1,6 @@
 import json
 import sys
+from collections import OrderedDict
 
 def readLines(filename,typ='.json'):
     return "".join([trim(x) for x in open(filename+typ,'r').readlines()])
@@ -19,7 +20,7 @@ def main():
         print "Usage: python gen_opt.py <file>"
         sys.exit(1)
     name = sys.argv[1]
-    plan = json.loads(readLines(name, ''))['optimizersteps']
+    plan = json.loads(readLines(name, ''), object_pairs_hook=OrderedDict)['optimizersteps']
     numb = len(plan)
     opt  = numb - 1 # output optimized one, i.e. 5
     #opt = 0  # unopt

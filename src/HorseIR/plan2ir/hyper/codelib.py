@@ -89,6 +89,7 @@ def getEnvAlias(env): return env['cols_a']
 def getEnvType (env): return env['cols_t']
 def getEnvMask (env): return env['mask']
 def getEnvMaskA(env): return env['mask_a']
+def getEnvCard (env): return env['card']
 
 def isEnv2(env): return isinstance(env, list)
 def isDict(x): return isinstance(x, dict)
@@ -96,7 +97,7 @@ def isList(x): return isinstance(x, list)
 
 
 def printEnv(env):
-    print 'Environment node: %s, mask: %s' % (getEnvTable(env), getEnvMask(env))
+    print 'Environment node: {name: "%s", mask: "%s", card: "%d"}' % (getEnvTable(env), getEnvMask(env), getEnvCard(env))
     alias = env['cols_a']
     names = env['cols_n']
     types = env['cols_t']

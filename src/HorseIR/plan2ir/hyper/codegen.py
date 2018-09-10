@@ -47,7 +47,7 @@ def genNamebyNum():
 def genPrint(s):
     global line_no, code_block
     line_no = line_no + 1
-    # print s
+    print s
     code_block.append(s)
 
 def genAssignment(expr,cast=''):

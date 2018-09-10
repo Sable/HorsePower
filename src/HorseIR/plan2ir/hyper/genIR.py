@@ -65,24 +65,25 @@ def scanMain(d, env):
                 if op == 'join': scanMagic(d['magic'], env2[0])  # q17
                 else: unexpected('Unhandled magic in the operator (%s)' % op)
             env2.append(scanMain(d['right'], env))
-        if   op == 'tablescan'    : return scanTablescan    (d, env )  # 0 child
-        elif op == 'tempscan'     : return scanTempscan     (d, env )  # 0 child
-        elif op == 'groupbyscan'  : return scanGroupbyscan  (d, env )  # 0 child
-        elif op == 'groupby'      : return scanGroupby      (d, env1)  # 1 child
-        elif op == 'sort'         : return scanSort         (d, env1)  # 1 child
-        elif op == 'map'          : return scanMap          (d, env1)  # 1 child
-        elif op == 'select'       : return scanSelect       (d, env1)  # 1 child
-        elif op == 'earlyprobe'   : return scanEearlyprobe  (d, env1)  # 1 child
-        elif op == 'join'         : return scanJoin         (d, env2)  # 2 children
-        elif op == 'groupjoin'    : return scanGroupjoin    (d, env2)  # 2 children
-        elif op == 'leftantijoin' : return scanLeftantijoin (d, env2)  # 2 children
-        elif op == 'rightantijoin': return scanRightantijoin(d, env2)  # 2 children
-        elif op == 'leftsemijoin' : return scanLeftsemijoin (d, env2)  # 2 children
-        elif op == 'rightsemijoin': return scanRightsemijoin(d, env2)  # 2 children
+        if   op == 'tablescan'    : rtn = scanTablescan    (d, env )  # 0 child
+        elif op == 'tempscan'     : rtn = scanTempscan     (d, env )  # 0 child
+        elif op == 'groupbyscan'  : rtn = scanGroupbyscan  (d, env )  # 0 child
+        elif op == 'groupby'      : rtn = scanGroupby      (d, env1)  # 1 child
+        elif op == 'sort'         : rtn = scanSort         (d, env1)  # 1 child
+        elif op == 'map'          : rtn = scanMap          (d, env1)  # 1 child
+        elif op == 'select'       : rtn = scanSelect       (d, env1)  # 1 child
+        elif op == 'earlyprobe'   : rtn = scanEearlyprobe  (d, env1)  # 1 child
+        elif op == 'join'         : rtn = scanJoin         (d, env2)  # 2 children
+        elif op == 'groupjoin'    : rtn = scanGroupjoin    (d, env2)  # 2 children
+        elif op == 'leftantijoin' : rtn = scanLeftantijoin (d, env2)  # 2 children
+        elif op == 'rightantijoin': rtn = scanRightantijoin(d, env2)  # 2 children
+        elif op == 'leftsemijoin' : rtn = scanLeftsemijoin (d, env2)  # 2 children
+        elif op == 'rightsemijoin': rtn = scanRightsemijoin(d, env2)  # 2 children
         # leftouterjoin
         # leftmarkjoin
         else:
             unexpected("Not impl. %s" % op)
+        return setProperty(d, rtn) # set cardinality
     else:
         unexpected("Check scanMain")
 
@@ -379,7 +380,7 @@ def scanAggr(d, values):
     # print env_names
     # print env_types
     # print env_alias
-    return encodeEnv('lambda', env_names, env_alias, env_types)
+    return encodeEnv('lambda_aggr', env_names, env_alias, env_types)
 
 def scanHeader(d, env):
     new_env = scanMain(d['plan'], env)
@@ -638,7 +639,7 @@ def addTarget2Env(d, env):
         env_alias.append(findAliasByName(source_name, env))
         # env_alias.append(genAssignment(findAliasByName(source_name, env)))
         env_types.append(strType(x['target'][1]))
-    return combineEnv2(env, encodeEnv('handleTarget', env_names, env_alias, env_types), False)
+    return combineEnv2(env, encodeEnv('add_target', env_names, env_alias, env_types), False)
 
 def scanTempscan(d, env):
     debug('temp scan')
@@ -1191,6 +1192,10 @@ def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=Fal
         debug('right keys (%s)' % right_alias)
         r = joinWithKeys(reverseJoinType(joinType), right_alias, right_env, left_alias, left_env) + ['plain']
         return [r[1],r[0],r[2],'plain']
+    elif getEnvCard(left_env) == 1:
+        printEnv(left_env)
+        printEnv(right_env)
+        pending('adding a new case for scalar on left/right, see q15')
     else: # plain join
         debug('plain join for (%s.%s) and (%s.%s)' % (left_table, left_name, right_table, right_name))
         return joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env) + ['plain']
@@ -1507,14 +1512,15 @@ def actionCompress(vid, cols):
     return alias
 
 
-def encodeEnv(table_name, cols_names, cols_alias, cols_types, mask='', mask_alias=[]):
+def encodeEnv(table_name, cols_names, cols_alias, cols_types, mask='', mask_alias=[], card=-1):
     return {
         "table"    : table_name,
         "cols_n"   : cols_names,
         "cols_a"   : cols_alias,
         "cols_t"   : cols_types,
         "mask"     : mask,
-        "mask_a"   : mask_alias  # mask/mask_a ==> cols_a
+        "mask_a"   : mask_alias, # mask/mask_a ==> cols_a
+        "card"     : card        # cardinality: -1 for unknown
     }
 
 def fetchID(d):
@@ -1646,6 +1652,16 @@ def checkForeignKey(table, name):
             if sameListString(x[0], packColumnName(name)):
                 return True
     return False
+
+def getCard(d):
+    return int(d['cardinality'])
+
+def setProperty(d, env):
+    env['card'] = int(d['cardinality'])
+    opId = d['operatorId']
+    if getEnvTable(env).startswith('lambda'): # assign a unique ID
+        env['table'] = getEnvTable(env) + '_' + str(opId)
+    return env
 
 if __name__ == '__main__':
     start = time.time()
