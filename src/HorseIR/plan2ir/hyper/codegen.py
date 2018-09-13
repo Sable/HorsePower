@@ -69,10 +69,11 @@ def genMonadic(description, value):
     return targ
 
 def genDyadic(description, value_0, value_1, cast=''):
-    if description == 'eq' or description == 'neq': # chf
-        value_1 = genSymFromString(value_1)
-    elif description == 'like':
-        value_1 = genStringFromSym(value_1)
+    if not value_1.startswith('t'):
+        if description == 'eq' or description == 'neq': # chf
+            value_1 = genSymFromString(value_1)
+        elif description == 'like':
+            value_1 = genStringFromSym(value_1)
     targ = genAssignment('@%s(%s,%s)'%(description,value_0,value_1),cast)
     insertUse(value_0, targ)
     insertUse(value_1, targ)
@@ -265,6 +266,9 @@ def genEachRight(x, m, n):
 
 def genBetween(x, m, n):
     return genAnd(genGeq(x, m), genLeq(x, n))
+
+def genJoinIndex(x, m, n):
+	return genTriple('join_index', x, m, n)
 
 ###############  other helper
 

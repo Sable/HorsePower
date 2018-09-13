@@ -1099,12 +1099,21 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
             vec_side_or = {} # reset
             return [t0, t0, 'masking']  # chf: t0, t0?
         else:
-            e0 = genEnum  (k_alias, v_alias)
-            t0 = genValues(e0)  #p0
-            t1 = genKeys  (e0)
-            t2 = genLt    (t0, genLength(t1))
-            t3 = genWhere (t2)  #p1
-            return [t0, t3, 'indexing']
+            # print k_alias, v_alias
+            # printEnv(k_env)
+            # printEnv(v_env)
+            # raw_input()
+            # TODO: add compress for both sides before join_index
+            t0 = genJoinIndex('@eq', k_alias, v_alias)
+            t1 = genIndex(t0, '0:i64')
+            t2 = genIndex(t0, '1:i64')
+            return [t1, t2, 'indexing']
+            # e0 = genEnum  (k_alias, v_alias)
+            # t0 = genValues(e0)  #p0
+            # t1 = genKeys  (e0)
+            # t2 = genLt    (t0, genLength(t1))
+            # t3 = genWhere (t2)  #p1
+            # return [t0, t3, 'indexing']
     elif joinType == 'right_antijoin':
         return joinWithoutRelation(joinType, k_alias, k_env, v_alias, v_env)
     elif joinType == 'left_antijoin':
@@ -1154,6 +1163,14 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
     else:
         pending('[joinWithoutRelation] add more join types: join type (%s)' % joinType)
 
+def joinWithScalar(joinType, left_alias, left_env, right_alias, right_env, isScalarLeft):
+    if joinType == 'equi_join':
+        t0 = genEq(left_alias, right_alias)
+        t1 = genVector(genLength(t0), '1:64')
+        return [t1, t0, 'masking'] if isScalarLeft else [t0, t1, 'masking']
+    else:
+        pending('[joinWithScalar] unknown join type: %s' % joinType)
+
 """
  return type: indexing / masking
 """
@@ -1193,9 +1210,10 @@ def joinColumns(joinType, left_name, left_env, right_name, right_env, isList=Fal
         r = joinWithKeys(reverseJoinType(joinType), right_alias, right_env, left_alias, left_env) + ['plain']
         return [r[1],r[0],r[2],'plain']
     elif getEnvCard(left_env) == 1:
-        printEnv(left_env)
-        printEnv(right_env)
-        pending('adding a new case for scalar on left/right, see q15')
+        # pending('adding a new case for scalar on left/right, see q15')
+        return joinWithScalar(joinType, left_alias, left_env, right_alias, right_env, True) + ['plain']
+    elif getEnvCard(right_env) == 1:
+        return joinWithScalar(joinType, left_alias, left_env, right_alias, right_env, False) + ['plain']
     else: # plain join
         debug('plain join for (%s.%s) and (%s.%s)' % (left_table, left_name, right_table, right_name))
         return joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env) + ['plain']

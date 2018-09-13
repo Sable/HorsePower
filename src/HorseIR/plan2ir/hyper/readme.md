@@ -1,29 +1,33 @@
 ## List of Queries
 
-| ID | Status | Verify  |is10 | Joins                                    | Special
-|----|--------|:-------:|-----|------------------------------------------|-------------------------
-| 1  | Pass   |  V      | Y   | 0 join                                   |
-| 2  | Pass*  |         |     | 8 joins                                  | earlyprobe, is
-| 3  | Pass   |         | Y   | 1 join,  1 groupjoin                     |
-| 4  | Pass   |  V      | Y   | 1 leftsemijoin                           |
-| 5  | Pass   |         |     | 5 joins                                  |
-| 6  | Pass   |  V      | Y   | 0 join                                   |
-| 7  | Pass*  |         |     | 5 joins                                  | bnl
-| 8  | Pass*  |         |     | 7 joins                                  |
-| 9  | Pass*  |         |     | 5 joins                                  |
-| 10 | Pass   |         |     | 3 joins                                  |
-| 11 | Pass   |         |     | 5 joins                                  | bnl join
-| 12 | Pass   |  V      |     | 1 join                                   | lookup
-| 13 | Pass   |  V      |     | 1 groupjoin                              | (left-outer-join)
-| 14 | Pass   |  V      | Y   | 1 join                                   |
-| 15 | Pass   |         |     | 1 join,  1 index join                    |
-| 16 | Pass   |  V      | Y   | 1 join,  1 rightantijoin                 |
-| 17 | Pass*  |  V      | Y   | 2 joins, 1 groupjoin                     | groupby scan, magic?
-| 18 | Pass   |         | Y   | 2 joins, 1 rightsemijoin                 | select
-| 19 | Pass   |  V      | Y   | 2 join                                   |
-| 20 | Pass*  |         |     | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
-| 21 | Pass*  |         |     | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
-| 22 | Pass   |  V      | Y   | 1 join,  1 leftantijoin                  | bnl
+| ID | Status | Hand Seq |Auto | Joins                                    | Special
+|----|--------|:--------:|-----|------------------------------------------|-------------------------
+| 1  | Pass   |  1       | Y   | 0 join                                   |
+| 2  | Pass*  |    2     |     | 8 joins                                  | earlyprobe, is
+| 3  | Pass   |    2     | Y   | 1 join,  1 groupjoin                     |
+| 4  | Pass   |  1       | Y   | 1 leftsemijoin                           |
+| 5  | Pass   |    2     |     | 5 joins                                  |
+| 6  | Pass   |  1       | Y   | 0 join                                   |
+| 7  | Pass*  |    2     |     | 5 joins                                  | bnl
+| 8  | Pass*  |    2     |     | 7 joins                                  |
+| 9  | Pass*  |      3   |     | 5 joins                                  |
+| 10 | Pass   |    2     |     | 3 joins                                  |
+| 11 | Pass   |      3   |     | 5 joins                                  | bnl join
+| 12 | Pass   |  1       |     | 1 join                                   | lookup
+| 13 | Pass   |  1       |     | 1 groupjoin                              | (left-outer-join)
+| 14 | Pass   |  1       | Y   | 1 join                                   |
+| 15 | Pass   |    2     | Y   | 1 join,  1 index join                    |
+| 16 | Pass   |  1       | Y   | 1 join,  1 rightantijoin                 |
+| 17 | Pass*  |    2     | Y   | 2 joins, 1 groupjoin                     | groupby scan, magic?
+| 18 | Pass   |    2     | Y   | 2 joins, 1 rightsemijoin                 | select
+| 19 | Pass   |  1       | Y   | 2 join                                   |
+| 20 | Pass*  |      3   |     | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
+| 21 | Pass*  |      3   |     | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
+| 22 | Pass   |  1       | Y   | 1 join,  1 leftantijoin                  | bnl
+
+Note (Sep 13)
+
+- Newly passed: 15
 
 Note (July 25)
 
