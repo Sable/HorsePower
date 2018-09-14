@@ -905,11 +905,16 @@ L pfnEnlist(V z, V x){
 
 L pfnRaze(V z, V x){
     if(isList(x)){
-        L typZ=-1, lenZ=0, n=0;
-        CHECKE(getCommonType(x, &typZ, &lenZ));
-        initV(z,typZ,lenZ);
-        CHECKE(fillRaze(z,&n,x));
-        CHECKE(n!=lenZ?E_UNKNOWN:0);
+        if(isListFlat(x)){
+            copyV(z, vg2(x));
+        }
+        else {
+            L typZ=-1, lenZ=0, n=0;
+            CHECKE(getCommonType(x, &typZ, &lenZ));
+            initV(z,typZ,lenZ);
+            CHECKE(fillRaze(z,&n,x));
+            CHECKE(n!=lenZ?E_UNKNOWN:0);
+        }
         R 0;
     }
     else if(isTypeGroupBasic(vp(x))){
@@ -920,21 +925,25 @@ L pfnRaze(V z, V x){
 
 L pfnToList(V z, V x){
     if(isTypeGroupBasic(xp)){
-        initV(z,H_G,xn);
-        switch(xp){
-            caseB DOP(xn, {V t=vV(z,i); initV(t,xp,1); vb(t)=vB(x,i);}) break;
-            caseJ DOP(xn, {V t=vV(z,i); initV(t,xp,1); vj(t)=vJ(x,i);}) break;
-            caseH DOP(xn, {V t=vV(z,i); initV(t,xp,1); vh(t)=vH(x,i);}) break;
-            caseI DOP(xn, {V t=vV(z,i); initV(t,xp,1); vi(t)=vI(x,i);}) break;
-            caseL DOP(xn, {V t=vV(z,i); initV(t,xp,1); vl(t)=vL(x,i);}) break;
-            caseF DOP(xn, {V t=vV(z,i); initV(t,xp,1); vf(t)=vF(x,i);}) break;
-            caseE DOP(xn, {V t=vV(z,i); initV(t,xp,1); ve(t)=vE(x,i);}) break;
-            caseX DOP(xn, {V t=vV(z,i); initV(t,xp,1); vx(t)=vX(x,i);}) break;
-            caseQ DOP(xn, {V t=vV(z,i); initV(t,xp,1); vq(t)=vQ(x,i);}) break;
-            caseS DOP(xn, {V t=vV(z,i); initV(t,xp,1); vs(t)=vS(x,i);}) break;
-            default: R E_NOT_IMPL;
-        }
+        initFlatList(z, xn);
+        vg2(z) = x;
+        DOP(xn, vL(z,i)=1)
         R 0;
+        //initV(z,H_G,xn);
+        //switch(xp){
+        //    caseB DOP(xn, {V t=vV(z,i); initV(t,xp,1); vb(t)=vB(x,i);}) break;
+        //    caseJ DOP(xn, {V t=vV(z,i); initV(t,xp,1); vj(t)=vJ(x,i);}) break;
+        //    caseH DOP(xn, {V t=vV(z,i); initV(t,xp,1); vh(t)=vH(x,i);}) break;
+        //    caseI DOP(xn, {V t=vV(z,i); initV(t,xp,1); vi(t)=vI(x,i);}) break;
+        //    caseL DOP(xn, {V t=vV(z,i); initV(t,xp,1); vl(t)=vL(x,i);}) break;
+        //    caseF DOP(xn, {V t=vV(z,i); initV(t,xp,1); vf(t)=vF(x,i);}) break;
+        //    caseE DOP(xn, {V t=vV(z,i); initV(t,xp,1); ve(t)=vE(x,i);}) break;
+        //    caseX DOP(xn, {V t=vV(z,i); initV(t,xp,1); vx(t)=vX(x,i);}) break;
+        //    caseQ DOP(xn, {V t=vV(z,i); initV(t,xp,1); vq(t)=vQ(x,i);}) break;
+        //    caseS DOP(xn, {V t=vV(z,i); initV(t,xp,1); vs(t)=vS(x,i);}) break;
+        //    default: R E_NOT_IMPL;
+        //}
+        //R 0;
     }
     else R E_DOMAIN;
 }
@@ -968,8 +977,7 @@ L pfnGroup(V z, V x){
         if(H_DEBUG) P("Ordered data found in pfnGroup\n");
         order_list = NULL;
     }
-    //else if(isInteger(x)){ // TODO: H_L
-    //}
+    else if(isInteger(x)){;} // skip
     else {
         DOP(lenZ,vB(y,i)=1)
         CHECKE(pfnOrderBy(t,x,y));
@@ -984,6 +992,10 @@ L pfnGroup(V z, V x){
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
+    }
+    else if(isInteger(x)){
+        //CHECKE(lib_group_by_flat(z,x));
+        CHECKE(lib_group_by_normal(z,x));
     }
     else if(isTypeGroupBasic(xp)){
         // V0 t1; V tx=&t1;
@@ -1034,6 +1046,7 @@ L pfnCompare(V z, V x, V y, L op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,0),vF(tempY,i),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,0),vE(tempY,i),compareFloat)) break;
+                    default: EP("1. type not defined: %s\n", getTypeName(typMax));
                 }
             }
             else if(isOne(y)) {
@@ -1045,6 +1058,7 @@ L pfnCompare(V z, V x, V y, L op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,0),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,0),compareFloat)) break;
+                    default: EP("2. type not defined: %s\n", getTypeName(typMax));
                 }
             }
             else {
@@ -1056,6 +1070,7 @@ L pfnCompare(V z, V x, V y, L op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,i),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,i),compareFloat)) break;
+                    default: EP("3. type not defined: %s\n", getTypeName(typMax));
                 }
             }
         }
@@ -1065,36 +1080,42 @@ L pfnCompare(V z, V x, V y, L op){
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,0),vQ(y,i),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,0),vS(y,i),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,0),vC(y,i))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,0),vM(y,i))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,0),vD(y,i))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,0),vZ(y,i))) break;
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,0),vU(y,i))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,0),vV(y,i))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,0),vT(y,i))) break;
+                    default: EP("4. type not defined: %s\n", getTypeName(vp(x)));
                 }
             }
             else if(isOne(y)) {
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,0),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,0),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,0))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,0))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,0))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,0))) break;
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,0))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,0))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,0))) break;
+                    default: EP("5. type not defined: %s\n", getTypeName(vp(x)));
                 }
             }
             else {
                 switch(vp(x)){
                     caseQ DOP(lenZ, vB(z,i)=COMPFN(op,vQ(x,i),vQ(y,i),compareSymbol)) break;
                     caseS DOP(lenZ, vB(z,i)=COMPFN(op,vS(x,i),vS(y,i),strcmp))        break;
+                    caseC DOP(lenZ, vB(z,i)=COMP(op,vC(x,i),vC(y,i))) break;
                     caseM DOP(lenZ, vB(z,i)=COMP(op,vM(x,i),vM(y,i))) break;
                     caseD DOP(lenZ, vB(z,i)=COMP(op,vD(x,i),vD(y,i))) break;
                     caseZ DOP(lenZ, vB(z,i)=COMP(op,vZ(x,i),vZ(y,i))) break;
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,i))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,i))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,i))) break;
+                    default: EP("6. type not defined: %s\n", getTypeName(vp(x)));
                 }
             }
         }
@@ -1696,24 +1717,24 @@ L pfnOrderBy(V z, V x, V y){
 
 L pfnEach(V z, V x, FUNC1(foo)){
     if(isList(x)){
-        if(vg2(x)) EP("TODO: flat list\n");
-        else {
-            initV(z,H_G,vn(x));
-            //P("Each: input size = %lld\n", vn(x));
-            L total = 0;
-            //DOI(xn, total += vn(vV(x,i))) P("avg = %g\n", total*1.0/vn(x));
-            DOI(xn, CHECKE((*foo)(vV(z,i),vV(x,i))))
+        V t = NULL;
+        if(isListFlat(x)) {
+            if(foo == &pfnLen) R listFlatEachLen(z,x); //TODO: add pfnSum
+            else {t=allocNode(); listFlat2Normal(t,x);}
         }
+        else t = x;
+        initV(z,H_G,vn(t));
+        DOI(vn(t), CHECKE((*foo)(vV(z,i),vV(t,i))))
         R 0;
     }
     else R E_DOMAIN;
 }
 
 L pfnEachItem(V z, V x, V y, FUNC2(foo)){
-    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     L lenX = isList(x)?vn(x):1;
     L lenY = isList(y)?vn(y):1;
     if(isList(x) && isList(y)){
+        if(isListFlat(x) || isListFlat(y)) EP("TODO: flat list\n");
         if(lenX==lenY){
             initV(z,H_G,lenX);
             DOI(lenX, CHECKE((*foo)(vV(z,i),vV(x,i),vV(y,i))))
@@ -1743,8 +1764,8 @@ L pfnEachItem(V z, V x, V y, FUNC2(foo)){
 }
 
 L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
-    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     if(isList(x)){
+        if(isListFlat(x)) EP("TODO: flat list\n");
         L lenZ = vn(x);
         initV(z,H_G,lenZ);
         DOI(lenZ, CHECKE((*foo)(vV(z,i),vV(x,i),y)))
@@ -1756,16 +1777,20 @@ L pfnEachLeft(V z, V x, V y, FUNC2(foo)){
 }
 
 L pfnEachRight(V z, V x, V y, FUNC2(foo)){
-    if(vg2(x) || vg2(y)) EP("TODO: flat list\n");
     if(isList(y)){
-        P("len(x) = %lld, len(y) = %lld\n", vn(x),vn(y));
-        L lenZ = vn(y);
+        V t = NULL;
+        if(isListFlat(y)) {
+            WP("[pfnEachRight] TODO: flat list\n");
+            t=allocNode(); listFlat2Normal(t,y);
+        }
+        else t = y;
+        L lenZ = vn(t);
         initV(z,H_G,lenZ);
         // P("pfnEachRight: size(z) = %lld\n", lenZ);
         // L minVal = 999999, maxVal = -1;
         // DOI(lenZ, {V tt=vV(y,i); if(minVal>vn(tt)) minVal=vn(tt); if(maxVal<vn(tt)) maxVal=vn(tt);})
         // P("lenZ = %lld, minVal = %lld, maxVal = %lld\n", lenZ, minVal, maxVal); getchar();
-        DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(y,i))))  // seg fault after DOI -> DOP
+        DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(t,i))))  // seg fault after DOI -> DOP
     }
     else {
         CHECKE((*foo)(z,x,y));

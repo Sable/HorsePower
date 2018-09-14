@@ -62,6 +62,8 @@ L setFKey               (V x, V colName, V fKey);
 B isOrdered             (V x);
 L searchOrdered         (V z, V x, V y);
 L joinIndexHash         (V z, V x, V y, C op);
+L listFlat2Normal       (V z, V x);
+L listFlatEachLen       (V z, V x);
 
 F logBaseF              (F b, F x);
 E logBaseE              (E b, E x);

@@ -25,6 +25,7 @@ extern "C" {
 #define isSecond(x)    (H_W==vp(x))
 #define isTime(x)      (H_T==vp(x))
 #define isList(x)      (H_G==vp(x))
+#define isListFlat(x)  (vg2(x))
 #define isEnum(x)      (H_Y==vp(x))
 #define isTable(x)     (H_A==vp(x))
 #define isKTable(x)    (H_K==vp(x))

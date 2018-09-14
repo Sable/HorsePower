@@ -639,6 +639,29 @@ L searchOrdered(V z, V x, V y){
     R 0;
 }
 
+L listFlat2Normal(V z, V x){
+    V g2 = vg2(x); L typ2 = vp(g2);
+    if(isTypeGroupBasic(typ2)){
+        L lenZ = vn(x), typSize = getpTypeSize(typ2); G cur=vg(g2); B f0 = typ2==H_C;
+        initV(z, H_G, lenZ);
+        DOI(lenZ, {V t=vV(z,i); L k=vL(x,i); L kSize=getTypeSize(typ2,k)-f0; initV(t,typ2,k);\
+                memcpy(vg(t),cur,kSize); if(f0)vg(t)[kSize]=0; cur+=kSize;})
+    }
+    else EP("Not supported type: %s\n", getpTypeName(typ2));
+    R 0;
+}
+
+L listFlatEachLen(V z, V x){
+    L lenZ = vn(x);
+    initFlatList(z, lenZ);
+    V g2 = allocNode();
+    initV(g2,H_L,lenZ);
+    memcpy(vg(g2),vg(x),sizeof(L)*lenZ);
+    vg2(z) = g2;
+    DOP(lenZ, vL(z,i)=1)
+    R 0;
+}
+
 //L searchOrdered(V z, V x, V y){
 //    L lenZ = vn(y);
 //    initV(z,H_L,lenZ);

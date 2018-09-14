@@ -1,7 +1,17 @@
 #include "../global.h"
 
 #define CS(x) case x: return #x
+#define SZ(x) case x: return sizeof(x)
 #define DF(x) default: EP("Type not defined: %d\n",x)
+
+const char *getTypeName(L x){
+    switch(x){
+        CS(H_B); CS(H_J); CS(H_H); CS(H_I); CS(H_L); CS(H_F); CS(H_E); CS(H_X);
+        CS(H_C); CS(H_Q); CS(H_S); CS(H_M); CS(H_D); CS(H_Z); CS(H_U); CS(H_W);
+        CS(H_T); CS(H_G); CS(H_N); CS(H_Y); CS(H_A); CS(H_K); CS(H_V); 
+        DF(x);
+    }
+}
 
 const char *getpTypeName(pType x){
     if(x >= totalT){
@@ -12,6 +22,21 @@ const char *getpTypeName(pType x){
         CS(charT); CS(clexT); CS(symT); CS(strT);
         CS(monthT); CS(dateT); CS(dtT); CS(hourT); CS(minuteT); CS(timeT);
         CS(tableT); CS(ktableT); CS(listT); CS(enumT); CS(dictT); CS(funcT);
+        DF(x);
+    } R 0;
+}
+
+// TODO 1: change the function to a constant array
+// TODO 2: check `getTypeSize` in backend/h_memory.c
+const int getpTypeSize(pType x){
+    if(x >= totalT){
+        EP("pType not defined: %d (total %d)\n", x, totalT);
+    }
+    switch(x){
+        SZ(unknownT); SZ(boolT); SZ(i16T); SZ(i32T); SZ(i64T);
+        SZ(charT); SZ(clexT); SZ(symT); SZ(strT);
+        SZ(monthT); SZ(dateT); SZ(dtT); SZ(hourT); SZ(minuteT); SZ(timeT);
+        SZ(tableT); SZ(ktableT); SZ(listT); SZ(enumT); SZ(dictT); SZ(funcT);
         DF(x);
     } R 0;
 }

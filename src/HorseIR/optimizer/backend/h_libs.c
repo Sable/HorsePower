@@ -789,32 +789,6 @@ L lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     R 0;
 }
 
-L lib_group_by_flat(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
-    L k, c, cz; V d,t;
-    /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
-    L lenZ=iLen>0?1:0;
-    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
-    /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
-    // initV(z, H_N, lenZ);
-    initV(z, H_N, 2);
-    V zKey = getDictKeys(z);
-    V zVal = getDictVals(z);
-    initV(zKey, H_L, lenZ);
-    initFlatList(zVal, lenZ);
-    vg2(zVal) = val;
-    /* 3. fill indices into each cell */
-    // P("step 3\n");
-    k=0, c=iLen>0?1:0;
-    DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
-                  vL(zVal,k++)=c; c=1; } \
-               else c++)
-    if(c>0) vL(zVal,k)=c;
-    // P("exit\n");
-    R 0;
-}
-
 /* 
  * copy from lib_get_group_by_other
  * index[x] => x
@@ -861,8 +835,8 @@ L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
        if(index == NULL)
            R lib_get_group_by_order(z, val, index, iLen, cmp);
        else 
-           R lib_group_by_flat(z, val, index, iLen, cmp);
-           //R lib_get_group_by_other(z, val, index, iLen, cmp);
+           R lib_get_group_by_other(z, val, index, iLen, cmp);
+           //R lib_group_by_flat(z, val, index, iLen, cmp);
     // #endif
 }
 
@@ -1182,12 +1156,12 @@ static void lib_radixsort_basic(Pos *val, I len){
     const L size = 255;
     int *tempC = (int*)malloc(sizeof(int)<<8);
     Pos *tempB = (Pos*)malloc(sizeof(Pos)*len);
-    int  maxSize = 32;
+    I maxSize = 32;
     const L halfL = 0xffffffff;
     for(I i=0; i<len; i++){
         //int numOfDigits = (int)log10(val[i].x) + 1;
-        if((((val[i].x)>>32) & halfL) > 0){
-            maxSize = 64;
+        if(((val[i].x)>>32) > 0){
+            maxSize = 64; break;
         }
     }
     WP("maxSize = %d\n", maxSize);
@@ -1197,7 +1171,7 @@ static void lib_radixsort_basic(Pos *val, I len){
         DOIa(size+1, tempC[i] = tempC[i] + tempC[i-1])
         //printf("j = %d\n", j);
         for(I i=len-1;i>=0;i--){
-            int k = ((val[i].x)>>j) & size;
+            L k = ((val[i].x)>>j) & size;
             //printf("val = %lld, k = %d\n", val[i].x,k);
             tempC[k]--;
             tempB[tempC[k]] = val[i];
@@ -1226,6 +1200,78 @@ void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
     }
     free(pos);
 }
+
+L lib_group_by_normal(V z, V x){
+    Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);
+    DOP(xn, {pos[i].x=vL(x,i); pos[i].i=i;})
+    lib_radixsort_basic(pos, xn);
+    L k, c, cz; V d,t;
+    L start=xn>0?1:0;
+    /* 1. get the total number of cells: lenZ */
+    // P("step 1\n");
+    L lenZ=start;
+    DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
+    /* 2. allocate list and get the info of each cell */
+    // P("step 2\n");
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initV(zKey, H_L, lenZ);
+    initV(zVal, H_G, lenZ);
+    /* 3. fill indices into each cell */
+    // P("step 3\n");
+    k=cz=0, c=start;
+    d=vV(zVal,k++);
+    if(start) vL(zKey,cz++)=pos[0].i;
+    DOIa(xn, if(pos[i-1].x!=pos[i].x){ \
+               vL(zKey,cz++)=pos[i].i; initV(d,H_L,c); d=vV(zVal,k++); c=1;} \
+             else c++)
+    if(c>0) initV(d,H_L,c);
+    k=0, c=0;
+    d=vV(zVal,k++);
+    if(start) vL(d,c++)=pos[0].i;
+    DOIa(xn, if(pos[i-1].x!=pos[i].x){\
+               d=vV(zVal,k++); vL(d,0)=pos[i].i; c=1;} \
+             else vL(d,c++)=pos[i].i)
+    free(pos);
+    R 0;
+}
+
+// TODO: extend from only (H_L == vp(x))
+L lib_group_by_flat(V z, V x){
+    Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);
+    DOP(xn, {pos[i].x=vL(x,i); pos[i].i=i;})
+    lib_radixsort_basic(pos, xn);
+    L k, c, cz; V d,t;
+    L start=xn>0?1:0;
+    /* 1. get the total number of cells: lenZ */
+    // P("step 1\n");
+    L lenZ=start;
+    DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
+    /* 2. allocate list and get the info of each cell */
+    // P("step 2\n");
+    initV(z, H_N, 2);
+    V zKey = getDictKeys(z);
+    V zVal = getDictVals(z);
+    initV(zKey, H_L, lenZ);
+    initFlatList(zVal, lenZ);
+    /* store index value */
+    V g2 = allocNode();
+    initV(g2,H_L,xn);
+    DOP(xn,vL(g2,i)=pos[i].i)
+    vg2(zVal) = g2;
+    /* 3. fill indices into each cell */
+    // P("step 3\n");
+    k=0, c=start;
+    if(start) vL(zKey,k)=pos[0].i;
+    DOIa(xn, if(pos[i-1].x!=pos[i].x){vL(zVal,k++)=c; vL(zKey,k)=pos[i].i; c=1;} \
+               else c++)
+    if(c>0) vL(zVal,k)=c;
+    //printV(x); printV(zKey); printV(zVal); getchar();
+    free(pos);
+    R 0;
+}
+
 
 /* index for join index*/
 

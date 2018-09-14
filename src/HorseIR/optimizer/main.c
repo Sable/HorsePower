@@ -159,7 +159,8 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    SP(file_path, "data/hand-q%d.hir", qid);
+    //SP(file_path, "data/hand-q%d.hir", qid);
+    SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 

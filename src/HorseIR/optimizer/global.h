@@ -71,8 +71,10 @@ V getValueFromNameTable(char *str);
 int runModeServer();
 int runModeClient();
 /* util/info.c */
+const char *getTypeName(L x);
 const char *getpTypeName(pType x);
 const char *getKindName(Kind x);
 const char *getpFuncName(pFunc x);
+const int   getpTypeSize(pType x);
 
 #endif

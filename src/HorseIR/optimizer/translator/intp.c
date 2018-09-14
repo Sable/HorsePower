@@ -91,12 +91,12 @@ static V executeEachMon(EachMonadic f, V *p){
     V z = NEW(V0);
     S funcName = getSymbolStr(vq(p[0]));
     pFunc fIndex = getFuncIndexByName(funcName);
-    if(fIndex >= ltF) EP("[EachMon] (%s) not supported.\n", funcName);
+    if(fIndex >= ltF) EP("Not supported: %s\n", funcName);
     L valence  = getValence(fIndex);
-    if(valence != 1) EP("monadic op expected for each, not %s\n", funcName);
+    if(valence != 1) EP("Monadic op expected for each, not %s\n", funcName);
     L status = (*f)(z, p[1], monFunc[fIndex]);
     if(status==0) return z;
-    else {P("[EachMonadic]"); printErrMsg(status);}
+    else {WP("[EachMonadic]"); printErrMsg(status);}
 }
 
 static V loadParam2V(Node *param){

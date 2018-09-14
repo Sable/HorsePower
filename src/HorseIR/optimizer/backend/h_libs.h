@@ -39,6 +39,8 @@ void lib_order_by_list      (L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(
 void lib_quicksort_list     (L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CMP(cmp));
 void lib_order_by_vector    (L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp));
 L    lib_get_group_by       (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
+L    lib_group_by_flat      (V z, V x);
+L    lib_group_by_normal    (V z, V x);
 void lib_radixsort_long     (L *rtn, V val, L len, B *isUp, B isRtnIndex);
 
 L lib_member_B(B* targ, B* src, L sLen, B* val, L vLen);
