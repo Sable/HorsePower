@@ -316,7 +316,7 @@ def scanAggr(d, values):
     keep_list = []
     env_names = [] ; env_types = []; env_alias = []
     for a in d:
-        if a['operation'] == 'keep':
+        if a['operation'] == 'keep' or a['operation'] == 'any':
             keep_list.append(a)
     if len(keep_list) == 0: # implicit aggr
         for a in d:
@@ -371,7 +371,7 @@ def scanAggr(d, values):
                 a2 = genEach     ('@len', a1)
                 a3 = genRaze     (a2)
                 env_alias.append(a3)
-            elif op == 'keep':
+            elif op == 'keep' or op == 'any':
                 a0 = genIndex(values[source], t2)
                 env_alias.append(a0) # keep
             else:
@@ -460,7 +460,9 @@ def scanValuesI(v):
 def scanValues(d, env):
     values = []
     for v in d:
-        values.append(scanValuesV(v['value'], env))
+        k = scanValuesV(v['value'], env)
+        t = getAliasType(k, env)
+        values.append(getEnumValue(k, env))
     return values
 
 def scanByFunc(d, name, foo):
@@ -489,7 +491,7 @@ def scanTablescan(d, env):
             mask = genAnd(mask, residuals)
         else:
             mask = residuals
-    newAlias = actionCompress(mask, alias) if mask is not None else alias  #??
+    newAlias = actionCompress(mask, alias, env) if mask is not None else alias  #??
     return encodeEnv(table_name, columns, newAlias, types, mask, alias)
 
 # Copied from scanRestrictions
@@ -611,8 +613,8 @@ def scanGroupjoin(d, env2):
     left_keys  = d['leftKey']
     right_keys = d['rightKey']
     print left_keys, right_keys
-    printEnv(env2[0])
-    printEnv(env2[1])
+    # printEnv(env2[0])
+    # printEnv(env2[1])
     if len(left_keys) == 1:
         # it seems left_col and right_col are useless
         # since 'source' has indicated the name of keys from both sides 
@@ -1070,6 +1072,8 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
     # print v_alias
     # printEnv(v_env)
     # raw_input()
+    k_alias = getEnumValue(k_alias, k_env)
+    v_alias = getEnumValue(v_alias, v_env)
     if joinType == 'equi_join':
         # printEnv(k_env)
         # printEnv(v_env)
@@ -1131,6 +1135,8 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
     # printEnv(left_env)
     # printEnv(right_env)
     # raw_input()
+    left_alias = getEnumValue( left_alias,  left_env)
+    right_alias= getEnumValue(right_alias, right_env)
     if joinType == 'right_antijoin':
         t0 = genMember(left_alias, right_alias)
         p1 = genNot(t0)
@@ -1146,14 +1152,18 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
         p0 = genMember(right_alias, left_alias)
         return [p0, None, 'masking']
     elif joinType == 'equi_join':
-        pending('general equi_join')
-        t0 = genOuter('@eq' if not isList else '@same', left_alias, right_alias)
-        t1 = genWhere(t0)
-        p0 = genIndex(t1,'0:i64','i64')
-        p1 = genIndex(t2,'1:i64','i64')
+        t0 = genJoinIndex('@eq', left_alias, right_alias)
+        p0 = genIndex(t0, '0:i64')
+        p1 = genIndex(t0, '1:i64')
         return [p0, p1, 'indexing']
+        #pending('general equi_join')
+        #t0 = genOuter('@eq' if not isList else '@same', left_alias, right_alias)
+        #t1 = genWhere(t0)
+        #p0 = genIndex(t1,'0:i64','i64')
+        #p1 = genIndex(t2,'1:i64','i64')
+        #eturn [p0, p1, 'indexing']
     elif joinType == 'groupjoin':
-        pending('general equi_join')
+        pending('general groupjoin')
         e0 = genEnum  (left_alias, right_alias) # if t0: key; t1 is fkey
         t0 = genValues(e0)
         t1 = genGroup (t0)   # dict<key, value>
@@ -1297,11 +1307,11 @@ def joinColumnsSpecial(joinType, d, env2):
 Update environment functions
 """
 def updateEnvWithMask(mask, env, func_name='lambda1'):
-    alias = actionCompress(mask, env['cols_a'])
+    alias = actionCompress(mask, env['cols_a'], env)
     return encodeEnv(func_name, env['cols_n'], alias, env['cols_t'], mask, env['cols_a']) #update alias
 
 def updateEnvWithMaskMask(mask, env, func_name='lambda2'):
-    alias = actionCompress(mask, env['mask_a'])
+    alias = actionCompress(mask, env['mask_a'], env)
     return encodeEnv(func_name, env['cols_n'], alias, env['cols_t'], mask, env['mask_a']) #update alias
 
 def updateEnvWithMaskNoCopy(mask, env, func_name='lambda3'):
@@ -1309,12 +1319,12 @@ def updateEnvWithMaskNoCopy(mask, env, func_name='lambda3'):
         mask  = genAnd(mask, getEnvMask(env))
         alias = getEnvAlias(env)
     else:
-        alias = actionCompress(mask, getEnvAlias(env))
+        alias = actionCompress(mask, getEnvAlias(env), env)
     return encodeEnv(func_name, getEnvName(env), alias, getEnvType(env), mask, getEnvMaskA(env))
 
 def updateMaskInEnv(mask, env):
     alias = getEnvAlias(env)
-    newAlias = actionCompress(mask, alias) if mask is not None else alias
+    newAlias = actionCompress(mask, alias, env) if mask is not None else alias
     return encodeEnv(getEnvTable(env), getEnvName(env), newAlias, getEnvType(env), mask, alias)
 
 def updateEnvWithCols(a, env):
@@ -1339,14 +1349,14 @@ def updateEnvWithIndex(ind, env):
     alias = env['cols_a']
     new_a = []
     for a in alias:
-        new_a.append(genIndex(a, ind))
+        new_a.append(genIndex(getEnumValue(a, env), ind))
     return updateEnvWithAlias(new_a, env)
 
 def updateEnvWithMaskIndex(ind, env):
     alias = env['mask_a']
     new_a = []
     for a in alias:
-        new_a.append(genIndex(a, ind))
+        new_a.append(genIndex(getEnumValue(a, env), ind))
     return updateEnvWithAlias(new_a, env)
 
 def updateEnvWithMaskIndex2(ind1, ind2, env1, env2):
@@ -1509,7 +1519,7 @@ def stringValue(typ, value, withType=True):
     if t == 'str':
         return '"%s"' % value
     elif t == 'char':
-        return "'%c'" % value
+        return "'%c':char" % value
     elif t == 'sym':
         if ' ' in value:
             return '`"%s"' % value
@@ -1522,10 +1532,10 @@ def stringValue(typ, value, withType=True):
     else:
         return ('%s:%s'%(value, t)) if withType else value
 
-def actionCompress(vid, cols):
+def actionCompress(vid, cols, env):
     alias = []
     for c in cols:
-        a = genCompress(vid, c)
+        a = genCompress(vid, getEnumValue(c, env))
         alias.append(a)
     return alias
 
@@ -1603,7 +1613,8 @@ def genVectorOr(vec_or):
 def findKeepList(d):
     r = []
     for x in d:
-        if x['operation'] == 'keep': r.append(x['iu'][0])
+        if x['operation'] == 'keep' or x['operation'] == 'any':
+            r.append(x['iu'][0])
     return r
 
 def findKeepList2(d1, d2):
@@ -1680,6 +1691,15 @@ def setProperty(d, env):
     if getEnvTable(env).startswith('lambda'): # assign a unique ID
         env['table'] = getEnvTable(env) + '_' + str(opId)
     return env
+
+def getEnumValue(x, env):
+    if not env:  # empty dict
+        return x
+    if getAliasType(x,env) == 'enum':
+        ind = getEnvAlias(env).index(x)
+        getEnvType(env)[ind] = '?'  # set type unknown
+        return genFetch(x)
+    return x
 
 if __name__ == '__main__':
     start = time.time()

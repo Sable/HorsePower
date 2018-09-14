@@ -70,7 +70,9 @@ def genMonadic(description, value):
 
 def genDyadic(description, value_0, value_1, cast=''):
     if not value_1.startswith('t'):
-        if description == 'eq' or description == 'neq': # chf
+    	if value_1.endswith(':char'):
+    		pass
+        elif description == 'eq' or description == 'neq': # chf
             value_1 = genSymFromString(value_1)
         elif description == 'like':
             value_1 = genStringFromSym(value_1)
@@ -183,6 +185,9 @@ def genDateDay(x):
 def genEnlist(x):
     return genMonadic('enlist', x)
 
+def genFetch(x):
+	return genMonadic('fetch', x)
+
 ###############  Dyadic 
 
 def genEnum(a, b):
@@ -252,8 +257,8 @@ def genIndexOf(a, b):
 
 def genColumnValue(a, b, cast=''):
     rtn = genDyadic('column_value',a,b,cast)
-    if cast == 'enum' and (not rtn in mapping_enum): #chf, q16
-        mapping_enum[rtn] = genValues(rtn);
+    #if cast == 'enum' and (not rtn in mapping_enum): #chf, q16
+    #    mapping_enum[rtn] = genValues(rtn);
     return rtn
 
 ###############  >2

@@ -11,7 +11,7 @@
 | 7  | Pass*  |    2     |     | 5 joins                                  | bnl
 | 8  | Pass*  |    2     |     | 7 joins                                  |
 | 9  | Pass*  |      3   |     | 5 joins                                  |
-| 10 | Pass   |    2     |     | 3 joins                                  |
+| 10 | Pass   |    2     | Y   | 3 joins                                  |
 | 11 | Pass   |      3   |     | 5 joins                                  | bnl join
 | 12 | Pass   |  1       |     | 1 join                                   | lookup
 | 13 | Pass   |  1       |     | 1 groupjoin                              | (left-outer-join)
@@ -27,7 +27,10 @@
 
 Note (Sep 13)
 
-- Newly passed: 15
+- Newly passed: 15,18,10
+- Pending: 13,17
+- Operation 'any' (treated the same as 'keep')
+    + q3, q10, q18
 
 Note (July 25)
 

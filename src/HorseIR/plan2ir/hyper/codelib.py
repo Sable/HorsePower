@@ -109,6 +109,15 @@ def printEnv(env):
         for x in range(len(alias)):
             print ' %-16s : %-5s -> %3s' % (names[x],types[x],alias[x])
 
+def getAliasType(n, env):
+    if not n in getEnvAlias(env):
+        # TODO: may improve later
+        return n
+    ind = getEnvAlias(env).index(n)
+    if ind < 0:
+        unexpected('name not found: %s' % n)
+    return getEnvType(env)[ind]
+
 def findAliasByName(n, env):
     names = env['cols_n']
     if n in names:
