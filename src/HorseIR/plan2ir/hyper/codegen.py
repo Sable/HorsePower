@@ -164,11 +164,11 @@ def genRange(x):
 def genWhere(x):
     return genMonadic('where', x)
 
-def genDuplicate(x):
-    return genMonadic('dup', x)
+# def genDuplicate(x):
+#     return genMonadic('dup', x)
 
-def genReplicate(x):
-    return genMonadic('rep', x)
+# def genReplicate(x):
+#     return genMonadic('rep', x)
 
 def genUnique(x):
     return genMonadic('unique', x)
@@ -249,8 +249,8 @@ def genNeq(a, b):
 def genSubString(a, b):
     return genDyadic('sub_string', a, b)
 
-def genCons(a, b):
-    return genDyadic('cons', a, b)  # concatenate
+def genAppend(a, b):
+    return genDyadic('append', a, b)  # concatenate
 
 def genIndexOf(a, b):
     return genDyadic('index_of', a, b)

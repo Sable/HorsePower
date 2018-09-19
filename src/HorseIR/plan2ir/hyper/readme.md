@@ -8,17 +8,17 @@
 | 4  | Pass   |  1       | Y   | 1 leftsemijoin                           |
 | 5  | Pass   |    2     |     | 5 joins                                  |
 | 6  | Pass   |  1       | Y   | 0 join                                   |
-| 7  | Pass*  |    2     |     | 5 joins                                  | bnl
-| 8  | Pass*  |    2     |     | 7 joins                                  |
+| 7  | Pass*  |    2     | Y   | 5 joins                                  | bnl
+| 8  | Pass*  |    2     | Y   | 7 joins                                  |
 | 9  | Pass*  |      3   |     | 5 joins                                  |
 | 10 | Pass   |    2     | Y   | 3 joins                                  |
 | 11 | Pass   |      3   |     | 5 joins                                  | bnl join
-| 12 | Pass   |  1       |     | 1 join                                   | lookup
+| 12 | Pass   |  1       | Y   | 1 join                                   | lookup
 | 13 | Pass   |  1       |     | 1 groupjoin                              | (left-outer-join)
 | 14 | Pass   |  1       | Y   | 1 join                                   |
 | 15 | Pass   |    2     | Y   | 1 join,  1 index join                    |
 | 16 | Pass   |  1       | Y   | 1 join,  1 rightantijoin                 |
-| 17 | Pass*  |    2     | Y   | 2 joins, 1 groupjoin                     | groupby scan, magic?
+| 17 | Pass*  |    2     |     | 2 joins, 1 groupjoin                     | groupby scan, magic?
 | 18 | Pass   |    2     | Y   | 2 joins, 1 rightsemijoin                 | select
 | 19 | Pass   |  1       | Y   | 2 join                                   |
 | 20 | Pass*  |      3   |     | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
@@ -27,7 +27,7 @@
 
 Note (Sep 13)
 
-- Newly passed: 15,18,10
+- Newly passed: 15,18,10,8,7, ..., 5,3,2
 - Pending: 13,17
 - Operation 'any' (treated the same as 'keep')
     + q3, q10, q18

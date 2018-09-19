@@ -827,8 +827,9 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         else: unexpected('cond (%s) not handled' % mode)
     elif expr == 'and':  #q7, multiple column join
         if isMultipleColumnJoin(d, env2):
+            # pending('No support for multiple column joins')
+            return joinColumnsMultiple(joinType, d, env2)
             # return joinColumnsSpecial(joinType, d, env2)
-            pending('No support for multiple column joins')
             # left_list = [] ; right_list = []
             # for d0 in d['arguments']:
             #     new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
@@ -880,15 +881,15 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         size = 0; indx0 = ''; indx1 = ''
         while size < len(const_list):
             t0, t1 = getAliasList(d['input'], const_list[size:], env2)
-            indx0 = genCons(indx0, t0) if indx0 else t0
-            indx1 = genCons(indx1, t1) if indx0 else t1
+            indx0 = genAppend(indx0, t0) if indx0 else t0
+            indx1 = genAppend(indx1, t1) if indx1 else t1
             size = size + len(d['input'])
         # unique [indx0, indx1]
         # indx = genUnique(genList('%s,%s' % (indx0, indx1)))
-        indx = genUnique(genList([indx0, indx1]))
-        left  = genIndex(indx0, indx)
-        right = genIndex(indx1, indx)
-        return [left, right, 'indexing', 'plain'] 
+        # indx = genUnique(genList([indx0, indx1]))
+        # left  = genIndex(indx0, indx)
+        # right = genIndex(indx1, indx)
+        return [indx0, indx1, 'indexing', 'plain'] 
     else:
         unexpected('not handled (%s) when looking for side info.' % expr)
 
@@ -1301,6 +1302,34 @@ def joinColumnsSpecial(joinType, d, env2):
     t4 = genCompress(t2, r_right1)
     return [t3,t4,'indexing', 'plain']
 
+def joinColumnsMultiple(joinType, d, env2):
+    if joinType != 'equi_join':
+        pending('multiple columns not supported for join: %s' % joinType)
+    left_alias = []; right_alias = []
+    left_env, right_env = env2
+    for d0 in d['arguments']:
+        if d0['expression'] == 'comparison':
+            typ,_ = checkExpr(d0)
+            if typ != 3:
+                pending('unexpected d0: ' + d0)
+            else:
+                name0 = d0['left']['iu']
+                name1 = d0['right']['iu']
+                side0 = findSideByName2(name0, env2)
+                side1 = findSideByName2(name1, env2)
+                if side0 == side1: pending('join error')
+                left_name  = name0 if side0 == 0 else name1
+                right_name = name0 if side1 == 0 else name1
+                left_alias.append(findAliasByName(left_name, left_env))
+                right_alias.append(findAliasByName(right_name, right_env))
+                print 'n0(%s, %d), n1(%s, %d)' % (name0,side0,name1,side1)
+    t0 = genList(left_alias)
+    t1 = genList(right_alias)
+    t2 = genJoinIndex('@eq', t0, t1)
+    t3 = genIndex(t2, '0:i64')
+    t4 = genIndex(t3, '1:i64')
+    # raw_input()
+    return [t3, t4, 'indexing', 'plain']
 
 
 """
@@ -1581,9 +1610,12 @@ def getAliasList(inputs, consts, env2):
     x0 = getAndList(left)  # left
     y0 = getAndList(right) # right
     # starting join from both sides
-    w0 = genWhere(x0)    ; w1 = genWhere(y0)
-    w2 = genDuplicate(w0); w3 = genReplicate(w1)
-    return [w2, w3]
+    t0 = genWhere(x0)    ; t1 = genWhere(y0)
+    t2 = genLength(t0)   ; t3 = genLength(t1)
+    t4 = genVector(t3,t0); t5 = genVector(t2,t1)
+    return [t4, t5]
+    # w2 = genDuplicate(w0); w3 = genReplicate(w1)
+    # return [w2, w3]
 
 def genVectorAnd(vec_and):
     size = len(vec_and)
