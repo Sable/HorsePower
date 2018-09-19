@@ -52,6 +52,7 @@ L printV3             (V x, L a, L b, B isR);
 L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);
+L printFormat         (V x, I op);
 
 void serializeV(V x, FILE *fp);
 void readSerializeV(V x, FILE *fp);

@@ -569,6 +569,21 @@ L getStrPretty(S str, L maxSize){
     R 0;
 }
 
+/* TODO: csv(0)/xml(1)/json(2) */
+
+static void printCSV(V x){;}
+static void printXML(V x){;}
+static void printJSON(V x){;}
+
+L printFormat(V x, I op){
+    switch(op){
+        case 0: printCSV(x); break;
+        case 1: printXML(x); break;
+        case 2: printJSON(x);break;
+        default: EP("format not supported: %d\n", op);
+    }
+}
+
 /* read a matrix */
 
 //const L LINE_SPECIAL_MAX = 29999;

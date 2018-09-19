@@ -1840,15 +1840,19 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
     L typCell = -1, op = -1, lenZ = 2;
     if(foo == &pfnEq){ typCell = H_B; op = 0; }
     else R E_DOMAIN;
-    P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
-    if(isOrdered(x)){
-        R joinIndexHash(z,x,y,'l');
-    }
-    else if(isOrdered(y)){
-        R joinIndexHash(z,x,y,'r');
-    }
-    else {
+    // TODO: a bug found in joinIndexHash (check q8)
+    //P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
+    //if(isOrdered(x)){
+    //    P("2.0 ordered left\n");
+    //    R joinIndexHash(z,x,y,'l');
+    //}
+    //else if(isOrdered(y)){
+    //    P("2.1 ordered right\n");
+    //    R joinIndexHash(z,x,y,'r');
+    //}
+    //else {
         if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
+            P("2.2 general\n");
             L lenX    = vn(x), lenY = vn(y);
             L typMax  = MAX(vp(x),vp(y));
             V tempX = allocNode();
@@ -1914,7 +1918,8 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             if(foo == &pfnEq){
                 switch(typ){
                     caseQ R lib_join_index_hash(vV(z,0),vV(z,1),x,y);
-                    default: R E_NOT_IMPL;
+                    caseG R lib_join_index_hash(vV(z,0),vV(z,1),x,y);
+                    default: EP("type not supported: %s\n", getTypeName(typ));
                 }
             }
             else { // brutal force
@@ -1939,7 +1944,7 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             }
         }
         else R E_TYPE;
-    }
+    //}
     R 0;
 }
 

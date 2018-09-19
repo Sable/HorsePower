@@ -81,7 +81,8 @@ module default{
       k5:?   = @compress(k2, c12);
       k6:?   = @compress(k2, c13);
       k7:?   = @compress(k2, c14); // l_shipdate
-      t5_0:? = @fetch(k3);
+      //t5_0:? = @fetch(k3);
+      t5_0:? = k3;
       t5_1:? = @join_index(@eq, t4_4, t5_0);
       t5_2:? = @index(t5_1, 0:i64);
       t5_3:? = @index(t5_1, 1:i64);
@@ -95,14 +96,17 @@ module default{
       t5_11:? = @index(k7 , t5_3);
       // 6.1 suppkey  : s_ and l_
       // 6.2 nationkey: s_ and n1_
-      t6_0:? = @join_index(@eq, c00, t5_8);
+      //t6_0:? = @join_index(@eq, {c00,c01}, {t5_8,t5_5});
+      k0:? = @list(c00,c01);
+      k1:? = @list(t5_8,t5_5);
+      t6_0:? = @join_index(@eq, k0, k1);
       t6_1:? = @index(t6_0, 0:i64);
-      t6_2:? = @index(t6_0, 1:i64);
-      t6_3:? = @index(t5_5, t6_2);    // n1_nationkey
-      t6_4:? = @index(c01 , t6_1);    //  s_nationkey
-      t6_5:? = @eq(t6_3, t6_4);
-      t6_6:? = @compress(t6_5, t6_1); // supplier
-      t6_7:? = @compress(t6_5, t6_2); // ...
+      t6_7:? = @index(t6_0, 1:i64);
+      //t6_3:? = @index(t5_5, t6_2);    // n1_nationkey
+      //t6_4:? = @index(c01 , t6_1);    //  s_nationkey
+      //t6_5:? = @eq(t6_3, t6_4);
+      //t6_6:? = @compress(t6_5, t6_1); // supplier
+      //t6_7:? = @compress(t6_5, t6_2); // ...
       t6_8:? = @index(t5_6, t6_7);    // n1_name
       t6_9:? = @index(t5_7, t6_7);    // n2_name
       t6_10:? = @index(t5_9, t6_7);   // l_extendedprice

@@ -136,7 +136,7 @@ UI getHashTableSize(L x){
     R (x<16?32:(x<<1));
 }
 
-UI getHashValue(void* val, L valI, L typ){
+static UI getHashValueComplete(void *val, L valI, L typ){
     switch(typ){
         caseJ R hash_J(toJ(val,valI));
         caseH R hash_H(toH(val,valI));
@@ -146,9 +146,19 @@ UI getHashValue(void* val, L valI, L typ){
         caseE R hash_E(toE(val,valI));
         caseX R hash_X(toX(val,valI));
         caseS R hash_S(toS(val,valI));
-        caseG { V x=(V)val; UI c=0; DOI(vn(x), c+=getHashValue(sG(vV(x,i)),valI,vp(vV(x,i)))) R c; }
+        caseG { V x=(V)val; UI c=0;
+            DOI(vn(x), {V y=vV(x,i); DOJ(vn(y),c+=getHashValueComplete(isList(y)?(void *)y:sG(y),j,vp(y)))}) R c; }
+        default: EP("type not supported: %lld\n", typ);
     }
-    R 0;
+}
+
+UI getHashValue(void *val, L valI, L typ){
+    /* row based, val[valI] */
+    switch(typ){
+        caseG {V x=(V)val; UI c=0; 
+              DOI(vn(x), {V y=vV(x,i); c+=getHashValueComplete(isList(y)?(void *)y:sG(y),valI,vp(y));}) R c; }
+        default: R getHashValueComplete(val, valI, typ);
+    }
 }
 
 L createHash(HN *hashT, L hashLen){
@@ -1276,8 +1286,15 @@ L lib_group_by_flat(V z, V x){
 /* index for join index*/
 
 L lib_join_index_hash(V z0, V z1, V x, V y){
-    L sLen=vn(x), vLen=vn(y), typ=vp(x);
-    void *src=sG(x), *val=sG(y);
+    L sLen,vLen,typ; void *src,*val;
+    if(isList(x)&&isList(y)){
+        sLen=vn(vV(x,0)), vLen=vn(vV(y,0)), typ=vp(x);
+        src=x; val=y; 
+    } // special for list
+    else {
+        sLen=vn(x), vLen=vn(y), typ=vp(x);
+        src=sG(x), val=sG(y);
+    }
     HN hashT;
     L hashLen = getHashTableSize(sLen);
     CHECKE(createHash(&hashT,hashLen));
@@ -1297,6 +1314,8 @@ L lib_join_index_hash(V z0, V z1, V x, V y){
     DOP(vLen, tempK[i]=find_hash_many(hashT,hashLen,src,val,i,typ,&tempH[i]))
     gettimeofday(&tv1, NULL);
     P("Time 2 (ms): %g\n", calcInterval(tv0,tv1));
+    /* debug: print result in 0/1 */
+    //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
     L parZ[H_CORE], offset[H_CORE]; 
     memset(parZ, 0, sizeof(L)*H_CORE);
     memset(offset, 0, sizeof(L)*H_CORE);

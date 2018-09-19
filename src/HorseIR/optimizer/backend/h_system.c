@@ -558,6 +558,7 @@ static L isSameValueItem(V x, L a, L b){
 
 /*
  * Search on an ordered vector, may contain duplicated values
+ * TODO: check the bug: join_index in step 1, q8 (13389 expected, but 13311 found)
  */
 L joinIndexHashValue(V z0, V z1, V x, V y){
     V0 t0; V t = &t0; L c;
