@@ -4,6 +4,7 @@ Helper functions
 
 import sys, traceback
 import copy
+import json
 
 # I/O operations
 def readLines(filename,typ='.json'):
@@ -215,6 +216,9 @@ def sameListString(a, b):
 
 def packColumnName(x):
         return x if isinstance(x, list) else [x]
+
+def printJSON(x):
+    print json.dumps(x, sort_keys=False, indent=2)
 
 """
 Handle exceptions

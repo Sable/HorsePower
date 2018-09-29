@@ -371,6 +371,11 @@ def scanAggr(d, values):
                 a2 = genEach     ('@len', a1)
                 a3 = genRaze     (a2)
                 env_alias.append(a3)
+            elif op == 'min' or op == 'max':
+                a0 = genEachRight('@index', values[source], t3)
+                a1 = genEach     ('@'+op, a0)
+                a2 = genRaze     (a1)
+                env_alias.append (a2)
             elif op == 'keep' or op == 'any':
                 a0 = genIndex(values[source], t2)
                 env_alias.append(a0) # keep
@@ -489,8 +494,8 @@ def scanTablescan(d, env):
     if residuals is not None:
         if mask is not None:
             mask = genAnd(mask, residuals)
-        else:
-            mask = residuals
+        else:  # q2, earlyprobe -> tablescan
+            mask = residuals  # q13
     newAlias = actionCompress(mask, alias, env) if mask is not None else alias  #??
     return encodeEnv(table_name, columns, newAlias, types, mask, alias)
 
@@ -610,25 +615,63 @@ def scanMap(d, env):
 
 def scanGroupjoin(d, env2):
     debug('group join')
+    left_env, right_env = env2
     left_keys  = d['leftKey']
     right_keys = d['rightKey']
     print left_keys, right_keys
-    # printEnv(env2[0])
-    # printEnv(env2[1])
+    printEnv(env2[0])
+    printEnv(env2[1])
+    raw_input()
     if len(left_keys) == 1:
         # it seems left_col and right_col are useless
-        # since 'source' has indicated the name of keys from both sides 
-        left_col  = left_keys [0]['iu']
-        right_col = right_keys[0]['iu']
-        left_env, right_env = env2
-        result = joinColumns('groupjoin', left_col, left_env, right_col, right_env)
-        _,w3,_,_ = result
+        # since 'source' has indicated the name of keys from both sides
+        left_name  = left_keys [0]['iu']
+        right_name = right_keys[0]['iu']
+        left_alias  = getEnumValue(findAliasByName(left_name , left_env ), left_env )
+        right_alias = getEnumValue(findAliasByName(right_name, right_env), right_env)
+        print left_alias, right_alias
+        # group: left
+        t0_0 = genGroup(left_alias)
+        t0_1 = genKeys(t0_0)
+        t0_2 = genValues(t0_0)
+        t0_3 = genEach('@len', t0_2)
+        t0_4 = genRaze(t0_3)
+        t0_5 = genIndex(left_alias, t0_1)
+        # group: right
+        t1_0 = genGroup(right_alias)
+        t1_1 = genKeys(t1_0)
+        t1_2 = genValues(t1_0)
+        t1_3 = genEach('@len', t1_2)
+        t1_4 = genRaze(t1_3)
+        t1_5 = genIndex(right_alias, t1_1)
+        # join
+        t2_0 = genJoinIndex('eq', t0_5, t1_5)
+        t2_1 = genIndex(t2_0, '0:i64')
+        t2_2 = genIndex(t2_0, '1:i64')
+        t2_3 = genIndex(t0_4, t2_1)
+        t2_4 = genIndex(t1_4, t2_2)
+        t2_5 = genMul(t2_3, t2_4)
+        t2_6 = genVector(genLength(t0_1), '0:i64')
+        t2_7 = genIndexA(t2_6, t2_1, t2_5)
+        # if left outer join (q13)
+        env_names =[] ; env_alias = []; env_types = []
+        addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
+        addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, None)
+        print d['leftAggregates']
+        printEnv(left_env)
+        print env_names
+        print env_alias
+        print env_types
+        print d['rightAggregates']
+        printEnv(right_env)
+        raw_input()
+        raise
         # q3
         # handle: leftExpressions
         # handle: rightExpressions
         env_names =[] ; env_alias = []; env_types = []
-        addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],env2[0], None)
-        addEnvValues(env_names, env_alias, env_types, d['rightAggregates'],env2[1], w3)
+        addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
+        addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, w3  )
         return encodeEnv('lambda_groupjoin',env_names, env_alias, env_types)
     else:
         unexpected('keys > 1 found in group join')
@@ -736,8 +779,8 @@ def checkExpr(expr):
     else:
         return [0,'<none>']
 
-# q19: trick
 def scanConditionOr(d, env2):
+    """ q19 """
     global vec_side_or
     # off load to scanValue
     vec_left_or = []
@@ -767,9 +810,98 @@ def scanConditionOr(d, env2):
     return 0,0
     # return genVectorOr(vec_left_or),genVectorOr(vec_right_or)
 
-# return if multiple columns (>1)
+def scanConditionOr2(d, env2):
+    vec_left_or = []
+    vec_right_or = []
+    print d
+    for d0 in d['arguments']:
+        if d0['expression'] == 'and':
+            vec_left_and = []
+            vec_right_and = []
+            for d1 in d0['arguments']:
+                t0 = scanValuesV(d1, env2)
+                typ,nam = checkExpr(d1)
+                if typ == 1 or typ == 2:
+                    if 0 == whichTableByName(nam, env2):
+                        vec_left_and.append(t0)
+                    else:
+                        vec_right_and.append(t0)
+                else:
+                    unexpected('unknown type %d' % typ)
+            vec_left_or.append(genVectorAnd(vec_left_and))
+            vec_right_or.append(genVectorAnd(vec_right_and))
+    print [vec_left_or, vec_right_or]
+    raw_input()
+    return [vec_left_or, vec_right_or]
+
+def fixSideInfo(name0, name1, env2):
+    side0 = findSideByName2(name0, env2)
+    side1 = findSideByName2(name1, env2)
+    if side0 == 0 and side1 == 1:
+        return [name0, name1]
+    elif side0 == 1 and side1 == 0:
+        return [name1, name0]
+    else:
+        unexpected('both columns (%s, %s) from the same table (%d,%d)' % (name0,name1,side0,side1))
+
+def scanJoinCondition(d, env2):
+    """ Return join columns """
+    expr = d['expression']
+    if expr == 'comparison':
+        typ,_ = checkExpr(d)
+        if typ ==3:
+            mode = d['mode']
+            left_value, right_value = fixSideInfo(fetchID(d['left']), fetchID(d['right']), env2)
+            return {
+                "expr"  : 'comparison',
+                "value" : [left_value, right_value, mode]
+            }
+            return [mode, left_value, right_value]
+        else:
+            unexpected('error in join condition')
+    elif expr == 'and':
+        cond_list = []
+        for d0 in d['arguments']:
+            t0 = scanJoinCondition(d0, env2)
+            cond_list.append(t0)
+        return {
+            "expr"  : expr,
+            "value" : cond_list
+        }
+    elif expr == 'or':
+        result_or = scanConditionOr2(d, env2)
+        return {
+            "expr" : expr,
+            "value": result_or
+        }
+        # unexpected('adding or, see q19')
+    else:
+        unexpected('join error: %s' % expr)
+
+def isSingleColumnJoin(x):
+    """ Single / Multiple """
+    return x['expr'] == 'comparison'
+
+def findExprFromSide2(d, joinType, env2, isCollect=False):
+    expr = d['expression']
+    cond_list = scanJoinCondition(d, env2)
+    printJSON(cond_list)
+    if isSingleColumnJoin(cond_list):
+        name0, name1, mode = cond_list['value']
+        if mode == '=' or mode == 'is':
+            return joinColumns(joinType, name0, env2[0], name1, env2[1])
+        elif mode == '>' or mode == '<' or mode == '<>':
+            return joinColumnsWithMode(mode, name0, env2[0], name1, env2[1])
+        else:
+            unexpected('cond (%s) not handled' % mode)
+    else:
+        print 'multiple column joins'
+    pass
+
 def isMultipleColumnJoin(d, env2):
+    """ Return if multiple columns (>1) """
     numJoin = 0
+    # print scanJoinCondition(d) # for q9
     if d['expression'] == 'and':
         for d0 in d['arguments']:
             if d0['expression'] == 'comparison': #q17, d0['mode'] == '<' | 'is'
@@ -788,6 +920,8 @@ type  : value / indexing
 """
 def findExprFromSide(d, joinType, env2, isCollect=False):
     expr = d['expression']
+    findExprFromSide2(d, joinType, env2, isCollect) # debug
+    raw_input()
     if expr == 'comparison': # single join case
         mode = d['mode']; left = [] ; right = []
         name0 = fetchID(d['left' ])
@@ -798,7 +932,7 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
         side1 = findSideByName2(name1, env2)
         if side0 == side1:
             unexpected('pred. vars from both sides')
-        # q2: 'is'
+        # q2/q17/q20: 'is'
         if mode == '=' or mode == 'is':
             # print 'side0 = %d, side1 = %d' % (side0, side1)
             # print 'alias0 = %s, alias1 = %s' % (alias0, alias1)
@@ -847,7 +981,13 @@ def findExprFromSide(d, joinType, env2, isCollect=False):
                     pred_left, pred_right = scanConditionOr(d0, env2)
                     cnt_pred = cnt_pred + 1
                 elif d0['expression'] == 'and':
-                    new_left, new_right, _ = findExprFromSide(d0, joinType, env2, True)
+                    # print '-'*30
+                    # print d0
+                    # print joinType
+                    # print findExprFromSide(d0, joinType, env2, True)
+                    # print '-'*30
+                    # raw_input()
+                    new_left, new_right, _, _ = findExprFromSide(d0, joinType, env2, True)
                     left_list.append(new_left)
                     right_list.append(new_right)
                 elif d0['expression'] == 'comparison' and d0['mode'] == '=':
@@ -1308,6 +1448,8 @@ def joinColumnsMultiple(joinType, d, env2):
     left_alias = []; right_alias = []
     left_env, right_env = env2
     for d0 in d['arguments']:
+        print d0
+        raw_input()
         if d0['expression'] == 'comparison':
             typ,_ = checkExpr(d0)
             if typ != 3:
@@ -1327,8 +1469,8 @@ def joinColumnsMultiple(joinType, d, env2):
     t1 = genList(right_alias)
     t2 = genJoinIndex('@eq', t0, t1)
     t3 = genIndex(t2, '0:i64')
-    t4 = genIndex(t3, '1:i64')
-    # raw_input()
+    t4 = genIndex(t2, '1:i64')
+    raw_input()
     return [t3, t4, 'indexing', 'plain']
 
 
@@ -1718,7 +1860,8 @@ def getCard(d):
     return int(d['cardinality'])
 
 def setProperty(d, env):
-    env['card'] = int(d['cardinality'])
+    """Q2: earlyprobe has no cardinality"""
+    env['card'] = int(d['cardinality']) if 'cardinality' in d else 0
     opId = d['operatorId']
     if getEnvTable(env).startswith('lambda'): # assign a unique ID
         env['table'] = getEnvTable(env) + '_' + str(opId)
