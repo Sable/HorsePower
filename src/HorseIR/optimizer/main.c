@@ -81,7 +81,8 @@ int main(int argc, char *argv[]){
         else if(isQFile) parseInput(qfile);
     }
     else if(isPretty){
-        parseInputWithQid(qid);
+        if(isQuery) parseInputWithQid(qid);
+        else if(isQFile) parseInput(qfile);
         prettyProg(root);
     }
     else if(isServer){
@@ -159,8 +160,8 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    SP(file_path, "data/hand-q%d.hir", qid);
-    //SP(file_path, "data/q%d.hir", qid);
+    //SP(file_path, "data/hand-q%d.hir", qid);
+    SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 

@@ -139,68 +139,85 @@ L findColFromTable(V x, L cId){
     R -1;
 }
 
-L promoteValue(V z, V x, L typMax){
-    if(vp(x) == typMax) R copyV(z,x);
+L promoteValueWithIndex(V z, V x, L typMax, V ind){
+    L size = ind?vn(ind):vn(x);
+    L *indx = ind?sL(ind):NULL;
+#define WithIndex ind?indx[i]:i
+    if(vp(x) == typMax) {
+        if(!ind) R copyV(z,x);
+        else {
+            switch(vp(x)){
+                caseB DOP(size, vB(z,i) = vB(x,indx[i])) break;
+                caseJ DOP(size, vJ(z,i) = vJ(x,indx[i])) break;
+                caseH DOP(size, vH(z,i) = vH(x,indx[i])) break;
+                caseI DOP(size, vI(z,i) = vI(x,indx[i])) break;
+                caseL DOP(size, vL(z,i) = vL(x,indx[i])) break;
+                caseF DOP(size, vF(z,i) = vF(x,indx[i])) break;
+                caseE DOP(size, vE(z,i) = vE(x,indx[i])) break;
+                default: R E_NOT_IMPL;
+            }
+        }
+    }
     else{
-        initV(z, typMax, xn); //opt?
+        initV(z, typMax, size); //opt?
         switch(vp(z)){
             caseJ {
                 switch(vp(x)){
-                    caseB DOP(xn, vJ(z,i)=vB(x,i)) break;
+                    caseB DOP(size, vJ(z,i)=vB(x,WithIndex)) break;
                 }
             } break;
             caseH {
                 switch(vp(x)){
-                    caseB DOP(xn, vH(z,i)=vB(x,i)) break;
-                    caseJ DOP(xn, vH(z,i)=vJ(x,i)) break;
+                    caseB DOP(size, vH(z,i)=vB(x,WithIndex)) break;
+                    caseJ DOP(size, vH(z,i)=vJ(x,WithIndex)) break;
                 }
             } break;
             caseI {
                 switch(vp(x)){
-                    caseB DOP(xn, vI(z,i)=vB(x,i)) break;
-                    caseJ DOP(xn, vI(z,i)=vJ(x,i)) break;
-                    caseH DOP(xn, vI(z,i)=vH(x,i)) break;
+                    caseB DOP(size, vI(z,i)=vB(x,WithIndex)) break;
+                    caseJ DOP(size, vI(z,i)=vJ(x,WithIndex)) break;
+                    caseH DOP(size, vI(z,i)=vH(x,WithIndex)) break;
                 }
             } break;
             caseL {
                 switch(vp(x)){
-                    caseB DOP(xn, vL(z,i)=vB(x,i)) break;
-                    caseJ DOP(xn, vL(z,i)=vJ(x,i)) break;
-                    caseH DOP(xn, vL(z,i)=vH(x,i)) break;
-                    caseI DOP(xn, vL(z,i)=vI(x,i)) break;
+                    caseB DOP(size, vL(z,i)=vB(x,WithIndex)) break;
+                    caseJ DOP(size, vL(z,i)=vJ(x,WithIndex)) break;
+                    caseH DOP(size, vL(z,i)=vH(x,WithIndex)) break;
+                    caseI DOP(size, vL(z,i)=vI(x,WithIndex)) break;
                 }
             } break;
             caseF {
                 switch(vp(x)){
-                    caseB DOP(xn, vF(z,i)=(F)vB(x,i)) break;
-                    caseJ DOP(xn, vF(z,i)=(F)vJ(x,i)) break;
-                    caseH DOP(xn, vF(z,i)=(F)vH(x,i)) break;
-                    caseI DOP(xn, vF(z,i)=(F)vI(x,i)) break;
-                    caseL DOP(xn, vF(z,i)=(F)vL(x,i)) break;
+                    caseB DOP(size, vF(z,i)=(F)vB(x,WithIndex)) break;
+                    caseJ DOP(size, vF(z,i)=(F)vJ(x,WithIndex)) break;
+                    caseH DOP(size, vF(z,i)=(F)vH(x,WithIndex)) break;
+                    caseI DOP(size, vF(z,i)=(F)vI(x,WithIndex)) break;
+                    caseL DOP(size, vF(z,i)=(F)vL(x,WithIndex)) break;
                 }
             } break;
             caseE {
                 switch(vp(x)){
-                    caseB DOP(xn, vE(z,i)=(E)vB(x,i)) break;
-                    caseJ DOP(xn, vE(z,i)=(E)vJ(x,i)) break;
-                    caseH DOP(xn, vE(z,i)=(E)vH(x,i)) break;
-                    caseI DOP(xn, vE(z,i)=(E)vI(x,i)) break;
-                    caseL DOP(xn, vE(z,i)=(E)vL(x,i)) break;
-                    caseF DOP(xn, vE(z,i)=(E)vF(x,i)) break;
+                    caseB DOP(size, vE(z,i)=(E)vB(x,WithIndex)) break;
+                    caseJ DOP(size, vE(z,i)=(E)vJ(x,WithIndex)) break;
+                    caseH DOP(size, vE(z,i)=(E)vH(x,WithIndex)) break;
+                    caseI DOP(size, vE(z,i)=(E)vI(x,WithIndex)) break;
+                    caseL DOP(size, vE(z,i)=(E)vL(x,WithIndex)) break;
+                    caseF DOP(size, vE(z,i)=(E)vF(x,WithIndex)) break;
                 }
             } break;
             caseX {
                 switch(vp(x)){
-                    caseB DOP(xn, xCopy(vX(z,i),vB(x,i),0)) break;
-                    caseJ DOP(xn, xCopy(vX(z,i),vJ(x,i),0)) break;
-                    caseH DOP(xn, xCopy(vX(z,i),vH(x,i),0)) break;
-                    caseI DOP(xn, xCopy(vX(z,i),vI(x,i),0)) break;
-                    caseL DOP(xn, xCopy(vX(z,i),vL(x,i),0)) break;
-                    caseF DOP(xn, xCopy(vX(z,i),vF(x,i),0)) break;
-                    caseE DOP(xn, xCopy(vX(z,i),vE(x,i),0)) break;
+                    caseB DOP(size, xCopy(vX(z,i),vB(x,WithIndex),0)) break;
+                    caseJ DOP(size, xCopy(vX(z,i),vJ(x,WithIndex),0)) break;
+                    caseH DOP(size, xCopy(vX(z,i),vH(x,WithIndex),0)) break;
+                    caseI DOP(size, xCopy(vX(z,i),vI(x,WithIndex),0)) break;
+                    caseL DOP(size, xCopy(vX(z,i),vL(x,WithIndex),0)) break;
+                    caseF DOP(size, xCopy(vX(z,i),vF(x,WithIndex),0)) break;
+                    caseE DOP(size, xCopy(vX(z,i),vE(x,WithIndex),0)) break;
                 }
             } break;
-            default: P("Error: PromoteValue error\n"); R E_DOMAIN;
+            default: EP("PromoteValue error\n");
         }
         R 0;
     }
@@ -672,6 +689,101 @@ L listFlatEachLen(V z, V x){
 //    E total = 0; DOI(10, total += optTime[i]) P("[searchOrdered] Createing index time (avg): %g ms\n", total/10); getchar();
 //    R 0;
 //}
+
+// same as pfnCompare
+L getOpFromName(S x){
+    if(!strcmp(x, "lt")) R 0;
+    else if(!strcmp(x, "leq")) R 1;
+    else if(!strcmp(x, "gt"))  R 2;
+    else if(!strcmp(x, "geq")) R 3;
+    else if(!strcmp(x, "eq"))  R 4;
+    else if(!strcmp(x, "neq")) R 5;
+    else R -1;
+}
+
+L getOpFromSymbol(L x){
+    R getOpFromName(getSymbolStr(x));
+}
+
+/* copy from backend/h_primitive.c */
+#define COMP(op,x,y) (2>op?COMPLESS(op,x,y):4>op?COMPMORE(op,x,y):6>op?COMPEQ(op,x,y):0)
+#define COMPLESS(op,x,y) (0==op?(x<y):(x)<=(y))
+#define COMPMORE(op,x,y) (2==op?(x>y):(x)>=(y))
+#define COMPEQ(op,x,y) (4==op?(x==y):(x!=y))
+
+B compareOpWithIndex(V x, V y, L k0, L k1, L op){
+    switch(vp(x)){
+        caseB R COMP(op,vB(x,k0),vB(y,k1));
+        caseH R COMP(op,vH(x,k0),vH(y,k1));
+        caseJ R COMP(op,vJ(x,k0),vJ(y,k1));
+        caseI R COMP(op,vI(x,k0),vI(y,k1));
+        caseL R COMP(op,vL(x,k0),vL(y,k1));
+        caseF R COMP(op,vF(x,k0),vF(y,k1));
+        caseE R COMP(op,vE(x,k0),vE(y,k1));
+        default: EP("type not supported: %lld\n", vp(x));
+    }
+    R 0;
+}
+
+B compareOp(V x, V y, L k, V ind0, V ind1, L op){
+    L k0=ind0?vL(ind0,k):k;
+    L k1=ind1?vL(ind1,k):k;
+    R compareOpWithIndex(x,y,k0,k1,op);
+}
+
+L compareOneColumn(V z0, V z1, V x, V y, V ind0, V ind1, L op){
+    L size = vn(ind0);
+    V t   = allocNode(); initV(t, H_B, size);
+    if(vp(x) == vp(y)){
+        DOP(size, vB(t,i)=compareOp(x,y,i,ind0,ind1,op))
+    }
+    else {
+        V tempX  = allocNode(), tempY = allocNode();
+        L typMax = MAX(vp(x), vp(y));
+        CHECKE(promoteValueWithIndex(tempX, x, typMax, ind0));
+        CHECKE(promoteValueWithIndex(tempY, y, typMax, ind1));
+        DOP(size, vB(t,i)=compareOp(tempX,tempY,i,NULL,NULL,op))
+    }
+    L tot=0; DOI(size, tot+=vB(t,i))
+    L *indx0=sL(ind0), *indx1=sL(ind1);
+    initV(z0,H_L,tot); initV(z1,H_L,tot);
+    tot=0; DOI(size, if(vB(t,i)){vL(z0,tot)=indx0[i];vL(z1,tot++)=indx1[i];}) R 0; /* free temp: t, tempX, tempY */
+}
+
+L joinOtherColumns(V z, V x, V y, V ind, L fx, V f){
+    V ind0 = vV(ind,0), ind1 = vV(ind,1);
+    DOI(vn(x), \
+       if(i!=fx){CHECKE(compareOneColumn(vV(z,0),vV(z,1),vV(x,i),vV(y,i),ind0,ind1,getOpFromSymbol(vQ(f,i))));\
+       ind0=vV(z,0); ind1=vV(z,1);}) R 0;
+}
+
+L joinOneColumn(V z, V x, V y, L sop){
+    L lenX    = vn(x), lenY = vn(y);
+    L typMax  = MAX(vp(x),vp(y));
+    I op      = getOpFromSymbol(sop);
+    V tempX = allocNode();
+    V tempY = allocNode();
+    CHECKE(promoteValue(tempX, x, typMax));
+    CHECKE(promoteValue(tempY, y, typMax));
+    initV(z, H_G, 2);
+    if(4 == op || 5 == op){ /* equal or not equal */
+        switch(typMax){
+            caseH caseI caseL caseF caseE
+                R lib_join_index_hash(vV(z,0),vV(z,1),tempX,tempY,4==op);
+            default: R E_NOT_IMPL;
+        }
+    }
+    else if(0 <= op && op < 4){
+        switch(typMax){
+            caseH caseI caseL caseF caseE
+                R lib_join_index_compare(vV(z,0),vV(z,1),tempX,tempY,op);
+            default: R E_NOT_IMPL;
+        }
+    }
+    else R E_DOMAIN;
+    R 0;
+}
+
 
 inline F logBaseF(F b, F x){
     R logf(x)/logf(b);

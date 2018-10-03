@@ -76,6 +76,7 @@ Node *makeNodeLiteralFloat (List *float_list, Node *type);
 Node *makeNodeFloatType    (pType typ);
 Node *makeNodeLiteralSymbol(List *symbol_list);
 Node *makeNodeLiteralDate  (List *date_list);
+Node *makeNodeLiteralFunc  (List *func_list);
 Node *makeNodeCompoundID1  (char *name1, char *name2);
 Node *makeNodeCompoundID2  (char *name1);
 Node *makeNodeType         (pType typ);

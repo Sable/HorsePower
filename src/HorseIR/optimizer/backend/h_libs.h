@@ -63,7 +63,8 @@ L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen);
 
 //void lib_hash_test(L *val, L n);
 
-L lib_join_index_hash(V z0, V z1, V x, V y);
+L lib_join_index_hash    (V z0, V z1, V x, V y, B isEq);
+L lib_join_index_compare (V z0, V z1, V x, V y, I op);
 
 #ifdef	__cplusplus
 }

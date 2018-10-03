@@ -740,6 +740,8 @@ L pfnWhere(V z, V x){
 }
 
 L pfnSum(V z, V x){
+    //P("Input x size: %lld\n", xn); printV2(x, 20); getchar();
+    //L numZero = 0; DOI(xn, if(vL(x,i)==0) numZero++) P("num = %lld\n", numZero); getchar();
     if(isTypeGroupReal(vp(x))){
         L typZ = isFloat(x)?H_F:isDouble(x)?H_E:H_L;
         initV(z,typZ,1);
@@ -752,6 +754,7 @@ L pfnSum(V z, V x){
             caseF {F t=0; DOP(vn(x), t+=vF(x,i), reduction(+:t)) vf(z)=t;} break;
             caseE {E t=0; DOP(vn(x), t+=vE(x,i), reduction(+:t)) ve(z)=t;} break;
         }
+        //printV(z); getchar();
         R 0;
     }
     else R E_DOMAIN;
@@ -1835,11 +1838,14 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
     R 0;
 }
 
-L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
+static L pfnJoinIndexSingle(V z, V x, V y, V f){
+    /* pfnEq (0), pfnLt (1) */
     P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
-    L typCell = -1, op = -1, lenZ = 2;
-    if(foo == &pfnEq){ typCell = H_B; op = 0; }
-    else R E_DOMAIN;
+    L typCell = -1, lenZ = 2;
+    L op = getOpFromSymbol(vq(f));
+    if(op<0) R E_DOMAIN;
+    else { typCell=H_B; }
+    B isEq= 4==op;
     // TODO: a bug found in joinIndexHash (check q8)
     //P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
     //if(isOrdered(x)){
@@ -1860,16 +1866,23 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,H_G,lenZ);
-            if(foo == &pfnEq){
+            if(4 == op || 5 == op){
                 switch(typMax){
-                    caseH
-                    caseI
-                    caseL
-                    caseF
-                    caseE R lib_join_index_hash(vV(z,0),vV(z,1),tempX,tempY);
+                    caseH caseI caseL caseF caseE
+                        R lib_join_index_hash(vV(z,0),vV(z,1),tempX,tempY,isEq);
                     default: R E_NOT_IMPL;
                 }
             }
+            // else if(1 == op){
+            //     switch(typMax){
+            //         caseH
+            //         caseI
+            //         caseL R lib_join_compare_int(vV(z,0),vV(z,1),tempX,tempY);
+            //         caseF
+            //         caseE EP("pending...\n");
+            //         default: R E_NOT_IMPL;
+            //     }
+            // }
             else { // brutal force
                 L c = 0;
                 P("3,x=%lld, y=%lld\n",lenX,lenY);
@@ -1915,10 +1928,10 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
             L lenX = vn(x), lenY = vn(y);
             initV(z,H_G,lenZ);
             L c = 0;
-            if(foo == &pfnEq){
+            if(4 == op || 5 == op){
                 switch(typ){
-                    caseQ R lib_join_index_hash(vV(z,0),vV(z,1),x,y);
-                    caseG R lib_join_index_hash(vV(z,0),vV(z,1),x,y);
+                    caseQ R lib_join_index_hash(vV(z,0),vV(z,1),x,y,isEq);
+                    caseG R lib_join_index_hash(vV(z,0),vV(z,1),x,y,isEq);
                     default: EP("type not supported: %s\n", getTypeName(typ));
                 }
             }
@@ -1947,6 +1960,38 @@ L pfnJoinIndex(V z, V x, V y, FUNC2(foo)){
     //}
     R 0;
 }
+
+static L getFirstEqual(V f){
+    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "eq"))R i)
+    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "neq"))R i)
+    R 0;
+}
+
+static L pfnJoinIndexMultiple(V z, V x, V y, V f){
+    if(vn(x)==vn(y) && vn(x)==vn(f)){
+        L size = vn(x);
+        L fx = getFirstEqual(f); L f0=vQ(f,fx);
+        V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
+        CHECKE(joinOneColumn(z0,x0,y0,f0));
+        //printV(x0); printV(y0); printV(z0); getchar();
+        initV(z,H_G,2);
+        CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+    }
+    else R E_LENGTH;
+    R 0;
+}
+
+L pfnJoinIndex(V z, V x, V y, V f){
+    if(vn(f)==1){
+        R pfnJoinIndexSingle(z,x,y,f);
+    }
+    else if(vn(f)>1){
+        //printV(f); P("hello\n"); getchar();
+        R pfnJoinIndexMultiple(z,x,y,f);
+    }
+    else R E_DOMAIN;
+}
+
 
 /* Literals */
 

@@ -128,12 +128,32 @@ static V fetchLiteralSym(Node *n, Kind k){
     return z;
 }
 
+//static V fetchLiteralFunc(Node *n, Kind k){
+//    Node *name = n->val.nodeS;
+//    char *sym = name->val.idS;
+//    V z = allocNode();
+//    initV(z,H_Q,1);
+//    vq(z) = getSymbol(sym); 
+//    return z;
+//}
+
 static V fetchLiteralFunc(Node *n, Kind k){
-    Node *name = n->val.nodeS;
-    char *sym = name->val.idS;
+    List *list; int c=0;
+    for(list=n->val.listS;list!=NULL;list=list->next) c++;
+    char **sym = NEW2(char,c); c=0;
+    for(list=n->val.listS;list!=NULL;list=list->next) {
+        // TODO: check name1
+        sym[c++] = list->val->val.nodeS->val.compoundID.name2;
+    }
     V z = allocNode();
-    initV(z,H_Q,1);
-    vq(z) = getSymbol(sym); 
+    initV(z,H_Q,c);
+    if(c==1){
+        vq(z) = getSymbol(sym[0]);
+    }
+    else if(c>1){
+        DOI(c, vQ(z,i)=getSymbol(sym[i]))
+    }
+    if(c>0) free(sym);
     return z;
 }
 

@@ -178,7 +178,8 @@ L pfnEachLeft      (V z, V x, V y, FUNC2(foo));
 L pfnEachRight     (V z, V x, V y, FUNC2(foo));
 
 L pfnOuter         (V z, V x, V y, FUNC2(foo));
-L pfnJoinIndex     (V z, V x, V y, FUNC2(foo));
+//L pfnJoinIndex     (V z, V x, V y, FUNC2(foo));
+L pfnJoinIndex     (V z, V x, V y, V f);
 
 L pfnDictTable     (V z, V x, V y, L op);
 L pfnDict          (V z, V x, V y);

@@ -150,6 +150,14 @@ static void initQ10(){
     addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
 }
 
+static void initQ11(){
+    initTableByName((S)"partsupp");
+    initTableByName((S)"supplier");
+    initTableByName((S)"nation");
+    addFKey("supplier", "s_suppkey"   , "partsupp" , "ps_suppkey" );
+    addFKey("nation"  , "n_nationkey" , "supplier" , "s_nationkey");
+}
+
 static void initQ6(){
     initTableByName((S)"lineitem");
     /* no fkey */
@@ -227,6 +235,7 @@ void initTablesByQid(I id){
             case  8: initQ8 (); break;
             case  9: initQ9 (); break; /* working */
             case 10: initQ10(); break;
+            case 11: initQ11(); break;
             case 12: initQ12(); break;
             case 13: initQ13(); break;
             case 14: initQ14(); break;

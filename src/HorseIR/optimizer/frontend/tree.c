@@ -168,6 +168,10 @@ Node *makeNodeLiteralDate(List *date_list){
     return makeListKind(date_list, literalDateK);
 }
 
+Node *makeNodeLiteralFunc(List *func_list){
+    return makeListKind(func_list, literalFuncK);
+}
+
 Node *makeNodeCompoundID1(char *name1, char *name2){
     Node *n     = NEW(Node);
     n->kind     = compoundK;

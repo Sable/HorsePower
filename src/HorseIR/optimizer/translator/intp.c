@@ -6,10 +6,12 @@ typedef L (*DyadicFunc)(V,V,V);
 typedef L (*AnyadicFunc)(V,L,V[]);
 typedef L (*EachMonadic)(V,V,MonadicFunc);
 typedef L (*EachDyadic)(V,V,V,DyadicFunc);
+typedef L (*EachTriple)(V,V,V,V);
 
 #define MonFuncSize 60
 #define DyaFuncSize 35
 #define OuterProduct EachDyadic
+#define JoinOperation EachTriple
 
 /* pfnRand, pfnSeed, pfnCount */
 MonadicFunc monFunc[MonFuncSize] = {
@@ -59,7 +61,6 @@ static V executeIndexA(V *p){
     else {P("[IndexA]"); printErrMsg(status);}
 }
 
-#define executeJoinIndex executeOuter
 static V executeOuter(OuterProduct f, V *p){
     if(H_DEBUG) P("executeOuter\n");
     V z = NEW(V0);
@@ -69,6 +70,14 @@ static V executeOuter(OuterProduct f, V *p){
     L valence  = getValence(fIndex);
     if(valence != 2) EP("dyadic op expected for each_left/right, not %s\n", funcName);
     L status = (*f)(z, p[1], p[2], dyaFunc[fIndex-ltF]);
+    if(status==0) return z;
+    else {printErrMsg(status);}
+}
+
+static V executeJoinIndex(JoinOperation f, V *p){
+    if(H_DEBUG) P("executeJoinIndex\n");
+    V z = NEW(V0);
+    L status = (*f)(z, p[1], p[2], p[0]);
     if(status==0) return z;
     else {printErrMsg(status);}
 }

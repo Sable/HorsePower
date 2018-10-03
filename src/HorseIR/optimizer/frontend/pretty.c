@@ -22,7 +22,7 @@ static char buff[BUFF_SIZE];
 #define printComp(b,n)   {if(n->val.compoundID.name1)printComp2(b,n);else printComp1(b,n);}
 #define printDate(b,n)   {int x=n->val.dateS; if(toC)SP(b,"%d",x);else SP(b,"%d.%02d.%02d",x/10000,x%10000/100,x%100);}
 #define printSym(b,n)    {if(toC)SP(b,"getSymbol(\"%s\")", n->val.charS);else printSymCommon(b,n->val.charS);}
-#define printFunc(b,n)   prettyNodeBuff(b,n->val.nodeS)
+#define printFunc(b,n)   {SP(b,"@"); prettyNodeBuff(b,n->val.nodeS);}
 
 #define printPlainList(b,n)  {L x=countList(n->val.listS); \
                               if(x>1)printChar('('); prettyListBuff(b, n->val.listS, comma); if(x>1)printChar(')');}
@@ -33,6 +33,7 @@ static char buff[BUFF_SIZE];
 #define printPlainBool(b,n)  printPlainList(b,n)
 #define printPlainInt(b,n)   printPlainList(b,n)
 #define printPlainStr(b,n)   printPlainList(b,n)
+#define printPlainFunc(b,n)  printPlainList2(b,n)
 
 #define printLiteralFloat(b,n) {printPlainFloat(b,n); if(withAttr) strcat(b,":f64");}
 #define printLiteralSym(b,n)   {printPlainSym(b,n);   if(withAttr) strcat(b,":sym");}
@@ -42,7 +43,8 @@ static char buff[BUFF_SIZE];
 #define printLiteralBool(b,n)  {printPlainBool(b,n);  if(withAttr) strcat(b,":bool");}
 #define printLiteralInt(b,n)   {printPlainInt(b,n);   if(withAttr) strcat(b,":i64" );}
 #define printLiteralParam(b,n) prettyNodeBuff(b,n->val.nodeS)
-#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS);}
+//#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS);}
+#define printLiteralFunc(b,n)  {printPlainFunc(b,n);}
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
 #define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
 #define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
@@ -69,7 +71,7 @@ static void printSymCommon(char *b, char *str){
 static void printExprBuff(char *b, Node *n){
     resetBuff(b);
     if(n->val.expr.func){
-        strcat(b,"@"); prettyNodeBuff(b, n->val.expr.func);
+        prettyNodeBuff(b, n->val.expr.func);
         strcat(b,"("); prettyNodeBuff(b, n->val.expr.param); strcat(b, ")");
     }
     else {

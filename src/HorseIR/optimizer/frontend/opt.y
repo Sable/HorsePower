@@ -37,8 +37,8 @@
 %token <floatconst>  tFLOAT
 
 %type <prog> program 
-%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list string_list paramType_list paramType_list1
-%type <node> module moduleContent moduleBody stmt simple_stmt return_stmt expression literalFunction param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate compoundID type intValue floatValue paramExpr symbol_single nameType method
+%type <list> module_list module_body_list stmt_list param_list symbol_list int_list float_list dateValue_list string_list paramType_list paramType_list1 func_list
+%type <node> module moduleContent moduleBody stmt simple_stmt return_stmt expression param funcName name literal literalBool literalChar literalString literalInteger intType literalFloat floatType literalSymbol literalDate literalFunc compoundID type intValue floatValue paramExpr symbol_single nameType method
 %type <stringconst> symbol_name
 
 %start program
@@ -116,12 +116,12 @@ simple_stmt     : name ':' type '=' expression ';'
 return_stmt     : kRETURN param ';'
                  { $$ = makeNodeReturnStmt($2); }
 ;
-expression      : literalFunction '(' paramExpr ')'
+expression      : funcName '(' paramExpr ')'
                  { $$ = makeNodeExpr($1, $3); }
                 | param
                  { $$ = makeNodeExpr(NULL, $1); }
 ;
-literalFunction : '@' tID
+funcName        : '@' tID
                  { $$ = makeNodeFunction(makeNodeCompoundID1(NULL,$2)); }
                 | '@' compoundID
                  { $$ = makeNodeFunction($2); }
@@ -138,17 +138,20 @@ param_list      : param
 ;
 param           : name
                  { $$ = makeNodeParamLiteral($1); }
-                | funcName
-                 { $$ = makeNodeParamLiteral($1); }
                 | literal
                  { $$ = makeNodeParamLiteral($1); }
 ;
-funcName        : '@' name
-                 { $$ = makeNodeKind($2, literalFuncK); }
+
+func_list       : funcName
+                 { $$ = makeList($1, NULL); }
+                | funcName func_list
+                 { $$ = makeList($1, $2); }
 ;
+
 name            : tID
                  { $$ = makeNodeID($1); }
 ;
+
 literal         : literalBool
                  { $$ = $1; }
                 | literalChar
@@ -162,6 +165,8 @@ literal         : literalBool
                 | literalSymbol
                  { $$ = $1; }
                 | literalDate
+                 { $$ = $1; }
+                | literalFunc
                  { $$ = $1; }
 ;
 
@@ -185,6 +190,10 @@ literalInteger  : int_list ':' intType
                  { $$ = makeNodeLiteralInt($1, $3); }
                 | '(' int_list ')' ':' intType
                  { $$ = makeNodeLiteralInt($2, $5); }
+;
+
+literalFunc     : func_list
+                 { $$ = makeNodeLiteralFunc($1); }
 ;
 
 intType         : kI16

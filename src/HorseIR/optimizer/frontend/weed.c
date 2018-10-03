@@ -124,22 +124,32 @@ static Node *mergeModule(Node *n, Node *x){
 
 static void weedModuleMerged(List *module_list){
     List *p = module_list;
+    List *t = p; int size = 0; while(t){ size++; t = t->next; }
+    bool *isVisited = (bool*)malloc(size);
+    int i = 0;
     while(p){
-        Node *p0 = p->val;
-        char *name = fetchModuleName(p0);
-        List *x = p;
-        while(x && x->next){
-            Node *x0 = x->next->val;
-            if(!strcmp(name, fetchModuleName(x0)) && p0!=x0){
-                mergeModule(p0, x0);
-                List *temp = x->next;
-                x->next = x->next->next;
-                free(temp); // free(x0);
+        if(!isVisited[i]){
+            Node *p0 = p->val;
+            char *name = fetchModuleName(p0);
+            List *x = p;
+            while(x && x->next){
+                int j = i + 1;
+                Node *x0 = x->next->val;
+                if(!strcmp(name, fetchModuleName(x0)) && p0!=x0){
+                    mergeModule(p0, x0);
+                    List *temp = x->next;
+                    x->next = x->next->next;
+                    free(temp); // free(x0);
+                    isVisited[j] = true;
+                }
+                else x = x->next;
+                j++;
             }
-            x = x->next;
+            isVisited[i] = true;
         }
-        p = p->next;
+        p = p->next; i++;
     }
+    free(isVisited);
 }
 
 static void weedModuleList(List *module_list){

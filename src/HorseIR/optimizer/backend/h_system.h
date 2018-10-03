@@ -30,7 +30,8 @@ L copyByIndexSimple     (V z, L p, V x, L q);
 L findColFromTable2     (V *z, V x, L cId);
 L findColFromTable      (V x, L cId);
 
-L promoteValue          (V z, V x, L typMax);
+#define promoteValue(z,x,typMax) promoteValueWithIndex(z,x,typMax,NULL)
+L promoteValueWithIndex (V z, V x, L typMax, V ind);
 B checkZero             (V x);
 B checkMatch            (V x);
 L getSingleIntValue     (V x);
@@ -64,6 +65,10 @@ L searchOrdered         (V z, V x, V y);
 L joinIndexHash         (V z, V x, V y, C op);
 L listFlat2Normal       (V z, V x);
 L listFlatEachLen       (V z, V x);
+L getOpFromSymbol       (L x);
+L joinOneColumn         (V z, V x, V y, L sop);
+L joinOtherColumns      (V z, V x, V y, V ind, L fx, V f);
+B compareOpWithIndex    (V x, V y, L k0, L k1, L op);
 
 F logBaseF              (F b, F x);
 E logBaseE              (E b, E x);
@@ -72,7 +77,6 @@ B logicNand             (B x, B y);
 B logicOr               (B x, B y);
 B logicNor              (B x, B y);
 B logicXor              (B x, B y);
-
 
 B isTypeGroupInt        (L t);
 B isTypeGroupFloat      (L t);

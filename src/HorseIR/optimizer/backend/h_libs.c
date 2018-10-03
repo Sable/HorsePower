@@ -387,7 +387,7 @@ void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
 }
 
 void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    S str = sC(val);  L len = high-low;  B f0 = isUp?1:*isUp;
+    S str = sC(val);  L len = high-low;  B f0 = isUp?*isUp:1; //isUp?1:*isUp;
     if(len < 10){
         DOI3(low, high, DOJ3(low, high, if(str[rtn[i]] > str[rtn[j]]) { L t=rtn[i]; rtn[i]=rtn[j]; rtn[j]=t; } ))
     }
@@ -1196,10 +1196,11 @@ static void lib_radixsort_basic(Pos *val, I len){
 }
 
 void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
-    B f0 = isUp?1:*isUp;
+    B f0 = isUp?*isUp:1;
     Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
     DOP(len, {pos[i].x=vL(val,i); pos[i].i=i;})
     lib_radixsort_basic(pos, len);
+    //P("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, P("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)
         else DOP(len, rtn[i]=pos[len-i-1].i)
@@ -1285,7 +1286,7 @@ L lib_group_by_flat(V z, V x){
 
 /* index for join index*/
 
-L lib_join_index_hash(V z0, V z1, V x, V y){
+L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     L sLen,vLen,typ; void *src,*val;
     if(isList(x)&&isList(y)){
         sLen=vn(vV(x,0)), vLen=vn(vV(y,0)), typ=vp(x);
@@ -1319,7 +1320,14 @@ L lib_join_index_hash(V z0, V z1, V x, V y){
     L parZ[H_CORE], offset[H_CORE]; 
     memset(parZ, 0, sizeof(L)*H_CORE);
     memset(offset, 0, sizeof(L)*H_CORE);
-    DOT(vLen, if(tempK[i]>=0) {parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;} })
+    if(isEq){
+        DOT(vLen, if(tempK[i]>=0){parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;}})
+    }
+    else {
+        DOT(vLen, if(tempK[i]>=0){L cc=1; HI t0=tempH[i]; while(t0){cc++;t0=t0->inext;} parZ[tid]+=sLen-cc;}\
+                  else{parZ[tid]+=sLen;})
+    }
+    //DOI(H_CORE, P("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
     DOI(H_CORE, P("%lld ",parZ[i])) P("\n");
     DOI(H_CORE, c+=parZ[i])
     DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
@@ -1327,9 +1335,17 @@ L lib_join_index_hash(V z0, V z1, V x, V y){
     initV(z1, H_L, c);
     //c = 0; L tt=0;
     gettimeofday(&tv0, NULL);
+    if(isEq){
     DOT(vLen, if(tempK[i]>=0){L p=offset[tid];\
                              vL(z0,p)=tempK[i];vL(z1,p)=i; \
                              HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
+    }
+    else {
+    DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; L k0=tempK[i]; DOJ(k0,{vL(z0,p)=j;vL(z1,p)=i;p++;}) k0++;\
+                             HI t0=tempH[i]; while(t0){L k1=t0->ival;while(k0<k1){vL(z0,p)=k0;vL(z1,p++)=i;k0++;}k0++;t0=t0->inext;}\
+                             while(k0<sLen){vL(z0,p)=k0++; vL(z1,p++)=i;}  offset[tid]=p;}\
+              else{L p=offset[tid]; DOJ(sLen,{vL(z0,p)=j;vL(z1,p)=i;p++;}) offset[tid]=p;})
+    }
 //#pragma omp parallel for
 //    for(L i=0;i<vLen;i++){
 //        HI t0=tempH[i];L k=tempK[i];
@@ -1340,7 +1356,7 @@ L lib_join_index_hash(V z0, V z1, V x, V y){
 //    }
     gettimeofday(&tv1, NULL);
     P("Time 3 (ms): %g\n", calcInterval(tv0,tv1));
-    P("size = %lld\n",c);
+    P("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     //P("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)
     //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
@@ -1356,7 +1372,37 @@ L lib_join_index_hash(V z0, V z1, V x, V y){
     R 0;
 }
 
+static L binary_search(V x, L p0, V y, V d, I op){
+    L sta = 0, end = vn(y)-1;
+    while(sta < end){
+        L mid = (sta + end)/2;
+        if(compareOpWithIndex(x,y,p0,vL(d,mid),op)){ sta = mid + 1; }
+        else { end = mid - 1; }
+    }
+    if(sta == end) R sta;
+    else if(end < 0) R end;
+    else EP("binary search result different:(%lld, %lld)\n",sta,end);
+}
 
+L lib_join_index_compare(V z0, V z1, V x, V y, I op){
+    // x and y have the same type
+    V0 tt; V d=&tt; L n=0; I op_f=(0==op||1==op?0:1); // lt/leq:0 (desc); gt/geq:1 (asc)
+    //P("op = %d, op_f = %d\n",op,op_f);
+    pfnOrderBy(d, y, initLiteralBool(op_f));
+    //printV(x); printV(y); printV(d); getchar();
+    // 1. fetch length
+    DOI(xn, {L k=binary_search(x,i,y,d,op); if(k>=0)n+=k+1;})
+    // 2. alloc memory & do it
+    L n0=0;
+    initV(z0, H_L, n);
+    initV(z1, H_L, n);
+    DOI(xn, {L k=binary_search(x,i,y,d,op); \
+            if(k>=0){DOJ(k+1, {vL(z0,n0+j)=i;vL(z1,n0+j)=vL(d,j);})n0+=k+1;}})
+    //printV(z0);
+    //printV(z1);
+    //getchar();
+    R 0;
+}
 
 
 
