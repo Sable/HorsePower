@@ -1,0 +1,56 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    a0:? = @load_table(`customer:sym);
+    a1:? = @load_table(`orders:sym);
+    c00:i64  = check_cast(@column_value(a0,`c_custkey:sym), i64);
+    c10:enum = check_cast(@column_value(a1,`o_custkey:sym), enum);
+    c11:str  = check_cast(@column_value(a1,`o_comment:sym), str);
+    // before join
+    t0_0:? = @like(c11, "%special%requests%":str);
+    t0_1:? = @not(t0_0);
+    t0_2:? = @fetch(c10);
+    t0_4:? = @compress(t0_1, t0_2);
+    // group_join: left
+    t1_0:? = @group(c00);
+    t1_1:? = @keys(t1_0);
+    t1_2:? = @values(t1_0);
+    t1_3:? = @each(@len, t1_2);
+    t1_4:? = @raze(t1_3);
+    t1_5:? = @index(c00 , t1_1);
+    // group_join: right
+    t2_0:? = @group(t0_4);
+    t2_1:? = @keys(t2_0);
+    t2_2:? = @values(t2_0);
+    t2_3:? = @each(@len, t2_2);
+    t2_4:? = @raze(t2_3);
+    t2_5:? = @index(t0_4, t2_1);
+    // group_join: join
+    t3_0:? = @join_index(@eq, t1_5, t2_5);
+    t3_1:? = @index(t3_0, 0:i64);
+    t3_2:? = @index(t3_0, 1:i64);
+    k0:? = @index(t1_4, t3_1);
+    k1:? = @index(t2_4, t3_2);
+    t3_3:? = @mul(k0, k1);
+    t3_4:? = @len(t1_1);
+    t3_5:? = @vector(t3_4, 0:i64);
+    t3_6:? = @index_a(t3_5, t3_1, t3_3); //c_count
+    // group
+    t4_0:? = @group(t3_6);
+    t4_1:? = @keys(t4_0);
+    t4_2:? = @values(t4_0);
+    t4_3:? = @index(t3_6, t4_1);
+    t4_4:? = @each(@len, t4_2);
+    t4_5:? = @raze(t4_4);
+    // order
+    t5_0:? = @list(t4_5, t4_3);
+    t5_1:? = @order(t5_0, (0,0):bool);
+    t5_2:? = @index(t4_3, t5_1);
+    t5_3:? = @index(t4_5, t5_1);
+    // return table
+    t6_0:? = `c_count`custdist:sym;
+    t6_1:? = @list(t5_2, t5_3);
+    t6_2:? = @table(t6_0, t6_1);
+    return t6_2;
+  }
+}

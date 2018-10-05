@@ -1,0 +1,64 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    a0:? = @load_table(`nation:sym);
+    a1:? = @load_table(`supplier:sym);
+    a2:? = @load_table(`partsupp:sym);
+    c00:? = check_cast(@column_value(a0,`n_nationkey:sym)  , i64);
+    c01:? = check_cast(@column_value(a0,`n_name:sym)       , sym);
+    c10:? = check_cast(@column_value(a1,`s_nationkey:sym)  , enum);
+    c11:? = check_cast(@column_value(a1,`s_suppkey:sym)    , i64);
+    c20:? = check_cast(@column_value(a2,`ps_partkey:sym)   , i64);
+    c21:? = check_cast(@column_value(a2,`ps_suppkey:sym)   , enum);
+    c22:? = check_cast(@column_value(a2,`ps_supplycost:sym), f64);
+    c23:? = check_cast(@column_value(a2,`ps_availqty:sym)  , f64);
+    // left side
+    // 1. join: n_ and s_
+    t0_0:? = @eq(c01, `GERMANY:sym);
+    t0_1:? = @values(c10);
+    t0_2:? = @index(t0_0, t0_1);
+    // 2.join: s_ and ps_
+    t1_0:? = @values(c21);
+    t1_1:? = @index(t0_2, t1_0);
+    // 3. join: 1_ and 2_
+    //t2_0:? = @compress(t1_1, c20);
+    t2_1:? = @compress(t1_1, c22);
+    t2_2:? = @compress(t1_1, c23);
+    t2_3:? = @mul(t2_1, t2_2);
+    t2_4:? = @sum(t2_3);
+    t2_4:? = @mul(t2_4, 0.0001:f64);
+    // right side
+    // 1. join: n_ and s_
+    t3_0:? = @eq(c01, `GERMANY:sym);
+    t3_1:? = @values(c10);
+    t3_2:? = @index(t0_0, t0_1);
+    // 2.join: s_ and ps_
+    t4_0:? = @values(c21);
+    t4_1:? = @index(t0_2, t1_0);
+    // 3. join: 1_ and 2_
+    t5_0:? = @compress(t4_1, c20);
+    t5_1:? = @compress(t4_1, c22);
+    t5_2:? = @compress(t4_1, c23);
+    t5_3:? = @group(t5_0);
+    t5_4:? = @keys(t5_3);
+    t5_5:? = @values(t5_3);
+    t5_6:? = @mul(t5_1, t5_2);
+    t5_7:? = @each_right(@index, t5_6, t5_5);
+    t5_8:? = @each(@sum, t5_7);
+    t5_9:? = @raze(t5_8);
+    // join both sides
+    t6_0:? = @gt(t5_9, t2_4);
+    t6_1:? = @compress(t6_0, t5_4);
+    t6_2:? = @index(t5_0, t6_1);
+    t6_3:? = @compress(t6_0, t5_9);
+    // order by
+    t7_0:? = @order(t6_3, 0:bool);
+    t7_1:? = @index(t6_2, t7_0);
+    t7_2:? = @index(t6_3, t7_0);
+    // return
+    w0:? = `ps_partkey`value:sym;
+    w1:? = @list(t7_1, t7_2);
+    w2:? = @table(w0, w1);
+    return w2;
+  }
+}
