@@ -10,4 +10,4 @@ s_acctbal   s_name              n_name          p_partkey  p_mfgr          s_add
 9852.52     Supplier#000008973  RUSSIA          18972      Manufacturer#2  t5L67YdBYYH6o,Vz24jpDyQ9               32-188-594-7038  rns wake final foxes. carefully unusual depende
 9847.83     Supplier#000008097  RUSSIA          130557     Manufacturer#2  xMe97bpE69NzdwLoX                      32-375-640-3593  the special excuses. silent sentiments serve carefully final ac
 9847.57     Supplier#000006345  FRANCE          86344      Manufacturer#1  VSt3rzk3qG698u6ld8HhOByvrTcSTSvQlDQDag 16-886-766-7945  ges. slyly regular requests are. ruthless, express excuses cajole blithely across the unu
-... (total 100 rows)
+... (total 460 rows)

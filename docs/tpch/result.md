@@ -3,15 +3,15 @@
 | ID | SF1                    | SF2                      |
 |:--:|:----------------------:|:------------------------:|
 | 1  | [4x10](sf1/q1.txt)     |                          |
-| 2  | [100x8](sf1/q2.txt)    |                          |
-| 3  | [10x4](sf1/q3.txt)     |                          |
+| 2  | [460x8](sf1/q2.txt)    |                          |
+| 3  | [11620x4](sf1/q3.txt)  |                          |
 | 4  | [5x2](sf1/q4.txt)      |                          |
 | 5  | [5x2](sf1/q5.txt)      |                          |
 | 6  | [1x1](sf1/q6.txt)      |                          |
 | 7  | [4x4](sf1/q7.txt)      |                          |
 | 8  | [2x2](sf1/q8.txt)      |                          |
 | 9  | [175x3](sf1/q9.txt)    |                          |
-| 10 | [20x8](sf1/q10.txt)    |                          |
+| 10 | [37967x8](sf1/q10.txt) |                          |
 | 11 | [1048x2](sf1/q11.txt)  |                          |
 | 12 | [2x3](sf1/q12.txt)     |                          |
 | 13 | [42x2](sf1/q13.txt)    |                          |
@@ -22,8 +22,17 @@
 | 18 | [57x6](sf1/q18.txt)    |                          |
 | 19 | [1x1](sf1/q19.txt)     |                          |
 | 20 | [186x2](sf1/q20.txt)   |                          |
-| 21 | [100x2](sf1/q21.txt)   |                          |
+| 21 | [411x2](sf1/q21.txt)   |                          |
 | 22 | [7x3](sf1/q22.txt)     |                          |
+
+Notes
+
+- Query output limit
+    + q2: limit 100
+    + q3: limit 10
+    + q10: limit 20
+    + q18: limit 100
+    + q21: limit 100
 
 Execution plans can be found at:
 
