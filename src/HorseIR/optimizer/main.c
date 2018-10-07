@@ -160,8 +160,8 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    //SP(file_path, "data/hand-q%d.hir", qid);
-    SP(file_path, "data/q%d.hir", qid);
+    SP(file_path, "data/hand-q%d.hir", qid);
+    //SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 
@@ -231,39 +231,49 @@ static void runInterpreterCore(){
     P("Interpreter time (ms): %g ms\n", calcInterval(tv0, tv1));
 }
 
-static void validateParameters(){
-    if(isFront || isExp) return; //skip on tests
-    if(isInterp && isCompiler){
-        EP("> choose one mode: interpreter (-t) or compiler (-c), not both.\n");
-    }
-    else if(isInterp || isCompiler){
-        if(!isQuery && !isQFile){
-            EP("> query must be specified (-q <id> or -n <filename>).\n");
-        }
-    }
-    if(isQuery){
+static void validateInputFile(){
+    if(isQuery && !isQFile){
         if(qid<0 || qid>22)
             EP("> qid must be [1,22], but %d found.\n", qid);
-        if(isQFile)
-            EP("> choose either '-q <qid>' or '-n <filename>'\n");
-        if(!isInterp && !isCompiler && !isPretty)
-            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
-        if(qscale < 0){
-            EP("> qscale must > 0, but %d found.\n", qscale);
-        }
     }
-    else if(isQFile){
-        if(!isInterp && !isCompiler && !isPretty)
-            EP("> choose interpreter (-t), compiler (-c) or pretty printer (-p).\n");
+    else if(!isQuery && isQFile){
+        // do nothing
     }
-    else { // isQuery: false; isQFile: false
-        if(isPretty) {
-            EP("> pretty printer needs a query specified (-q <id> or -n <filename>).\n");
-        }
+    else {
+        EP("> choose either '-q <qid>' or '-n <filename>'\n");
     }
-    if(runs < 0){
+}
+
+static void validateInterp()  {
+    validateInputFile();
+    if(qscale < 0)
+        EP("> qscale must > 0, but %d found.\n", qscale);
+    if(runs < 0)
         EP("> # of runs must > 0, but %d found.\n", runs);
+}
+
+static void validateCompiler(){
+    validateInputFile();
+    if(isOpt){
+        if(strcmp(optName,"fe") && strcmp(optName,"fp")){
+            EP("> query opt., either fe or fp\n");
+        }
     }
+}
+
+static void validatePretty(){
+    validateInputFile();
+}
+
+static void validateParameters(){
+    if(isFront || isExp) return; //skip on tests
+    int count = isInterp + isCompiler + isPretty + isServer + isClient;
+    if(count > 1){
+        EP("> select one mode: interpreter(-t), compiler(-c), pretty printer(-p), or server/client(-z).\n");
+    }
+    else if(isInterp)  { validateInputFile(); }
+    else if(isCompiler){ validateCompiler();  }
+    else if(isPretty)  { validatePretty();    }
 }
 
 static void serializeToFile(char *name){
