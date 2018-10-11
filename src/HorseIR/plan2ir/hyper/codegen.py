@@ -219,6 +219,9 @@ def genOr(a, b):
 def genMul(a, b):
     return genDyadic('mul', a, b)
 
+def genDiv(a, b):
+    return genDyadic('div', a, b)
+
 def genPlus(a, b):
     return genDyadic('plus', a, b)
 

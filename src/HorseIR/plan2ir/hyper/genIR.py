@@ -33,7 +33,7 @@ Entry/Main
 """
 def main():
     if len(sys.argv) != 2:
-        print "Usage: python buildAST.py opt/<file>"
+        print "Usage: python genIR.py opt/<file>"
         sys.exit(1)
     name = sys.argv[1]
     plan = json.loads(readLines(name, ''))
@@ -274,9 +274,10 @@ def scanValuesExtractYear(v, env):
 
 # return anything input
 def scanValuesIsnotnull(v, env):
-    args = fetch('input', v)
-    t0   = scanValuesV(args, env)
-    return t0
+    # args = fetch('input', v)
+    # t0   = scanValuesV(args, env)
+    # return t0
+    return None
 
 def scanValuesV(v, env):
     expr = fetch('expression', v)
@@ -361,8 +362,8 @@ def scanAggr(d, values):
                 a2 = genRaze     (a1)
                 env_alias.append(a2)
             elif op == 'count':
-                a0 = genEachRight('@index', values[0], t3)
-                a1 = genEach     ('@len'  , a0)
+                # a0 = genEachRight('@index', values[0], t3)
+                a1 = genEach     ('@len'  , t3) # a0
                 a2 = genRaze     (a1)
                 env_alias.append(a2)
             elif op == 'countdistinct':
@@ -382,6 +383,10 @@ def scanAggr(d, values):
             else:
                 pending('op (%s) is not supported yet.' % op)
         # raise ValueError("stop")
+        env_names.append('_aggr_value_')
+        env_types.append('N/A')
+        env_alias.append(t3)
+    # values
     # print env_names
     # print env_types
     # print env_alias
@@ -407,13 +412,13 @@ def scanHeader(d, env):
         temp = temp + '`%s' % head[x*2]
     a0 = genLiteral(temp + ':sym')
     # build column values
-    if size == 1:
-        a1 = genEnlist(findAliasByName(head[1], new_env))
-    else:
-        temp = []
-        for x in range(size):
-            temp.append(findAliasByName(head[x*2+1], new_env))
-        a1 = genList(temp)
+    # if size == 1:
+    #     a1 = genEnlist(findAliasByName(head[1], new_env))
+    # else:
+    temp = []
+    for x in range(size):
+        temp.append(findAliasByName(head[x*2+1], new_env))
+    a1 = genList(temp)
     a2 = genTable(a0, a1)
     genReturn(a2)  # return table
     return None
@@ -504,7 +509,8 @@ def scanResiduals(d, env):
     debug('residuals')
     cells = []
     for c in d:
-        cells.append(scanValuesV(c, env))
+        value = scanValuesV(c, env)
+        if value: cells.append(value) # skip isnotnull -> None
         # cells.append(scanResidualsCell(c))
     if len(cells) == 1:
         return cells[0]
@@ -564,10 +570,10 @@ def scanRightsemijoin(d, env2):
 def scanCondition(d, tag, joinType, env):
     if tag == 'hash':
         # env -> 2 env
-        return findExprFromSide(d, joinType, env)
+        return findExprFromSide2(d, joinType, env)
     elif tag == 'index':
         # index join == hash join ??
-        return findExprFromSide(d, joinType, env)
+        return findExprFromSide2(d, joinType, env)
     elif tag == 'select':
         # q18
         return scanValuesV(d, env)
@@ -614,14 +620,84 @@ def scanMap(d, env):
     return combineEnv2(encodeEnv('lambda_map', env_names, env_alias, env_types), env)
 
 def scanGroupjoin(d, env2):
+    def readExpressions(expr, env):
+        rtn = []
+        for x in expr:
+            rtn.append(scanValuesV(x, env))
+        return rtn
+    def updateValueWithIndex(value, index):
+        v_alias = []
+        for v in value:
+            v_alias.append(genEachRight('@index',v,index))
+        return v_alias
+    def readAggrGrouped(aggr, value):
+        ids = []
+        for a in aggr:
+            sId = int(a['source'])
+            oId = a['operation']
+            if oId == 'keep' or oId == 'any':
+                ids.append(value[sId])
+            else:
+                pending('Grouped aggregation must have the operation "keep": %s' % oId)
+        return ids
+    def readAggrNotGrouped(aggr, value, length, env):
+        ids = []
+        hasSum = hasCount = False
+        t_sum = t_count = -1
+        for a in aggr:
+            sId  = int(a['source'])
+            oId  = a['operation']
+            uId  = a['iu'][0]
+            # print oId,uId
+            # raw_input()
+            if oId == 'sum':
+                hasSum = True
+                t0 = genEach('@sum', value[sId])
+                t1 = genRaze(t0)
+                t2 = genMul(length, t1)
+                t_sum = t2
+                ids.append(t_sum)
+            elif oId == 'count' and sId != 4294967295:
+                hasCount = True
+                t0 = genEach('@len', value[sId])
+                t1 = genRaze(t0)
+                t2 = genMul(length, t1)
+                t_count = t2
+                ids.append(t_count)
+            elif oId == 'avg':
+                if hasSum and hasCount:
+                    t0 = genDiv(t_sum, t_count)
+                    ids.append(t0)
+                else:
+                    pending('not hasSum and hasCount: %d, %d' % (hasSum,hasCount))
+            elif oId == 'keep':
+                pass
+        return ids
+    def readAggrGroupedAfter(aggr, left_value, right_value):
+        ids = []
+        for a in aggr:
+            sId = int(a['source'])
+            oId = a['operation']
+            if oId == 'count' and sId != 4294967295:
+                t0 = genMul(left_value, right_value)
+                ids.append(t0)
+            else:
+                pass
+        return ids
+    """ Start from here """
     debug('group join')
     left_env, right_env = env2
     left_keys  = d['leftKey']
     right_keys = d['rightKey']
+    semantic   = d['semantic']
     print left_keys, right_keys
-    printEnv(env2[0])
-    printEnv(env2[1])
-    raw_input()
+    # printEnv(env2[0])
+    # printEnv(env2[1])
+    # raw_input()
+    key_grouped = 'groupbyscan'
+    isLeftGrouped = key_grouped in getEnvTable(left_env)
+    isRightGrouped = key_grouped in getEnvTable(right_env)
+    # print isLeftGrouped, isRightGrouped
     if len(left_keys) == 1:
         # it seems left_col and right_col are useless
         # since 'source' has indicated the name of keys from both sides
@@ -630,49 +706,111 @@ def scanGroupjoin(d, env2):
         left_alias  = getEnumValue(findAliasByName(left_name , left_env ), left_env )
         right_alias = getEnumValue(findAliasByName(right_name, right_env), right_env)
         print left_alias, right_alias
-        # group: left
-        t0_0 = genGroup(left_alias)
-        t0_1 = genKeys(t0_0)
-        t0_2 = genValues(t0_0)
-        t0_3 = genEach('@len', t0_2)
-        t0_4 = genRaze(t0_3)
-        t0_5 = genIndex(left_alias, t0_1)
-        # group: right
-        t1_0 = genGroup(right_alias)
-        t1_1 = genKeys(t1_0)
-        t1_2 = genValues(t1_0)
-        t1_3 = genEach('@len', t1_2)
-        t1_4 = genRaze(t1_3)
-        t1_5 = genIndex(right_alias, t1_1)
-        # join
-        t2_0 = genJoinIndex('eq', t0_5, t1_5)
-        t2_1 = genIndex(t2_0, '0:i64')
-        t2_2 = genIndex(t2_0, '1:i64')
-        t2_3 = genIndex(t0_4, t2_1)
-        t2_4 = genIndex(t1_4, t2_2)
-        t2_5 = genMul(t2_3, t2_4)
-        t2_6 = genVector(genLength(t0_1), '0:i64')
-        t2_7 = genIndexA(t2_6, t2_1, t2_5)
-        # if left outer join (q13)
-        env_names =[] ; env_alias = []; env_types = []
-        addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
-        addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, None)
-        print d['leftAggregates']
-        printEnv(left_env)
-        print env_names
-        print env_alias
-        print env_types
-        print d['rightAggregates']
-        printEnv(right_env)
-        raw_input()
-        raise
-        # q3
-        # handle: leftExpressions
-        # handle: rightExpressions
-        env_names =[] ; env_alias = []; env_types = []
-        addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
-        addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, w3  )
-        return encodeEnv('lambda_groupjoin',env_names, env_alias, env_types)
+        left_value = [ left_alias ] + readExpressions(d['leftExpressions'], left_env)
+        right_value = [ right_alias ] + readExpressions(d['rightExpressions'], right_env)
+        print isLeftGrouped, isRightGrouped
+        # raw_input()
+        if isLeftGrouped:
+            if isRightGrouped:
+                EP('pending: %d, %d' % (isLeftGrouped,isRightGrouped))
+            else:
+                # 0. join index
+                t0_0 = genJoinIndex('@eq', left_alias, right_alias)
+                t0_1 = genIndex(t0_0, '0:i64')
+                t0_2 = genIndex(t0_0, '1:i64')
+                # 1. group by right side
+                t1_0 = genGroup(t0_1)
+                t1_1 = genKeys(t1_0)
+                t1_2 = genValues(t1_0)
+                t1_3 = genIndex(t0_1, t1_1)
+                t1_4 = genEachRight('@index',t0_2,t1_2)
+                t1_5 = genIndex(left_alias, t1_3) # left key
+                # 2. return
+                t2_0 = findAliasByName('_aggr_value_', left_env)
+                t2_1 = genEach('len', t2_0)
+                t2_2 = genRaze(t2_1)
+                t2_3 = genIndex(t2_2, t1_3) # length
+                left_aggr = readAggrGrouped(d[ 'leftAggregates'],  left_value)
+                right_updated_value = updateValueWithIndex(right_value, t1_4)
+                right_aggr = readAggrNotGrouped(d['rightAggregates'], right_updated_value, t2_3, right_env)
+                # print left_value, right_value
+                env_names =[] ; env_alias = []; env_types = []
+                # print left_aggr
+                # print right_aggr
+                # raw_input()
+                addEnvValuesFromVector(env_names, env_alias, env_types, d['leftAggregates' ],  left_aggr)
+                addEnvValuesFromVector(env_names, env_alias, env_types, d['rightAggregates'], right_aggr)
+                return encodeEnv('lambda_groupjoin', env_names, env_alias, env_types)
+        else:
+            if isRightGrouped:
+                EP('pending: %d, %d' % (isLeftGrouped,isRightGrouped))
+            else:
+                # print d['leftAggregates']
+                # print d['rightAggregates']
+                # raw_input()
+                # group: left
+                t0_0 = genGroup(left_alias)
+                t0_1 = genKeys(t0_0)
+                t0_2 = genValues(t0_0)
+                t0_3 = genEach('@len', t0_2)
+                t0_4 = genRaze(t0_3)
+                t0_5 = genIndex(left_alias, t0_1)
+                # group: right
+                t1_0 = genGroup(right_alias)
+                t1_1 = genKeys(t1_0)
+                t1_2 = genValues(t1_0)
+                t1_3 = genEach('@len', t1_2)
+                t1_4 = genRaze(t1_3)
+                t1_5 = genIndex(right_alias, t1_1)
+                # join
+                t2_0 = genJoinIndex('@eq', t0_5, t1_5)
+                t2_1 = genIndex(t2_0, '0:i64')
+                t2_2 = genIndex(t2_0, '1:i64')
+                t2_3 = genIndex(t0_4, t2_1)
+                t2_4 = genIndex(t1_4, t2_2)
+                left_updated_value = updateValueWithIndex(left_value, t2_3)
+                right_updated_value = updateValueWithIndex(right_value, t2_4)
+                left_aggr  = readAggrGrouped(d['leftAggregates'], left_updated_value)
+                right_aggr = []
+                if semantic == 'outer':
+                    right_after = readAggrGroupedAfter(d['rightAggregates'], t2_3, t2_4)
+                    t3_0 = genLength(t0_1)
+                    for val_aggr in right_after:
+                        t3_1 = genVector(t3_0, '0:i64')
+                        t3_2 = genIndexA(t3_1, t2_1, val_aggr)  # left side
+                        right_aggr.append(t3_2)
+                elif semantic == 'inner':
+                    # print right_updated_value
+                    # print d['rightAggregates']
+                    # raw_input()
+                    right_aggr = readAggrNotGrouped(d['rightAggregates'], right_updated_value, t2_3, right_env)
+                else:
+                    pending('GroupJoin: semantic not supported: %s' % semantic)
+                env_names =[] ; env_alias = []; env_types = []
+                addEnvValuesFromVector(env_names, env_alias, env_types, d['leftAggregates' ],  left_aggr)
+                addEnvValuesFromVector(env_names, env_alias, env_types, d['rightAggregates'], right_aggr)
+                return encodeEnv('lambda_groupjoin', env_names, env_alias, env_types)
+        # raise
+        # # if left outer join (q13)
+        # env_names =[] ; env_alias = []; env_types = []
+        # addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
+        # addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, None)
+        # print d['leftAggregates']
+        # printEnv(left_env)
+        # print env_names
+        # print env_alias
+        # print env_types
+        # print d['rightAggregates']
+        # printEnv(right_env)
+        # raw_input()
+        # raise
+        # # q3
+        # # handle: leftExpressions
+        # # handle: rightExpressions
+        # env_names =[] ; env_alias = []; env_types = []
+        # addEnvValues(env_names, env_alias, env_types, d['leftAggregates' ],  left_env, None)
+        # addEnvValues(env_names, env_alias, env_types, d['rightAggregates'], right_env, w3  )
+        # return encodeEnv('lambda_groupjoin',env_names, env_alias, env_types)
     else:
         unexpected('keys > 1 found in group join')
 
@@ -739,7 +877,7 @@ def scanGroupbyscan(d, env):
             if v == old_key:
                 old_cols[c] = new_key
                 break
-    return updateEnvWithCols(old_cols, source_env)
+    return updateEnvWithCols(old_cols, source_env, 'lambda_groupbyscan')
 
 # read source from the result of join (left-side)
 def scanMagic(d, env):
@@ -830,8 +968,8 @@ def scanConditionOr2(d, env2):
                     unexpected('unknown type %d' % typ)
             vec_left_or.append(genVectorAnd(vec_left_and))
             vec_right_or.append(genVectorAnd(vec_right_and))
-    print [vec_left_or, vec_right_or]
-    raw_input()
+    # print [vec_left_or, vec_right_or]
+    # raw_input()
     return [vec_left_or, vec_right_or]
 
 def fixSideInfo(name0, name1, env2):
@@ -882,7 +1020,60 @@ def isSingleColumnJoin(x):
     """ Single / Multiple """
     return x['expr'] == 'comparison'
 
+def joinColumnsMultiple2(joinType, cond_list, env2):
+    print cond_list
+    def isJoinAllEqual(x):
+        for cell in x['value']:
+            if cell['expr'] == 'comparison':
+                _,_,mode = cell['value']
+                if mode != '=' and mode != 'is': return False
+            else: return False
+        return True
+    def strJoinOp(x):
+        str_op = ''
+        for cell in x['value']:
+            _,_,mode = cell['value']
+            str_op = str_op + '@' + m2p(mode)
+        return str_op
+    #if joinType != 'equi_join':
+    #    pending('multiple columns not supported for join: %s' % joinType)
+    left_alias = []; right_alias = []; left_env, right_env = env2
+    join_op = '@eq' if isJoinAllEqual(cond_list) else strJoinOp(cond_list)
+    # gen code
+    for cond in cond_list['value']:
+        left_name, right_name, _ = cond['value']
+        left_alias.append(findAliasByName(left_name, left_env))
+        right_alias.append(findAliasByName(right_name, right_env))
+    t0 = genList(left_alias)
+    t1 = genList(right_alias)
+    t2 = genJoinIndex(join_op, t0, t1)
+    t3 = genIndex(t2, '0:i64')
+    t4 = genIndex(t2, '1:i64')
+    # raw_input()
+    return [t3, t4, 'indexing', 'plain']
+
 def findExprFromSide2(d, joinType, env2, isCollect=False):
+    def isJoinAllComparison(x):
+        for cell in x['value']:
+            if cell['expr'] == 'and':
+                if not isJoinAllComparison(cell):
+                    return False
+            elif cell['expr'] != 'comparison':
+                return False
+        return True
+    def floatConditionExpr(x):
+        value = []
+        for cell in x['value']:
+            if cell['expr'] == 'and':
+                value = value + floatConditionExpr(cell)
+            else:
+                value.append(cell)
+        return value
+    def flatConditionList(x):
+        return {
+            "expr": "and",
+            "value": floatConditionExpr(x)
+        }
     expr = d['expression']
     cond_list = scanJoinCondition(d, env2)
     printJSON(cond_list)
@@ -894,8 +1085,14 @@ def findExprFromSide2(d, joinType, env2, isCollect=False):
             return joinColumnsWithMode(mode, name0, env2[0], name1, env2[1])
         else:
             unexpected('cond (%s) not handled' % mode)
-    else:
+    elif expr == 'and':
         print 'multiple column joins'
+        if isJoinAllComparison(cond_list):
+            return joinColumnsMultiple2(joinType, flatConditionList(cond_list), env2)
+        else:
+            unexpected('not supported join type: ' + str(cond_list))
+    else:
+        unexpected('not supported join: %s' % expr)
     pass
 
 def isMultipleColumnJoin(d, env2):
@@ -921,7 +1118,6 @@ type  : value / indexing
 def findExprFromSide(d, joinType, env2, isCollect=False):
     expr = d['expression']
     findExprFromSide2(d, joinType, env2, isCollect) # debug
-    raw_input()
     if expr == 'comparison': # single join case
         mode = d['mode']; left = [] ; right = []
         name0 = fetchID(d['left' ])
@@ -1498,9 +1694,11 @@ def updateMaskInEnv(mask, env):
     newAlias = actionCompress(mask, alias, env) if mask is not None else alias
     return encodeEnv(getEnvTable(env), getEnvName(env), newAlias, getEnvType(env), mask, alias)
 
-def updateEnvWithCols(a, env):
+def updateEnvWithCols(a, env, new_name=None):
     new_env = copy.deepcopy(env)
     new_env['cols_n'] = a
+    if new_name:
+        new_env['table'] = new_name
     return new_env
 
 def updateEnvWithAlias(a, env):
@@ -1815,6 +2013,19 @@ def addEnvValues(names, alias, types, d, env, indx):
             names.append(nam)
             alias.append(genRaze(genIndex(aaa, indx)))
             types.append(typ)
+
+def addEnvValuesFromVector(names, alias, types, d, vector):
+    for c,a in enumerate(d):
+        sId = int(a['source'])
+        if sId == 4294967295:
+            continue
+        nam = a['iu'][0]
+        typ = strType(a['iu'][1])
+        aaa = vector[c]
+        names.append(nam)
+        alias.append(aaa)
+        types.append(typ)
+
 
 def isOkStr2Sym(tab, col, typ):
     global table_types

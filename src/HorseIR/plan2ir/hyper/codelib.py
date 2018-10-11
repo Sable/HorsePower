@@ -28,7 +28,8 @@ def m2p(c):
         '=': 'eq',
         '>=': 'geq',
         '<=': 'leq',
-        '<>': 'neq'
+        '<>': 'neq',
+        'is': 'eq' # q17
     }.get(c, '')
 
 def isArithOps(op):

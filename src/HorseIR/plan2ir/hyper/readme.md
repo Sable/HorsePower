@@ -1,34 +1,48 @@
 ## List of Queries
 
-| ID | Status | Hand Seq |Auto | Joins                                    | Special
-|----|--------|:--------:|-----|------------------------------------------|-------------------------
-| 1  | Pass   |  1       | Y   | 0 join                                   |
-| 2  | Pass*  |    2     |     | 8 joins                                  | earlyprobe, is
-| 3  | Pass   |    2     | Y   | 1 join,  1 groupjoin                     |
-| 4  | Pass   |  1       | Y   | 1 leftsemijoin                           |
-| 5  | Pass   |    2     |     | 5 joins                                  |
-| 6  | Pass   |  1       | Y   | 0 join                                   |
-| 7  | Pass*  |    2     | Y   | 5 joins                                  | bnl
-| 8  | Pass*  |    2     | Y   | 7 joins                                  |
-| 9  | Pass*  |      3   |     | 5 joins                                  |
-| 10 | Pass   |    2     | Y   | 3 joins                                  |
-| 11 | Pass   |      3   |     | 5 joins                                  | bnl join
-| 12 | Pass   |  1       | Y   | 1 join                                   | lookup
-| 13 | Pass   |  1       |     | 1 groupjoin                              | (left-outer-join)
-| 14 | Pass   |  1       | Y   | 1 join                                   |
-| 15 | Pass   |    2     | Y   | 1 join,  1 index join                    |
-| 16 | Pass   |  1       | Y   | 1 join,  1 rightantijoin                 |
-| 17 | Pass*  |    2     |     | 2 joins, 1 groupjoin                     | groupby scan, magic?
-| 18 | Pass   |    2     | Y   | 2 joins, 1 rightsemijoin                 | select
-| 19 | Pass   |  1       | Y   | 2 join                                   |
-| 20 | Pass*  |      3   |     | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
-| 21 | Pass*  |      3   |     | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
-| 22 | Pass   |  1       | Y   | 1 join,  1 leftantijoin                  | bnl
+| ID | Status |1st|2nd|Auto| Joins                                    | Special
+|----|--------|:-:|:-:|:--:|------------------------------------------|-------------------------
+| 1  | Pass   | P |   | Y  | 0 join                                   |
+| 2  | Pass*  |   | P | Y  | 8 joins                                  | earlyprobe, is
+| 3  | Pass   |   | P |    | 1 join,  1 groupjoin                     |
+| 4  | Pass   | P |   | Y  | 1 leftsemijoin                           |
+| 5  | Pass   |   | P | Y  | 5 joins                                  |
+| 6  | Pass   | P |   | Y  | 0 join                                   |
+| 7  | Pass*  |   | P | Y  | 5 joins                                  | bnl
+| 8  | Pass*  |   | P | Y  | 7 joins                                  |
+| 9  | Pass*  |   | P |    | 5 joins                                  |
+| 10 | Pass   |   | P | Y  | 3 joins                                  |
+| 11 | Pass   |   | P | Y  | 5 joins                                  | bnl join
+| 12 | Pass   | P |   | Y  | 1 join                                   | lookup
+| 13 | Pass   |   | P | Y' | 1 groupjoin                              | (left-outer-join)
+| 14 | Pass   | P |   | Y  | 1 join                                   |
+| 15 | Pass   |   | P | Y  | 2 joins                                  | 1 index join
+| 16 | Pass   | P |   | Y  | 1 join,  1 rightantijoin                 |
+| 17 | Pass*  |   | P |    | 2 joins, 1 groupjoin                     | groupby scan, magic?
+| 18 | Pass   |   | P | Y  | 2 joins, 1 rightsemijoin                 | select
+| 19 | Pass   | P |   | Y  | 1 join                                   |
+| 20 | Pass*  |   | P |    | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
+| 21 | Pass*  |   | P |    | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
+| 22 | Pass   | P |   | Y  | 1 join,  1 leftantijoin                  | bnl
+
+Note (Oct 10)
+
+- Auto: 17,20,21,13,9,3 ... 7,11,19,22
+
+Note (Oct 8)
+
+- Check optimized plans: `python profile.py opt`
+- Check unoptimized plans: `python profile.py unopt`
+- Hand version of 1st is [here](https://github.com/Sable/HorsePower/blob/master/docs/tpch)
+
+Note (Oct 4)
+
+- Newly passed: 20,21,3 ..., 9,17
 
 Note (Sep 13)
 
-- Newly passed: 15,18,10,8,7, ..., 5,3,2
-- Pending: 13,17
+- Newly passed: 15,18,10,8,7,5,2,13,11, ..., 9,20,21
+- groupjoin: 3,13,17 (pending)
 - Operation 'any' (treated the same as 'keep')
     + q3, q10, q18
 
