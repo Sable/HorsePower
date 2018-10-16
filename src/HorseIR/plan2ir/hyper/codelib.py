@@ -17,6 +17,9 @@ def debug(msg=''):
     sys.stderr.write('// %s\n' % msg)
     # print '// %s' % msg
 
+def info(msg=''):
+    sys.stdout.write('// %s\n' % msg)
+
 def m2p(c):
     return {
         '[': 'geq',
@@ -31,6 +34,14 @@ def m2p(c):
         '<>': 'neq',
         'is': 'eq' # q17
     }.get(c, '')
+
+def fixMode(c):
+    return {
+        '<' : '>' ,
+        '<=': '>=',
+        '>' : '<' ,
+        '>=': '<='
+    }.get(c, c)
 
 def isArithOps(op):
     return {
@@ -79,8 +90,8 @@ def strType(t):
             'Numeric': 'f64' ,
             'Char1'  : 'char',
             'Date'   : 'd'   ,
-            'Char'   : 'str' ,
-            'Varchar': 'sym'    # chf: char -> sym
+            'Char'   : 'sym' , # str  -> sym
+            'Varchar': 'sym'   # char -> sym
         }.get(t[0], ('<Invalid type %s>' % t[0]))
     else:
         raise ValueError(('Invalid type %s found' % t))
@@ -186,9 +197,6 @@ def whichTableByName(d, env2):
     else:
         unexpected('name (%s) not found in both tables' % d)
 
-
-
-
 def addOrderToEnv(d, env):
     if 'order' not in env:
         env['order'] = d
@@ -242,3 +250,7 @@ def wrong(msg):
 
 def todo(msg):
     debug('[TODO]: %s' % msg)
+
+def stop(msg):
+    print msg
+    raw_input('stop ...')

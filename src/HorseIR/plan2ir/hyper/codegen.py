@@ -47,7 +47,7 @@ def genNamebyNum():
 def genPrint(s):
     global line_no, code_block
     line_no = line_no + 1
-    print s
+    # print s
     code_block.append(s)
 
 def genAssignment(expr,cast=''):
@@ -69,13 +69,14 @@ def genMonadic(description, value):
     return targ
 
 def genDyadic(description, value_0, value_1, cast=''):
-    if not value_1.startswith('t'):
-    	if value_1.endswith(':char'):
-    		pass
-        elif description == 'eq' or description == 'neq': # chf
-            value_1 = genSymFromString(value_1)
-        elif description == 'like':
-            value_1 = genStringFromSym(value_1)
+    # if not value_1.startswith('t'):
+    #     stop(value_1)
+    #     if value_1.endswith(':char'):
+    #         pass
+    #     elif description == 'eq' or description == 'neq': # chf
+    #         value_1 = genSymFromString(value_1)
+    #     elif description == 'like':
+    #         value_1 = genStringFromSym(value_1)
     targ = genAssignment('@%s(%s,%s)'%(description,value_0,value_1),cast)
     insertUse(value_0, targ)
     insertUse(value_1, targ)
@@ -186,7 +187,7 @@ def genEnlist(x):
     return genMonadic('enlist', x)
 
 def genFetch(x):
-	return genMonadic('fetch', x)
+    return genMonadic('fetch', x)
 
 ###############  Dyadic 
 
@@ -276,7 +277,7 @@ def genBetween(x, m, n):
     return genAnd(genGeq(x, m), genLeq(x, n))
 
 def genJoinIndex(x, m, n):
-	return genTriple('join_index', x, m, n)
+    return genTriple('join_index', x, m, n)
 
 ###############  other helper
 
@@ -314,12 +315,23 @@ def genStringFromSym(x):
     else:
         return '**error**'*10
 
+def isSimpleSymbol(x):
+    """
+    Simple symbol: no   "", example: `h_world (with '_', [a-z], [A-Z], [0-9])
+    Other  symbol: with "", example: `"%BASS" (contains other char)
+    """
+    for c in x:
+        if c == '_' or (c>='a' and c<='z') or (c>='A' and c<='Z') or (c>='0' and c<='9'):
+            pass
+        else:
+            return False
+    return True
+
 ###############
 
 def printAllCode(mask=[], isDebug=False):
     global code_block
     head_lines = 5
-    debug('Program slicing (before: %d, after %d)' % (len(code_block)+head_lines, len(mask)+head_lines))
     if not isDebug:
         genModuleBegin('default')
     if mask:
@@ -331,6 +343,7 @@ def printAllCode(mask=[], isDebug=False):
             print (('    %s' % b) if not isDebug else '[%3d] %s' % (c,b))
     if not isDebug:
         genModuleEnd()
+    info('Program slicing (before %d, after %d)' % (len(code_block)+head_lines, len(mask)+head_lines))
 
 def traverseDef():
     global chain_def

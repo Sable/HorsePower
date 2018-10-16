@@ -10,20 +10,28 @@
 | 6  | Pass   | P |   | Y  | 0 join                                   |
 | 7  | Pass*  |   | P | Y  | 5 joins                                  | bnl
 | 8  | Pass*  |   | P | Y  | 7 joins                                  |
-| 9  | Pass*  |   | P |    | 5 joins                                  |
+| 9  | Pass*  |   | P | Y  | 5 joins                                  |
 | 10 | Pass   |   | P | Y  | 3 joins                                  |
 | 11 | Pass   |   | P | Y  | 5 joins                                  | bnl join
 | 12 | Pass   | P |   | Y  | 1 join                                   | lookup
-| 13 | Pass   |   | P | Y' | 1 groupjoin                              | (left-outer-join)
+| 13 | Pass   |   | P | Y  | 1 groupjoin                              | (left-outer-join)
 | 14 | Pass   | P |   | Y  | 1 join                                   |
 | 15 | Pass   |   | P | Y  | 2 joins                                  | 1 index join
 | 16 | Pass   | P |   | Y  | 1 join,  1 rightantijoin                 |
 | 17 | Pass*  |   | P |    | 2 joins, 1 groupjoin                     | groupby scan, magic?
 | 18 | Pass   |   | P | Y  | 2 joins, 1 rightsemijoin                 | select
 | 19 | Pass   | P |   | Y  | 1 join                                   |
-| 20 | Pass*  |   | P |    | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
-| 21 | Pass*  |   | P |    | 3 joins, 1 leftsemijoin, 1 leftantijoin  |
+| 20 | Pass*  |   | P | Y  | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
+| 21 | Pass*  |   | P | Y  | 4 joins, 1 leftsemijoin, 1 leftantijoin  |
 | 22 | Pass   | P |   | Y  | 1 join,  1 leftantijoin                  | bnl
+
+Command lines
+
+    # fetch information: line numbers and execution time
+    grep -REin "program slicing|time" gen | python profile_horseir.py
+
+    # show the details of execution plans
+    python profile.py opt
 
 Note (Oct 10)
 
@@ -35,7 +43,7 @@ Note (Oct 8)
 - Check unoptimized plans: `python profile.py unopt`
 - Hand version of 1st is [here](https://github.com/Sable/HorsePower/blob/master/docs/tpch)
 
-Note (Oct 4)
+Note (Oct 5)
 
 - Newly passed: 20,21,3 ..., 9,17
 
