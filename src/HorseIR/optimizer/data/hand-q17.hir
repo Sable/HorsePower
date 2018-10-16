@@ -22,7 +22,6 @@ module default{
       t0_7:? = @index(t0_3, t0_5);  // p_partkey
       t0_8:? = @index(c01 , t0_6);  // l_quantity
       t0_9:? = @index(c02 , t0_6);  // l_extendedprice
-      //xx:? = @sum(t0_5);
       // 1. magic box (groupby p_partkey)
       t1_0:? = @group(t0_7);
       t1_1:? = @keys(t1_0);

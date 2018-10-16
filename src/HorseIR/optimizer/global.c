@@ -96,6 +96,7 @@ static void initQ5(){
     initTableByName((S)"region");
     addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
     addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
     addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
     addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
 }
@@ -107,6 +108,7 @@ static void initQ7(){
     initTableByName((S)"customer");
     initTableByName((S)"nation");
     addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
     addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
     addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
 }
@@ -121,6 +123,7 @@ static void initQ8(){
     initTableByName((S)"region");
     addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
     addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
     addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
     addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
 }
@@ -132,6 +135,7 @@ static void initQ9(){
     initTableByName((S)"partsupp");
     initTableByName((S)"orders");
     initTableByName((S)"nation");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
     addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
     addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey");
     addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey");
@@ -154,7 +158,9 @@ static void initQ11(){
     initTableByName((S)"partsupp");
     initTableByName((S)"supplier");
     initTableByName((S)"nation");
+    initTableByName((S)"part");  // extra
     addFKey("supplier", "s_suppkey"   , "partsupp" , "ps_suppkey" );
+    addFKey("part"    , "p_partkey"   , "partsupp" , "ps_partkey" );
     addFKey("nation"  , "n_nationkey" , "supplier" , "s_nationkey");
 }
 
@@ -207,6 +213,19 @@ static void initQ19(){
     initTableByName((S)"part");
 }
 
+static void initQ20(){
+    initTableByName((S)"supplier");
+    initTableByName((S)"nation");
+    initTableByName((S)"partsupp");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"part");
+    addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
+    addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey");
+    addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey");
+    //addFKey2("partsupp", ((S []){"ps_partkey", "ps_suppkey"}),
+    //         "lineitem", ((S []){"l_partkey" , "l_suppkey" }), 2);
+}
+
 static void initQ21(){
     initTableByName((S)"supplier");
     initTableByName((S)"orders");
@@ -215,6 +234,7 @@ static void initQ21(){
     addFKey("nation", "n_nationkey", "supplier", "s_nationkey");
     addFKey("orders", "o_orderkey" , "lineitem", "l_orderkey" );
 }
+
 
 static void initQ22(){
     initTableByName((S)"customer");
@@ -244,13 +264,14 @@ void initTablesByQid(I id){
             case 17: initQ17(); break;
             case 18: initQ18(); break;
             case 19: initQ19(); break;
+            case 20: initQ20(); break;
             case 21: initQ21(); break;
             case 22: initQ22(); break;
             default: EP("Pending initTablesByQid: %d\n",id);
         }
     }
-    else { // init all tables
-        EP("loading all tables\n");
+    else if(id==99){ // init all tables
+        // EP("loading all tables\n");
         initTableByName((S)"region");
         initTableByName((S)"nation");
         initTableByName((S)"customer");
@@ -259,7 +280,15 @@ void initTablesByQid(I id){
         initTableByName((S)"part");
         initTableByName((S)"supplier");
         initTableByName((S)"partsupp");
+        addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey" );
+        addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey" );
+        addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
+        addFKey("customer", "c_custkey"  , "orders"  , "o_custkey"  );
+        addFKey("orders"  , "o_orderkey" , "lineitem", "l_orderkey" );
+        addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
+        addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
     }
+    else EP("qid must be [1,22] or 99 (all)\n");
 }
 
 /* entry */

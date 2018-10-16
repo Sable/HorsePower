@@ -146,6 +146,7 @@ L promoteValueWithIndex(V z, V x, L typMax, V ind){
     if(vp(x) == typMax) {
         if(!ind) R copyV(z,x);
         else {
+            initV(z, typMax, size); //opt?
             switch(vp(x)){
                 caseB DOP(size, vB(z,i) = vB(x,indx[i])) break;
                 caseJ DOP(size, vJ(z,i) = vJ(x,indx[i])) break;
@@ -217,7 +218,7 @@ L promoteValueWithIndex(V z, V x, L typMax, V ind){
                     caseE DOP(size, xCopy(vX(z,i),vE(x,WithIndex),0)) break;
                 }
             } break;
-            default: EP("PromoteValue error\n");
+            default: EP("PromoteValue error: %lld\n", vp(z));
         }
         R 0;
     }

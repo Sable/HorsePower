@@ -434,7 +434,7 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSam
             if(temp != 0) *leftSame = false;
             if(temp > 0) break;
         }
-        do{--j;} while((*cmp)(val,rtn[j],rtn[pivot],isUp) > 0);
+        do{--j;} while(j>=0 && ((*cmp)(val,rtn[j],rtn[pivot],isUp)>0));
         if(i>=j) break;
         t = rtn[i]; rtn[i] = rtn[j]; rtn[j] = t;
     }
@@ -442,7 +442,9 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSam
     R j;
 }
 
+/* f(0) desc; f(1) asc */
 #define cmp_switch(x) (x?-1:1):(x?1:-1)
+//#define cmp_switch(x) (-1):(1)
 
 L lib_quicksort_cmp(V val, L a, L b, B *isUp){
     DOI(vn(val), {V t=vV(val,i); B f=isUp?isUp[i]:1; \
@@ -452,6 +454,10 @@ L lib_quicksort_cmp(V val, L a, L b, B *isUp){
 
 L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
     B f = isUp?*isUp:1;
+    // switch(vp(t)){
+    //     caseH if(f==0 && vH(t,a)==1992){
+    //         P("1992: a = %d, b = %d\n",vH(t,a),vH(t,b)); getchar();} break;
+    // }
     #define SORT_CMP(q) case##q if(v##q(t,a)!=v##q(t,b)) R v##q(t,a)<v##q(t,b)?cmp_switch(f); break
     switch(vp(t)){ \
         SORT_CMP(B); \
@@ -482,7 +488,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
 }
 
 void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    // P("Entering merge sort: (%lld, %lld)\n",low,high);
+    //P("Entering merge sort: (%lld, %lld)\n",low,high);
     // #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
     #define SWAP_I(a,b) { rtn[a]^=rtn[b]; rtn[b]^=rtn[a]; rtn[a]^=rtn[b]; }
     // P("type of val: %lld\n", vp(val));
@@ -592,8 +598,8 @@ void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
 
 /*
  * check if it is a sorted vector by a given order, isUp
- * isUp: true  -> -1
- *     : false ->  1
+ * isUp: true  -> -1 (asc)
+ *     : false ->  1 (desc)
  */
 B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
     L rtn = 0;
@@ -606,16 +612,16 @@ B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
 
 void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
     DOP(tLen, targ[i]=i);
-    #if defined(OPT_Q16) || defined(SORT_MERGE)
-        /* quick sort */
-        // lib_quicksort_other(targ, val, 0, tLen, isUp, lib_quicksort_cmp);
-        /* merge sort (fast) */ 
-        LARGE_BUFF = (L*)malloc(sizeof(L)*vn(vV(val,0)));
-        lib_mergesort_list(targ, val, 0, tLen, isUp, cmp);
-        free(LARGE_BUFF);
-    #else
+    //#if defined(OPT_Q16) || defined(SORT_MERGE)
+    //    /* quick sort */
+    //    // lib_quicksort_other(targ, val, 0, tLen, isUp, lib_quicksort_cmp);
+    //    /* merge sort (fast) */ 
+    //    LARGE_BUFF = (L*)malloc(sizeof(L)*vn(vV(val,0)));
+    //    lib_mergesort_list(targ, val, 0, tLen, isUp, cmp);
+    //    free(LARGE_BUFF);
+    //#else
         lib_quicksort_list(targ, val, isUp, 0, tLen, colId, cmp);
-    #endif
+    //#endif
 }
 
 void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CMP(cmp)){
@@ -630,9 +636,9 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
         // }
     }
     else {
-        // if(colId == 2 && low == 29 && high == 33){
-        //     P("xxxxx\n");
-        // }
+        //if(colId == 1 && low == 0 && high == 7){
+        //    P("xxxxx: %d\n", isInteger(curV)); getchar();
+        //}
         //#ifdef OPT_Q16
         //    LARGE_BUFF = (L*)malloc(sizeof(L)*vn(curV));
         //    lib_mergesort(targ, curV, low, high, curB, cmp);
@@ -1296,6 +1302,8 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
         sLen=vn(x), vLen=vn(y), typ=vp(x);
         src=sG(x), val=sG(y);
     }
+    //DOI(vn(x), if(vL(x,i)<74){P("stop at x: %lld\n",vL(x,i)); getchar();})
+    //DOI(vn(y), if(vL(y,i)==1){P("see y == 1 at y[%lld]\n",i); break;}) getchar();
     HN hashT;
     L hashLen = getHashTableSize(sLen);
     CHECKE(createHash(&hashT,hashLen));
@@ -1321,7 +1329,7 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     memset(parZ, 0, sizeof(L)*H_CORE);
     memset(offset, 0, sizeof(L)*H_CORE);
     if(isEq){
-        DOT(vLen, if(tempK[i]>=0){parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;}})
+        DOT(vLen, if(tempK[i]>=0){  parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;}})
     }
     else {
         DOT(vLen, if(tempK[i]>=0){L cc=1; HI t0=tempH[i]; while(t0){cc++;t0=t0->inext;} parZ[tid]+=sLen-cc;}\

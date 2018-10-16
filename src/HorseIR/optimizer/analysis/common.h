@@ -16,7 +16,7 @@
 
 /* consts */
 typedef enum FunctionType {
-    /* unary */
+    /* unary 60 */
     absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
     logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
     atanF, coshF, sinhF, tanhF, acoshF, asinhF, atanhF,
@@ -25,15 +25,15 @@ typedef enum FunctionType {
     uniqueF, strF, lenF, rangeF, factF, randF, seedF, flipF, reverseF,
     whereF, groupF, countF, sumF, avgF, minF, maxF, razeF, enlistF, tolistF,
     formatF, keysF, valuesF, metaF, loadTableF, fetchF,
-    /* binary */
+    /* binary 33 */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
     powerF, logbF, modF, andF, orF, nandF, norF, xorF,
-    dtdiffF, dtaddF, dtsubF,
+    dtdiffF, 
     appendF, likeF, compressF, randkF, indexofF, takeF, dropF, orderF,
     memberF, vectorF, matchF, indexF, columnValueF, subStringF,
-    /* special */
+    /* special 14 */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF,
-    ktableF, indexAF, listF, outerF, joinIndexF,
+    ktableF, indexAF, listF, outerF, joinIndexF, dtaddF, dtsubF,
     totalFunc
 }pFunc;
 

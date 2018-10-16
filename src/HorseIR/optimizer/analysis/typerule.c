@@ -12,15 +12,15 @@ const char *FUNCTIONS[] = {
     "unique", "str", "len", "range", "fact", "rand", "seed", "flip", "reverse",
     "where", "group", "count", "sum", "avg", "min", "max", "raze", "enlist", "tolist",
     "format", "keys", "values", "meta", "load_table", "fetch",
-    /* binary 35 */
+    /* binary 33 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul", "div",
     "power", "logb", "mod", "and", "or", "nand", "nor" , "xor",
-    "datetime_diff", "datetime_add", "datetime_sub",
+    "datetime_diff",
     "append", "like", "compress", "randk", "index_of", "take", "drop", "order",
     "member", "vector", "match", "index", "column_value", "sub_string",
-    /* special 10 */
+    /* special 14 */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
-    "ktable", "index_a", "list", "outer", "join_index"
+    "ktable", "index_a", "list", "outer", "join_index", "datetime_add", "datetime_sub"
 };
 
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
@@ -687,6 +687,7 @@ int getFuncIndexByName(char *name){
         error("FUNCTIONS and FunctionType should have the same # of elem.");
     }
     int k = findInBuiltinSet(name, FUNCTIONS);
+    //P("get name = %s, k = %d\n", name,k); getchar();
     if(k>=0) return k;
     else {
         if(!strcmp(name, "le")) P("Do you mean 'leq' instead of 'le'?\n");
@@ -697,8 +698,8 @@ int getFuncIndexByName(char *name){
 }
 
 void *fetchTypeRules(char *name, int* num){
-    // P("fetch name = %s\n", name); getchar();
     int k = getFuncIndexByName(name);
+    //P("fetch name = %s, k = %d\n", name,k); getchar();
     if(k>=0){
         *num = getValence(k);
         //P("valence = %d, k = %d\n", *num,k);
@@ -778,8 +779,6 @@ void *fetchTypeRules(char *name, int* num){
             CASE(     norF, ruleNor)
             CASE(     xorF, ruleXor)
             CASE(  dtdiffF, ruleDtdiff)
-            CASE(   dtaddF, ruleDtadd)
-            CASE(   dtsubF, ruleDtsub)
             CASE(  appendF, ruleAppend)
             CASE(    likeF, ruleLike)
             CASE(compressF, ruleCompress)
@@ -812,6 +811,8 @@ void *fetchTypeRules(char *name, int* num){
             CASE(      outerF, ruleOuter)
             CASE(  joinIndexF, ruleJoinIndex)
             CASE(       listF, ruleList)
+            CASE(      dtaddF, ruleDtadd)
+            CASE(      dtsubF, ruleDtsub)
             default: EP("type rules not defined.: %s\n", name);
         }
     }
@@ -842,6 +843,8 @@ int getValence(pFunc k){
             case       outerF: return 3;
             case   joinIndexF: return 3;
             case        listF: return -1; //any
+            case       dtaddF: return 3;
+            case       dtsubF: return 3;
             default: EP("[getValence] Func (%d) not defined yet.\n",k);
         }
     }

@@ -29,7 +29,7 @@ MonadicFunc monFunc[MonFuncSize] = {
 DyadicFunc  dyaFunc[DyaFuncSize] = {
     pfnLt, pfnGt, pfnLeq, pfnGeq, pfnEq, pfnNeq, pfnPlus, pfnMinus, pfnMul, pfnDiv,
     pfnPower, pfnLogBase, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor, pfnXor,
-    NULL, NULL, NULL,
+    NULL,
     pfnAppend, pfnLike, pfnCompress, NULL, pfnIndexOf, NULL, NULL, pfnOrderBy,
     pfnMember, pfnVector, pfnMatch, pfnIndex, pfnColumnValue, pfnSubString
 };
@@ -70,6 +70,14 @@ static V executeOuter(OuterProduct f, V *p){
     L valence  = getValence(fIndex);
     if(valence != 2) EP("dyadic op expected for each_left/right, not %s\n", funcName);
     L status = (*f)(z, p[1], p[2], dyaFunc[fIndex-ltF]);
+    if(status==0) return z;
+    else {printErrMsg(status);}
+}
+
+static V executeTriple(EachTriple f, V *p){
+    if(H_DEBUG) P("executeTriple\n");
+    V z = NEW(V0);
+    L status = (*f)(z, p[0], p[1], p[2]);
     if(status==0) return z;
     else {printErrMsg(status);}
 }
@@ -168,6 +176,8 @@ static V processStmtCommon(Node *expr){
                 /* others */
                 case       outerF: return executeOuter(&pfnOuter, params); break;
                 case   joinIndexF: return executeJoinIndex(&pfnJoinIndex, params); break;
+                case       dtaddF: return executeTriple(&pfnDatetimeAdd, params); break;
+                case       dtsubF: return executeTriple(&pfnDatetimeSub, params); break;
                 default: EP("pending ... for %d\n", fIndex);
             }
         }
@@ -181,9 +191,9 @@ static void runSimpleStmt(Node *stmt){
     Node *expr = stmt->val.simpleStmt.expr;
     if(expr->val.expr.func){
         saveToNameTable(writeName, processStmtCommon(expr));
-        //if(!strcmp(writeName, "t31")){
-        //    printV(getValueFromNameTable(writeName));
-        //}
+        // if(!strcmp(writeName, "t2")){
+        //     printV(getValueFromNameTable(writeName));
+        // }
     }
     else { // assignment
         Node *param = expr->val.expr.param;
@@ -215,7 +225,9 @@ static int runSingleStmt(Node *stmt, V *rtn){
     }
 #ifdef PROFILE
     gettimeofday(&tv1, NULL);
-    P(">> Time (ms): %g\n\n", calcInterval(tv0, tv1));
+    double elapsed = calcInterval(tv0, tv1);
+    if(elapsed >= 1)
+        P(">> Time (ms): %g\n\n", elapsed);
 #endif
     return 0;
 }

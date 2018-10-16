@@ -740,7 +740,10 @@ L pfnWhere(V z, V x){
 }
 
 L pfnSum(V z, V x){
-    //P("Input x size: %lld\n", xn); printV2(x, 20); getchar();
+    //P("type is %s\n", getTypeName(xp));getchar();
+    //if(xn>1000){
+    //    P("Input x size: %lld\n", xn); printV2(x, 20); getchar();
+    //}
     //L numZero = 0; DOI(xn, if(vL(x,i)==0) numZero++) P("num = %lld\n", numZero); getchar();
     if(isTypeGroupReal(vp(x))){
         L typZ = isFloat(x)?H_F:isDouble(x)?H_E:H_L;
@@ -962,8 +965,8 @@ L pfnToIndex(V z, V x){
 }
 
 L pfnGroup(V z, V x){
-    P("Input len = %lld, type = %lld\n", xn,xp);
-    //printV2(x,100);
+    //P("Input len = %lld, type = %lld\n", xn,xp);
+    //printV2(x,100); getchar();
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
     V t = allocNode();
@@ -1623,13 +1626,14 @@ L pfnAppend(V z, V x, V y){
 }
 // TODO: debug caseQ, a non-deterministic bug
 L pfnLike(V z, V x, V y){
-    if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
+    //if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
+    if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
         B t;
-        if(isChar(y) || isOne(y)){
+        if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
-            S strY = isChar(y)?sC(y):vs(y);
+            S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
             pcre2_code *re = getLikePatten(strY);
-            P("input size: %lld\n", vn(x));
+            //P("input size: %lld\n", vn(x));
             /* jit facilities */
             I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
             B case1 = false;
@@ -1658,6 +1662,9 @@ L pfnLike(V z, V x, V y){
             R 0;
         }
         else if(isChar(x) || isEqualLength(x,y)){  // y:string
+            if(isSymbol(y)){
+                EP("pending ... for like (..., symbol)");
+            }
             switch(vp(x)){
                 caseC DOI(vn(y), \
                       CHECKE(getLikeFromString(&t,sC(x),vS(y,i))))                   break;
@@ -1719,6 +1726,7 @@ L pfnOrderBy(V z, V x, V y){
 }
 
 L pfnEach(V z, V x, FUNC1(foo)){
+    //P("type x: %s\n", getTypeName(xp));
     if(isList(x)){
         V t = NULL;
         if(isListFlat(x)) {
@@ -1737,7 +1745,7 @@ L pfnEachItem(V z, V x, V y, FUNC2(foo)){
     L lenX = isList(x)?vn(x):1;
     L lenY = isList(y)?vn(y):1;
     if(isList(x) && isList(y)){
-        if(isListFlat(x) || isListFlat(y)) EP("TODO: flat list\n");
+        if(isListFlat(x) || isListFlat(y)) EP("TODO: flat list: %d, %d\n",isListFlat(x),isListFlat(y));
         if(lenX==lenY){
             initV(z,H_G,lenX);
             DOI(lenX, CHECKE((*foo)(vV(z,i),vV(x,i),vV(y,i))))
@@ -1789,10 +1797,12 @@ L pfnEachRight(V z, V x, V y, FUNC2(foo)){
         else t = y;
         L lenZ = vn(t);
         initV(z,H_G,lenZ);
-        // P("pfnEachRight: size(z) = %lld\n", lenZ);
-        // L minVal = 999999, maxVal = -1;
-        // DOI(lenZ, {V tt=vV(y,i); if(minVal>vn(tt)) minVal=vn(tt); if(maxVal<vn(tt)) maxVal=vn(tt);})
-        // P("lenZ = %lld, minVal = %lld, maxVal = %lld\n", lenZ, minVal, maxVal); getchar();
+#ifdef PROFILE
+        P(">> pfnEachRight: size(z) = %lld\n", lenZ);
+        L minVal = 999999, maxVal = -1;
+        DOI(lenZ, {V tt=vV(y,i); if(minVal>vn(tt)) minVal=vn(tt); if(maxVal<vn(tt)) maxVal=vn(tt);})
+        P(">> lenZ = %lld, minVal = %lld, maxVal = %lld\n", lenZ, minVal, maxVal);
+#endif
         DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(t,i))))  // seg fault after DOI -> DOP
     }
     else {
@@ -1866,6 +1876,7 @@ static L pfnJoinIndexSingle(V z, V x, V y, V f){
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,H_G,lenZ);
+            P("2.3 op = %lld\n",op);
             if(4 == op || 5 == op){
                 switch(typMax){
                     caseH caseI caseL caseF caseE
@@ -2124,7 +2135,8 @@ L pfnKTable(V z, V x, V y){
 #define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
 L pfnMember(V z, V x, V y){
     //P("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
-    if(isTypeGroupReal(vp(x))){
+    //printV(x); printV(y); getchar();
+    if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         V tempX = allocNode();
         V tempY = allocNode();
         L typMax = MAX(vp(x),vp(y));
@@ -2138,9 +2150,10 @@ L pfnMember(V z, V x, V y){
             MEMBER(L,z,tempX,tempY);
             MEMBER(F,z,tempX,tempY);
             MEMBER(E,z,tempX,tempY);
+            default: EP("type not supported: %lld\n",typMax);
         }
     }
-    else if(isTypeGroupString(vp(x)) || isComplex(x) || isTypeGroupDTime(vp(x))){
+    else if(isSameType(x,y) && (isTypeGroupString(vp(x)) || isComplex(x) || isTypeGroupDTime(vp(x)))){
         initV(z,H_B,vn(y));
         switch(vp(x)){
             MEMBER(X,z,x,y);
@@ -2153,6 +2166,7 @@ L pfnMember(V z, V x, V y){
             MEMBER(U,z,x,y);
             MEMBER(W,z,x,y);
             MEMBER(T,z,x,y);
+            default: EP("type not supported: %lld\n",vp(x));
         }
     }
     else R E_DOMAIN;
@@ -2279,6 +2293,7 @@ L pfnAddFKey(V x, V xKey, V y, V yKey){
             P(" (key) -> %s.", getSymbolStr(vq(y)));
             printValue(yKey);
             P(" (fkey)\n");
+            getchar();
         }
         //else R E_NOT_IMPL;
     }

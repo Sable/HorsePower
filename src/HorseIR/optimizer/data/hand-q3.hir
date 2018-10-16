@@ -26,44 +26,51 @@ module default{
     t0_5:? = @compress(t0_4, t0_3);  // key
     t0_6:? = @where(t0_1);
     t0_7:? = @compress(t0_4, t0_6);  // value
-    t0_8:? = @index(c13, t0_7);
-    t0_9:? = @index(c10, t0_7);
-    t0_10:? = @index(c11, t0_7);
-    // orderkey: o_ and l_
-    t1_0:? = @gt(c23, 1995.03.15:d);
-    t1_1:? = @compress(t1_0, c20);
-    t1_2:? = @fetch(t1_1);
-    t1_3:? = @join_index(@eq, t0_8, t1_2);
-    t1_4:? = @index(t1_3, 0:i64);
-    t1_5:? = @index(t1_3, 1:i64);
-    t1_6:? = @index(t1_2, t1_5 ); // l_orderkey
-    t1_7:? = @index(t0_9, t1_4 ); // o_orderdate
-    t1_8:? = @index(t0_10, t1_4 );// o_shippriority
-    t1_9:? = @compress(t1_0, c21);
-    t1_10:? = @compress(t1_0, c22);
-    t1_11:? = @index(t1_9, t1_5);  // l_extendedprice
-    t1_12:? = @index(t1_10, t1_5); // l_discount
-    // materialize
-    t2_0:? = @minus(1:i64, t1_12);
-    t2_1:? = @mul(t1_11, t2_0);    // revenue
-    // group
-    t3_0:? = @list(t1_6, t1_7, t1_8);
-    t3_1:? = @group(t3_0);
-    t3_2:? = @keys(t3_1);
-    t3_3:? = @values(t3_1);
-    t3_4:? = @each_right(@index,t2_1, t3_3);
-    t3_5:? = @each(@sum, t3_4);
-    t3_6:? = @raze(t3_5);  // revenue
-    t3_7:? = @index(t1_6, t3_2); // l_orderkey
-    t3_8:? = @index(t1_7, t3_2); // o_orderdate
-    t3_9:? = @index(t1_8, t3_2); // o_shippriority
+    t0_8:? = @index(c13, t0_7);  // o_orderkey
+    t0_9:? = @index(c10, t0_7);  // o_orderdate
+    t0_10:? = @index(c11, t0_7); // o_shippriority
+    // group left
+    t1_0:? = @list(t0_8, t0_9, t0_10);
+    t1_1:? = @group(t1_0);
+    t1_2:? = @keys(t1_1);
+    t1_3:? = @values(t1_1);
+    t1_4:? = @index(t0_8, t1_2);  // o_orderkey
+    t1_5:? = @each(@len, t1_3);
+    t1_6:? = @raze(t1_5);
+    t1_8:? = @index(t0_9, t1_2);  // o_orderdate
+    t1_9:? = @index(t0_10,t1_2);  // o_shippriority
+    // scan right
+    t9_0:? = @gt(c23, 1995.03.15:d);
+    t9_1:? = @compress(t9_0, c20);
+    t9_2:? = @fetch(t9_1); // l_orderkey
+    t9_3:? = @compress(t9_0, c21); // l_extendedprice
+    t9_4:? = @compress(t9_0, c22); // l_discount
+    t9_5:? = @group(t9_2);
+    t9_6:? = @keys(t9_5);
+    t9_7:? = @values(t9_5);
+    t9_8:? = @index(t9_2, t9_6); // l_orderkey
+    t9_9:? = @minus(1:i64, t9_4);
+    t9_10:? = @mul(t9_9, t9_3);  // revenue
+    t9_11:? = @each_right(@index, t9_10, t9_7);
+    t9_12:? = @each(@sum, t9_11);
+    t9_13:? = @raze(t9_12);
+    // join
+    t2_0:? = @join_index(@eq, t1_4, t9_8);
+    t2_1:? = @index(t2_0, 0:i64);
+    t2_2:? = @index(t2_0, 1:i64);
+    t2_3:? = @index(t9_13, t2_2);
+    t2_4:? = @index(t1_6, t2_1);  // size for each pair (many 1s)
+    t2_5:? = @mul(t2_3, t2_4);    // revenue
+    t2_9:? = @index(t1_4, t2_1);  // o_orderkey
+    t2_10:? = @index(t1_8, t2_1); // o_orderdate
+    t2_11:? = @index(t1_9, t2_1); // o_shippriority
     // order by
-    t4_0:? = @list(t3_6, t3_8);
+    t4_0:? = @list(t2_5, t2_10);
     t4_1:? = @order(t4_0, (0, 1):bool);
-    t4_2:? = @index(t3_7, t4_1);
-    t4_3:? = @index(t3_6, t4_1);
-    t4_4:? = @index(t3_8, t4_1);
-    t4_5:? = @index(t3_9, t4_1);
+    t4_2:? = @index(t2_9 , t4_1);
+    t4_3:? = @index(t2_5 , t4_1);
+    t4_4:? = @index(t2_10, t4_1);
+    t4_5:? = @index(t2_11, t4_1);
     // return debug
     w0:? = `l_orderkey`revenue`o_orderdate`o_shippriority:sym;
     w1:? = @list(t4_2, t4_3, t4_4, t4_5);

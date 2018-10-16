@@ -4,6 +4,7 @@ Prog *root;
 int yyparse(); /* see y.tab.c */
 extern FILE *yyin;
 extern ChainList *chain_list;
+extern int yylineno;
 #define isCharNumber(c) ((c)>='0'&&(c)<='9')
 #define version() P("HorseIR version: 0.1.1\n")
 
@@ -26,6 +27,7 @@ I qscale    = 1;
 C delimiter = '|';
 S optName   = NULL;
 S qfile     = NULL;
+I expId     = -1;
 
 static void usage();
 static int  getOption(int argc, char *argv[]);
@@ -35,7 +37,9 @@ static void runCompileWithOpt(char *optName);
 static void runInterpreterWithQid(I qid);
 static void runInterpreter();
 static void runInterpreterCore();
-static void runExperiment();
+static void runExperiment(I id);
+static void runExperiment0(); // Serialization
+static void runExperiment1(); // Run all TPC-H queries
 static void validateParameters();
 
 /*
@@ -74,7 +78,7 @@ int main(int argc, char *argv[]){
         }
     }
     else if(isExp){
-        runExperiment();
+        runExperiment(expId);
     }
     else if(isFront){
         if(isQuery) parseInputWithQid(qid);
@@ -119,7 +123,8 @@ static int getOption(int argc, char *argv[]){
             case 'd': delimiter = optarg[0];       break;
             case 'r': runs      = atoi(optarg);    break;
             case 'x': isExp     = true; \
-                      isW       = 0==atoi(optarg); break;
+                      expId     = atoi(optarg);    break;
+            //        isW       = 0==atoi(optarg); break;
             case 'f': isFront   = true;            break;
             case 'p': isPretty  = true;            break;
             case 'z': isServer  = 0==atoi(optarg);
@@ -160,13 +165,15 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    SP(file_path, "data/hand-q%d.hir", qid);
+    SP(file_path, "gen/q%d.hir", qid);
+    //SP(file_path, "data/hand-q%d.hir", qid);
     //SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 
 static void parseInput(S file_path){
     struct timeval tv0, tv1;
+    yylineno = 1;
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s\n", file_path);
     }
@@ -290,9 +297,18 @@ static void serializeToFile(char *name){
 /*
  * ./a.out -x 0/1
  */
-static void runExperiment(){
+
+static void runExperiment(int id){
+    switch(id){
+        case 0: runExperiment0(); break;
+        case 1: runExperiment1(); break;
+        default: EP("Experiment not specified: %d\n", id);
+    }
+}
+
+static void runExperiment0(){
     P(">> Hello experiments\n");
-    B isReadFromText = isW;
+    B isReadFromText = false; // isW: true or false
     initBackend();
     V t0 = allocNode();
     struct timeval tv0, tv1;
@@ -331,5 +347,23 @@ static void runExperiment(){
         serializeToFile("orders");
         serializeToFile("lineitem");
     }
+}
+
+static void runSingleQuery(I id){
+    P("Start running query: %d\n", id);
+    parseInputWithQid(id);
+    runInterpreterCore();
+    /* free root */
+    P("Query done: %d\n", id);
+}
+
+#define initTablesAll() initTablesByQid(99)
+static void runExperiment1(){
+    I nums[] = {1,3};
+    initBackend();
+    initTablesAll();
+    L cur = getHeapOffset();
+    DOI(2, { setHeapOffset(cur); runSingleQuery(nums[i]); })
+    P("All 22 queries done!\n");
 }
 

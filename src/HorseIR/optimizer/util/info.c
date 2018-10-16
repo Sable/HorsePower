@@ -74,12 +74,12 @@ const char *getpFuncName(pFunc x){
         /* binary */
         CS(ltF); CS(gtF); CS(leqF); CS(geqF); CS(eqF); CS(neqF); CS(plusF); CS(minusF); CS(mulF); CS(divF);
         CS(powerF); CS(logbF); CS(modF); CS(andF); CS(orF); CS(nandF); CS(norF); CS(xorF);
-        CS(dtdiffF); CS(dtaddF); CS(dtsubF);
+        CS(dtdiffF);
         CS(appendF); CS(likeF); CS(compressF); CS(randkF); CS(indexofF); CS(takeF); CS(dropF); CS(orderF);
         CS(memberF); CS(vectorF); CS(matchF); CS(indexF); CS(columnValueF); CS(subStringF);
         /* special */
         CS(eachF); CS(eachItemF); CS(eachLeftF); CS(eachRightF); CS(enumF); CS(dictF); CS(tableF);
-        CS(ktableF); CS(indexAF); CS(listF); CS(outerF); CS(joinIndexF);
+        CS(ktableF); CS(indexAF); CS(listF); CS(outerF); CS(joinIndexF); CS(dtaddF); CS(dtsubF);
     } R 0;
 }
 

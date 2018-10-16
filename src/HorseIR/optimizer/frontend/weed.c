@@ -104,6 +104,7 @@ static void checkModuleMain(Node *m){
 }
 
 static void weedModule(Node *module){
+    main_total = 0;
     // 1. check conflict method signatures
     checkModuleContent(module);
     P("1. main_total = %d\n",main_total);
