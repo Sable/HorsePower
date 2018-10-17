@@ -741,7 +741,7 @@ L pfnWhere(V z, V x){
 
 L pfnSum(V z, V x){
     //P("type is %s\n", getTypeName(xp));getchar();
-    //if(xn>1000){
+    //if(xn<200){
     //    P("Input x size: %lld\n", xn); printV2(x, 20); getchar();
     //}
     //L numZero = 0; DOI(xn, if(vL(x,i)==0) numZero++) P("num = %lld\n", numZero); getchar();

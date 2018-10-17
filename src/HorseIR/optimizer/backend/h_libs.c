@@ -438,7 +438,7 @@ L lib_partition(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp), B *leftSam
         if(i>=j) break;
         t = rtn[i]; rtn[i] = rtn[j]; rtn[j] = t;
     }
-    t = rtn[low]; rtn[low] = rtn[j]; rtn[j] = t;
+    if(!(*leftSame)){ t = rtn[low]; rtn[low] = rtn[j]; rtn[j] = t; }
     R j;
 }
 
@@ -607,7 +607,12 @@ B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cmp)){
     DOIm(low, high, {L t=(*cmp)(val,targ[i-1],targ[i],isUp); \
         rtn=rtn==0?t:rtn==-1?(t==1?-2:rtn):(t==-1?-2:rtn); \
         if(rtn==-2) { /*P("i=%lld, %lld, %lld\n",i,vL(val,i-1),vL(val,i));*/ R 0;} })
-    R rtn==(*isUp?-1:1);
+    B isOrder= rtn==(*isUp?-1:1);
+    if(isOrder && !(*isUp)){ // reverse order
+        //P("low = %lld, high = %lld\n", low,high); getchar();
+        DOI3(low, (low+high)/2, {L temp=targ[i]; L pos=high-(i-low)-1; targ[i]=targ[pos]; targ[pos] = temp;})
+    }
+    R isOrder;
 }
 
 void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
@@ -620,7 +625,9 @@ void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
     //    lib_mergesort_list(targ, val, 0, tLen, isUp, cmp);
     //    free(LARGE_BUFF);
     //#else
+        //P("before: "); DOI(tLen, P(" %lld",targ[i])) P("\n");
         lib_quicksort_list(targ, val, isUp, 0, tLen, colId, cmp);
+        //P("after : "); DOI(tLen, P(" %lld",targ[i])) P("\n");
     //#endif
 }
 
@@ -632,7 +639,7 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     // gettimeofday(&tv0, NULL);
     if(lib_order_by_sorted(targ,curV,curB,low,high,cmp)){
         // if(colId == 2 && low == 29 && high == 33){
-        //     P("happy: colId = %lld, range = (%lld,%lld)\n", colId,low,high);
+        //     P("happy: colId = %lld, range = (%lld,%lld), curB = %d\n", colId,low,high,*curB);
         // }
     }
     else {
