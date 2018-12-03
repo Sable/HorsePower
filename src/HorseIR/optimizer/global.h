@@ -26,12 +26,14 @@ void error(const char* s);
 #define FP fprintf
 #define PN(x)     P("%s\n",x)
 #define newLine() P("\n")
-#define INFO()    FP(stderr, "[ERROR] [%s:%d:%s]:\n\t", __FILE__, __LINE__, __func__)
+#define INFO(s)    FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
 #define WP(...)   FP(stderr,__VA_ARGS__)  // warning
-#define EP(...)   do{INFO(); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
+#define EP(...)   do{INFO("[ERROR]"); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
+#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stderr,__VA_ARGS__);     }while(0)  // debug
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 
+/* For debugging */
 #define printBanner(s) P("/*==== "s" ====*/\n")
 
 #include "backend/common.h"
@@ -76,5 +78,7 @@ const char *getpTypeName(pType x);
 const char *getKindName(Kind x);
 const char *getpFuncName(pFunc x);
 const int   getpTypeSize(pType x);
+void        getInfoVar2(V x, S name);
+#define getInfoVar(x) getInfoVar2(x, #x)
 
 #endif

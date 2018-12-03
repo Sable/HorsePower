@@ -188,12 +188,24 @@ static InfoNode *newInfoNode(pType type, ShapeNode *shape){
     return in;
 }
 
-static InfoNode *newInfoNodeList(pType type, pType sub, ShapeNode *shape){
+static InfoNode *newInfoNodeList0(pType type, pType subType, ShapeNode *shape, ShapeNodeSub *subShape){
     InfoNode *in = NEW(InfoNode);
     in->type     = type;
-    in->subtype  = sub;
+    in->subtype  = subType;
     in->shape    = shape;
+    in->subshape = subShape;
     return in;
+}
+
+static InfoNode *newInfoNodeList(pType type, pType subType, ShapeNode *shape){
+    return newInfoNodeList0(type, subType, shape, NULL);
+}
+
+static InfoNode *newInfoNodeListSub(pType type, pType subType, ShapeNode *shape){
+    ShapeNodeSub *subShape = NEW(ShapeNodeSub);
+    subShape->isSame = true;
+    subShape->sizeId = -1;
+    return newInfoNodeList0(type, subType, shape, subShape);
 }
 
 ShapeNode *newShapeNode(pShape type, bool isId, int size){
@@ -345,6 +357,7 @@ static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
 
 static InfoNode *propMember(InfoNode *x, InfoNode *y){
     pType rtnType;
+    //P("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
     if(sameT(x,y) && isBasicIN(x)){
         rtnType = boolT;
     }
@@ -571,7 +584,21 @@ static InfoNode *propKeys(InfoNode *x){
 static InfoNode *propIndex(InfoNode *x, InfoNode *y){
     if(isIntIN(y)){
         if(isListT(x) && isShapeScalar(y->shape)){
-            return newInfoNode(x->subtype, newShapeNode(isListS(x)?listH:vectorH, true, -1)); // S: subtype
+            ShapeNodeSub *subShape = x->subshape;
+            ShapeNode *rtnShape = NULL;
+            if(subShape && subShape->isSame){ // special
+                if(subShape->sizeId < 0){
+                    rtnShape = newShapeNode(isListS(x)?listH:vectorH, true, -1);  //S: subtype
+                    subShape->sizeId = rtnShape->sizeId;
+                }
+                else {
+                    rtnShape = newShapeNode(isListS(x)?listH:vectorH, true, subShape->sizeId);
+                }
+            }
+            else { // normal
+                rtnShape = newShapeNode(isListS(x)?listH:vectorH, true, -1);
+            }
+            return newInfoNode(x->subtype, rtnShape); // S: subtype
         }
         else return newInfoNode(x->type, y->shape);
     }
@@ -652,6 +679,8 @@ static InfoNode *propIndexA(InfoNodeList *in_list){
     InfoNode *v = getNode(in_list, 0);
     InfoNode *x = getNode(in_list, 1);
     InfoNode *y = getNode(in_list, 2);
+    //P("type: v(%s), x(%s), y(%s)\n",getpTypeName(v->type),getpTypeName(x->type),getpTypeName(y->type));
+    //P("shape: %d, %d\n", x->shape->type, y->shape->type); getchar();
     if(sameT(v,y) && isIntIN(x) && sameH(x->shape,y->shape)){
         return v;
     }
@@ -672,7 +701,7 @@ static InfoNode *propJoinIndex(InfoNodeList *in_list){
     else {
         rtnType = listT;
     }
-    return newInfoNodeList(listT, i64T, newShapeNode(vectorH, false, 2)); // length: 2
+    return newInfoNodeListSub(rtnType, i64T, newShapeNode(vectorH, false, 2)); // length: 2; with sub
 }
 
 /* main */ 

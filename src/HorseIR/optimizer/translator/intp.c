@@ -9,7 +9,7 @@ typedef L (*EachDyadic)(V,V,V,DyadicFunc);
 typedef L (*EachTriple)(V,V,V,V);
 
 #define MonFuncSize 60
-#define DyaFuncSize 35
+#define DyaFuncSize 33
 #define OuterProduct EachDyadic
 #define JoinOperation EachTriple
 
@@ -56,8 +56,9 @@ static V executeAny(AnyadicFunc f, V *p, L n){
 }
 
 static V executeIndexA(V *p){
-    L status = pfnIndexA(p[0], p[1], p[2]);
-    if(status==0) return p[0];
+    V z = NEW(V0);
+    L status = pfnIndexA(z, p[0], p[1], p[2]);
+    if(status==0) return z;
     else {P("[IndexA]"); printErrMsg(status);}
 }
 

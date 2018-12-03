@@ -94,9 +94,9 @@ L pfnIndex(V z, V x, V y){
 
 /*
  * indexing assignment: x[y] = m
- * no return
+ * return z (new x)
  */
-L pfnIndexA(V x, V y, V m){
+L pfnIndexA(V z, V x, V y, V m){
     if(isTypeGroupInt(vp(y))){
         if(isAssignableType(vp(x),vp(m))){
             if(isTypeGroupBasic(vp(x))){
@@ -105,33 +105,34 @@ L pfnIndexA(V x, V y, V m){
                     V tempM = allocNode();
                     CHECKE(promoteValue(tempY,y,H_L));
                     CHECKE(promoteValue(tempM,m,vp(x)));
+                    copyV(z,x); /* TODO: need to fix */
                     if(isEqualLength(y,m)){
                         switch(vp(x)){
-                            caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,i)) break;
-                            caseJ DOI(vn(y), vJ(x,vL(tempY,i))=vJ(tempM,i)) break;
-                            caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,i)) break;
-                            caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,i)) break;
-                            caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,i)) break;
-                            caseF DOI(vn(y), vF(x,vL(tempY,i))=vF(tempM,i)) break;
-                            caseE DOI(vn(y), vE(x,vL(tempY,i))=vE(tempM,i)) break;
-                            caseX DOI(vn(y), vX(x,vL(tempY,i))=vX(tempM,i)) break;
-                            caseQ DOI(vn(y), vQ(x,vL(tempY,i))=vQ(tempM,i)) break;
-                            caseS DOI(vn(y), vS(x,vL(tempY,i))=vS(tempM,i)) break;
+                            caseB DOI(vn(y), vB(z,vL(tempY,i))=vB(tempM,i)) break;
+                            caseJ DOI(vn(y), vJ(z,vL(tempY,i))=vJ(tempM,i)) break;
+                            caseH DOI(vn(y), vH(z,vL(tempY,i))=vH(tempM,i)) break;
+                            caseI DOI(vn(y), vI(z,vL(tempY,i))=vI(tempM,i)) break;
+                            caseL DOI(vn(y), vL(z,vL(tempY,i))=vL(tempM,i)) break;
+                            caseF DOI(vn(y), vF(z,vL(tempY,i))=vF(tempM,i)) break;
+                            caseE DOI(vn(y), vE(z,vL(tempY,i))=vE(tempM,i)) break;
+                            caseX DOI(vn(y), vX(z,vL(tempY,i))=vX(tempM,i)) break;
+                            caseQ DOI(vn(y), vQ(z,vL(tempY,i))=vQ(tempM,i)) break;
+                            caseS DOI(vn(y), vS(z,vL(tempY,i))=vS(tempM,i)) break;
                             default: R E_NOT_IMPL; /* date time */
                         }
                     }
                     else{
                         switch(vp(x)){
-                            caseB DOI(vn(y), vB(x,vL(tempY,i))=vB(tempM,0)) break;
-                            caseJ DOI(vn(y), vJ(x,vL(tempY,i))=vJ(tempM,0)) break;
-                            caseH DOI(vn(y), vH(x,vL(tempY,i))=vH(tempM,0)) break;
-                            caseI DOI(vn(y), vI(x,vL(tempY,i))=vI(tempM,0)) break;
-                            caseL DOI(vn(y), vL(x,vL(tempY,i))=vL(tempM,0)) break;
-                            caseF DOI(vn(y), vF(x,vL(tempY,i))=vF(tempM,0)) break;
-                            caseE DOI(vn(y), vE(x,vL(tempY,i))=vE(tempM,0)) break;
-                            caseX DOI(vn(y), vX(x,vL(tempY,i))=vX(tempM,0)) break;
-                            caseQ DOI(vn(y), vQ(x,vL(tempY,i))=vQ(tempM,0)) break;
-                            caseS DOI(vn(y), vS(x,vL(tempY,i))=vS(tempM,0)) break;
+                            caseB DOI(vn(y), vB(z,vL(tempY,i))=vB(tempM,0)) break;
+                            caseJ DOI(vn(y), vJ(z,vL(tempY,i))=vJ(tempM,0)) break;
+                            caseH DOI(vn(y), vH(z,vL(tempY,i))=vH(tempM,0)) break;
+                            caseI DOI(vn(y), vI(z,vL(tempY,i))=vI(tempM,0)) break;
+                            caseL DOI(vn(y), vL(z,vL(tempY,i))=vL(tempM,0)) break;
+                            caseF DOI(vn(y), vF(z,vL(tempY,i))=vF(tempM,0)) break;
+                            caseE DOI(vn(y), vE(z,vL(tempY,i))=vE(tempM,0)) break;
+                            caseX DOI(vn(y), vX(z,vL(tempY,i))=vX(tempM,0)) break;
+                            caseQ DOI(vn(y), vQ(z,vL(tempY,i))=vQ(tempM,0)) break;
+                            caseS DOI(vn(y), vS(z,vL(tempY,i))=vS(tempM,0)) break;
                             default: R E_NOT_IMPL; /* date time */
                         }
                     }
@@ -965,7 +966,7 @@ L pfnToIndex(V z, V x){
 }
 
 L pfnGroup(V z, V x){
-    //P("Input len = %lld, type = %lld\n", xn,xp);
+    getInfoVar(x);
     //printV2(x,100); getchar();
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
@@ -973,10 +974,6 @@ L pfnGroup(V z, V x){
     L lenZ = isList(x)?vn(x):1;
     L *order_list = NULL;
     initV(y,H_B,lenZ);
-    //if(xn == 1483918){
-        //DOI(20, P("%lld ",vL(x,i))) P("\n");
-        //lib_hash_test(sL(x), vn(x));
-    //}
  struct timeval tv0, tv1;
  gettimeofday(&tv0, NULL);
     if(isOrdered(x)){
@@ -1850,7 +1847,7 @@ L pfnOuter(V z, V x, V y, FUNC2(foo)){
 
 static L pfnJoinIndexSingle(V z, V x, V y, V f){
     /* pfnEq (0), pfnLt (1) */
-    P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
+    //P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
     L typCell = -1, lenZ = 2;
     L op = getOpFromSymbol(vq(f));
     if(op<0) R E_DOMAIN;

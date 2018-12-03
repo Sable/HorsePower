@@ -14,10 +14,16 @@ typedef struct ShapeNode{
     };
 }ShapeNode;
 
+typedef struct ShapeNodeSub{
+    bool isSame; /* true if all sub cells have the same shape */
+    int  sizeId;
+}ShapeNodeSub;
+
 typedef struct TypeShapeNode{
          char *name;
         pType  type, subtype;
     ShapeNode *shape;
+ ShapeNodeSub *subshape;
 }InfoNode;
 
 typedef struct TypeShapeNodeList{

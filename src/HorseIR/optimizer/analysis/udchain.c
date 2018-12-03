@@ -41,7 +41,17 @@ char *fetchName(Node *n){
         if(x->val.compoundID.name1) EP("Not a built-in function\n");
         return x->val.compoundID.name2;
     }
-    else if(n->kind == literalFuncK) return fetchName(n->val.nodeS); // next: idK
+    else if(n->kind == literalFuncK) {
+        Node *x = n->val.listS->val->val.nodeS; // fetch the first one
+        if(n->val.listS->next){
+            EP("only one literal function required\n");
+        }
+        char name[99]; // TODO: fixed size?
+        char *n1 = x->val.compoundID.name1;
+        char *n2 = x->val.compoundID.name2;
+        if(n1) return strdup(strcat(strcpy(name,n1),n2));
+        else return n2;
+    }
     else {
         P("id found: %d not %d\n", n->kind, idK);
         error("Kind must be idK (0) or funcK(14)");

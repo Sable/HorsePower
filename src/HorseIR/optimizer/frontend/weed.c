@@ -107,10 +107,10 @@ static void weedModule(Node *module){
     main_total = 0;
     // 1. check conflict method signatures
     checkModuleContent(module);
-    P("1. main_total = %d\n",main_total);
+    //P("1. main_total = %d\n",main_total);
     // 2. check methods/...
     checkModuleMain(module);
-    P("2. main_total = %d\n",main_total);
+    //P("2. main_total = %d\n",main_total);
 }
 
 /* merge n and x, and return n */

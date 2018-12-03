@@ -172,12 +172,12 @@ L freeHash(HN hashT){
     R 0;
 }
 
-HN newHashNode(){
+static HN newHashNode(){
     HN x = (HN) malloc(sizeof(HN0)); init_H(x);
     R x;
 }
 
-HI newIndexNode(){
+static HI newIndexNode(){
     HI x = (HI) malloc(sizeof(HI0)); init_I(x);
     R x;
 }
@@ -280,14 +280,32 @@ L insertHashMany(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
 }
 
 L profileHash(HN ht, L htSize){
-    L minValue=99999, maxValue=-1, nonZero=0;
+    L minValue=99999, maxValue=-1, nonZero=0; 
     P("\n> Hash table size: %lld\n",htSize);
     DOI(htSize, {L c=0; HN t=hV(ht,i); while(hN(t)){c++;t=hN(t);} \
         if(c!=0) nonZero++; \
         if(c<minValue) minValue=c; \
         if(c>maxValue) maxValue=c; })
     P("> Sparsity (%lld/%lld) = %g%%\n",nonZero,htSize, nonZero*100.0/htSize);
-    P("> min = %lld, max = %lld\n\n",minValue,maxValue);
+    P("> min = %lld, max = %lld\n",minValue,maxValue);
+    B isVerbose=false;
+    if(isVerbose){
+        L c=0, c2=0, c3=0;
+        DOI(htSize, {HN t=hN(hV(ht,i)); \
+            while(t){HI p=hT(t); L k=0; \
+              while(p){k++; p=p->inext;} c+=k+1; c2+=k; c3+=k>0; t=hN(t);}})
+        P("> total = %lld, print (%lld / %lld) = %.1lf\n", c,c2,c3,1.0*c2/c3);
+    }
+    P("\n"); R 0;
+}
+
+L profileV(V x){
+    if(xp == H_L){
+        L vmax = LONG_MIN, vmin = LONG_MAX;
+        DOI(vn(x), {if(vmax<vL(x,i))vmax=vL(x,i); if(vmin>vL(x,i))vmin=vL(x,i);})
+        PP(">> len=%lld, max=%lld, min=%lld\n", xn,vmax,vmin);
+    }
+    else WP("type not supported: %d\n", xp);
     R 0;
 }
 
@@ -1296,6 +1314,50 @@ L lib_group_by_flat(V z, V x){
     R 0;
 }
 
+/*
+ * Radix-based hash join
+ * > Not that efficient as expected
+ * > Need to build a private hash for each partition
+ */
+L lib_join_radix_hash(V x, V y){
+    if(vp(x)==H_L && vp(y)==H_L){
+        L setN = 255; // 0xFF
+        L setT = setN+1; // total
+        L  *count     = NEWL(L , setT);
+        L  *prefix    = NEWL(L , setT);
+        L  *set_radix = NEWL(L , xn);
+        L  *set_from  = NEWL(L , xn);
+        HN *hashTable = NEWL(HN, setT);
+        L  *hashSize  = NEWL(L , setT);
+        HI *tempH     = NEWL(HI, vn(y));
+        struct timeval tv0, tv1;
+        gettimeofday(&tv0, NULL);
+        DOI(xn, count[vL(x,i)&setN]++)
+        DOIa(xn, prefix[i]=prefix[i-1]+count[i-1])
+        DOI(xn, {L t=vL(x,i)&setN; set_radix[prefix[t]]=vL(x,i);set_from[prefix[t]++]=i;})
+        gettimeofday(&tv1, NULL);
+        PP("Radix hash: partition: %g ms\n", calcInterval(tv0,tv1));
+        gettimeofday(&tv0, NULL);
+        L tot=0;
+        DOI(setT,{HN ht; L hashLen=getHashTableSize(count[i]);createHash(&ht,hashLen);hashTable[i]=ht; hashSize[i]=hashLen;})
+        gettimeofday(&tv1, NULL);
+        PP("Radix hash: build: %g ms\n", calcInterval(tv0,tv1));
+        gettimeofday(&tv0, NULL);
+        DOI(vn(x), {L t=vL(x,i)&setN; insertHashMany(hashTable[t],hashSize[t],sG(x),i,NULL,-1,H_L);})
+        gettimeofday(&tv1, NULL);
+        PP("Radix hash: insert: %g ms\n", calcInterval(tv0,tv1));
+        gettimeofday(&tv0, NULL);
+        DOI(vn(y), {L t=vL(y,i)&setN; L k=find_hash_many(hashTable[t],hashSize[t],sG(x),sG(y),i,H_L,&tempH[i]); if(k>=0)tot++;})
+        //DOJ(vn(y), {L t=vL(y,j)&setN; DOI3(prefix[t]-count[t],prefix[t], if(vL(y,j)==set_radix[i])tot++)})
+        //DOJ(vn(y), {L t=vL(y,j)&setN; DOIa(set_hash[t][0],if(vL(y,j)==set_hash[t][i])tot++)})
+        gettimeofday(&tv1, NULL);
+        PP("Radix hash: probe: %g ms ==> total = %lld\n", calcInterval(tv0,tv1),tot);
+        //DOI(setT, P("[%3lld] = %lld , %lld,  %lld\n",i,count[i],prefix[i]))
+        //DOI(50, P("[%lld] = %lld, %lld\n", i,set_radix[i]&setN, set_radix[i]))
+        DOI(10, P("--")) P("\n");
+        free(count); free(prefix); free(set_radix); free(set_from); free(tempH); free(hashSize);
+    } R 0;
+}
 
 /* index for join index*/
 
@@ -1309,17 +1371,21 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
         sLen=vn(x), vLen=vn(y), typ=vp(x);
         src=sG(x), val=sG(y);
     }
+    //lib_join_radix_hash(x, y);
+    PP("Profiling x: "); profileV(x);
+    PP("Profiling y: "); profileV(y);
+    PP("xLen = %lld, yLen = %lld\n", sLen,vLen);
     //DOI(vn(x), if(vL(x,i)<74){P("stop at x: %lld\n",vL(x,i)); getchar();})
     //DOI(vn(y), if(vL(y,i)==1){P("see y == 1 at y[%lld]\n",i); break;}) getchar();
     HN hashT;
     L hashLen = getHashTableSize(sLen);
     CHECKE(createHash(&hashT,hashLen));
     struct timeval tv0, tv1;
-    gettimeofday(&tv0, NULL);
+gettimeofday(&tv0, NULL);
     DOI(sLen, insertHashMany(hashT,hashLen,src,i,NULL,-1,typ))
-    gettimeofday(&tv1, NULL);
-    P("Time 1 (ms): %g\n", calcInterval(tv0,tv1));
-    gettimeofday(&tv0, NULL);
+gettimeofday(&tv1, NULL);
+    PP("Step 1: Hash build %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*sLen/calcInterval(tv0,tv1)/1000);
+gettimeofday(&tv0, NULL);
     L c = 0;
     L *tempK = (L*)malloc(sizeof(L)*vLen);
     HI *tempH = (HI*)malloc(sizeof(HI)*vLen);
@@ -1328,8 +1394,9 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
                if(k>=0){c++;while(t0){c++;t0=t0->inext;}}}, \
        reduction(+:c))
     DOP(vLen, tempK[i]=find_hash_many(hashT,hashLen,src,val,i,typ,&tempH[i]))
-    gettimeofday(&tv1, NULL);
-    P("Time 2 (ms): %g\n", calcInterval(tv0,tv1));
+gettimeofday(&tv1, NULL);
+    PP("Step 2: Hash probe %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*vLen/calcInterval(tv0,tv1)/1000);
+gettimeofday(&tv0, NULL);
     /* debug: print result in 0/1 */
     //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
     L parZ[H_CORE], offset[H_CORE]; 
@@ -1343,23 +1410,23 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
                   else{parZ[tid]+=sLen;})
     }
     //DOI(H_CORE, P("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
-    DOI(H_CORE, P("%lld ",parZ[i])) P("\n");
     DOI(H_CORE, c+=parZ[i])
+    //DOI(H_CORE, P("%lld ",parZ[i])) P(" => total %lld\n",c); // show segment info
     DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
     initV(z0, H_L, c);
     initV(z1, H_L, c);
     //c = 0; L tt=0;
-    gettimeofday(&tv0, NULL);
     if(isEq){
-    DOT(vLen, if(tempK[i]>=0){L p=offset[tid];\
-                             vL(z0,p)=tempK[i];vL(z1,p)=i; \
-                             HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
+        //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) P("tot = %lld\n",tot); getchar();
+        DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; \
+                     vL(z0,p)=tempK[i];vL(z1,p)=i; \
+                     HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
     }
     else {
-    DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; L k0=tempK[i]; DOJ(k0,{vL(z0,p)=j;vL(z1,p)=i;p++;}) k0++;\
-                             HI t0=tempH[i]; while(t0){L k1=t0->ival;while(k0<k1){vL(z0,p)=k0;vL(z1,p++)=i;k0++;}k0++;t0=t0->inext;}\
-                             while(k0<sLen){vL(z0,p)=k0++; vL(z1,p++)=i;}  offset[tid]=p;}\
-              else{L p=offset[tid]; DOJ(sLen,{vL(z0,p)=j;vL(z1,p)=i;p++;}) offset[tid]=p;})
+        DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; L k0=tempK[i]; DOJ(k0,{vL(z0,p)=j;vL(z1,p)=i;p++;}) k0++;\
+                     HI t0=tempH[i]; while(t0){L k1=t0->ival;while(k0<k1){vL(z0,p)=k0;vL(z1,p++)=i;k0++;}k0++;t0=t0->inext;}\
+                     while(k0<sLen){vL(z0,p)=k0++; vL(z1,p++)=i;}  offset[tid]=p;}\
+                  else{L p=offset[tid]; DOJ(sLen,{vL(z0,p)=j;vL(z1,p)=i;p++;}) offset[tid]=p;})
     }
 //#pragma omp parallel for
 //    for(L i=0;i<vLen;i++){
@@ -1369,9 +1436,9 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
 //        if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;tt++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}
 //        }
 //    }
-    gettimeofday(&tv1, NULL);
-    P("Time 3 (ms): %g\n", calcInterval(tv0,tv1));
-    P("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
+gettimeofday(&tv1, NULL);
+    PP("Step 3: hash finish %g ms\n", calcInterval(tv0,tv1));
+    //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     //P("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)
     //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
@@ -1384,6 +1451,7 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     profileHash(hashT, hashLen);
     free(tempK);
     free(tempH);
+    DOI(20, P("--")) P("\n");
     R 0;
 }
 

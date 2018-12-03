@@ -2,7 +2,8 @@
 
 // The two numbers below must be the same as intp.c's
 #define MonFuncSize 60
-#define DyaFuncSize 35
+#define DyaFuncSize 33
+#define SpeFuncSize 14
 
 extern I qid; // ../main.c
 extern Chain *exitChain;
@@ -28,9 +29,14 @@ char *monFnName[] = {
 char *dyaFnName[] = {
     "pfnLt", "pfnGt", "pfnLeq", "pfnGeq", "pfnEq", "pfnNeq", "pfnPlus", "pfnMinus", "pfnMul", "pfnDiv",
     "pfnPower", "pfnLog2", "pfnMod", "pfnAnd", "pfnOr", "pfnNand", "pfnNor", "pfnXor",
-    NULL, NULL, NULL,
+    NULL, 
     "pfnAppend", "pfnLike", "pfnCompress", NULL, "pfnIndexOf", NULL, NULL, "pfnOrderBy",
     "pfnMember", "pfnVector", "pfnMatch", "pfnIndex", "pfnColumnValue", "pfnSubString"
+};
+
+char *specialFnName[] = {
+    "pfnEach", "pfnEachItem", "pfnEachLeft", "pfnEachRight", "pfnEnum", "pfnDict", "pfnTable",
+    "pfnKTable", "pfnIndexA", "pfnList", "pfnOuter", "pfnJoinIndex", "pfnDatetimeAdd", "pfnDatetimeSub"
 };
 
 #define outF stdout
@@ -51,7 +57,7 @@ static void genAny(S f, S n, S *p, L tot){
 }
 
 static void genIndexA(S n, S *p){
-    genStmt(n, FP(outF, "pfnIndexA(%s, %s, %s)",p[0],p[1],p[2]))
+    genStmt(n, FP(outF, "pfnIndexA(%s, %s, %s, %s)",p[0],p[1],p[2],p[3]))
 }
 
 static void fetchFuncName(S s, S func){
@@ -67,17 +73,27 @@ static void fetchFuncName(S s, S func){
 }
 
 void getRealFuncName(S func, S x){
-    if(!strcmp(x, "index"))      strcpy(func, "pfnIndex");
-    else if(!strcmp(x, "mul"))   strcpy(func, "pfnMul");
-    else if(!strcmp(x, "minus")) strcpy(func, "pfnMinus");
-    else if(!strcmp(x, "plus"))  strcpy(func, "pfnPlus");
-    else if(!strcmp(x, "sum"))   strcpy(func, "pfnSum");
-    else if(!strcmp(x, "avg"))   strcpy(func, "pfnAvg");
-    else if(!strcmp(x, "len"))   strcpy(func, "pfnLen");
-    else if(!strcmp(x, "unique"))strcpy(func, "pfnUnique");
-    else if(!strcmp(x, "eq"))    strcpy(func, "pfnEq");
-    else if(!strcmp(x, "min"))   strcpy(func, "pfnMin");
-    else { EP("Func. not supported: %s\n", x); }
+    int k = getFuncIndexByName(func);
+    //P("input: %s", func);
+    if(k>=0){
+        if(k < MonFuncSize) strcpy(func, monFnName[k]);
+        else if(k < MonFuncSize + DyaFuncSize) strcpy(func, dyaFnName[k-MonFuncSize]);
+        else if(k < MonFuncSize + DyaFuncSize + SpeFuncSize) strcpy(func, specialFnName[k-MonFuncSize-DyaFuncSize]);
+        else EP("func is not found with outbounded index: %d\n", k);
+    }
+    else EP("func not found: %s\n",func);
+    //P(", output: %s", func); getchar();
+    // if(!strcmp(x, "index"))      strcpy(func, "pfnIndex");
+    // else if(!strcmp(x, "mul"))   strcpy(func, "pfnMul");
+    // else if(!strcmp(x, "minus")) strcpy(func, "pfnMinus");
+    // else if(!strcmp(x, "plus"))  strcpy(func, "pfnPlus");
+    // else if(!strcmp(x, "sum"))   strcpy(func, "pfnSum");
+    // else if(!strcmp(x, "avg"))   strcpy(func, "pfnAvg");
+    // else if(!strcmp(x, "len"))   strcpy(func, "pfnLen");
+    // else if(!strcmp(x, "unique"))strcpy(func, "pfnUnique");
+    // else if(!strcmp(x, "eq"))    strcpy(func, "pfnEq");
+    // else if(!strcmp(x, "min"))   strcpy(func, "pfnMin");
+    // else { EP("Func. not supported: %s\n", x); }
 }
 
 static void genStmtArg3(S f, S n, S *p){
@@ -94,9 +110,12 @@ static void genStmtArg2(S f,S n, S *p){
     genStmt(n, FP(outF, "%s(%s,%s,%s)",f,n,p[1],func))
 }
 
+static void genJoinIndex(S f, S n, S *p){
+    genStmt(n, FP(outF, "%s(%s,%s,%s,%s)",f,n,p[1],p[2],p[0]))
+}
+
 #define genEachMon genStmtArg2
 #define genEachDya genStmtArg3
-#define genJoinIndex genStmtArg3
 
 static void genAssignment(S n, S p){
     genStmt(n, FP(outF, "copyV(%s, %s)",n,p))
@@ -185,7 +204,10 @@ static void processStmtCommon(S writeName, Node *expr){
             else EP("valence == %d not expected\n", valence);
         }
         else {
-            //P("three: %s, %s, %s\n", params[0],params[1],params[2]);
+            //if(fIndex == joinIndexF){
+            //    P("three: %s, %s, %s\n", params[0],params[1],params[2]);
+            //    getchar();
+            //}
             switch(fIndex){
                 /* monadic */
                 case        eachF: return genEachMon("pfnEach"   , writeName, params);
@@ -229,7 +251,7 @@ static void compileReturnStmt(Node *stmt){
     Node *param = stmt->val.nodeS;
     S rtn = loadParam2V(param);
     genOther(FP(outF, "toc;\n"));
-    genOther(FP(outF, "printV(%s);\n",rtn));
+    genOther(FP(outF, "printV2(%s,20);\n",rtn));
     genOther(FP(outF, "R elapsed;\n"));
 }
 
@@ -270,7 +292,7 @@ static int findTargInList(OptNode *list, S s, I n){
 
 static void collectName(char *name){
     if(totalDefs==0) genIndent();
-    P("V %-6s = allocNode(); ", name);
+    P("V %-4s = allocNode(); ", name);
     totalDefs++;
     if(totalDefs == 4){ totalDefs = 0; FP(outF,"\n"); }
 }

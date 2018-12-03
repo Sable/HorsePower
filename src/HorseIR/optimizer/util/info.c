@@ -83,4 +83,18 @@ const char *getpFuncName(pFunc x){
     } R 0;
 }
 
+void getInfoVar2(V x, S name){
+    P("Variable %s has type %s and len %lld\n", name, getTypeName(xp),xn);
+    if(xp == H_G){
+        L v_min = 9999999, v_max = -1;
+        DOI(xn, {V t=vV(x,i); \
+                if(vn(t)<v_min)v_min=vn(t); \
+                if(vn(t)>v_max)v_max=vn(t);})
+        if(xn < 10){
+            P(" "); DOI(xn, P(" %s", getTypeName(vp(vV(x,i))))) P("\n");
+        }
+        P("  total = %lld, max = %lld, min = %lld\n", xn, v_max, v_min); //getchar();
+    }
+}
+
 

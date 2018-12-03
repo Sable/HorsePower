@@ -27,7 +27,7 @@ void getNumberOfCore(){
         if(0==tid)
             H_CORE = omp_get_num_threads();
     }
-    P("# of cores: %lld\n", H_CORE);
+    WP("# of cores: %lld\n", H_CORE);
 }
 
 void deleteSys(){

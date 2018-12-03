@@ -313,20 +313,15 @@ static void genRaze(ChainList *list, int count){
     char *func3   = getParamsName(params3);
     char *p0      = getParamsName(params3->next);
     char *p1      = getParamsName(params3->next->next);
+    // debug
+    //prettyNode(expr2);
+    //prettyNode(expr3);
     //P("targ = %s, %s, p0 = %s, p1 = %s\n", targ,func2,p0,p1);
     //P("func2 = %s, func3 = %s\n", func2, func3);
     if(!strcmp(func3, "index")){
         if(!strcmp(func2, "len")){
             //P("RazeTotal = %d\n", RazeTotal);
-            if(RazeTotal > 0){
-                genRazeCode(); // output all cached
-                genRazeCodeLen(targ, func2, p0, p1);
-                // below 3 lines for RazeCodeLen
-                setVisited(first , true);
-                setVisited(second, true);
-                setVisited(third , true);
-            }
-            return ;
+            if(RazeTotal > 0) goto PRODUCE;
         }
         else if(varIndex == NULL){
             varIndex = p1;
@@ -345,7 +340,17 @@ static void genRaze(ChainList *list, int count){
         RazeNode[RazeTotal][3] = (char *)rg;
         RazeTotal++; varIndex = p1;
     }
-    else EP("3rd stmt must has pfnIndex\n");
+    else EP("3rd stmt must has pfnIndex: %s\n", func3);
+    if(RazeTotal > 0){
+PRODUCE:
+        genRazeCode(); // output all cached
+        genRazeCodeLen(targ, func2, p0, p1);
+        // below 3 lines for RazeCodeLen
+        setVisited(first , true);
+        setVisited(second, true);
+        setVisited(third , true);
+    }
+    return;
 }
 
 static void findPatternRaze(ChainList *list){
@@ -356,7 +361,7 @@ static void findPatternRaze(ChainList *list){
             if(count ==3){
                 genRaze(p, count);
                 if(p->next && matchChain(p->next->chain, "list") && RazeTotal > 0){
-                    //P("RazeTotal = %d\n", RazeTotal); //q12
+                    //P("RazeTotal = %d\n", RazeTotal); getchar(); //q12
                     genRazeCode();
                 }
             }
@@ -433,6 +438,20 @@ static char *phNameFP3(char *z, char *invc, char *x0, char *x1, char *y0, char *
     return strdup(tmp);
 }
 
+static void genPattern2(PatternTree *ptree){
+    char tmp[99];
+    Chain *chain_x = ptree->child[0]->child[0]->chain; // each_right
+    Chain *chain_y = ptree->child[0]->chain;           // each, sum/avg
+    Chain *chain_z = ptree->chain;                     // raze
+    char *x0 = getParamFromChain(chain_x, 1); // index
+    char *y0 = getParamFromChain(chain_y, 1); // sum/avg
+    char *z0 = getParamFromChain(chain_z, 0); // index
+    P("x0 = %s, y0 = %s, z0 = %s\n", x0,y0,z0);
+    SP(tmp, "q%d_peephole_%d", qid, PhTotal);
+    //P("L %s(V z, V *x, V *y){\n", tmp);
+    EP("pending ... \n");
+}
+
 static void genPattern3(PatternTree *ptree){
     char tmp[99], pfn[30];
     Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
@@ -501,6 +520,7 @@ static void genPattern5(PatternTree *ptree){
 static void genPattern(PatternTree *ptree, I pid){
     //P("gen pattern pid = %d\n", pid);
     switch(pid){
+        //case 2: genPattern2(ptree); break; // q3
         case 3: genPattern3(ptree); break;
         case 4: genPattern4(ptree); break;
         case 5: genPattern5(ptree); break; // q2
@@ -538,14 +558,19 @@ static void revokePatternTree(PatternTree *ptree){
     free(ptree);
 }
 
-static PatternTree *createFP2(){
+static PatternTree *createFP2(int op){
+    if(op!=1&&op!=2){
+        EP("pattern 2 must have an option 1 or 2\n");
+    }
+    P("// Pattern FP2\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
-    rt->child[0] = initPatternTree("each", "sum", 1);
+    rt->child[0] = initPatternTree("each", op==1?"sum":op==2?"avg":NULL, 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
     return rt;
 }
 
 static PatternTree *createFP3(){
+    P("// Pattern FP3\n");
     PatternTree *rt = initPatternTree("index_a", NULL, 2);
     rt->child[0] = initPatternTree("vector", NULL, 1);
     rt->child[0]->child[0] = initPatternTree("len", NULL, 0);
@@ -556,6 +581,7 @@ static PatternTree *createFP3(){
 }
 
 static PatternTree *createFP4(){
+    P("// Pattern FP4\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", "len", 1);
     rt->child[0]->child[0] = initPatternTree("each", "unique", 1);
@@ -564,6 +590,7 @@ static PatternTree *createFP4(){
 }
 
 static PatternTree *createFP5(){
+    P("// Pattern FP5\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", "min", 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
@@ -575,6 +602,11 @@ static PatternTree *createFP5(){
 static void analyzeChainList(ChainList *list){
     findPatternCompress(list);
     findPatternRaze(list);
+    //PatternTree *fp2_1 = createFP2(1);
+    //prettyPatternTree(fp2_1); P("\n");
+    //findPattern(list, fp2_1, 2);
+    //PatternTree *fp2_2 = createFP2(2);
+    //findPattern(list, fp2_2, 2);
     PatternTree *fp3 = createFP3(); /* q4 */
     //prettyPatternTree(fp3); P("\n");
     findPattern(list, fp3, 3);

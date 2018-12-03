@@ -17,24 +17,30 @@ extern L CSV_FILE_SCALE;
 
 static E runOpt(int id){
     switch(id){
-        case  1: R compiledQ1(); break;
-        case  4: R compiledQ4(); break;
-        case  6: R compiledQ6(); break;
+        /* part A */
+        case  1: R compiledQ1 (); break;
+        case  4: R compiledQ4 (); break;
+        case  6: R compiledQ6 (); break;
         case 12: R compiledQ12(); break;
         case 14: R compiledQ14(); break;
         case 16: R compiledQ16(); break;
         case 19: R compiledQ19(); break;
         case 22: R compiledQ22(); break;
-        /* testing */
-        case  2: R compiledQ2(); break;
-        case  3: R compiledQ3(); break;
-        case  5: R compiledQ5(); break;
-        case  7: R compiledQ7(); break;
-        case  8: R compiledQ8(); break;
+        /* part B */
+        case  2: R compiledQ2() ; break;
+        case  3: R compiledQ3() ; break;
+        case  5: R compiledQ5() ; break;
+        case  7: R compiledQ7() ; break;
+        case  8: R compiledQ8() ; break;
+        case  9: R compiledQ9() ; break;
         case 10: R compiledQ10(); break;
+        case 11: R compiledQ11(); break;
         case 13: R compiledQ13(); break;
         case 15: R compiledQ15(); break;
+        case 17: R compiledQ17(); break;
         case 18: R compiledQ18(); break;
+        case 20: R compiledQ20(); break;
+        case 21: R compiledQ21(); break;
         default: R -1;
     }
 }

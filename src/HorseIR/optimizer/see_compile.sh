@@ -8,8 +8,8 @@ NO='\033[0m'
 make
 
 # Complete tests
-#for id in {1..22}
-for id in ${ids[@]}
+for id in {1..22}
+#for id in ${ids[@]}
 do
     ./horse -c -q $id &> /dev/null
     if test ${PIPESTATUS[0]} -eq 0 ; then
