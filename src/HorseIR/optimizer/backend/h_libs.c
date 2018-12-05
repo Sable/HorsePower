@@ -76,6 +76,7 @@ L *LARGE_BUFF; // used in merge sort
  * http://stackoverflow.com/questions/9624963/java-simplest-integer-hash
  */
 
+/*
 UI quickMod(L x){
     L j = x >> 32;
     L k = x & 0xffffffffL;
@@ -93,6 +94,32 @@ UI hash_i64(L n){
     I high = (I)(0x00000000ffffffffLL & (n>>32));
     I low  = (I)(0x00000000ffffffffLL & n);
     R hash_i32(high) + hash_i32(low);
+}
+*/
+
+/*
+ * quick hash functions
+ * src1: https://burtleburtle.net/bob/hash/integer.html
+ * src2: https://gist.github.com/badboy/6267743
+ */
+static UI hash_i32(I a){
+    a = (a ^ 61) ^ (a >> 16);
+    a = a + (a << 3);
+    a = a ^ (a >> 4);
+    a = a * 0x27d4eb2d;
+    a = a ^ (a >> 15);
+    return a;
+}
+
+static UI hash_i64(L a){
+    a = (~a) + (a << 21); // key = (key << 21) - key - 1;
+    a = a ^ (a >> 24);
+    a = (a + (a << 3)) + (a << 8); // key * 265
+    a = a ^ (a >> 14);
+    a = (a + (a << 2)) + (a << 4); // key * 21
+    a = a ^ (a >> 28);
+    a = a + (a << 31);
+    return a;
 }
 
 UI hash_djb2(S str){
@@ -132,9 +159,15 @@ UI hash_clex(X n){
     R hash_S_n((S)(&n),sizeof(X));
 }
 
-UI getHashTableSize(L x){
-    R (x<16?32:(x<<1));
+static UI getHashTableSize(L x){
+    if(x < 16) R 16;
+    L n=16; while(n>0 && n<=x){n<<=1;}
+    R n;
 }
+
+//UI getHashTableSize(L x){
+//    R (x<16?32:(x<<1));
+//}
 
 static UI getHashValueComplete(void *val, L valI, L typ){
     switch(typ){
@@ -152,7 +185,7 @@ static UI getHashValueComplete(void *val, L valI, L typ){
     }
 }
 
-UI getHashValue(void *val, L valI, L typ){
+static UI getHashValue(void *val, L valI, L typ){
     /* row based, val[valI] */
     switch(typ){
         caseG {V x=(V)val; UI c=0; 
@@ -161,9 +194,9 @@ UI getHashValue(void *val, L valI, L typ){
     }
 }
 
-L createHash(HN *hashT, L hashLen){
-    *hashT = (HN) malloc(sizeof(HN0) * hashLen);
-    memset(*hashT, 0, sizeof(HN0)*hashLen);
+L createHash(HN *hashT, L htSize){
+    *hashT = (HN) malloc(sizeof(HN0) * htSize);
+    memset(*hashT, 0, sizeof(HN0)*htSize);
     R 0;
 }
 
@@ -197,8 +230,8 @@ L insert_index(HN t, L td){
 }
 
 // isU: isUnique
-static L insert_hash(HN ht, L htSize, void* src, L srcI, L typ, B isU){
-    L hashKey = getHashValue(src,srcI,typ) % htSize;
+static L insert_hash(HN ht, L htMask, void* src, L srcI, L typ, B isU){
+    L hashKey = getHashValue(src,srcI,typ) & htMask;
     HN t = hV(ht,hashKey);
     while(hN(t)){
         t = hN(t); L td = hD(t);
@@ -224,8 +257,8 @@ static L insert_hash(HN ht, L htSize, void* src, L srcI, L typ, B isU){
     R srcI;
 }
 
-static L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
-    L hashKey = getHashValue(val,valI,typ) % htSize;
+static L find_hash(HN ht, L htMask, void* src, void* val, L valI, L typ){
+    L hashKey = getHashValue(val,valI,typ) & htMask;
     HN t = hV(ht,hashKey);
     while(hN(t)){
         t = hN(t); L td = hD(t);
@@ -245,8 +278,8 @@ static L find_hash(HN ht, L htSize, void* src, void* val, L valI, L typ){
     R -1;
 }
 
-static L find_hash_many(HN ht, L htSize, void* src, void* val, L valI, L typ, HI *other){
-    L hashKey = getHashValue(val,valI,typ) % htSize;
+static L find_hash_many(HN ht, L htMask, void* src, void* val, L valI, L typ, HI *other){
+    L hashKey = getHashValue(val,valI,typ) & htMask;
     HN t = hV(ht,hashKey);
     *other = NULL; // default
     while(hN(t)){
@@ -271,12 +304,12 @@ static L find_hash_many(HN ht, L htSize, void* src, void* val, L valI, L typ, HI
 //    R find_hash(ht,htSize,src,val,valI,typ);
 //}
 
-L insertHash(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
-    R insert_hash(ht,htSize,src,srcI,typ,true);
+L insertHash(HN ht, L htMask, void* src, L srcI, void* val, L valI, L typ){
+    R insert_hash(ht,htMask,src,srcI,typ,true);
 }
 
-L insertHashMany(HN ht, L htSize, void* src, L srcI, void* val, L valI, L typ){
-    R insert_hash(ht,htSize,src,srcI,typ,false);
+L insertHashMany(HN ht, L htMask, void* src, L srcI, void* val, L valI, L typ){
+    R insert_hash(ht,htMask,src,srcI,typ,false);
 }
 
 L profileHash(HN ht, L htSize){
@@ -305,7 +338,7 @@ L profileV(V x){
         DOI(vn(x), {if(vmax<vL(x,i))vmax=vL(x,i); if(vmin>vL(x,i))vmin=vL(x,i);})
         PP(">> len=%lld, max=%lld, min=%lld\n", xn,vmax,vmin);
     }
-    else WP("type not supported: %d\n", xp);
+    else WP("type not supported: %lld\n", xp);
     R 0;
 }
 
@@ -325,10 +358,11 @@ L profileV(V x){
 
 #define lib_index_template(typ) \
     HN hashT; \
-    L hashLen = getHashTableSize(sLen); \
+    L hashLen  = getHashTableSize(sLen); \
+    L hashMask = hashLen - 1; \
     CHECKE(createHash(&hashT,hashLen)); \
-    DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOI(vLen, {L t=find_hash(hashT,hashLen,src,val,i,typ);targ[i]=t<0?sLen:t;})
+    DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
+    DOI(vLen, {L t=find_hash(hashT,hashMask,src,val,i,typ);targ[i]=t<0?sLen:t;})
 
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen){
     L flag[2]={-1}; I c=0;
@@ -970,10 +1004,11 @@ B lib_member_fast2(void* src, void* val, L valI, L typ){
 
 #define lib_member_template_normal(typ)\
     HN hashT; \
-    L hashLen = getHashTableSize(sLen); \
+    L hashLen  = getHashTableSize(sLen); \
+    L hashMask = hashLen - 1; \
     CHECKE(createHash(&hashT,hashLen)); \
-    DOI(sLen, insertHash(hashT,hashLen,src,i,NULL,-1,typ)) \
-    DOP(vLen, targ[i]=(0<=find_hash(hashT,hashLen,src,val,i,typ)))
+    DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
+    DOP(vLen, targ[i]=(0<=find_hash(hashT,hashMask,src,val,i,typ)))
     // profileHash(hashT,hashLen);
 
 
@@ -1379,21 +1414,22 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     //DOI(vn(y), if(vL(y,i)==1){P("see y == 1 at y[%lld]\n",i); break;}) getchar();
     HN hashT;
     L hashLen = getHashTableSize(sLen);
+    L hashMask = hashLen - 1;
     CHECKE(createHash(&hashT,hashLen));
     struct timeval tv0, tv1;
 gettimeofday(&tv0, NULL);
-    DOI(sLen, insertHashMany(hashT,hashLen,src,i,NULL,-1,typ))
+    DOI(sLen, insertHashMany(hashT,hashMask,src,i,NULL,-1,typ))
 gettimeofday(&tv1, NULL);
     PP("Step 1: Hash build %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*sLen/calcInterval(tv0,tv1)/1000);
 gettimeofday(&tv0, NULL);
     L c = 0;
     L *tempK = (L*)malloc(sizeof(L)*vLen);
     HI *tempH = (HI*)malloc(sizeof(HI)*vLen);
-    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0); \
+    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0); \
                tempK[i]=k; tempH[i]=t0;\
                if(k>=0){c++;while(t0){c++;t0=t0->inext;}}}, \
        reduction(+:c))
-    DOP(vLen, tempK[i]=find_hash_many(hashT,hashLen,src,val,i,typ,&tempH[i]))
+    DOP(vLen, tempK[i]=find_hash_many(hashT,hashMask,src,val,i,typ,&tempH[i]))
 gettimeofday(&tv1, NULL);
     PP("Step 2: Hash probe %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*vLen/calcInterval(tv0,tv1)/1000);
 gettimeofday(&tv0, NULL);
@@ -1441,11 +1477,11 @@ gettimeofday(&tv1, NULL);
     //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     //P("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)
-    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
+    //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0);\
                if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}},\
         reduction(+:c))
     // serial
-    //DOI(vLen, {HI t0;L k=find_hash_many(hashT,hashLen,src,val,i,typ,&t0);\
+    //DOI(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0);\
                if(k>=0){P("i=%lld, k=%lld\n",i,k);vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}})
     // free hashT
     profileHash(hashT, hashLen);
@@ -1454,6 +1490,77 @@ gettimeofday(&tv1, NULL);
     DOI(20, P("--")) P("\n");
     R 0;
 }
+
+static L getFirstEqual(V f){
+    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "eq"))R i)
+    //DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "neq"))R i)
+    R 0;
+}
+
+static B compareOpRow(V x, V y, L cx, L cy, V f){
+    DOI(xn, if(!compareOpWithIndex(vV(x,i),vV(y,i),cx,cy,getOpFromSymbol(vL(f,i))))R 0) R 1;
+}
+
+/*
+ * x0: sLen
+ * y0: vLen
+ */
+L lib_join_index_hash_many(V z0, V z1, V x, V y, V f){
+    L fx=getFirstEqual(f); L f0=vQ(f,fx);
+    V x0=vV(x,fx), y0=vV(y,fx);
+    L sLen=vn(x0), vLen=vn(y0), typ=vp(x0);
+    void *src=sG(x0), *val=sG(y0);
+    //PP("Profiling x: "); profileV(x);
+    //PP("Profiling y: "); profileV(y);
+    //PP("xLen = %lld, yLen = %lld\n", sLen,vLen);
+    HN hashT;
+    L hashLen = getHashTableSize(sLen);
+    L hashMask = hashLen - 1;
+    CHECKE(createHash(&hashT,hashLen));
+    struct timeval tv0, tv1;
+gettimeofday(&tv0, NULL);
+    DOI(sLen, insertHashMany(hashT,hashMask,src,i,NULL,-1,typ))
+gettimeofday(&tv1, NULL);
+    PP("Step 1: Hash build %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*sLen/calcInterval(tv0,tv1)/1000);
+gettimeofday(&tv0, NULL);
+    L c = 0;
+    L *tempK = (L*)malloc(sizeof(L)*vLen);
+    HI *tempH = (HI*)malloc(sizeof(HI)*vLen);
+    DOP(vLen, tempK[i]=find_hash_many(hashT,hashMask,src,val,i,typ,&tempH[i]))
+gettimeofday(&tv1, NULL);
+    PP("Step 2: Hash probe %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*vLen/calcInterval(tv0,tv1)/1000);
+gettimeofday(&tv0, NULL);
+    /* debug: print result in 0/1 */
+    //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
+    L parZ[H_CORE], offset[H_CORE]; 
+    memset(parZ, 0, sizeof(L)*H_CORE);
+    memset(offset, 0, sizeof(L)*H_CORE);
+    // xxxxxx
+    DOT(vLen, if(tempK[i]>=0){ B none=true; \
+         if(compareOpRow(x,y,tempK[i],i,f)){parZ[tid]++;none=false;} \
+         HI t0=tempH[i]; while(t0){if(compareOpRow(x,y,tempK[i],i,f)){parZ[tid]++; none=false;} t0=t0->inext;} \
+         if(none)tempK[i]=-1;})
+    //DOI(H_CORE, P("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
+    DOI(H_CORE, c+=parZ[i])
+    //DOI(H_CORE, P("%lld ",parZ[i])) P(" => total %lld\n",c); // show segment info
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    initV(z0, H_L, c);
+    initV(z1, H_L, c);
+    //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) P("tot = %lld\n",tot); getchar();
+    DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; \
+         if(compareOpRow(x,y,tempK[i],i,f)){vL(z0,p)=tempK[i];vL(z1,p)=i;} \
+         HI t0=tempH[i]; while(t0){p++; if(compareOpRow(x,y,tempK[i],i,f)){vL(z0,p)=t0->ival;vL(z1,p)=i;}t0=t0->inext;} \
+         offset[tid]=p+1; })
+gettimeofday(&tv1, NULL);
+    PP("Step 3: hash finish %g ms\n", calcInterval(tv0,tv1));
+    //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
+    profileHash(hashT, hashLen);
+    free(tempK);
+    free(tempH);
+    DOI(20, P("**")) P("\n");
+    R 0;
+}
+
 
 static L binary_search(V x, L p0, V y, V d, I op){
     L sta = 0, end = vn(y)-1;

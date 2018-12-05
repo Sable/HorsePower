@@ -47,7 +47,7 @@ static void fuseNameClean(){
 }
 
 static void fuseNamePrint(){
-    DOI(list_total, P(indent "V x%d = x[%d]; // %s\n",i,i,list_name[i]))
+    DOI(list_total, P(indent "V x%lld = x[%lld]; // %s\n",i,i,list_name[i]))
 }
 
 static S fuseNameString(S targ, S invc){

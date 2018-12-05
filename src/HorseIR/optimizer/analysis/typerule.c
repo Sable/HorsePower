@@ -712,7 +712,7 @@ static int findInBuiltinSet(char *funcName, const char *set[]){
 
 int getFuncIndexByName(char *name){
     if(sizeof(FUNCTIONS)/8 != totalFunc){
-        P("%d vs. %d\n", sizeof(FUNCTIONS)/8, totalFunc);
+        P("%d vs. %d\n", (I)(sizeof(FUNCTIONS)/8), totalFunc);
         error("FUNCTIONS and FunctionType should have the same # of elem.");
     }
     int k = findInBuiltinSet(name, FUNCTIONS);

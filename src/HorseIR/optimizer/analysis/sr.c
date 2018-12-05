@@ -28,11 +28,11 @@ static void scanCastStmt(Node *n){
 static void printValueNode(V v){
     if(v->len == 1){
         switch(v->typ){
-            caseB P("%d:b"  ,v->b  ); break;
-            caseL P("%d:i64",v->i64); break;
-            caseD P("%d:d"  ,v->d  ); break;
-            caseE P("%g:f64",v->f64); break;
-            default: P("type: %d not supported\n", v->typ);
+            caseB P(  "%d:b"  ,v->b  ); break;
+            caseL P("%lld:i64",v->i64); break;
+            caseD P(  "%d:d"  ,v->d  ); break;
+            caseE P(  "%g:f64",v->f64); break;
+            default: P("type: %lld not supported\n", v->typ);
         }
     }
     else if(v->len > 1){
@@ -41,7 +41,7 @@ static void printValueNode(V v){
             caseD {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):d");} break;
             caseL {int *num=(int*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%d",num[i]);}) P("):i64");} break;
             caseE {double *num=(double*)v->g; P("("); DOI(v->len, {if(i>0)P(",");P("%g",num[i]);}) P("):f64");} break;
-            default: P("kind: %d not supported\n", v->typ);
+            default: P("kind: %lld not supported\n", v->typ);
         }
     }
 }

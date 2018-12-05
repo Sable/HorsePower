@@ -58,9 +58,13 @@ int runModeClient()
     if (server == NULL) EP("No such host\n");
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
+#ifdef H_MACOS
     bcopy((char *)server->h_addr, 
           (char *)&serv_addr.sin_addr.s_addr,
           server->h_length);
+#else
+    EP("bcopy is missing\n");
+#endif
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
         EP("Fail in connecting\n");

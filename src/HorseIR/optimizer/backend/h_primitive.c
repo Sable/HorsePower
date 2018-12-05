@@ -318,7 +318,15 @@ L pfnIsValidBranch(V z, V x){
 
 /* Implement in order */
 
-const E PI = acos(-1);
+#ifdef H_MACOS
+  const E PI = acos(-1);
+#endif
+
+#ifdef H_LINUX
+  /* copy from /usr/include/math.h */
+  #define M_PI       3.14159265358979323846  /* pi */
+  #define PI M_PI
+#endif
 
 #define ABS(x) ((x)<0?(-x):x)
 #define NEG(x) -(x)
@@ -1681,7 +1689,7 @@ L pfnLike(V z, V x, V y){
                       {getLikeFromString(&t,vS(x,i),vS(y,i)); \
                        vB(z,i)=t;})                                                  break;
             }
-            DOI(10, P("%lld ",vB(z,i))) P("\n");
+            DOI(10, P("%d ",vB(z,i))) P("\n");
             R 0;
         }
         else R E_LENGTH;
@@ -1905,7 +1913,7 @@ static L pfnJoinIndexSingle(V z, V x, V y, V f){
                             caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j)))c++)); break;
                             caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j)))c++)); break;
                             caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j)))c++)); break;
-                            default: EP("add more types for %lld\n", vp(x), vp(y));
+                            default: EP("add more types for %lld, %lld\n", vp(x), vp(y));
                         }
                     } break;
                     default: R E_DOMAIN;
@@ -1948,7 +1956,7 @@ static L pfnJoinIndexSingle(V z, V x, V y, V f){
                     caseB {
                         switch(typ){
                             caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j)))c++)); break;
-                            default: EP("add more types for %lld\n", vp(x), vp(y));
+                            default: EP("add more types for %lld, %lld\n", vp(x), vp(y));
                         }
                     } break;
                     default: R E_DOMAIN;
@@ -1975,21 +1983,33 @@ static L getFirstEqual(V f){
     R 0;
 }
 
+// static L pfnJoinIndexMultiple(V z, V x, V y, V f){
+//     if(vn(x)==vn(y) && vn(x)==vn(f)){
+//         L size = vn(x);
+//         L fx = getFirstEqual(f); L f0=vQ(f,fx);
+//         V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
+//         CHECKE(joinOneColumn(z0,x0,y0,f0));
+//         //printV(x0); printV(y0); printV(z0); getchar();
+//         initV(z,H_G,2);
+//         CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+//     }
+//     else R E_LENGTH;
+//     R 0;
+// }
+
 static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     if(vn(x)==vn(y) && vn(x)==vn(f)){
-        L size = vn(x);
-        L fx = getFirstEqual(f); L f0=vQ(f,fx);
-        V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
-        CHECKE(joinOneColumn(z0,x0,y0,f0));
-        //printV(x0); printV(y0); printV(z0); getchar();
         initV(z,H_G,2);
-        CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+        CHECKE(lib_join_index_hash_many(vV(z,0),vV(z,1),x,y,f));
     }
     else R E_LENGTH;
     R 0;
 }
 
 L pfnJoinIndex(V z, V x, V y, V f){
+#ifdef H_CALL
+    CALLGRIND_START_INSTRUMENTATION;
+#endif
     if(vn(f)==1){
         R pfnJoinIndexSingle(z,x,y,f);
     }
@@ -1998,6 +2018,10 @@ L pfnJoinIndex(V z, V x, V y, V f){
         R pfnJoinIndexMultiple(z,x,y,f);
     }
     else R E_DOMAIN;
+#ifdef H_CALL
+    CALLGRIND_STOP_INSTRUMENTATION;
+    CALLGRIND_DUMP_STATS;
+#endif
 }
 
 

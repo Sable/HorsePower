@@ -2,7 +2,7 @@
 
 #define CS(x) case x: return #x
 #define SZ(x) case x: return sizeof(x)
-#define DF(x) default: EP("Type not defined: %d\n",x)
+#define DF(x) default: EP("Type not defined: %d\n",(I)x)
 
 const char *getTypeName(L x){
     switch(x){

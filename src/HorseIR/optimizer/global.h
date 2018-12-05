@@ -1,6 +1,29 @@
 #ifndef __H_GLOBAL__
 #define __H_GLOBAL__
 
+#if defined(__APPLE__)
+    #define H_MACOS
+#endif
+
+#if defined(__linux__)
+    #define H_LINUX
+#endif
+
+#if defined(__MINGW32__)
+    #define H_WINDOWS
+#endif
+
+/* declare additional macros */
+#ifdef H_LINUX
+  #define _BSD_SOURCE
+/* check for ANSI extensions: e.g. strdup */
+  #ifdef __STDC_ALLOC_LIB__
+    #define __STDC_WANT_LIB_EXT2__ 1
+  #else
+    #define _POSIX_C_SOURCE 200810L
+  #endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +32,14 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <unistd.h>
+
+#ifdef H_LINUX
+#include <getopt.h>
+#endif
+
+#ifdef H_CALL
+#include <valgrind/callgrind.h>
+#endif
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
