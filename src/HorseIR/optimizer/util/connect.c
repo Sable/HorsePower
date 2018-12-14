@@ -71,7 +71,7 @@ int runModeClient()
     while(true){
         P("  client> ");
         bzero(buffer,256);
-        fgets(buffer,255,stdin);
+        if(!fgets(buffer,255,stdin)) EP("fgets error\n");
         int len = strlen(buffer);
         if(len>0 && buffer[len-1]=='\n') buffer[--len]=0;
         n = write(sockfd,buffer,len);
