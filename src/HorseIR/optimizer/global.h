@@ -108,8 +108,11 @@ const char *getTypeName(L x);
 const char *getpTypeName(pType x);
 const char *getKindName(Kind x);
 const char *getpFuncName(pFunc x);
-const int   getpTypeSize(pType x);
-void        getInfoVar2(V x, S name);
+int   getpTypeSize(pType x);
+void  getInfoVar2(V x, S name);
 #define getInfoVar(x) getInfoVar2(x, #x)
+#define showTime(s) P("[%-10s]> The elapsed time (ms): %g\n",s,calcInterval(tv0, tv1))
+
+void dotProg(Prog *root); /* util/dot.c */
 
 #endif

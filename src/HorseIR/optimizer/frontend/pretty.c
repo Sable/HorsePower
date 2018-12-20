@@ -2,6 +2,7 @@
 
 int depth;
 static bool withAttr = true;
+static bool withLine = false;
 static bool toC      = false;
 
 #define BUFF_SIZE 10240
@@ -10,7 +11,7 @@ static char buff[BUFF_SIZE];
 #define comma ','
 #define nospace 0
 
-#define newLineBuff() strcat(b, "\n")
+#define newLineBuff() if(withLine) strcat(b, "\n")
 #define echo(b,n)     strcat(b,n)
 #define printChar(c)  SP(b+strlen(b),"%c",c)
 #define printID(b,n)  echo(b,n->val.idS)
@@ -46,8 +47,8 @@ static char buff[BUFF_SIZE];
 //#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS);}
 #define printLiteralFunc(b,n)  {printPlainFunc(b,n);}
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
-#define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
-#define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); strcat(b,";\n");}
+#define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); if(withLine) strcat(b,";\n");}
+#define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); if(withLine) strcat(b,";\n");}
 #define resetBuff(b) if(b[0]!=0) b+=strlen(b)
 
 static int countList(List *list){
@@ -229,6 +230,12 @@ void prettyNodeBuff2C(char *b, Node *n){
     toC = true;
     prettyNodeBuffNoAttr(b,n);
     toC = false;
+}
+
+void prettyNodeBuffNoLine(char *b, Node *n){
+    withLine = false;
+    prettyNodeBuff(b,n);
+    withLine = true;
 }
 
 void prettyNode(Node *n){

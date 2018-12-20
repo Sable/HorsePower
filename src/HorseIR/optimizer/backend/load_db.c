@@ -1,8 +1,8 @@
 #include "../global.h"
-
 C CSV_FILE_ROOT[] = "../data/tpch/db";
 L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
+extern B isReadBin;
 
 static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
     DOI(n, insertSym(createSymbol((S)PRE_DEFINED[i])));
@@ -188,23 +188,28 @@ L readTpchTables(){
 L initTableByName(S tableName){
     if(!findTableByName(getSymbol(tableName))){
         P("Loading table %s\n",tableName);
-        if(!strcmp(tableName, "region"))
-            readTableRegion();
-        else if(!strcmp(tableName, "nation"))
-            readTableNation();
-        else if(!strcmp(tableName, "customer"))
-            readTableCustomer();
-        else if(!strcmp(tableName, "orders"))
-            readTableOrders();
-        else if(!strcmp(tableName, "lineitem"))
-            readTableLineitem();
-        else if(!strcmp(tableName, "part"))
-            readTablePart();
-        else if(!strcmp(tableName, "supplier"))
-            readTableSupplier();
-        else if(!strcmp(tableName, "partsupp"))
-            readTablePartsupp();
-        else EP("Table %s NOT FOUND\n",tableName);
+        if(isReadBin){
+            initTableFromBin(tableName);
+        }
+        else{
+            if(!strcmp(tableName, "region"))
+                readTableRegion();
+            else if(!strcmp(tableName, "nation"))
+                readTableNation();
+            else if(!strcmp(tableName, "customer"))
+                readTableCustomer();
+            else if(!strcmp(tableName, "orders"))
+                readTableOrders();
+            else if(!strcmp(tableName, "lineitem"))
+                readTableLineitem();
+            else if(!strcmp(tableName, "part"))
+                readTablePart();
+            else if(!strcmp(tableName, "supplier"))
+                readTableSupplier();
+            else if(!strcmp(tableName, "partsupp"))
+                readTablePartsupp();
+            else EP("Table %s NOT FOUND\n",tableName);
+        }
     }
     else {
         P("Table %s has been loaded\n",tableName);
@@ -213,15 +218,17 @@ L initTableByName(S tableName){
 }
 
 /* load from bin */
-
 L initTableFromBin(S tableName){
     char temp[99];
-    SP(temp, "temp/%s.bin",tableName);
+    SP(temp, "../data/tpch-bin/db1/%s.bin",tableName);
     FILE *fp = fopen(temp, "rb");
+    if(!fp) EP("File ../data/tpch-bin/db1/%s.bin open fails\n",tableName);
     V x = allocNode();
     readSerializeV(x, fp);
     fclose(fp);
     registerTable(tableName, x);
     R 0;
 }
+
+
 

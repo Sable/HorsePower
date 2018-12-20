@@ -18,6 +18,7 @@ static L calcIntervalPrecise(struct timeval t0, struct timeval t1){
     return (t1.tv_sec-t0.tv_sec)*1000000 + t1.tv_usec-t0.tv_usec;
 }
 
+// return: ms (Linux/MacOS)
 E calcInterval(struct timeval t0, struct timeval t1){
     return calcIntervalPrecise(t0, t1) / 1000.0;
 }
@@ -243,6 +244,8 @@ static void initQ22(){
 }
 
 void initTablesByQid(I id){
+    struct timeval tv0, tv1;
+    gettimeofday(&tv0, NULL);
     if(id>=0 && id<=22){
         switch(id){
             case  1: initQ1 (); break;
@@ -289,6 +292,8 @@ void initTablesByQid(I id){
         addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
     }
     else EP("qid must be [1,22] or 99 (all)\n");
+    gettimeofday(&tv1, NULL);
+    P(">>> Loading data (ms): %g ms\n", calcInterval(tv0, tv1));
 }
 
 /* entry */

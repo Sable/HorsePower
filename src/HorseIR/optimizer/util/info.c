@@ -28,7 +28,7 @@ const char *getpTypeName(pType x){
 
 // TODO 1: change the function to a constant array
 // TODO 2: check `getTypeSize` in backend/h_memory.c
-const int getpTypeSize(pType x){
+int getpTypeSize(pType x){
     if(x >= totalT){
         EP("pType not defined: %d (total %d)\n", x, totalT);
     }

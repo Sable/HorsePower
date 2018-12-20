@@ -1983,20 +1983,21 @@ static L getFirstEqual(V f){
     R 0;
 }
 
-// static L pfnJoinIndexMultiple(V z, V x, V y, V f){
-//     if(vn(x)==vn(y) && vn(x)==vn(f)){
-//         L size = vn(x);
-//         L fx = getFirstEqual(f); L f0=vQ(f,fx);
-//         V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
-//         CHECKE(joinOneColumn(z0,x0,y0,f0));
-//         //printV(x0); printV(y0); printV(z0); getchar();
-//         initV(z,H_G,2);
-//         CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
-//     }
-//     else R E_LENGTH;
-//     R 0;
-// }
+static L pfnJoinIndexMultiple(V z, V x, V y, V f){
+    if(vn(x)==vn(y) && vn(x)==vn(f)){
+        L size = vn(x);
+        L fx = getFirstEqual(f); L f0=vQ(f,fx);
+        V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
+        CHECKE(joinOneColumn(z0,x0,y0,f0));
+        //printV(x0); printV(y0); printV(z0); getchar();
+        initV(z,H_G,2);
+        CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+    }
+    else R E_LENGTH;
+    R 0;
+}
 
+/*
 static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     if(vn(x)==vn(y) && vn(x)==vn(f)){
         initV(z,H_G,2);
@@ -2004,7 +2005,7 @@ static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     }
     else R E_LENGTH;
     R 0;
-}
+}*/
 
 L pfnJoinIndex(V z, V x, V y, V f){
 #ifdef H_CALL

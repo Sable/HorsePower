@@ -21,6 +21,8 @@ B isW       = false;
 B isPretty  = false;
 B isServer  = false;
 B isClient  = false;
+B isFileDot = false;
+B isReadBin = true;
 I runs      = 1;
 I qid       = -1;
 I qscale    = 1;
@@ -31,6 +33,7 @@ I expId     = -1;
 
 static void usage();
 static int  getOption(int argc, char *argv[]);
+static int  getLongOption(int argc, char *argv[]);
 static void parseInputWithQid(I qid);
 static void parseInput(S file_path);
 static void runCompileWithOpt(char *optName);
@@ -54,7 +57,7 @@ static void validateParameters();
 */
 int main(int argc, char *argv[]){
     char *flagOpt=NULL;
-    int r = getOption(argc, argv);
+    int r = getLongOption(argc, argv);
     if(r) {
         usage(); exit(1);
     }
@@ -95,12 +98,81 @@ int main(int argc, char *argv[]){
     else if(isClient){
         runModeClient();
     }
+    else if(isFileDot){
+        if(isQuery) parseInputWithQid(qid);
+        else if(isQFile) parseInput(qfile);
+        dotProg(root);
+    }
     else if(isUsage)   { usage();   exit(1); }
     else if(isVersion) { version(); exit(1); }
     else {
         usage(); exit(1);
     }
     return 0;
+}
+
+static int long_flag; // set by '--verbose'
+
+/* no_argument, required_argument and optional_argument */
+static struct option long_options[] = {
+    {"dot" , no_argument, &long_flag, 0},
+    {"test", no_argument, &long_flag, 1},
+    {"help"        , no_argument      , 0, 'h'},
+    {"version"     , no_argument      , 0, 'v'},
+    {"interpreter" , no_argument      , 0, 't'},
+    {"tpch_scale"  , no_argument      , 0, 's'},
+    {"tpch_runs"   , no_argument      , 0, 'r'},
+    {"delimiter"   , no_argument      , 0, 'd'},
+    {"compiler"    , no_argument      , 0, 'c'},
+    {"pretty"      , no_argument      , 0, 'p'},
+    {"tcph_query"  , required_argument, 0, 'q'},
+    {"other_query" , required_argument, 0, 'n'},
+    {"compiler_opt", required_argument, 0, 'o'},
+    {0, 0, 0, 0}
+};
+
+static void getLongOptionVerbose(int x){
+    switch(x){
+        case 0: isFileDot = true; break;
+        case 1: P("do test\n"); break;
+    }
+}
+
+static int getLongOption(int argc, char *argv[]){
+    int c, option_index=0;
+    //while((c = getopt_long(argc, argv, "hvtsrdcpq:n:o", long_options, &option_index)) != -1){
+    while((c = getopt_long_only(argc, argv, "hvtsrdcpq:n:o", long_options, &option_index)) != -1){
+        switch(c){
+            case 0:
+                if(long_options[option_index].flag != 0) {
+                    getLongOptionVerbose(long_options[option_index].val);
+                } break;
+            case 'h': isUsage   = true;            break;
+            case 'v': isVersion = true;            break;
+            case 't': isInterp  = true;            break;
+            case 'q': isQuery   = true; \
+                      qid       = atoi(optarg);    break;
+            case 'n': isQFile   = true; \
+                      qfile     = strdup(optarg);  break;
+            case 's': qscale    = atoi(optarg);    break;
+            case 'c': isCompiler= true;            break;
+            case 'o': isCompiler= true; \
+                      isOpt     = true; \
+                      optName   = strdup(optarg);  break;
+            case 'd': delimiter = optarg[0];       break;
+            case 'r': runs      = atoi(optarg);    break;
+            case 'x': isExp     = true; \
+                      expId     = atoi(optarg);    break;
+            //        isW       = 0==atoi(optarg); break;
+            case 'f': isFront   = true;            break;
+            case 'p': isPretty  = true;            break;
+            case 'z': isServer  = 0==atoi(optarg);
+                      isClient  = 1==atoi(optarg); break;
+            default : return 1;
+        }
+    }
+    validateParameters();
+    R 0;
 }
 
 // TODO: getopt_long
@@ -141,20 +213,23 @@ static void usage(){
 #define usage_n() WP("  -n <filename>  Set a query file (-q or -n)\n"      )
     WP("Usage: ./horse <option> [parameter]  \n");
     WP("\nRun with an interpreter:\n");
-    WP("  -t             Enable interpreter\n"  );
+    WP("  -t             Enable interpreter\n");
     usage_q();
     usage_n();
-    WP("  -s <sid>       TPC-H query scale (default 1)\n"    );
-    WP("  -r <runs>      Number of runs (default 1)\n"       );
+    WP("  -s <sid>       TPC-H query scale (default 1)\n");
+    WP("  -r <runs>      Number of runs (default 1)\n");
     WP("\nRun with a compiler:\n");
-    WP("  -c             Enable compiler\n"          );
+    WP("  -c             Enable compiler\n");
     usage_q();
     usage_n();
-    WP("  -o <name>      Query opt. (fe or fp)\n"    );
+    WP("  -o <name>      Query opt. (fe or fp)\n");
     WP("\nRun with a pretty printer:\n");
-    WP("  -p             Enable pretty printer\n"    );
+    WP("  -p             Enable pretty printer\n");
     usage_q();
     usage_n();
+    WP("\nRun with a dot printer:\n");
+    WP("  -dot           Enable dot printer\n");
+    usage_q();
     WP("\nRun with server/client:\n");
     WP("  -z 0/1         Enable server/client mode\n");
     WP("\nOthers:\n");
@@ -165,9 +240,9 @@ static void usage(){
 
 static void parseInputWithQid(I qid){
     char file_path[128];
-    SP(file_path, "gen/q%d.hir", qid);
+    //SP(file_path, "gen/q%d.hir", qid);
     //SP(file_path, "data/hand-q%d.hir", qid);
-    //SP(file_path, "data/q%d.hir", qid);
+    SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 
@@ -268,9 +343,8 @@ static void validateCompiler(){
     }
 }
 
-static void validatePretty(){
-    validateInputFile();
-}
+#define validatePretty  validateInputFile
+#define validateDotFile validateInputFile
 
 static void validateParameters(){
     if(isFront || isExp) return; //skip on tests
@@ -281,18 +355,21 @@ static void validateParameters(){
     else if(isInterp)  { validateInputFile(); }
     else if(isCompiler){ validateCompiler();  }
     else if(isPretty)  { validatePretty();    }
+    else if(isFileDot) { validateDotFile();   }
 }
 
 static void serializeToFile(char *name){
     char temp[99];
-    SP(temp, "temp/%s.bin",name);
+    SP(temp, "../data/tpch-bin/db1/%s.bin",name);
     FILE *fp = fopen(temp, "wb");
+    if(!fp) EP("File ../data/tpch-bin/db1/%s.bin write fails\n");
     V x = allocNode();
     pfnLoadTable(x, initLiteralSym(name));
     serializeV(x, fp);
     fclose(fp);
     P("done\n");
 }
+
 
 /*
  * ./a.out -x 0/1
@@ -324,6 +401,7 @@ static void runExperiment0(){
         initTableByName((S)"lineitem");
     }
     else { // total: 14142.6 ms
+        P("reading from binary files\n");
         initTableFromBin((S)"region");
         initTableFromBin((S)"nation");
         initTableFromBin((S)"supplier");

@@ -10,6 +10,7 @@ void prettyProg   (Prog *root);
 
 void prettyNodeBuff      (char *b, Node *n);
 void prettyNodeBuffNoAttr(char *b, Node *n);
+void prettyNodeBuffNoLine(char *b, Node *n);
 void prettyNodeBuff2C    (char *b, Node *n);  /* loop fusion */
 void prettyListBuff      (char *b, List *list, char sep);
 void printTypeBuff       (char *b, pType p);

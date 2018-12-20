@@ -69,6 +69,7 @@ typedef struct list_table{
 #define DOI3(m, n, x) {for(L i=m,i2=n;i<i2;i++)x;}
 #define DOJ3(m, n, x) {for(L j=m,j2=n;j<j2;j++)x;}
 
+#define DOIr(n, x) {for(L i=n;i>=0;i--)x;}
 #define DOIa(n, x) {for(L i=1,i2=n;i<i2;i++)x;}
 #define DOJa(n, x) {for(L j=1,j2=n;j<j2;j++)x;}
 

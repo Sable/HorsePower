@@ -680,7 +680,13 @@ void serializeV(V x, FILE *fp){
 }
 
 // read from bin
-#define readSerializeV1(x) fread(x,sizeof(V0),1,fp)
+#define readSerializeV1(x) readDataBySize(x,sizeof(V0),1,fp)
+
+static void readDataBySize(void *ptr, L t_size, L size, FILE *fp){
+    if(size != fread(ptr, t_size, size, fp)){
+        EP("fread error\n");
+    }
+}
 
 static void readSerializeBasic(V x, FILE *fp){
     L size = getTypeSize(xp, xn);
@@ -692,21 +698,21 @@ static void readSerializeBasic(V x, FILE *fp){
     //    caseD fread(xg, sizeof(D), size/sizeof(D), fp); break;
     //    default: fread(xg, 1, size, fp);
     //}
-    fread(xg, 1, size, fp);
+    readDataBySize(xg, 1, size, fp);
 }
 
 static void readSerializeQ(V x,FILE *fp){
-    DOI(xn, fread(sQ(x)+i, sizeof(L), 1, fp));
+    DOI(xn, readDataBySize(sQ(x)+i, sizeof(L), 1, fp));
     L maxSize=-1; DOI(xn, if(maxSize < vQ(x,i)) maxSize=vQ(x,i))
     S temp = malloc(maxSize + 1);
-    DOI(xn, {L size=vQ(x,i); fread(temp, 1, size+1, fp); vQ(x,i)=getSymbol(temp);})
+    DOI(xn, {L size=vQ(x,i)+1; readDataBySize(temp, 1, size, fp); vQ(x,i)=getSymbol(temp);})
     free(temp);
 }
 
 static void readSerializeS(V x, FILE *fp){
     L *temp = (L*)malloc(sizeof(L)*(xn));
-    DOI(xn, fread(temp+i, sizeof(L), 1, fp))
-    DOI(xn, {S t=allocStrMem(temp[i]); fread(t,1,temp[i]+1,fp); vS(x,i)=t;})
+    DOI(xn, readDataBySize(temp+i, sizeof(L), 1, fp))
+    DOI(xn, {S t=allocStrMem(temp[i]); readDataBySize(t,1,temp[i]+1,fp); vS(x,i)=t;})
     free(temp);
 }
 
