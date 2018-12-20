@@ -362,7 +362,7 @@ static void serializeToFile(char *name){
     char temp[99];
     SP(temp, "../data/tpch-bin/db1/%s.bin",name);
     FILE *fp = fopen(temp, "wb");
-    if(!fp) EP("File ../data/tpch-bin/db1/%s.bin write fails\n");
+    if(!fp) EP("File ../data/tpch-bin/db1/%s.bin write fails\n",name);
     V x = allocNode();
     pfnLoadTable(x, initLiteralSym(name));
     serializeV(x, fp);

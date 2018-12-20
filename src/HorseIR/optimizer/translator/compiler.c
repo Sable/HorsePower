@@ -140,7 +140,7 @@ static char *stringifyLiteral(V x){
         char *str = t;
         switch(xp){
             caseB str+=SP(str,"initLiteralBoolVector(%lld, (B []){",xn);
-                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%lld",xB(i));})
+                  DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"%d",xB(i));})
                   str+=SP(str, "})"); break;
             caseQ str+=SP(str,"initLiteralSymVector(%lld, (S []){",xn);
                   DOI(xn, {if(i>0){str[0]=',';str++;} str+=SP(str,"\"%s\"",getSymbolStr(xQ(i)));})

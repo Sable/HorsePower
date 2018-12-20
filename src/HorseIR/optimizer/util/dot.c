@@ -5,23 +5,45 @@ typedef struct _stack{
     S targ;
     L lineno;
     Node *node;
+    B isMarked;
 }STACK;
 
 static STACK method[STACK_SIZE];
 static L stack_index, line_cnt;
+static B isDotMermaid = false;
 
 static void dotScan(Node *n);
 static void dotMain(List *list);
 
-static void printDotNode(Node *x){
-    S temp[512]; temp[0]=0; prettyNodeBuffNoLine(temp, x); P("[\"%s\"]",temp);
+// Temp solution: " -> ''
+static void printDotNode(Node *x, B isDot){
+    C temp[512]; temp[0]=0; prettyNodeBuffNoLine(temp, x);
+    putchar('[');
+    if(isDot) P("label=");
+    putchar('"');
+    DOI(strlen(temp),{if(temp[i]=='"')P("''");else P("%c",temp[i]);})
+    putchar('"');
+    if(isDot) P(", shape=box");
+    putchar(']');
 }
 
+static void printDotDef(L x){
+    if(!method[x].isMarked){
+        P("    "); P("N%lld",x); printDotNode(method[x].node, true); P("\n");
+        method[x].isMarked = true;
+    }
+}
 static void printDot(L x, L y){
+    printDotDef(x);
+    printDotDef(y);
+    P("    "); P("N%lld -> N%lld\n",x,y);
+}
+
+static void printDotMermaid(L x, L y){
     P("    ");
-    P("N%lld",x); printDotNode(method[x].node);
+    P("N%lld",x); printDotNode(method[x].node, false);
     P(" --> ");
-    P("N%lld",y); printDotNode(method[y].node);
+    P("N%lld",y); printDotNode(method[y].node, false);
     P("\n");
 }
 
@@ -30,9 +52,10 @@ static void addToStack(Node *n, S x){ /* x can be NULL */
         EP("stack full... max %d\n", STACK_SIZE);
     }
     //P("added: %s\n",x);
-    method[++stack_index].targ = x;
-    method[stack_index].lineno = line_cnt++;
-    method[stack_index].node   = n;
+    method[++stack_index].targ   = x;
+    method[stack_index].lineno   = line_cnt++;
+    method[stack_index].node     = n;
+    method[stack_index].isMarked = false;
 }
 
 static L fetchFromStack(S x){
@@ -43,7 +66,10 @@ static void linkInStack(S x){
     L k = fetchFromStack(x);
     if(k < 0) EP("variable %s not found, total = %lld\n", x,stack_index);
     //P("linking! %lld %lld %lld\n",line_cnt,k,stack_index);
-    printDot(method[k].lineno, line_cnt-1);
+    if(!isDotMermaid)
+        printDot(method[k].lineno, line_cnt-1);
+    else
+        printDotMermaid(method[k].lineno, line_cnt-1);
 }
 
 /* -------- dotScan* -------- */
@@ -55,8 +81,10 @@ static void dotScanModule(Node *n){
 static void dotScanMethod(Node *n){
     // method.name/param/type
     stack_index = -1; line_cnt = 0;
-    P("graph TD\n");
+    if(!isDotMermaid) P("digraph G {\n");
+    else P("graph TD\n");
     dotMain(n->val.method.list);
+    if(!isDotMermaid) P("}\n");
 }
 
 static void dotScanParamExpr(Node *n){

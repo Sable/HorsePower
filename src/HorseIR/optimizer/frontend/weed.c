@@ -71,7 +71,7 @@ static bool isBodyConflict(List *n_list, List *x_list, bool isSelf){
                 }
             } break;
             case importK: break; /* skip */
-            default: EP("TODO: support new kind: %ld\n", x0->kind);
+            default: EP("TODO: support new kind: %d\n", x0->kind);
         }
         x_list = x_list->next;
     }

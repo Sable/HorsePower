@@ -4,6 +4,7 @@
 
 L opt = 0;
 I qid = -1;
+B isReadBin = true;
 extern L CSV_FILE_SCALE;
 
 #define OPT_NONE (0==opt)

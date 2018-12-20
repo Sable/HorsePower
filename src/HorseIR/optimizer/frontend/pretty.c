@@ -47,8 +47,8 @@ static char buff[BUFF_SIZE];
 //#define printLiteralFunc(b,n)  {strcpy(b, "@"); prettyNodeBuff(b,n->val.nodeS);}
 #define printLiteralFunc(b,n)  {printPlainFunc(b,n);}
 #define printParamExpr(b,n)    prettyListBuff(b,n->val.listS, comma)
-#define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); if(withLine) strcat(b,";\n");}
-#define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); if(withLine) strcat(b,";\n");}
+#define printReturnStmt(b,n)   {SP(b,"return "); prettyNodeBuff(b,n->val.nodeS); strcat(b,withLine?";\n":";");}
+#define printImportStmt(b,n)   {SP(b,"import "); prettyNodeBuff(b,n->val.nodeS); strcat(b,withLine?";\n":";");}
 #define resetBuff(b) if(b[0]!=0) b+=strlen(b)
 
 static int countList(List *list){

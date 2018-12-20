@@ -2,21 +2,19 @@
 /* part A */
     #include "opt/q1.h"
     #include "opt/q4.h"
-    #include "opt/q6.h"
+    //#include "opt/q6.h"
     #include "opt/q12.h"
     #include "opt/q14.h"
     #include "opt/q16.h"
     #include "opt/q19.h"
-    #include "opt/q22.h"
+    //#include "opt/q22.h"
 /* part B */
     #include "opt/q2.h"
     #include "opt/q3.h"
-    //#include "opt/q5.h"
-    #include "exp/q5.h" // experiment
+    #include "opt/q5.h"
     #include "opt/q7.h"
     #include "opt/q8.h"
-    //#include "opt/q9.h"
-    #include "exp/q9.h" // experiment
+    #include "opt/q9.h"
     #include "opt/q10.h"
     #include "opt/q11.h"
     #include "opt/q13.h"
@@ -25,6 +23,11 @@
     #include "opt/q18.h"
     #include "opt/q20.h"
     #include "opt/q21.h"
+/* experiment */
+    //#include "exp/q5.h"
+    #include "exp/q6.h"
+    //#include "exp/q9.h"
+    #include "exp/q22.h" 
 #endif
 
 //#ifdef QALL
