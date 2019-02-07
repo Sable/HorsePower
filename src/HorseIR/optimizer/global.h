@@ -57,10 +57,12 @@ void error(const char* s);
 #define FP fprintf
 #define PN(x)     P("%s\n",x)
 #define newLine() P("\n")
-#define INFO(s)    FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
+#define INFO(s)   FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
 #define WP(...)   FP(stderr,__VA_ARGS__)  // warning
 #define EP(...)   do{INFO("[ERROR]"); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
-#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stderr,__VA_ARGS__);     }while(0)  // debug
+#define TODO(...) do{INFO("[TODO]");  FP(stderr,__VA_ARGS__); exit(1);}while(0)  // todo
+//#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stderr,__VA_ARGS__);     }while(0)  // debug
+#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stdout,__VA_ARGS__);     }while(0) 
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 

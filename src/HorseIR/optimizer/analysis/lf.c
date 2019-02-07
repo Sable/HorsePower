@@ -223,7 +223,7 @@ static void findFusion(Chain *chain){
 }
 
 /* num_func must > 1 */
-static void genFusedFunc(char *str, char *targ){
+static void genFusedFunc_C(char *str, char *targ){
     char tmp[99], type_alias[10];
     P("/* num_func = %d, targ = %s */\n", num_func,targ);
     SP(tmp,"q%d_loopfusion_%d",qid,FuseTotal);
@@ -243,6 +243,20 @@ static void genFusedFunc(char *str, char *targ){
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
     FuseList[FuseTotal].targ = strdup(targ); FuseTotal++;
+}
+
+static void genFusedFunc_ACC(char *str, char *targ){
+    TODO("add code gen for OpenACC\n");
+}
+
+static void genFusedFunc(char *str, char *targ){
+    switch(H_TARGET){
+        case TARGET_C   : genFusedFunc_C(str, targ); break;
+        case TARGET_LLVM: TODO("Support for LLVM\n"); break;
+        case TARGET_ACC : genFusedFunc_ACC(str, targ); break;
+        case TARGET_CL  : TODO("Support for OpenCL\n"); break;
+        default: EP("TARGET platform is unknown: %d\n", H_TARGET);
+    }
 }
 
 static void analyzeChain(Chain *chain){

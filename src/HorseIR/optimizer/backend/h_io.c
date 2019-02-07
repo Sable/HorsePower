@@ -145,6 +145,9 @@ FILE* openFile(S s){
     R fp;
 }
 
+#define ATOF(x) strtof(x, NULL)
+#define ATOE(x) atof(x) /* atof -> double */
+
 /* x[k] = (typ) s */
 void loadItem(V x, L k, L typ, S s){
     switch(typ){
@@ -153,8 +156,8 @@ void loadItem(V x, L k, L typ, S s){
         caseH xH(k) = atoi(s); break;
         caseI xI(k) = atoi(s); break;
         caseL xL(k) = atol(s); break;
-        caseF xF(k) = atof(s); break;
-        caseE xE(k) = atof(s); break;
+        caseF xF(k) = ATOF(s); break;
+        caseE xE(k) = ATOE(s); break; 
         caseC xC(k) = s[0];    break;
         caseQ xQ(k) = getSymbol(s); break;
         caseS {S t=allocStrMem(strlen(s)); strcpy(t,s); xS(k)=t;} break;
@@ -274,7 +277,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
         caseH c=SP(buff, "%d"   , xH(k));   break;
         caseI c=SP(buff, "%d"   , xI(k));   break;
         caseL c=SP(buff, "%lld" , xL(k));   break;
-        caseF c=SP(buff, "%g"   , xF(k));   break;
+        caseF c=SP(buff, "%f"   , xF(k));   break;
         caseE c=SP(buff, "%lf"  , xE(k));   break;
         caseX c=getComplexStr(xX(k),buff);  break;
         /* deal with caseC and caseS carefully */

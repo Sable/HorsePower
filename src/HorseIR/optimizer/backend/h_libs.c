@@ -64,6 +64,11 @@ typedef struct hash_node {
 #define toS(v,f) toBase(S,v,f)
 #define toC(v,f) toBase(C,v,f)
 
+#define TIME_INIT() struct timeval tv0, tv1
+#define TIME_BEGIN() gettimeofday(&tv0, NULL)
+#define TIME_END() gettimeofday(&tv1, NULL)
+#define TIME_SHOW(t) PP(t " %g ms\n", calcInterval(tv0,tv1))
+
 L *LARGE_BUFF; // used in merge sort
 
 static void writeToFileFromPtr(L *x, L n, const char* fn){
@@ -295,10 +300,17 @@ static L find_hash(HN ht, L htMask, void* src, void* val, L valI, L typ){
     R -1;
 }
 
+#ifdef PROFILE_HASH_JOIN
+static L temp_search_counter = 0;
+#endif
+
 static L find_hash_many(HN ht, L htMask, void* src, void* val, L valI, L typ, HI *other){
     L hashKey = getHashValue(val,valI,typ) & htMask;
     HN t = hV(ht,hashKey);
     *other = NULL; // default
+#ifdef PROFILE_HASH_JOIN
+    temp_search_counter++;
+#endif
     while(hN(t)){
         t = hN(t); L td = hD(t);
         switch(typ){
@@ -313,6 +325,9 @@ static L find_hash_many(HN ht, L htMask, void* src, void* val, L valI, L typ, HI
             caseG if(compareTuple((V)src,td,(V)val,valI)){*other=hT(t);R td;} break;
             default: R -1;
         }
+#ifdef PROFILE_HASH_JOIN
+        temp_search_counter++;
+#endif
     }
     R -1;
 }
@@ -1023,14 +1038,14 @@ B lib_member_fast2(void* src, void* val, L valI, L typ){
     HN hashT; \
     L hashLen  = getHashTableSize(sLen); \
     L hashMask = hashLen - 1; \
-    struct timeval tv0,tv1; \
-    gettimeofday(&tv0, NULL); \
+    TIME_INIT(); \
+    TIME_BEGIN(); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
-    gettimeofday(&tv1, NULL); showTime("build time"); \
-    gettimeofday(&tv0, NULL); \
+    TIME_END(); TIME_SHOW("build time"); \
+    TIME_BEGIN(); \
     DOP(vLen, targ[i]=(0<=find_hash(hashT,hashMask,src,val,i,typ))) \
-    gettimeofday(&tv1, NULL); showTime("probe time");
+    TIME_END(); TIME_SHOW("probe time");
     // profileHash(hashT,hashLen);
 
 
@@ -1374,12 +1389,12 @@ L lib_group_by_flat(V z, V x){
 
 /*
  * Radix-based hash join
- * > Not that efficient as expected
- * > Need to build a private hash for each partition
+ * > not that efficient as expected
+ * > need to build a private hash for each partition
  */
 L lib_join_radix_hash(V z0, V z1, V x, V y){
     if(vp(x)==H_L && vp(y)==H_L){
-        L setT = 256; // total
+        L setT = 512; // total
         L setN = setT - 1; // 0xFF
         L  *count     = NEWL(L , setT);
         L  *prefix    = NEWL(L , setT);
@@ -1389,34 +1404,44 @@ L lib_join_radix_hash(V z0, V z1, V x, V y){
         L  *hashSize  = NEWL(L , setT);
         HI *tempH     = NEWL(HI, vn(y));
         L  *tempK     = NEWL(L , vn(y));
-        struct timeval tv0, tv1;
-        gettimeofday(&tv0, NULL);
+    TIME_INIT();
+    TIME_BEGIN();
         DOI(xn, count[vL(x,i)&setN]++)
         DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
         DOI(xn, {L t=vL(x,i)&setN; set_radix[prefix[t]]=vL(x,i);set_from[prefix[t]++]=i;})
-        gettimeofday(&tv1, NULL);
-        PP("Radix hash: partition: %g ms\n", calcInterval(tv0,tv1));
-        gettimeofday(&tv0, NULL);
+    TIME_END();
+    TIME_SHOW("Radix hash, partition:");
+    TIME_BEGIN();
         L c=0;
-        DOI(setT,{HN ht=NULL; L hashLen=count[i]==0?0:getHashTableSize(count[i]);if(hashLen>0)createHash(&ht,hashLen);hashTable[i]=ht; hashSize[i]=hashLen;})
+        DOI(setT, \
+            {HN ht=NULL; L hashLen=count[i]==0?0:getHashTableSize(count[i]);\
+            if(hashLen>0)createHash(&ht,hashLen);hashTable[i]=ht; hashSize[i]=hashLen;})
         //DOI(setT, P("size[ %lld] = %lld\n",i,hashSize[i]))
-        DOI(vn(x), {L t=vL(x,i)&setN; /*P("i=%lld, t=%lld, ht=%d, size=%lld\n",i,t,hashTable[t]!=NULL,hashSize[t]);*/ \
+        DOI(vn(x), \
+            {L t=vL(x,i)&setN; /*P("i=%lld, t=%lld, ht=%d, size=%lld\n",i,t,hashTable[t]!=NULL,hashSize[t]);*/ \
             insertHashMany(hashTable[t],hashSize[t]-1,sG(x),i,NULL,-1,H_L);})
-        gettimeofday(&tv1, NULL);
-        PP("Radix hash: build %g ms\n", calcInterval(tv0,tv1));
-        gettimeofday(&tv0, NULL);
+    TIME_END();
+    TIME_SHOW("Radix hash, build:");
+    TIME_BEGIN();
+#ifdef PROFILE_HASH_JOIN
+        temp_search_counter = 0;
+        L temp_item_counter = vn(y);
+#endif
         DOI(vn(y), {L t=vL(y,i)&setN; tempK[i]=find_hash_many(hashTable[t],hashSize[t]-1,sG(x),sG(y),i,H_L,&tempH[i]);})
+#ifdef PROFILE_HASH_JOIN
+        P("total_item = %lld, total_search = %lld, total_search/total_item = %.1lf\n", temp_item_counter,temp_search_counter,1.0*temp_search_counter/temp_item_counter); getchar();
+#endif
         //DOJ(vn(y), {L t=vL(y,j)&setN; DOI3(prefix[t]-count[t],prefix[t], if(vL(y,j)==set_radix[i])tot++)})
         //DOJ(vn(y), {L t=vL(y,j)&setN; DOIa(set_hash[t][0],if(vL(y,j)==set_hash[t][i])tot++)})
-        gettimeofday(&tv1, NULL);
-        PP("Radix hash: probe: %g ms\n", calcInterval(tv0,tv1));
+    TIME_END();
+    TIME_SHOW("Radix hash, probe:");
         //DOI(setT, P("[%3lld] = %lld , %lld,  %lld\n",i,count[i],prefix[i]))
         //DOI(50, P("[%lld] = %lld, %lld\n", i,set_radix[i]&setN, set_radix[i]))
-        gettimeofday(&tv0, NULL);
+    TIME_BEGIN();
         L parZ[H_CORE], offset[H_CORE]; 
         memset(parZ, 0, sizeof(L)*H_CORE);
         memset(offset, 0, sizeof(L)*H_CORE);
-        DOT(vn(y), if(tempK[i]>=0){  parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;}})
+        DOT(vn(y), if(tempK[i]>=0){parZ[tid]++; HI t0=tempH[i]; while(t0){parZ[tid]++;t0=t0->inext;}})
         DOI(H_CORE, c+=parZ[i])
         DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
         initV(z0, H_L, c);
@@ -1424,8 +1449,8 @@ L lib_join_radix_hash(V z0, V z1, V x, V y){
         DOT(vn(y), if(tempK[i]>=0){L p=offset[tid]; \
                 vL(z0,p)=tempK[i];vL(z1,p)=i; \
                 HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
-        gettimeofday(&tv1, NULL);
-        PP("Radix hash: final %g ms, total = %lld\n", calcInterval(tv0,tv1),c);
+    TIME_END();
+    TIME_SHOW("Radix hash, final:"); PP("total c = %lld\n",c);
         free(count); free(prefix); free(set_radix); free(set_from); free(tempH); free(hashSize); free(tempK);
         DOI(10, P("--")) P("\n");
         R 0;
@@ -1436,7 +1461,7 @@ L lib_join_radix_hash(V z0, V z1, V x, V y){
 /* index for join index*/
 
 L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
-    //if(!lib_join_radix_hash(z0, z1, x, y)) R 0;
+    if(!lib_join_radix_hash(z0, z1, x, y)) R 0;
     L sLen,vLen,typ; void *src,*val;
     if(isList(x)&&isList(y)){
         sLen=vn(vV(x,0)), vLen=vn(vV(y,0)), typ=vp(x);
@@ -1459,12 +1484,12 @@ L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     L hashLen = getHashTableSize(sLen);
     L hashMask = hashLen - 1;
     CHECKE(createHash(&hashT,hashLen));
-    struct timeval tv0, tv1;
-gettimeofday(&tv0, NULL);
+    TIME_INIT();
+TIME_BEGIN();
     DOI(sLen, insertHashMany(hashT,hashMask,src,i,NULL,-1,typ))
-gettimeofday(&tv1, NULL);
-    PP("Step 1: Hash build %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*sLen/calcInterval(tv0,tv1)/1000);
-gettimeofday(&tv0, NULL);
+TIME_END();
+    PP("Step 1: Hash build %g ms, %.1lf K/ms (%s)\n", calcInterval(tv0,tv1), 1.0*sLen/calcInterval(tv0,tv1)/1000, getTypeName(typ));
+TIME_BEGIN();
     L c = 0;
     L *tempK = (L*)malloc(sizeof(L)*vLen);
     HI *tempH = (HI*)malloc(sizeof(HI)*vLen);
@@ -1473,9 +1498,9 @@ gettimeofday(&tv0, NULL);
                if(k>=0){c++;while(t0){c++;t0=t0->inext;}}}, \
        reduction(+:c))
     DOP(vLen, tempK[i]=find_hash_many(hashT,hashMask,src,val,i,typ,&tempH[i]))
-gettimeofday(&tv1, NULL);
-    PP("Step 2: Hash probe %g ms, %.1lf MB/s\n", calcInterval(tv0,tv1), 1.0*vLen/calcInterval(tv0,tv1)/1000);
-gettimeofday(&tv0, NULL);
+TIME_END();
+    PP("Step 2: Hash probe %g ms, %.1lf K/ms (%s)\n", calcInterval(tv0,tv1), 1.0*vLen/calcInterval(tv0,tv1)/1000, getTypeName(typ));
+TIME_BEGIN();
     /* debug: print result in 0/1 */
     //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
     L parZ[H_CORE], offset[H_CORE]; 
@@ -1515,8 +1540,8 @@ gettimeofday(&tv0, NULL);
 //        if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;tt++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}
 //        }
 //    }
-gettimeofday(&tv1, NULL);
-    PP("Step 3: hash finish %g ms\n", calcInterval(tv0,tv1));
+TIME_END();
+    TIME_SHOW("Step 3: hash finish");
     //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     //P("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)

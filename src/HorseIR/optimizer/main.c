@@ -5,31 +5,32 @@ int yyparse(); /* see y.tab.c */
 extern FILE *yyin;
 extern ChainList *chain_list;
 extern int yylineno;
+extern TC H_TARGET;
 #define isCharNumber(c) ((c)>='0'&&(c)<='9')
 #define version() P("HorseIR version: 0.1.1\n")
 
-B isUsage   = false;
-B isVersion = false;
-B isQuery   = false;
-B isQFile   = false;
-B isOpt     = false;
-B isCompiler= false;
-B isInterp  = false;
-B isExp     = false;
-B isFront   = false;
-B isW       = false;
-B isPretty  = false;
-B isServer  = false;
-B isClient  = false;
-B isFileDot = false;
-B isReadBin = true;
-I runs      = 1;
-I qid       = -1;
-I qscale    = 1;
-C delimiter = '|';
-S optName   = NULL;
-S qfile     = NULL;
-I expId     = -1;
+B isUsage    = false;
+B isVersion  = false;
+B isQuery    = false;
+B isQFile    = false;
+B isOpt      = false;
+B isCompiler = false;
+B isInterp   = false;
+B isExp      = false;
+B isFront    = false;
+B isPretty   = false;
+B isServer   = false;
+B isClient   = false;
+B isFileDot  = false;
+B isReadBin  = false;
+I runs       = 1;
+I qid        = -1;
+I qscale     = 1;
+C delimiter  = '|';
+S qfile      = NULL;
+I expId      = -1;
+S optName    = NULL;
+S targetStr  = NULL;
 
 static void usage();
 static int  getOption(int argc, char *argv[]);
@@ -141,7 +142,7 @@ static void getLongOptionVerbose(int x){
 static int getLongOption(int argc, char *argv[]){
     int c, option_index=0;
     //while((c = getopt_long(argc, argv, "hvtsrdcpq:n:o", long_options, &option_index)) != -1){
-    while((c = getopt_long_only(argc, argv, "hvtsrdcpq:n:o", long_options, &option_index)) != -1){
+    while((c = getopt_long_only(argc, argv, "hvtsrdpc:q:n:o:x:", long_options, &option_index)) != -1){
         switch(c){
             case 0:
                 if(long_options[option_index].flag != 0) {
@@ -155,7 +156,8 @@ static int getLongOption(int argc, char *argv[]){
             case 'n': isQFile   = true; \
                       qfile     = strdup(optarg);  break;
             case 's': qscale    = atoi(optarg);    break;
-            case 'c': isCompiler= true;            break;
+            case 'c': isCompiler= true; 
+                      targetStr = strdup(optarg);  break;
             case 'o': isCompiler= true; \
                       isOpt     = true; \
                       optName   = strdup(optarg);  break;
@@ -178,7 +180,7 @@ static int getLongOption(int argc, char *argv[]){
 // TODO: getopt_long
 static int getOption(int argc, char *argv[]){
     int c;
-    while((c = getopt(argc, argv, "hvtq:n:s:co:d:r:x:fpz:")) != -1){
+    while((c = getopt(argc, argv, "hvtq:n:s:c:o:d:r:x:fpz:")) != -1){
         switch(c){
             case 'h': isUsage   = true;            break;
             case 'v': isVersion = true;            break;
@@ -188,7 +190,8 @@ static int getOption(int argc, char *argv[]){
             case 'n': isQFile   = true; \
                       qfile     = strdup(optarg);  break;
             case 's': qscale    = atoi(optarg);    break;
-            case 'c': isCompiler= true;            break;
+            case 'c': isCompiler= true;
+                      targetStr = strdup(optarg);  break;
             case 'o': isCompiler= true; \
                       isOpt     = true; \
                       optName   = strdup(optarg);  break;
@@ -219,7 +222,7 @@ static void usage(){
     WP("  -s <sid>       TPC-H query scale (default 1)\n");
     WP("  -r <runs>      Number of runs (default 1)\n");
     WP("\nRun with a compiler:\n");
-    WP("  -c             Enable compiler\n");
+    WP("  -c <target>    Enable compiler with target c/llvm/openacc/cuda/opencl\n");
     usage_q();
     usage_n();
     WP("  -o <name>      Query opt. (fe or fp)\n");
@@ -263,6 +266,21 @@ static void parseInput(S file_path){
     weedProg(root);
 }
 
+static OC getOptCode(S x){
+    if(!strcmp(x, "sr")) R OPT_SR;
+    else if(!strcmp(x, "fe")) R OPT_FE;
+    else if(!strcmp(x, "fp")) R OPT_FP;
+    else R OPT_NA;
+}
+
+static TC getTargetCode(S target){
+    if(!strcmp(target, "cpu")) R TARGET_C;
+    else if(!strcmp(target, "llvm")) R TARGET_LLVM;
+    else if(!strcmp(target, "openacc")) R TARGET_ACC;
+    else if(!strcmp(target, "opencl")) R TARGET_CL;
+    else R TARGET_NA;
+}
+
 static void runCompileWithOpt(char *optName){
     struct timeval tv0, tv1;
     /* basics */
@@ -271,19 +289,16 @@ static void runCompileWithOpt(char *optName){
     gettimeofday(&tv0, NULL);
     buildUDChain(root); /* include type and shape propagation */
     if(H_DEBUG) printTypeShape();
+    H_TARGET = getTargetCode(targetStr); /* H_TARGET: backend/common.c */
+    OC H_OPT = getOptCode(optName);
     /* optimizations */
     if(optName){ /* check a single optimization */
-        if(!strcmp(optName, "sr")){
-            analyzeSR(root);
-            prettyProg(root); /* verify */
+        switch(H_OPT){
+            case OPT_SR: analyzeSR(root); prettyProg(root); /* verify */ break;
+            case OPT_FE: analyzeLF(); break;
+            case OPT_FP: analyzePeephole(); break;
+            default: EP("opt not supported: %s\n",optName);
         }
-        else if(!strcmp(optName, "fe")){ //lf -> fe
-            analyzeLF();
-        }
-        else if(!strcmp(optName, "fp")){ //ph -> fp
-            analyzePeephole();
-        }
-        else { EP("opt %s is not supported\n",optName); }
     }
     else { /* all optimizations */
         analyzeLF();
@@ -336,10 +351,14 @@ static void validateInterp()  {
 
 static void validateCompiler(){
     validateInputFile();
+    if(targetStr){
+        if(TARGET_NA == getTargetCode(targetStr))
+            EP("Compiler target must be provided correctly: cpu or gpu\n");
+    }
+    else EP("Compiler target is missing: cpu or gpu\n");
     if(isOpt){
-        if(strcmp(optName,"fe") && strcmp(optName,"fp")){
+        if(OPT_NA == getOptCode(optName))
             EP("> query opt., either fe or fp\n");
-        }
     }
 }
 
@@ -366,6 +385,7 @@ static void serializeToFile(char *name){
     V x = allocNode();
     pfnLoadTable(x, initLiteralSym(name));
     serializeV(x, fp);
+    metaTable(x, name);
     fclose(fp);
     P("done\n");
 }

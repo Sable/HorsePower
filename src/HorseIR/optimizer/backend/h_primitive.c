@@ -23,6 +23,7 @@ L pfnLoadTable(V z, V x){
         V t = findTableByName(vq(x));
         if(!t) R E_TABLE_NOT_FOUND;
         *z = *t;
+        //printTablePretty(t, 15);
         R 0;
     }
     else R E_DOMAIN;
@@ -1448,7 +1449,6 @@ L pfnCompress(V z, V x, V y){
         if(!isEqualLength(x,y)) R E_LENGTH;
         L lenX = vn(x);
         L typZ = vp(y);
-        L k    = 0;
         L lenZ = 0, parZ[H_CORE], offset[H_CORE];
         memset(parZ  , 0, sizeof(L)*H_CORE);
         memset(offset, 0, sizeof(L)*H_CORE);
@@ -1456,7 +1456,7 @@ L pfnCompress(V z, V x, V y){
         DOI(H_CORE, lenZ += parZ[i])
         DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
         initV(z,typZ,lenZ);
-        if(k != lenZ){
+        if(lenX != lenZ){
             switch(typZ){
                 caseB DOT(lenX, if(vB(x,i))vB(z,offset[tid]++)=vB(y,i)) break;
                 caseJ DOT(lenX, if(vB(x,i))vJ(z,offset[tid]++)=vJ(y,i)) break;
@@ -1634,6 +1634,7 @@ L pfnLike(V z, V x, V y){
     //if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
     if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
         B t;
+        //P("Entering pfnLike: x(%s, %lld), y(%s, %lld)\n",getTypeName(vp(x)),vn(x),getTypeName(vp(y)),vn(y)); getchar();
         if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
@@ -1641,7 +1642,6 @@ L pfnLike(V z, V x, V y){
             //P("input size: %lld\n", vn(x));
             /* jit facilities */
             I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-            B case1 = false;
             //case 1
             // if(jit_status == 0) P("jit pattern initialized successfully\n");
             // else P("jit pattern initialized failed %lld\n", jit_status);
@@ -1651,9 +1651,8 @@ L pfnLike(V z, V x, V y){
             pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
             if(re==NULL) R E_NULL_VALUE;
             initV(z,H_B,lenZ);
-            //P("Entering pfnLike: x(%lld, %lld), y(%lld, %lld)\n",vp(x),vn(x),vp(y),vn(y)); //getchar();
             switch(vp(x)){
-                caseC vB(z,0)=getLikeMatch(sC(x),re,match);                                break;
+                caseC vB(z,0)=getLikeMatch(sC(x),re,match); break;
                 caseQ DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);}) break;
                 caseS DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
             }
@@ -2012,11 +2011,17 @@ L pfnJoinIndex(V z, V x, V y, V f){
     CALLGRIND_START_INSTRUMENTATION;
 #endif
     if(vn(f)==1){
-        R pfnJoinIndexSingle(z,x,y,f);
+        if(vn(x) > vn(y)){
+            CHECKE(pfnJoinIndexSingle(z,y,x,f)); swap2(z); R 0;
+        }
+        else R pfnJoinIndexSingle(z,x,y,f);
     }
     else if(vn(f)>1){
         //printV(f); P("hello\n"); getchar();
-        R pfnJoinIndexMultiple(z,x,y,f);
+        if(getListSize1(x) > getListSize1(y)){
+            CHECKE(pfnJoinIndexMultiple(z,y,x,f)); swap2(z); R 0;
+        }
+        else R pfnJoinIndexMultiple(z,x,y,f);
     }
     else R E_DOMAIN;
 #ifdef H_CALL

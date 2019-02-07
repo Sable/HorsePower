@@ -17,8 +17,7 @@ extern "C" {
 void printFloat(E x);
 
 void initSys();
-void deleteSys();
-void getNumberOfCore();
+void swap2(V z);
 
 L registerTable         (S tableName, V tablePtr);
 V findTableByName       (L sid);
@@ -69,6 +68,7 @@ L getOpFromSymbol       (L x);
 L joinOneColumn         (V z, V x, V y, L sop);
 L joinOtherColumns      (V z, V x, V y, V ind, L fx, V f);
 B compareOpWithIndex    (V x, V y, L k0, L k1, L op);
+L getListSize1          (V x);
 
 F logBaseF              (F b, F x);
 E logBaseE              (E b, E x);

@@ -1,5 +1,7 @@
 #include "../global.h"
 
+TC H_TARGET; /* backend/common.h, define the target platform: cpu,  gpu, or others */
+
 V initLiteralDate(L x){
     V z = allocNode();
     initV(z,H_D,1);

@@ -4,6 +4,9 @@ L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
 extern B isReadBin;
 
+#define H_INT H_I
+#define H_FLT H_E
+
 static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
     DOI(n, insertSym(createSymbol((S)PRE_DEFINED[i])));
     // printAllSymol();
@@ -14,7 +17,7 @@ static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
 static L readTableRegion(){
     // C CSV_LINE[] = "data/tpch/db1/region.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/region.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_Q, H_S};
+    L TYPE_LINE[]  = {H_INT, H_Q, H_S};
     const L NUM_COL_LINE = 3;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -30,7 +33,7 @@ static L readTableRegion(){
 static L readTableNation(){
     // C CSV_LINE[] = "data/tpch/db1/nation.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/nation.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_Q, H_L, H_S};
+    L TYPE_LINE[]  = {H_INT, H_Q, H_INT, H_S};
     const L NUM_COL_LINE = 4;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -46,8 +49,8 @@ static L readTableNation(){
 static L readTableCustomer(){
     // C CSV_LINE[] = "data/tpch/db1/customer.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/customer.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_Q, H_S, H_L,\
-                      H_S, H_E, H_Q, H_S};
+    L TYPE_LINE[]  = {H_INT, H_Q, H_S, H_INT,\
+                      H_S, H_FLT, H_Q, H_S};
     const L NUM_COL_LINE = 8;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -65,8 +68,8 @@ static L readTableOrders(){
     // C CSV_LINE[] = "data/tpch/db1/orders.tbl";
     // C CSV_LINE[] = "data/test-tables/orders-small.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/orders.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_L, H_C, H_E,\
-                      H_D, H_Q, H_S, H_L, H_S};
+    L TYPE_LINE[]  = {H_INT, H_INT, H_C, H_FLT,\
+                      H_D, H_Q, H_S, H_INT, H_S};
     const L NUM_COL_LINE = 9;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -84,8 +87,8 @@ static L readTableLineitem(){
     // C CSV_LINE[] = "data/tpch/db1/lineitem.tbl";
     // C CSV_LINE[] = "data/test-tables/lineitem-small.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/lineitem.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_L, H_L, H_L, \
-                      H_E, H_E, H_E, H_E, \
+    L TYPE_LINE[]  = {H_INT, H_INT, H_INT, H_INT, \
+                      H_FLT, H_FLT, H_FLT, H_FLT, \
                       H_C, H_C, H_D, H_D, \
                       H_D, H_Q, H_Q, H_S };
     const L NUM_COL_LINE = 16;
@@ -106,8 +109,8 @@ static L readTableLineitem(){
 static L readTablePart(){
     // C CSV_LINE[] = "data/tpch/db1/part.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/part.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_S, H_S, H_Q, \
-                      H_Q, H_L, H_Q, H_E, H_S };
+    L TYPE_LINE[]  = {H_INT, H_S, H_S, H_Q, \
+                      H_Q, H_INT, H_Q, H_FLT, H_S };
     const L NUM_COL_LINE = 9;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -124,8 +127,8 @@ static L readTablePart(){
 static L readTableSupplier(){
     // C CSV_LINE[] = "data/tpch/db1/supplier.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/supplier.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_S, H_S, H_L, \
-                      H_S, H_E, H_S };
+    L TYPE_LINE[]  = {H_INT, H_S, H_S, H_INT, \
+                      H_S, H_FLT, H_S };
     const L NUM_COL_LINE = 7;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -142,7 +145,7 @@ static L readTableSupplier(){
 static L readTablePartsupp(){
     // C CSV_LINE[] = "data/tpch/db1/partsupp.tbl";
     C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/partsupp.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
-    L TYPE_LINE[]  = {H_L, H_L, H_L, H_E, H_S};
+    L TYPE_LINE[]  = {H_INT, H_INT, H_INT, H_FLT, H_S};
     const L NUM_COL_LINE = 5;
     Q SYM_LIST_LINE[NUM_COL_LINE];
     const C* PRE_DEFINED[] = {
@@ -189,6 +192,7 @@ L initTableByName(S tableName){
     if(!findTableByName(getSymbol(tableName))){
         P("Loading table %s\n",tableName);
         if(isReadBin){
+            P(">> Reading from bin\n");
             initTableFromBin(tableName);
         }
         else{
@@ -217,6 +221,14 @@ L initTableByName(S tableName){
     R 0;
 }
 
+L metaTable(V x, S tableName){
+    V keyV = getTableKeys(x);
+    V valV = getTableVals(x);
+    P("Table: %s\n", tableName);
+    DOI(vn(keyV),{P("[%2lld] %-15s %s\n",i,getSymbolStr(vQ(keyV,i)),getTypeName(vp(vV(valV,i))));})
+    R 0;
+}
+
 /* load from bin */
 L initTableFromBin(S tableName){
     char temp[99];
@@ -227,6 +239,7 @@ L initTableFromBin(S tableName){
     readSerializeV(x, fp);
     fclose(fp);
     registerTable(tableName, x);
+    metaTable(x, tableName);
     R 0;
 }
 

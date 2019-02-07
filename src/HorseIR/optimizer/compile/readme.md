@@ -7,9 +7,9 @@ see usage
 
 ## debug: logging files
 
-generate a log file
+generate a log file (10 runs)
 
-     (make release && ./run.sh 14) &> debug/q14.log
+     (make release && ./run.sh 14 10) &> debug/q14.log
 
 ## opt: storing auto-generated optimized code 
 

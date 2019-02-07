@@ -1,13 +1,17 @@
 #!/bin/bash
-ids=(1 4 6 12 14 16 19 22)
+
+# A tester for going through all 22 queries under the folder 'gen', which
+# contains all 22 horseir programs generated automatically
+
+#ids=(1 4 6 12 14 16 19 22)
 RED='\033[0;31m'
 GN='\033[0;32m'
 NO='\033[0m'
 
-# build code
+# build
 make
 
-# Complete tests
+# complete tests
 for id in {1..22}
 #for id in ${ids[@]}
 do

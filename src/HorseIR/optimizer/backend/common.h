@@ -60,6 +60,17 @@ typedef struct list_table{
     V table;
 }ListT0, *ListT;
 
+typedef enum TargetCode{
+    TARGET_NA,
+    TARGET_C, TARGET_LLVM,
+    TARGET_ACC, TARGET_CUDA, TARGET_CL
+}TC;
+
+typedef enum OptCode{
+    OPT_NA, OPT_SR, OPT_FE, OPT_FP
+}OC;
+
+
 #include "h_type.h"
 
 /* macros */ 
@@ -98,10 +109,11 @@ typedef struct list_table{
 
 /* extern */
 
-extern G H_heap;
-extern E H_EPSILON;
-extern L H_CORE;
-extern C LINE_SEP;
+extern G  H_heap;
+extern E  H_EPSILON;
+extern L  H_CORE;
+extern C  LINE_SEP;
+extern TC H_TARGET;
 
 #ifdef  __cplusplus
 }

@@ -5,7 +5,10 @@ L q17_loopfusion_0(V z, V *x){
     V x0 = x[0]; // t7
     V x1 = x[1]; // t4
     initV(z,H_B,vn(x0));
-    DOP(vn(x0), vB(z,i)=AND(EQ(vQ(x0,i),getSymbol("MED BOX")),EQ(vQ(x1,i),getSymbol("Brand#23")))) R 0;
+    Q s0 = getSymbol("MED BOX");
+    Q s1 = getSymbol("Brand#23");
+    //DOP(vn(x0), vB(z,i)=AND(EQ(vQ(x0,i),getSymbol("MED BOX")),EQ(vQ(x1,i),getSymbol("Brand#23")))) R 0;
+    DOP(vn(x0), vB(z,i)=AND(EQ(vQ(x0,i),s0),EQ(vQ(x1,i),s1))) R 0;
 }
 /* num_func = 4, targ = t111 */
 L q17_loopfusion_1(V z, V *x){

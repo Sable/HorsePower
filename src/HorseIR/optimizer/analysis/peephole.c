@@ -108,7 +108,7 @@ static S phNameString(char *invc, char **targ, char *lval, char **rval, int n){
     return strdup(tmp);
 }
 
-static void genCompressCode(char **targ, char *lval, char **rval, int n){
+static void genCompressCode_C(char **targ, char *lval, char **rval, int n){
     char tmp[99], typ[20];
     SP(tmp, "q%d_peephole_%d", qid, PhTotal);
     P("L %s(V *z, V y, V *x){\n", tmp);
@@ -126,6 +126,20 @@ static void genCompressCode(char **targ, char *lval, char **rval, int n){
     P("}) R 0;\n}\n");
     PhList[PhTotal].invc = phNameString(tmp, targ, lval, rval, n);
     PhList[PhTotal].targ = targ[n-1]; PhTotal++;
+}
+
+static void genCompressCode_ACC(char **targ, char *lval, char **rval, int n){
+    TODO("adding support for OpenACC\n");
+}
+
+static void genCompressCode(char **targ, char *lval, char **rval, int n){
+    switch(H_TARGET){
+        case TARGET_C   : genCompressCode_C(targ, lval, rval, n); break;
+        case TARGET_ACC : genCompressCode_ACC(targ, lval, rval, n); break;
+        case TARGET_LLVM: TODO("Support for LLVM\n"); break;
+        case TARGET_CL  : TODO("Support for OpenCL\n"); break;
+        default: EP("TARGET platform is unknown: %d\n", H_TARGET);
+    }
 }
 
 static void genCompress(ChainList *list, int count){
@@ -245,7 +259,7 @@ static char *phNameRazeCode(int z, char *invc, int x, char *y, int n){
     return strdup(tmp);
 }
 
-static void genRazeCode(){
+static void genRazeCode_C(){
     char tmp[99], typeCode[99];
     DOI(RazeTotal, typeCode[i]=!strcmp(RazeNode[i][1],"sum")?getTypeCodeByName(RazeNode[i][2]):'E')
     SP(tmp, "q%d_peephole_%d", qid, PhTotal);
@@ -270,6 +284,20 @@ static void genRazeCode(){
     PhList[PhTotal].targ = RazeNode[RazeTotal-1][0];  PhTotal++;
     setRazeNodeVisited();
     RazeTotal = 0; varIndex = NULL; // clean
+}
+
+static void genRazeCode_ACC(){
+    TODO("adding support for ACC\n");
+}
+
+static void genRazeCode(){
+    switch(H_TARGET){
+        case TARGET_C   : genRazeCode_C(); break;
+        case TARGET_ACC : genRazeCode_ACC(); break;
+        case TARGET_LLVM: TODO("Support for LLVM\n"); break;
+        case TARGET_CL  : TODO("Support for OpenCL\n"); break;
+        default: EP("TARGET platform is unknown: %d\n", H_TARGET);
+    }
 }
 
 static char *phNameRazeCodeLen(char *z, char *invc, char *x, char *y){
@@ -438,7 +466,7 @@ static char *phNameFP3(char *z, char *invc, char *x0, char *x1, char *y0, char *
     return strdup(tmp);
 }
 
-static void genPattern2(PatternTree *ptree){
+static void genPattern2_C(PatternTree *ptree){
     char tmp[99];
     Chain *chain_x = ptree->child[0]->child[0]->chain; // each_right
     Chain *chain_y = ptree->child[0]->chain;           // each, sum/avg
@@ -452,7 +480,7 @@ static void genPattern2(PatternTree *ptree){
     EP("pending ... \n");
 }
 
-static void genPattern3(PatternTree *ptree){
+static void genPattern3_C(PatternTree *ptree){
     char tmp[99], pfn[30];
     Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
     Chain *chain_y0 = ptree->child[1]->chain;            // 2nd param of compress
@@ -485,7 +513,7 @@ static char *phNameFP4(char *z, char *invc, char *x, char *y){
     return strdup(tmp);
 }
 
-static void genPattern4(PatternTree *ptree){
+static void genPattern4_C(PatternTree *ptree){
     char tmp[99], pfn[30];
     Chain *chain_x  = ptree->child[0]->child[0]->child[0]->chain;  // 2 params of each_right
     Chain *chain_z  = ptree->chain;  // 2 params of each_right
@@ -508,7 +536,7 @@ static void genPattern4(PatternTree *ptree){
     setAllChainVisited(ptree);
 }
 
-static void genPattern5(PatternTree *ptree){
+static void genPattern5_C(PatternTree *ptree){
     // TODO: add code template for this pattern
 }
 
@@ -517,14 +545,33 @@ static void genPattern5(PatternTree *ptree){
  *   P5 -> q2
  *   P6 -> q3
  */
-static void genPattern(PatternTree *ptree, I pid){
+static void genPattern_C(PatternTree *ptree, I pid){
     //P("gen pattern pid = %d\n", pid);
     switch(pid){
         //case 2: genPattern2(ptree); break; // q3
-        case 3: genPattern3(ptree); break;
-        case 4: genPattern4(ptree); break;
-        case 5: genPattern5(ptree); break; // q2
+        case 3: genPattern3_C(ptree); break;
+        case 4: genPattern4_C(ptree); break;
+        case 5: genPattern5_C(ptree); break; // q2
         default: EP("Pattern not supported yet: %d\n", pid);
+    }
+}
+
+static void genPattern_ACC(PatternTree *ptree, I pid){
+    switch(pid){
+        case 3: TODO("OpenACC code gen for pattern 3\n");
+        case 4: TODO("OpenACC code gen for pattern 4\n");
+        case 5: TODO("OpenACC code gen for pattern 5\n");
+        default: EP("Pattern not supported yet: %d\n", pid);
+    }
+}
+
+static void genPattern(PatternTree *ptree, I pid){
+    switch(H_TARGET){
+        case TARGET_C    : genPattern_C(ptree, pid); break;
+        case TARGET_LLVM : TODO("Support for LLVM\n"); break;
+        case TARGET_ACC  : genPattern_ACC(ptree, pid); break;
+        case TARGET_CL   : TODO("Support for OpenCL\n"); break;
+        default: EP("TARGET platform is unknown: %d\n", H_TARGET);
     }
 }
 

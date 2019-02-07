@@ -13,14 +13,7 @@ L listTableCur;
 
 L H_CORE = 1;
 
-void initSys(){
-    listTable = (ListT)malloc(sizeof(ListT0) * NUM_LIST_TABLE);
-    listTableCur = 0;
-    //omp_set_num_threads(1);
-    getNumberOfCore();
-}
-
-void getNumberOfCore(){
+static void getNumberOfCore(){
     #pragma omp parallel
     {
         L tid = omp_get_thread_num();
@@ -30,9 +23,19 @@ void getNumberOfCore(){
     WP("# of cores: %lld\n", H_CORE);
 }
 
-void deleteSys(){
+static void deleteSys(){
     listTableCur = 0;
     free(listTable);
+}
+
+// TODO: maybe swap by pointers?
+void swap2(V z){
+    if(isList(z) && 2==vn(z)){
+        V p0 = vV(z,0);
+        V p1 = vV(z,1);
+        V0 t = *p0; *p0 = *p1; *p1 = t;
+    }
+    else EP("z is not a list or vn(z) !=2: %d %d\n", isList(z),2==vn(z));
 }
 
 L registerTable(S tableName, V tablePtr){
@@ -785,6 +788,13 @@ L joinOneColumn(V z, V x, V y, L sop){
     R 0;
 }
 
+L getListSize1(V x){
+    if(isList(x) && vn(x)>0){
+        R vn(vV(x,0));
+    }
+    else EP("List size rank error\n");
+}
+
 
 inline F logBaseF(F b, F x){
     R logf(x)/logf(b);
@@ -925,3 +935,13 @@ void printErrMsg(L eid){
         default: EP("Error code not specified: %lld\n", eid);
     }
 }
+
+
+void initSys(){
+    listTable = (ListT)malloc(sizeof(ListT0) * NUM_LIST_TABLE);
+    listTableCur = 0;
+    //omp_set_num_threads(1);
+    getNumberOfCore();
+    H_TARGET = TARGET_NA;
+}
+

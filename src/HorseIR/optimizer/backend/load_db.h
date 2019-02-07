@@ -3,5 +3,6 @@
 
 L initTableByName(S tableName);
 L initTableFromBin(S tableName);
+L metaTable(V x, S tableName);
 
 #endif
