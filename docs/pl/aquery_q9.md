@@ -7,8 +7,8 @@ WITH
     getYear(max(TradeDate) - 365 * 3), max(TradeDate) - 365 * 3
     FROM price)
 
-    // we introduce a dummy column to avoid having q
-    // group on distinct
+    -- we introduce a dummy column to avoid having q
+    -- group on distinct
     splitdata(Dummy, Id) AS
     (SELECT 1, distinct(Id)
     FROM split
