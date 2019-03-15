@@ -1,3 +1,4 @@
 Real, Real -> L
+C, C -> L
 S, S -> L
 Q, Q -> L

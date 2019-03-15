@@ -1,4 +1,4 @@
-## ceil
+# ceil
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - ceiling the value of x
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> bool

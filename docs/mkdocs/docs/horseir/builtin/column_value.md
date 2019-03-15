@@ -1,4 +1,4 @@
-## column_value
+# column_value
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - get column value by given a column name
 
-### Type rules
+### Type Rules
 
 ```
 (sym, sym) -> list<?>

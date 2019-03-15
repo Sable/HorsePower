@@ -1,7 +1,7 @@
-!!! danger "Database Related"
+!!! danger "Database related"
     A collection of database functions and operations. (Currently not maintained)
 
-## <p id="ref">Database Functions</p>
+### <span id="ref">Database Functions</span>
 
 MySQL functions
 
@@ -16,7 +16,7 @@ MySQL functions
 See more about [MySQL reference](https://www.w3schools.com/sql/func_date_sub.asp).
 
 
-## <p id="clause">Important Database Operations</p>
+### <span id="clause">Important Database Operations</span>
 
 A couple of important database operations are listed as follows.
 
@@ -25,7 +25,7 @@ A couple of important database operations are listed as follows.
 - [Group by](#group-by)
 - [Limit](#limit)
 
-### Join
+#### Join
 
 A join may have various kinds of joins which can be implemented with different
 efficient algorithms.  We consider the following joins which are included in
@@ -42,7 +42,7 @@ SQL joins ([StackOverflow](https://stackoverflow.com/questions/5706437/whats-the
 - Right join
 - Right join less
 
-### Order
+#### Order
 
 There are a couple of built-in functions designed for handling ordering
 problem.  If only one order condition is specified, either `asc` or `desc` is
@@ -58,7 +58,7 @@ t1:i64 = desc(t0);
 
 A list of integers (indices) is returned and saved into `t1`;
 
-### Group by
+#### Group by
 
 This clause aggregates items with the same value.
 
@@ -72,7 +72,7 @@ t1:list<i64> = @group_by(t0);
 The returned `t1` is a list of lists.  The internal list has integers (indices)
 which point to their original position in the list `t0`.
 
-### <span id="limit">Limit / Top</span>
+#### <span id="limit">Limit / Top</span>
 
 Limit (or top) is useful in selecting a limited amount of items out of a long list.
 
@@ -95,7 +95,7 @@ t3:i64 = @add(t2, m);      // addition
 t4:?   = @index(t0, t3);   // indexing
 ```
 
-## <p id="operations">Implementing Database Operations Using Array Operations</p>
+### <span id="operations">Implementing Database Operations Using Array Operations</span>
 
 References:
 
@@ -106,7 +106,7 @@ References:
   SIGGRAPH Courses (2004).
 
 
-### Scan-like Operators
+#### Scan-like Operators
 
 Problem description:
 
@@ -164,7 +164,7 @@ We see
   outer-product way
 - `each(where, t0)` operates `where` in the each list of `t0`
 
-### Aggregation
+#### Aggregation
 
 Basic operations for aggregation
 
@@ -188,9 +188,9 @@ Aggregation is a perfect candidate for data parallelism despite it may take
 different aggregation functions.
 
 
-## <p id="examples">Examples for database operations</p>
+### <span id="examples">Examples for database operations</span>
 
-### GROUP BY
+#### GROUP BY
 
 [Source](https://www.w3schools.com/sql/sql_groupby.asp)
 
@@ -243,7 +243,7 @@ modeul _default{
 }
 ```
 
-### ORDER BY
+#### ORDER BY
 
 [Source](https://www.w3schools.com/sql/sql_orderby.asp)
 
@@ -300,7 +300,7 @@ ELI code for `order by`
 5 1 2 3 7
 ```
 
-### MIN and MAX
+#### MIN and MAX
 
 [Definition of MIN and MAX](https://www.w3schools.com/sql/sql_min_max.asp)
 

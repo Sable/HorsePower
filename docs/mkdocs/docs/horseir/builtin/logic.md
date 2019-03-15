@@ -1,4 +1,4 @@
-# Logic
+# logic
 
 All logic operations are defined with the following type rules.
 
@@ -9,7 +9,7 @@ High-level
 ```no-highlight
 // dyadic
 bool,bool -> bool
-_         -> domain error
+_   ,_    -> domain error
 
 // monadic
 bool -> bool
@@ -24,7 +24,10 @@ Table with details (See [type alias](../types.md))
 
 [Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
 
-## and
+
+### List of Functions
+
+#### and
 
 `and(x,y)`
 
@@ -33,7 +36,7 @@ Table with details (See [type alias](../types.md))
 (0,0,0):bool
 ```
 
-## nand
+#### nand
 
 `nand(x,y)`
 
@@ -42,7 +45,7 @@ Table with details (See [type alias](../types.md))
 > (1,1,1):bool
 ```
 
-## or
+#### or
 
 `or(x,y)`
 
@@ -51,7 +54,7 @@ Table with details (See [type alias](../types.md))
 > (0,0,1):bool
 ```
 
-## nor
+#### nor
 
 `nor(x,y)`
 
@@ -60,7 +63,7 @@ Table with details (See [type alias](../types.md))
 > (1,1,0):bool
 ```
 
-## not
+#### not
 
 `not(x)`
 
@@ -69,7 +72,7 @@ Table with details (See [type alias](../types.md))
 > (1,1,0):bool
 ```
 
-## xor
+#### xor
 
 `xor(x,y)`
 

@@ -1,4 +1,4 @@
-## Trig and Hyper Functions
+# A Collection of trig and hyper Functions
 
 ### List of Functions
 

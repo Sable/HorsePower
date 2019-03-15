@@ -4,20 +4,20 @@
 #include<stdbool.h>
 #define P printf
 
-const char SetInt[] = "BCHIL";       // size: 5
+const char SetInt[] = "BJHIL";       // size: 5
 const int  SetIntSize = 5; 
 const char SetFloat[] = "FE";        // size: 2
 const int  SetFloatSize = 2; 
-const char SetReal[] = "BCHILFE";    // size: 7
+const char SetReal[] = "BJHILFE";    // size: 7
 const int  SetRealSize = 7;
 const char SetString[] = "CQS";      // size: 3
 const int  SetStringSize = 3; 
 const char SetDatetime[] = "MDZUWT"; // size: 6
 const int  SetDatetimeSize = 6;
-const char SetBasic[] = "BCHILFEQSMDZUWTX";    // size: 16
-const int  SetBasicSize = 16;
-const char SetAll[] = "BCHILFEQSMDZUWTXGNYAK"; // size: 21
-#define SetAllSize 21
+const char SetBasic[] = "BJHILFECQSMDZUWTX";   // size: 17
+const int  SetBasicSize = 17;
+const char SetAll[] = "BJHILFECQSMDZUWTXGNYAK"; // size: 22
+#define SetAllSize 22
 char map[SetAllSize][SetAllSize] = {0};
 
 void pending(char *str, char *type){

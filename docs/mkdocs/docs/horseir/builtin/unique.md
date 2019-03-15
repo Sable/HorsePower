@@ -1,4 +1,4 @@
-## unique
+# unique
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - unique value of x (in indices)
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool   -> i64

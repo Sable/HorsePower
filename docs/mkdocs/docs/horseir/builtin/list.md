@@ -1,8 +1,8 @@
-# List related operations
+# A Collection of List-related Functions
 
-## list
+### list
 
-### Description
+**Description**
 
 ```no-highlight
 list(...)
@@ -10,22 +10,22 @@ list(...)
 
 - Return a list with a given arbitrary number of arguments
 
-### Type Rules
+**Type Rules**
 
 ```no-highlight
 (Any;...) -> list
 ```
 
-### Examples
+**Examples**
 
 ```no-highlight
 list(`a`b`c:sym,(4,5,6):i32)
 > (`a`b`c:sym, (-1,2,3):i32):list
 ```
 
-## enlist
+### enlist
 
-### Description
+**Description**
 
 ```no-highlight
 enlist(x)
@@ -34,7 +34,7 @@ enlist(x)
 - Return a list enclose `x`
 - Increase the depth of `x` by 1
 
-### Type Rules
+**Type Rules**
 
 ```no-highlight
 bool   -> list<bool>
@@ -61,16 +61,16 @@ ktable -> list<ktable>
 _      -> domain error
 ```
 
-### Examples
+**Examples**
 
 ```no-highlight
 enlist((-1,2,3):i32)
 > ((-1,2,3):i32):list
 ```
 
-## raze
+### raze
 
-### Description
+**Description**
 
 ```no-highlight
 raze(x)
@@ -79,7 +79,7 @@ raze(x)
 - Return a vector if all items in `x` can be safely placed in a vector
 - All items in the list `x` are "freed"
 
-### Type Rules
+**Type Rules**
 
 ```no-highlight
 list<bool>    -> bool
@@ -102,23 +102,23 @@ list<?>       -> ?
 _    -> domain error
 ```
 
-### Examples
+**Examples**
 
 ```no-highlight
 raze(enlist((-1,2,3):i32))
 > (-1,2,3):i32
 ```
 
-## tolist
+### tolist
 
-### Description
+**Description**
 
 `tolist(x)`
 
 - Converting a vector to a list
 - Each item in the vector becomes a cell in the list
 
-### Type Rules
+**Type Rules**
 
 ```no-highlight
 bool   -> list<bool>
@@ -140,7 +140,7 @@ time   -> list<time>
 _      -> domain error
 ```
 
-### Examples
+**Examples**
 
 ```no-highlight
 tolist((-1,2,3))
@@ -149,55 +149,55 @@ tolist((-1,2,3))
 
 ## each operations
 
-- each(func, list): operate *func* on each element in *list*
-- each_item(func, list1, list2): operate *func* on each pair of elements in *list1* and *list2*
-- each_left(func, list1, list2): operate *func* on each pair of each element in *list1* and total of *list2*
-- each_right(func, list1, list2): operate *func* on each pair of total of *list1* and each element in *list2*
+- each(func, list): operate *func* on each cell in *list*
+- each_item(func, list1, list2): operate *func* on each pair of cells in *list1* and *list2*
+- each_left(func, list, item): operate *func* on each pair of each cell in *list* and *item* (as a whole)
+- each_right(func, item, list): operate *func* on each pair of *item* (as a whole) and each cell in *list*
 
 ### each
 
 ```no-highlight
-each(func, [a0;a1;...])
+each(func, (a0,a1,...):list)  // operate func on each cell in the list
 ```
 
 Result:
 
 ```no-highlight
-[func(a0);func(a1);...]
+(func(a0),func(a1),...):list
 ```
 
 ### each_item
 
 ```no-highlight
-each_item(func,[a0;a1;...],[b0;b1;...])
+each_item(func,(a0,a1,...):list,(b0,b1,...):list) // operate func on each pair
 ```
 
 Result:
 
 ```no-highlight
-(func(a0,b0);func(a1,b1);...)
+(func(a0,b0),func(a1,b1),...):list
 ```
 
 ### each_left
 
 ```no-highlight
-each_left(func,[a0;a1;...],[b0;b1;...])
+each_left(func,(a0,a1,...):list,B) // pairs: {a0,B}, {a1,B}, ...
 ```
 
 Result:
 
 ```no-highlight
-(func(a0,[b0;b1;...]),func(a1,[b0;b1;...]),...)
+(func(a0,B),func(a1,B),...):list
 ```
 
 ### each_right
 
 ```no-highlight
-each_right(func,[a0;a1;...],[b0;b1;...])
+each_right(func,A,(b0,b1,...):list) // pairs: {A,b0}, {A,b1}, ...
 ```
 
 Result:
 
 ```no-highlight
-(func([a0;a1;...],b0),func([a0;a1;...],b1),...)
+(func(A,b0),func(A,b1),...):list
 ```

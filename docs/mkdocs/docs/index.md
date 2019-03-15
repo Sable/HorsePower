@@ -1,10 +1,11 @@
 # HorsePower
 
 In order to explore a new method to improve the performance of database
-queries, we conduct the research in combining array programming languages and
-database systems.
+queries, we conduct the research in combining array programming and
+in-memory column-based database systems.
 We propose *HorsePower* which aims at optimizing SQL queries with user-defined
-functions (UDFs) at a level of a new array-based intermediate representative (IR).
+functions (UDFs) at a level of a new array-based intermediate representative
+(HorseIR).
 Moreover, an extensible framework is designed for improving the throughput of
 database queries with low response time.
 
@@ -14,4 +15,5 @@ HorsePower has the following parts:
 - **HorseSQL**:     An SQL to HorseIR translator
 - **HorseSystem**:  A system for executing HorseIR programs
 - **HorseRuntime**: A runtime system for In-Memory Database Systems (IMDB)
+
 

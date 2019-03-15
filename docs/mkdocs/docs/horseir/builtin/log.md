@@ -1,3 +1,5 @@
+# A collection of log functions
+
 ## log
 
 ### Description
@@ -7,7 +9,7 @@ Natural logarithm
 - `log(value)`
 - base is `e`
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> f32
@@ -30,7 +32,7 @@ Logarithm
 - `log(value)`
 - base is 2
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> f32
@@ -59,7 +61,7 @@ Logarithm
 - `log10(value)`
 - base is 10
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> f32
@@ -86,7 +88,7 @@ Natural logarithm
 
 - `logb(base, number)`
 
-### Type rules
+### Type Rules
 
 High-level (without complex)
 

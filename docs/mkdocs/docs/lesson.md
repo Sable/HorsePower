@@ -1,7 +1,8 @@
-## Lessons learned from projects
+# Lessons learned from projects
 
 !!! tip "Note"
     Keep updating this page!
+
 
 ### Common
 
@@ -61,5 +62,11 @@ See [discussion](https://github.com/numpy/numpy/issues/6357)
 ```no-highlight
     np.argsort(x) -> np.argsort(x, kind='mergesort')
 ```
+
+### Hash Join
+
+- An example of [hash join](https://rosettacode.org/wiki/Hash_join)
+- [Hash join in a phd thesis](http://www.dcs.ed.ac.uk/home/tz/phd/thesis/node21.htm)
+
 
 

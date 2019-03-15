@@ -1,10 +1,10 @@
-## reverse
+# reverse
 
 ### Description
 
 Reverse a list
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool    -> bool

@@ -1,4 +1,4 @@
-## recip
+# recip
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - reciprocal, divide(1,x)
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> f32

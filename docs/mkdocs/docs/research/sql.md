@@ -1,4 +1,4 @@
-# SQL
+# Database SQL
 
 This page summarizes the state-of-arts research on SQL queries, including
 papers about improving the performance of query processing and in-memory

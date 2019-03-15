@@ -1,31 +1,57 @@
 site_name: HorsePower
-#theme: cluster
-#theme: windmill
-#theme: material
-theme: readthedocs
-#theme: cosmo
-#theme: null
-#theme_dir: 'custom_theme'
+
+theme:
+    name: material
+    highlihtjs: True
+    titles_only: True
+    static_templates:
+        - 404.html
+    palette:
+        primary: 'blue grey'
+        accent: 'blue grey'
+        #primary: 'indigo'
+        #accent: 'light blue'
+
+extra:
+    font:
+        text: 'Helvetica'
+        code: 'Roboto Mono'
+    author:
+        github: 'wukefe'
+
 extra_css: 
     - extra/extra.css
 #    - extra/bootstrap.min.css
-extra_javascript:
-    - extra/extra.js
 
 # mdx_math: https://github.com/mitya57/python-markdown-math
+extra_javascript:
+    - extra/extra.js
+    - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'
+
+# https://squidfunk.github.io/mkdocs-material/extensions/pymdown
+# /usr/local/lib/python2.7/site-packages/material
 markdown_extensions:
-    - mdx_math
+#   - mdx_math
+    - pymdownx.arithmatex
+    - pymdownx.caret
+    - pymdownx.critic
+    - pymdownx.details
+    - pymdownx.mark
     - admonition
     - toc:
         permalink: True
-copyright: '&copy; 2017-2018, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
 
-pages:
+copyright:
+    '&copy; 2017-2019, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
+
+#<a id="audrey_page" href="https://www.cs.mcgill.ca/~yfeng21/" target="_blank">Yulan Feng</a>
+
+nav:
 - Home    : 'index.md'
 - Overview: 'overview.md'
 - SQL2IR  : 'sql2ir.md'
 - HorseIR : 
-    - IR Overview  : 'horseir/spec.md'
+    - IR Overview : 'horseir/spec.md'
     - Naming       : 'horseir/naming.md'
     - Types        : 'horseir/types.md'
     - Shapes       : 'horseir/shapes.md'
@@ -44,57 +70,4 @@ pages:
     - Venue        : 'conf/venue.md'
 - Summary  : 
     - Lesson       : 'lesson.md'
-
-# internal pages (see custom_theme/readme)
-- "___" :
-    - "___": eval/settings.md
-- "___" :
-    - "___": horseir/builtin/abs.md
-    - "___": horseir/builtin/append.md
-    - "___": horseir/builtin/ceil.md
-    - "___": horseir/builtin/compress.md
-    - "___": horseir/builtin/conj.md
-    - "___": horseir/builtin/date.md
-    - "___": horseir/builtin/div.md
-    - "___": horseir/builtin/eq.md
-    - "___": horseir/builtin/fact.md
-    - "___": horseir/builtin/floor.md
-    - "___": horseir/builtin/geq.md
-    - "___": horseir/builtin/group.md
-    - "___": horseir/builtin/gt.md
-    - "___": horseir/builtin/indexing.md
-    - "___": horseir/builtin/indexof.md
-    - "___": horseir/builtin/len.md
-    - "___": horseir/builtin/leq.md
-    - "___": horseir/builtin/like.md
-    - "___": horseir/builtin/list.md
-    - "___": horseir/builtin/log.md
-    - "___": horseir/builtin/logic.md
-    - "___": horseir/builtin/advanced.md
-    - "___": horseir/builtin/lt.md
-    - "___": horseir/builtin/member.md
-    - "___": horseir/builtin/minus.md
-    - "___": horseir/builtin/mod.md
-    - "___": horseir/builtin/mul.md
-    - "___": horseir/builtin/neg.md
-    - "___": horseir/builtin/neq.md
-    - "___": horseir/builtin/order.md
-    - "___": horseir/builtin/pi.md
-    - "___": horseir/builtin/plus.md
-    - "___": horseir/builtin/power.md
-    - "___": horseir/builtin/range.md
-    - "___": horseir/builtin/recip.md
-    - "___": horseir/builtin/reduce.md
-    - "___": horseir/builtin/reverse.md
-    - "___": horseir/builtin/round.md
-    - "___": horseir/builtin/signum.md
-    - "___": horseir/builtin/str.md
-    - "___": horseir/builtin/trig.md
-    - "___": horseir/builtin/unique.md
-    - "___": horseir/builtin/vector.md
-    - "___": horseir/builtin/where.md
-    - "___": horseir/builtin/outer.md
-    - "___": horseir/builtin/join.md
-    - "___": horseir/builtin/substring.md
-    - "___": horseir/builtin/dbhelper.md
 

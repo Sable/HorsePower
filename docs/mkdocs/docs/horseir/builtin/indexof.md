@@ -1,4 +1,4 @@
-## index_of
+# index_of
 
 ### Description
 

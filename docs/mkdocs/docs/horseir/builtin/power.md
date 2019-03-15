@@ -1,3 +1,5 @@
+# A Collection of power Functions
+
 ## power
 
 *Note*:

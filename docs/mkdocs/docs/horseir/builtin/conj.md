@@ -1,4 +1,4 @@
-## conj
+# conj
 
 ### Description
 
@@ -6,16 +6,16 @@
 
 - conjugate value of x (complex numbers)
 
-### Type rules
+### Type Rules
 
 ```no-highlight
-clex -> clex
-_    -> domain error
+complex -> complex
+_       -> domain error
 ```
 
 ### Examples
 
 ```no-highlight
-conj((1+2i,2-3i))
-> (1-2i,2+3i):complex
+    conj((1+2i,2-3i))
+(1-2i,2+3i):complex
 ```

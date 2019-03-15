@@ -1,16 +1,19 @@
 !!! tip "Built-in Functions"
     Built-in functions with definitions and examples.
 
-## 1. Type alias
+## 1. Type Alias
 
-<table style="width:45%;float:left">
+See [type specifications](types.md)
+
+<div class="left-column">
+<table>
 <tr>
     <th> 1-level </th>
     <th> Description </th>
 </tr>
 <tr>
     <td>Int</td>
-    <td>B, C, H, I, L</td>
+    <td>B, J, H, I, L</td>
 </tr>
 <tr>
     <td>Float</td>
@@ -37,8 +40,10 @@
     <td>G, N, Y, A, K</td>
 </tr>
 </table>
+</div>
 
-<table style="width:55%;float:left">
+<div class="right-column">
+<table>
 <tr>
     <th> 2-level </th>
     <th> Description </th>
@@ -72,8 +77,7 @@
     <td>Any of all types</td>
 </tr>
 </table>
-
-See [type specifications](types.md).
+</div>
 
 ## 2. Basics
 
@@ -138,14 +142,14 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 14 | <script>hgFunc('sqrt(x)'         ,'Sqrt root              ');</script> | Real                | Number                        | [link](builtin/power.md#sqrt)|P       | Y        |
 | 15 | <script>hgFunc('exp(x)'          ,'Exponential            ');</script> | Real                | Number                        | [link](builtin/power.md#exp) |P       | Y        |
 | 16 | <script>hgFunc('date(x)'         ,'Time: date             ');</script> | Z                   | D                             | [link](builtin/date.md#date)        |&#10004;| Y        |
-| 17 | <script>hgFunc('date\_year(x)'   ,'Time: year             ');</script> | Date                | L                             | [link](builtin/date.md#date-year)   |&#10004;| Y        |
-| 18 | <script>hgFunc('date\_month(x)'  ,'Time: month            ');</script> | Date                | L                             | [link](builtin/date.md#date-month)  |&#10004;| Y        |
-| 19 | <script>hgFunc('date\_day(x)'    ,'Time: day              ');</script> | D,Z                 | L                             | [link](builtin/date.md#date-day)    |&#10004;| Y        |
+| 17 | <script>hgFunc('date\_year(x)'   ,'Time: year (yyyy)      ');</script> | Date                | H                             | [link](builtin/date.md#date-year)   |&#10004;| Y        |
+| 18 | <script>hgFunc('date\_month(x)'  ,'Time: month (mm)       ');</script> | Date                | H                             | [link](builtin/date.md#date-month)  |&#10004;| Y        |
+| 19 | <script>hgFunc('date\_day(x)'    ,'Time: day (dd)         ');</script> | D,Z                 | H                             | [link](builtin/date.md#date-day)    |&#10004;| Y        |
 | 20 | <script>hgFunc('time(x)'         ,'Time: time             ');</script> | Z                   | T                             | [link](builtin/date.md#time)        |&#10004;| Y        |
-| 21 | <script>hgFunc('time\_hour(x)'   ,'Time: hour             ');</script> | Time                | L                             | [link](builtin/date.md#time-hour)   |&#10004;| Y        |
-| 22 | <script>hgFunc('time\_minute(x)' ,'Time: minute           ');</script> | Time                | L                             | [link](builtin/date.md#time-minute) |&#10004;| Y        |
-| 23 | <script>hgFunc('time\_second(x)' ,'Time: second           ');</script> | W,T,Z               | L                             | [link](builtin/date.md#time-second) |&#10004;| Y        |
-| 24 | <script>hgFunc('time\_mill(x)'   ,'Time: millisecond      ');</script> | T,Z                 | L                             | [link](builtin/date.md#time-mill)   |&#10004;| Y        |
+| 21 | <script>hgFunc('time\_hour(x)'   ,'Time: hour (HH)        ');</script> | Time                | L                             | [link](builtin/date.md#time-hour)   |&#10004;| Y        |
+| 22 | <script>hgFunc('time\_minute(x)' ,'Time: minute (MM)      ');</script> | Time                | L                             | [link](builtin/date.md#time-minute) |&#10004;| Y        |
+| 23 | <script>hgFunc('time\_second(x)' ,'Time: second (SS)      ');</script> | W,T,Z               | L                             | [link](builtin/date.md#time-second) |&#10004;| Y        |
+| 24 | <script>hgFunc('time\_mill(x)'   ,'Time: millisecond (LL) ');</script> | T,Z                 | L                             | [link](builtin/date.md#time-mill)   |&#10004;| Y        |
 | 25 | <script>hgFunc('cos(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#cos)  |&#10004;| Y        |
 | 26 | <script>hgFunc('sin(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#sin)  |&#10004;| Y        |
 | 27 | <script>hgFunc('tan(x)'          ,'Trigonometric functions');</script> | Real                | Real                          | [link](builtin/trig.md#tan)  |&#10004;| Y        |
@@ -175,7 +179,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 8  | <script>hgFunc('minus(x,y)           ','Subtraction   ');</script>   | Various             | Various                       | [link](builtin/minus.md)     |P       | Y        |
 | 9  | <script>hgFunc('mul(x,y)             ','Multiplication');</script>   | (Real;Real)         | Various                       | [link](builtin/mul.md)       |P       | Y        |
 | 10 | <script>hgFunc('div(x,y)             ','Division      ');</script>   | (Real;Real)         | Various                       | [link](builtin/div.md)       |P       | Y        |
-| 11 | <script>hgFunc('power(x,y)           ','Power x of y  ');</script>   | (Real;Real)         | Various                       | [link](builtin/power.md)     |P       | Y        |
+| 11 | <script>hgFunc('power(x,y)           ','Power x of y  ');</script>   | (Real;Real)         | Various                       | [link](builtin/power.md#power)|P       | Y        |
 | 12 | <script>hgFunc('logb(x,y)            ','log\_x(y)     ');</script>   | (Real;Real)         | Various                       | [link](builtin/log.md#logb)  |P       | Y        |
 | 13 | <script>hgFunc('mod(x,y)             ','x mod y       ');</script>   | (Real;Real)         | Various                       | [link](builtin/mod.md)       |&#10004;| Y        |
 | 14 | <script>hgFunc('and(x,y)             ','And           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#and) |&#10004;| Y        |
@@ -236,9 +240,9 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 | No.| Function                                                                    | Type of Arg(s)\*    | Type of Value        | Details                           | Status | Parallel |
 | :-:| :-------------------------------------------------------------------------- | :------------------ | :------------------- | :-------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;|         |
-| 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Anyl,...)          | List                 | [link](builtin/list.md#list)      |&#10004;|         |
-| 3  | <script>hgFunc('enlist(x)            ','Return a list (1-cell)  ');</script>| Any                 | List                 | [link](builtin/list.md#enlist)    |&#10004;|         |
+| 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;|          |
+| 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Any,...)           | List                 | [link](builtin/list.md#list)      |&#10004;|          |
+| 3  | <script>hgFunc('enlist(x)            ','Return a list (1-cell)  ');</script>| Any                 | List                 | [link](builtin/list.md#enlist)    |&#10004;|          |
 | 4  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
 | 5  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List)        | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
 | 6  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
@@ -249,21 +253,21 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 ## 4. Database Related
 
-| No.| Function                                                                | Type of Arg(s)\*            | Type of Value        | Details                           | Status | Parallel |
-| :-:| :---------------------------------------------------------------------- | :---------------------------| :------------------- | :-------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('enum          ','enum(key, value)         ');</script>  | (Basic;Basic),(list;list)   | Enum                 | [link](builtin/advanced.md#enum)  |&#10004;| N        |
-| 2  | <script>hgFunc('dict          ','dict(keys, values)       ');</script>  | (Any;Any)                   | Dict                 | [link](builtin/advanced.md#dict)  |&#10004;| ?        |
-| 3  | <script>hgFunc('table         ','table(col\_names, values)');</script>  | (List;Column)               | Table                | [link](builtin/advanced.md#table) |&#10004;| ?        |
-| 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable               | [link](builtin/advanced.md#ktable)|&#10004;| N        |
-| 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List                 | [link](builtin/dbhelper.md#keys)  |&#10004;| ?(CHECKE)|
-| 6  | <script>hgFunc('values        ','Return value part        ');</script>  | Various                     | Various              | [link](builtin/dbhelper.md#values)|&#10004;| N        |
-| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table                | [link](builtin/dbhelper.md#meta)  |        |         |
-| 8  | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various              | [link](builtin/dbhelper.md#fetch) |&#10004;| Y        |
-| 9  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various              | [link](builtin/dbhelper.md#column_value)|&#10004;| N        |
-| 10 | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable        | [link](builtin/dbhelper.md#load_table)  |&#10004;| N        |
-| 11 | <script>hgFunc('datetime\_add(x,y,m) ','Date time add     ');</script>  | (Calendar;Int;Sym)          | Calendar             | [link](builtin/date.md#datetime-add) |&#10004;| Y        |
-| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Date time sub     ');</script>  | (Calendar;Int;Sym)          | Calendar             | [link](builtin/date.md#datetime-sub) |        |         |
-| 13 | <script>hgFunc('join\_index   ','General join index       ');</script>  | (func;Real;Real)            | List                 | [link](builtin/join.md#join_index)   |&#10004;| ?        |
+| No.| Function                                                                | Type of Arg(s)\*            | Type of Value    | Details                           | Status | Parallel |
+| :-:| :---------------------------------------------------------------------- | :---------------------------| :--------------- | :-------------------------------: | :----- | :------: |
+| 1  | <script>hgFunc('enum          ','enum(key, value)         ');</script>  | (Basic;Basic),(List;List)   | Enum             | [link](builtin/advanced.md#enum)  |&#10004;| N        |
+| 2  | <script>hgFunc('dict          ','dict(keys, values)       ');</script>  | (Any;Any)                   | Dict             | [link](builtin/advanced.md#dict)  |&#10004;| ?        |
+| 3  | <script>hgFunc('table         ','table(col\_names, values)');</script>  | (List;Column)               | Table            | [link](builtin/advanced.md#table) |&#10004;| ?        |
+| 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable           | [link](builtin/advanced.md#ktable)|&#10004;| N        |
+| 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List             | [link](builtin/dbhelper.md#keys)  |&#10004;| ?(CHECKE)|
+| 6  | <script>hgFunc('values        ','Return value part        ');</script>  | Various                     | Various          | [link](builtin/dbhelper.md#values)|&#10004;| N        |
+| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table            | [link](builtin/dbhelper.md#meta)  |        |          |
+| 8  | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various          | [link](builtin/dbhelper.md#fetch) |&#10004;| Y        |
+| 9  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various          | [link](builtin/dbhelper.md#column_value)|&#10004;| N  |
+| 10 | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable    | [link](builtin/dbhelper.md#load_table)  |&#10004;| N  |
+| 11 | <script>hgFunc('datetime\_add(x,y,m) ','Date time add     ');</script>  | (Calendar;Int;Sym)          | Calendar         | [link](builtin/date.md#datetime-add) |&#10004;| Y     |
+| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Date time sub     ');</script>  | (Calendar;Int;Sym)          | Calendar         | [link](builtin/date.md#datetime-sub) |        |       |
+| 13 | <script>hgFunc('join\_index   ','General join index       ');</script>  | (func;Real;Real)            | List             | [link](builtin/join.md#join_index)   |&#10004;| ?     |
 
 ## 5. Misc
 

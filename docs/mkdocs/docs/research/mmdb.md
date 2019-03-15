@@ -1,8 +1,6 @@
-# Related papers
+# Main Memory Database Systems (MMDB)
 
 Refer to Faerber et al. **Main Memory Database System**.
-
-## List of papers
 
 | ID           | Authors             | Title (link to download)                                                               | Year | Read?   | Print?  |
 | :----------- | :------------------ | :--------------------------------------------------------------------------------------|:---- | :------ | :------ |
@@ -12,7 +10,7 @@ Refer to Faerber et al. **Main Memory Database System**.
 | [107](#p107) | Muller      et al.  | [Adaptive string dictionary compression in IMDB](http://bit.ly/2whBROe)                | 2014 |         |         |
 | [132](#p132) | Rodiger     et al.  | [Locality-sensitive operators for parallel MMDB clusters](http://bit.ly/2whEtLH)       | 2014 |         |         |
 | [159](#p159) | Zheng       et al.  | [Fast databases with fast durability and recovery through ...](http://bit.ly/2waqebi)  | 2014 |         |         |
-| [15](#p15)   | Balkesen    et al.  | [Main-Memory hash joins on multi-core CPUs](http://bit.ly/2v8sb3k)                     | 2013 |         |         |
+| [15](#p15)   | Balkesen    et al.  | [Main-Memory hash joins on multi-core CPUs](http://bit.ly/2v8sb3k)                     | 2013 | &#10004;|         |
 | [38](#p38)   | Diaconu     et al.  | [Hekaton: SQL server memory-optimized OLTP engine](http://bit.ly/2idZKjm)              | 2013 |         |         |
 | [74](#p74)   | Lahiri      et al.  | [Oracel TimesTen](http://bit.ly/2w9HFsD)                                               | 2013 |         |         |
 | [88](#p88)   | Levandoski  et al.  | [Identifying hot and cold data in MMDB](http://bit.ly/2v8ICfX)                         | 2013 |         |         |
@@ -23,7 +21,7 @@ Refer to Faerber et al. **Main Memory Database System**.
 | [9](#p9)     | Albutiu     et al.  | [Massively parallel sort-merge joins](http://bit.ly/2uMF5J3)                           | 2012 |         |         |
 | [105](#p105) | Muhe        et al.  | [The mainframe strikes back:...](http://bit.ly/2wYqoAf)                                | 2012 |         |         |
 | [109](#p109) | Neumann     et al.  | [Efficient compiling query plans for modern hardware](http://bit.ly/2vHb1gK)           | 2012 | &#10004;| &#10004;|
-| [22](#p22)   | Blanas      et al.  | [Design and evaluation of main memory hash join algo.](http://bit.ly/2w9C3ON)          | 2011 |         |         |
+| [22](#p22)   | Blanas      et al.  | [Design and evaluation of main memory hash join algo.](http://bit.ly/2w9C3ON)          | 2011 | &#10004;|         |
 | [72](#p72)   | Kemper      et al.  | [HyPer: A hybrid OLTP&OLAP main memory database system](http://bit.ly/2vQgssl)         | 2011 |         |         |
 | [124](#p124) | Plattner    et al.  | [A common database approach for OLTP and OLAP ...](http://bit.ly/2fSLEDj)              | 2009 |         |         |
 | [4](#p4)     | Abadi       et al.  | [Column-Stores vs. Row-Stores](http://bit.ly/2wjQKPf)                                  | 2008 |         |         |
@@ -49,6 +47,7 @@ Refer to Faerber et al. **Main Memory Database System**.
 | [56](#p56)   | Gray        et al.  | [The 5 minute rule for trading memory for disk ..](http://bit.ly/2wYc0I2)              | 1987 |         |         |
 | [36](#p36)   | DeWitt      et al.  | [GAMMA - A high performance dataflow database machine](http://bit.ly/2iclsnK)          | 1986 |         |         |
 
+<!--
 ## Content of papers
 
 ### <p id="p4">P4: Column-Stores vs. Row-Stores: How Different are they really?</p>
@@ -103,5 +102,5 @@ Features of VoltDB
 
 **Suggestions**: It is better if we could find formal technical papers about
 VoltDB for further readings.
-
+-->
 

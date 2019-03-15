@@ -1,9 +1,9 @@
+<!--
 <table class="top_table">
 <tr>
 <td width=76%>
     <div class="left">
         <todo>To-do</todo>
-        <!--<done>Completed</done>-->
     </div>
 </td>
 <td>
@@ -13,6 +13,7 @@
 </td>
 </tr>
 </table>
+-->
 
 ## 1. Scanner
 
@@ -20,19 +21,14 @@
 
 HorseIR supports ASCII charset, except for string encoding, i.e. strings and symbols.
 
-<todo>
-Support Unicode for strings and symbols.
-</todo>
+!!! note "To-do"
+    Support {++Unicode++} for strings and symbols.
 
 ### 1.2 Keywords
 
 ```no-highlight
 def   import   return   goto   check_type   check_cast
 ```
-
-<todo>
-Support goto and check_type
-</todo>
 
 ### 1.3 Built-in functions
 
@@ -54,7 +50,7 @@ See [built-in functions](functions.md).
 
 Both block comments and line comments are supported.
 
-```no-highlight
+```c
 // this is a line comment (style 1)
 ...
 /*
@@ -62,32 +58,34 @@ Both block comments and line comments are supported.
  */
 ```
 
-<todo> Support the style 2 </todo>
-<todo> Unicode is allowed </todo>
+!!! note "To-do"
+    - Support the style 2
+    - Unicode is allowed
 
 ### 1.5 Literals
 
 HorseIR has a rich set of literals for each type.
 
-- <blue>bit</blue>
+- {++bit++}
 - bool
 - char
 - string
-- integer: <blue>i8</blue>, i16, i32, and i64
+- integer: {++i8++}, i16, i32, and i64
 - real: f32 and f64
-- <blue>complex</blue>
+- {++complex++}
 - symbol
 - date & time
-- <blue>function</blue>
+- {++function++}
 - list
 - dictionary
 - table
-- <blue>keyed table</blue>
-- special: <blue>N/A</blue>, <blue>Inf</blue>, and <blue>NaN</blue>
+- {++keyed table++}
+- special: {++N/A++}, {++Inf++}, and {++NaN++}
 
 See [all types](types.md).
 
-<todo> Support the types highlighted. </todo>
+!!! note "To-do"
+    Support the types highlighted
 
 ### 1.6 Identifier
 
@@ -112,14 +110,22 @@ A valid HorseIR program has the following parts.
 A module is used to organize methods and variables in a specific namespace.  It
 is allowed to declare two methods with the same name in different namespace.
 
-<u>Conventions</u>
+#### Conventions
 
+| Name            | Definition                                             |
+|----------------:|:-------------------------------------------------------|
+| module          | zero or more methods and global variables              |
+| method          | zero or more parameters, 1 return, and local variables |
+| entry method    | the method <u>main</u> defines the entry of a program  |
+| global variable | declaration must be placed inside a module             |
+
+<!--
 <dl>
     <dt>module</dt>
     <dd>zero or more methods and global variables</dd>
     
     <dt>method</dt>
-    <dd>zero or more parameters and local variables</dd>
+    <dd>zero or more parameters, 1 return, and local variables</dd>
 
     <dt>entry method</dt>
     <dd>the method <u>main</u> defines the entry of a program</dt>
@@ -127,9 +133,10 @@ is allowed to declare two methods with the same name in different namespace.
     <dt>global variable</dt>
     <dd>declaration must be placed inside a module</dd>
 </dl>
+-->
 
 *Note:* If there is no module declaration top of a method, this method is
-included into a default module (i.e. the method name <u>default</u>).
+included into a default module (i.e. the method name ^^default^^).
 
 <!--
 - A **module** has zero or more methods and global variables
@@ -139,7 +146,7 @@ included into a default module (i.e. the method name <u>default</u>).
 - If there is no module declaration top of a method, this method is included into a default module (i.e. `default`)
 -->
 
-<u>Sample</u>
+^^Sample^^
 
 ```no-highlight
 def default{      // a module 'default'
@@ -163,11 +170,11 @@ def default{      // a module 'default'
     + Global variable name with local variable name
 
 
-#### Variable declaration
+#### Variables
 
-Each variable declaration in a program is associated with a type.  A variable
-declared inside a method is considered as a **local variable**.  If a variable
-is declared outside a method explicitly, it is a **global variables**.
+Each variable has a type.
+A variable declared inside a method is considered as a **local variable**.
+If a variable is declared outside a method explicitly, it is a **global variable**.
 
 ```no-highlight
 module default{             // a module 'default'
@@ -179,10 +186,12 @@ module default{             // a module 'default'
 }
 ```
 
-#### Method declaration
+#### Methods
 
-A method takes zero or more parameters, and it may or may not have a return
-type.  A pair of parenthesis defines the method body.
+^^Declaration^^
+
+A method takes zero or more parameters, and it may or may not have a return type.
+A pair of parenthesis defines the method body.
 
 ```no-highlight
 def foo(x:i64, y:i64) : i64{
@@ -191,7 +200,7 @@ def foo(x:i64, y:i64) : i64{
 }
 ```
 
-#### Method overloading
+^^Overloading^^
 
 Two methods may share a same method name, but with different number of
 arguments or different types.  An unknown type `?` covers all possible types,
@@ -210,10 +219,10 @@ def foo(x:i64, y:f32){ // allowed
 }
 ```
 
-#### Unknown number of parameters (Optional)
+^^Unknown number of parameters (Optional)^^
 
-A method may not decide the number of parameters at compile time.  [In
-C](https://stackoverflow.com/questions/10071186/function-with-unknown-number-of-parameters-in-c),
+A method may not decide the number of parameters at compile time.
+[In C](https://stackoverflow.com/questions/10071186/function-with-unknown-number-of-parameters-in-c),
 a type `va\_list` is used to handle unknown number of parameters.
 
 ```no-highlight
@@ -223,50 +232,61 @@ def foo(x:i64, ...){
 
 ### 2.3 Types
 
-See [types](types.md).
+See all available [types](types.md).
 
 #### Basic types
 
 HorseIR supports basic types as follows.
 
-```no-highlight
-boolean, short, int, long, float, double, complex numbers.
-```
-
-#### Real numbers
+^^Integers^^
 
 ```no-highlight
-bool, short, int, long, float, double, char (ascii value)
+Types  | (bool)   (i8)   (i16)  (i32)  (i64)
+Names  | boolean  small  short  int    long 
 ```
 
-#### Complex numbers
+^^Floating numbers^^
+
+```no-highlight
+Types  | (f32)  (f64) 
+Names  | float  double
+```
+
+^^Real numbers^^
+
+Real numbers are the combination of integers and floating numbers.
+
+^^Complex numbers^^
 
 A complex number consists of two parts: real numbers and imaginary unit.
+For example, `2 + 3i`, where `2` is the real number and `3i` is the imagninary unit.
 
-For example,
+!!! note "To-do"
+    Support complex numbers.
 
-```no-highlight
-2 + 3i
-```
+^^String types^^
 
-where `2` is the real number and `3i` is the imagninary unit.
-
-<todo> Not supported yet </todo>
-
-#### String
+Three different string types: char, string, and symbol, have different delimiters as follows.
 
 ```no-highlight
+'char'    // char
 "string"  // string
 `symbol   // symbol
 ```
 
-About Unicode
+It should be noted that a char type should not be treated as an integer (ASCII value) as it is in C.
 
-- Unicode is not supported currently, but we will add it later.
-- See [escape sequences in C](https://en.wikipedia.org/wiki/Escape_sequences_in_C)
-- Discussions about [wchar vs. icu](https://stackoverflow.com/questions/4507222/inconsistency-in-unicode-with-wchar-t-vs-icu-in-c)
+!!! note "To-do"
 
-#### List
+    About Unicode
+
+    - Unicode is not supported currently, but we will add it later.
+    - See [escape sequences in C](https://en.wikipedia.org/wiki/Escape_sequences_in_C)
+    - Discussions about [wchar vs. icu](https://stackoverflow.com/questions/4507222/inconsistency-in-unicode-with-wchar-t-vs-icu-in-c)
+
+#### Compund Types
+
+^^List^^
 
 A list is a collection of heterogeneous data.  It consists of cells and each
 cell has homogeneous data or another list.  Thus, it is possible to have
@@ -278,7 +298,7 @@ x1:i64 = 1:i64;
 x2:list<i64> = @list(x0,x1); // a list of integers
 ```
 
-#### Dictionary
+^^Dictionary^^
 
 A dictionary is a key to value pair.  Given a key, the dictionary is able to
 fetch its stored value directly.
@@ -287,7 +307,7 @@ fetch its stored value directly.
 dict<sym, list<i64>>  // a mapping from symbol to a list of integers
 ```
 
-#### Table
+^^Table^^
 
 A table is a list of columns.  A column can be represented by a special
 dictionary whose key is a symbol (i.e. a column name).
@@ -298,7 +318,7 @@ column_value:list<?> = @list(d0,d1,...,dn);
 t:table = @table(column_key, column_value);
 ```
 
-#### Keyed table
+^^Keyed table^^
 
 A keyed table consists of two normal tables (non-keyed).  The two tables must
 have the same number of rows.
@@ -309,35 +329,18 @@ kt:ktable = @ktable(t0,t1); // t0 and t1 are tables
 
 ### 2.4 Statements
 
-!!! note "Semicolon"
-    A semicolon must be found at the end of a statement.
-
-#### Empty statements
-
-Support.
-
-#### Expression statements
-
-Support.
-
-#### Assignment statements
-
-An assignment statement has an assignment `=`.
-
-#### Return statements
-
-A return statement only accepts zero or one expression.
-
-#### Goto statements
-
-A goto statement takes one valid label name.
-
-```no-highlight
-goto [label_name];
-```
+| Statement Types  | Description             |
+|:----------------:|:------------------------|
+| Empty      | i.e. `;` |
+| Expression | Statement without assignment, e.g. `check_cast`   |
+| Assignment | An assignment statement has an assignment `=`     |
+| Return     | A return statement only accepts zero or one expression |
+| Goto       | A goto statement takes one valid label name, i.e.  `goto [label_name];` |
 
 <u><b>No</b> break, continue, if, while or switch.</u>
 
+!!! note "Semicolon is mandotary"
+    A semicolon must be found at the end of a statement.
 
 ### 2.5 Expressions
 
@@ -364,40 +367,27 @@ rvalue, agree.
 
 ## 3. Database operations
 
-### Table
-
-#### Create an empty table
-
-A normal table
+Build a normal table
 
 ```no-highlight
-my_meta:list<sym> = {`employee `department; `str`sym}
+my_meta:list<sym> = @list(`employee`department:sym);
 my_table:table    = @table(my_meta);
 ```
 
-A keyed table
+Build a keyed table
 
 ```no-highlight
-my_meta_key:list<sym> = {`id; `i64}
-my_meta_val:list<sym> = {`employee `department; `str`sym}
+my_meta_key:list<sym> = @list(`id:i64);
+my_meta_val:list<sym> = @list(`employee`department:`sym);
 my_table_key:table    = @table(my_meta_key);
 my_table_val:table    = @table(my_meta_val);
     my_table:table    = @ktable(my_table_key, my_table_val);
 ```
 
-<todo> Not supported yet </todo>
+!!! note "To-do"
 
-#### Load data to a table
-
-The data to be loaded can be stored in a regular file format. A built-in
-function (e.g. load_csv) loads the data with given file specifications.
-
-```no-highlight
-r:i64 = @load_csv(table_name, file_name, file_format);
- ...    @load_txt  ...
-```
-
-<todo> Not supported yet </todo>
+    - A function for loading data from external files directly, e.g. `load_csv`
+    - A way for creating an empty table
 
 ## Appendix
 

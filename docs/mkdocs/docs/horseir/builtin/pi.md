@@ -1,4 +1,4 @@
-## pi
+# pi
 
 ### Description
 
@@ -7,7 +7,7 @@
 - return `pi * x`
 - `pi = acos(-1.0)` in C
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool    -> f32

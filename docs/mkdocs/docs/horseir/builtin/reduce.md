@@ -1,4 +1,4 @@
-## reduction
+# A Collection of Reduction Functions
 
 ### Overview
 

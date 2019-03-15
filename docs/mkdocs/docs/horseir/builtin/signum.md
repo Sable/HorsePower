@@ -1,4 +1,4 @@
-## signum
+# signum
 
 ### Description
 
@@ -8,7 +8,7 @@
 - else if `x > 0`, return `1`
 - else return 0
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> i16

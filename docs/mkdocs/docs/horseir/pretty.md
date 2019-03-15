@@ -1,4 +1,4 @@
-!!! tip "Pretty Printer for HorseIR Programs"
+!!! tip "Pretty printer for HorseIR programs"
     Pretty printer.
 
 ### Principles

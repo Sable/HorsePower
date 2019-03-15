@@ -1,12 +1,12 @@
-!!! danger "HorseIR Memory Management"
+!!! danger "HorseIR memory management"
     Ongoing ...
 
 ## Introduction
 
-Unlike a programming language, a database system considers more about resource
-allocation in the purpose of improving its throughput.  For an In-Memory
-Database system (IMDB), the memory management plays a crucial role in its
-holistic system design.
+Compared with a pure programming language, a database system considers more
+about resource allocation in the purpose of improving its throughput.  For an
+In-Memory Database system (IMDB), the memory management plays a crucial role in
+its holistic system design.
 
 In HorseIR, there is a rich set of data types (see [types](types.md)). Each
 type requires various bytes. From a programming language point of view, the

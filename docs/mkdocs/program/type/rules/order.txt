@@ -1,5 +1,6 @@
 Real,     B -> L
 Datetime, B -> L
+C,        B -> L
 Q,        B -> L
 S,        B -> L
 G,        B -> L

@@ -1,4 +1,4 @@
-## len
+# len
 
 ### Description
 
@@ -10,7 +10,7 @@ len(x)
   otherwise, return the length of x
 - `x` can be any type
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool   -> i64

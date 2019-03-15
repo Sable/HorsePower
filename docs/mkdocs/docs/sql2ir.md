@@ -1,59 +1,65 @@
+# SQL-to-HorseIR Translation
+
 !!! tip "Note (Updated Frequently!)"
     This page is maintained to keep track of the translation from SQL queries to HorseIR programs.
 
 ## TPC-H benchmarks
 
-Query profile (<u>Total 22</u>: **Pass** X; <blue>Testing</blue>: X; <red>Working</red>: X)
+Query profile data: [Database Schema](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md)
 
-| ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return | Comment                       |
-| :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: | :---------------------------: |
-| [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     | <blue>Pass</blue>             |
-| [2][q2]  | P,S,PS,N,R  | 13    | 8    | 1     | 0     | 4     | 9      |                               |
-| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      | <red>Working</red>            |
-| [4][q4]  | O,L         | 5     | 1    | 1     | 1     | 1     | 3      | <blue>Pass</blue>             |
-| [5][q5]  | C,O,L,S,N,R | 9     | 6    | 1     | 1     | 1     | 2      |                               |
-| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      | <blue>Pass</blue>             |
-| [7][q7]  | S,L,O,C,N   | 9     | 5    | 1     | 3     | 3     | 8      |                               |
-| [8][q8]  |P,S,L,O,C,N,R| 10    | 7    | 1     | 1     | 1     | 5      |                               |
-| [9][q9]  |P,S,L,PS,O,N | 7     | 6    | 1     | 2     | 2     | 6      | <red>Working</red>            |
-| [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |                               |
-| [11][q11]| PS,S,N      | 6     | 4    | 2     | 1(big)| 1     | 3      |                               |
-| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      | <blue>Pass</blue>             |
-| [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      | <blue>Pass</blue>             |
-| [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      | <blue>Pass</blue>             |
-| [15][q15]| S,L         |       |      |       |       |       |        | (View)                        |
-| [16][q16]| PS,P,S      | 6     | 2    | 1     | 3     | 4     | 5      | <blue>Pass</blue>             |
-| [17][q17]| L,P         | 4     | 2    | 2     | 0     | 0     | 2      | <red>Working</red>            |
-| [18][q18]| C,O,L       | 3     | 2    | 1     | 5     | 2     | 7      | <red>Working</red>            |
-| [19][q19]| L,P         | 21    | 3    | 1     | 0     | 0     | 1      | <blue>Pass<blue>              |
-| [20][q20]| S,N,PS,P,L  | 9     | 3    | 1     | 0     | 1     | 5      |                               |
-| [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |                               |
-| [22][q22]| C,O         | 6     | 2    | 3     | 1     | 1     | 7      | <blue>Pass<blue>              |
+<!-- (<u>Total 22</u>: **Pass** X; <blue>Testing</blue>: X; <red>Working</red>: X) -->
+
+| ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return |
+| :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: |
+| [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     |
+| [2][q2]  | P,S,PS,N,R  | 13    | 8    | 1     | 0     | 4     | 9      |
+| [3][q3]  | C,O,L       | 5     | 2    | 1     | 3     | 2     | 4      |
+| [4][q4]  | O,L         | 5     | 1    | 1     | 1     | 1     | 3      |
+| [5][q5]  | C,O,L,S,N,R | 9     | 5    | 1     | 1     | 1     | 2      |
+| [6][q6]  | L           | 4     | 0    | 1     | 0     | 0     | 1      |
+| [7][q7]  | S,L,O,C,N   | 9     | 5    | 1     | 3     | 3     | 8      |
+| [8][q8]  |P,S,L,O,C,N,R| 10    | 7    | 1     | 1     | 1     | 5      |
+| [9][q9]  |P,S,L,PS,O,N | 7     | 5    | 1     | 2     | 2     | 6      |
+| [10][q10]| C,O,L,N     | 6     | 3    | 1     | 7     | 1     | 8      |
+| [11][q11]| PS,S,N      | 6     | 5    | 2     | 1(big)| 1     | 3      |
+| [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      |
+| [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      |
+| [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      |
+| [15][q15]| S,L         |       | 2    |       |       |       |        |
+| [16][q16]| PS,P,S      | 6     | 2    | 1     | 3     | 4     | 5      |
+| [17][q17]| L,P         | 4     | 3    | 2     | 0     | 0     | 2      |
+| [18][q18]| C,O,L       | 3     | 3    | 1     | 5     | 2     | 7      |
+| [19][q19]| L,P         | 21    | 1    | 1     | 0     | 0     | 1      |
+| [20][q20]| S,N,PS,P,L  | 9     | 4    | 1     | 0     | 1     | 5      |
+| [21][q21]| S,L,O,N     | 13    | 5    | 1     | 1     | 2     | 4      |
+| [22][q22]| C,O         | 6     | 2    | 3     | 1     | 1     | 7      |
 
 
 \* List of tables ([On GitHub](https://github.com/Sable/HorsePower/blob/master/docs/tpch/create-table.md))
 
-```no-highlight
-| (N)  Nation   | (R) Region   | (P) Part   | (S) Supplier |
-| (PS) PartSupp | (C) Customer | (O) Orders | (L) Lineitem |
-```
+| Short | Long      | Short | Long      |
+| :---: | :-------: | :---: | :-------: |
+| **N** | Nation    | **R** | Region    |
+| **P** | Part      | **S** | Supplier  |
+| **PS**| PartSupp  | **C** | Customer  |
+| **O** | Orders    | **L** | Lineitem  |
+
 
 Basic classification of queries
 
 - 0 join : 6,1
-- 1 join : 4,12,13,14
-- 2 joins: 3,16,17,18,22
-- 3 joins: 10,19,20
-- 4 joins: 11
-- 5 joins: 7,21
-- Others : 2,5,8,9 (\>5)
-- Pending: 15
+- 1 join : 4,12,13,14,19
+- 2 joins: 3,15,16,22
+- 3 joins: 10,17,18
+- 4 joins: 20
+- 5 joins: 5,7,9,11,21
+- Others : 2,8 (\>5)
 
 ## Translation
 
-### Automatic Translation (Under Development)
+### Automatic Translation
 
-- To be updated soon.
+- See [the grammar of the translator](research/hyper.md#horseir-translator)
 
 ### Manual Translation (Expired)
 
@@ -75,6 +81,11 @@ module default{
 ```
 
 ## Performance issues
+
+TO-DO List
+
+- Short floating numbers to integers, e.g. DECIMAL(15,2) to INT
+    + `DECIMAL(6,2)`: 6 digits with 2 decimal places, range from 9999.99 to -9999.99 ([mysql decimal](http://www.mysqltutorial.org/mysql-decimal/))
 
 ### Q1
 
@@ -106,9 +117,6 @@ Loop fusion
 
 - Place 1: line [6, 17] return t15 (good)
 - Place 2: line [18,20] return t18 (optional)
-
-
-## Formal methods
 
 
 [q1]: https://github.com/Sable/HorsePower/blob/master/docs/tpch/q1.md

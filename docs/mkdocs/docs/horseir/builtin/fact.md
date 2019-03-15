@@ -1,4 +1,4 @@
-## fact
+# fact
 
 ### Description
 
@@ -6,8 +6,9 @@
 
 - Factorial
 
+### Type Rules
 
-### Type rules
+See [type alias](../../functions/#1-type-alias)
 
 ```no-highlight
 Int -> i64

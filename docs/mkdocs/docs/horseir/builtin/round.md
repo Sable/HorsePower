@@ -1,4 +1,4 @@
-## round
+# round
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - round the value of x
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> bool

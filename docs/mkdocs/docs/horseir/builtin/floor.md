@@ -1,4 +1,4 @@
-## floor
+# floor
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - floor the value of x
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> bool

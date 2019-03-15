@@ -1,11 +1,13 @@
+# abs
+
 !!! Note "Math Support Available"
     This website is going to provide examples in math, such as \( y = \sqrt{x^2-1} \).  Please come back to check later.
 
-## abs
+### Description
 
 | Invocation      |  # of parameters | # of returns | isElementwise | Note                 |
 |:---------------:|:----------------:|:------------:|:-------------:|:--------------------:|
-| z:? = @abs(x)   | 1                | 1            | Yes           | Return absolute value|
+| @abs(x)         | 1                | 1            | Yes           | Return absolute value|
 
 
 ### Type Rules

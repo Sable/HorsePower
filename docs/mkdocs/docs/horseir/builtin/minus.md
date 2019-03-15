@@ -1,4 +1,4 @@
-## minus
+# minus
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - `x - y`
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 Real  ,Real   -> MaxType

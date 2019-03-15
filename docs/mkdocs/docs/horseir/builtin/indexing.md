@@ -1,3 +1,5 @@
+# A Collection of Array Indexing Functions
+
 !!! note "Array Indexing"
     Include **index** and **index_a**
 
@@ -16,24 +18,23 @@ index(x,k)
 Basic types
 
 ```no-highlight
-bool   , (Int|list<Int>) -> (bool   |list<bool   >)
-i8     , (Int|list<Int>) -> (i8     |list<i8     >)
-i16    , (Int|list<Int>) -> (i16    |list<i16    >)
-i32    , (Int|list<Int>) -> (i32    |list<i32    >)
-i64    , (Int|list<Int>) -> (i64    |list<i64    >)
-f32    , (Int|list<Int>) -> (f32    |list<f32    >)
-f64    , (Int|list<Int>) -> (f64    |list<f64    >)
-complex, (Int|list<Int>) -> (complex|list<complex>)
-sym    , (Int|list<Int>) -> (sym    |list<sym    >)
-str    , (Int|list<Int>) -> (str    |list<str    >)
-month  , (Int|list<Int>) -> (month  |list<month  >)
-date   , (Int|list<Int>) -> (date   |list<date   >)
-dt     , (Int|list<Int>) -> (dt     |list<dt     >)
-minute , (Int|list<Int>) -> (minute |list<minute >)
-second , (Int|list<Int>) -> (second |list<second >)
-time   , (Int|list<Int>) -> (time   |list<time   >)
-list<?>, Int             -> list<?>
-_      , _               -> domain error
+bool   , Int -> bool   
+i8     , Int -> i8     
+i16    , Int -> i16    
+i32    , Int -> i32    
+i64    , Int -> i64    
+f32    , Int -> f32    
+f64    , Int -> f64    
+complex, Int -> complex
+sym    , Int -> sym    
+str    , Int -> str    
+month  , Int -> month  
+date   , Int -> date   
+dt     , Int -> dt     
+minute , Int -> minute 
+second , Int -> second 
+time   , Int -> time   
+_      , _   -> domain error
 ```
 
 

@@ -1,4 +1,4 @@
-## neg
+# neg
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - negative value of x
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool -> i16

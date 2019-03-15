@@ -1,4 +1,4 @@
-## group
+# group
 
 ### Description
 
@@ -7,7 +7,7 @@
 - group items/pairs in x
 - return a dict: unique key indices and list key indices
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool    -> dict<i64, list<i64>>

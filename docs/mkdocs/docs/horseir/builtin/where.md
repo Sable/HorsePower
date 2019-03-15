@@ -1,4 +1,4 @@
-## where
+# where
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - return the indices of elements which point to the 'true' values in x
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 bool       -> i64

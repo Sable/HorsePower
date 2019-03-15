@@ -1,4 +1,4 @@
-## range
+# range
 
 ### Description
 
@@ -6,7 +6,7 @@
 
 - from `0 to x-1`, inclusive
 
-### Type rules
+### Type Rules
 
 ```no-highlight
 Int -> i64
