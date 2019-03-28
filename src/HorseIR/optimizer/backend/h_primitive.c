@@ -1613,13 +1613,13 @@ L pfnAppend(V z, V x, V y){
 #define LIKEMATCH(src,slen,re,matchData) \
     pcre2_jit_match(re,\
        (PCRE2_SPTR)src,\
-        slen,0,PCRE2_ANCHORED,matchData,NULL\
+        slen,0,PCRE2_ANCHORED|PCRE2_NO_UTF_CHECK,matchData,NULL\
     )<0?0:1
 #define DOLIKE(n, x, ...){ L seg=(n)/H_CORE; \
     _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
     { \
         pcre2_match_context *mcontext = pcre2_match_context_create(NULL); \
-        pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(128*1024, 512*1024, NULL);\
+        pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(1024*1024, 4096*1024, NULL);\
         pcre2_jit_stack_assign(mcontext, NULL, jit_stack);\
         pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);\
         L tid = omp_get_thread_num(); \
@@ -1651,10 +1651,34 @@ L pfnLike(V z, V x, V y){
             pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);
             if(re==NULL) R E_NULL_VALUE;
             initV(z,H_B,lenZ);
+            if(xp==H_S){
+                //L *temp = (L*)malloc(sizeof(L)*xn);
+                //debug_tic;
+                //DOI(vn(x), temp[i]=strlen(vS(x,i))) // 50ms
+                //P("size temp[2] = %lld\n", temp[2]);
+                //DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);})
+                EP("need to comment out the following code\n");
+                L n = xn;
+                {
+                    pcre2_match_context *mcontext = pcre2_match_context_create(NULL); \
+                    pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(128*1024, 512*1024, NULL);\
+                    pcre2_jit_stack_assign(mcontext, NULL, jit_stack);\
+                    pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);\
+                    debug_tic;
+                    for(L i=0;i<n;i++) {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}; \
+                    debug_toc;
+                    pcre2_match_data_free(match); \
+                    pcre2_match_context_free(mcontext); \
+                    pcre2_jit_stack_free(jit_stack);
+                }
+                //debug_toc;
+            }
+            else {
             switch(vp(x)){
                 caseC vB(z,0)=getLikeMatch(sC(x),re,match); break;
                 caseQ DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),re,match);}) break;
                 caseS DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);}) break;
+            }
             }
             //L jit_size = pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, NULL);
             //P("pfnLike time (ms): %g ms , jit size = %lld\n", calcInterval(tv0, tv1), jit_size); //getchar();
@@ -2160,7 +2184,7 @@ L pfnKTable(V z, V x, V y){
 
 
 #define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
-L pfnMember(V z, V x, V y){
+L pfnMember(V z, V y, V x){ /* <--- (y,x) NOT (x,y)  */
     //P("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
     //printV(x); printV(y); getchar();
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){

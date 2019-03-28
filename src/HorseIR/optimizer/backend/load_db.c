@@ -4,7 +4,7 @@ L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
 extern B isReadBin;
 
-#define H_INT H_I
+#define H_INT H_L
 #define H_FLT H_E
 
 static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){

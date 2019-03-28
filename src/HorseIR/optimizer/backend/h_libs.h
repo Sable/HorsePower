@@ -5,6 +5,70 @@
 extern "C" {
 #endif
 
+typedef struct hash_index_node {
+    I ival;
+    struct hash_index_node *inext;
+}HI0, *HI;
+
+/* default: 16 hash_node(s) */
+typedef struct hash_node {
+    L  h_hash;  /* hash value */
+    I  h_index;
+    HI h_index_other;
+    L  h_num;   /* number of duplicated items */
+    L  h_other; /* if !h_num, then h_other != NULL */
+    union { /* no boolean or char */
+        J h_j;
+        H h_h;
+        I h_i;
+        L h_l;
+        F h_f;
+        E h_e;
+        X h_x;
+        S h_s;
+    };
+    struct hash_node *next;
+}HN0,*HN;
+
+typedef struct hash_bucket {
+    L size, cur;
+    HN node;
+}HB0,*HB;
+
+/* backup version */
+// typedef struct hash_node {
+//     I h_index;
+//     HI h_index_other;
+//     union {
+//         /* no boolean or char */
+//         J h_j;
+//         H h_h;
+//         I h_i;
+//         L h_l;
+//         F h_f;
+//         E h_e;
+//         X h_x;
+//         S h_s;
+//     };
+//     struct hash_node *next;
+// }HN0,*HN;
+
+#define hJ(x) x->h_j
+#define hH(x) x->h_h
+#define hI(x) x->h_i
+#define hL(x) x->h_l
+#define hF(x) x->h_f
+#define hE(x) x->h_e
+#define hX(x) x->h_x
+#define hS(x) x->h_s
+
+#define hD(x) x->h_index
+#define hT(x) x->h_index_other
+#define hN(x) x->next
+#define hV(x,k) ((x)+(k))
+
+#define bV(x,k) hV(x,k)
+
 L lib_index_of_B(L* targ, B* src, L sLen, B* val, L vLen);
 L lib_index_of_J(L* targ, J* src, L sLen, J* val, L vLen);
 L lib_index_of_H(L* targ, H* src, L sLen, H* val, L vLen);
@@ -66,6 +130,40 @@ L lib_member_S(B* targ, S* src, L sLen, S* val, L vLen);
 L lib_join_index_hash     (V z0, V z1, V x, V y, B isEq);
 L lib_join_index_compare  (V z0, V z1, V x, V y, I op  );
 L lib_join_index_hash_many(V z0, V z1, V x, V y, V f   );
+
+HN createHashWithV(L n, V *x, L *hashLen);    /* single partition */
+HN findValueFromHash(HN hashT, V *src, L hashLen, L n, ...);
+
+typedef struct TupleHash{
+    HN *hashTable;
+    L  *hashSize;
+    L  numTable;
+}THash;
+
+//THash createHashWithV2(L n, V *x, L *hashLen);  /* multiple partitions */
+//HN    findValueFromHash2(HN* hashT, V *src, L *hashSize, L n, ...);
+
+typedef struct TupleBucket{
+    HB *hashBucket;
+    L  *hashSize;
+    L  numBucket;
+}TBucket;
+
+TBucket createHashWithV2(L n, V *x, L *hashLen);  /* multiple partitions */
+HN      findValueFromHash2(HB* hashT, V *src, L *hashSize, L n, ...);
+
+//extern L debug_hash_total1;
+//extern L debug_hash_total2;
+extern L debug_hash_find1;
+extern L debug_hash_find2;
+extern L debug_hash_max1;
+extern L debug_hash_max2;
+extern L debug_hash_count1;
+extern L debug_hash_count2;
+extern L debug_hash_need_search1;
+extern L debug_hash_need_search2;
+extern L debug_hash_op_total1;
+extern L debug_hash_op_total2;
 
 #ifdef	__cplusplus
 }

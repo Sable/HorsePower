@@ -66,18 +66,23 @@ void error(const char* s);
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 
+#define isSerial() (1==H_CORE)
+#define isMulti()  (1!=H_CORE)
+
 /* For debugging */
 #define printBanner(s) P("/*==== "s" ====*/\n")
-
-#include "backend/common.h"
+#define debug_tic struct timeval tv0, tv1; gettimeofday(&tv0, NULL)
+#define debug_toc gettimeofday(&tv1, NULL); showTime("debug_toc")
 
 #include "frontend/tree.h"
 #include "frontend/pretty.h"
 #include "frontend/weed.h"
+#include "backend/common.h"
 #include "analysis/common.h"
-#include "analysis/udchain.h"
-#include "analysis/typeshape.h"
+//#include "analysis/udchain.h"
+//#include "analysis/typeshape.h"
 #include "translator/common.h"
+#include "util/common.h"
 
 void initGlobal   ();
 void initTrie     ();
@@ -90,31 +95,6 @@ void insertString(char *str, Chain *chain, InfoNode *in);
 Chain    *getChain(char *str);
 InfoNode *getInfoNode(char *str);
 
-void buildUDChain(Prog *root);
-void analyzeSR(Prog *root);
-void analyzeLF();
-void analyzeCPF();
-void analyzePeephole();
-void printTypeShape(); /*util/trie.c*/
-bool isElementwise(char *funcName);
-E calcInterval(struct timeval t0, struct timeval t1); /* util/mics.c*/
-
-/* util/nametable.c */
-void saveToNameTable(char *str, V val);
-V getValueFromNameTable(char *str);
-/* util/connect.c */
-int runModeServer();
-int runModeClient();
-/* util/info.c */
-const char *getTypeName(L x);
-const char *getpTypeName(pType x);
-const char *getKindName(Kind x);
-const char *getpFuncName(pFunc x);
-int   getpTypeSize(pType x);
-void  getInfoVar2(V x, S name);
-#define getInfoVar(x) getInfoVar2(x, #x)
-#define showTime(s) P("[%-10s]> The elapsed time (ms): %g\n",s,calcInterval(tv0, tv1))
-
-void dotProg(Prog *root); /* util/dot.c */
+bool isInReductionGroup(pFunc x);
 
 #endif

@@ -1,3 +1,7 @@
+/*
+ * Fusion patterns
+ */
+
 #include "../global.h"
 
 extern ChainList *chain_list;
@@ -668,7 +672,7 @@ static void analyzeChainList(ChainList *list){
 }
 
 /* entry */
-void analyzePeephole(){
+void analyzeFusePattern(){
     printBanner("FP: Loop fusion with patterns");
     //printChainList();
     analyzeChainList(chain_list);

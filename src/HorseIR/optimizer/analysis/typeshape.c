@@ -84,14 +84,19 @@ void printShapeNode(ShapeNode *sn){
             case  vectorH: P("shape(vector,"); break;
             case    listH: P("shape(list,"); break;
             case   tableH: P("shape(table,"); break;
-            default: error("shape type not supported yet.");
+            default: EP("shape type not supported yet: %d\n",sn->type); break;
         }
         switch(sn->type){
             case unknownH: P("%d)",sn->size); break;
             case  vectorH:
             case    listH:
-            case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);
-                           else P("%d)",sn->size); break;
+            case   tableH: if(isSNConst(sn)) P("%d",sn->size);
+                           else if(isSNId(sn)) P("id:%d",sn->sizeId);
+                           else if(isSNScan(sn)) P("scan:%d",sn->sizeScan);
+                           else EP("kind not supported: %d\n", sn->kind);
+                           P(")"); break;
+            //case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);
+            //               else P("%d)",sn->size); break;
         }
     }
 }
@@ -127,7 +132,7 @@ InfoNode *propagateType(char *funcName, Node *param_list){
         InfoNode *newNode;
         if(valence == 2){
             DyaFunc func = (DyaFunc)funcRtn;
-            newNode = func(getNode(in_list,0), getNode(in_list, 1));
+            newNode = func(getNode(in_list,0), getNode(in_list,1));
             if(newNode == NULL){
                 printInfoNode(getNode(in_list, 0));
                 printInfoNode(getNode(in_list, 1));

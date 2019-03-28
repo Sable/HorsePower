@@ -257,7 +257,7 @@ void prettyList(List *list, char sep){
 void printType(pType p){
     buff[0]=0;
     printTypeBuff(buff, p);
-    P("Type: %s",buff);
+    P("type(%s)",buff);
 }
 
 void printNodeKind(Node *n){

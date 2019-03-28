@@ -17,6 +17,7 @@ void printTrie(TNode *rt){
         }
     }
 }
+
 void printTireAllType(TNode *rt, char *name, int dep){
     if(rt) {
         if(rt->in){

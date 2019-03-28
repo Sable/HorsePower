@@ -1,3 +1,7 @@
+/*
+ * Fusion elementwise functions
+ */
+
 #include "../global.h"
 
 /* signatures */
@@ -11,15 +15,7 @@ I FuseTotal = 0;
 
 static void genFusedFunc(char *str, char *targ);
 
-#define chainNode(c) (c->cur)
-#define isSimpleStmt(n) instanceOf(n,simpleStmtK)
-#define isCastStmt(n) instanceOf(n,castStmtK)
-#define isAssignment(n) (isSimpleStmt(n)||isCastStmt(n))
-#define isReturnStmt(n) instanceOf(n,returnK)
-#define setVisited(c, v) c->isVisited=v
-#define isVisited(c) (c->isVisited)
 #define resetBuff(b) if(b[0]!=0) b+=strlen(b) /* copied from pretty.c */
-#define indent "    "
 
 static char *list_name[256];
 static int list_total = 0;
@@ -30,7 +26,7 @@ bool isElementwise(char *funcName){
     return ElementFuncMap[p];
 }
 
-static int findParamName(char *pName, Chain *chain){
+int findParamName(char *pName, Chain *chain){
     NameList *ptr = chain->uses;
     int c = 0;
     while(ptr->next){
@@ -41,13 +37,13 @@ static int findParamName(char *pName, Chain *chain){
     return -1;
 }
 
-static void fuseNameClean(){
+void fuseNameClean(){
     DOI(list_total, free(list_name[i]))
     list_total = 0;
 }
 
 static void fuseNamePrint(){
-    DOI(list_total, P(indent "V x%lld = x[%lld]; // %s\n",i,i,list_name[i]))
+    DOI(list_total, P(indentStr "V x%lld = x[%lld]; // %s\n",i,i,list_name[i]))
 }
 
 static S fuseNameString(S targ, S invc){
@@ -58,12 +54,10 @@ static S fuseNameString(S targ, S invc){
     return strdup(tmp);
 }
 
-#define isLength1(sn) (sn->type==vectorH && !(sn->isId) && sn->size==1)
-
 static L fuseLength(){
     DOI(list_total, {\
             ShapeNode *sn=getInfoNode(list_name[i])->shape;\
-            if(!isLength1(sn))R i;})
+            if(!isShapeScalar(sn))R i;})
     R -1;
 }
 
@@ -89,7 +83,7 @@ static void fuseNameByStr(char *buff, char *name, char *str){
     ShapeNode *sn = in->shape;
     resetBuff(buff);
     // check if 1-length vector
-    bool is1 = (sn->type == vectorH) && !(sn->isId) && (sn->size == 1);
+    bool is1 = isShapeScalar(sn);
     switch(k){
         case  boolT: SP(buff, is1?"vb(%s)":"vB(%s,i)", str); break;
         case   i32T: SP(buff, is1?"vi(%s)":"vI(%s,i)", str); break;
@@ -104,19 +98,19 @@ static void fuseNameByStr(char *buff, char *name, char *str){
     }
 }
 
-static void fuseName(char *buff, int nameID){
+void fuseName(char *buff, int nameID){
     char str[20]; SP(str, "x%d",nameID);
     fuseNameByStr(buff, list_name[nameID], str);
 }
 
-static int findNameID(char *name){
+int findNameID(char *name){
     DOI(list_total, if(!strcmp(list_name[i], name)) return i)
     /* add into list */
     list_name[list_total] = strdup(name);
     return list_total++;
 }
 
-static char *fuseNameTarg(char *buff, Chain *chain){
+char *fuseNameTarg(char *buff, Chain *chain){
     /* must be assignment stmt */
     Node *name = chainNode(chain)->val.simpleStmt.name;
     Node *expr = chainNode(chain)->val.simpleStmt.expr;
@@ -163,7 +157,7 @@ static bool findFusionSub(Chain *chain, char *buff){
                         fuseName(buff, findNameID(pName));
                     }
                 }
-                else error("<0 index found\n");
+                else EP("<0 index found\n");
             }
             else {
                 prettyNodeBuff2C(buff,p);
@@ -209,7 +203,7 @@ static void findFusion(Chain *chain){
                 if(c>=0){
                     findFusion(chain->chain_defs[c]);
                 }
-                else error("<0 index found\n");
+                else EP("<0 index found\n");
             }
             params=params->next;
         }
@@ -228,17 +222,17 @@ static void genFusedFunc_C(char *str, char *targ){
     P("/* num_func = %d, targ = %s */\n", num_func,targ);
     SP(tmp,"q%d_loopfusion_%d",qid,FuseTotal);
     P("L %s(V z, V *x){\n",tmp);
-    P(indent "// z -> %s\n",targ);
+    P(indentStr "// z -> %s\n",targ);
     fuseNamePrint();
     L size_index = fuseLength();
     getNameTypeAlias(type_alias, targ);
     if(size_index >= 0){
-        P(indent "initV(z,%s,vn(x%lld));\n", type_alias, size_index);
-        P(indent "DOP(vn(x%lld), %s) R 0;\n", size_index, str);
+        P(indentStr "initV(z,%s,vn(x%lld));\n", type_alias, size_index);
+        P(indentStr "DOP(vn(x%lld), %s) R 0;\n", size_index, str);
     }
     else{
-        P(indent "initV(z,%s,1);\n", type_alias);
-        P(indent "L i=0; %s; R 0;\n", str);
+        P(indentStr "initV(z,%s,1);\n", type_alias);
+        P(indentStr "L i=0; %s; R 0;\n", str);
     }
     P("}\n");
     FuseList[FuseTotal].invc = fuseNameString(targ, tmp); 
@@ -270,7 +264,7 @@ static void analyzeChain(Chain *chain){
 }
 
 /* entry */
-void analyzeLF(){
+void analyzeFusionElem(){
     printBanner("FE: Loop fusion with elementwise functions");
     analyzeChain(exitChain);
 }

@@ -6,7 +6,8 @@
  * 2   G = 2147483648
  * 2.5 G = 2684354560
  */
-const L INIT_HEAP_SIZE  = 2147483648; //64MB, 64*1024*1024
+const L INIT_HEAP_SIZE = 2147483648; //64MB, 64*1024*1024
+const L INIT_HASH_SIZE = 268435456;  //256MB
 
 typedef struct buddy_node { /* size 48 */
     L size, level; G value;
@@ -30,6 +31,7 @@ G gHeap = NULL; L gHeapCur;  // naive: global heap and its cursor
 BN gRoot = NULL;             // buddy: global heap
 L numBlocks = 0;
 
+G hHeap = NULL; L hHeapCur;  // hash heap
 
 /* methods */
 
@@ -42,6 +44,7 @@ void initMemory(){
     #ifdef USE_BUDDY
         useBuddySystem();
     #endif
+    initHashHeap();
 }
 
 void useNaiveSystem(){
@@ -73,9 +76,11 @@ G allocHeap(L size){
 /* Naive system */
 
 G allocMem(G heap, L *cur, L top, L typ, L len){
+#define CHUNK_MASK 0xF
+#define CHUNK_SIZE 4
     L size = getTypeSize(typ, len);
-    if(size % 16 !=0) {
-        size = (size/16+1)*16;
+    if(size % CHUNK_MASK !=0) {
+        size = ((size>>CHUNK_SIZE)+1)<<CHUNK_SIZE;
     }
     G g = NULL;
     if((*cur)+size < top){
@@ -88,8 +93,7 @@ G allocMem(G heap, L *cur, L top, L typ, L len){
         *cur = (*cur) + size;
     }
     else {
-        P("Heap full!!\n");
-        exit(99);
+        EP("Heap full!!\n");
     }
     R g;
 }
@@ -393,4 +397,32 @@ void printHeapInfo(){
     #endif
 }
 
+
+/* Heap allocation for heap */
+
+void initHashHeap(){
+    hHeap = (G)malloc(INIT_HASH_SIZE);
+    hHeapCur = 0;
+    if(H_DEBUG)
+        P("-> [Info hash heap] Successfully initialized\n");
+}
+
+G allocHashMem(L size){
+    if((size&0x3)!=0){
+        size = ((size>>4)+1)<<4;
+    }
+    if(hHeapCur+size < INIT_HASH_SIZE){
+        G g = hHeap + hHeapCur;
+        hHeapCur += size;
+        R g;
+    }
+    else {
+        EP("Hash heap full!!\n");
+    }
+}
+
+void printHashInfo(){
+    P("-> [Info hash heap] usage = %.2lf%% (%lld/%lld)\n", \
+        hHeapCur*100.0/INIT_HASH_SIZE,hHeapCur,INIT_HASH_SIZE);
+}
 

@@ -1,49 +1,15 @@
 #include "../global.h"
 
+/* declared in h_lib.h: HI, HN */
+
 const I HASH_A = 1223106847;
 const I HASH_M = (1LL << 32)-5;
-
-typedef struct hash_index_node {
-    I ival;
-    struct hash_index_node *inext;
-}HI0, *HI;
-
-typedef struct hash_node {
-    I h_index;
-    HI h_index_other;
-    union {
-        /* no boolean or char */
-        J h_j;
-        H h_h;
-        I h_i;
-        L h_l;
-        F h_f;
-        E h_e;
-        X h_x;
-        S h_s;
-    };
-    struct hash_node *next;
-}HN0,*HN;
-
-#define hJ(x) x->h_j
-#define hH(x) x->h_h
-#define hI(x) x->h_i
-#define hL(x) x->h_l
-#define hF(x) x->h_f
-#define hE(x) x->h_e
-#define hX(x) x->h_x
-#define hS(x) x->h_s
-
-#define hD(x) x->h_index
-#define hT(x) x->h_index_other
-#define hN(x) x->next
-#define hV(x,k) ((x)+(k))
 
 #define hash_B /* empty */
 #define hash_J hash_i32
 #define hash_H hash_i32
 #define hash_I hash_i32
-#define hash_L hash_i64
+#define hash_L hash_murmur3_i64 //hash_i64
 #define hash_F hash_f32
 #define hash_E hash_f64
 #define hash_X hash_clex
@@ -132,7 +98,8 @@ static UI hash_i32(I a){
     return a;
 }
 
-static UI hash_i64(L a){
+/*
+static UL hash_i64(L a){
     a = (~a) + (a << 21); // key = (key << 21) - key - 1;
     a = a ^ (a >> 24);
     a = (a + (a << 3)) + (a << 8); // key * 265
@@ -141,7 +108,30 @@ static UI hash_i64(L a){
     a = a ^ (a >> 28);
     a = a + (a << 31);
     return a;
+}*/
+
+#define ROTL32(x, r) ((x<<r)|(x>>(32-r)))
+static UI hash_murmur3_i32(I a){
+    UI h1 = 16807;
+    UI c1 = 0xcc9e2d51;
+    UI c2 = 0x1b873593;
+    a *= c1;
+    a = ROTL32(a, 15);
+    a *= c2;
+    h1 ^= a;
+    h1 = ROTL32(h1,13);
+    h1 = h1*5+0xe6546b64;
+    R h1;
 }
+
+static UL hash_murmur3_i64(L a){
+    I a_low = a&0xFFFFFFFF;
+    if(a_low != a){ EP("need to hash a_high as well\n"); }
+    R hash_murmur3_i32(a_low);
+}
+
+
+
 
 UI hash_djb2(S str){
     UI h = 5381; I c;
@@ -183,7 +173,7 @@ UI hash_clex(X n){
 static UI getHashTableSize(L x){
     if(x < 16) R 16;
     L n=16; while(n>0 && n<=x){n<<=1;}
-    R n;
+    R n<<1;
 }
 
 //UI getHashTableSize(L x){
@@ -216,9 +206,15 @@ static UI getHashValue(void *val, L valI, L typ){
 }
 
 L createHash(HN *hashT, L htSize){
-    *hashT = (HN) malloc(sizeof(HN0) * htSize);
+    *hashT = (HN) allocHashMem(sizeof(HN0) * htSize);
     memset(*hashT, 0, sizeof(HN0)*htSize);
     R 0;
+}
+
+HB createHashBucket(L htSize){
+    HB hashT = HASH_AL(HB0, htSize);
+    memset(hashT, 0, sizeof(HN0)*htSize);
+    R hashT;
 }
 
 /* free a hash table */
@@ -227,13 +223,22 @@ L freeHash(HN hashT){
 }
 
 static HN newHashNode(){
-    HN x = (HN) malloc(sizeof(HN0));
+    //HN x = (HN) allocHashMem(sizeof(HN0));
+    HN x = HASH_AL1(HN0);
+    init_H(x);
+    R x;
+}
+
+static HN newHashNodeN(L n){
+    HN x = HASH_AL(HN0, n);
     init_H(x);
     R x;
 }
 
 static HI newIndexNode(){
-    HI x = (HI) malloc(sizeof(HI0)); init_I(x);
+    //HI x = (HI) allocHashMem(sizeof(HI0));
+    HI x = HASH_AL1(HI0);
+    init_I(x);
     R x;
 }
 
@@ -251,7 +256,7 @@ L insert_index(HN t, L td){
     R td;
 }
 
-// isU: isUnique
+/* isU: isUnique */
 static L insert_hash(HN ht, L htMask, void* src, L srcI, L typ, B isU){
     L hashKey = getHashValue(src,srcI,typ) & htMask;
     HN t = hV(ht,hashKey);
@@ -278,6 +283,73 @@ static L insert_hash(HN ht, L htMask, void* src, L srcI, L typ, B isU){
     hN(t) = x;
     R srcI;
 }
+
+static L insert_index_v2(HN t, L td){
+    const L SLOT_SIZE = 64;
+    P("insert_index_v2 stop here\n"); getchar();
+    if(t->h_num == 0){
+        t->h_num = 1;
+        t->h_other = td;
+    }
+    else if(t->h_num == 1){
+        L *other = HASH_AL(L, SLOT_SIZE);
+        other[0] = t->h_other;
+        other[1] = td;
+        t->h_other = (L)other;
+        t->h_num = 2;
+    }
+    else if(t->h_num > 1 && t->h_num < SLOT_SIZE){
+        L *other = (L*)(t->h_other);
+        other[t->h_num] = td;
+        t->h_num++;
+    }
+    else EP("not enough slots: %lld\n", t->h_num);
+    P("number of slots: %lld\n", t->h_num); getchar();
+    R td;
+}
+
+static L insert_hash_v2(HB ht, L htMask, void *src, L srcI, L typ){
+    L srcV      = *(((L*)src)+srcI);
+    L hashValue = hash_L(srcV);  //getHashValue(src,srcI,typ);
+    L hashKey   = hashValue & htMask;
+    //P("hash value = %lld, key = %lld\n", hashValue,hashKey); getchar();
+    HB t = bV(ht,hashKey);
+    if(t->cur!=0){ // non-empty
+        HN node = t->node;
+        DOI(t->cur, {HN x=node+i; \
+            if(x->h_hash==hashValue){ \
+            switch(typ){\
+                caseL if(x->h_l==toL(src,srcI)) R insert_index_v2(x,srcI); break; \
+                default: EP("unexpected type: %s\n", getTypeName(typ)); \
+            }}})
+        if(t->cur + 1 < t->size){
+            HN x=node+(t->cur);
+            x->h_index = srcI;
+            x->h_l     = srcV;
+            x->h_hash  = hashValue;
+            // insert_index_v2(x, srcI);
+            x->h_num   = 1;
+            x->h_other = srcI;
+            t->cur++;
+        }
+        else EP("size not enough, need to grow: %lld / %lld\n", t->cur, t->size);
+    }
+    else { // empty bucket
+        const L init_size = 16;
+        HN x = newHashNodeN(init_size);
+        x->h_index = srcI;
+        x->h_l     = srcV;
+        x->h_hash  = hashValue;
+        //insert_index_v2(x,srcI);
+        x->h_num   = 1;
+        x->h_other = srcI;
+        t->node = x;
+        t->size = init_size;
+        t->cur  = 1;
+    }
+    R srcI;
+}
+
 
 static L find_hash(HN ht, L htMask, void* src, void* val, L valI, L typ){
     L hashKey = getHashValue(val,valI,typ) & htMask;
@@ -344,15 +416,19 @@ L insertHashMany(HN ht, L htMask, void* src, L srcI, void* val, L valI, L typ){
     R insert_hash(ht,htMask,src,srcI,typ,false);
 }
 
+L insertHashMany_v2(HB ht, L htMask, void* src, L srcI, void* val, L valI, L typ){
+    R insert_hash_v2(ht,htMask,src,srcI,typ);
+}
+
 L profileHash(HN ht, L htSize){
-    L minValue=99999, maxValue=-1, nonZero=0; 
+    L minValue=99999, maxValue=-1, nonZero=0, totElem=0; 
     P("\n> Hash table size: %lld\n",htSize);
     DOI(htSize, {L c=0; HN t=hV(ht,i); while(hN(t)){c++;t=hN(t);} \
-        if(c!=0) nonZero++; \
-        if(c<minValue) minValue=c; \
+        if(c!=0) nonZero++; totElem+=c; \
+        if(c>0 && c<minValue) minValue=c; \
         if(c>maxValue) maxValue=c; })
     P("> Sparsity (%lld/%lld) = %g%%\n",nonZero,htSize, nonZero*100.0/htSize);
-    P("> min = %lld, max = %lld\n",minValue,maxValue);
+    P("> min = %lld, max = %lld, avg elem. per line: (%lld/%lld)=%.1lf\n",minValue,maxValue,totElem,nonZero,totElem*1.0/nonZero);
     B isVerbose=false;
     if(isVerbose){
         L c=0, c2=0, c3=0;
@@ -370,7 +446,7 @@ L profileV(V x){
         DOI(vn(x), {if(vmax<vL(x,i))vmax=vL(x,i); if(vmin>vL(x,i))vmin=vL(x,i);})
         PP(">> len=%lld, max=%lld, min=%lld\n", xn,vmax,vmin);
     }
-    else WP("type not supported: %lld\n", xp);
+    else WP("type not supported: %s\n", getTypeName(xp));
     R 0;
 }
 
@@ -1461,7 +1537,7 @@ L lib_join_radix_hash(V z0, V z1, V x, V y){
 /* index for join index*/
 
 L lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
-    if(!lib_join_radix_hash(z0, z1, x, y)) R 0;
+    //if(!lib_join_radix_hash(z0, z1, x, y)) R 0;
     L sLen,vLen,typ; void *src,*val;
     if(isList(x)&&isList(y)){
         sLen=vn(vV(x,0)), vLen=vn(vV(y,0)), typ=vp(x);
@@ -1663,13 +1739,243 @@ L lib_join_index_compare(V z0, V z1, V x, V y, I op){
     R 0;
 }
 
+/* ------ Hash Related ------ */
+
+#include <stdarg.h>  // move to global.h ?
+// http://www.cplusplus.com/reference/cstdarg/va_start/
+
+static HN createHashSingle(V x, L *hashLen){
+    HN hashT; createHash(&hashT, *hashLen=getHashTableSize(xn));
+    L hashMask = (*hashLen) - 1;
+    DOI(xn, insertHashMany(hashT,hashMask,xg,i,NULL,-1,xp))
+    //profileHash(hashT, *hashLen); getchar();
+    R hashT;
+}
+
+#define setT_CONSTANT 1024
+static const L setT = 1024; // gcc-5 fails to know setT is a constant
+static const L setN = setT_CONSTANT - 1;
+
+static void test_hashSize(L *hashSize){
+    L debug_size_max = -1;
+    L debug_size_tot = 0;
+    DOI(setT, if(hashSize[i]>debug_size_max) debug_size_max=hashSize[i])
+    DOI(setT, debug_size_tot+=hashSize[i])
+    DOI(setT, P("hashSize[%lld] = %lld\n", i,hashSize[i]))
+    P("max size %lld, with total %lld\n", debug_size_max, debug_size_tot);
+    getchar();
+}
+
+static TBucket createHashMultiple_v2(V x, L *hashLen){
+    L  *count      = HASH_AL(L , setT);
+    L  *prefix     = HASH_AL(L , setT);
+    HB *hashBucket = HASH_AL(HB, setT);
+    L  *hashSize   = HASH_AL(L , setT);
+    // Step 1: scan for basic info
+    DOI(xn, count[vL(x,i)&setN]++)
+    DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
+    // Step 2: create partitions
+    DOI(setT, { \
+        L hashLen=count[i]==0?0:getHashTableSize(count[i]); \
+        hashBucket[i]=(hashLen>0)?createHashBucket(hashLen):NULL; \
+        hashSize[i]=hashLen;})
+    //test_hashSize(hashSize);
+    // Step 3: insert items
+    DOI(xn, {L id=vL(x,i)&setN; \
+        insertHashMany_v2(hashBucket[id],hashSize[id]-1,xg,i,NULL,-1,H_L);})
+    TBucket tb;
+    tb.hashBucket = hashBucket;
+    tb.hashSize   = hashSize;
+    tb.numBucket  = setT;
+    R tb;
+}
+
+static THash createHashMultiple(V x, L *hashLen){
+    L *count      = NEWL(L , setT);
+    L *prefix     = NEWL(L , setT);
+    HN *hashTable = NEWL(HN, setT);
+    L  *hashSize  = NEWL(L , setT);
+    // Step 1: scan for basic info
+    DOI(xn, count[vL(x,i)&setN]++)
+    DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
+    // Step 2: create partitions
+    DOI(setT, { HN ht=NULL; \
+        L hashLen=count[i]==0?0:getHashTableSize(count[i]);\
+        if(hashLen>0)createHash(&ht,hashLen); \
+        hashTable[i]=ht; hashSize[i]=hashLen;})
+    //test_hashSize(hashSize);
+    // Step 3: insert items
+    DOI(xn, {L t=vL(x,i)&setN; \
+        insertHashMany(hashTable[t],hashSize[t]-1,xg,i,NULL,-1,H_L);})
+    THash th;
+    th.hashTable = hashTable;
+    th.hashSize  = hashSize;
+    th.numTable  = setT;
+    R th;
+}
 
 
+HN createHashWithV(L n, V *x, L *hashLen){
+    if(n >= 1) R createHashSingle(x[0], hashLen);
+    else EP("number of columns invalid: %lld\n", n);
+}
+
+// x[k] == y[k]
+static B isAllMatch(L n, V *x, L k, L *y){
+    DOI(n, if(vL(x[i],k)!=y[i]) R 0) R 1;
+}
+
+//L debug_hash_total1 = 0;
+//L debug_hash_total2 = 0;
+L debug_hash_find1 = 0;
+L debug_hash_find2 = 0;
+L debug_hash_max1 = -1;
+L debug_hash_max2 = -1;
+
+L debug_hash_count1 = 0;
+L debug_hash_count2 = 0;
+L debug_hash_need_search1 = 0;
+L debug_hash_need_search2 = 0;
+L debug_hash_op_total1 = 0;
+L debug_hash_op_total2 = 0;
+
+static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
+    if(n == 1){
+        L val = args[0];
+        L hashMask = hashLen - 1;
+        L hashKey = hash_L(args[0]) & hashMask;
+        HN t = hV(hashT, hashKey);
+        V src0 = src[0];
+        //P(" n = 1, begin\n");
+        while(hN(t)){
+            t = hN(t); L td = hD(t);
+            if(vL(src0,td)==val)  R t;
+        }
+        //P(" n = 1, done\n");
+    }
+    else {
+        L val = args[0];
+        L hashMask = hashLen - 1;
+        L hashKey = hash_L(args[0]) & hashMask;
+        HN t = hV(hashT, hashKey);
+        //P("1: n = %lld\n",n);
+        while(hN(t)){
+            t = hN(t); L td = hD(t);
+            if(isAllMatch(n,src,td,args)) R t;
+        }
+        //P("2: done\n");
+    }
+    R 0;
+}
+
+/*
+static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
+    if(n == 1){
+        L val = args[0];
+        L hashMask = hashLen - 1;
+        L hashKey = hash_L(args[0]) & hashMask;
+        HN t = hV(hashT, hashKey);
+        V src0 = src[0];
+        //P(" n = 1, begin\n");
+        L debug_local_num = 0;
+        if(hN(t)) debug_hash_need_search1++;
+        debug_hash_count1++;
+        debug_hash_op_total1++;
+        while(hN(t)){
+            t = hN(t); L td = hD(t);
+            debug_local_num++;
+            if(vL(src0,td)==val) { debug_hash_find1++; R t; }
+            debug_hash_op_total1++;
+        }
+        //debug_hash_total1 += debug_local_num;
+        if(debug_hash_max1 < debug_local_num)
+            debug_hash_max1 = debug_local_num;
+        //P(" n = 1, done\n");
+    }
+    else {
+        L val = args[0];
+        L hashMask = hashLen - 1;
+        L hashKey = hash_L(args[0]) & hashMask;
+        HN t = hV(hashT, hashKey);
+        //P("1: n = %lld\n",n);
+        L debug_local_num = 0;
+        if(hN(t)) debug_hash_need_search2++;
+        debug_hash_count2++;
+        debug_hash_op_total2++;
+        while(hN(t)){
+            t = hN(t); L td = hD(t);
+            debug_local_num++;
+            if(isAllMatch(n,src,td,args)) {debug_hash_find2++; R t;}
+            debug_hash_op_total2++;
+        }
+        //debug_hash_total2 += debug_local_num;
+        if(debug_hash_max2 < debug_local_num)
+            debug_hash_max2 = debug_local_num;
+        //P("2: done\n");
+    }
+    R 0;
+}
+*/
+
+static HN findValueFromHashCore_v2(HB hashT, V *src, L hashLen, L n, L *args){
+    L val = args[0];
+    L hashMask = hashLen - 1;
+    L hashKey  = hash_L(val);
+    L hashId   = hashKey & hashMask;
+    HB t = bV(hashT, hashId);
+    //P(" n = %lld, begin with t->cur = %lld\n",n,t->cur);
+    if(n == 1){
+        DOI(t->cur, {HN x=t->node+i;/*P("hash: %lld ?= %lld\n",x->h_hash,hashKey);*/ \
+           if(x->h_hash==hashKey&&x->h_l==val)R x;})
+    }
+    else {
+        DOI(t->cur, {HN x=t->node+i;\
+           if(x->h_hash==hashKey&&x->h_l==val&&isAllMatch(n,src,hD(x),args))R x;})
+    }
+    //P(" n = %lld, done\n",n); getchar();
+    R 0;
+}
 
 
+#define readArgs() \
+    L args[99]; \
+    va_list vlist; \
+    va_start(vlist, n); \
+    DOI(n, args[i]=va_arg(vlist, L)); \
+    va_end(vlist);
 
+HN findValueFromHash(HN hashT, V *src, L hashLen, L n, ...){
+    readArgs();
+    //P("Input with %lld:\n",n);
+    //DOI(n, P("args[%lld] = %lld\n",i,args[i]))
+    R findValueFromHashCore(hashT,src,hashLen,n,args);
+}
 
+// THash createHashWithV2(L n, V *x, L *hashLen){
+//     if(n >= 1) R createHashMultiple(x[0], hashLen);
+//     else EP("number of columns invalid: %lld\n", n);
+// }
 
+// HN findValueFromHash2(HN *hashT, V *src, L *hashSize, L n, ...){
+//     readArgs();
+//     //P("Input with %lld:\n",n);
+//     //DOI(n, P("args[%lld] = %lld\n",i,args[i]))
+//     L hashSetId  = args[0] & setN;
+//     R findValueFromHashCore(hashT[hashSetId],src,hashSize[hashSetId],n,args);
+// }
+
+TBucket createHashWithV2(L n, V *x, L *hashLen){
+    if(n >= 1) R createHashMultiple_v2(x[0], hashLen);
+    else EP("number of columns invalid: %lld\n", n);
+}
+
+HN findValueFromHash2(HB *hashT, V *src, L *hashSize, L n, ...){
+    readArgs();
+    //P("Input with %lld:\n",n);
+    //DOI(n, P("args[%lld] = %lld\n",i,args[i]))
+    L hashSetId  = args[0] & setN;
+    R findValueFromHashCore_v2(hashT[hashSetId],src,hashSize[hashSetId],n,args);
+}
 
 
 

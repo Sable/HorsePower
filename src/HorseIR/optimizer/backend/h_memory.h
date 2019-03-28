@@ -18,6 +18,10 @@ extern "C" {
 #define getKTableKey(x)  CELL_FIRST(x)
 #define getKTableVal(x)  CELL_SECOND(x)
 
+#define HASH_AL(t,n) (t*)allocHashMem(sizeof(t)*(n))
+#define HASH_AL1(t)  HASH_AL(t,1)
+
+
 /* methods */
 
 void initMemory     ();
@@ -54,6 +58,11 @@ G allocBlock        (L typ, L len);
 L getRefCount       (G x);
 L updateRefCount    (G x);
 void printHeapInfo  ();
+
+/* hash heap */
+void initHashHeap   ();
+G    allocHashMem   (L size);
+void printHashInfo  ();
 
 #ifdef	__cplusplus
 }

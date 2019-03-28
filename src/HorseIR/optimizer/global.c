@@ -26,10 +26,10 @@ E calcInterval(struct timeval t0, struct timeval t1){
 /* initialization */
 
 /*
- * if FunctionType in typerule.h is changed,
+ * if FunctionType in analysis/common.h is changed,
  *   the list below may be updated as well
  */
-const pFunc ElementWiseFunc[] = {
+const pFunc GroupElementwise[] = {
     /* unary 32 */
     absF, negF, ceilF, floorF, roundF, piF, notF,
     logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
@@ -40,13 +40,33 @@ const pFunc ElementWiseFunc[] = {
     ltF, gtF, leqF, geqF, eqF, neqF, plusF, minusF, mulF, divF,
     powerF, modF, andF, orF, nandF, norF, xorF
 };
+const pFunc GroupReduction[] = { sumF, avgF, minF, maxF };
+const pFunc GroupScan     [] = { compressF };
+const pFunc GroupIndexing [] = { indexF };
+const pFunc GroupSpecial  [] = { likeF, memberF };
 
 bool ElementFuncMap[999]; /* max # of functions, must > totalFunc */
+bool FusableFuncMap[999];
 
-static void initFuncKind(){
+static void initFuncMapE(){
     if(totalFunc >= 999) error("Size of FuncMap is not enough");
     memset(ElementFuncMap, 0, sizeof(bool)*999);
-    DOI(sizeof(ElementWiseFunc)/sizeof(pFunc), ElementFuncMap[ElementWiseFunc[i]]=1)
+    DOI(sizeof(GroupElementwise)/sizeof(pFunc), ElementFuncMap[GroupElementwise[i]]=1)
+}
+
+#define setFuncMap(group,x,v) DOI(sizeof(group)/sizeof(pFunc), x[group[i]]=v)
+static void initFuncKind(){
+    initFuncMapE();
+    memset(FusableFuncMap, 0, sizeof(bool)*999);
+    setFuncMap(GroupElementwise, FusableFuncMap, 1);
+    setFuncMap(GroupReduction  , FusableFuncMap, 1);
+    setFuncMap(GroupScan       , FusableFuncMap, 1);
+    setFuncMap(GroupIndexing   , FusableFuncMap, 1);
+    setFuncMap(GroupSpecial    , FusableFuncMap, 1);
+}
+
+bool isInReductionGroup(pFunc x){
+    DOI(sizeof(GroupReduction)/sizeof(pFunc), if(GroupReduction[i]==x)R 1) R 0;
 }
 
 void initBackend(){

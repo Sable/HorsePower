@@ -49,4 +49,32 @@ typedef struct FuseNode {
 V getLiteralFromNode(Node *n);
 int getFuncIndexByName(char *name);
 
+void buildUDChain(Prog *root);
+void analyzeSR(Prog *root);
+void analyzeFusionElem();
+//void analyzeCPF(); // not implemented
+void analyzeFusePattern();
+void analyzeFusion2();
+bool isElementwise(char *funcName);
+
+/* macros: elementwise.c and fusion2.c */
+#define chainNode(c)    (c->cur)
+#define isSimpleStmt(n) instanceOf(n,simpleStmtK)
+#define isCastStmt(n)   instanceOf(n,castStmtK)
+#define isAssignment(n) (isSimpleStmt(n)||isCastStmt(n))
+#define isReturnStmt(n) instanceOf(n,returnK)
+#define setVisited(c,v) c->isVisited=v
+#define isVisited(c)    (c->isVisited)
+#define indentStr       "    "
+
+#include "udchain.h"
+#include "typeshape.h"
+
+/* elementwise */
+int  findParamName(char *pName, Chain *chain);
+void fuseName(char *buff, int nameID);
+int  findNameID(char *name);
+void fuseNameClean();
+char *fuseNameTarg(char *buff, Chain *chain);
+
 #endif

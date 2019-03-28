@@ -67,7 +67,7 @@ typedef enum TargetCode{
 }TC;
 
 typedef enum OptCode{
-    OPT_NA, OPT_SR, OPT_FE, OPT_FP
+    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_FS
 }OC;
 
 
@@ -105,7 +105,7 @@ typedef enum OptCode{
 
 #define ERROR_CODE 99
 #define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
-#define H_DEBUG false
+#define H_DEBUG true
 
 /* extern */
 

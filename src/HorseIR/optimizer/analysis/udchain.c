@@ -151,7 +151,7 @@ void printChainList(){
     int lineno = 0;
     while(p->next){
         p = p->next;
-        P("[%2d] %d: ",lineno++,p->chain->isVisited); prettyNode(p->chain->cur);
+        P("[%2d] %d: ",lineno++,p->chain->isVisited); prettyNode(p->chain->cur); P("\n");
     }
 }
 
