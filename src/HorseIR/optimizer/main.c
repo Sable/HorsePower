@@ -42,7 +42,7 @@ static void runInterpreterWithQid(I qid);
 static void runInterpreter();
 static void runInterpreterCore();
 static void runExperiment(I id);
-static void runExperiment0(); // Serialization
+static void runExperiment0(B isW); // Read/Write
 static void runExperiment1(); // Run all TPC-H queries
 static void validateParameters();
 
@@ -161,7 +161,8 @@ static int getLongOption(int argc, char *argv[]){
             case 'o': isCompiler= true; \
                       isOpt     = true; \
                       optName   = strdup(optarg);  break;
-            case 'd': delimiter = optarg[0];       break;
+            case 'd': if(optarg)
+                      delimiter = optarg[0];       break;
             case 'r': runs      = atoi(optarg);    break;
             case 'x': isExp     = true; \
                       expId     = atoi(optarg);    break;
@@ -244,8 +245,8 @@ static void usage(){
 static void parseInputWithQid(I qid){
     char file_path[128];
     //SP(file_path, "gen/q%d.hir", qid);
-    //SP(file_path, "data/hand-q%d.hir", qid);
-    SP(file_path, "data/q%d.hir", qid);
+    SP(file_path, "data/hand-q%d.hir", qid);
+    //SP(file_path, "data/q%d.hir", qid);
     parseInput(file_path);
 }
 
@@ -270,6 +271,7 @@ static OC getOptCode(S x){
     if(!strcmp(x, "sr")) R OPT_SR;
     else if(!strcmp(x, "fe")) R OPT_FE;
     else if(!strcmp(x, "fp")) R OPT_FP;
+    else if(!strcmp(x, "fs")) R OPT_FS; // advanced fusion
     else R OPT_NA;
 }
 
@@ -295,14 +297,15 @@ static void runCompileWithOpt(char *optName){
     if(optName){ /* check a single optimization */
         switch(H_OPT){
             case OPT_SR: analyzeSR(root); prettyProg(root); /* verify */ break;
-            case OPT_FE: analyzeLF(); break;
-            case OPT_FP: analyzePeephole(); break;
+            case OPT_FE: analyzeFusionElem (); break;
+            case OPT_FP: analyzeFusePattern(); break;
+            case OPT_FS: analyzeFusion2    (); break; /* advanced fusion */
             default: EP("opt not supported: %s\n",optName);
         }
     }
     else { /* all optimizations */
-        analyzeLF();
-        analyzePeephole();
+        analyzeFusionElem();
+        analyzeFusePattern();
         HorseCompiler(chain_list);
     }
     gettimeofday(&tv1, NULL);
@@ -392,25 +395,29 @@ static void serializeToFile(char *name){
 
 
 /*
- * ./a.out -x 0/1
+ * -x <id>
+ *   0 - read from bin files
+ *   1 - write to bin files
+ *   2 - run all queries
+ *   3 - conformabiliy analysis
  */
 
 static void runExperiment(int id){
     switch(id){
-        case 0: runExperiment0(); break;
-        case 1: runExperiment1(); break;
+        case 0: runExperiment0(false); break;
+        case 1: runExperiment0(true ); break;
+        case 2: runExperiment1(); break;
         default: EP("Experiment not specified: %d\n", id);
     }
 }
 
-static void runExperiment0(){
+static void runExperiment0(B isW){
     P(">> Hello experiments\n");
-    B isReadFromText = false; // isW: true or false
     initBackend();
     V t0 = allocNode();
     struct timeval tv0, tv1;
     gettimeofday(&tv0, NULL);
-    if(isReadFromText){ // total: 29376.3 ms
+    if(isW){ // total: 29376.3 ms
         initTableByName((S)"region");
         initTableByName((S)"nation");
         initTableByName((S)"supplier");
@@ -435,7 +442,7 @@ static void runExperiment0(){
     P("Reading time (ms): %g ms\n", calcInterval(tv0, tv1));
     pfnLoadTable(t0, initLiteralSym((S)"lineitem"));
     printTablePretty(t0, 10);
-    if(isReadFromText){
+    if(isW){  // <-- write through data to disk
         serializeToFile("region");
         serializeToFile("nation");
         serializeToFile("supplier");
