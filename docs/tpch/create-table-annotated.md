@@ -38,8 +38,8 @@
 
 ```sql
   CREATE TABLE PART  ( P_PARTKEY     INTEGER NOT NULL,       -- i32
-                       P_NAME        VARCHAR(55) NOT NULL,   -- sym
-                       P_MFGR        CHAR(25) NOT NULL,      -- sym
+                       P_NAME        VARCHAR(55) NOT NULL,   -- str
+                       P_MFGR        CHAR(25) NOT NULL,      -- str
                        P_BRAND       CHAR(10) NOT NULL,      -- sym
                        P_TYPE        VARCHAR(25) NOT NULL,   -- sym
                        P_SIZE        INTEGER NOT NULL,       -- i32
@@ -54,10 +54,10 @@
 
 ```sql
   CREATE TABLE SUPPLIER ( S_SUPPKEY     INTEGER NOT NULL,        -- i32
-                          S_NAME        CHAR(25) NOT NULL,       -- sym
+                          S_NAME        CHAR(25) NOT NULL,       -- str
                           S_ADDRESS     VARCHAR(40) NOT NULL,    -- str
                           S_NATIONKEY   INTEGER NOT NULL,        -- i32
-                          S_PHONE       CHAR(15) NOT NULL,       -- sym
+                          S_PHONE       CHAR(15) NOT NULL,       -- str
                           S_ACCTBAL     DECIMAL(15,2) NOT NULL,  -- f64
                           S_COMMENT     VARCHAR(101) NOT NULL);  -- str
 ```
@@ -82,9 +82,9 @@
 ```sql 
   CREATE TABLE CUSTOMER ( C_CUSTKEY     INTEGER NOT NULL,          -- i32
                           C_NAME        VARCHAR(25) NOT NULL,      -- sym
-                          C_ADDRESS     VARCHAR(40) NOT NULL,      -- sym
+                          C_ADDRESS     VARCHAR(40) NOT NULL,      -- str
                           C_NATIONKEY   INTEGER NOT NULL,          -- i32
-                          C_PHONE       CHAR(15) NOT NULL,         -- sym
+                          C_PHONE       CHAR(15) NOT NULL,         -- str
                           C_ACCTBAL     DECIMAL(15,2)   NOT NULL,  -- f64
                           C_MKTSEGMENT  CHAR(10) NOT NULL,         -- sym
                           C_COMMENT     VARCHAR(117) NOT NULL);    -- str
@@ -97,11 +97,11 @@
 ```sql
   CREATE TABLE ORDERS  ( O_ORDERKEY       INTEGER NOT NULL,       -- i32
                          O_CUSTKEY        INTEGER NOT NULL,       -- i32
-                         O_ORDERSTATUS    CHAR(1) NOT NULL,       -- small
+                         O_ORDERSTATUS    CHAR(1) NOT NULL,       -- char
                          O_TOTALPRICE     DECIMAL(15,2) NOT NULL, -- f64
                          O_ORDERDATE      DATE NOT NULL,          -- i32
                          O_ORDERPRIORITY  CHAR(15) NOT NULL,      -- sym
-                         O_CLERK          CHAR(15) NOT NULL,      -- sym
+                         O_CLERK          CHAR(15) NOT NULL,      -- str
                          O_SHIPPRIORITY   INTEGER NOT NULL,       -- i32
                          O_COMMENT        VARCHAR(79) NOT NULL);  -- str
 ```
@@ -119,8 +119,8 @@
                           L_EXTENDEDPRICE   DECIMAL(15,2) NOT NULL,  -- f64
                           L_DISCOUNT        DECIMAL(15,2) NOT NULL,  -- f64
                           L_TAX             DECIMAL(15,2) NOT NULL,  -- f64
-                          L_RETURNFLAG      CHAR(1) NOT NULL,        -- small
-                          L_LINESTATUS      CHAR(1) NOT NULL,        -- small
+                          L_RETURNFLAG      CHAR(1) NOT NULL,        -- char
+                          L_LINESTATUS      CHAR(1) NOT NULL,        -- char
                           L_SHIPDATE        DATE NOT NULL,           -- i32
                           L_COMMITDATE      DATE NOT NULL,           -- i32
                           L_RECEIPTDATE     DATE NOT NULL,           -- i32
