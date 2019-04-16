@@ -1,5 +1,6 @@
 
 ## Compile & run a query
+
 Build a compiled query (single)
 
     make q6 # generate: horse-compile-q6
@@ -8,6 +9,32 @@ Run the query
 
     ./run.sh      # check help info
     ./run.sh 6 10 # Example: query 6 with 10 times
+
+Frequently used commandlines
+
+    ./refresh_lib.sh && ./make.sh 5 exp && ./run.sh 5
+    ./make.sh 5 exp && ./run.sh 5
+
+## Profiling
+
+Compile
+
+    ./make.sh 5 exp profile
+
+Run valgrind
+
+    ./profile.sh 5 &> logs/profile-q5.log
+
+Use gdb/lldb
+
+    make source src=EXP opt=debug sys=sableintel    
+    (cd ../ && gdb ./compile-static/compile-q5)
+    r 1 3 1 # inside gdb
+
+perf
+
+    ./profile-perf.sh process  # fetch running a thread ID automatically
+
 
 ## Setup
 
@@ -26,6 +53,33 @@ Library order in linking (see Makefile)
 See a loaded file with a specific query id
 
     gcc -E loadcode.h -DINCLUDE_Q14
+
+Initial files for cur/exp
+
+    cp ../compile/exp/.h exp/.h
+    cp ../compile/opt/.h cur/.h
+
+## Structure
+
+Folder description
+
+    ./cur   current generated code
+    ./exp   experiments
+    ./opt   finalized optimized code
+
+Note: the content of `cur` can be replaced by `opt`'s after one round of manual
+tuning to figure out the optimized code.
+
+    cur -> exp -> opt
+     ^             |
+     |_____________|
+
+## Knowledge
+
+- SSE4.2 (128-bit registers): some instructions perform comparison on two operands of 16 bytes at a time
+- AVX (256-bit registers)
+- AVX2 (256-bit registers)
+- AVX512 (512-bit registers)
 
 ## Experiments
 
