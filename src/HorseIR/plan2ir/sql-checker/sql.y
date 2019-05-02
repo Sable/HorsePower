@@ -30,7 +30,7 @@
     }
 }
 
-%token <stringconst> kSELECT kFROM kWHERE kGROUPBY kORDERBY kHAVING kLIMIT kDISTINCT kAS kIN kNOT kLIKE kBETWEEN kIS kNULL kDATE kCASE kWHEN kTHEN kELSE kEND kAND kOR kINTERVAL kEXISTS kEXTRACT kSUBSTRING kFOR
+%token <stringconst> kSELECT kFROM kWHERE kGROUPBY kORDERBY kHAVING kLIMIT kDISTINCT kAS kIN kNOT kLIKE kBETWEEN kIS kNULL kDATE kCASE kWHEN kTHEN kELSE kEND kAND kOR kINTERVAL kEXISTS kEXTRACT kSUBSTRING kFOR kLEFTJOIN kRIGHTJOIN kON kCREATE kDROP kVIEW
 %token <stringconst> fAVG fSUM fCOUNT fMIN fMAX
 %token <stringconst> aNOT2 aLE aGE aLT aGT aEQ aNOT
 %token <stringconst> tID tSTRING tSINGLE kASC kDESC
@@ -47,21 +47,32 @@
 
 %% 
 
-program            : sql_query ';'
+program            : sql_view_list sql_query ';' sql_view_list
 ;
 
-sql_query          : kSELECT select_expr_list kFROM table_expression optional_stmt
+sql_query          : kSELECT select_expr_list
+                     kFROM table_expression
+                     optional_stmt
 ;
 
-optional_stmt      : 
-                   | sql_stmt optional_stmt
+sql_view_list      :
+                   | sql_view sql_view_list
 ;
 
-sql_stmt           : where_stmt
-                   | groupby_stmt
-                   | orderby_stmt
-                   | having_stmt
-                   | limit_stmt
+sql_view           : sql_create_view
+                   | sql_drop_view
+;
+
+sql_create_view    : kCREATE kVIEW tID parameter_list kAS sql_query ';' //q15
+;
+
+sql_drop_view      : kDROP kVIEW term ';'
+
+optional_stmt      :   where_stmt
+                     groupby_stmt
+                      having_stmt
+                     orderby_stmt
+                       limit_stmt
 ;
 
 /* SELECT part */
@@ -81,23 +92,32 @@ table_expression   : table_name_expr
 table_name_expr    : term
                    | term tID
                    | term kAS tID
+                   | term kAS tID parameter_list   // q13
+                   | term kLEFTJOIN term kON expression
 ;
+
+parameter_list     : '(' expression_list ')'
 
 /* WHERE / GROUP BY / ORDER BY / HAVING */
 
-where_stmt         : kWHERE expression
+where_stmt         :
+                   | kWHERE expression
 ;
 
-groupby_stmt       : kGROUPBY expression_list
+groupby_stmt       :
+                   | kGROUPBY expression_list
 ;
 
-orderby_stmt       : kORDERBY expression_list
+orderby_stmt       :
+                   | kORDERBY expression_list
 ;
 
-having_stmt        : kHAVING expression
+having_stmt        :
+                   | kHAVING expression
 ;
 
-limit_stmt         : kLIMIT tINT
+limit_stmt         :
+                   | kLIMIT tINT
 ;
 
 /* expressions */
@@ -234,10 +254,10 @@ arith_op           : '+'
                    | '/'
 ;
 
-case_stmt          : kCASE term kWHEN expression kTHEN term case_else_stmt kEND
+case_stmt          : kCASE term kWHEN expression kTHEN expression case_else_stmt kEND
 ;
 
-case_when_stmt     : kCASE kWHEN expression kTHEN term case_else_stmt kEND
+case_when_stmt     : kCASE kWHEN expression kTHEN expression case_else_stmt kEND
 ;
 
 case_else_stmt     :

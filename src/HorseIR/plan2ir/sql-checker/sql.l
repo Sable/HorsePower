@@ -41,13 +41,12 @@ LETTER          [a-zA-Z_]
 "select"      {addStr(); return kSELECT;}
 "from"        {addStr(); return kFROM;}
 "where"       {addStr(); return kWHERE;}
-"group by"    {addStr(); return kGROUPBY;}
-"order by"    {addStr(); return kORDERBY;}
 "having"      {addStr(); return kHAVING;}
 "limit"       {addStr(); return kLIMIT;}
 "distinct"    {addStr(); return kDISTINCT;}
 "as"          {addStr(); return kAS;}
 "in"          {addStr(); return kIN;}
+"on"          {addStr(); return kON;}
 "not"         {addStr(); return kNOT;}
 "like"        {addStr(); return kLIKE;}
 "between"     {addStr(); return kBETWEEN;}
@@ -68,6 +67,9 @@ LETTER          [a-zA-Z_]
 "extract"     {addStr(); return kEXTRACT;}
 "substring"   {addStr(); return kSUBSTRING;}
 "for"         {addStr(); return kFOR;}
+"create"      {addStr(); return kCREATE;}
+"drop"        {addStr(); return kDROP;}
+"view"        {addStr(); return kVIEW;}
 
 "avg"         {addStr(); return fAVG;}
 "sum"         {addStr(); return fSUM;}
@@ -82,6 +84,11 @@ LETTER          [a-zA-Z_]
 ">"           {addStr(); return aGT;}
 "="           {addStr(); return aEQ;}
 "!="          {addStr(); return aNOT;}
+
+left[ ]+outer[ ]+join  { addStr(); return kLEFTJOIN;  }
+right[ ]+outer[ ]+join { addStr(); return kRIGHTJOIN; }
+group[ ]+by            { addStr(); return kGROUPBY;}
+order[ ]+by            { addStr(); return kORDERBY;}
 
 0|({NONZERODIGIT}{DIGIT}*) {
     //printf("-- Saw an integer %s\n", yytext);
