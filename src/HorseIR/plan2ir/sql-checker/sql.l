@@ -107,7 +107,7 @@ order[ ]+by            { addStr(); return kORDERBY;}
     return tFLOAT;
 }
 (\"[^"]*\")|(\'[^']*\') {
-    printf("-- Saw a string %s\n", yytext);
+    //printf("-- Saw a string %s\n", yytext);
     int len = strlen(yytext);
     yylval.stringconst = (char*)malloc(len-1);
     sprintf(yylval.stringconst, "%s", yytext+1);

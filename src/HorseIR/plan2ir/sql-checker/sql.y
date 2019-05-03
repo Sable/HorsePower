@@ -140,8 +140,8 @@ and_condition      :
 */
 
 condition          : operand condition_right
-                   | '(' expression ')'
-                   | kNOT expression
+                   | kNOT condition           /* kNOT expression */
+                   //| '(' expression ')'
 ;
 
 condition_right    :
@@ -182,16 +182,15 @@ const_value        : tINT
 
 term               : '*'
                    | show_distinct name orderby_order
-                   | const_value
-                   | case_stmt
+                   |     const_value
+                   |      case_stmt
                    | case_when_stmt
-                   | function_stmt
-                   | exists_stmt
-                   | extract_stmt
+                   |  function_stmt
+                   |    exists_stmt
+                   |   extract_stmt
                    | substring_stmt
-                   | '(' operand ')'
+                   | '(' expression_list ')'
                    | '(' sql_query ')'
-                   | '(' operand_list ')' 
 ;
 
 function_stmt      : basic_func_op term
@@ -267,10 +266,6 @@ case_else_stmt     :
 name               : tID
                    | tID '.' tID
                    | tSTRING
-;
-
-operand_list       : const_value
-                   | const_value ',' operand_list
 ;
 
 %%
