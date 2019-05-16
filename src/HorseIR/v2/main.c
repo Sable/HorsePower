@@ -20,8 +20,8 @@ int main(int argc, char *argv[]){
     if(ret == 0) P("Successfully parsed: %s!\n", file_path);
     else EP("Parsing failed: %s\n", file_path);
     // do sth with root
-    //prettyProg(root);
-    weedProg(root);
+    //weedProg(root);
+    prettyProg(root);
     return 0;
 }
 

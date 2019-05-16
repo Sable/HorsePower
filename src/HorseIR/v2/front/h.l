@@ -115,26 +115,27 @@ nzdigit    [1-9]
 }
 
  /* datetime */
-{digit}{digit}{digit}{digit}\.{digit}{digit}\.{digit}{digit}T{digit}{digit}:{digit}{digit}:{digit}{digit}\.{digit}{digit}{digit} {
+{digit}{digit}{digit}{digit}-{digit}{digit}-{digit}{digit}T{digit}{digit}:{digit}{digit}:{digit}{digit}\.{digit}{digit}{digit} {
     int yy,mm,dd,hh,m2,ss,ll;
-    sscanf(yytext, "%d.%d.%dT%d:%d:%d.%d",&yy,&mm,&dd,&hh,&m2,&ss,&ll);
+    sscanf(yytext, "%d-%d-%dT%d:%d:%d.%d",&yy,&mm,&dd,&hh,&m2,&ss,&ll);
     yylval.longconst = calcDate(yy,mm,dd)*86400000LL + calcSecond(hh,m2,ss)*1000 + ll;
     return tDT;
 }
 
  /* date */
-{digit}{digit}{digit}{digit}\.{digit}{digit}\.{digit}{digit} {
+{digit}{digit}{digit}{digit}-{digit}{digit}-{digit}{digit} {
     //printf("-- Saw a date %s\n", yytext);
     int yy,mm,dd;
-    sscanf(yytext, "%d.%d.%d",&yy,&mm,&dd);
+    sscanf(yytext, "%d-%d-%d",&yy,&mm,&dd);
     yylval.intconst = yy*10000+mm*100+dd;
     return tDATE;
 }
 
  /* month */
-{digit}{digit}{digit}{digit}\.{digit}{digit}m {
+{digit}{digit}{digit}{digit}-{digit}{digit} {
+    //printf("-- Saw a month %s\n", yytext);
     int yy,mm;
-    sscanf(yytext, "%d.%dm",&yy,&mm);
+    sscanf(yytext, "%d-%d",&yy,&mm);
     yylval.intconst = calcMonth(yy,mm);
     return tMONTH;
 }

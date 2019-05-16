@@ -406,6 +406,7 @@ calendarValue      : tDT
                      { $$ = makeMinute($1); }
                    | tSECOND
                      { $$ = makeSecond($1); }
+
 ;
 
  /* check cast */

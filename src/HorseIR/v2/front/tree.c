@@ -214,7 +214,7 @@ Node *makeNodeLiteralVector(bool isOne, List *value, Node *type){
     n->kind     = vectorK;
     n->val.vec.one = isOne;
     n->val.vec.val = value;
-    n->val.vec.typ = type;
+    n->val.vec.typ = type;  // may be NULL when isOne is true
     n->lineno   = yylineno;
     return n;
 }
@@ -296,7 +296,7 @@ ConstValue *makeReal(char op, ConstValue *x){
     switch(x->type){
         case   intC: n->valI = op=='-'?-(x->valI):x->valI; break;
         case floatC: n->valF = op=='-'?-(x->valF):x->valF; break;
-        case  longC: n->valI = op=='-'?-(x->valL):x->valL; break;
+        case  longC: n->valL = op=='-'?-(x->valL):x->valL; break;
         case  clexC: n->valX[0] = op=='-'?-(x->valX[0]):x->valX[0]; break;
         default: P("type not supported\n"); exit(1);
     }
