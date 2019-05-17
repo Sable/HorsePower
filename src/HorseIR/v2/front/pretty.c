@@ -28,6 +28,7 @@ static char buff[BUFF_SIZE];
 
 /* declaration */
 static void printBlockBuff(char *b, Node *n);
+static void prettyNodeBuff(char *b, Node *n);
 
 static int countList(List *list){
     int tot = 0; while(list){ tot++; list = list->next; } return tot;
@@ -274,7 +275,7 @@ static void printBlockBuff(char *b, Node *n){
     printDepth(b); echo(b, "}");
 }
 
-void prettyNodeBuff(char *b, Node *n){
+static void prettyNodeBuff(char *b, Node *n){
     if(!n) R ; // NULL, do nothing
     switch(n->kind){
         case       stmtK:
@@ -324,7 +325,51 @@ void prettyNodeBuff(char *b, Node *n){
     }
 }
 
-void prettyProg(Prog *root){
+#define CaseLine(k) case k: R #k
+
+char *getNodeTypeStr(Node *n){
+    switch(n->kind){
+        CaseLine(idK);
+        CaseLine(varK);
+        CaseLine(globalK);
+        CaseLine(typeK);
+        CaseLine(compoundK);
+        CaseLine(funcK);
+        CaseLine(argExprK);
+        CaseLine(paramExprK);
+        CaseLine(blockK);
+        CaseLine(stmtK);
+        CaseLine(castK);
+        CaseLine(importK);
+        CaseLine(methodK);
+        CaseLine(moduleK);
+        CaseLine(ifK);
+        CaseLine(whileK);
+        CaseLine(repeatK);
+        CaseLine(labelK);
+        CaseLine(gotoK);
+        CaseLine(returnK);
+        CaseLine(breakK);
+        CaseLine(continueK);
+        CaseLine(callK);
+        CaseLine(vectorK);
+        CaseLine(constK);
+        default: EP("unknown node: %d\n", n->kind);
+    }
+    R NULL;
+}
+
+void printNodeType(Node *n){
+    P("[Line %3d]: %s\n",n->lineno,getNodeTypeStr(n));
+}
+
+void printNode(Node *n){
+    buff[0]=0;
+    prettyNodeBuff(buff, n);
+    P("%s\n", buff);
+}
+
+void printProg(Prog *root){
     buff[0]=0;
     printBanner("Pretty Printer");
     depth = 0;

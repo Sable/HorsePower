@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
     else EP("Parsing failed: %s\n", file_path);
     // do sth with root
     weedProg(root);
-    //prettyProg(root);
+    //printProg(root);
     return 0;
 }
 

@@ -248,24 +248,13 @@ static void weedVector(Node *x){
     Type  t = getType(x->val.vec.typ);
     while(p){
         if(!weedConst(p->val, t)){
-            EP("Literal type expects %s, but %s found\n", \
+            printNode(x);
+            EP("Literal type or range error: (expect %s, find %s)\n", \
                     getTypeStr(t),getConstTypeStr(p->val));
         }
         p = p->next;
     }
 }
-
-//static void weedOperand(Node *x){
-//    printNodeType(x);
-//    //switch(x->kind){
-//    //    case       idK: break;
-//    //    case compoundK: break;
-//    //    case     funcK: break;
-//    //    case   vectorK: weedVector(x); break;
-//    //    default: EP("type unknown: %s\n", printNodeTypeStr(x));
-//    //}
-//    weedNode(x->val.listS);
-//}
 
 static void weedStmt(Node *stmt){
     weedNode(stmt->val.assignStmt.expr);
@@ -312,7 +301,7 @@ static void weedModule(Node *module){
             case importK: weedImport(x); break;
             case methodK: weedMethod(x); break;
             case globalK: weedGlobal(x); break;
-            default: EP("type unknown: %s\n", printNodeTypeStr(x));
+            default: EP("Type unknown: %s\n", getNodeTypeStr(x));
         }
         p = p->next;
     }
@@ -359,7 +348,7 @@ static void weedNode(Node *x){
         case     constK: printConst(x);    break;
         case   argExprK: weedExpr(x);      break; /* list */
         case paramExprK: weedParamExpr(x); break; /* list */
-        default: EP("type unknown: %s\n", printNodeTypeStr(x));
+        default: EP("Type unknown: %s\n", getNodeTypeStr(x));
     }
 }
 

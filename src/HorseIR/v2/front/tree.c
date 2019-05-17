@@ -311,42 +311,4 @@ ConstValue *makeReal(char op, ConstValue *x){
     return n;
 }
 
-#define CaseLine(k) case k: R #k
-
-char *printNodeTypeStr(Node *x){
-    switch(x->kind){
-        CaseLine(idK);
-        CaseLine(varK);
-        CaseLine(globalK);
-        CaseLine(typeK);
-        CaseLine(compoundK);
-        CaseLine(funcK);
-        CaseLine(argExprK);
-        CaseLine(paramExprK);
-        CaseLine(blockK);
-        CaseLine(stmtK);
-        CaseLine(castK);
-        CaseLine(importK);
-        CaseLine(methodK);
-        CaseLine(moduleK);
-        CaseLine(ifK);
-        CaseLine(whileK);
-        CaseLine(repeatK);
-        CaseLine(labelK);
-        CaseLine(gotoK);
-        CaseLine(returnK);
-        CaseLine(breakK);
-        CaseLine(continueK);
-        CaseLine(callK);
-        CaseLine(vectorK);
-        CaseLine(constK);
-        default: EP("unknown node: %d\n", x->kind);
-    }
-    R NULL;
-}
-
-void printNodeType(Node *x){
-    P("[Line %3d]: %s\n",x->lineno,printNodeTypeStr(x));
-}
-
 

@@ -126,8 +126,4 @@ ConstValue *makeFloat      (double x);
 ConstValue *makeReal       (char op, ConstValue *x);
 ConstValue *makeComplex    (ConstValue *x, char op, ConstValue *y);
 
-/* helper */
-void  printNodeType        (Node *x);
-char *printNodeTypeStr     (Node *x);
-
 #endif
