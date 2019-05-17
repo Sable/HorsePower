@@ -156,6 +156,14 @@ Node *makeNodeStmtRepeat(Node *cond, Node *body){
     return n;
 }
 
+Node *makeNodeStmtExpr(Node *expr){
+    Node *n     = NEW(Node);
+    n->kind     = exprstmtK;
+    n->val.exprStmt.expr = expr;
+    n->lineno   = yylineno;
+    return n;
+}
+
 Node *makeNodeStmtLabel(char *id, Node *stmt){
     Node *n     = NEW(Node);
     n->kind     = labelK;
@@ -239,8 +247,8 @@ Node *makeNodeStmtReturn(List *operands){
     return makeListKind(operands, returnK);
 }
 
-Node *makeNodeExpr(List *operands){
-    return makeListKind(operands, exprK);
+Node *makeNodeArgExpr(List *operands){
+    return makeListKind(operands, argExprK);
 }
 
 /* constant values */
@@ -313,7 +321,7 @@ char *printNodeTypeStr(Node *x){
         CaseLine(typeK);
         CaseLine(compoundK);
         CaseLine(funcK);
-        CaseLine(exprK);
+        CaseLine(argExprK);
         CaseLine(paramExprK);
         CaseLine(blockK);
         CaseLine(stmtK);

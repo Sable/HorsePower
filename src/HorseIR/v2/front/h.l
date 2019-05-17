@@ -152,7 +152,7 @@ nzdigit    [1-9]
 {digit}{digit}:{digit}{digit}:{digit}{digit} {
     int hh,mm,ss;
     sscanf(yytext, "%d:%d:%d",&hh,&mm,&ss);
-    yylval.intconst = calcDate(hh,mm,ss);
+    yylval.intconst = calcSecond(hh,mm,ss);
     return tSECOND;
 }
 

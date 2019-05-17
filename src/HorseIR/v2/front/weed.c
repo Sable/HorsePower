@@ -6,7 +6,15 @@
 #define weedExpr      weedList
 #define weedReturn    weedList
 
-static void weedNode(Node *x);
+static void weedNode  (Node *x);
+static bool weedDate  (int x);
+static bool weedMonth (int x);
+static bool weedMinute(int x);
+static bool weedSecond(int x);
+static bool weedTime  (int x);
+static bool weedDT    (long long x);
+static bool weedClex  (float *x);
+static bool weedString(char *x);
 
 /* code blocks */
 
@@ -21,49 +29,34 @@ static void weedNode(Node *x);
 #define checkDay(x, n) ((x)>=1 && (x)<=(n))
 #define isNotLeap(yy)  (yy%4!=0 || yy%400!=0)
 
-static bool weedDate(int x){
-    int yy=x/10000,mm=x/100%100,dd=x%100;
-    if(yy>=1000 && yy<=9999 && mm>=1 && mm<=12){
-        switch(mm){
-            case  1: R checkDay(dd, 31); break;
-            case  2: R checkDay(dd, isNotLeap(yy)?28:29); break;
-            case  3: R checkDay(dd, 31); break;
-            case  4: R checkDay(dd, 30); break;
-            case  5: R checkDay(dd, 31); break;
-            case  6: R checkDay(dd, 30); break;
-            case  7: R checkDay(dd, 31); break;
-            case  8: R checkDay(dd, 31); break;
-            case  9: R checkDay(dd, 30); break;
-            case 10: R checkDay(dd, 31); break;
-            case 11: R checkDay(dd, 30); break;
-            case 12: R checkDay(dd, 31); break;
-        }
-    }
-    else R 0;
-}
+#define checkBool(x)   (0==x || 1==x)
+#define checkSmall(x)  (x>=-128 || x<=127);
+#define checkShort(x)  (x>=-32768 || x<=32767)
+#define checkInt(x)    (x>=INT_MIN || x<=INT_MAX);
+#define checkFloat(x)  (x>=FLT_MIN || x<=FLT_MAX)
+#define checkDouble(x) (x>=DBL_MIN || x<=DBL_MAX)
 
 static bool weedInt(int x, Type t){
     switch(t){
-        case boolT: R (0==x || 1==x);
-        case   i8T: R (x>=-128 || x<=127);
-        case  i16T: R (x>=-32768 || x<=32767);
-        case  i32T: R 1;
-        case  f32T: R (x>=FLT_MIN || x<=FLT_MAX);
-        case  f64T: R (x>=DBL_MIN || x<=DBL_MAX);
-        case dateT: 
+        case   boolT: R checkBool(x);
+        case     i8T: R checkSmall(x);
+        case    i16T: R checkShort(x);
+        case    i32T: R 1;
+        case    f32T: R checkFloat(x);
+        case    f64T: R checkDouble(x);
         default: R 0;
     }
 }
 
 static bool weedLong(long long x, Type t){
     switch(t){
-        case boolT: R (0==x || 1==x);
-        case   i8T: R (x>=-128 || x<=127);
-        case  i16T: R (x>=-32768 || x<=32767);
-        case  i32T: R (x>=INT_MIN || x<=INT_MAX);
+        case boolT: R checkBool(x);
+        case   i8T: R checkSmall(x);
+        case  i16T: R checkShort(x);
+        case  i32T: R checkInt(x);
         case  i64T: R 1;
-        case  f32T: R (x>=FLT_MIN || x<=FLT_MAX);
-        case  f64T: R (x>=DBL_MIN || x<=DBL_MAX);
+        case  f32T: R checkFloat(x);
+        case  f64T: R checkDouble(x);
         default: R 0;
     }
 }
@@ -82,18 +75,82 @@ static bool weedConst(Node *x, Type t){
         case    intC: R weedInt  (p->valI, t);
         case  floatC: R weedFloat(p->valF, t);
         case   longC: R weedLong (p->valL, t);
-        case   clexC: R   clexT == t;
-        case   charC: R   charT == t;
-        case    symC: R    symT == t;
-        case    strC: R    strT == t;
-        case   dateC: R   dateT == t;
-        case  monthC: R  monthT == t;
-        case     dtC: R     dtT == t;
-        case minuteC: R minuteT == t;
-        case secondC: R secondT == t;
-        case   timeC: R   timeT == t;
+        case   clexC: R   clexT == t && weedClex  (p->valX);
+        case   charC: R   charT == t && weedString(p->valS);
+        case    symC: R    symT == t && weedString(p->valS);
+        case    strC: R    strT == t && weedString(p->valS);
+        case   dateC: R   dateT == t && weedDate  (p->valI);
+        case  monthC: R  monthT == t && weedMonth (p->valI);
+        case     dtC: R     dtT == t && weedDT    (p->valL);
+        case minuteC: R minuteT == t && weedMinute(p->valI);
+        case secondC: R secondT == t && weedSecond(p->valI);
+        case   timeC: R   timeT == t && weedTime  (p->valI);
         default: EP("Constant type not supported: %d\n", p->type);
     }
+}
+
+#define weedYY(x) (x>=1000 && x<=9999)
+#define weedMM(x) (x>=1 && x<=12)
+#define weedHH(x) (x>=0 && x<24)
+#define weedM2(x) (x>=0 && x<60)
+#define weedSS(x) (x>=0 && x<60)
+#define weedLL(x) (x>=0 && x<1000)
+
+static bool weedDate(int x){
+    int yy=x/10000,mm=x/100%100,dd=x%100;
+    if(weedYY(yy) && weedMM(mm)){
+        switch(mm){
+            case  1: R checkDay(dd, 31); break; //
+            case  2: R checkDay(dd, isNotLeap(yy)?28:29); break;
+            case  3: R checkDay(dd, 31); break; //
+            case  4: R checkDay(dd, 30); break;
+            case  5: R checkDay(dd, 31); break; //
+            case  6: R checkDay(dd, 30); break;
+            case  7: R checkDay(dd, 31); break; //
+            case  8: R checkDay(dd, 31); break; //
+            case  9: R checkDay(dd, 30); break;
+            case 10: R checkDay(dd, 31); break; //
+            case 11: R checkDay(dd, 30); break;
+            case 12: R checkDay(dd, 31); break; //
+        }
+    }
+    else R 0;
+}
+
+static bool weedMonth(int x){
+    int yy=x/100,mm=x%100;
+    R weedYY(yy) && weedMM(mm);
+}
+
+static bool weedMinute(int x){
+    int hh=x/60, mm=x%60;
+    R weedHH(hh) && weedM2(mm);
+}
+
+static bool weedSecond(int x){
+    int ss=x%60;
+    R weedMinute(x/60) && weedSS(ss);
+}
+
+static bool weedTime(int x){
+    int ll=x%1000;
+    R weedSecond(x/1000) && weedLL(ll);
+}
+
+static bool weedDT(long long x){
+    R weedDate(x/86400000) && weedTime(x%86400000);
+}
+
+static bool weedClex(float *x){
+    float rel = x[0], img = x[1];
+    R checkFloat(rel) && checkFloat(img);
+}
+
+static bool weedString(char *x){
+    while(*x){
+        char c = *x; if(c<0 || c>255) R 0; x++;
+    }
+    R 1;
 }
 
 static void printConst(Node *x){
@@ -300,7 +357,7 @@ static void weedNode(Node *x){
         case      castK: weedCast(x);      break;
         case    vectorK: weedVector(x);    break;
         case     constK: printConst(x);    break;
-        case      exprK: weedExpr(x);      break; /* list */
+        case   argExprK: weedExpr(x);      break; /* list */
         case paramExprK: weedParamExpr(x); break; /* list */
         default: EP("type unknown: %s\n", printNodeTypeStr(x));
     }

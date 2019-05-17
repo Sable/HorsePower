@@ -20,7 +20,7 @@ static char buff[BUFF_SIZE];
 #define printComp(b,n)   {if(n->val.compoundID.id1)printComp2(b,n);else printComp1(b,n);}
 #define printVar(b,n)    {SP(b,"%s:", n->val.param.id); prettyNodeBuff(b,n->val.param.typ);}
 
-#define printExprBuff(b,n)    prettyListBuff(b,n->val.listS,comma)
+#define printArgExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
 #define printParamExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
 #define printReturnStmt(b,n)  {SP(b,"return "); prettyListBuff(b,n->val.listS,comma); strcat(b,withLine?";\n":";"); printLine(b); }
 
@@ -51,21 +51,6 @@ static void prettyListBuff(char *b, List *list, char sep){
         }
     }
 }
-
-//static void prettyListBuff(char *b, List *list, char sep){
-//    if(list){
-//        List *ptr = list;
-//        while(ptr){
-//            resetBuff(b);
-//            if(ptr->val){
-//                prettyNodeBuff(b, ptr->val);
-//                if(sep && ptr->next) { printChar(sep); echo(b," "); }
-//            }
-//            ptr = ptr->next;
-//        }
-//    }
-//    //else { strcat(b, "<NULL list found>"); }
-//}
 
 static void printNodeFunc(char *b, Node *n){
     resetBuff(b);
@@ -190,6 +175,12 @@ static void printLabelBuff(char *b, Node *n){
     printStmtBuff(b, n->val.labelStmt.stmt);
 }
 
+static void printExprStmtBuff(char *b, Node *n){
+    resetBuff(b);
+    prettyNodeBuff(b, n->val.exprStmt.expr);
+    printLine(b);
+}
+
 static void printGotoBuff(char *b, Node *n){
     resetBuff(b);
     echo(b, "goto ");
@@ -294,6 +285,7 @@ void prettyNodeBuff(char *b, Node *n){
         case      whileK:
         case     repeatK:
         case      labelK:
+        case   exprstmtK:
         case       gotoK:
         case      breakK:
         case   continueK:
@@ -307,7 +299,7 @@ void prettyNodeBuff(char *b, Node *n){
         case          varK: printVar             (b,n); break;
         case         typeK: printNodeTypeBuff    (b,n); break;
         case         funcK: printNodeFunc        (b,n); break;
-        case         exprK: printExprBuff        (b,n); break;
+        case      argExprK: printArgExpr         (b,n); break;
         case    paramExprK: printParamExpr       (b,n); break;
         case         stmtK: printStmtBuff        (b,n); break;
         case         castK: printCastBuff        (b,n); break;
@@ -319,6 +311,7 @@ void prettyNodeBuff(char *b, Node *n){
         case        whileK: printWhileBuff       (b,n); break;
         case       repeatK: printRepeatBuff      (b,n); break;
         case        labelK: printLabelBuff       (b,n); break;
+        case     exprstmtK: printExprStmtBuff    (b,n); break;
         case         gotoK: printGotoBuff        (b,n); break;
         case        breakK: printBreakBuff       (b,n); break;
         case     continueK: printContinueBuff    (b,n); break;

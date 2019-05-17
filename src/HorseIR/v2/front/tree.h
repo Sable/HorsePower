@@ -13,9 +13,9 @@ typedef struct Program {
 }Prog;
 
 typedef enum Kind {
-    idK, varK, globalK, typeK, compoundK, funcK, exprK, paramExprK, blockK,
-    stmtK, castK, importK, methodK, moduleK, ifK, whileK, repeatK, labelK,
-    gotoK, returnK, breakK, continueK, callK, vectorK, constK,
+    idK, varK, globalK, typeK, compoundK, funcK, argExprK, paramExprK, blockK,
+    stmtK, castK, exprstmtK, importK, methodK, moduleK, ifK, whileK,
+    repeatK, labelK, gotoK, returnK, breakK, continueK, callK, vectorK, constK,
     totalK
 }Kind;
 
@@ -30,6 +30,7 @@ typedef struct Node {
         struct type       {bool isWild; char *typ; List *cell;          } type;
         struct cast       {struct Node *exp,*typ;                       } cast;
         struct assignStmt {struct Node *expr; List *vars;               } assignStmt;
+        struct exprStmt   {struct Node *expr;                           } exprStmt;
         struct ifStmt     {struct Node *condExpr,*thenBlock,*elseBlock; } ifStmt;
         struct whileStmt  {struct Node *condExpr,*bodyBlock;            } whileStmt, repeatStmt;
         struct funcCall   {struct Node *func,*param;                    } call;
@@ -103,6 +104,7 @@ Node *makeNodeCompoundID   (char *id1, char *id2);
 Node *makeNodeStmtIf       (Node *cond, Node *then, Node *other);
 Node *makeNodeStmtWhile    (Node *cond, Node *body);
 Node *makeNodeStmtRepeat   (Node *cond, Node *body);
+Node *makeNodeStmtExpr     (Node *expr);
 Node *makeNodeStmtLabel    (char *id, Node *stmt);
 Node *makeNodeStmtGoto     (char *targ, List *val, List *label);
 Node *makeNodeStmtBreak    (char *id);
@@ -114,7 +116,7 @@ Node *makeNodeConst        (ConstValue *val);
 Node *makeNodeParamExpr    (List *params);
 Node *makeNodeBlock        (List *stmts);
 Node *makeNodeStmtReturn   (List *operands);
-Node *makeNodeExpr         (List *operands);
+Node *makeNodeArgExpr      (List *operands);
 
 /* constant functions */
 ConstValue *makeIntType    (int x, Constant t);

@@ -45,7 +45,7 @@
 
 %type <node> module moduleContent importDirective globalDecl functionDecl
 %type <node> params param typ wildCard generalTypes
-%type <node> stmt block assignStmt controlStmt labelledStmt
+%type <node> stmt block assignStmt controlStmt expressionStmt labelledStmt
 %type <node> expression var name ifStmt whileStmt repeatStmt returnStmt
 %type <node> gotoStmt breakStmt continueStmt condition controlBlock
 %type <node> operand functionCall paramExpr cast functionId literal literalFunc
@@ -189,6 +189,8 @@ stmt               : assignStmt
                      { $$ = $1; }
                    | controlStmt
                      { $$ = $1; }
+                   | expressionStmt
+                     { $$ = $1; }
                    | labelledStmt
                      { $$ = $1; }
 ;
@@ -251,6 +253,9 @@ repeatStmt         : kREPEAT '(' condition ')' controlBlock
                      { $$ = makeNodeStmtRepeat($3, $5); }
 ;
 
+expressionStmt     : expression ';'
+                     { $$ = makeNodeStmtExpr($1); }
+
 labelledStmt       : tID '>' stmt
                      { $$ = makeNodeStmtLabel($1, $3); }
 ;
@@ -304,7 +309,7 @@ functionId         : '@' name
 paramExpr          :
                      { $$ = NULL; }
                    | operand_list
-                     { $$ = makeNodeExpr($1); }
+                     { $$ = makeNodeArgExpr($1); }
 ;
 
 operand_list       : operand
