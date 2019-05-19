@@ -5,11 +5,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <float.h>
 #include <limits.h>
+#include <errno.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <stdarg.h> /* va_start */
 
-void *newM(int n);
-void error(const char* s);
+/* declaration */
+void  *newM(int n);
+void   error(const char* s);
+void   my_tic();
+double my_toc(bool isPrint);
+void   time_clear();
+
 #define NEW(typ)    (typ* )newM(sizeof(typ))
 #define NEW2(typ,n) (typ**)newM(sizeof(typ*)*(n))
 #define NEWL(typ,n) (typ* )newM(sizeof(typ)*(n))
@@ -31,8 +41,17 @@ void error(const char* s);
 #define debug_tic struct timeval tv0, tv1; gettimeofday(&tv0, NULL)
 #define debug_toc gettimeofday(&tv1, NULL); showTime("debug_toc")
 
-#include "front/tree.h"
-#include "front/weed.h"
-#include "front/pretty.h"
+/* time functions */
+#define tic()      my_tic()
+#define toc(...)   do{E elapsed=my_toc(0);P(__VA_ARGS__);}while(0)
+#define time_toc() my_toc(1)
+
+#include "frontend/tree.h"
+#include "frontend/weed.h"
+#include "frontend/pretty.h"
+#include "frontend/pretty.h"
+#include "frontend/name.h"
+#include "backend/common.h"
+#include "translator/common.h"
 
 #endif

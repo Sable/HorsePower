@@ -3,13 +3,15 @@ all: debug
 
 test: flex bison
 
-front = front
+front = frontend
+back  = backend
+trans = translator
 exec_name = horse
 
 flex_file  = h.l
 bison_file = h.y
-h_files = $(front)/*.h global.h
-c_files = $(front)/*.c global.c main.c
+h_files = $(front)/*.h $(back)/*.h $(trans)/*.h global.h
+c_files = $(front)/*.c $(back)/*.c $(trans)/*.c global.c main.c
 
 flex: $(front)/$(flex_file)
 	cd $(front) && flex -o lex.yy.c $(flex_file)

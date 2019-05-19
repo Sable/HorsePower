@@ -11,8 +11,7 @@ static char buff[BUFF_SIZE];
 #define nospace 0
 
 #define echo(b,n)        strcat(b,n)
-#define newLineBuff()    if(withLine) echo(b,"\n")
-#define printLine(b)     echo(b,"\n")
+#define printLine(b)     if(withLine) echo(b,"\n")
 #define printChar(c)     SP(b+strlen(b),"%c",c)
 #define printID(b,n)     echo(b,n->val.idS)
 #define printComp1(b,n)  SP(b,"%s",n->val.compoundID.id2)
@@ -359,19 +358,27 @@ char *getNodeTypeStr(Node *n){
     R NULL;
 }
 
+static void setNewLine(bool x){
+    withLine = x;
+}
+
 void printNodeType(Node *n){
     P("[Line %3d]: %s\n",n->lineno,getNodeTypeStr(n));
 }
 
+void printNodeLine(Node *n){
+    P("[Line %3d]: ",n->lineno); printNode(n);
+}
+
 void printNode(Node *n){
-    buff[0]=0;
+    buff[0]=0; setNewLine(false);
     prettyNodeBuff(buff, n);
     P("%s\n", buff);
 }
 
 void printProg(Prog *root){
-    buff[0]=0;
     printBanner("Pretty Printer");
+    buff[0]=0; setNewLine(true);
     depth = 0;
     prettyListBuff(buff, root->module_list, nospace);
     P("%s\n", buff);

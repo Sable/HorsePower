@@ -25,7 +25,7 @@ typedef struct Node {
         struct import     {char *module; List *content;                 } import;
         struct method     {char *kind,*fname; List *typ; \
                            struct Node *param,*block;                   } method;
-        struct param      {char *id; struct Node *typ;                  } param;
+        struct param      {char *id; struct Node *typ;                  } param;   /* change to var? */
         struct global     {char *id; struct Node *typ,*op;              } global;
         struct type       {bool isWild; char *typ; List *cell;          } type;
         struct cast       {struct Node *exp,*typ;                       } cast;
@@ -42,7 +42,6 @@ typedef struct Node {
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;
-
     } val;
     Kind kind;
     int lineno;
