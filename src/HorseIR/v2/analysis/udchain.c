@@ -3,7 +3,6 @@
 static void scanNode(Node *n   , ChainList *flow);
 static void scanList(List *list, ChainList *flow);
 
-static void   addToChainList    (Chain *c);
 static void   addDefNameToChain (Chain *chain, char *defName);
 static void   addUseNameToChain (Chain *chain, char *useName);
 static void   setCurrentNode    (Node *n, Node *val);
@@ -11,12 +10,12 @@ static void   addToUDChain      (Chain *useChain, Chain *defChain);
 static void   addToDUChain      (Chain *defChain, Chain *useChain);
 static Chain *initChainWithNode (Node *val);
 
-#define scanBlock(n,f)   scanList(n->val.listS,f)
-#define scanCast(n)      scanNode(n->val.cast.exp,NULL)
-#define scanExprStmt(n)  scanNode(n->val.exprStmt.expr,NULL)
-#define scanParamExpr(n) scanList(n->val.listS,NULL)
-#define scanArgExpr(n,f) scanList(n->val.listS,f)
-#define newChain(n)      initChainWithNode(n)
+#define scanBlock(n,f)     scanList(n->val.listS,f)
+#define scanCast(n,f)      scanNode(n->val.cast.exp,f)
+#define scanExprStmt(n,f)  scanNode(n->val.exprStmt.expr,f)
+#define scanParamExpr(n,f) scanList(n->val.listS,f)
+#define scanArgExpr(n,f)   scanList(n->val.listS,f)
+#define newChain(n)        initChainWithNode(n)
 
 Chain *currentChain, *exitChain;
 ChainList *chain_list, *chain_rt;
@@ -26,13 +25,6 @@ bool isLHS;
 
 void initUDChain(){
     chain_list = chain_rt = NEW(ChainList);
-}
-
-static void addToChainList(Chain *c){
-    EP("method deprecated\n");
-    chain_rt->next = NEW(ChainList);
-    chain_rt = chain_rt->next;
-    chain_rt->chain = c;
 }
 
 static bool isInNameList(NameList *x, char *s){
@@ -297,8 +289,8 @@ static void scanCall(Node *n, ChainList *flow){
 }
 
 static void scanReturn(Node *n, ChainList *flow){
+    TODO("Handle return\n");
     exitChain = currentChain;
-    addToChainList(currentChain);
     /* continue scan */
     scanList(n->val.listS, flow);
 }
@@ -325,7 +317,6 @@ static void scanIf(Node *n, ChainList *flow){
 static void scanGlobal(Node *n){
     char *name2 = strName2(currentModuleName, n->val.global.id);
     addDefNameToChain(currentChain, name2);
-    addToChainList(currentChain);
 }
 
 static void scanMethod(Node *n){
@@ -359,24 +350,24 @@ static void scanNode(Node *n, ChainList *flow){
     P("flow is NULL: %d\n", NULL == flow);
     setCurrentNode(n, n);
     switch(n->kind){
-        case       moduleK: scanModule    (n); break; //
-        case       methodK: scanMethod    (n); break; //
-        case         stmtK: scanAssignStmt(n,flow); break; //
-        case         castK: scanCast      (n); break; //
-        case     exprstmtK: scanExprStmt  (n); break; //
-        case    paramExprK: scanParamExpr (n); break; //
-        case         callK: scanCall      (n,flow); break; //
-        case         nameK: scanName      (n,flow); break; //
-        case      argExprK: scanArgExpr   (n,flow); break; //
-        case       returnK: scanReturn    (n,flow); break; //
-        case     continueK: scanContinue  (n); break;
-        case        breakK: scanBreak     (n); break;
-        case           ifK: scanIf        (n,flow); break;
-        case        whileK: scanWhile     (n); break;
-        case       repeatK: scanRepeat    (n); break;
-        case        blockK: scanBlock     (n,flow); break; //
-        case          varK: scanVar       (n,flow); break; //
-        case       globalK: scanGlobal    (n); break; //
+        case    moduleK: scanModule    (n); break; //
+        case    methodK: scanMethod    (n); break; // entry
+        case      stmtK: scanAssignStmt(n,flow); break; //
+        case      castK: scanCast      (n,flow); break; //
+        case  exprstmtK: scanExprStmt  (n,flow); break; //
+        case paramExprK: scanParamExpr (n,flow); break; //
+        case      callK: scanCall      (n,flow); break; //
+        case      nameK: scanName      (n,flow); break; //
+        case   argExprK: scanArgExpr   (n,flow); break; //
+        case    returnK: scanReturn    (n,flow); break; //
+        case  continueK: scanContinue  (n); break;
+        case     breakK: scanBreak     (n); break;
+        case        ifK: scanIf        (n,flow); break;
+        case     whileK: scanWhile     (n); break;
+        case    repeatK: scanRepeat    (n); break;
+        case     blockK: scanBlock     (n,flow); break; //
+        case       varK: scanVar       (n,flow); break; //
+        case    globalK: scanGlobal    (n); break; //
         /* TODO: add more kinds if possible */
     }
     setCurrentNode(n, NULL);
