@@ -6,6 +6,7 @@ char *getNodeTypeStr(Node *n);
 void  printNodeType (Node *n);
 void  printNodeLine (Node *n);
 void  printNode     (Node *n);
+void printNodeStr   (Node *n);
 void  printProg     (Prog *root);
 
 #endif

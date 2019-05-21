@@ -3,15 +3,16 @@ all: debug
 
 test: flex bison
 
-front = frontend
-back  = backend
-trans = translator
+front    = frontend
+analysis = analysis
+back     = backend
+trans    = translator
 exec_name = horse
 
 flex_file  = h.l
 bison_file = h.y
-h_files = $(front)/*.h $(back)/*.h $(trans)/*.h global.h
-c_files = $(front)/*.c $(back)/*.c $(trans)/*.c global.c main.c
+h_files = $(front)/*.h $(back)/*.h $(analysis)/*.h global.h
+c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c global.c main.c
 
 flex: $(front)/$(flex_file)
 	cd $(front) && flex -o lex.yy.c $(flex_file)
@@ -24,7 +25,8 @@ debug: flex bison $(h_files)
 
 
 clean: $(front)_clean
+	rm -f $(exec_name)
 
 $(front)_clean:
-	rm -f lex.yy.c y.tab.c y.tab.h $(exec_name)
+	(cd $(front) && rm -f lex.yy.c y.tab.c y.tab.h)
 

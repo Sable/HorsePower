@@ -14,9 +14,9 @@ static char buff[BUFF_SIZE];
 #define printLine(b)     if(withLine) echo(b,"\n")
 #define printChar(c)     SP(b+strlen(b),"%c",c)
 #define printID(b,n)     echo(b,n->val.idS)
-#define printComp1(b,n)  SP(b,"%s",n->val.compoundID.id2)
-#define printComp2(b,n)  SP(b,"%s.%s", n->val.compoundID.id1, n->val.compoundID.id2)
-#define printComp(b,n)   {if(n->val.compoundID.id1)printComp2(b,n);else printComp1(b,n);}
+#define printName1(b,n)  SP(b,"%s",n->val.name.id2)
+#define printName2(b,n)  SP(b,"%s.%s", n->val.name.id1, n->val.name.id2)
+#define printName(b,n)   {if(n->val.name.id1)printName2(b,n);else printName1(b,n);}
 #define printVar(b,n)    {SP(b,"%s:", n->val.param.id); prettyNodeBuff(b,n->val.param.typ);}
 
 #define printArgExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
@@ -295,7 +295,7 @@ static void prettyNodeBuff(char *b, Node *n){
     resetBuff(b);
     switch(n->kind){
         case           idK: printID              (b,n); break;
-        case     compoundK: printComp            (b,n); break;
+        case         nameK: printName            (b,n); break;
         case          varK: printVar             (b,n); break;
         case         typeK: printNodeTypeBuff    (b,n); break;
         case         funcK: printNodeFunc        (b,n); break;
@@ -324,15 +324,13 @@ static void prettyNodeBuff(char *b, Node *n){
     }
 }
 
-#define CaseLine(k) case k: R #k
-
 char *getNodeTypeStr(Node *n){
     switch(n->kind){
         CaseLine(idK);
         CaseLine(varK);
         CaseLine(globalK);
         CaseLine(typeK);
-        CaseLine(compoundK);
+        CaseLine(nameK);
         CaseLine(funcK);
         CaseLine(argExprK);
         CaseLine(paramExprK);
@@ -370,10 +368,14 @@ void printNodeLine(Node *n){
     P("[Line %3d]: ",n->lineno); printNode(n);
 }
 
-void printNode(Node *n){
+void printNodeStr(Node *n){
     buff[0]=0; setNewLine(false);
     prettyNodeBuff(buff, n);
-    P("%s\n", buff);
+    P("%s", buff);
+}
+
+void printNode(Node *n){
+    printNodeStr(n); P("\n");
 }
 
 void printProg(Prog *root){

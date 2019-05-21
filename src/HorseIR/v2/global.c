@@ -56,3 +56,8 @@ void time_clear(){
 #endif
 
 
+void initGlobal(){
+    initUDChain();
+}
+
+

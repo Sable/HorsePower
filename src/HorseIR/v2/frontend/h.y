@@ -211,9 +211,9 @@ var                : name
 ;
 
 name               : tID
-                     { $$ = makeNodeID($1); }
+                     { $$ = makeNodeName(NULL, $1); }
                    | tID '.' tID
-                     { $$ = makeNodeCompoundID($1, $3); }
+                     { $$ = makeNodeName($1, $3); }
 ;
 
 

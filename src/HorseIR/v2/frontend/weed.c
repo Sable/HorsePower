@@ -194,8 +194,6 @@ static Type getType(Node *x){
     R 0;
 }
 
-#define CaseLine(x) case x: R #x
-
 static char *getTypeStr(Type t){
     switch(t){
         CaseLine(boolT);
@@ -341,7 +339,7 @@ static void weedNode(Node *x){
         case    globalK: weedGlobal(x);    break;
         case        idK: break;
         case      callK: weedCall(x);      break;
-        case  compoundK: break;
+        case      nameK: break;
         case      funcK: break;
         case      castK: weedCast(x);      break;
         case    vectorK: weedVector(x);    break;

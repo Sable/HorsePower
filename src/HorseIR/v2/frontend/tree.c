@@ -119,11 +119,12 @@ Node *makeNodeCast(Node *expr, Node *type){
     return n;
 }
 
-Node *makeNodeCompoundID(char *id1, char *id2){
+Node *makeNodeName(char *id1, char *id2){
     Node *n     = NEW(Node);
-    n->kind     = compoundK;
-    n->val.compoundID.id1 = id1;
-    n->val.compoundID.id2 = id2;
+    n->kind     = nameK;
+    n->val.name.one = NULL==id1;
+    n->val.name.id1 = id1;
+    n->val.name.id2 = id2;
     n->lineno   = yylineno;
     return n;
 }

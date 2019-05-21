@@ -22,12 +22,15 @@ typedef struct SymbolName{
 
 typedef struct SymbolTable{
     SymbolName *table[SymbolTableSize];
-    struct SymbolTable *parent;
+    struct SymbolTable  *parent;
 }SymbolTable;
 
 /* declarations */
-SymbolTable *rootSymbolTable;
 void createSymbolTable(Prog *root);
+extern SymbolTable *rootSymbolTable;
+
+char *strName2 (char *id1, char *id2);
+char *strName  (Node *n);
 
 #endif
 

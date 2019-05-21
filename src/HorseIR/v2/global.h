@@ -24,6 +24,7 @@ void   time_clear();
 #define NEW2(typ,n) (typ**)newM(sizeof(typ*)*(n))
 #define NEWL(typ,n) (typ* )newM(sizeof(typ)*(n))
 #define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))
+#define CaseLine(x) case x: R #x
 
 #define P printf
 #define R return
@@ -49,9 +50,11 @@ void   time_clear();
 #include "frontend/tree.h"
 #include "frontend/weed.h"
 #include "frontend/pretty.h"
-#include "frontend/pretty.h"
 #include "frontend/name.h"
+#include "analysis/common.h"
 #include "backend/common.h"
-#include "translator/common.h"
+//#include "translator/common.h"
+
+void initGlobal();
 
 #endif

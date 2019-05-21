@@ -13,7 +13,7 @@ typedef struct Program {
 }Prog;
 
 typedef enum Kind {
-    idK, varK, globalK, typeK, compoundK, funcK, argExprK, paramExprK, blockK,
+    idK, varK, globalK, typeK, nameK, funcK, argExprK, paramExprK, blockK,
     stmtK, castK, exprstmtK, importK, methodK, moduleK, ifK, whileK,
     repeatK, labelK, gotoK, returnK, breakK, continueK, callK, vectorK, constK,
     totalK
@@ -28,17 +28,17 @@ typedef struct Node {
         struct param      {char *id; struct Node *typ;                  } param;   /* change to var? */
         struct global     {char *id; struct Node *typ,*op;              } global;
         struct type       {bool isWild; char *typ; List *cell;          } type;
-        struct cast       {struct Node *exp,*typ;                       } cast;
+        struct cast       {struct Node *exp,*typ;                       } cast;  /* exp -> expr ? */
         struct assignStmt {struct Node *expr; List *vars;               } assignStmt;
         struct exprStmt   {struct Node *expr;                           } exprStmt;
         struct ifStmt     {struct Node *condExpr,*thenBlock,*elseBlock; } ifStmt;
         struct whileStmt  {struct Node *condExpr,*bodyBlock;            } whileStmt, repeatStmt;
         struct funcCall   {struct Node *func,*param;                    } call;
-        struct labelStmt  {char *id; struct Node *stmt;                 } labelStmt;
-        struct gotoStmt   {char *targ; List *val,*label;                } gotoStmt;
+        struct labelStmt  {char *id; struct Node *stmt;                 } labelStmt; // remove
+        struct gotoStmt   {char *targ; List *val,*label;                } gotoStmt;  // remove
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
-        struct compoundID {char *id1,*id2;                              } compoundID;
+        struct name       {bool one; char *id1,*id2;                    } name;
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;
@@ -99,7 +99,7 @@ Node *makeNodeGlobal       (char *id, Node *type, Node *operand);
 Node *makeNodeType         (bool wild, char *id, List *cellType);
 Node *makeNodeAssignment   (List *vars, Node *expr);
 Node *makeNodeCast         (Node *expr, Node *type);
-Node *makeNodeCompoundID   (char *id1, char *id2);
+Node *makeNodeName         (char *id1, char *id2);
 Node *makeNodeStmtIf       (Node *cond, Node *then, Node *other);
 Node *makeNodeStmtWhile    (Node *cond, Node *body);
 Node *makeNodeStmtRepeat   (Node *cond, Node *body);

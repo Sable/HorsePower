@@ -5,11 +5,11 @@ int yyparse(); /* see y.tab.c */
 extern FILE *yyin;
 extern int yylineno;
 
-static void runInterpreterCore(){
-    tic();
-    HorseInterpreter(root);
-    toc("Interpreter time (ms): %g ms\n", elapsed);
-}
+//static void runInterpreterCore(){
+//    tic();
+//    HorseInterpreter(root);
+//    toc("Interpreter time (ms): %g ms\n", elapsed);
+//}
 
 static void parseInput(char *file_path){
     yylineno = 1;
@@ -33,10 +33,12 @@ int main(int argc, char *argv[]){
     char *qfile = argv[1];
     parseInput(qfile);
     // do sth with root
+    initGlobal();
     //weedProg(root);
+    //createSymbolTable(root);
     //printProg(root);
+    buildUDChain(root);
     //runInterpreterCore();
-    createSymbolTable(root);
     return 0;
 }
 
