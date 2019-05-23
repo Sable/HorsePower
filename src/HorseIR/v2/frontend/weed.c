@@ -164,7 +164,7 @@ static void printConst(Node *x){
     }
 }
 
-static Type getType(Node *x){
+Type getType(Node *x){
     if(!x) R -1;
     if(x->val.type.isWild) R wildT;
     else if(x->val.type.cell) {

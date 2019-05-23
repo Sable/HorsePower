@@ -16,7 +16,7 @@ static char buff[BUFF_SIZE];
 #define printID(b,n)     echo(b,n->val.idS)
 #define printName1(b,n)  SP(b,"%s",n->val.name.id2)
 #define printName2(b,n)  SP(b,"%s.%s", n->val.name.id1, n->val.name.id2)
-#define printName(b,n)   {if(n->val.name.id1)printName2(b,n);else printName1(b,n);}
+#define printName(b,n)   {if(n->val.name.one)printName1(b,n);else printName2(b,n);}
 #define printVar(b,n)    {SP(b,"%s:", n->val.param.id); prettyNodeBuff(b,n->val.param.typ);}
 
 #define printArgExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
@@ -359,6 +359,40 @@ char *getNodeTypeStr(Node *n){
 static void setNewLine(bool x){
     withLine = x;
 }
+
+static void printTypeBuff(char *b, Type x){
+    resetBuff(b);
+    switch(x){
+        case   wildT: echo(b, "?");    break;
+        case   boolT: echo(b, "bool"); break;
+        case    i16T: echo(b, "i16");  break;
+        case    i32T: echo(b, "i32");  break;
+        case    i64T: echo(b, "i64");  break;
+        case    f32T: echo(b, "f32");  break;
+        case    f64T: echo(b, "f64");  break;
+        case   charT: echo(b, "char"); break;
+        case   clexT: echo(b, "complex"); break;
+        case    symT: echo(b, "sym");     break;
+        case    strT: echo(b, "str");     break;
+        case  monthT: echo(b, "m");       break;
+        case   dateT: echo(b, "d");       break;
+        case  tableT: echo(b, "table");   break;
+        case ktableT: echo(b, "ktable");  break;
+        case   listT: echo(b, "list");    break;
+        case   enumT: echo(b, "enum");    break;
+        case   dictT: echo(b, "dict");    break;
+        case   funcT: echo(b, "func");    break;
+        case  wrongT: echo(b, "WRONG");   break;
+        default: EP("Type not supported yet.: %d\n", x);
+    }
+}
+
+void printType(Type x){
+    buff[0]=0;
+    printTypeBuff(buff, x);
+    P("type(%s)",buff);
+}
+
 
 void printNodeType(Node *n){
     P("[Line %3d]: %s\n",n->lineno,getNodeTypeStr(n));

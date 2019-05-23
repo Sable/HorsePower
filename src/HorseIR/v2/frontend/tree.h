@@ -38,7 +38,7 @@ typedef struct Node {
         struct gotoStmt   {char *targ; List *val,*label;                } gotoStmt;  // remove
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
-        struct name       {bool one; char *id1,*id2;                    } name;
+        struct name       {bool one; char *id1,*id2;  /* sym */         } name;
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;
@@ -64,10 +64,11 @@ typedef struct ConstValue{
     };
 }ConstValue;
 
+// wrongT: uninitialized type
 typedef enum Type {
     wildT, boolT, i8T, i16T, i32T, i64T, f32T, f64T, clexT, charT, symT, strT,
     dateT, monthT, timeT, dtT, minuteT, secondT, listT, dictT, enumT, tableT,
-    ktableT,
+    ktableT, funcT, wrongT,
     totalT
 }Type;
 

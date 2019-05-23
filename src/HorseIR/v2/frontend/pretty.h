@@ -9,4 +9,6 @@ void  printNode     (Node *n);
 void printNodeStr   (Node *n);
 void  printProg     (Prog *root);
 
+void  printType     (Type x);
+
 #endif

@@ -13,6 +13,9 @@
 #include <unistd.h>
 #include <stdarg.h> /* va_start */
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 /* declaration */
 void  *newM(int n);
 void   error(const char* s);
@@ -50,7 +53,6 @@ void   time_clear();
 #include "frontend/tree.h"
 #include "frontend/weed.h"
 #include "frontend/pretty.h"
-#include "frontend/name.h"
 #include "analysis/common.h"
 #include "backend/common.h"
 //#include "translator/common.h"

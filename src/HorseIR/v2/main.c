@@ -35,9 +35,9 @@ int main(int argc, char *argv[]){
     // do sth with root
     initGlobal();
     //weedProg(root);
-    //createSymbolTable(root);
+    createSymbolTable(root);
     //printProg(root);
-    buildUDChain(root);
+    //buildUDChain(root);
     //runInterpreterCore();
     return 0;
 }

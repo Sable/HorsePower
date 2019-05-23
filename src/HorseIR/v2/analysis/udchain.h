@@ -14,6 +14,7 @@ typedef struct Chain {
     struct Chain **chain_uses;
     struct Chain **chain_defs;
     bool isVisited;
+    //InfoNodeList *info;
 }Chain;
 
 typedef struct ChainList {

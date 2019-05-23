@@ -21,7 +21,7 @@ Chain *currentChain, *exitChain;
 ChainList *chain_list, *chain_rt;
 char *currentModuleName;
 bool isLHS;
-//InfoNode *currentIn;
+InfoNode *currentIn;
 
 void initUDChain(){
     chain_list = chain_rt = NEW(ChainList);
@@ -281,8 +281,8 @@ static void scanName(Node *n, ChainList *flow){
 
 static void scanCall(Node *n, ChainList *flow){
     if(instanceOf(n, callK)){
-        Node *funcName = n->val.call.func;
-        //currentIn = propagateType(funcName, n->val.call.param);
+        Node *func = n->val.call.func;
+        currentIn = propagateType(func, n->val.call.param);
     }
     //else currentIn = propagateTypeCopy(n->val.call.param);
     scanNode(n->val.call.param, flow);

@@ -58,6 +58,7 @@ void time_clear(){
 
 void initGlobal(){
     initUDChain();
+    checkFuncNumber();
 }
 
 

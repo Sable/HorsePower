@@ -4,7 +4,7 @@
 #define SymbolTableSize 317
 
 typedef enum SymbolKind {
-    moduleS, globalS, methodS, localS, otherS
+    moduleS, globalS, methodS, localS
 }SymbolKind;
 
 typedef struct SymbolName{
@@ -14,16 +14,21 @@ typedef struct SymbolName{
         Node *module;
         Node *global;
         Node *method;
-        Node *locals;
-        Node *others;
+        Node *local;
     }val;
     struct SymbolName *next;
 }SymbolName;
 
 typedef struct SymbolTable{
     SymbolName *table[SymbolTableSize];
-    struct SymbolTable  *parent;
+    struct SymbolTable *parent;
 }SymbolTable;
+
+typedef struct SymbolDecl{
+    char *moduleName;
+    SymbolTable *symTable;
+    struct SymbolDecl *next;
+}SymbolDecl;
 
 /* declarations */
 void createSymbolTable(Prog *root);
