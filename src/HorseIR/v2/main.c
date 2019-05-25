@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     initGlobal();
     //weedProg(root);
     createSymbolTable(root);
+    propagateTypeShape(root);
     //printProg(root);
     //buildUDChain(root);
     //runInterpreterCore();

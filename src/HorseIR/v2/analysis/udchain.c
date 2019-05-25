@@ -282,7 +282,11 @@ static void scanName(Node *n, ChainList *flow){
 static void scanCall(Node *n, ChainList *flow){
     if(instanceOf(n, callK)){
         Node *func = n->val.call.func;
-        currentIn = propagateType(func, n->val.call.param);
+        //InfoNodeList *rtns = propagateType(func, n->val.call.param);
+        //if(totalInfo(rnts) == 1)
+        //    currentIn = rtns->next->val;
+        //else
+        TODO("Add support for single-/multi-var return\n");
     }
     //else currentIn = propagateTypeCopy(n->val.call.param);
     scanNode(n->val.call.param, flow);

@@ -27,7 +27,8 @@ typedef struct Node {
                            struct Node *param,*block;                   } method;
         struct param      {char *id; struct Node *typ;                  } param;   /* change to var? */
         struct global     {char *id; struct Node *typ,*op;              } global;
-        struct type       {bool isWild; char *typ; List *cell;          } type;
+        struct type       {bool isWild; char *typ; List *cell; \
+                           struct InfoNode *in;                         } type;
         struct cast       {struct Node *exp,*typ;                       } cast;  /* exp -> expr ? */
         struct assignStmt {struct Node *expr; List *vars;               } assignStmt;
         struct exprStmt   {struct Node *expr;                           } exprStmt;
@@ -38,7 +39,8 @@ typedef struct Node {
         struct gotoStmt   {char *targ; List *val,*label;                } gotoStmt;  // remove
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
-        struct name       {bool one; char *id1,*id2;  /* sym */         } name;
+        struct name       {bool one; char *id1,*id2; \
+                           struct SymbolTable *st;                      } name;
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;
