@@ -38,6 +38,7 @@ void printInfoNode(InfoNode *x);
 Type getSubType(InfoNode *x);
 ShapeNode *getSubShape(InfoNode *x);
 bool isSameShape(ShapeNode *x, ShapeNode *y);
+void freeInfoNode(InfoNode *in);
 
 #include "symtable.h"   // create symbol tables
 #include "typerule.h"   // define typeshape rules

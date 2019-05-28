@@ -26,42 +26,6 @@ const char *FunctionOtherStr[] = { /* special 14 */
     "datetime_sub"
 };
 
-/* consts */
-typedef enum TypeUnary { /* unary 60 */
-    absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
-    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF,
-    sinhF, tanhF, acoshF, asinhF, atanhF, dateF, yearF, monthF, dayF, timeF,
-    hourF, minuteF, secondF, millF, uniqueF, strF, lenF, rangeF, factF, randF,
-    seedF, flipF, reverseF, whereF, groupF, countF, sumF, avgF, minF, maxF,
-    razeF, enlistF, tolistF, formatF, keysF, valuesF, metaF, loadTableF,
-    fetchF,
-    totalU
-}TypeUnary;
-
-typedef enum TypeBinary { /* binary 33 */
-    ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
-    powerF, logbF, modF, andF, orF, nandF, norF, xorF, dtdiffF, appendF, likeF,
-    compressF, randkF, indexofF, takeF, dropF, orderF, memberF, vectorF,
-    matchF, indexF, columnValueF, subStringF,
-    totalB
-}TypeBinary;
-
-typedef enum TypeOther { /* special 14 */
-    eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF, ktableF,
-    indexAF, listF, outerF, joinIndexF, dtaddF, dtsubF,
-    totalO
-}TypeOther;
-
-
-typedef struct FuncUnit{
-    int kind;
-    union{
-        TypeUnary  u;  /* kind == 1 */
-        TypeBinary b;  /* kind == 2 */
-        TypeOther  t;  /* kind == 3 */
-    };
-}FuncUnit;
-
 
 const int  UnarySize = sizeof( FunctionUnaryStr)/sizeof(char*);
 const int BinarySize = sizeof(FunctionBinaryStr)/sizeof(char*);
@@ -1005,6 +969,15 @@ void *fetchOtherRules(TypeOther x){
         CASE(      dtsubF, ruleDtsub)
         DEFAULT(x);
     }
+}
+
+int getValence(FuncUnit *x){
+    switch(x->kind){
+        case 1: return 1;
+        case 2: return 2;
+        case 3: return getValenceOther(x->t);
+    }
+    return -1;
 }
 
 void *fetchTypeRules(char *name, int* num){

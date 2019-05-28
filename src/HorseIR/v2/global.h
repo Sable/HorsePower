@@ -1,6 +1,29 @@
 #ifndef H_GLOBAL_H
 #define H_GLOBAL_H
 
+#if defined(__APPLE__)
+    #define H_MACOS
+#endif
+
+#if defined(__linux__)
+    #define H_LINUX
+#endif
+
+#if defined(__MINGW32__)
+    #define H_WINDOWS
+#endif
+
+/* declare additional macros */
+#ifdef H_LINUX
+  #define _BSD_SOURCE
+/* check for ANSI extensions: e.g. strdup */
+  #ifdef __STDC_ALLOC_LIB__
+    #define __STDC_WANT_LIB_EXT2__ 1
+  #else
+    #define _POSIX_C_SOURCE 200810L
+  #endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,23 +62,25 @@ void   time_clear();
 #define WP(...)   FP(stderr,__VA_ARGS__)  // warning
 #define EP(...)   do{INFO("[ERROR]"); FP(stderr,__VA_ARGS__); exit(1);}while(0)  // error
 #define TODO(...) do{INFO("[TODO]");  FP(stderr,__VA_ARGS__); exit(1);}while(0)  // todo
+#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stdout,__VA_ARGS__);     }while(0) 
+#define FT(s,...) FP(stdout,s,__VA_ARGS__)
+#define FS(x)     FT("%s",x)
 
 /* For debugging */
 #define printBanner(s) P("/*==== "s" ====*/\n")
-#define debug_tic struct timeval tv0, tv1; gettimeofday(&tv0, NULL)
-#define debug_toc gettimeofday(&tv1, NULL); showTime("debug_toc")
 
 /* time functions */
-#define tic()      my_tic()
-#define toc(...)   do{E elapsed=my_toc(0);P(__VA_ARGS__);}while(0)
-#define time_toc() my_toc(1)
+#define tic() my_tic()
+#define toc() my_toc(1)
+#define time_toc(...) do{E elapsed=my_toc(0);P(__VA_ARGS__);}while(0)
 
 #include "frontend/tree.h"
 #include "frontend/weed.h"
 #include "frontend/pretty.h"
-#include "analysis/common.h"
-#include "backend/common.h"
-//#include "translator/common.h"
+#include    "backend/common.h"
+#include   "analysis/common.h"
+#include       "util/common.h"
+#include "translator/common.h"
 
 void initGlobal();
 

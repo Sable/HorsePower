@@ -28,7 +28,7 @@ List *makeList(List *next, Node *val){
 Node *makeNodeID(char *id){
     Node *n    = NEW(Node);
     n->kind    = idK;
-    n->val.idS = strdup(id);
+    n->val.idS = id;
     n->lineno  = yylineno;
     return n;
 }

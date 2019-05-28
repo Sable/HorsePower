@@ -16,6 +16,9 @@ static bool weedDT    (long long x);
 static bool weedClex  (float *x);
 static bool weedString(char *x);
 
+static int cntMain = 0;
+extern Node *entryMain;
+
 /* code blocks */
 
 /*
@@ -168,7 +171,7 @@ Type getType(Node *x){
     if(!x) R -1;
     if(x->val.type.isWild) R wildT;
     else if(x->val.type.cell) {
-        TODO("Compound type\n");
+        TODO("Cell types not allowed.\n");
     }
     else {
         char *typ = x->val.type.typ;
@@ -194,7 +197,8 @@ Type getType(Node *x){
     R 0;
 }
 
-static char *getTypeStr(Type t){
+// boolT =?= H_B ...
+static char *getTypeStr2(Type t){
     switch(t){
         CaseLine(boolT);
         CaseLine(i8T);
@@ -248,7 +252,7 @@ static void weedVector(Node *x){
         if(!weedConst(p->val, t)){
             printNode(x);
             EP("Literal type or range error: (expect %s, find %s)\n", \
-                    getTypeStr(t),getConstTypeStr(p->val));
+                    getTypeStr2(t),getConstTypeStr(p->val));
         }
         p = p->next;
     }
@@ -287,6 +291,10 @@ static void weedGlobal(Node *x){
 
 static void weedMethod(Node *x){
     printNodeType(x);
+    if(!strcmp(x->val.method.fname, "main")){
+        if(cntMain == 0){ entryMain = x; cntMain++; }
+        else EP("Only one main method expected in modules.\n");
+    }
     weedBlock(x->val.method.block);
 }
 
@@ -351,6 +359,7 @@ static void weedNode(Node *x){
 }
 
 void weedProg(Prog *root){
+    cntMain = 0;
     printBanner("Program Weeder");
     weedModuleList(root->module_list);
 }

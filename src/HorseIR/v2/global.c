@@ -14,6 +14,18 @@ void error(const char *s){
     exit(1);
 }
 
+void initBackend(){
+    initMemory();    // h_memory.c
+    initSym();       // h_symbol.c
+    initSys();       // h_system.c
+}
+
+void initGlobal(){
+    initUDChain();
+    checkFuncNumber();
+    initBackend();
+}
+
 #ifndef my_tic
 
 #define TIMEVAL_N 10
@@ -54,11 +66,5 @@ void time_clear(){
     timeSlotId = 0;
 }
 #endif
-
-
-void initGlobal(){
-    initUDChain();
-    checkFuncNumber();
-}
 
 

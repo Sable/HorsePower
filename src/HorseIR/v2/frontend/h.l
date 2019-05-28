@@ -4,9 +4,9 @@
 #include<string.h>
 #include<stdlib.h>
 void addStr();
-int calcMonth (int yy, int mm);
-int calcDate  (int yy, int mm, int dd);
-int calcSecond(int hh, int mm, int ss);
+int convertMonth (int yy, int mm);
+int convertDate  (int yy, int mm, int dd);
+int convertSecond(int hh, int mm, int ss);
 
 %}
 
@@ -118,7 +118,7 @@ nzdigit    [1-9]
 {digit}{digit}{digit}{digit}-{digit}{digit}-{digit}{digit}T{digit}{digit}:{digit}{digit}:{digit}{digit}\.{digit}{digit}{digit} {
     int yy,mm,dd,hh,m2,ss,ll;
     sscanf(yytext, "%d-%d-%dT%d:%d:%d.%d",&yy,&mm,&dd,&hh,&m2,&ss,&ll);
-    yylval.longconst = calcDate(yy,mm,dd)*86400000LL + calcSecond(hh,m2,ss)*1000 + ll;
+    yylval.longconst = convertDate(yy,mm,dd)*86400000LL + convertSecond(hh,m2,ss)*1000 + ll;
     return tDT;
 }
 
@@ -136,7 +136,7 @@ nzdigit    [1-9]
     //printf("-- Saw a month %s\n", yytext);
     int yy,mm;
     sscanf(yytext, "%d-%d",&yy,&mm);
-    yylval.intconst = calcMonth(yy,mm);
+    yylval.intconst = convertMonth(yy,mm);
     return tMONTH;
 }
 
@@ -144,7 +144,7 @@ nzdigit    [1-9]
 {digit}{digit}:{digit}{digit}:{digit}{digit}\.{digit}{digit}{digit} {
     int hh,mm,ss,ll;
     sscanf(yytext, "%d:%d:%d.%d",&hh,&mm,&ss,&ll);
-    yylval.intconst = calcSecond(hh,mm,ss)*1000 + ll;
+    yylval.intconst = convertSecond(hh,mm,ss)*1000 + ll;
     return tTIME;
 }
 
@@ -152,7 +152,7 @@ nzdigit    [1-9]
 {digit}{digit}:{digit}{digit}:{digit}{digit} {
     int hh,mm,ss;
     sscanf(yytext, "%d:%d:%d",&hh,&mm,&ss);
-    yylval.intconst = calcSecond(hh,mm,ss);
+    yylval.intconst = convertSecond(hh,mm,ss);
     return tSECOND;
 }
 
@@ -191,15 +191,15 @@ void addStr() {
     sprintf(yylval.stringconst, "%s", yytext);
 }
 
-int calcMonth(int yy, int mm){
+int convertMonth(int yy, int mm){
     return yy * 100 + mm;
 }
 
-int calcDate(int yy, int mm, int dd){
+int convertDate(int yy, int mm, int dd){
     return yy * 10000 + mm * 100 + dd;
 }
 
-int calcSecond(int hh, int mm, int ss){
+int convertSecond(int hh, int mm, int ss){
     return hh * 3600 + mm * 60 + ss;
 }
 

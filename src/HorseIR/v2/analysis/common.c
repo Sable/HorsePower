@@ -71,6 +71,13 @@ bool isSameShape(ShapeNode *x, ShapeNode *y){
     return false;
 }
 
+void freeInfoNode(InfoNode *in){
+    if(in){
+        freeInfoNode(in->subInfo);
+        freeInfoNode(in->next);
+        free(in);
+    }
+}
 
 
 

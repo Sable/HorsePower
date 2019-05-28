@@ -1,6 +1,42 @@
 #ifndef __A_TYPERULE__
 #define __A_TYPERULE__
 
+/* consts */
+typedef enum TypeUnary { /* unary 60 */
+    absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
+    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF,
+    sinhF, tanhF, acoshF, asinhF, atanhF, dateF, yearF, monthF, dayF, timeF,
+    hourF, minuteF, secondF, millF, uniqueF, strF, lenF, rangeF, factF, randF,
+    seedF, flipF, reverseF, whereF, groupF, countF, sumF, avgF, minF, maxF,
+    razeF, enlistF, tolistF, formatF, keysF, valuesF, metaF, loadTableF,
+    fetchF,
+    totalU
+}TypeUnary;
+
+typedef enum TypeBinary { /* binary 33 */
+    ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
+    powerF, logbF, modF, andF, orF, nandF, norF, xorF, dtdiffF, appendF, likeF,
+    compressF, randkF, indexofF, takeF, dropF, orderF, memberF, vectorF,
+    matchF, indexF, columnValueF, subStringF,
+    totalB
+}TypeBinary;
+
+typedef enum TypeOther { /* special 14 */
+    eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF, ktableF,
+    indexAF, listF, outerF, joinIndexF, dtaddF, dtsubF,
+    totalO
+}TypeOther;
+
+typedef struct FuncUnit{
+    int kind;
+    union{
+        TypeUnary  u;  /* kind == 1 */
+        TypeBinary b;  /* kind == 2 */
+        TypeOther  t;  /* kind == 3 */
+    };
+}FuncUnit;
+
+
 /* macros */
 
 #define inType(n)  (n)->type
@@ -43,6 +79,7 @@ void *fetchTypeRules(char *name, int* num);
 ShapeNode *newShapeNode(pShape type, int kind, int size);
 bool checkType(InfoNode *x, InfoNode *y);
 bool checkShape(InfoNode *x, InfoNode *y);
-
+int getValence(FuncUnit *x);
+void getFuncIndexByName(char *name, FuncUnit *x);
 
 #endif

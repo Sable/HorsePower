@@ -6,13 +6,18 @@ test: flex bison
 front    = frontend
 analysis = analysis
 back     = backend
-trans    = translator
+transt   = translator
+util     = util
+
 exec_name = horse
 
 flex_file  = h.l
 bison_file = h.y
-h_files = $(front)/*.h $(back)/*.h $(analysis)/*.h global.h
-c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c global.c main.c
+h_files = $(front)/*.h $(back)/*.h $(analysis)/*.h $(transt)/*.h $(util)/*.h global.h
+c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c $(transt)/*.c $(util)/*.c global.c main.c
+include_files = -I"../../../libs/include/"
+include_libs  = ../../../libs/lib/libpcre2-8.a
+include_flags = -ll -fopenmp -std=c99 -lm -march=native -DPROFILE -D_POSIX_SOURCE
 
 flex: $(front)/$(flex_file)
 	cd $(front) && flex -o lex.yy.c $(flex_file)
@@ -21,7 +26,10 @@ bison: $(front)/$(bison_file)
 	cd $(front) && bison --yacc --defines $(bison_file) -v
 
 debug: flex bison $(h_files)
-	gcc -g $(c_files) -o $(exec_name)
+	gcc -g $(c_files) -o $(exec_name) \
+		$(include_files) \
+		$(include_libs)  \
+		$(include_flags)
 
 
 clean: $(front)_clean

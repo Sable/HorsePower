@@ -17,6 +17,7 @@ typedef struct SymbolName{
         Node *local;
     }val;
     struct SymbolName *next;
+    V value;
 }SymbolName;
 
 typedef struct SymbolTable{
@@ -29,6 +30,16 @@ typedef struct SymbolDecl{
     SymbolTable *symTable;
     struct SymbolDecl *next;
 }SymbolDecl;
+
+typedef struct SymbolNameList{
+    SymbolName *symName;
+    struct SymbolNameList *next;
+}SymbolNameList;
+
+typedef struct MetaMethod{
+    SymbolNameList *paramVars;
+    SymbolNameList *localVars;
+}MetaMethod;
 
 //typedef struct InfoNode{
 //    Type type;
@@ -55,14 +66,15 @@ typedef struct SymbolDecl{
 //}InfoNodeList;
 
 /* declarations */
-void createSymbolTable(Prog *root);
+void buildSymbolTable(Prog *root);
 extern SymbolTable *rootSymbolTable;
 
 char *strName2 (char *id1, char *id2);
 char *strName  (Node *n);
 
-SymbolName *getSymbol(SymbolTable *st, char *name);
-SymbolName *putSymbol(SymbolTable *st, char *name, SymbolKind kind);
+SymbolName *getSymbolName(SymbolTable *st, char *name);
+SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind);
+SymbolName *getSymbolNameFromName(Node *n);
 
 #endif
 

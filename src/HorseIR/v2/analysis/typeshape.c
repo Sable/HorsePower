@@ -18,7 +18,7 @@ InfoNodeList *currentInList;
 
 /*  ---- above declarations ---- */
 
-static int totalElement(List *list){ // no dummy
+int totalElement(List *list){ // no dummy
     int c=0; while(list){c++; list=list->next;} return c;
 }
 
@@ -74,7 +74,7 @@ static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
 InfoNodeList *propagateType(Node *func, InfoNodeList *list){
     //printNode(func);
     char *funcName = func->val.name.id2;
-    SymbolName *sn = getSymbol(func->val.name.st, funcName);
+    SymbolName *sn = getSymbolName(func->val.name.st, funcName);
     switch(sn->kind){
         case builtinS:
             {
@@ -116,7 +116,7 @@ static InfoNode *getInfoFromNode(Node *n){
         return n->val.type.in;
     }
     else if(instanceOf(n, nameK)){
-        SymbolName *x = getSymbol(n->val.name.st, n->val.name.id2);
+        SymbolName *x = getSymbolName(n->val.name.st, n->val.name.id2);
         Node *t = NULL;
         switch(x->kind){
             case globalS: t = x->val.global; break;
@@ -268,7 +268,7 @@ static InfoNodeList *scanRepeatStmt(Node *n){
 }
 
 static void scanName(Node *n){
-    SymbolName *x = getSymbol(n->val.name.st, n->val.name.id2);
+    SymbolName *x = getSymbolName(n->val.name.st, n->val.name.id2);
     switch(x->kind){
         case globalS: {Node *t=x->val.global; scanType(t->val.global.typ); } break;
         case localS : {Node *t=x->val.local;  scanType(t->val.param.typ);  } break;

@@ -62,6 +62,21 @@ static InfoNode *getInfoNode(Node *n){
     return x;
 }
 
+SymbolNameList *symList;
+
+static void cleanSymbolNameList(SymbolNameList *list){
+    //if(list && list->next){ cleanSymbolNameList(list->next); free(list->next); list->next = NULL; }
+    list->next = NULL;
+}
+
+static void addSymbolNameList(SymbolNameList *list, SymbolName *sn){
+    //P("added %s\n", sn->name);
+    SymbolNameList *x = NEW(SymbolNameList);
+    x->symName = sn;
+    x->next = list->next;
+    list->next = x;
+}
+
 // "id1.id2"
 char *strName(Node *n){
     if(n->val.name.one) return n->val.name.id2;
@@ -113,7 +128,7 @@ static int simpleHash(char *str){
     return hash % SymbolTableSize;
 }
 
-SymbolName *putSymbol(SymbolTable *st, char *name, SymbolKind kind){
+SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind){
     int i = simpleHash(name);
     //if(kind != builtinS)
     //  P("put string: %s ==> %d ==> %lld\n", name,i,(long long)(st->table[i]));
@@ -128,13 +143,13 @@ SymbolName *putSymbol(SymbolTable *st, char *name, SymbolKind kind){
     return s;
 }
 
-SymbolName *getSymbol(SymbolTable *st, char *name){
+SymbolName *getSymbolName(SymbolTable *st, char *name){
     int i = simpleHash(name);
     for(SymbolName *s = st->table[i]; s; s = s->next){
         if(!strcmp(s->name, name)) return s;
     }
     if(st->parent == NULL) return NULL;
-    return getSymbol(st->parent, name);
+    return getSymbolName(st->parent, name);
 }
 
 static bool defSymbol(SymbolTable *st, char *name){
@@ -153,7 +168,7 @@ static void scanDeclarationList(List *list, SymbolTable *st);
 static void addDecls(SymbolTable *table, char *name){
     SymbolDecl *x = NEW(SymbolDecl);
     x->moduleName = name;
-    x->symTable = table;
+    x->symTable   = table;
     x->next = globalDecls->next;
     globalDecls->next = x;
 }
@@ -184,13 +199,13 @@ static SymbolTable *getDecls(char *moduleName, char **subNames, int size){
         else if(size > 0){
             SymbolTable *st = NEW(SymbolTable);
             for(int i=0; i<size; i++){
-                SymbolName *sn = getSymbol(x->symTable, subNames[i]);
+                SymbolName *sn = getSymbolName(x->symTable, subNames[i]);
                 if(sn->kind == methodS){
-                    SymbolName *n = putSymbol(st, subNames[i], methodS);
+                    SymbolName *n = putSymbolName(st, subNames[i], methodS);
                     n->val.method = sn->val.method;
                 }
                 else if(sn->kind == globalS){
-                    SymbolName *n  = putSymbol(st, subNames[i], globalS);
+                    SymbolName *n  = putSymbolName(st, subNames[i], globalS);
                     n->val.global = sn->val.global;
                 }
             }
@@ -208,12 +223,12 @@ static void scanModuleDecl(Node *n, SymbolTable *st){
 }
 
 static void scanMethodDecl(Node *n, SymbolTable *st){
-    SymbolName *s = putSymbol(st, n->val.method.fname, methodS);
+    SymbolName *s = putSymbolName(st, n->val.method.fname, methodS);
     s->val.method = n;
 }
 
 static void scanGlobalDecl(Node *n, SymbolTable *st){
-    SymbolName *s = putSymbol(st, n->val.global.id, globalS);
+    SymbolName *s = putSymbolName(st, n->val.global.id, globalS);
     s->val.global = n;
 }
 
@@ -236,10 +251,25 @@ static void scanDeclarationList(List *list, SymbolTable *st){
 // 2nd pass: scan
 
 static void scanVar(Node *n, SymbolTable *st){
-    P("var = %s\n", n->val.param.id);
-    SymbolName *s = putSymbol(st, n->val.param.id, localS);
+    //P("var = %s\n", n->val.param.id);
+    SymbolName *s = putSymbolName(st, n->val.param.id, localS);
     s->val.local = n;
     scanStatement(n->val.param.typ, st);
+    addSymbolNameList(symList, n->val.param.sn = s); // assign symbolname and add it to a list
+}
+
+SymbolName *getSymbolNameFromName(Node *n){
+    if(instanceOf(n, nameK)){
+        char *moduleName = n->val.name.id1;
+        char *fieldName  = n->val.name.id2;
+        if(n->val.name.one)
+            return getSymbolName(n->val.name.st, fieldName);
+        else{
+            SymbolDecl *sd = findDecls(moduleName);
+            return getSymbolName(sd->symTable, fieldName);
+        }
+    }
+    return NULL;
 }
 
 static void scanName(Node *n, SymbolTable *st){
@@ -248,12 +278,12 @@ static void scanName(Node *n, SymbolTable *st){
     SymbolName *sn = NULL;
     //printNode(n);
     if(n->val.name.one){
-        sn = getSymbol(st, fieldName);
+        sn = getSymbolName(st, fieldName);
         n->val.name.st = st;
     }
     else {
         SymbolDecl *sd = findDecls(moduleName);
-        sn = getSymbol(sd->symTable, fieldName);
+        sn = getSymbolName(sd->symTable, fieldName);
         n->val.name.st = sd->symTable;
     }
     if(sn){
@@ -300,12 +330,27 @@ static void scanReturnStmt(Node *n, SymbolTable *st){
     scanStatementList(n->val.listS, st);
 }
 
+//static void printSymList(){
+//    SymbolNameList *p = symList->next;
+//    while(p){P("- %s\n", p->symName->name); p=p->next;}
+//}
+
 static void scanMethod(Node *n, SymbolTable *st){
     //SymbolName *s = putSymbol(st, n->val.method.fname, methodS);
     //s->val.method = n;
+    MetaMethod *meta = NEW(MetaMethod);
     SymbolTable *t = scopeSymbolTable(n, st);
-    scanStatement(n->val.method.param, t);
-    scanStatement(n->val.method.block, t);
+    scanStatementList(n->val.method.typ, t); // types
+
+    cleanSymbolNameList(symList);
+    scanStatement(n->val.method.param, t);   // parameters
+    meta->paramVars = symList->next; // no dummy
+
+    cleanSymbolNameList(symList);
+    scanStatement(n->val.method.block, t);   // statements
+    meta->localVars = symList->next; // no dummy
+    // collect all meta info
+    n->val.method.meta = meta;
 }
 
 static void scanGlobal(Node *n, SymbolTable *st){
@@ -346,6 +391,7 @@ static void scanArgExpr(Node *n, SymbolTable *st){
     scanStatementList(n->val.listS, st);
 }
 
+/* TODO: import partial */
 static void scanImport(Node *n, SymbolTable *st){
     //SymbolName *s = putSymbol(st, n->val.import.module, otherS);
     //s->val.others = n;
@@ -408,20 +454,21 @@ extern int  OtherSize;
 
 static void addDefaultBuiltin(){
     SymbolTable *st = NEW(SymbolTable);
-    DOI(UnarySize , putSymbol(st,  FunctionUnaryStr[i], builtinS));
-    DOI(BinarySize, putSymbol(st, FunctionBinaryStr[i], builtinS));
-    DOI(OtherSize , putSymbol(st,  FunctionOtherStr[i], builtinS));
+    DOI(UnarySize , putSymbolName(st,  FunctionUnaryStr[i], builtinS));
+    DOI(BinarySize, putSymbolName(st, FunctionBinaryStr[i], builtinS));
+    DOI(OtherSize , putSymbolName(st,  FunctionOtherStr[i], builtinS));
     addDecls(st, "Builtin");
 }
 
 static void addDefaultSystem(){
-    // add sth...
+    // TODO: add sth...
 }
 
-void createSymbolTable(Prog *root){
+void buildSymbolTable(Prog *root){
     printBanner("Symbol Table");
     // 1st pass
     globalDecls = NEW(SymbolDecl);
+    symList = NEW(SymbolNameList);
     scanDeclarationList(root->module_list, NULL);
     addDefaultBuiltin();
     addDefaultSystem();

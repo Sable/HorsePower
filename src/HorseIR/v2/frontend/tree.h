@@ -23,9 +23,10 @@ typedef struct Node {
     union {
         struct module     {char *id; List *body;                        } module;
         struct import     {char *module; List *content;                 } import;
-        struct method     {char *kind,*fname; List *typ; \
-                           struct Node *param,*block;                   } method;
-        struct param      {char *id; struct Node *typ;                  } param;   /* change to var? */
+        struct method     {char *kind,*fname; struct Node *param,*block; \
+                           List *typ; struct MetaMethod *meta;          } method;
+        struct param      {char *id; struct Node *typ; \
+                           struct SymbolName *sn;                       } param;   /* change to var? */
         struct global     {char *id; struct Node *typ,*op;              } global;
         struct type       {bool isWild; char *typ; List *cell; \
                            struct InfoNode *in;                         } type;

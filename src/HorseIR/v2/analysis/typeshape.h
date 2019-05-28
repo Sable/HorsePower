@@ -49,7 +49,8 @@
 /* signatures */
 
 InfoNodeList *propagateType(Node *func, InfoNodeList *list);
-int totalInfo(InfoNodeList *list);
+int totalInfo(InfoNodeList *list); // skip dummy
+int totalElement(List *list);      //   no dummy
 void propagateTypeShape(Prog *root);
 
 

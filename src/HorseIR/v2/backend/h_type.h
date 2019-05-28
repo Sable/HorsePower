@@ -172,3 +172,9 @@
  *
  */
 
+#define H_LL     H_I
+#define sLL(x)   sI(x)
+#define vLL(x,i) vI(x,i)
+#define xLL(i)   xI(i)
+#define hash_LL  hash_I
+

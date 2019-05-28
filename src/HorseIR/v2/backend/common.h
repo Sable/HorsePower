@@ -24,8 +24,10 @@ typedef struct { L row, col; ListY *fkey; } A0,*A;
 typedef uint64_t UL;
 typedef uint32_t UI;
 
+#define LL I
+
 /* size: 4 + 2 * 8 + 16 = 36 */
-typedef struct node_value{
+typedef struct NodeValue {
     L len; G g; I typ;
     union{
         B b;   //boolean   1  byte
@@ -47,9 +49,14 @@ typedef struct node_value{
         X x;   //complex   8  bytes
         Y y;   //enum      8  bytes
         A a;   //table     16 bytes
-        struct node_value *g2;
+        struct NodeValue *g2;
     };
 }V0,*V;
+
+typedef struct ValueList{
+    V v;
+    struct ValueList *next;
+}VList;
 
 typedef struct list_value_node{
     V value;
@@ -86,17 +93,20 @@ typedef enum OptCode{
 
 /* parallel DOI */
 #define STRINGIFY(x) #x
-#define DOP(n, x, ...) {IL i2=n; \
+#define DOP(n, x, ...) {L i2=n; \
     _Pragma(STRINGIFY(omp parallel for simd __VA_ARGS__)) \
-    for(IL i=0;i<i2;i++) x;}
+    for(L i=0;i<i2;i++) x;}
 
-#define DOT(n, x, ...) {IL seg=(n)/H_CORE; \
+#define DOT(n, x, ...) {L seg=(n)/H_CORE; \
     _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
     { \
-        IL tid = omp_get_thread_num(); \
-        for(IL i=tid*seg,i2=(tid!=H_CORE-1?(i+seg):(n));i<i2;i++) x; \
+        L tid = omp_get_thread_num(); \
+        for(L i=tid*seg,i2=(tid!=H_CORE-1?(i+seg):(n));i<i2;i++) x; \
     } \
 }
+
+#define STRING_EMPTY(s) ((s)[0]!=0)
+#define STRING_NONEMPTY(s) ((s)[0]!=0)
 
 /* constant */
 
@@ -105,11 +115,43 @@ typedef enum OptCode{
 
 /* extern */
 
+extern G  H_heap;
+extern E  H_EPSILON;
+extern L  H_CORE;
+extern C  LINE_SEP;
+extern TC H_TARGET;
+
 #ifdef __cplusplus
 }
 #endif
 
 /* include .h files */
+#include <pcre2.h>
+#include <omp.h>
+#include "h_memory.h"
+#include "h_symbol.h"
+#include "h_libs.h"
+#include "h_io.h"
+#include "h_system.h"
+#include "h_hash.h"
+#include "h_primitive.h"
+#include "load_db.h"
+
+/* common.c */
+V initLiteralDate   (L x);
+V initLiteralBool   (L x);
+V initLiteralI64    (L x);
+V initLiteralString (S s);
+V initLiteralSym    (S str);
+V initLiteralF64    (E x);
+V initLiteralChar   (C x);
+V initLiteralSymVector (L n, S strs[]);
+V initLiteralBoolVector(L n, B b[]);
+V initLiteralI64Vector (L n, L b[]);
+V initLiteralStrVector (L n, S b[]);
+
+/* heuristics */
+#define NUM_JOIN_LINEAR 10   // linear scan (<) or hash (>=)
 
 #endif
 
