@@ -18,15 +18,17 @@ typedef I (*EachTriple)(V,V,V,V);
 extern Node *entryMain;
 static Node *currentMethod;
 
-static O runList(List *list);
-static O runNode(Node *n);
+static O runList(List *list, B *isR);
+static O runNode(Node *n, B *isR);
 static O runMethod(Node *method, VList *param);
 
-#define runListKind(n) runList(n->val.listS)
-#define runBlock(n)    runListKind(n)
-#define runArgExpr(n)  runListKind(n)
+#define runListKind(n, r) runList(n->val.listS, r)
+#define runBlock(n,r)     runListKind(n,r)
+#define runArgExpr(n)     runListKind(n,NULL)
 
 static VList *paramList, *rtnList;
+
+// TODO: test a variable is used before assigned
 
 /* ---- above declarations ---- */
 
@@ -158,6 +160,11 @@ V executeOther(TypeOther x, V *params, I numParams){
     R NULL;
 }
 
+static B H_LINE;
+static O showLine(Node *n){
+    P(">> running line %d: ", n->lineno);
+    printNode(n);
+}
 
 static I totalVList(VList *x){ // skip dummy
     I c=0; while(x->next){c++; x=x->next;} R c;
@@ -171,7 +178,12 @@ static O addParam(VList *list, V x){
 }
 
 static O cleanVList(VList *x){ // free x->v also?
-    if(x && x->next){ cleanVList(x->next); free(x->next); x->next = NULL; }
+    VList *p = x->next;
+    while(p){
+        VList *t = p; p = p->next; free(t);
+    }
+    x->next = NULL;
+    //if(x && x->next){ cleanVList(x->next); free(x->next); x->next = NULL; }
 }
 
 static void printVList(VList *list){
@@ -182,7 +194,7 @@ static void printVList(VList *list){
 }
 
 static G runStack;
-static L stackPtr;
+static L stackPtr, stackPeak;
 #define STACK_SIZE 67108864  // 64MB
 
 static L totalSymbolNames(SymbolNameList *list){
@@ -196,7 +208,7 @@ static O saveToStackSub(SymbolNameList *list){
         V *x = (V*)(runStack + stackPtr);
         L i = 0;
         while(list){
-            P("added: %s\n", list->symName->name);
+            //P("added: %s\n", list->symName->name);
             x[i++] = list->symName->value;
             list=list->next;
         }
@@ -210,24 +222,27 @@ static O saveToStack(Node *method){
     //P("save to stack\n");
     saveToStackSub(method->val.method.meta->paramVars);
     saveToStackSub(method->val.method.meta->localVars);
+    if(stackPtr > stackPeak)
+        stackPeak = stackPtr;
 }
 
 static O loadFromStackSub(SymbolNameList *list){
-    L size = totalSymbolNames(list);
-    stackPtr -= size *sizeof(V);
+    L size = totalSymbolNames(list) * sizeof(V);
+    stackPtr -= size;
     V *x = (V*)(runStack + stackPtr);
     L i = 0;
     while(list){
+        //P("loaded: %s\n", list->symName->name);
         list->symName->value = x[i++];
         list=list->next;
     }
-    //P(">> load i = %lld\n", i);
+    //P(">> load i = %lld\n", i); getchar();
 }
 
-static O loadFromStack(Node *method){
-    //P("load from stack\n");
-    loadFromStackSub(method->val.method.meta->paramVars);
+static O loadFromStack(Node *method){ // localVars first, then paramVars
+    //P("load from stack\n"); getchar();
     loadFromStackSub(method->val.method.meta->localVars);
+    loadFromStackSub(method->val.method.meta->paramVars);
 }
 
 static O loadParams(Node *method, VList *param){
@@ -250,8 +265,6 @@ static I getParamsSub(VList *list, V *rtn){
     }
     return 0;
 }
-
-// TODO: test a variable is used before assigned
 
 static V *getParams(VList *list){
     I tot = totalVList(list);
@@ -278,6 +291,14 @@ static V invokeBuiltin(char *funcName, VList *list){
     // TODO: free params
 }
 
+static O copyParamToRtn(VList *param, VList *rtn){
+    if(param && param->next){
+        VList *p = param->next;
+        copyParamToRtn(p, rtn);
+        addParam(rtn, p->v);
+    }
+}
+
 static O invokeFunction(Node *func, VList *param){
     char *funcName = func->val.name.id2;
     SymbolName *sn = getSymbolName(func->val.name.st, funcName);
@@ -287,8 +308,12 @@ static O invokeFunction(Node *func, VList *param){
               addParam(rtnList, rtn);
              } break;
         case  methodS: {
+                //P("stackPtr = %lld\n", stackPtr);
+                //printV(param->next->v); getchar();
                 runMethod(sn->val.method, param);
-                rtnList->next = paramList->next; // save link
+                //rtnList->next = paramList->next; // save link (dangerous)
+                cleanVList(rtnList);  // must be cleaned before copy
+                copyParamToRtn(paramList, rtnList);
              } break;
         default: TODO("Support kind: %d\n", sn->kind);
     }
@@ -300,7 +325,7 @@ static O runCall(Node *n){
     cleanVList(rtnList);
     cleanVList(paramList);
     //P("size = %d\n", totalVList(rtnList)); getchar();
-    runNode(n->val.call.param); 
+    runNode(n->val.call.param, NULL); 
     invokeFunction(funcName, paramList);
 }
 
@@ -334,15 +359,16 @@ static O assignVars(List *vars, VList *list){
 }
 
 static O runAssignStmt(Node *n){
+    if(H_LINE) showLine(n);
     Node *expr = n->val.assignStmt.expr;
     List *vars = n->val.assignStmt.vars;
-    runNode(expr);
+    runNode(expr, NULL);
     I numVars = totalVar(vars);
     I numRtns = totalVList(rtnList);
     if(numVars == numRtns){
         assignVars(vars, rtnList->next);
     }
-    else EP("%d expects ,but only %d returned\n", numVars, numRtns);
+    else EP("%d expects, but %d returned\n", numVars, numRtns);
 }
 
 static O runName(Node *n){
@@ -390,24 +416,38 @@ static O checkReturnType(List *nlist, VList *plist){
     }
 }
 
-static O runReturn(Node *n){
+static O runReturn(Node *n, B *isR){
+    if(H_LINE) showLine(n);
     cleanVList(paramList);
-    runList(n->val.listS);
+    runList(n->val.listS, NULL);
     checkReturnType(currentMethod->val.method.typ, paramList->next);
+    *isR = true;
 }
 
-static O runNode(Node *n){
+static O runIf(Node *n, B *isR){
+    cleanVList(paramList);
+    runNode(n->val.ifStmt.condExpr, isR);
+    V x = paramList->next->v; // only 1st value node
+    if(xn == 1 && xp == H_B){
+        if(xb) runNode(n->val.ifStmt.thenBlock, isR);
+        else runNode(n->val.ifStmt.elseBlock, isR);
+    }
+    else EP("If-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+}
+
+static O runNode(Node *n, B *isR){
+    if(isR && *isR) R;
     switch(n->kind){
         case     stmtK: runAssignStmt(n); break;
-        case   returnK: runReturn(n);     break;
-        case    blockK: runBlock(n);      break;
         case     callK: runCall(n);       break;
         case   vectorK: runVector(n);     break;
         case  argExprK: runArgExpr(n);    break;
         case     nameK: runName(n);       break;
+        case   returnK: runReturn(n, isR);break;
+        case    blockK: runBlock(n, isR); break;
+        case       ifK: runIf(n, isR);    break;
         case    breakK: TODO("break");    break;
         case continueK: TODO("continue"); break;
-        case       ifK: TODO("if");       break;
         case    whileK: TODO("while");    break;
         case   repeatK: TODO("repeat");   break;
         default: EP("Kind not supported yet: %s\n", getNodeTypeStr(n));
@@ -415,15 +455,16 @@ static O runNode(Node *n){
 }
 
 
-static void runList(List *list){
+static O runList(List *list, B *isR){
     if(list){
-        runList(list->next);
-        if(list->val) runNode(list->val);
+        runList(list->next, isR);
+        if(list->val)
+            runNode(list->val, isR);
     }
 }
 
 static O runMethod(Node *method, VList *param){
-    P("method name %s\n", method->val.method.fname);
+    if(H_LINE) P("method name %s\n", method->val.method.fname);
     Node *prevNode = currentMethod;
     if(prevNode != NULL)
         saveToStack(prevNode);
@@ -431,16 +472,16 @@ static O runMethod(Node *method, VList *param){
         loadParams(method, param);
     currentMethod = method;
     List *rtnTypes = method->val.method.typ;
-    runNode(method->val.method.block);
+    B isR=false; runNode(method->val.method.block, &isR);
     if(rtnTypes){
         // output - if it has returns
         if(method == entryMain){
             P("Output: \n");
             printVList(paramList->next);
         }
-        else if(prevNode != NULL){
-            loadFromStack(prevNode);
-        }
+    }
+    if(prevNode != NULL){
+        loadFromStack(prevNode);
     }
 }
 
@@ -448,7 +489,12 @@ static O init(){
     paramList = NEW(VList);
     rtnList = NEW(VList);
     runStack = (G)malloc(STACK_SIZE);
-    stackPtr = 0;
+    stackPtr = stackPeak = 0;
+    H_LINE = false; // debug
+}
+
+static O resultReport(){
+    P("stack pointer> current: %lld, peak = %lld, max = %lld\n", stackPtr, stackPeak, (L)STACK_SIZE);
 }
 
 /* entry */
@@ -458,6 +504,7 @@ I HorseInterpreter(Prog *rt){
     runMethod(entryMain, NULL);
     //printSymInfo();
     //printHeapInfo();
+    resultReport();
     R 0;
 }
 

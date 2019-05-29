@@ -29,7 +29,6 @@ static void parseInput(char *file_path){
 
 static void envInit(char *file){
     parseInput(file);
-    // do sth with root
     initGlobal();
     weedProg(root);  // weed types/main
     //printProg(root);
@@ -51,10 +50,8 @@ static void envCompiler(char *file){
 
 
 int main(int argc, char *argv[]){
-    if(argc != 2){
-        WP("Usage: %s <file_path>\n", argv[0]);
-        exit(1);
-    }
+    if(argc != 2)
+        EP("Usage: %s <file_path>\n", argv[0]);
     char *qfile = argv[1];
     envInterpreter(qfile);
     return 0;
