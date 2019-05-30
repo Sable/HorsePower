@@ -57,7 +57,7 @@
 %type <constvalue> realValue complexValue realNumber numericValue 
 %type <constvalue> charValue stringValue symbolValue calendarValue
 
-%type <stringconst> funcKind label
+%type <stringconst> funcKind
 
 %start program
 
@@ -270,18 +270,12 @@ returnStmt         : kRETURN operand_list ';'
                      { $$ = makeNodeStmtReturn($2); }
 ;
 
-breakStmt          : kBREAK label ';'
-                     { $$ = makeNodeStmtBreak($2); }
+breakStmt          : kBREAK ';'
+                     { $$ = makeNodeStmtBreak(); }
 ;
 
-continueStmt       : kCONTINUE label ';'
-                     { $$ = makeNodeStmtContinue($2); }
-;
-
-label              : 
-                     { $$ = NULL; }
-                   | tID
-                     { $$ = $1; }
+continueStmt       : kCONTINUE ';'
+                     { $$ = makeNodeStmtContinue(); }
 ;
 
 condition          : operand

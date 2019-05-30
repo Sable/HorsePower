@@ -18,13 +18,19 @@ typedef I (*EachTriple)(V,V,V,V);
 extern Node *entryMain;
 static Node *currentMethod;
 
-static O runList(List *list, B *isR);
-static O runNode(Node *n, B *isR);
+static O runList(List *list, I *isR);
+static O runNode(Node *n, I *isR);
 static O runMethod(Node *method, VList *param);
 
 #define runListKind(n, r) runList(n->val.listS, r)
 #define runBlock(n,r)     runListKind(n,r)
 #define runArgExpr(n)     runListKind(n,NULL)
+
+// isR == 0, means normal status
+#define isRtn (isR && *isR == 1) // return
+#define isBrk (isR && *isR == 2) // break
+#define isCtn (isR && *isR == 3) // continue
+#define isCtlAny (isR && *isR > 0)
 
 static VList *paramList, *rtnList;
 
@@ -305,6 +311,7 @@ static O invokeFunction(Node *func, VList *param){
     switch(sn->kind){
         case builtinS: {
               V rtn = invokeBuiltin(funcName, param);
+              //printV(rtn); getchar();
               addParam(rtnList, rtn);
              } break;
         case  methodS: {
@@ -353,22 +360,42 @@ static O assignVars(List *vars, VList *list){
     if(vars){
         assignVars(vars->next, list->next);
         Node *n = vars->val;
-        n->val.param.sn->value = list->v;
-        //printV(list->v);
+        if(instanceOf(n, varK)){
+            n->val.param.sn->value = list->v;
+        }
+        else if(instanceOf(n, nameK)){
+            n->val.name.sn->value = list->v;
+            //printNode(n); printV(list->v); getchar();
+        }
+        else TODO("Unknown kind: %d\n", n->kind);
     }
 }
 
+static O checkRtns(List *vars, VList *list){
+    I numVars = totalVar(vars);
+    I numRtns = totalVList(list);
+    if(numVars == numRtns){
+        assignVars(vars, list->next);
+    }
+    else EP("%d expects, but %d returned\n", numVars, numRtns);
+}
+
+
 static O runAssignStmt(Node *n){
     if(H_LINE) showLine(n);
+    cleanVList(paramList);
     Node *expr = n->val.assignStmt.expr;
     List *vars = n->val.assignStmt.vars;
     runNode(expr, NULL);
-    I numVars = totalVar(vars);
-    I numRtns = totalVList(rtnList);
-    if(numVars == numRtns){
-        assignVars(vars, rtnList->next);
+    if(instanceOf(expr, callK)){
+        checkRtns(vars, rtnList);
     }
-    else EP("%d expects, but %d returned\n", numVars, numRtns);
+    else if(instanceOf(expr, castK)){
+        checkRtns(vars, rtnList);
+    }
+    else {
+        checkRtns(vars, paramList);
+    }
 }
 
 static O runName(Node *n){
@@ -416,27 +443,74 @@ static O checkReturnType(List *nlist, VList *plist){
     }
 }
 
-static O runReturn(Node *n, B *isR){
+static O runReturn(Node *n, I *isR){
     if(H_LINE) showLine(n);
     cleanVList(paramList);
     runList(n->val.listS, NULL);
     checkReturnType(currentMethod->val.method.typ, paramList->next);
-    *isR = true;
+    *isR = 1;
 }
 
-static O runIf(Node *n, B *isR){
+static O runIf(Node *n, I *isR){
     cleanVList(paramList);
     runNode(n->val.ifStmt.condExpr, isR);
     V x = paramList->next->v; // only 1st value node
     if(xn == 1 && xp == H_B){
-        if(xb) runNode(n->val.ifStmt.thenBlock, isR);
-        else runNode(n->val.ifStmt.elseBlock, isR);
+        Node *thenBlock = n->val.ifStmt.thenBlock;
+        Node *elseBlock = n->val.ifStmt.elseBlock;
+        if(xb) {
+            runNode(thenBlock, isR);
+        }
+        else if(elseBlock) {
+            runNode(elseBlock, isR);
+        }
     }
     else EP("If-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
 }
 
-static O runNode(Node *n, B *isR){
-    if(isR && *isR) R;
+static O runWhile(Node *n, I *isR){
+    cleanVList(paramList);
+    runNode(n->val.whileStmt.condExpr, isR);
+    V x = paramList->next->v;
+    if(xn == 1 && xp == H_B){
+        if(xb) {
+            runNode(n->val.whileStmt.bodyBlock, isR);
+            if(isRtn) R;
+            else if(isBrk) { *isR = 0; R; }
+            else if(isCtn) { *isR = 0; runWhile(n, isR); }
+            else runWhile(n, isR);
+        }
+    }
+    else EP("While-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+}
+
+static O runRepeat(Node *n, I *isR){
+    cleanVList(paramList);
+    runNode(n->val.whileStmt.condExpr, isR);
+    V x = paramList->next->v;
+    if(xn == 1 && isIntegers(x)){
+        L t = getInteger1(x);
+        while(t--) {
+            runNode(n->val.repeatStmt.bodyBlock, isR);
+            //P("t = %lld, isR = %d\n", t, *isR); getchar();
+            if(isRtn) break;
+            else if(isBrk) { *isR = 0; break; }
+            else if(isCtn) { *isR = 0; }
+        }
+    }
+    else EP("Repeat-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+}
+
+static O runBreak(I *isR){
+    *isR = 2;
+}
+
+static O runContinue(I *isR){
+    *isR = 3;
+}
+
+static O runNode(Node *n, I *isR){
+    if(isCtlAny) R;
     switch(n->kind){
         case     stmtK: runAssignStmt(n); break;
         case     callK: runCall(n);       break;
@@ -446,18 +520,19 @@ static O runNode(Node *n, B *isR){
         case   returnK: runReturn(n, isR);break;
         case    blockK: runBlock(n, isR); break;
         case       ifK: runIf(n, isR);    break;
-        case    breakK: TODO("break");    break;
-        case continueK: TODO("continue"); break;
-        case    whileK: TODO("while");    break;
-        case   repeatK: TODO("repeat");   break;
+        case    whileK: runWhile(n, isR); break;
+        case   repeatK: runRepeat(n, isR);break;
+        case    breakK: runBreak(isR);    break;
+        case continueK: runContinue(isR); break;
         default: EP("Kind not supported yet: %s\n", getNodeTypeStr(n));
     }
 }
 
 
-static O runList(List *list, B *isR){
+static O runList(List *list, I *isR){
     if(list){
         runList(list->next, isR);
+        if(isCtlAny) R; // if any control stmt occurs, then stop
         if(list->val)
             runNode(list->val, isR);
     }
@@ -472,7 +547,8 @@ static O runMethod(Node *method, VList *param){
         loadParams(method, param);
     currentMethod = method;
     List *rtnTypes = method->val.method.typ;
-    B isR=false; runNode(method->val.method.block, &isR);
+    I isR=0; runNode(method->val.method.block, &isR);
+    //P("return code: %d\n", isR);
     if(rtnTypes){
         // output - if it has returns
         if(method == entryMain){
@@ -480,9 +556,8 @@ static O runMethod(Node *method, VList *param){
             printVList(paramList->next);
         }
     }
-    if(prevNode != NULL){
+    if(prevNode != NULL)
         loadFromStack(prevNode);
-    }
 }
 
 static O init(){
@@ -490,7 +565,7 @@ static O init(){
     rtnList = NEW(VList);
     runStack = (G)malloc(STACK_SIZE);
     stackPtr = stackPeak = 0;
-    H_LINE = false; // debug
+    H_LINE = true; // debug
 }
 
 static O resultReport(){

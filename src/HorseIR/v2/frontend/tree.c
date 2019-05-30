@@ -184,18 +184,18 @@ Node *makeNodeStmtGoto(char *targ, List *val, List *label){
     return n;
 }
 
-Node *makeNodeStmtBreak(char *id){
+Node *makeNodeStmtBreak(){
     Node *n     = NEW(Node);
     n->kind     = breakK;
-    n->val.idS = id;  /* NULL or label */
+    //n->val.idS = id;  /* NULL or label */
     n->lineno   = yylineno;
     return n;
 }
 
-Node *makeNodeStmtContinue(char *id){
+Node *makeNodeStmtContinue(){
     Node *n     = NEW(Node);
     n->kind     = continueK;
-    n->val.idS = id;  /* NULL or label */
+    //n->val.idS = id;  /* NULL or label */
     n->lineno   = yylineno;
     return n;
 }

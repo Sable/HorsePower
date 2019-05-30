@@ -41,7 +41,7 @@ typedef struct Node {
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
         struct name       {bool one; char *id1,*id2; \
-                           struct SymbolTable *st;                      } name;
+                           struct SymbolTable *st;struct SymbolName *sn;} name;
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;
@@ -110,8 +110,8 @@ Node *makeNodeStmtRepeat   (Node *cond, Node *body);
 Node *makeNodeStmtExpr     (Node *expr);
 Node *makeNodeStmtLabel    (char *id, Node *stmt);
 Node *makeNodeStmtGoto     (char *targ, List *val, List *label);
-Node *makeNodeStmtBreak    (char *id);
-Node *makeNodeStmtContinue (char *id);
+Node *makeNodeStmtBreak    ();
+Node *makeNodeStmtContinue ();
 Node *makeNodeFuncCall     (Node *func, Node *paramExpr);
 Node *makeNodeLiteralFunc  (Node *func, Node *type);
 Node *makeNodeLiteralVector(bool isOne, List *value, Node *type);

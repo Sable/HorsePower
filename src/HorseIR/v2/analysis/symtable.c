@@ -280,11 +280,13 @@ static void scanName(Node *n, SymbolTable *st){
     if(n->val.name.one){
         sn = getSymbolName(st, fieldName);
         n->val.name.st = st;
+        n->val.name.sn = sn;
     }
     else {
         SymbolDecl *sd = findDecls(moduleName);
         sn = getSymbolName(sd->symTable, fieldName);
         n->val.name.st = sd->symTable;
+        n->val.name.sn = sn;
     }
     if(sn){
         //printSymbolName(sn); getchar();
@@ -404,10 +406,8 @@ static void scanVector(Node *n, SymbolTable *st){
     scanStatement(n->val.vec.typ, st);
 }
 
-#define scanContinueStmt(n,s) TODO("continue")
-#define scanBreakStmt(n,s)    TODO("break")
-#define scanWhileStmt(n,s)    TODO("while")
-#define scanRepeatStmt(n,s)   TODO("repeat")
+//#define scanContinueStmt(n,s) TODO("continue")
+//#define scanBreakStmt(n,s)    TODO("break")
 
 static void scanStatement(Node *n, SymbolTable *st){
     if(!n) R;
@@ -422,8 +422,6 @@ static void scanStatement(Node *n, SymbolTable *st){
         case      nameK: scanName        (n, st); break;
         case   argExprK: scanArgExpr     (n, st); break;
         case    returnK: scanReturnStmt  (n, st); break;
-        case  continueK: scanContinueStmt(n, st); break;
-        case     breakK: scanBreakStmt   (n, st); break;
         case        ifK: scanIfStmt      (n, st); break;
         case     whileK: scanWhileStmt   (n, st); break;
         case    repeatK: scanRepeatStmt  (n, st); break;
@@ -434,6 +432,8 @@ static void scanStatement(Node *n, SymbolTable *st){
         case     blockK: scanBlockStmt   (n, st); break;
         case    importK: scanImport      (n, st); break;
         case    vectorK: scanVector      (n, st); break;
+        //case  continueK: scanContinueStmt(n, st); break;
+        //case     breakK: scanBreakStmt   (n, st); break;
     }
 }
 
