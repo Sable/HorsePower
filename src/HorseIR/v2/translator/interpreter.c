@@ -412,18 +412,7 @@ static B checkInfoNodeWithValue(InfoNode *in, V v){
 
 static InfoNode *getInfoNodeFromV(V x){
     InfoNode *in = NEW(InfoNode);
-    Type t;
-    switch(xp){
-        caseB t = boolT; break;
-        caseJ t =   i8T; break;
-        caseH t =  i16T; break;
-        caseI t =  i32T; break;
-        caseL t =  i64T; break;
-        caseF t =  f32T; break;
-        caseE t =  f64T; break;
-        default: TODO("Add more types\n");
-    }
-    in->type = t;
+    in->type = getTypeFromV(x);
     return in;
 }
 
@@ -582,5 +571,12 @@ I HorseInterpreter(Prog *rt){
     resultReport();
     R 0;
 }
+
+/*
+ * TODO:
+ * - Need to check variable types to see if they are the same as their
+ *   designated types at runtime
+ * - Update from passing by reference to passing by value (maybe reference count)
+ */
 
 
