@@ -32,7 +32,7 @@
     }
 }
 
-%token <stringconst> kMODULE kIMPORT kDEF kKERNEL kGLOBAL kCKCAST kIF kELSE kWHILE kREPEAT kGOTO kRETURN kBREAK kCONTINUE
+%token <stringconst> kMODULE kIMPORT kDEF kKERNEL kGLOBAL kCKCAST kIF kELSE kWHILE kREPEAT kGOTO kRETURN kBREAK kCONTINUE kVAR
 //%token <stringconst> kBOOL kCHAR kI16 kI32 kI64 kF32 kF64 kCLEX kSTR kSYM kDT kDATE kMONTH kMINUTE kSECOND kTIME kFUNC kLIST kDICT kENUM kTABLE kKTABLE
 //%token <stringconst> kLIST kDICT kENUM kTABLE kKTABLE
 %token <stringconst> tID tCHAR tSTRING
@@ -45,7 +45,7 @@
 
 %type <node> module moduleContent importDirective globalDecl functionDecl
 %type <node> params param typ wildCard generalTypes
-%type <node> stmt block assignStmt controlStmt expressionStmt labelledStmt
+%type <node> stmt block assignStmt controlStmt expressionStmt varDecl
 %type <node> expression var name ifStmt whileStmt repeatStmt returnStmt
 %type <node> gotoStmt breakStmt continueStmt condition controlBlock
 %type <node> operand functionCall paramExpr cast functionId literal literalFunc
@@ -191,7 +191,7 @@ stmt               : assignStmt
                      { $$ = $1; }
                    | expressionStmt
                      { $$ = $1; }
-                   | labelledStmt
+                   | varDecl
                      { $$ = $1; }
 ;
 
@@ -255,9 +255,10 @@ repeatStmt         : kREPEAT '(' condition ')' controlBlock
 
 expressionStmt     : expression ';'
                      { $$ = makeNodeStmtExpr($1); }
+;
 
-labelledStmt       : tID '>' stmt
-                     { $$ = makeNodeStmtLabel($1, $3); }
+varDecl            : kVAR id_list ':' typ ';'
+                     { $$ = makeNodeVarDecl($2, $4); }
 ;
 
 gotoStmt           : kGOTO tID ';'

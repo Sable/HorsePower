@@ -70,6 +70,7 @@ nzdigit    [1-9]
 "return"      {addStr(); return kRETURN;  }
 "break"       {addStr(); return kBREAK;   }
 "continue"    {addStr(); return kCONTINUE;}
+"var"         {addStr(); return kVAR;     }
 
  /* "bool"        {addStr(); return kBOOL;    }*/
  /* "char"        {addStr(); return kCHAR;    }*/

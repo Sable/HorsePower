@@ -236,6 +236,21 @@ Node *makeNodeConst(ConstValue *val){
     return n;
 }
 
+static List *createVarList(List *vars, Node *type){
+    if(vars){
+        List *list = createVarList(vars->next, type);
+        Node *n = vars->val;
+        return makeList(list, makeNodeVar(n->val.idS, type));
+    }
+    return NULL;
+}
+
+// varDeclK: a list of vars
+Node *makeNodeVarDecl(List *vars, Node *type){
+    List *var_list = createVarList(vars, type);
+    return makeListKind(var_list, varDeclK);
+}
+
 Node *makeNodeParamExpr(List *params){
     return makeListKind(params, paramExprK);
 }

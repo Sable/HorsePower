@@ -14,7 +14,7 @@ typedef struct Program {
 
 typedef enum Kind {
     idK, varK, globalK, typeK, nameK, funcK, argExprK, paramExprK, blockK,
-    stmtK, castK, exprstmtK, importK, methodK, moduleK, ifK, whileK,
+    stmtK, castK, varDeclK, exprstmtK, importK, methodK, moduleK, ifK, whileK,
     repeatK, labelK, gotoK, returnK, breakK, continueK, callK, vectorK, constK,
     totalK
 }Kind;
@@ -99,6 +99,7 @@ Node *makeNodeModule       (char *id, List *body);
 Node *makeNodeImport       (char *id, List *value);
 Node *makeNodeModuleMethod (char *kind, char *id, Node *param, List *type, Node *block);
 Node *makeNodeVar          (char *id, Node *type);
+Node *makeNodeVarDecl      (List *vars, Node *type);
 Node *makeNodeGlobal       (char *id, Node *type, Node *operand);
 Node *makeNodeType         (bool wild, char *id, List *cellType);
 Node *makeNodeAssignment   (List *vars, Node *expr);

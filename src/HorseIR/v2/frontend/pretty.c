@@ -21,7 +21,7 @@ static char buff[BUFF_SIZE];
 
 #define printArgExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
 #define printParamExpr(b,n)   prettyListBuff(b,n->val.listS,comma)
-#define printReturnStmt(b,n)  {SP(b,"return "); prettyListBuff(b,n->val.listS,comma); strcat(b,withLine?";\n":";"); printLine(b); }
+#define printReturnStmt(b,n)  {SP(b,"return "); prettyListBuff(b,n->val.listS,comma); strcat(b, ";"); printLine(b); }
 
 #define resetBuff(b) if(b[0]!=0) b+=strlen(b)
 
@@ -120,7 +120,6 @@ static void printMethodBuff(char *b, Node *n){
     }
     echo(b, " ");
     prettyNodeBuff(b, n->val.method.block);
-    printLine(b);
     //depth--;
     //printDepth(b);
 }
@@ -151,21 +150,24 @@ static void printIfBuff(char *b, Node *n){
         depth--;
     }
     if(n->val.ifStmt.elseBlock){
-        echo(b, "else");
+        printDepth(b); echo(b, "else");
         prettyNodeBuff(b, n->val.ifStmt.elseBlock);
-        printLine(b);
     }
 }
 
 static void printWhileBuff(char *b, Node *n){
     resetBuff(b);
+    echo(b, "while (");
     prettyNodeBuff(b, n->val.whileStmt.condExpr);
+    echo(b, ")");
     prettyNodeBuff(b, n->val.whileStmt.bodyBlock);
 }
 
 static void printRepeatBuff(char *b, Node *n){
     resetBuff(b);
+    echo(b, "repeat (");
     prettyNodeBuff(b, n->val.repeatStmt.condExpr);
+    echo(b, ")");
     prettyNodeBuff(b, n->val.repeatStmt.bodyBlock);
 }
 
@@ -201,9 +203,9 @@ static void printGotoBuff(char *b, Node *n){
 #define printContinueBuff(b,n)  printBreakContinueBuff(b,n,"continue")
 
 static void printBreakContinueBuff(char *b, Node *n, const char *op){
-    SP(b, "%s ", op);
-    if(n->val.idS) echo(b, n->val.idS);
+    SP(b, "%s", op);
     echo(b, ";");
+    printLine(b);
 }
 
 static void printGlobalBuff(char *b, Node *n){
@@ -214,6 +216,7 @@ static void printGlobalBuff(char *b, Node *n){
     echo(b, "=");
     prettyNodeBuff(b, n->val.global.op);
     echo(b, ";");
+    printLine(b);
 }
 
 static void printCallBuff(char *b, Node *n){
@@ -272,6 +275,28 @@ static void printBlockBuff(char *b, Node *n){
     prettyListBuff(b, n->val.listS, nospace);
     depth--;
     printDepth(b); echo(b, "}");
+    printLine(b);
+}
+
+static void prettyVarBuff(char *b, List *list, char sep){
+    if(list){
+        prettyVarBuff(b, list->next, sep);
+        resetBuff(b);
+        Node *n = list->val;
+        SP(b, "%s", n->val.param.id);
+        if(sep) { printChar(sep); echo(b," "); }
+    }
+}
+
+static void printVarDecl(char *b, Node *n){
+    SP(b,"var ");
+    resetBuff(b);
+    prettyVarBuff(b, n->val.listS->next, comma); // print the names rather than the 1st one without type info
+    resetBuff(b);
+    Node *first = n->val.listS->val;
+    printVar(b, first);  // print the first one with type info
+    echo(b, ";");
+    printLine(b);
 }
 
 static void prettyNodeBuff(char *b, Node *n){
@@ -290,6 +315,7 @@ static void prettyNodeBuff(char *b, Node *n){
         case      breakK:
         case   continueK:
         case     globalK:
+        case    varDeclK:
         case     methodK: printDepth(b); break;
     }
     resetBuff(b);
@@ -297,6 +323,7 @@ static void prettyNodeBuff(char *b, Node *n){
         case           idK: printID              (b,n); break;
         case         nameK: printName            (b,n); break;
         case          varK: printVar             (b,n); break;
+        case      varDeclK: printVarDecl         (b,n); break;
         case         typeK: printNodeTypeBuff    (b,n); break;
         case         funcK: printNodeFunc        (b,n); break;
         case      argExprK: printArgExpr         (b,n); break;
