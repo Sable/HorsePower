@@ -171,18 +171,13 @@ static void printRepeatBuff(char *b, Node *n){
     prettyNodeBuff(b, n->val.repeatStmt.bodyBlock);
 }
 
-static void printLabelBuff(char *b, Node *n){
-    resetBuff(b);
-    SP(b, "%s > ", n->val.labelStmt.id);
-    printStmtBuff(b, n->val.labelStmt.stmt);
-}
-
 static void printExprStmtBuff(char *b, Node *n){
     resetBuff(b);
     prettyNodeBuff(b, n->val.exprStmt.expr);
     printLine(b);
 }
 
+/*
 static void printGotoBuff(char *b, Node *n){
     resetBuff(b);
     echo(b, "goto ");
@@ -198,6 +193,7 @@ static void printGotoBuff(char *b, Node *n){
     echo(b, ";");
     printLine(b);
 }
+*/
 
 #define printBreakBuff(b,n)     printBreakContinueBuff(b,n,"break")
 #define printContinueBuff(b,n)  printBreakContinueBuff(b,n,"continue")
@@ -309,9 +305,7 @@ static void prettyNodeBuff(char *b, Node *n){
         case         ifK:
         case      whileK:
         case     repeatK:
-        case      labelK:
         case   exprstmtK:
-        case       gotoK:
         case      breakK:
         case   continueK:
         case     globalK:
@@ -337,9 +331,7 @@ static void prettyNodeBuff(char *b, Node *n){
         case           ifK: printIfBuff          (b,n); break;
         case        whileK: printWhileBuff       (b,n); break;
         case       repeatK: printRepeatBuff      (b,n); break;
-        case        labelK: printLabelBuff       (b,n); break;
         case     exprstmtK: printExprStmtBuff    (b,n); break;
-        case         gotoK: printGotoBuff        (b,n); break;
         case        breakK: printBreakBuff       (b,n); break;
         case     continueK: printContinueBuff    (b,n); break;
         case       globalK: printGlobalBuff      (b,n); break;
@@ -355,6 +347,7 @@ char *getNodeTypeStr(Node *n){
     switch(n->kind){
         CaseLine(idK);
         CaseLine(varK);
+        CaseLine(varDeclK);
         CaseLine(globalK);
         CaseLine(typeK);
         CaseLine(nameK);
@@ -370,8 +363,6 @@ char *getNodeTypeStr(Node *n){
         CaseLine(ifK);
         CaseLine(whileK);
         CaseLine(repeatK);
-        CaseLine(labelK);
-        CaseLine(gotoK);
         CaseLine(returnK);
         CaseLine(breakK);
         CaseLine(continueK);

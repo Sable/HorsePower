@@ -66,7 +66,6 @@ nzdigit    [1-9]
 "else"        {addStr(); return kELSE;    }
 "while"       {addStr(); return kWHILE;   }
 "repeat"      {addStr(); return kREPEAT;  }
-"goto"        {addStr(); return kGOTO;    }
 "return"      {addStr(); return kRETURN;  }
 "break"       {addStr(); return kBREAK;   }
 "continue"    {addStr(); return kCONTINUE;}

@@ -400,7 +400,8 @@ static O runAssignStmt(Node *n){
 
 static O runName(Node *n){
     SymbolName *sn = getSymbolNameFromName(n);
-    addParam(paramList, sn->value);
+    if(sn->value) addParam(paramList, sn->value);
+    else EP("Variable must be initialized before used: %s\n", sn->name);
 }
 
 static B checkInfoNodeWithValue(InfoNode *in, V v){
@@ -498,21 +499,24 @@ static O runContinue(I *isR){
     *isR = 3;
 }
 
+#define runVarDecl(n, r) ; // do nothing
+
 static O runNode(Node *n, I *isR){
     if(isCtlAny) R;
     switch(n->kind){
-        case     stmtK: runAssignStmt(n); break;
-        case     callK: runCall(n);       break;
-        case   vectorK: runVector(n);     break;
-        case  argExprK: runArgExpr(n);    break;
-        case     nameK: runName(n);       break;
-        case   returnK: runReturn(n, isR);break;
-        case    blockK: runBlock(n, isR); break;
-        case       ifK: runIf(n, isR);    break;
-        case    whileK: runWhile(n, isR); break;
-        case   repeatK: runRepeat(n, isR);break;
-        case    breakK: runBreak(isR);    break;
-        case continueK: runContinue(isR); break;
+        case     stmtK: runAssignStmt(n);  break;
+        case     callK: runCall(n);        break;
+        case   vectorK: runVector(n);      break;
+        case  argExprK: runArgExpr(n);     break;
+        case     nameK: runName(n);        break;
+        case   returnK: runReturn(n, isR); break;
+        case    blockK: runBlock(n, isR);  break;
+        case       ifK: runIf(n, isR);     break;
+        case    whileK: runWhile(n, isR);  break;
+        case   repeatK: runRepeat(n, isR); break;
+        case    breakK: runBreak(isR);     break;
+        case continueK: runContinue(isR);  break;
+        case  varDeclK: runVarDecl(n,isR); break;
         default: EP("Kind not supported yet: %s\n", getNodeTypeStr(n));
     }
 }

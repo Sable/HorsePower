@@ -273,7 +273,6 @@ static void weedBlock(Node *block){
             case    whileK: break;
             case   repeatK: break;
             case   returnK: break;
-            case     gotoK: break;
             case    breakK: break;
             case continueK: break;
         }

@@ -32,7 +32,7 @@
     }
 }
 
-%token <stringconst> kMODULE kIMPORT kDEF kKERNEL kGLOBAL kCKCAST kIF kELSE kWHILE kREPEAT kGOTO kRETURN kBREAK kCONTINUE kVAR
+%token <stringconst> kMODULE kIMPORT kDEF kKERNEL kGLOBAL kCKCAST kIF kELSE kWHILE kREPEAT kRETURN kBREAK kCONTINUE kVAR
 //%token <stringconst> kBOOL kCHAR kI16 kI32 kI64 kF32 kF64 kCLEX kSTR kSYM kDT kDATE kMONTH kMINUTE kSECOND kTIME kFUNC kLIST kDICT kENUM kTABLE kKTABLE
 //%token <stringconst> kLIST kDICT kENUM kTABLE kKTABLE
 %token <stringconst> tID tCHAR tSTRING
@@ -47,7 +47,7 @@
 %type <node> params param typ wildCard generalTypes
 %type <node> stmt block assignStmt controlStmt expressionStmt varDecl
 %type <node> expression var name ifStmt whileStmt repeatStmt returnStmt
-%type <node> gotoStmt breakStmt continueStmt condition controlBlock
+%type <node> breakStmt continueStmt condition controlBlock
 %type <node> operand functionCall paramExpr cast functionId literal literalFunc
 %type <node> literalVector value
 
@@ -225,8 +225,6 @@ controlStmt        : ifStmt
                      { $$ = $1; }
                    | returnStmt
                      { $$ = $1; }
-                   | gotoStmt
-                     { $$ = $1; }
                    | breakStmt
                      { $$ = $1; }
                    | continueStmt
@@ -261,11 +259,13 @@ varDecl            : kVAR id_list ':' typ ';'
                      { $$ = makeNodeVarDecl($2, $4); }
 ;
 
+/*
 gotoStmt           : kGOTO tID ';'
                      { $$ = makeNodeStmtGoto($2, NULL, NULL); }
                    | kGOTO '(' id_list ')' '/' id_list ';'
                      { $$ = makeNodeStmtGoto(NULL, $3, $6); }
 ;
+*/
 
 returnStmt         : kRETURN operand_list ';'
                      { $$ = makeNodeStmtReturn($2); }

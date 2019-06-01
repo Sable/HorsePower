@@ -31,7 +31,6 @@ static void envInit(char *file){
     parseInput(file);
     initGlobal();
     weedProg(root);  // weed types/main
-    printProg(root);
 }
 
 static void envInterpreter(char *file){
@@ -48,13 +47,18 @@ static void envCompiler(char *file){
     //runInterpreterCore();
 }
 
+static void envPrettyPrint(char *file){
+    envInit(file);
+    printProg(root);
+}
+
 
 int main(int argc, char *argv[]){
     if(argc != 2)
         EP("Usage: %s <file_path>\n", argv[0]);
     char *qfile = argv[1];
-    envInit(qfile);
-    //envInterpreter(qfile);
+    //envPrettyPrint(qfile);
+    envInterpreter(qfile);
     return 0;
 }
 

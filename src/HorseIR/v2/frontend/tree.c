@@ -165,25 +165,6 @@ Node *makeNodeStmtExpr(Node *expr){
     return n;
 }
 
-Node *makeNodeStmtLabel(char *id, Node *stmt){
-    Node *n     = NEW(Node);
-    n->kind     = labelK;
-    n->val.labelStmt.id   = id;
-    n->val.labelStmt.stmt = stmt;
-    n->lineno   = yylineno;
-    return n;
-}
-
-Node *makeNodeStmtGoto(char *targ, List *val, List *label){
-    Node *n     = NEW(Node);
-    n->kind     = gotoK;
-    n->val.gotoStmt.targ  = targ; /* NULL -> targ; NOT NULL label */
-    n->val.gotoStmt.val   = val;
-    n->val.gotoStmt.label = label;
-    n->lineno   = yylineno;
-    return n;
-}
-
 Node *makeNodeStmtBreak(){
     Node *n     = NEW(Node);
     n->kind     = breakK;

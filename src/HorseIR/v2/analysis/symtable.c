@@ -258,6 +258,10 @@ static void scanVar(Node *n, SymbolTable *st){
     addSymbolNameList(symList, n->val.param.sn = s); // assign symbolname and add it to a list
 }
 
+static void scanVarDecl(Node *n, SymbolTable *st){
+    scanStatementList(n->val.listS, st);
+}
+
 SymbolName *getSymbolNameFromName(Node *n){
     if(instanceOf(n, nameK)){
         char *moduleName = n->val.name.id1;
@@ -427,6 +431,7 @@ static void scanStatement(Node *n, SymbolTable *st){
         case    repeatK: scanRepeatStmt  (n, st); break;
         case        idK: scanId          (n, st); break;
         case       varK: scanVar         (n, st); break;
+        case   varDeclK: scanVarDecl     (n, st); break;
         case    globalK: scanGlobal      (n, st); break;
         case      typeK: scanType        (n, st); break;
         case     blockK: scanBlockStmt   (n, st); break;

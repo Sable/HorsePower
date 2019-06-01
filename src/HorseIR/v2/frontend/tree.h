@@ -15,7 +15,7 @@ typedef struct Program {
 typedef enum Kind {
     idK, varK, globalK, typeK, nameK, funcK, argExprK, paramExprK, blockK,
     stmtK, castK, varDeclK, exprstmtK, importK, methodK, moduleK, ifK, whileK,
-    repeatK, labelK, gotoK, returnK, breakK, continueK, callK, vectorK, constK,
+    repeatK, returnK, breakK, continueK, callK, vectorK, constK,
     totalK
 }Kind;
 
@@ -36,8 +36,6 @@ typedef struct Node {
         struct ifStmt     {struct Node *condExpr,*thenBlock,*elseBlock; } ifStmt;
         struct whileStmt  {struct Node *condExpr,*bodyBlock;            } whileStmt, repeatStmt;
         struct funcCall   {struct Node *func,*param;                    } call;
-        struct labelStmt  {char *id; struct Node *stmt;                 } labelStmt; // remove
-        struct gotoStmt   {char *targ; List *val,*label;                } gotoStmt;  // remove
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
         struct name       {bool one; char *id1,*id2; \
@@ -109,8 +107,6 @@ Node *makeNodeStmtIf       (Node *cond, Node *then, Node *other);
 Node *makeNodeStmtWhile    (Node *cond, Node *body);
 Node *makeNodeStmtRepeat   (Node *cond, Node *body);
 Node *makeNodeStmtExpr     (Node *expr);
-Node *makeNodeStmtLabel    (char *id, Node *stmt);
-Node *makeNodeStmtGoto     (char *targ, List *val, List *label);
 Node *makeNodeStmtBreak    ();
 Node *makeNodeStmtContinue ();
 Node *makeNodeFuncCall     (Node *func, Node *paramExpr);
