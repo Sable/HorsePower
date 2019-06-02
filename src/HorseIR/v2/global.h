@@ -51,6 +51,7 @@ void   time_clear();
 #define NEWL(typ,n) (typ* )newM(sizeof(typ)*(n))
 #define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))
 #define CaseLine(x) case x: R #x
+#define USCORE "_"  // constant: underscore
 
 #define P printf
 #define R return

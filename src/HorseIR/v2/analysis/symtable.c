@@ -262,29 +262,18 @@ static void scanVarDecl(Node *n, SymbolTable *st){
     scanStatementList(n->val.listS, st);
 }
 
-SymbolName *getSymbolNameFromName(Node *n){
-    if(instanceOf(n, nameK)){
-        char *moduleName = n->val.name.id1;
-        char *fieldName  = n->val.name.id2;
-        if(n->val.name.one)
-            return getSymbolName(n->val.name.st, fieldName);
-        else{
-            SymbolDecl *sd = findDecls(moduleName);
-            return getSymbolName(sd->symTable, fieldName);
-        }
-    }
-    return NULL;
-}
-
 static void scanName(Node *n, SymbolTable *st){
     char *moduleName = n->val.name.id1;
     char *fieldName  = n->val.name.id2;
     SymbolName *sn = NULL;
     //printNode(n);
     if(n->val.name.one){
-        sn = getSymbolName(st, fieldName);
-        n->val.name.st = st;
-        n->val.name.sn = sn;
+        if(!n->val.name.isUS){
+            sn = getSymbolName(st, fieldName);
+            n->val.name.st = st;
+            n->val.name.sn = sn;
+        }
+        else return ; // if _, skip check
     }
     else {
         SymbolDecl *sd = findDecls(moduleName);

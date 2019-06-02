@@ -38,7 +38,7 @@ typedef struct Node {
         struct funcCall   {struct Node *func,*param;                    } call;
         struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
-        struct name       {bool one; char *id1,*id2; \
+        struct name       {bool one, isUS; char *id1,*id2; \
                            struct SymbolTable *st;struct SymbolName *sn;} name;
         struct ConstValue *nodeC;
         char   *idS;

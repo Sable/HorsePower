@@ -122,7 +122,8 @@ Node *makeNodeCast(Node *expr, Node *type){
 Node *makeNodeName(char *id1, char *id2){
     Node *n     = NEW(Node);
     n->kind     = nameK;
-    n->val.name.one = NULL==id1;
+    n->val.name.one  = NULL==id1;
+    n->val.name.isUS = NULL==id1 && !strcmp(id2, USCORE);
     n->val.name.id1 = id1;
     n->val.name.id2 = id2;
     n->lineno   = yylineno;

@@ -200,8 +200,8 @@ assignStmt         : var_list '=' expression ';'
 
 var_list           : var
                      { $$ = makeList(NULL, $1); }
-                   | var_list var
-                     { $$ = makeList($1, $2); }
+                   | var_list ',' var
+                     { $$ = makeList($1, $3); }
 ;
 
 var                : name

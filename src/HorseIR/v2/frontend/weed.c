@@ -2,19 +2,22 @@
 
 /* declarations */
 
-#define weedParamExpr weedList
-#define weedExpr      weedList
-#define weedReturn    weedList
+#define weedParamExpr weedListNode
+#define weedExpr      weedListNode
+#define weedReturn    weedListNode
+#define weedBlock     weedListNode
 
-static void weedNode  (Node *x);
-static bool weedDate  (int x);
-static bool weedMonth (int x);
-static bool weedMinute(int x);
-static bool weedSecond(int x);
-static bool weedTime  (int x);
-static bool weedDT    (long long x);
-static bool weedClex  (float *x);
-static bool weedString(char *x);
+static void weedNode    (Node *x);
+static bool weedDate    (int x);
+static bool weedMonth   (int x);
+static bool weedMinute  (int x);
+static bool weedSecond  (int x);
+static bool weedTime    (int x);
+static bool weedDT      (long long x);
+static bool weedClex    (float *x);
+static bool weedString  (char *x);
+static void weedList    (List *x);
+static void weedListNode(Node *x);
 
 static int cntMain = 0;
 extern Node *entryMain;
@@ -258,26 +261,31 @@ static void weedVector(Node *x){
     }
 }
 
+static void weedVar(Node *x){
+    char *name = x->val.param.id;
+    if(!strcmp(name, USCORE))
+        EP("Underscore '" USCORE "' shouldn't have any type.\n");
+}
+
 static void weedStmt(Node *stmt){
+    weedList(stmt->val.assignStmt.vars);
     weedNode(stmt->val.assignStmt.expr);
 }
 
-static void weedBlock(Node *block){
-    printNodeType(block);
-    List *p = block->val.listS;
-    while(p){
-        Node *x = p->val;
-        switch(x->kind){
-            case     stmtK: weedStmt(x); break;
-            case       ifK: break;
-            case    whileK: break;
-            case   repeatK: break;
-            case   returnK: break;
-            case    breakK: break;
-            case continueK: break;
-        }
-        p = p->next;
-    }
+static void weedIf(Node *x){
+    weedNode(x->val.ifStmt.condExpr);
+    weedNode(x->val.ifStmt.thenBlock);
+    weedNode(x->val.ifStmt.elseBlock);
+}
+
+static void weedWhile(Node *x){
+    weedNode(x->val.whileStmt.condExpr);
+    weedNode(x->val.whileStmt.bodyBlock);
+}
+
+static void weedRepeat(Node *x){
+    weedNode(x->val.repeatStmt.condExpr);
+    weedNode(x->val.repeatStmt.bodyBlock);
 }
 
 static void weedImport(Node *x){
@@ -294,35 +302,18 @@ static void weedMethod(Node *x){
         if(cntMain == 0){ entryMain = x; cntMain++; }
         else EP("Only one main method expected in modules.\n");
     }
-    weedBlock(x->val.method.block);
+    weedNode(x->val.method.block);
 }
 
 static void weedModule(Node *module){
     printNodeType(module);
-    List *p = module->val.module.body;
-    while(p){
-        Node *x = p->val;
-        switch(x->kind){
-            case importK: weedImport(x); break;
-            case methodK: weedMethod(x); break;
-            case globalK: weedGlobal(x); break;
-            default: EP("Type unknown: %s\n", getNodeTypeStr(x));
-        }
-        p = p->next;
-    }
-}
-
-static void weedModuleList(List *modules){
-    List *p = modules;
-    while(p){
-        weedModule(p->val);
-        p = p->next;
-    }
+    weedList(module->val.module.body);
 }
 
 static void weedCall(Node *x){
     printNodeType(x);
-    weedNode(x->val.call.param);
+    Node *param = x->val.call.param;
+    if(param) weedNode(param);
 }
 
 static void weedCast(Node *x){
@@ -330,35 +321,69 @@ static void weedCast(Node *x){
     weedNode(x->val.cast.exp);
 }
 
-static void weedList(Node *x){
-    printNodeType(x);
-    List *p = x->val.listS;
-    while(p){
-        weedNode(p->val);
-        p = p->next;
+static void weedList(List *x){
+    if(x){
+        weedList(x->next);
+        weedNode(x->val);
+    }
+}
+
+static void weedListNode(Node *x){
+    weedList(x->val.listS);
+}
+
+static void weedName(Node *x){
+    if(x->val.name.one) ;
+    else {
+        char *id1 = x->val.name.id1;
+        char *id2 = x->val.name.id2;
+        if(!strcmp(id2, USCORE) || !strcmp(id1, USCORE))
+            EP("Underscore '" USCORE "' can't be used in a global name reference\n");
     }
 }
 
 static void weedNode(Node *x){
+    if(!x) R ;
     switch(x->kind){
+        case    moduleK: weedModule(x);    break;
         case    importK: weedImport(x);    break;
         case    methodK: weedMethod(x);    break;
         case    globalK: weedGlobal(x);    break;
-        case        idK: break;
+        case     blockK: weedBlock(x);     break;
+        case       varK: weedVar(x);       break;
         case      callK: weedCall(x);      break;
-        case      nameK: break;
+        case      nameK: weedName(x);      break;
         case      funcK: break;
         case      castK: weedCast(x);      break;
         case    vectorK: weedVector(x);    break;
         case     constK: printConst(x);    break;
         case   argExprK: weedExpr(x);      break; /* list */
         case paramExprK: weedParamExpr(x); break; /* list */
+        case      stmtK: weedStmt(x);      break;
+        case        ifK: weedIf(x);        break;
+        case     whileK: weedWhile(x);     break;
+        case    repeatK: weedRepeat(x);    break;
+        case    returnK: weedReturn(x);    break;
+        case     breakK: break;
+        case  continueK: break;
         default: EP("Type unknown: %s\n", getNodeTypeStr(x));
     }
 }
 
-void weedProg(Prog *root){
+static void weedMainMethod(){
+    if(cntMain == 1); // fine
+    else if(cntMain == 0) EP("Main method not found\n");
+    else EP("Only one main method expected, but %d found\n", cntMain);
+}
+
+static void init(){
     cntMain = 0;
+    entryMain = NULL;
+}
+
+void weedProg(Prog *root){
+    init();
     printBanner("Program Weeder");
-    weedModuleList(root->module_list);
+    weedList(root->module_list);
+    weedMainMethod();
 }

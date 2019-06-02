@@ -328,11 +328,12 @@ static O invokeFunction(Node *func, VList *param){
 
 static O runCall(Node *n){
     Node *funcName = n->val.call.func;
+    Node *param = n->val.call.param;
     //char *funcName = n->val.call.func;
     cleanVList(rtnList);
     cleanVList(paramList);
     //P("size = %d\n", totalVList(rtnList)); getchar();
-    runNode(n->val.call.param, NULL); 
+    if(param) runNode(param, NULL); 
     invokeFunction(funcName, paramList);
 }
 
@@ -364,7 +365,8 @@ static O assignVars(List *vars, VList *list){
             n->val.param.sn->value = list->v;
         }
         else if(instanceOf(n, nameK)){
-            n->val.name.sn->value = list->v;
+            if(n->val.name.sn)  // NOT '_'
+                n->val.name.sn->value = list->v;
             //printNode(n); printV(list->v); getchar();
         }
         else TODO("Unknown kind: %d\n", n->kind);
@@ -399,9 +401,12 @@ static O runAssignStmt(Node *n){
 }
 
 static O runName(Node *n){
-    SymbolName *sn = getSymbolNameFromName(n);
-    if(sn->value) addParam(paramList, sn->value);
-    else EP("Variable must be initialized before used: %s\n", sn->name);
+    if(!n->val.name.isUS){
+        SymbolName *sn = n->val.name.sn;
+        if(sn->value) addParam(paramList, sn->value);
+        else EP("Variable must be initialized before used: %s\n", sn->name);
+    }
+    else EP("Underscore '" USCORE "' can't be used in a name reference\n");
 }
 
 static B checkInfoNodeWithValue(InfoNode *in, V v){
@@ -551,6 +556,7 @@ static O runMethod(Node *method, VList *param){
     }
     if(prevNode != NULL)
         loadFromStack(prevNode);
+    currentMethod = prevNode;
 }
 
 static O init(){
