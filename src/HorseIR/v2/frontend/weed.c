@@ -382,8 +382,8 @@ static void init(){
 }
 
 void weedProg(Prog *root){
-    init();
     printBanner("Program Weeder");
+    init();
     weedList(root->module_list);
     weedMainMethod();
 }

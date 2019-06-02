@@ -9,8 +9,14 @@ B isReadBin  = false;
 
 static void runInterpreterCore(){
     tic();
-    HorseInterpreter(root);
-    time_toc("Interpreter time (ms): %g ms\n", elapsed);
+    HorseInterpreter();
+    time_toc("Interpretation time (ms): %g ms\n", elapsed);
+}
+
+static void runCompilerCore(){
+    tic();
+    HorseCompiler();
+    time_toc("Compile time (ms): %g ms\n", elapsed);
 }
 
 static void parseInput(char *file_path){
@@ -40,11 +46,11 @@ static void envInterpreter(char *file){
 }
 
 static void envCompiler(char *file){
-    //envInit(file);
-    //buildSymbolTable(root);
-    //propagateTypeShape(root);
-    ////buildUDChain(root);
-    //runInterpreterCore();
+    envInit(file);
+    buildSymbolTable(root);
+    propagateTypeShape(root);
+    buildUDChain(root);
+    runCompilerCore();
 }
 
 static void envPrettyPrint(char *file){
@@ -52,13 +58,28 @@ static void envPrettyPrint(char *file){
     printProg(root);
 }
 
+static void envPrettyPrint(char *file){
+    envInit(file);
+    //printProgDot(root);
+}
 
 int main(int argc, char *argv[]){
-    if(argc != 2)
-        EP("Usage: %s <file_path>\n", argv[0]);
-    char *qfile = argv[1];
-    //envPrettyPrint(qfile);
-    envInterpreter(qfile);
+    int r = getLongOption(argc, argv);
+    if(r) BAD_TRY();
+    else {
+        switch(optMode){
+            case InterpNaiveM: envInterpreter(qPath); break;
+            case    CompilerM: envCompiler(qPath);    break;
+            case   InterpJITM: TODO("interpreter jit mode\n"); break;
+            case PrettyPrintM: envPrettyPrint(qPath); break;
+            case    DotPrintM: envDotPrint(qPath);    break;
+            case  ExperimentM: TODO("experiment\n");  break;
+            case     VersionM: version();   break;
+            case      HelperM: GOOD_TRY();  break;
+            case     UnknownM:  BAD_TRY();  break;
+            default: EP("Option mode not supported: %d\n", optMode);
+        }
+    }
     return 0;
 }
 

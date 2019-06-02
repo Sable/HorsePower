@@ -572,8 +572,8 @@ static O resultReport(){
 }
 
 /* entry */
-I HorseInterpreter(Prog *rt){
-    printBanner("Interpretation");
+I HorseInterpreter(){
+    printBanner("Interpreting");
     init();
     runMethod(entryMain, NULL);
     //printSymInfo();

@@ -4,14 +4,14 @@
 /* declaration */
 
 /* Interpreter */
-I HorseInterpreter(Prog *rt);
+I HorseInterpreter();
 O runInterpreter();
 
 /* Compiler */
-I HorseCompiler(Prog *rt);
+I HorseCompiler();
 
 /* Interpreter v2 */
-I HorseInterpreter2(Prog *rt);
+I HorseInterpreter2();
 
 
 /* helper functions */

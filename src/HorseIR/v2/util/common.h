@@ -51,6 +51,25 @@ void freeHorseArray(HA x);
 /* dot.c */
 //void dotProg(Prog *root);
 
+/* options.c */
+typedef enum OptionMode{
+    UnknownM, InterpNaiveM, CompilerM, InterpJITM, PrettyPrintM, DotPrintM,
+    VersionM, HelperM, ExperimentM
+}OptionMode;
+
+int  getLongOption(int argc, char *argv[]);
+void usage(int e);
+void version();
+
+extern OptionMode optMode;    // program mode
+extern int   qRun;            // number of runs
+extern char *qPath;           // file path
+extern TC    qTarg;           // one target
+extern OC    qOpts[99];       // list of optimizations
+extern int   numOpts;         // number of optimizations
+
+#define GOOD_TRY() usage(0)
+#define BAD_TRY()  usage(1)
 
 #ifdef  __cplusplus
 }
