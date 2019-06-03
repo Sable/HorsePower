@@ -49,8 +49,8 @@ static void envCompiler(char *file){
     envInit(file);
     buildSymbolTable(root);
     propagateTypeShape(root);
-    buildUDChain(root);
-    runCompilerCore();
+    //buildUDChain(root);
+    //runCompilerCore();
 }
 
 static void envPrettyPrint(char *file){
@@ -58,9 +58,10 @@ static void envPrettyPrint(char *file){
     printProg(root);
 }
 
-static void envPrettyPrint(char *file){
+static void envDotPrint(char *file){
     envInit(file);
-    //printProgDot(root);
+    TODO("dot print\n");
+    //dotProg(root);
 }
 
 int main(int argc, char *argv[]){

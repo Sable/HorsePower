@@ -77,6 +77,19 @@ static void addSymbolNameList(SymbolNameList *list, SymbolName *sn){
     list->next = x;
 }
 
+InfoNodeList *rtnList; // return type list
+
+static void cleanReturnTypeList(InfoNodeList *list){
+    list->next = NULL;
+}
+
+static void addReturnTypeList(InfoNodeList *list, InfoNode *in){
+    InfoNodeList *x = NEW(InfoNodeList);
+    x->in = in;
+    x->next = list->next;
+    list->next = x;
+}
+
 // "id1.id2"
 char *strName(Node *n){
     if(n->val.name.one) return n->val.name.id2;
@@ -289,6 +302,8 @@ static void scanName(Node *n, SymbolTable *st){
 
 static void scanType(Node *n, SymbolTable *st){
     n->val.type.in = getInfoNode(n);
+    //printInfoNode(n->val.type.in); getchar();
+    addReturnTypeList(rtnList, n->val.type.in);
 }
 
 static void scanAssignStmt(Node *n, SymbolTable *st){
@@ -344,6 +359,10 @@ static void scanMethod(Node *n, SymbolTable *st){
     cleanSymbolNameList(symList);
     scanStatement(n->val.method.block, t);   // statements
     meta->localVars = symList->next; // no dummy
+
+    cleanReturnTypeList(rtnList);
+    scanStatementList(n->val.method.typ, t);
+    meta->returnTypes = rtnList->next; // no dummy
     // collect all meta info
     n->val.method.meta = meta;
 }
@@ -458,16 +477,23 @@ static void addDefaultSystem(){
     // TODO: add sth...
 }
 
-void buildSymbolTable(Prog *root){
-    printBanner("Symbol Table");
+static void init(){
     // 1st pass
     globalDecls = NEW(SymbolDecl);
-    symList = NEW(SymbolNameList);
+    symList     = NEW(SymbolNameList);
+    rtnList     = NEW(InfoNodeList);
+    // 2nd pass
+    rootSymbolTable = initSymbolTable();
+}
+
+void buildSymbolTable(Prog *root){
+    printBanner("Symbol Table");
+    init();
+    // 1st pass
     scanDeclarationList(root->module_list, NULL);
     addDefaultBuiltin();
     addDefaultSystem();
     // 2nd pass
-    rootSymbolTable = initSymbolTable();
     scanStatementList(root->module_list, rootSymbolTable);
 }
 

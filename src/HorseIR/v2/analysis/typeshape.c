@@ -16,10 +16,16 @@ static InfoNode *scanType(Node *n);
 static bool H_SHOW;
 InfoNodeList *currentInList;
 
+static Node *currentMethod;
+
 /*  ---- above declarations ---- */
 
 int totalElement(List *list){ // no dummy
     int c=0; while(list){c++; list=list->next;} return c;
+}
+
+int totalInfoNoDummy(InfoNodeList *list){
+    int c=0; while(list){list=list->next; c++;} return c;
 }
 
 int totalInfo(InfoNodeList *list){
@@ -189,6 +195,15 @@ static bool typelistCompatible(int num, List *x, InfoNodeList *list){
     return true;
 }
 
+// both lists no dummy
+static bool typeInfoNodeListCompatible(InfoNodeList *list_x, InfoNodeList *list_y){
+    if(list_x){
+        bool t = typeInfoNodeListCompatible(list_x->next, list_y->next);
+        return t?infoCompatible(list_x->in, list_y->in):false;
+    }
+    return true;
+}
+
 static void printInfoVars(List *list){
     if(list){
         printInfoVars(list->next);
@@ -198,13 +213,17 @@ static void printInfoVars(List *list){
 }
 
 static void scanModule(Node *n){ scanList(n->val.module.body ); }
-static void scanMethod(Node *n){ scanNode(n->val.method.block); }
+static void scanMethod(Node *n){
+    Node *prevNode = currentMethod;
+    currentMethod = n;
+    scanNode(n->val.method.block);
+    currentMethod = prevNode;
+}
 
 #define scanListNode(n)   scanList(n->val.listS)
 #define scanParams(n)     scanListNode(n)
 #define scanArgExpr(n)    scanListNode(n)
 #define scanBlockStmt(n)  scanListNode(n)
-#define scanReturnStmt(n) scanListNode(n)
 
 // TODO: a,_ = ...
 static void scanAssignStmt(Node *n){
@@ -294,6 +313,20 @@ static void scanExprStmt(Node *n){
     scanNode(n->val.exprStmt.expr);
 }
 
+static void scanReturnStmt(Node *n){
+    scanListNode(n);
+    MetaMethod *meta = currentMethod->val.method.meta;
+    int numExpr = totalInfo(currentInList);
+    int numRtns = totalInfoNoDummy(meta->returnTypes);
+    if(numExpr == numRtns){
+        if(numRtns > 0){
+            if(typeInfoNodeListCompatible(meta->returnTypes, currentInList->next));
+            else EP("Return type mismatch in method: %s\n", currentMethod->val.method.fname);
+        }
+    }
+    else EP("Method expects %d returns, but gets %d", numRtns, numExpr);
+}
+
 static void scanNode(Node *n){
     if(!n) R;
     switch(n->kind){
@@ -326,11 +359,16 @@ static void scanList(List *list){
     }
 }
 
+static void init(){
+    H_SHOW = true;
+    currentMethod = NULL;
+    currentInList = NEW(InfoNodeList);
+}
+
 /* entry */
 void propagateTypeShape(Prog *root){
     printBanner("Type Shape Propagation (After symbol table)");
-    currentInList = NEW(InfoNodeList);
-    H_SHOW = true;
+    init();
     scanList(root->module_list);
 }
 

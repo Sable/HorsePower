@@ -267,7 +267,9 @@ gotoStmt           : kGOTO tID ';'
 ;
 */
 
-returnStmt         : kRETURN operand_list ';'
+returnStmt         : kRETURN ';'
+                     { $$ = makeNodeStmtReturn(NULL); }
+                   | kRETURN operand_list ';'
                      { $$ = makeNodeStmtReturn($2); }
 ;
 

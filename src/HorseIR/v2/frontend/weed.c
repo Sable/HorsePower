@@ -6,6 +6,7 @@
 #define weedExpr      weedListNode
 #define weedReturn    weedListNode
 #define weedBlock     weedListNode
+#define weedVarDecl   weedListNode
 
 static void weedNode    (Node *x);
 static bool weedDate    (int x);
@@ -170,8 +171,19 @@ static void printConst(Node *x){
     }
 }
 
+static Type getVectorType(Node *x){
+    Type t = getType(x);
+    switch(t){
+        case   boolT: case     i8T: case   i16T: case  i32T: case  i64T:
+        case    f32T: case    f64T: case  clexT: case charT: case  symT:
+        case    strT: case   dateT: case monthT: case timeT: case   dtT:
+        case minuteT: case secondT: return t;
+        default: EP("Invalid type for constants: %s\n", x->val.type.typ);
+    }
+}
+
 Type getType(Node *x){
-    if(!x) R -1;
+    if(!x) EP("Empty type node found\n");
     if(x->val.type.isWild) R wildT;
     else if(x->val.type.cell) {
         TODO("Cell types not allowed.\n");
@@ -195,7 +207,13 @@ Type getType(Node *x){
         else if(!strcmp(typ, "w"   )) R minuteT;
         else if(!strcmp(typ, "v"   )) R secondT;
         else if(!strcmp(typ, "t"   )) R timeT;
-        else EP("Invalid typ for constants: %s\n", typ);
+        else if(!strcmp(typ, "list")) R listT;
+        else if(!strcmp(typ, "dict")) R dictT;
+        else if(!strcmp(typ, "enum")) R enumT;
+        else if(!strcmp(typ, "table" )) R tableT;
+        else if(!strcmp(typ, "ktable")) R ktableT;
+        else if(!strcmp(typ, "func"  )) R funcT;
+        else EP("Invalid type: %s\n", typ);
     }
     R 0;
 }
@@ -250,7 +268,7 @@ static char *getConstTypeStr(Node *x){
 static void weedVector(Node *x){
     printNodeType(x);
     List *p = x->val.vec.val;
-    Type  t = getType(x->val.vec.typ);
+    Type  t = getVectorType(x->val.vec.typ);
     while(p){
         if(!weedConst(p->val, t)){
             printNode(x);
@@ -366,6 +384,7 @@ static void weedNode(Node *x){
         case    returnK: weedReturn(x);    break;
         case     breakK: break;
         case  continueK: break;
+        case   varDeclK: weedVarDecl(x);   break;
         default: EP("Type unknown: %s\n", getNodeTypeStr(x));
     }
 }
