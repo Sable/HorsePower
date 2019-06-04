@@ -34,9 +34,11 @@ static int countList(List *list){
 }
 
 static void printDepth(char* b){
-    resetBuff(b);
-    for(int i=0;i<depth;i++){
-        SP(b+i*4, "    ");
+    if(withLine) {
+        resetBuff(b);
+        for(int i=0;i<depth;i++){
+            SP(b+i*4, "    ");
+        }
     }
 }
 

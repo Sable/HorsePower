@@ -17,15 +17,27 @@ static Chain *initChainWithNode (Node *val);
 #define scanArgExpr(n,f)   scanList(n->val.listS,f)
 #define newChain(n)        initChainWithNode(n)
 
-Chain *currentChain, *exitChain;
-ChainList *chain_list, *chain_rt;
-char *currentModuleName;
-bool isLHS;
-InfoNode *currentIn;
+static Chain *currentChain;
+static ChainList *flow_sink, *chain_list;
+static char *currentModuleName;
+static bool isLHS;
+static InfoNode *currentIn;
 
-void initUDChain(){
-    chain_list = chain_rt = NEW(ChainList);
+#define printChainList printFlow
+static void addToChainList(ChainList *chains, Chain *c){
+    ChainList *x = NEW(ChainList);
+    x->chain = c;
+    x->next = chains->next;
+    chains->next = x;
 }
+
+//static void printChainList(ChainList *chains){
+//    if(chains && chains->next){
+//        printChainList(chains->next);
+//        printChainInfo(chains->next->chain);
+//    }
+//}
+
 
 static bool isInNameList(NameList *x, char *s){
     if(x){
@@ -56,17 +68,22 @@ static void addToFlow(ChainList *flow, Chain *c){
     flow->next = p;
 }
 
-static void markInFlow(ChainList *flow, char *s){
+static void removeKillSet(ChainList *flow, char *s){
     // kill all defs before
-    while(flow->next){
+    //bool isFound = false; ChainList *src = flow;
+    while(flow && flow->next){
         Chain *x = flow->next->chain;
         if(isInNameList(x->defs,s)){
+            //isFound = true; P("found s = %s\n", s); printFlow(src); getchar();
             ChainList *t = flow->next;
             flow->next = flow->next->next; 
             free(t); // clean flow->next ?
         }
-        flow = flow->next;
+        else flow = flow->next;
     }
+    //if(isFound){
+        //P("----> after <-----\n"); printFlow(src); getchar();
+    //}
 }
 
 static ChainList *copyFlow(ChainList *flow){
@@ -91,14 +108,36 @@ static void cleanFlow(ChainList *p){
     }
 }
 
-static bool hasDupChain(ChainList *p, Chain *t){
-    while(p->next){
-        Chain *c = p->next->chain;
-        if(c == t) R 1; // is it ok?
-        p = p->next;
+// static bool hasDupChain(ChainList *p, Chain *t){
+//     while(p->next){
+//         Chain *c = p->next->chain;
+//         if(c == t) R 1; // is it ok?
+//         p = p->next;
+//     }
+//     R 0;
+// }
+
+#define sameChain(x,y) (x)->cur == (y)->cur
+
+// list: no dummy
+static bool isChainInList(ChainList *list, Chain *chain){
+    if(list){
+        bool t = isChainInList(list->next, chain);
+        //P("%lld vs %lld\n", (L)list->chain->cur, (L)chain->cur);
+        return t?true:sameChain(list->chain, chain);  // check Node cur
     }
-    R 0;
+    return false;
 }
+
+static Chain *findChainInList(ChainList *list, Node *n){
+    if(list){
+        Chain *chain = findChainInList(list->next, n);
+        if(chain) return chain;
+        else return list->chain->cur == n? list->chain: NULL;
+    }
+    return NULL;
+}
+
 
 static ChainList *mergeFlow(ChainList *left, ChainList *right){
     ChainList *newFlow = copyFlow(left);
@@ -106,7 +145,7 @@ static ChainList *mergeFlow(ChainList *left, ChainList *right){
     ChainList *t = right;
     while(t->next){
         Chain *c = t->next->chain;
-        if(!hasDupChain(newFlow,c)){
+        if(!isChainInList(newFlow->next, c)){
             ChainList *t = NEW(ChainList);
             t->chain = c;
             p->next = t;
@@ -119,6 +158,37 @@ static ChainList *mergeFlow(ChainList *left, ChainList *right){
     //printFlow(newFlow);
     //getchar();
     return newFlow;
+}
+
+static bool sameFlowBody(ChainList *left, ChainList *right){
+    if(left){
+        bool t = sameFlowBody(left->next, right);
+        //if(t) P("t = true\n"); else P("t = false\n");
+        return t?isChainInList(right, left->chain):false;
+    }
+    return true;
+}
+
+// probably a duplicated method
+static int countChainList(ChainList *list){
+    if(list){ return 1 + countChainList(list->next); } return 0;
+}
+
+// assume: left contains distinct chains
+static bool sameFlow(ChainList *left, ChainList *right){
+    int  leftSize = countChainList(left);
+    int rightSize = countChainList(right);
+    //P("leftSize = %d, rightSize = %d\n", leftSize, rightSize);
+    //printFlow(left); printFlow(right); getchar();
+    if(left && right) {
+        if(leftSize == rightSize){
+            bool t = sameFlowBody(left->next, right->next);
+            //P("t = %d\n", t); getchar();
+            return t;
+        }
+        else return false;
+    }
+    else return false;
 }
 
 /* UD Chain */
@@ -208,17 +278,22 @@ static void printChainDefs(Chain *p){
     DOI(p->defSize, {P(" <-- "); printChain(p->chain_defs[i]); P("\n"); })
 }
 
-void printFlow(ChainList *chainList){
-    printBanner("Chain list");
-    ChainList *p = chainList;
-    int lineno = 0;
-    while(p->next){
-        p = p->next;
-        P("[%3d] %d: ",lineno++, p->chain->isVisited);
-        printChain(p->chain); P("\n");
-        printChainUses(p->chain);
-        printChainDefs(p->chain);
+static int printFlowBody(ChainList *list){
+    if(list){
+        int lineno = printFlowBody(list->next);
+        Chain *p = list->chain;
+        P("[%3d] %d, %lld: ",lineno, p->isVisited, (L)list->chain->cur);
+        printChain(p);     P("\n");
+        printChainUses(p);
+        printChainDefs(p); P("\n");
+        return lineno + 1;
     }
+    return 0;
+}
+
+void printFlow(ChainList *chainList){
+    if(chainList)
+        printFlowBody(chainList->next);
 }
 
 static void scanModule(Node *n){
@@ -237,44 +312,64 @@ static void scanAssignStmt(Node *n, ChainList *flow){
 
 static void scanVar(Node *n, ChainList *flow){
     char *name = n->val.param.id;
-    P("var = %s\n", name);
+    //P("var = %s\n", name);
     // udchain: add defs
     //P("1. addDefNameToChain\n");
     addDefNameToChain(currentChain, name);
-    //P("2. markInFlow\n");
-    markInFlow(flow, name);
+    //P("2. removeKillSet\n");
+    removeKillSet(flow, name);
     //P("3. addToFlow\n");
     addToFlow(flow, currentChain);
 }
 
-void findInFlow(ChainList *flow, char *s){
-    // kill all defs before
-    while(flow->next){
-        Chain *x = flow->next->chain;
-        //P("looking for %s\n", s);
-        //printChainDefNames(x);
-        if(isInNameList(x->defs,s)){
-            //P(">> found!!!\n"); printChain(x);
+static void findInFlowBody(ChainList *flow, char *s){
+    if(flow){
+        findInFlowBody(flow->next, s);
+        Chain *x = flow->chain;
+        if(isInNameList(x->defs,s)){  // TODO: can improve with symbol tables
+            //P(">> found!!! (%s)\n", s); printChain(x); P("\n");
             addToUDChain(currentChain, x); // use-def chain
             addToDUChain(x, currentChain); // def-use chain
         }
-        flow = flow->next;
     }
 }
+
+static void findInFlow(ChainList *flow, char *s){
+    //printFlow(flow);
+    findInFlowBody(flow->next, s);
+}
+
+// void findInFlow(ChainList *flow, char *s){
+//     // kill all defs before
+//     while(flow->next){
+//         Chain *x = flow->next->chain;
+//         //P("looking for %s\n", s);
+//         //printChainDefNames(x);
+//         if(isInNameList(x->defs,s)){  // TODO: can improve with symbol tables
+//             //P(">> found!!!\n"); printChain(x); P("\n");
+//             addToUDChain(currentChain, x); // use-def chain
+//             addToDUChain(x, currentChain); // def-use chain
+//         }
+//         flow = flow->next;
+//     }
+// }
 
 static void scanName(Node *n, ChainList *flow){
     //printFlow(flow); getchar();
     char *name = strName(n);
     if(isLHS){ // udchain: add defs
         addDefNameToChain(currentChain, name);
-        markInFlow(flow, name);
+        removeKillSet(flow, name);
         addToFlow(flow, currentChain);
+        //P("flow next = %lld\n", (L)flow->next); printFlow(flow); getchar();
     }
     else { // udchain: add uses
+        //P("checking use: %s, currentChain: %lld\n", name, (L)currentChain); getchar();
         if(currentChain){
             char *useName = name;
             addUseNameToChain(currentChain, useName);
             findInFlow(flow, useName);
+            // should not add current chain to flow
         }
     }
 }
@@ -292,11 +387,16 @@ static void scanCall(Node *n, ChainList *flow){
     scanNode(n->val.call.param, flow);
 }
 
+static void setFlow(ChainList *dest, ChainList *src){
+    // clean flow?
+    cleanFlow(dest); // dummy node remained
+    dest->next = src->next; // set flow
+}
+
 static void scanReturn(Node *n, ChainList *flow){
-    TODO("Handle return\n");
-    exitChain = currentChain;
-    /* continue scan */
     scanList(n->val.listS, flow);
+    ChainList *newFlow = mergeFlow(flow_sink, flow);
+    setFlow(flow_sink, newFlow);
 }
 
 static void scanIf(Node *n, ChainList *flow){
@@ -313,9 +413,49 @@ static void scanIf(Node *n, ChainList *flow){
     else {
         newFlow = mergeFlow(flow, flow_then);
     }
-    // clean flow?
-    cleanFlow(flow);  // dummy node remained
-    flow->next = newFlow->next; // set flow
+    setFlow(flow, newFlow);
+    //// clean flow?
+    //cleanFlow(flow);  // dummy node remained
+    //flow->next = newFlow->next; // set flow
+}
+
+// same as copyFlow
+static ChainList *dupFlow(ChainList *flow){
+    if(flow){
+        ChainList *t = dupFlow(flow->next);
+        ChainList *newChain = NEW(ChainList);
+        newChain->chain = flow->chain;
+        newChain->next  = t;
+        return newChain;
+    }
+    return NULL;
+}
+
+static void freeFlow(ChainList *flow){
+    if(flow){ freeFlow(flow->next); free(flow); }
+}
+
+static void scanWhile(Node *n, ChainList *flow){
+    ChainList *entryFlow = copyFlow(flow);
+    ChainList *mergedFlow = NULL;
+    int cnt = 0;
+    //P("Starting while...");
+    while(true){
+        if(mergedFlow){
+            //printFlow(entryFlow); getchar();
+            ChainList *newFlow = mergeFlow(entryFlow, flow);
+            if(sameFlow(mergedFlow, newFlow)) break;
+            else { setFlow(flow, newFlow); }
+            freeFlow(mergedFlow);
+        }
+        mergedFlow = copyFlow(flow);
+        //P("Mergedflow: \n"); printFlow(mergedFlow); getchar();
+        scanNode(n->val.whileStmt.condExpr, flow);
+        scanNode(n->val.whileStmt.bodyBlock, flow);
+        //P("Iteration: \n"); printFlow(flow); getchar();
+        cnt++;
+    }
+    P("Scan while with %d loops to a fixed point\n", cnt); //getchar();
 }
 
 static void scanGlobal(Node *n){
@@ -325,13 +465,17 @@ static void scanGlobal(Node *n){
 
 static void scanMethod(Node *n){
     ChainList *flow = NEW(ChainList);
+    chain_list->next = NULL;
     scanNode(n->val.method.block, flow);
-    printFlow(flow);
+    //printFlow(flow);
+    //printFlow(flow_sink);
+    printChainList(chain_list); // print all chains
+    // TODO: assign chain_list to a method node
+    // TODO: clean chain_list
 }
 
 #define scanContinue(n) TODO("continue")
 #define scanBreak(n)    TODO("break")
-#define scanWhile(n)    TODO("while")
 #define scanRepeat(n)   TODO("repeat")
 
 static void setCurrentNode(Node *n, Node *val){
@@ -344,14 +488,22 @@ static void setCurrentNode(Node *n, Node *val){
         case    whileK:
         case   repeatK:
         case   globalK:
-             currentChain = val?initChainWithNode(val):NULL; break;
+             //currentChain = val?initChainWithNode(val):NULL;
+            { Chain *chain = findChainInList(chain_list->next, val);
+                if(chain) currentChain = chain;
+                else {
+                    currentChain = initChainWithNode(val);
+                    addToChainList(chain_list, currentChain);
+                }
+            } break;
     }
 }
 
 static void scanNode(Node *n, ChainList *flow){
     if(!n) return ;
-    printNodeType(n);
-    P("flow is NULL: %d\n", NULL == flow);
+    //printNodeType(n);
+    //if(!flow) WP("flow is NULL"); else WP("flow is NOT NULL");
+    Chain *prevChain = currentChain;
     setCurrentNode(n, n);
     switch(n->kind){
         case    moduleK: scanModule    (n); break; //
@@ -367,14 +519,15 @@ static void scanNode(Node *n, ChainList *flow){
         case  continueK: scanContinue  (n); break;
         case     breakK: scanBreak     (n); break;
         case        ifK: scanIf        (n,flow); break;
-        case     whileK: scanWhile     (n); break;
+        case     whileK: scanWhile     (n,flow); break;
         case    repeatK: scanRepeat    (n); break;
         case     blockK: scanBlock     (n,flow); break; //
         case       varK: scanVar       (n,flow); break; //
         case    globalK: scanGlobal    (n); break; //
         /* TODO: add more kinds if possible */
     }
-    setCurrentNode(n, NULL);
+    //setCurrentNode(n, NULL);
+    currentChain = prevChain;
 }
 
 static void scanList(List *list, ChainList *flow){
@@ -384,10 +537,17 @@ static void scanList(List *list, ChainList *flow){
     }
 }
 
+static void init(){
+    isLHS = false;
+    currentModuleName = NULL;
+    flow_sink = NEW(ChainList);
+    chain_list = NEW(ChainList);
+}
+
 /* entry */
 void buildUDChain(Prog *root){
-    currentModuleName = NULL;
+    printBanner("UD Chaining");
+    init();
     scanList(root->module_list, NULL);
-    //printChainList();
 }
 

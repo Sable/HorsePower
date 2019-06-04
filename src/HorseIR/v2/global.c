@@ -21,7 +21,6 @@ void initBackend(){
 }
 
 void initGlobal(){
-    initUDChain();
     checkFuncNumber();
     initBackend();
 }

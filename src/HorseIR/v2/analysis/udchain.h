@@ -27,10 +27,9 @@ typedef struct ChainList {
 
 #define printChain(x) printNodeStr(x->cur)
 
-void initUDChain    ();
 void buildUDChain   (Prog *root);
 void printChainInfo (Chain *p);
-void printFlow      ();
+void printFlow      (ChainList *list);
 
 
 #endif

@@ -49,7 +49,7 @@ static void envCompiler(char *file){
     envInit(file);
     buildSymbolTable(root);
     propagateTypeShape(root);
-    //buildUDChain(root);
+    buildUDChain(root);
     //runCompilerCore();
 }
 

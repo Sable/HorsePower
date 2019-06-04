@@ -161,7 +161,7 @@ static bool weedString(char *x){
 }
 
 static void printConst(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
     ConstValue *p = x->val.nodeC;
     switch(p->type){
         case   intC: P("int: %d\n"   , p->valI); break;
@@ -266,7 +266,7 @@ static char *getConstTypeStr(Node *x){
  * a type indicator is a must
  */
 static void weedVector(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
     List *p = x->val.vec.val;
     Type  t = getVectorType(x->val.vec.typ);
     while(p){
@@ -307,15 +307,15 @@ static void weedRepeat(Node *x){
 }
 
 static void weedImport(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
 }
 
 static void weedGlobal(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
 }
 
 static void weedMethod(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
     if(!strcmp(x->val.method.fname, "main")){
         if(cntMain == 0){ entryMain = x; cntMain++; }
         else EP("Only one main method expected in modules.\n");
@@ -324,18 +324,18 @@ static void weedMethod(Node *x){
 }
 
 static void weedModule(Node *module){
-    printNodeType(module);
+    //printNodeType(module);
     weedList(module->val.module.body);
 }
 
 static void weedCall(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
     Node *param = x->val.call.param;
     if(param) weedNode(param);
 }
 
 static void weedCast(Node *x){
-    printNodeType(x);
+    //printNodeType(x);
     weedNode(x->val.cast.exp);
 }
 
