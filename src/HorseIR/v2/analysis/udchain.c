@@ -19,6 +19,7 @@ static Chain *initChainWithNode (Node *val);
 
 static Chain *currentChain;
 static ChainList *flow_sink, *chain_list;
+static FlowList *flow_list_exit, *flow_list_input;
 static char *currentModuleName;
 static bool isLHS;
 static InfoNode *currentIn;
@@ -59,6 +60,22 @@ static void printChainDefNames(Chain *c){
     }
     P("---list---done----\n");
 }
+
+static void addToFlowList(FlowList *list, ChainList *flow){
+    FlowList *p = NEW(FlowList);
+    p->flow = flow;
+    p->next = list->next;
+    list->next = p;
+}
+
+static void cleanFlowList(FlowList *list){
+    if(list){
+        FlowList *p = list->next;
+        while(p){FlowList *t = p; p = p->next; free(t);}
+        list->next = NULL;
+    }
+}
+
 
 static void addToFlow(ChainList *flow, Chain *c){
     //printChain(c); P("--added--\n"); getchar();
@@ -435,27 +452,75 @@ static void freeFlow(ChainList *flow){
     if(flow){ freeFlow(flow->next); free(flow); }
 }
 
-static void scanWhile(Node *n, ChainList *flow){
+
+static ChainList *mergeFlowListBody(FlowList *list){
+    if(list){
+        ChainList *flow = mergeFlowListBody(list->next);
+        return flow?mergeFlow(flow, list->flow):list->flow;
+    }
+    return NULL;
+}
+
+// has dummy
+static ChainList *mergeFlowList(FlowList *flowList){
+    return mergeFlowListBody(flowList->next);
+}
+
+static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
     ChainList *entryFlow = copyFlow(flow);
-    ChainList *mergedFlow = NULL;
+    ChainList *mergedFlow = NULL, *newFlow = NULL;
     int cnt = 0;
-    //P("Starting while...");
+    FlowList *prev_input = flow_list_input->next;
+    FlowList *prev_exit  = flow_list_exit->next;
+    flow_list_input->next = NULL;
+    flow_list_exit->next  = NULL;
+    //P("Starting while/repeat...");
     while(true){
         if(mergedFlow){
-            //printFlow(entryFlow); getchar();
-            ChainList *newFlow = mergeFlow(entryFlow, flow);
-            if(sameFlow(mergedFlow, newFlow)) break;
-            else { setFlow(flow, newFlow); }
+            addToFlowList(flow_list_input, entryFlow);
+            newFlow = mergeFlowList(flow_list_input);
+            cleanFlowList(flow_list_input);
+            if(sameFlow(mergedFlow, newFlow)) {
+                addToFlowList(flow_list_exit, newFlow); break;
+            }
+            else {setFlow(flow, newFlow);}
             freeFlow(mergedFlow);
         }
         mergedFlow = copyFlow(flow);
         //P("Mergedflow: \n"); printFlow(mergedFlow); getchar();
-        scanNode(n->val.whileStmt.condExpr, flow);
-        scanNode(n->val.whileStmt.bodyBlock, flow);
+        if(isWhile){
+            scanNode(n->val.whileStmt.condExpr , flow);
+            scanNode(n->val.whileStmt.bodyBlock, flow);
+        }
+        else {
+            scanNode(n->val.repeatStmt.condExpr , flow);
+            scanNode(n->val.repeatStmt.bodyBlock, flow);
+        }
+        addToFlowList(flow_list_input, flow);
         //P("Iteration: \n"); printFlow(flow); getchar();
         cnt++;
     }
-    P("Scan while with %d loops to a fixed point\n", cnt); //getchar();
+    newFlow = mergeFlowList(flow_list_exit);
+    setFlow(flow, newFlow);
+    P("Scan while/repeat with %d loops to a fixed point\n", cnt); //getchar();
+    flow_list_input->next = prev_input;
+    flow_list_exit->next  = prev_exit;
+}
+
+static void scanWhile(Node *n, ChainList *flow){
+    scanWhileRepeat(n, flow, true);
+}
+
+static void scanRepeat(Node *n, ChainList *flow){
+    scanWhileRepeat(n, flow, false);
+}
+
+static void scanContinue(Node *n, ChainList *flow){
+    addToFlowList(flow_list_input, flow);
+}
+
+static void scanBreak(Node *n, ChainList *flow){
+    addToFlowList(flow_list_exit, flow);
 }
 
 static void scanGlobal(Node *n){
@@ -473,10 +538,6 @@ static void scanMethod(Node *n){
     // TODO: assign chain_list to a method node
     // TODO: clean chain_list
 }
-
-#define scanContinue(n) TODO("continue")
-#define scanBreak(n)    TODO("break")
-#define scanRepeat(n)   TODO("repeat")
 
 static void setCurrentNode(Node *n, Node *val){
     switch(n->kind){
@@ -516,11 +577,11 @@ static void scanNode(Node *n, ChainList *flow){
         case      nameK: scanName      (n,flow); break; //
         case   argExprK: scanArgExpr   (n,flow); break; //
         case    returnK: scanReturn    (n,flow); break; //
-        case  continueK: scanContinue  (n); break;
-        case     breakK: scanBreak     (n); break;
+        case  continueK: scanContinue  (n,flow); break;
+        case     breakK: scanBreak     (n,flow); break;
         case        ifK: scanIf        (n,flow); break;
         case     whileK: scanWhile     (n,flow); break;
-        case    repeatK: scanRepeat    (n); break;
+        case    repeatK: scanRepeat    (n,flow); break;
         case     blockK: scanBlock     (n,flow); break; //
         case       varK: scanVar       (n,flow); break; //
         case    globalK: scanGlobal    (n); break; //
@@ -542,6 +603,8 @@ static void init(){
     currentModuleName = NULL;
     flow_sink = NEW(ChainList);
     chain_list = NEW(ChainList);
+    flow_list_input = NEW(FlowList);
+    flow_list_exit  = NEW(FlowList);
 }
 
 /* entry */

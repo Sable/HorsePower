@@ -22,6 +22,11 @@ typedef struct ChainList {
     struct ChainList *next;
 }ChainList;
 
+typedef struct FlowList{
+    ChainList *flow;
+    struct FlowList *next;
+}FlowList;
+
 //void printChainList();
 //void printChainInfo(Chain *chain, char opt);
 
