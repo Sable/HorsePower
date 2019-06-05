@@ -77,5 +77,7 @@ char *strName  (Node *n);
 SymbolName *getSymbolName(SymbolTable *st, char *name);
 SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind);
 
+void printSymbolName(SymbolName *sn);
+
 #endif
 

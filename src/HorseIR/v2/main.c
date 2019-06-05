@@ -10,13 +10,13 @@ B isReadBin  = false;
 static void runInterpreterCore(){
     tic();
     HorseInterpreter();
-    time_toc("Interpretation time (ms): %g ms\n", elapsed);
+    time_toc("Interpretation time (ms): %g\n", elapsed);
 }
 
 static void runCompilerCore(){
     tic();
     HorseCompiler();
-    time_toc("Compile time (ms): %g ms\n", elapsed);
+    time_toc("Compile time (ms): %g\n", elapsed);
 }
 
 static void parseInput(char *file_path){

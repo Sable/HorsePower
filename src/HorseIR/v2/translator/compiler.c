@@ -1,13 +1,16 @@
 #include "../global.h"
 
 #define outF stdout
+#define comma ','
 
 extern Node *entryMain;
-static I depth; // 0
-static B lhs; // false
+static I depth, numArg;
+static B needInd; // false
+static List *lhsVars;
 
 static void scanNode(Node *n);
 static void scanList(List *list);
+static void genList(List *list, C sep);
 
 #define scanArgExpr(n) scanList(n->val.listS)
 /* ------ declaration above ------ */
@@ -39,7 +42,9 @@ static char *otherFnName[] = {
 #define genStr(s) FP(outF, "%s", s)
 #define genLine() genStr("\n");
 
-static void genMethodHead(){ genStr("E compiled_query(){\n"); }
+static char code[1024];
+
+static void genMethodHead(S n){ SP(code, "I horse_%s(){\n",n); genStr(code); }
 static void genMethodTail(){ genStr("}\n"); }
 static void genIndent(){ DOI(depth, P("    ")); }
 
@@ -61,6 +66,8 @@ static void genToc(){
     //genStr("time_toc(\"The elapsed time: %g\\n\", elapsed);");
     genLine();
 }
+
+/* ------ gen functions defined above ------ */
 
 static void scanExprStmt(Node *n){
     scanNode(n->val.exprStmt.expr);
@@ -90,43 +97,80 @@ static void scanFuncName(Node *n){
 }
 
 static void scanCall(Node *n){
-    if(!lhs) genIndent();
+    I prevNumArg = numArg;
+    if(needInd) genIndent();
     scanFuncName(n->val.call.func);
     genStr("(");
+    genList(lhsVars, comma);
+    numArg = countNode(lhsVars);
     scanNode(n->val.call.param);
+    numArg = prevNumArg;
     genStr(");");
     genLine();
 }
 
 static void scanVar(Node *n){
+    genStr(n->val.param.id);
     // n->val.param.id
     // n->val.param.typ
 }
 
 static void scanName(Node *n){
-    P("%s\n", n->val.name.id2);
+    if(numArg == 0) numArg = 1;
+    else if(numArg > 0) { putchar(comma); numArg++; }
+    P("%s", n->val.name.id2);
     // n->val.name.id1
     // n->val.name.id2
 }
 
 static void scanAssignStmt(Node *n){
-    genIndent();
-    lhs = true;
-    scanList(n->val.assignStmt.vars);
-    lhs = false;
+    B prevNeedInd= needInd;
+    List *prevVars = lhsVars;
+    genIndent(); needInd = false;
+    lhsVars = n->val.assignStmt.vars;
     scanNode(n->val.assignStmt.expr);
+    needInd = prevNeedInd;
+    lhsVars = prevVars;
+}
+
+static void genList(List *list, C sep){
+    if(list){
+        genList(list->next, sep);
+        if(list->next) P("%c", sep);
+        scanNode(list->val);
+    }
 }
 
 static void scanVector(Node *n){
-    scanList(n->val.vec.val);
+    if(numArg == 0) numArg = 1;
+    else if(numArg > 0) { putchar(comma); numArg++; }
+    I c = countNode(n->val.vec.val);
+    if(c > 1) P("(");
+    genList(n->val.vec.val, comma);
+    if(c > 1) P(")");
 }
 
 static void scanConst(Node *n){
     ConstValue *v = n->val.nodeC;
     switch(v->type){
-        case strC: P("\"%s\"", v->valS); break;
+        case  strC: P("\"%s\"", v->valS); break;
+        case  intC: P("%d"    , v->valI); break;
+        case longC: P("%lld"  , v->valL); break;
         default: EP("Add more constant types: %d\n", v->type);
     }
+}
+
+static void scanReturn(Node *n){
+    genIndent();
+    if(n->val.listS){
+        P("return ");
+        genList(n->val.listS, comma);
+        P(";");
+    }
+    else {
+        P("return ;");
+    }
+    genLine();
 }
 
 static void scanNode(Node *n){
@@ -139,6 +183,7 @@ static void scanNode(Node *n){
         case     stmtK: scanAssignStmt(n); break;
         case   vectorK: scanVector    (n); break;
         case    constK: scanConst     (n); break;
+        case   returnK: scanReturn    (n); break;
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
 }
@@ -162,21 +207,31 @@ static void compileChainList(ChainList *list){
     }
 }
 
+static void printSymbolNameList(SymbolNameList *list){
+    if(list){
+        printSymbolNameList(list->next);
+        printSymbolName(list->symName);
+    }
+}
+
 static void compileMethod(Node *n){
     ChainList *chains = n->val.method.meta->chains;
     //printChainList(chains);
-    genMethodHead();
+    printSymbolNameList(n->val.method.meta->localVars);
+    genMethodHead(n->val.method.fname); // TODO: method name
     depth++;
-    if(n == entryMain) genTic();
+    //if(n == entryMain) genTic();
     compileChainList(chains);
-    if(n == entryMain) genToc();
+    //if(n == entryMain) genToc();
     depth--;
     genMethodTail();
 }
 
 static void init(){
     depth = 0;
-    lhs = false;
+    numArg = -1;
+    needInd = true;
+    lhsVars = NULL;
 }
 
 I HorseCompiler(){

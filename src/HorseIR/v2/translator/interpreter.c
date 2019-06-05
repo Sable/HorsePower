@@ -568,7 +568,7 @@ static O init(){
 }
 
 static O resultReport(){
-    P("stack pointer> current: %lld, peak = %lld, max = %lld\n", stackPtr, stackPeak, (L)STACK_SIZE);
+    P(">> stack pointer current: %lld, peak = %lld, max = %lld\n", stackPtr, stackPeak, (L)STACK_SIZE);
 }
 
 /* entry */

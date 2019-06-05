@@ -438,7 +438,7 @@ static ShapeNode *decideShapeElementwiseV(ShapeNode *x, ShapeNode *y){
     if(isSNConst(x)){
         if(x->size == 1) rtnShape = y;
         else if(isSNConst(y)){
-            if(x->size == y->size) rtnShape = y;
+            if(x->size == y->size || y->size == 1) rtnShape = x;
             else EP("length of both sides should obey the elemetwise rule\n");
         }
         else rtnShape = newShapeNode(unknownH, SN_ID, -1);
