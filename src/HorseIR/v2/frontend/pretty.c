@@ -371,6 +371,7 @@ char *getNodeTypeStr(Node *n){
         CaseLine(callK);
         CaseLine(vectorK);
         CaseLine(constK);
+        CaseLine(exprstmtK);
         default: EP("unknown node: %d\n", n->kind);
     }
     R NULL;

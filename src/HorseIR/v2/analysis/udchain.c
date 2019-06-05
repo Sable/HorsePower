@@ -24,7 +24,6 @@ static char *currentModuleName;
 static bool isLHS;
 static InfoNode *currentIn;
 
-#define printChainList printFlow
 static void addToChainList(ChainList *chains, Chain *c){
     ChainList *x = NEW(ChainList);
     x->chain = c;
@@ -392,15 +391,14 @@ static void scanName(Node *n, ChainList *flow){
 }
 
 static void scanCall(Node *n, ChainList *flow){
-    if(instanceOf(n, callK)){
-        Node *func = n->val.call.func;
-        //InfoNodeList *rtns = propagateType(func, n->val.call.param);
-        //if(totalInfo(rnts) == 1)
-        //    currentIn = rtns->next->val;
-        //else
-        TODO("Add support for single-/multi-var return\n");
-    }
-    //else currentIn = propagateTypeCopy(n->val.call.param);
+    //if(instanceOf(n, callK)){
+    //    Node *func = n->val.call.func;
+    //    //InfoNodeList *rtns = propagateType(func, n->val.call.param);
+    //    //if(totalInfo(rnts) == 1)
+    //    //    currentIn = rtns->next->val;
+    //    //else
+    //    TODO("Add support for single-/multi-var return\n");
+    //}
     scanNode(n->val.call.param, flow);
 }
 
@@ -485,6 +483,8 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
             }
             else {setFlow(flow, newFlow);}
             freeFlow(mergedFlow);
+            cleanFlowList(flow_list_input);
+            cleanFlowList(flow_list_exit);
         }
         mergedFlow = copyFlow(flow);
         //P("Mergedflow: \n"); printFlow(mergedFlow); getchar();
@@ -503,6 +503,8 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
     newFlow = mergeFlowList(flow_list_exit);
     setFlow(flow, newFlow);
     P("Scan while/repeat with %d loops to a fixed point\n", cnt); //getchar();
+    cleanFlowList(flow_list_input);
+    cleanFlowList(flow_list_exit);
     flow_list_input->next = prev_input;
     flow_list_exit->next  = prev_exit;
 }
@@ -535,6 +537,7 @@ static void scanMethod(Node *n){
     //printFlow(flow);
     //printFlow(flow_sink);
     printChainList(chain_list); // print all chains
+    n->val.method.meta->chains = chain_list->next; // skip dummy
     // TODO: assign chain_list to a method node
     // TODO: clean chain_list
 }

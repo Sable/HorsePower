@@ -40,6 +40,7 @@ typedef struct MetaMethod{
     SymbolNameList *paramVars;
     SymbolNameList *localVars;
     struct InfoNodeList *returnTypes;
+    struct ChainList *chains;
 }MetaMethod;
 
 //typedef struct InfoNode{

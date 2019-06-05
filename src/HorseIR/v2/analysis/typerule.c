@@ -1,6 +1,6 @@
 #include "../global.h"
 
-const char *FunctionUnaryStr[] = { /* unary 60 */
+const char *FunctionUnaryStr[] = { /* unary 60 + 1 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" ,
     "not", "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",
     "asin",  "atan", "cosh", "sinh", "tanh", "acosh", "asinh", "atanh", "date",
@@ -8,7 +8,7 @@ const char *FunctionUnaryStr[] = { /* unary 60 */
     "time_second", "time_mill", "unique", "str", "len", "range", "fact",
     "rand", "seed", "flip", "reverse", "where", "group", "count", "sum", "avg",
     "min", "max", "raze", "enlist", "tolist", "format", "keys", "values",
-    "meta", "load_table", "fetch"
+    "meta", "load_table", "fetch", "print"
 };
 
 
@@ -20,7 +20,7 @@ const char *FunctionBinaryStr[] = { /* binary 33 */
     "sub_string"
 };
 
-const char *FunctionOtherStr[] = { /* special 14 */
+const char *FunctionOtherStr[] = { /* special 14  */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
     "ktable", "index_a", "list", "outer", "join_index", "datetime_add",
     "datetime_sub"
@@ -98,6 +98,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleEnlist      specialEnlist
 #define ruleTolist      NULL
 #define ruleFormat      NULL
+#define rulePrint       propPrint
+
 /* dyadic */ 
 #define ruleLt          commonCompare2
 #define ruleGt          commonCompare2
@@ -376,6 +378,18 @@ static InfoNode *propYear(InfoNode *x){
         return newInfoNode(i64T, inShape(x));
     }
     else return NULL;
+}
+
+static InfoNode *propPrint(InfoNode *x){
+    Type rtnType;
+    if(isW(x)){
+        rtnType = wildT;
+    }
+    else {
+        rtnType = i64T;
+    }
+    return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
+     // or @print returns nothing
 }
 
 /* dyadic */
@@ -843,6 +857,7 @@ int getValenceOther(TypeOther x){
         CASE(     listF, -1); //any
         CASE(    dtaddF, 3);
         CASE(    dtsubF, 3);
+        CASE(    printF, 1);
         DEFAULT(x);
     }
 }
@@ -903,6 +918,7 @@ void *fetchUnaryRules(TypeUnary x){
         CASE( enlistF, ruleEnlist)
         CASE( tolistF, ruleTolist)
         CASE( formatF, ruleFormat)
+        CASE(  printF, rulePrint)
         DEFAULT(x)
     }
 }

@@ -30,7 +30,8 @@ typedef struct FlowList{
 //void printChainList();
 //void printChainInfo(Chain *chain, char opt);
 
-#define printChain(x) printNodeStr(x->cur)
+#define printChain(x)  printNodeStr(x->cur)
+#define printChainList printFlow
 
 void buildUDChain   (Prog *root);
 void printChainInfo (Chain *p);

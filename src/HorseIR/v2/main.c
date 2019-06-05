@@ -50,7 +50,7 @@ static void envCompiler(char *file){
     buildSymbolTable(root);
     propagateTypeShape(root);
     buildUDChain(root);
-    //runCompilerCore();
+    runCompilerCore();
 }
 
 static void envPrettyPrint(char *file){

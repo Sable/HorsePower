@@ -360,6 +360,10 @@ static void weedName(Node *x){
     }
 }
 
+static void weedExprStmt(Node *x){
+    weedNode(x->val.exprStmt.expr);
+}
+
 static void weedNode(Node *x){
     if(!x) R ;
     switch(x->kind){
@@ -385,6 +389,7 @@ static void weedNode(Node *x){
         case     breakK: break;
         case  continueK: break;
         case   varDeclK: weedVarDecl(x);   break;
+        case  exprstmtK: weedExprStmt(x);  break;
         default: EP("Type unknown: %s\n", getNodeTypeStr(x));
     }
 }
