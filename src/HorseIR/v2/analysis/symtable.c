@@ -111,6 +111,14 @@ void printSymbolName(SymbolName *sn){
     P("\n");
 }
 
+void printSymbolNameList(SymbolNameList *list){
+    if(list){
+        printSymbolNameList(list->next);
+        printSymbolName(list->symName);
+    }
+}
+
+
 static SymbolTable *initSymbolTable(){
     SymbolTable *t = (SymbolTable*)malloc(sizeof(SymbolTable));
     for(int i=0; i<SymbolTableSize; i++)
