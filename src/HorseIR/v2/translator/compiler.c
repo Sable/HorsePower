@@ -42,13 +42,16 @@ static char *otherFnName[] = {
 #define genStr(s) FP(out_stream, "%s", s)
 #define genLine() genStr("\n");
 
-#define glueCode(s) strcat(ptr,s)
-#define glueLine()  strcat(ptr,"\n")
+#define glueCode(s)  strcat(ptr,s)
+#define glueLine()   strcat(ptr,"\n")
 #define cleanCode()  code[0]=0
-#define resetCode() if(ptr[0]!=0) ptr+=strlen(ptr)
-#define glueChar(c) do{resetCode(); ptr[0]=c; ptr[1]=0; ptr++;}while(0)
-#define glueInt(x)  do{resetCode(); SP(ptr, "%d"  , x);}while(0)
-#define glueLong(x) do{resetCode(); SP(ptr, "%lld", x);}while(0)
+#define resetCode()  if(ptr[0]!=0) ptr+=strlen(ptr)
+#define glueChar(c)  do{resetCode(); ptr[0]=c; ptr[1]=0; ptr++;}while(0)
+#define glueInt(x)   do{resetCode(); SP(ptr, "%d", x);     }while(0)
+#define glueLong(x)  do{resetCode(); SP(ptr, "%lld", x);   }while(0)
+#define glueAny(...) do{resetCode(); SP(ptr, __VA_ARGS__); }while(0)
+#define glueCodeLine(x)  do{genIndent(); resetCode(); SP(ptr, "%s\n",x);}while(0)
+#define glueAnyLine(...) do{genIndent(); glueAny(__VA_ARGS__);}while(0)
 
 typedef struct CodeList{
     char code[128];
@@ -59,7 +62,6 @@ typedef struct CodeList{
 static char code[CODE_MAX_SIZE], *ptr;
 static CodeList *codeList;
 
-static void genMethodTail(){ glueCode("}\n"); }
 static void genIndent(){ DOI(depth, glueCode("    ")); }
 
 static int countInfoNodeList(InfoNodeList *list){
@@ -67,12 +69,10 @@ static int countInfoNodeList(InfoNodeList *list){
 }
 
 static void genMethodHead(Node *n){
-    resetCode();
-    SP(ptr, "I horse_%s(", n->val.method.fname);
+    glueAny("I horse_%s(", n->val.method.fname);
     int total = countInfoNodeList(n->val.method.meta->returnTypes);
     if(total > 0) glueCode("V *h_rtn");
-    glueCode("){");
-    glueLine();
+    glueCodeLine("){");
 }
 
 static void addToCodeList(CodeList *list, CodeList *c){
@@ -114,6 +114,17 @@ static void genList(List *list, C sep){
         if(list->next) glueChar(sep);
         scanNode(list->val);
     }
+}
+
+static int genListReturn(List *list, C sep, S text){
+    if(list){
+        int k = genListReturn(list->next, sep, text);
+        glueAny("%s[%d]=",text,k);
+        scanNode(list->val);
+        glueChar(sep);
+        return k+1;
+    }
+    return 0;
 }
 
 char getTypeAlias(Type t){
@@ -268,9 +279,8 @@ static void scanConst(Node *n){
 static void scanReturn(Node *n){
     if(n->val.listS){
         glueCode("return ");
-        genList(n->val.listS, comma);
-        glueCode(",0");
-        glueCode(";");
+        genListReturn(n->val.listS, comma, "h_rtn");
+        glueCode("0;");
     }
     else {
         glueCode("return ;");
@@ -338,7 +348,25 @@ static void compileMethod(Node *n){
     compileChainList(chains);
     //if(n == entryMain) genToc();
     depth--;
-    genMethodTail();
+    glueCodeLine("}\n");
+}
+
+static void genEntry(){
+    resetCode();
+    int numRtns = countInfoNodeList(entryMain->val.method.meta->returnTypes);
+    glueCodeLine("I horse_entry(){");
+    depth++;
+    if(numRtns > 0){
+        glueCodeLine("V rtns[99];");
+        glueCodeLine("tic();");
+        glueCodeLine("horse_main(rtns);");
+        glueCodeLine("time_toc(\"The elapsed time (ms): %g\\n\", elapsed);");
+        glueCodeLine("P(\"Output:\\n\");");
+        glueAnyLine("DOI(%d, printV(rtns[i]))\n", numRtns);
+    }
+    glueCodeLine("return 0;");
+    depth--;
+    glueCodeLine("}");
 }
 
 static void init(){
@@ -354,14 +382,16 @@ static void init(){
 static void result(){
     resetCode();
     I size = ptr - code;
-    P("Output:\n%s\n",code);
-    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
+    P("%s\n",code);
+    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
+            percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
 }
 
 I HorseCompiler(){
     printBanner("Compiling");
     init();
     compileMethod(entryMain);
+    genEntry();
     //if(H_DEBUG) printChainList(); // display visited chains
     result();
     R 0;
