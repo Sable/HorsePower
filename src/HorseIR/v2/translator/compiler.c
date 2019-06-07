@@ -5,7 +5,7 @@
 
 extern Node *entryMain;
 static I depth, numArg;
-static B needInd; // false
+static B needInd;
 static List *lhsVars;
 
 static void scanNode(Node *n);
@@ -47,6 +47,8 @@ static char *otherFnName[] = {
 #define cleanCode()  code[0]=0
 #define resetCode() if(ptr[0]!=0) ptr+=strlen(ptr)
 #define glueChar(c) do{resetCode(); ptr[0]=c; ptr[1]=0; ptr++;}while(0)
+#define glueInt(x)  do{resetCode(); SP(ptr, "%d"  , x);}while(0)
+#define glueLong(x) do{resetCode(); SP(ptr, "%lld", x);}while(0)
 
 typedef struct CodeList{
     char code[128];
@@ -57,9 +59,21 @@ typedef struct CodeList{
 static char code[CODE_MAX_SIZE], *ptr;
 static CodeList *codeList;
 
-static void genMethodHead(S n){ char temp[99]; SP(temp, "I horse_%s(){\n",n); glueCode(temp); }
 static void genMethodTail(){ glueCode("}\n"); }
 static void genIndent(){ DOI(depth, glueCode("    ")); }
+
+static int countInfoNodeList(InfoNodeList *list){
+    if(list) return 1 + countInfoNodeList(list->next); return 0;
+}
+
+static void genMethodHead(Node *n){
+    resetCode();
+    SP(ptr, "I horse_%s(", n->val.method.fname);
+    int total = countInfoNodeList(n->val.method.meta->returnTypes);
+    if(total > 0) glueCode("V *h_rtn");
+    glueCode("){");
+    glueLine();
+}
 
 static void addToCodeList(CodeList *list, CodeList *c){
     c->next = list->next;
@@ -185,17 +199,14 @@ static void scanFuncName(Node *n){
 }
 
 static void scanCall(Node *n){
-    resetCode();
     I prevNumArg = numArg;
-    if(needInd) genIndent();
     scanFuncName(n->val.call.func);
     glueCode("(");
     genList(lhsVars, comma);
     numArg = countNode(lhsVars);
     scanNode(n->val.call.param);
     numArg = prevNumArg;
-    glueCode(");");
-    glueLine();
+    glueCode(")");
 }
 
 static void scanVar(Node *n){
@@ -214,8 +225,8 @@ static void scanName(Node *n){
 
 static void scanAssignStmt(Node *n){
     B prevNeedInd= needInd;
+    needInd = false;
     List *prevVars = lhsVars;
-    genIndent(); needInd = false;
     lhsVars = n->val.assignStmt.vars;
     scanNode(n->val.assignStmt.expr);
     needInd = prevNeedInd;
@@ -242,7 +253,6 @@ static void scanVector(Node *n){
 }
 
 static void scanConst(Node *n){
-    resetCode();
     char temp[99]; temp[0]=0;
     ConstValue *v = n->val.nodeC;
     switch(v->type){
@@ -256,20 +266,31 @@ static void scanConst(Node *n){
 
 // TODO: think how to return multiple values
 static void scanReturn(Node *n){
-    resetCode();
-    genIndent();
     if(n->val.listS){
         glueCode("return ");
         genList(n->val.listS, comma);
+        glueCode(",0");
         glueCode(";");
     }
     else {
         glueCode("return ;");
     }
-    glueLine();
+}
+
+static void genStatement(Node *n, B f){
+    switch(n->kind){
+        case   callK: if(f){ if(needInd) genIndent(); }
+                      else { if(needInd) { glueCode(";"); glueLine(); }  } break;
+        case returnK: if(f) genIndent();
+                      else glueLine(); break;
+        case   stmtK: if(f) { genIndent(); glueCode("CHECKE("); }
+                      else { glueCode(");"); glueLine(); } break;
+    }
 }
 
 static void scanNode(Node *n){
+    resetCode();
+    genStatement(n, true);
     switch(n->kind){
         case     callK: scanCall      (n); break;
         case exprstmtK: scanExprStmt  (n); break;
@@ -282,6 +303,7 @@ static void scanNode(Node *n){
         case   returnK: scanReturn    (n); break;
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
+    genStatement(n, false);
 }
 
 static void scanList(List *list){
@@ -309,7 +331,8 @@ static void compileMethod(Node *n){
     //printChainList(chains);
     // show the list of all local variables
     //printSymbolNameList(n->val.method.meta->localVars);
-    genMethodHead(n->val.method.fname); // TODO: method name
+    //genMethodHead(n->val.method.fname); // TODO: method name
+    genMethodHead(n);
     depth++;
     //if(n == entryMain) genTic();
     compileChainList(chains);
