@@ -10,7 +10,7 @@ static void   addToUDChain      (Chain *useChain, Chain *defChain);
 static void   addToDUChain      (Chain *defChain, Chain *useChain);
 static Chain *initChainWithNode (Node *val);
 
-#define scanBlock(n,f)     scanList(n->val.listS,f)
+#define scanBlock(n,f)     scanList(n->val.block.stmts,f)
 #define scanCast(n,f)      scanNode(n->val.cast.exp,f)
 #define scanExprStmt(n,f)  scanNode(n->val.exprStmt.expr,f)
 #define scanParamExpr(n,f) scanList(n->val.listS,f)

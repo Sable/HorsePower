@@ -326,6 +326,7 @@ static void scanCast(Node *n, SymbolTable *st){
 static void scanBlockStmt(Node *n, SymbolTable *st){
     SymbolTable *new_st = scopeSymbolTable(n, st);
     scanStatementList(n->val.listS, new_st);
+    n->val.block.st = new_st;
 }
 
 static void scanIfStmt(Node *n, SymbolTable *st){

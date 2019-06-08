@@ -223,7 +223,6 @@ static void scanMethod(Node *n){
 #define scanListNode(n)   scanList(n->val.listS)
 #define scanParams(n)     scanListNode(n)
 #define scanArgExpr(n)    scanListNode(n)
-#define scanBlockStmt(n)  scanListNode(n)
 
 // TODO: a,_ = ...
 static void scanAssignStmt(Node *n){
@@ -313,6 +312,10 @@ static void scanExprStmt(Node *n){
     scanNode(n->val.exprStmt.expr);
 }
 
+static void scanBlockStmt(Node *n){
+    scanList(n->val.block.stmts);
+}
+
 static void scanReturnStmt(Node *n){
     scanListNode(n);
     MetaMethod *meta = currentMethod->val.method.meta;
@@ -360,6 +363,7 @@ static void scanList(List *list){
 }
 
 static void init(){
+    checkFuncNumber();
     H_SHOW = true;
     currentMethod = NULL;
     currentInList = NEW(InfoNodeList);

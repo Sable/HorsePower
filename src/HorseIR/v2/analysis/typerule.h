@@ -79,7 +79,7 @@ void *fetchTypeRules(char *name, int* num);
 ShapeNode *newShapeNode(pShape type, int kind, int size);
 bool checkType(InfoNode *x, InfoNode *y);
 bool checkShape(InfoNode *x, InfoNode *y);
-int getValence(FuncUnit *x);
+int  getValence(FuncUnit *x);
 void getFuncIndexByName(char *name, FuncUnit *x);
 
 #endif

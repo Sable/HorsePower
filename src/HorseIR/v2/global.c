@@ -1,5 +1,7 @@
 #include "global.h"
 
+B isReadBin  = false;
+
 /* helper functions */
 
 void *newM(int n){
@@ -21,7 +23,6 @@ void initBackend(){
 }
 
 void initGlobal(){
-    checkFuncNumber();
     initBackend();
 }
 

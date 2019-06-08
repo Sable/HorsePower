@@ -5,7 +5,6 @@ Node *entryMain;
 int yyparse(); /* see y.tab.c */
 extern FILE *yyin;
 extern int yylineno;
-B isReadBin  = false;
 
 static void runInterpreterCore(){
     tic();

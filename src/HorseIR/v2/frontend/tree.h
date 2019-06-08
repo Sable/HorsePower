@@ -40,6 +40,7 @@ typedef struct Node {
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
         struct name       {bool one, isUS; char *id1,*id2; \
                            struct SymbolTable *st;struct SymbolName *sn;} name;
+        struct block      {List *stmts; struct SymbolTable *st;         } block;
         struct ConstValue *nodeC;
         char   *idS;
         List   *listS;

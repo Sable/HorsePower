@@ -5,7 +5,6 @@
 #define weedParamExpr weedListNode
 #define weedExpr      weedListNode
 #define weedReturn    weedListNode
-#define weedBlock     weedListNode
 #define weedVarDecl   weedListNode
 
 static void weedNode    (Node *x);
@@ -304,6 +303,10 @@ static void weedWhile(Node *x){
 static void weedRepeat(Node *x){
     weedNode(x->val.repeatStmt.condExpr);
     weedNode(x->val.repeatStmt.bodyBlock);
+}
+
+static void weedBlock(Node *x){
+    weedList(x->val.block.stmts);
 }
 
 static void weedImport(Node *x){

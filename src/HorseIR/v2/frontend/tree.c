@@ -218,6 +218,15 @@ Node *makeNodeConst(ConstValue *val){
     return n;
 }
 
+Node *makeNodeBlock(List *stmts){
+    Node *n     = NEW(Node);
+    n->kind     = blockK;
+    n->val.block.stmts = stmts;
+    n->val.block.st    = NULL;
+    n->lineno   = yylineno;
+    return n;
+}
+
 static List *createVarList(List *vars, Node *type){
     if(vars){
         List *list = createVarList(vars->next, type);
@@ -235,10 +244,6 @@ Node *makeNodeVarDecl(List *vars, Node *type){
 
 Node *makeNodeParamExpr(List *params){
     return makeListKind(params, paramExprK);
-}
-
-Node *makeNodeBlock(List *stmts){
-    return makeListKind(stmts, blockK);
 }
 
 Node *makeNodeStmtReturn(List *operands){

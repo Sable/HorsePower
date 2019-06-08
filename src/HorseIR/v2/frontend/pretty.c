@@ -270,7 +270,7 @@ static void printConstBuff(char *b, Node *n){
 static void printBlockBuff(char *b, Node *n){
     echo(b, "{"); printLine(b);
     depth++;
-    prettyListBuff(b, n->val.listS, nospace);
+    prettyListBuff(b, n->val.block.stmts, nospace);
     depth--;
     printDepth(b); echo(b, "}");
     printLine(b);
