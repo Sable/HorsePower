@@ -286,12 +286,11 @@ static V invokeBuiltin(char *funcName, VList *list){
     I numArg = totalVList(list);
     V *params = getParams(list);
     if(numArg == valence || valence == -1){ //-1: any
-        if(valence == 1)
-            return executeMon(monFunc[fu.u], params);
-        else if(valence == 2)
-            return executeDya(dyaFunc[fu.b], params);
-        else
-            return executeOther(fu.t, params, numArg);
+        switch(fu.kind){
+            case 1: return executeMon(monFunc[fu.u], params);
+            case 2: return executeDya(dyaFunc[fu.b], params);
+            case 3: return executeOther(fu.t, params, numArg);
+        }
     }
     else EP("valence error: %d expected, but %d found\n", valence, numArg);
     // TODO: free params
@@ -398,6 +397,11 @@ static O runAssignStmt(Node *n){
     else {
         checkRtns(vars, paramList);
     }
+}
+
+static O runCastStmt(Node *n){
+    Node *expr = n->val.cast.exp;
+    runNode(expr, NULL);
 }
 
 static O runName(Node *n){
@@ -510,6 +514,7 @@ static O runNode(Node *n, I *isR){
     if(isCtlAny) R;
     switch(n->kind){
         case     stmtK: runAssignStmt(n);  break;
+        case     castK: runCastStmt(n);    break;
         case     callK: runCall(n);        break;
         case   vectorK: runVector(n);      break;
         case  argExprK: runArgExpr(n);     break;

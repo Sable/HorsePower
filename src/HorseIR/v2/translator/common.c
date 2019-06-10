@@ -19,7 +19,7 @@ I getHType(Type t){
         case   timeT: R H_T;
         case minuteT: R H_U;
         case secondT: R H_W;
-        EP("Type not supported: %d\n", t);
+        default: EP("Type not supported: %d\n", t);
     }
 }
 
@@ -31,6 +31,12 @@ static O loadInt(I v, V x, L k, I t){
         caseI xI(k) = (I)v; break;
         caseF xF(k) = (F)v; break;
         caseE xE(k) = (E)v; break;
+        caseD xD(k) =    v; break;
+        caseM xM(k) =    v; break;
+        caseT xT(k) =    v; break;
+        caseU xU(k) =    v; break;
+        caseW xW(k) =    v; break;
+        default: EP("Type not supported: %d\n", t);
     }
 }
 
@@ -38,6 +44,7 @@ static O loadFloat(E v, V x, L k, I t){
     switch(t){
         caseF xF(k) = (F)v; break;
         caseE xE(k) = (E)v; break;
+        default: EP("Type not supported: %d\n", t);
     }
 }
 
@@ -47,27 +54,39 @@ static O loadLong(L v, V x, L k, I t){
         caseJ xJ(k) = (J)v; break;
         caseH xH(k) = (H)v; break;
         caseI xI(k) = (I)v; break;
+        caseL xL(k) =    v; break;
         caseF xF(k) = (F)v; break;
         caseE xE(k) = (E)v; break;
+        caseZ xZ(k) =    v; break;
+        default: EP("Type not supported: %d\n", t);
     }
 }
 
+static O loadString(S v, V x, L k, I t){
+    switch(t){
+        caseQ xQ(k) = getSymbol(v); break;
+        caseS {S s=allocStrMem(strlen(s)); strcpy(s,v); xS(k)=s;} break;
+        default: EP("Type not supported: %d\n", t);
+    }
+}
+
+// similar to b/h_io.c:loadItem
 O loadConst(Node *n, V x, L k, I t){
     ConstValue *p = n->val.nodeC;
     switch(p->type){
-        case    intC: loadInt  (p->valI,x,k,t); break;
-        case  floatC: loadFloat(p->valF,x,k,t); break;
-        case   longC: loadLong (p->valL,x,k,t); break;
+        case    intC: loadInt   (p->valI,x,k,t); break;
+        case  floatC: loadFloat (p->valF,x,k,t); break;
+        case   longC: loadLong  (p->valL,x,k,t); break;
         case   clexC: TODO("Support more const\n"); 
         case   charC: TODO("Support more const\n"); 
-        case    symC: TODO("Support more const\n"); 
-        case    strC: TODO("Support more const\n"); 
-        case   dateC: TODO("Support more const\n"); 
-        case  monthC: TODO("Support more const\n"); 
-        case     dtC: TODO("Support more const\n"); 
-        case minuteC: TODO("Support more const\n"); 
-        case secondC: TODO("Support more const\n"); 
-        case   timeC: TODO("Support more const\n"); 
+        case    symC: 
+        case    strC: loadString(p->valS,x,k,t); break;
+        case  monthC: 
+        case minuteC: 
+        case secondC: 
+        case   timeC: 
+        case   dateC: loadInt   (p->valI,x,k,t); break;
+        case     dtC: loadLong  (p->valF,x,k,t); break;
         default: EP("Constant type not supported: %d\n", p->type);
     }
 }

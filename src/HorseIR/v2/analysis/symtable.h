@@ -41,6 +41,7 @@ typedef struct MetaMethod{
     SymbolNameList *localVars;
     struct InfoNodeList *returnTypes;
     struct ChainList *chains;
+    Node *lastStmt;
 }MetaMethod;
 
 //typedef struct InfoNode{

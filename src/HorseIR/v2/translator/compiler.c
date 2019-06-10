@@ -4,9 +4,11 @@
 #define comma ','
 
 extern Node *entryMain;
+
 static I depth, numArg;
 static B needInd;
 static List *lhsVars;
+static Node *currentMethod;
 
 static void scanNode(Node *n);
 static void scanList(List *list);
@@ -128,9 +130,9 @@ static void genList(List *list, C sep){
 static int genListReturn(List *list, C sep, S text){
     if(list){
         int k = genListReturn(list->next, sep, text);
+        if(list->next) glueChar(sep);
         glueAny("%s[%d]=",text,k);
         scanNode(list->val);
-        glueChar(sep);
         return k+1;
     }
     return 0;
@@ -295,15 +297,13 @@ static void scanConst(Node *n){
 
 // TODO: think how to return multiple values
 static void scanReturn(Node *n){
+    B notLast = (n != currentMethod->val.method.meta->lastStmt);
     if(n->val.listS){
         //glueCode("return ");
         genListReturn(n->val.listS, comma, "h_rtn");
-        //glueCode("0;");
-        glueCode("goto END;");
+        glueChar(';');
     }
-    else {
-        glueCode("return ;");
-    }
+    if(notLast) glueCode("goto END;");
 }
 
 static void scanIf(Node *n){
@@ -324,7 +324,7 @@ static void genStatement(Node *n, B f){
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
         case returnK: if(f) genIndent();
                       else glueLine(); break;
-        case   stmtK: if(f) { genIndent(); glueCode("CHECKE("); }
+        case   stmtK: if(f) { genIndent(); glueCode("PROFILE("); }
                       else { glueCode(");"); glueLine(); } break;
     }
 }
@@ -373,6 +373,8 @@ static void compileChainList(ChainList *list){
 }
 
 static void compileMethod(Node *n){
+    Node *prevMethod = currentMethod;
+    currentMethod = n;
     ChainList *chains = n->val.method.meta->chains;
     //printChainList(chains);
     // show the list of all local variables
@@ -384,12 +386,14 @@ static void compileMethod(Node *n){
     genLocalVars(n->val.method.block);
     //if(n == entryMain) genTic();
     compileChainList(chains);
-    glueCodeLine("END:");
+    if(!instanceOf(n->val.method.meta->lastStmt, returnK))
+        glueCodeLine("END:");
     glueCodeLine("buffS = prevBuffS;");
     glueCodeLine("return 0;");
     //if(n == entryMain) genToc();
     depth--;
     glueCodeLine("}\n");
+    currentMethod = prevMethod;
 }
 
 static void genEntry(){

@@ -31,6 +31,11 @@ debug: flex bison $(h_files)
 		$(include_libs)  \
 		$(include_flags)
 
+release: flex bison $(h_files)
+	gcc -O3 $(c_files) -o $(exec_name) \
+		$(include_files) \
+		$(include_libs)  \
+		$(include_flags)
 
 clean: $(front)_clean
 	rm -f $(exec_name)
