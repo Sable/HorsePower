@@ -8,10 +8,11 @@ typedef I (*EachMonadic)(V,V,MonadicFunc);
 typedef I (*EachDyadic)(V,V,V,DyadicFunc);
 typedef I (*EachTriple)(V,V,V,V);
 
-#define MonFuncSize 60
+#define MonFuncSize 61
 #define DyaFuncSize 33
 #define OuterProduct  EachDyadic
 #define JoinOperation EachTriple
+#define LIMIT_ROW 20
 
 #define VAR_MAX_SIZE 32
 
@@ -48,7 +49,7 @@ MonadicFunc monFunc[MonFuncSize] = {
     pfnTimeHour, pfnTimeMinute, pfnTimeSecond, pfnTimeMill, pfnUnique, NULL,
     pfnLen, pfnRange, pfnFact, NULL, NULL, pfnFlip, pfnReverse, pfnWhere,
     pfnGroup, NULL, pfnSum, pfnAvg, pfnMin, pfnMax, pfnRaze, pfnEnlist,
-    pfnToList, NULL, pfnKeys, pfnValues, pfnMeta, pfnLoadTable, pfnFetch
+    pfnToList, NULL, pfnKeys, pfnValues, pfnMeta, pfnLoadTable, pfnFetch, pfnPrint
 };
 
 /* pfnRandk, pfnDrop, pfnTake, pfnDatetimeAdd, pfnDatetimeSub */
@@ -195,7 +196,7 @@ static O cleanVList(VList *x){ // free x->v also?
 static void printVList(VList *list){
     if(list){
         printVList(list->next);
-        printV(list->v);
+        printV2(list->v, LIMIT_ROW); // default: 20
     }
 }
 
@@ -381,7 +382,6 @@ static O checkRtns(List *vars, VList *list){
     else EP("%d expects, but %d returned\n", numVars, numRtns);
 }
 
-
 static O runAssignStmt(Node *n){
     if(H_LINE) showLine(n);
     cleanVList(paramList);
@@ -404,6 +404,12 @@ static O runCastStmt(Node *n){
     runNode(expr, NULL);
 }
 
+static O runExprStmt(Node *n){
+    Node *expr = n->val.exprStmt.expr;
+    runNode(expr, NULL);
+    // discard returns
+}
+
 static O runName(Node *n){
     if(!n->val.name.isUS){
         SymbolName *sn = n->val.name.sn;
@@ -411,6 +417,40 @@ static O runName(Node *n){
         else EP("Variable must be initialized before used: %s\n", sn->name);
     }
     else EP("Underscore '" USCORE "' can't be used in a name reference\n");
+}
+
+static V initSymVector(S s){
+    V x = allocNode();
+    initV(x, H_Q, 1);
+    xq = getSymbol(s);
+    return x;
+}
+
+static S getFuncNameStr(Node *funcName){
+    SymbolName *sn = funcName->val.name.sn;
+    //printV(literalSymbol(sn->name)); getchar();
+    switch(sn->kind){
+        case builtinS: return sn->name; 
+        default: EP("Add more support for %d\n", sn->kind);
+    }
+}
+
+static I totalList(List *list){
+    R list?(1+totalList(list->next)):0;
+}
+
+static O addFuncList(List *list, V x, I dep){
+    if(list) {
+        addFuncList(list->next,x,dep+1);
+        xQ(dep) = getSymbol(getFuncNameStr(list->val));
+    }
+}
+
+static O runFunc(Node *n){
+    V x = allocNode();
+    initV(x, H_Q, totalList(n->val.listS));
+    addFuncList(n->val.listS, x, 0);
+    addParam(paramList, x);
 }
 
 static B checkInfoNodeWithValue(InfoNode *in, V v){
@@ -513,20 +553,22 @@ static O runContinue(I *isR){
 static O runNode(Node *n, I *isR){
     if(isCtlAny) R;
     switch(n->kind){
-        case     stmtK: runAssignStmt(n);  break;
-        case     castK: runCastStmt(n);    break;
-        case     callK: runCall(n);        break;
-        case   vectorK: runVector(n);      break;
-        case  argExprK: runArgExpr(n);     break;
-        case     nameK: runName(n);        break;
-        case   returnK: runReturn(n, isR); break;
-        case    blockK: runBlock(n, isR);  break;
-        case       ifK: runIf(n, isR);     break;
-        case    whileK: runWhile(n, isR);  break;
-        case   repeatK: runRepeat(n, isR); break;
-        case    breakK: runBreak(isR);     break;
-        case continueK: runContinue(isR);  break;
-        case  varDeclK: runVarDecl(n,isR); break;
+        case     stmtK: runAssignStmt(n);      break;
+        case     castK: runCastStmt  (n);      break;
+        case exprstmtK: runExprStmt  (n);      break;
+        case     callK: runCall      (n);      break;
+        case   vectorK: runVector    (n);      break;
+        case  argExprK: runArgExpr   (n);      break;
+        case     nameK: runName      (n);      break;
+        case     funcK: runFunc      (n);      break;
+        case   returnK: runReturn    (n, isR); break;
+        case    blockK: runBlock     (n, isR); break;
+        case       ifK: runIf        (n, isR); break;
+        case    whileK: runWhile     (n, isR); break;
+        case   repeatK: runRepeat    (n, isR); break;
+        case    breakK: runBreak     (isR);    break;
+        case continueK: runContinue  (isR);    break;
+        case  varDeclK: runVarDecl   (n,isR);  break;
         default: EP("Kind not supported yet: %s\n", getNodeTypeStr(n));
     }
 }

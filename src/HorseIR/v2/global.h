@@ -59,7 +59,7 @@ void   time_clear();
 #define FP fprintf
 #define PN(x)     P("%s\n",x)
 #define newLine() P("\n")
-#define WP(...)   do{FP(stderr,__VA_ARGS__); FLine();}while(0)  // warning
+#define WP(...)   do{FP(stderr,__VA_ARGS__);}while(0)  // warning
 #define FLine()   FP(stderr, "\n")
 #define INFO(s)   FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
 #define EP(...)   do{INFO("[ERROR]");  FP(stderr,__VA_ARGS__); FLine(); exit(1);}while(0)  // error

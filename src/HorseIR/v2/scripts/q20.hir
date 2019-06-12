@@ -1,0 +1,83 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:? = @load_table(`supplier:sym);
+      a1:? = @load_table(`nation:sym);
+      a2:? = @load_table(`partsupp:sym);
+      a3:? = @load_table(`lineitem:sym);
+      a4:? = @load_table(`part:sym);
+      // supplier
+      c00:? = check_cast(@column_value(a0, `s_name:sym     ), sym);
+      c01:? = check_cast(@column_value(a0, `s_address:sym  ), str);
+      c02:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
+      c03:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
+      // nation
+      c10:? = check_cast(@column_value(a1, `n_name:sym     ), sym);
+      c11:? = check_cast(@column_value(a1, `n_nationkey:sym), i64);
+      // partsupp
+      c20:? = check_cast(@column_value(a2, `ps_suppkey:sym ), enum);
+      c21:? = check_cast(@column_value(a2, `ps_partkey:sym ), enum);
+      c22:? = check_cast(@column_value(a2, `ps_availqty:sym), f64);
+      // lineitem
+      c30:? = check_cast(@column_value(a3, `l_partkey:sym  ), i64);
+      c31:? = check_cast(@column_value(a3, `l_suppkey:sym  ), i64);
+      c32:? = check_cast(@column_value(a3, `l_shipdate:sym ), d  );
+      c33:? = check_cast(@column_value(a3, `l_quantity:sym ), f64);
+      // part
+      c40:? = check_cast(@column_value(a4, `p_partkey:sym  ), i64);
+      c41:? = check_cast(@column_value(a4, `p_name:sym     ), sym);
+      // TODO: add compound enum for the two-column join (maybe)
+      // 0. group by: {l_suppkey, l_partkey}
+      t0_0:? = @lt(c32, 1995-01-01:d);
+      t0_1:? = @geq(c32, 1994-01-01:d);
+      t0_2:? = @and(t0_0, t0_1);
+      t0_3:? = @compress(t0_2, c31);
+      t0_4:? = @compress(t0_2, c30);
+      t0_5:? = @compress(t0_2, c33);
+      t0_6:? = @list(t0_3, t0_4);
+      t0_7:? = @group(t0_6);
+      t0_8:? = @keys(t0_7);
+      t0_9:? = @values(t0_7);
+      t0_10:? = @each_right(@index,t0_5,t0_9);
+      t0_11:? = @each(@sum, t0_10);
+      t0_12:? = @raze(t0_11);       
+      t0_13:? = @mul(t0_12, 0.5:f64);// l_quantity
+      t0_14:? = @index(t0_3, t0_8);  // l_suppkey
+      t0_15:? = @index(t0_4, t0_8);  // l_partkey
+      // 1. partkey: ps_ and p_ (rightsemijoin)
+      t1_0:? = @like(c41, "forest%":str);
+      t1_1:? = @values(c21);
+      t1_2:? = @index(t1_0, t1_1); // mask: ps_
+      t1_3:? = @fetch(c21);
+      t1_4:? = @fetch(c20);
+      t1_5:? = @compress(t1_2, t1_3); // ps_partkey
+      t1_6:? = @compress(t1_2, t1_4); // ps_suppkey
+      t1_7:? = @compress(t1_2, c22);  // ps_availqty
+      t1_8:? = @list(t1_5, t1_6, t1_7);
+      t1_9:? = @list(t0_15, t0_14, t0_13);
+      t1_10:? = @join_index(@eq@eq@gt,t1_8,t1_9);
+      t1_11:? = @index(t1_10, 0:i64);
+      t1_12:? = @index(t1_10, 1:i64);
+      t1_13:? = @index(t1_6, t1_11); // ps_suppkey
+      // 2. nationkey: s_ and n_
+      t2_0:? = @eq(c10, `CANADA:sym);
+      t2_1:? = @values(c03);
+      t2_2:? = @index(t2_0, t2_1);
+      t2_3:? = @compress(t2_2, c02); // s_suppkey
+      t2_4:? = @compress(t2_2, c00); // s_name
+      t2_5:? = @compress(t2_2, c01); // s_address
+      // 3. suppkey: 2_ and 1_ (leftsemijoin)
+      t3_0:? = @member(t2_3, t1_13);  // @member(t1_13, t2_3);
+      t3_1:? = @compress(t3_0, t2_4); // s_name
+      t3_2:? = @compress(t3_0, t2_5); // s_address
+      // 4. order by
+      t4_0:? = @order(t3_1, 1:bool);
+      t4_1:? = @index(t3_1, t4_0);
+      t4_2:? = @index(t3_2, t4_0);
+      // result
+      w0:? = (`s_name,`s_address):sym;
+      w1:? = @list(t4_1,t4_2);
+      w2:? = @table(w0,w1);
+      return w2;
+  }
+}

@@ -1,0 +1,135 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:? = @load_table(`part:sym    );
+      a1:? = @load_table(`supplier:sym);
+      a2:? = @load_table(`lineitem:sym);
+      a3:? = @load_table(`orders:sym  );
+      a4:? = @load_table(`customer:sym);
+      a5:? = @load_table(`nation:sym  ); // n1
+      a6:? = @load_table(`nation:sym  ); // n2
+      a7:? = @load_table(`region:sym  );
+      // part
+      c00:? = check_cast(@column_value(a0, `p_partkey:sym), i64);
+      c01:? = check_cast(@column_value(a0, `p_type:sym   ), sym);
+      // supplier
+      c10:? = check_cast(@column_value(a1, `s_suppkey:sym  ), i64);
+      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), i64);
+      // lineitem
+      c20:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
+      c21:? = check_cast(@column_value(a2, `l_partkey:sym  ), i64);
+      c22:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum);
+      c23:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
+      c24:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);
+      // orders
+      c30:? = check_cast(@column_value(a3, `o_orderkey:sym ), i64);
+      c31:? = check_cast(@column_value(a3, `o_orderdate:sym), d  );
+      c32:? = check_cast(@column_value(a3, `o_custkey:sym  ), enum);
+      // customer
+      c40:? = check_cast(@column_value(a4, `c_custkey:sym  ), i64);
+      c41:? = check_cast(@column_value(a4, `c_nationkey:sym), enum);
+      // nation,n1
+      c50:? = check_cast(@column_value(a5, `n_nationkey:sym), i64);
+      c51:? = check_cast(@column_value(a5, `n_regionkey:sym), enum);
+      // nation,n2
+      c60:? = check_cast(@column_value(a6, `n_nationkey:sym), i64);
+      c61:? = check_cast(@column_value(a6, `n_name:sym     ), sym);
+      // region
+      c70:? = check_cast(@column_value(a7, `r_regionkey:sym), i64);
+      c71:? = check_cast(@column_value(a7, `r_name:sym     ), sym);
+      // 0. partkey: p_ and l_
+      t0_0:? = @eq(c01, `"ECONOMY ANODIZED STEEL":sym);
+      t0_1:? = @compress(t0_0, c00);
+      t0_2:? = @join_index(@eq, t0_1, c21);
+      t0_3:? = @index(t0_2, 0:i32);
+      t0_4:? = @index(t0_2, 1:i32);
+      t0_5:? = @fetch(c22);
+      t0_6:? = @index(t0_5, t0_4); // l_orderkey
+      t0_7:? = @index(c20 , t0_4); // l_suppkey
+      t0_8:? = @index(c23 , t0_4); // l_extendedprice
+      t0_9:? = @index(c24 , t0_4); // l_discount
+      // 1. orderkey: l_ and o_
+      t1_0:? = @leq(c31, 1996-12-31:d);
+      t1_1:? = @geq(c31, 1995-01-01:d);
+      t1_2:? = @and(t1_0, t1_1);
+      t1_3:? = @compress(t1_2, c30);
+      t1_4:? = @join_index(@eq, t0_6, t1_3);
+      t1_5:? = @index(t1_4, 0:i32);
+      t1_6:? = @index(t1_4, 1:i32);
+      t1_7:? = @compress(t1_2, c32);
+      t1_8:? = @fetch(t1_7);
+      t1_9:? = @index(t1_8, t1_6);  // o_custkey
+      t1_10:? = @index(t0_7, t1_5); // l_suppkey
+      t1_11:? = @index(t0_8, t1_5); // l_extendedprice
+      t1_12:? = @index(t0_9, t1_5); // l_discount
+      t1_13:? = @compress(t1_2, c31);
+      t1_14:? = @index(t1_13, t1_6);// o_orderdate
+      // 2. custkey: o_ and c_
+      t2_0:? = @join_index(@eq, t1_9, c40);
+      t2_1:? = @index(t2_0, 0:i32);
+      t2_2:? = @index(t2_0, 1:i32);
+      t2_3:? = @fetch(c41);
+      t2_4:? = @index(t2_3 , t2_2); // c_nationkey
+      t2_5:? = @index(t1_10, t2_1); // l_suppkey
+      t2_6:? = @index(t1_11, t2_1); // l_extendedprice
+      t2_7:? = @index(t1_12, t2_1); // l_discount
+      t2_8:? = @index(t1_14, t2_1); // o_orderdate
+      // 3. regionkey: r_ and n_
+      t3_0:? = @eq(c71, `AMERICA:sym);
+      t3_1:? = @values(c51);
+      t3_2:? = @index(t3_0, t3_1);
+      t3_3:? = @compress(t3_2, c50); // n1.nationkey
+      // 4. nationkey
+      t4_0:? = @join_index(@eq, t3_3, t2_4);
+      t4_1:? = @index(t4_0, 0:i32);
+      t4_2:? = @index(t4_0, 1:i32);
+      t4_3:? = @index(t2_5, t4_2);  // l_suppkey
+      t4_4:? = @index(t2_6, t4_2);  // l_extendedprice
+      t4_5:? = @index(t2_7, t4_2);  // l_discount
+      t4_6:? = @index(t2_8, t4_2);  // o_orderdate
+      // 5. suppkey: xx_ and s_
+      t5_0:? = @join_index(@eq, t4_3, c10);
+      t5_1:? = @index(t5_0, 0:i32);
+      t5_2:? = @index(t5_0, 1:i32);
+      t5_3:? = @index(c11 , t5_2);  // s_nationkey
+      t5_4:? = @index(t4_4, t5_1);  // l_extendedprice
+      t5_5:? = @index(t4_5, t5_1);  // l_discount
+      t5_6:? = @index(t4_6, t5_1);  // o_orderdate
+      // 6. nationkey: n2_ and xx_
+      t6_0:? = @join_index(@eq, c60, t5_3);
+      t6_1:? = @index(t6_0, 0:i32);
+      t6_2:? = @index(t6_0, 1:i32);
+      t6_3:? = @index(c61 , t6_1);
+      t6_4:? = @index(t5_4, t6_2);  // l_extendedprice
+      t6_5:? = @index(t5_5, t6_2);  // l_discount
+      t6_6:? = @index(t5_6, t6_2);  // o_orderdate
+      // 7. value
+      t7_0:? = @minus(1:i32, t6_5);
+      t7_1:? = @mul(t6_4, t7_0);
+      t7_2:? = @date_year(t6_6);
+      // table: all_nations
+      //w0:? = `o_year`volume`nation:sym;
+      ////w1:? = @list(p1,p2,p3);
+      //w1:? = @list(t7_2,t7_1,t6_3);
+      //w2:? = @table(w0,w1);
+      // 8. group by
+      t8_0:? = @group(t7_2);
+      t8_1:? = @keys(t8_0);
+      t8_2:? = @values(t8_0);
+      t8_3:? = @each_right(@index, t7_1, t8_2); // volume
+      t8_4:? = @each_right(@index, t6_3, t8_2); // nation
+      t8_5:? = @each_right(@eq, `BRAZIL:sym, t8_4);
+      t8_6:? = @each_item(@mul, t8_3, t8_5);
+      t8_7:? = @each(@sum, t8_6);
+      t8_8:? = @each(@sum, t8_3);
+      t8_9:? = @raze(t8_7);
+      t8_10:? = @raze(t8_8);
+      t8_11:? = @div(t8_9, t8_10);  // mkt_share
+      t8_12:? = @index(t7_2, t8_1); // o_year
+      // result
+      w0:? = (`o_year,`mkt_share):sym;
+      w1:? = @list(t8_12, t8_11);
+      w2:? = @table(w0,w1);
+      return w2;
+  }
+}

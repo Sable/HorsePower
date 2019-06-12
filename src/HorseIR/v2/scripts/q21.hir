@@ -1,0 +1,121 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:? = @load_table(`supplier:sym);
+      a1:? = @load_table(`orders:sym);
+      a2:? = @load_table(`nation:sym);
+      a3:? = @load_table(`lineitem:sym); // l1
+      a4:? = @load_table(`lineitem:sym); // l2
+      a5:? = @load_table(`lineitem:sym); // l3
+      // supplier
+      c00:? = check_cast(@column_value(a0, `s_name:sym     ), sym);
+      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
+      c02:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
+      // orders
+      c10:? = check_cast(@column_value(a1, `o_orderkey:sym   ), i64);
+      c11:? = check_cast(@column_value(a1, `o_orderstatus:sym), char);
+      // nation
+      c20:? = check_cast(@column_value(a2, `n_name:sym     ), sym);
+      c21:? = check_cast(@column_value(a2, `n_nationkey:sym), i64);
+      // lineitem (l1)
+      c30:? = check_cast(@column_value(a3, `l_suppkey:sym    ), i64 );
+      c31:? = check_cast(@column_value(a3, `l_orderkey:sym   ), enum);
+      c32:? = check_cast(@column_value(a3, `l_receiptdate:sym), d   );
+      c33:? = check_cast(@column_value(a3, `l_commitdate:sym ), d   );
+      // 0. nationkey: n_ and s_
+      t0_0:? = @eq(c20, `"SAUDI ARABIA":sym);
+      t0_1:? = @values(c01);
+      t0_2:? = @index(t0_0, t0_1);  // mask: s_
+      t0_3:? = @compress(t0_2,c02); // s_suppkey
+      t0_4:? = @compress(t0_2,c00); // s_name
+      // 1. suppkey: 0_ and l_
+      t1_0:? = @gt(c32,c33);
+      t1_1:? = @compress(t1_0, c30); // l_suppkey
+      t1_k:? = @fetch(c31);          // t1_5
+      t1_2:? = @compress(t1_0, t1_k);
+      t1_3:? = @join_index(@eq, t0_3, t1_1);
+      t1_4:? = @index(t1_3, 0:i64);
+      t1_5:? = @index(t1_3, 1:i64);
+      t1_6:? = @index(t1_2, t1_5);  // l_orderkey
+      t1_7:? = @index(t1_1 , t1_5); // l_suppkey
+      t1_8:? = @index(t0_4, t1_4);  // s_name
+      // 2. orderkey: 1_ and o_
+      t2_0:? = @eq(c11, 'F':char);
+      t2_1:? = @compress(t2_0, c10); // o_orderkey
+      t2_2:? = @join_index(@eq,t1_6,t2_1);
+      t2_3:? = @index(t2_2, 0:i64);
+      t2_4:? = @index(t2_2, 1:i64);
+      t2_5:? = @index(t1_6, t2_3); // l_orderkey
+      t2_6:? = @index(t1_7, t2_3); // l_suppkey
+      t2_7:? = @index(t1_8, t2_3); // s_name
+      // experiment 1
+      //t3_0:? = @gt(c32,c33);
+      //t3_1:? = @compress(t3_0, c30);  // l_suppkey2
+      //t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
+      //t3_3:? = @list(t2_5, t2_6);
+      //t3_4:? = @list(t3_2, t3_1);
+      //t3_5:? = @join_index(@eq@neq,t3_3, t3_4);
+      //t3_6:? = @index(t3_5, 0:i64);
+      //t3_7:? = @unique(t3_6);
+      //xx:? = @sum(t3_7);
+      //xx:? = @sum(t2_5);
+      // experiment 2
+      //t3_0:? = @gt(c32,c33);
+      //t3_1:? = @compress(t3_0, c30);  // l_suppkey2
+      //t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
+      //t3_3:? = @list(t2_5, t2_6);
+      //t3_4:? = @list(t3_2, t3_1);
+      //t3_5:? = @join_leftanti(@eq@neq,t3_3, t3_4);
+      // Note 1: lineitem2(plan) is lineitem3(query)
+      // Note 2: lineitem3(plan) is lineitem2(query)
+      // Note 3: join_leftanti and join_rightanti
+      // Note 4: join_leftsemi and join_rightsemi
+      // 3 left_antijoin
+      // 3.1 l_orderkey = l_orderkey2
+      // 3.2 l_suppkey <> l_suppkey2
+      t3_0:? = @gt(c32,c33);
+      t3_1:? = @compress(t3_0, c30);  // l_suppkey2
+      t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
+      t3_3:? = @list(t2_5, t2_6);
+      t3_4:? = @list(t3_2, t3_1);
+      t3_5:? = @join_index(@eq@neq,t3_3,t3_4);
+      t3_6:? = @index(t3_5, 0:i64);
+      t3_7:? = @len(t2_5);
+      t3_8:? = @vector(t3_7, 1:bool);
+      t3_9:? = @index_a(t3_8, t3_6, 0:bool);
+      t3_10:? = @compress(t3_9, t2_5); // l_orderkey
+      t3_11:? = @compress(t3_9, t2_6); // l_suppkey
+      t3_12:? = @compress(t3_9, t2_7); // s_name
+      //x1:? = @order(t3_8, 1:bool);
+      //x2:? = @index(t3_8, x1);
+      //x3:? = @sum(x2); // 6923
+      // 4 left_semijoin
+      // 4.1 l_orderkey = l_orderkey3
+      // 4.2 l_suppkey <> l_suppkey3
+      t4_0:? = @list(t3_10, t3_11);
+      t4_1:? = @list(t1_k, c30);
+      t4_2:? = @join_index(@eq@neq,t4_0,t4_1);
+      t4_3:? = @index(t4_2, 0:i64);
+      t4_4:? = @unique(t4_3);
+      t4_5:? = @index(t4_3, t4_4);
+      //xx:? = @sum(t4_5);  // 4144
+      t4_6:? = @index(t3_12, t4_5); // s_name
+      // 5. groupby
+      t5_0:? = @group(t4_6);
+      t5_1:? = @keys(t5_0);
+      t5_2:? = @values(t5_0);
+      t5_3:? = @each(@len, t5_2);
+      t5_4:? = @raze(t5_3);
+      t5_5:? = @index(t4_6, t5_1);
+      // 6. order
+      t6_0:? = @list(t5_4, t5_5);
+      t6_1:? = @order(t6_0, (0,1):bool);
+      t6_2:? = @index(t5_5, t6_1);
+      t6_3:? = @index(t5_4, t6_1);
+      // result
+      w0:? = (`s_name,`numwait):sym;
+      w1:? = @list(t6_2, t6_3);
+      w2:? = @table(w0,w1);
+      return w2;
+  }
+}

@@ -1,0 +1,50 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`customer:sym);
+    t6:str = check_cast(@column_value(t0,`c_phone:sym), str);
+    t7:f64 = check_cast(@column_value(t0,`c_acctbal:sym), f64);
+    t10:? = ("13","31","23","29","30","18","17"):str;
+    t11:? = @sub_string(t6,(1,2):i64);
+    t12:? = @member(t11,t10); // @member(t10,t11);
+    t13:? = @gt(t7,0:f64);
+    t14:? = @and(t13,t12);
+    t20:? = @compress(t14,t7);
+    t25:? = @avg(t20);
+    t26:? = @load_table(`customer:sym);
+    t32:str = check_cast(@column_value(t26,`c_phone:sym), str);
+    t33:f64 = check_cast(@column_value(t26,`c_acctbal:sym), f64);
+    t36:? = ("13","31","23","29","30","18","17"):str;
+    t37:? = @sub_string(t32,(1,2):i64);
+    t38:? = @member(t37,t36); // @member(t36,t37);
+    t47:? = @gt(t33,t25);
+    t48:? = @and(t47,t38);
+    t49:? = @load_table(`orders:sym);
+    t51:enum = check_cast(@column_value(t49,`o_custkey:sym), enum);
+    t60:? = @values(t51);
+    t61:? = @index_a(t48,t60,0:bool);
+    t66:? = @compress(t61,t32);
+    t67:? = @compress(t61,t33);
+    t70:? = @sub_string(t66,(1,2):i64);
+    t71:? = @list(t70);
+    t72:? = @group(t71);
+    t73:? = @keys(t72);
+    t74:? = @values(t72);
+    t75:? = @index(t70,t73);
+    t76:? = @each_right(@index,t67,t74);
+    t77:? = @each(@sum,t76);
+    t78:? = @raze(t77);
+    t79:? = @each_right(@index,t70,t74);
+    t80:? = @each(@len,t79);
+    t81:? = @raze(t80);
+    t82:? = @list(t75);
+    t83:? = @order(t82,1:bool);
+    t84:? = @index(t75,t83);
+    t85:? = @index(t81,t83);
+    t86:? = @index(t78,t83);
+    t87:? = (`cntrycode,`numcust,`totacctbal):sym;
+    t88:? = @list(t84,t85,t86);
+    t89:? = @table(t87,t88);
+    return t89;
+  }
+}

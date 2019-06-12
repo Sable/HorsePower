@@ -42,7 +42,7 @@ static void printDepth(char* b){
     }
 }
 
-
+// output: A<sep> B<sep> C
 static void prettyListBuff(char *b, List *list, char sep){
     if(list){
         prettyListBuff(b, list->next, sep);
@@ -54,14 +54,21 @@ static void prettyListBuff(char *b, List *list, char sep){
     }
 }
 
+// output: <sep>A<sep>B
+static void prettyListBuffv2(char *b, List *list, char sep){
+    if(list){
+        prettyListBuff(b, list->next, sep);
+        if(sep) printChar(sep);
+        resetBuff(b);
+        if(list->val){
+            prettyNodeBuff(b, list->val);
+        }
+    }
+}
+
 static void printNodeFunc(char *b, Node *n){
     resetBuff(b);
-    echo(b, "@");
-    prettyNodeBuff(b, n->val.func.name);
-    if(n->val.func.typ){
-        echo(b, ":");
-        prettyNodeBuff(b, n->val.func.typ);
-    }
+    prettyListBuffv2(b,n->val.listS,'@');
 }
 
 static void printNodeTypeBuff(char *b, Node *n){

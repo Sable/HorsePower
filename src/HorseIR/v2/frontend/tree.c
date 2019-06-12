@@ -191,15 +191,6 @@ Node *makeNodeFuncCall(Node *func, Node *paramExpr){
     return n;
 }
 
-Node *makeNodeLiteralFunc(Node *func, Node *type){
-    Node *n     = NEW(Node);
-    n->kind     = funcK;
-    n->val.func.name = func;
-    n->val.func.typ  = type;
-    n->lineno   = yylineno;
-    return n;
-}
-
 Node *makeNodeLiteralVector(bool isOne, List *value, Node *type){
     Node *n     = NEW(Node);
     n->kind     = vectorK;
@@ -252,6 +243,10 @@ Node *makeNodeStmtReturn(List *operands){
 
 Node *makeNodeArgExpr(List *operands){
     return makeListKind(operands, argExprK);
+}
+
+Node *makeNodeLiteralFunc(List *funcs){
+    return makeListKind(funcs, funcK);
 }
 
 /* constant values */

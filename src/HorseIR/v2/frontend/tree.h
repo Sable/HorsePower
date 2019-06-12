@@ -36,7 +36,7 @@ typedef struct Node {
         struct ifStmt     {struct Node *condExpr,*thenBlock,*elseBlock; } ifStmt;
         struct whileStmt  {struct Node *condExpr,*bodyBlock;            } whileStmt, repeatStmt;
         struct funcCall   {struct Node *func,*param;                    } call;
-        struct func       {struct Node *name,*typ;                      } func;
+        //struct func       {struct Node *name,*typ;                      } func;
         struct vec        {bool one; List *val; struct Node *typ;       } vec;
         struct name       {bool one, isUS; char *id1,*id2; \
                            struct SymbolTable *st;struct SymbolName *sn;} name;
@@ -111,13 +111,13 @@ Node *makeNodeStmtExpr     (Node *expr);
 Node *makeNodeStmtBreak    ();
 Node *makeNodeStmtContinue ();
 Node *makeNodeFuncCall     (Node *func, Node *paramExpr);
-Node *makeNodeLiteralFunc  (Node *func, Node *type);
 Node *makeNodeLiteralVector(bool isOne, List *value, Node *type);
 Node *makeNodeConst        (ConstValue *val);
 Node *makeNodeParamExpr    (List *params);
 Node *makeNodeBlock        (List *stmts);
 Node *makeNodeStmtReturn   (List *operands);
 Node *makeNodeArgExpr      (List *operands);
+Node *makeNodeLiteralFunc  (List *funcs);
 
 /* constant functions */
 ConstValue *makeIntType    (int x, Constant t);

@@ -65,7 +65,8 @@ static O loadLong(L v, V x, L k, I t){
 static O loadString(S v, V x, L k, I t){
     switch(t){
         caseQ xQ(k) = getSymbol(v); break;
-        caseS {S s=allocStrMem(strlen(s)); strcpy(s,v); xS(k)=s;} break;
+        caseS {S s=allocStrMem(strlen(v)); strcpy(s,v); xS(k)=s;} break;
+        caseC xC(k) = v[0]; break;
         default: EP("Type not supported: %d\n", t);
     }
 }
@@ -78,7 +79,7 @@ O loadConst(Node *n, V x, L k, I t){
         case  floatC: loadFloat (p->valF,x,k,t); break;
         case   longC: loadLong  (p->valL,x,k,t); break;
         case   clexC: TODO("Support more const\n"); 
-        case   charC: TODO("Support more const\n"); 
+        case   charC:
         case    symC: 
         case    strC: loadString(p->valS,x,k,t); break;
         case  monthC: 

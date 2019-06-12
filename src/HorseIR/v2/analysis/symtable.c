@@ -3,6 +3,7 @@
 static void scanStatement(Node *n, SymbolTable *st);
 static void scanStatementList(List *list, SymbolTable *st);
 static InfoNode *getInfoNode(Node *n);
+static void scanName(Node *n, SymbolTable *st);
 
 SymbolTable *rootSymbolTable;
 SymbolDecl *globalDecls;
@@ -181,6 +182,23 @@ static bool defSymbol(SymbolTable *st, char *name){
     return 0;
 }
 
+static void checkFuncName(Node *funcName, SymbolTable *st){
+    scanName(funcName, st);
+    SymbolName *sn = funcName->val.name.sn;
+    switch(sn->kind){
+        case builtinS:
+        case  methodS: break; // safe
+        default: EP("Function literal only supports methods/builtins");
+    }
+}
+
+static void checkFuncList(List *list, SymbolTable *st){
+    if(list){
+        checkFuncList(list->next, st);
+        checkFuncName(list->val, st);
+    }
+}
+
 // 1st pass
 
 static void scanDeclaration(Node *n, SymbolTable *st);
@@ -306,6 +324,10 @@ static void scanName(Node *n, SymbolTable *st){
         //printSymbolName(sn); getchar();
     }
     else EP("Name %s needs to be declared before used\n", strName(n));
+}
+
+static void scanFunc(Node *n, SymbolTable *st){
+    checkFuncList(n->val.listS, st);
 }
 
 static void scanType(Node *n, SymbolTable *st){
@@ -449,6 +471,7 @@ static void scanStatement(Node *n, SymbolTable *st){
         case paramExprK: scanParams      (n, st); break;
         case      callK: scanCall        (n, st); break;
         case      nameK: scanName        (n, st); break;
+        case      funcK: scanFunc        (n, st); break;
         case   argExprK: scanArgExpr     (n, st); break;
         case    returnK: scanReturnStmt  (n, st); break;
         case        ifK: scanIfStmt      (n, st); break;

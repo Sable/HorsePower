@@ -52,7 +52,7 @@
 %type <node> literalVector value
 
 %type <list> module_list moduleContent_list import_list id_list param_list
-%type <list> typ_list stmt_list var_list operand_list value_list 
+%type <list> typ_list stmt_list var_list operand_list value_list functionList
 
 %type <constvalue> realValue complexValue realNumber numericValue 
 %type <constvalue> charValue stringValue symbolValue calendarValue
@@ -303,6 +303,12 @@ functionId         : '@' name
                      { $$ = $2; }
 ;
 
+functionList       : functionId
+                     { $$ = makeList(NULL, $1); }
+                   | functionList functionId
+                     { $$ = makeList($1  , $2); }
+;
+
 paramExpr          :
                      { $$ = NULL; }
                    | operand_list
@@ -327,10 +333,8 @@ literal            : literalVector
                      { $$ = $1; }
 ;
 
-literalFunc        : functionId
-                     { $$ = makeNodeLiteralFunc($1, NULL); }
-                   | functionId ':' typ
-                     { $$ = makeNodeLiteralFunc($1, $3); }
+literalFunc        : functionList
+                     { $$ = makeNodeLiteralFunc($1); }
 ;
 
 literalVector      : value ':' typ
