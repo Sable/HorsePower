@@ -631,6 +631,11 @@ def scanGroupjoin(d, env2):
             v_alias.append(genIndex(v,index))
             # v_alias.append(genEachRight('@index',v,index))
         return v_alias
+    def updateValueWithEachIndex(value, index):
+        v_alias = []
+        for v in value:
+            v_alias.append(genEachRight('@index',v,index))
+        return v_alias
     def readAggrGrouped(aggr, value):
         ids = []
         for a in aggr:
@@ -762,11 +767,11 @@ def scanGroupjoin(d, env2):
                 t1_5 = genIndex(left_alias, t1_3) # left key
                 # 2. return
                 t2_0 = findAliasByName('_aggr_value_', left_env)
-                t2_1 = genEach('len', t2_0)
+                t2_1 = genEach('@len', t2_0)
                 t2_2 = genRaze(t2_1)
                 t2_3 = genIndex(t2_2, t1_3) # length
                 left_aggr = readAggrGrouped(d[ 'leftAggregates'],  left_value)
-                right_updated_value = updateValueWithIndex(right_value, t1_4)
+                right_updated_value = updateValueWithEachIndex(right_value, t1_4)
                 right_aggr = readAggrNotGrouped(d['rightAggregates'], right_updated_value, t2_3, right_env)
                 # print left_value, right_value
                 env_names =[] ; env_alias = []; env_types = []
@@ -803,50 +808,43 @@ def scanGroupjoin(d, env2):
                     t1_2 = genIndex(t1_0, '1:i64')
                     t1_3 = genIndex(t0_2, t1_1)   # left side: length
                     return updateEnvWithSpecial(rightAggr['special'], t1_3, updateEnvWithIndex2(t1_1, t1_2, new_left_env, new_right_env))
-                # group: left
-                t0_0 = genGroup(left_alias)
-                t0_1 = genKeys(t0_0)
-                t0_2 = genValues(t0_0)
-                t0_3 = genEach('@len', t0_2)
-                t0_4 = genRaze(t0_3)
-                t0_5 = genIndex(left_alias, t0_1)
-                # group: right
-                t1_0 = genGroup(right_alias)
-                t1_1 = genKeys(t1_0)
-                t1_2 = genValues(t1_0)
-                t1_3 = genEach('@len', t1_2)
-                t1_4 = genRaze(t1_3)
-                t1_5 = genIndex(right_alias, t1_1)
-                # join
-                t2_0 = genJoinIndex('@eq', t0_5, t1_5)
-                t2_1 = genIndex(t2_0, '0:i64')
-                t2_2 = genIndex(t2_0, '1:i64')
-                t2_3 = genIndex(t0_4, t2_1)
-                t2_4 = genIndex(t1_4, t2_2)
-                left_updated_value = updateValueWithIndex(left_value, t2_1) # t2_3
-                right_updated_value = updateValueWithIndex(right_value, t2_2) # t2_4
-                left_aggr  = readAggrGrouped(d['leftAggregates'], left_updated_value)
-                right_aggr = []
-                if semantic == 'outer':
+                elif semantic == 'outer':
+                    # group: left
+                    t0_0 = genGroup(left_alias)
+                    t0_1 = genKeys(t0_0)
+                    t0_2 = genValues(t0_0)
+                    t0_3 = genEach('@len', t0_2)
+                    t0_4 = genRaze(t0_3)
+                    t0_5 = genIndex(left_alias, t0_1)
+                    # group: right
+                    t1_0 = genGroup(right_alias)
+                    t1_1 = genKeys(t1_0)
+                    t1_2 = genValues(t1_0)
+                    t1_3 = genEach('@len', t1_2)
+                    t1_4 = genRaze(t1_3)
+                    t1_5 = genIndex(right_alias, t1_1)
+                    # join
+                    t2_0 = genJoinIndex('@eq', t0_5, t1_5)
+                    t2_1 = genIndex(t2_0, '0:i64')
+                    t2_2 = genIndex(t2_0, '1:i64')
+                    t2_3 = genIndex(t0_4, t2_1)
+                    t2_4 = genIndex(t1_4, t2_2)
+                    left_updated_value  = updateValueWithIndex(left_value, t2_1) # t2_3
+                    right_updated_value = updateValueWithIndex(right_value, t2_2) # t2_4
+                    left_aggr   = readAggrGrouped(d['leftAggregates'], left_updated_value)
+                    right_aggr  = []
                     right_after = readAggrGroupedAfter(d['rightAggregates'], t2_3, t2_4)
-                    t3_0 = genLength(t0_1)
+                    t3_0        = genLength(t0_1)
                     for val_aggr in right_after:
                         t3_1 = genVector(t3_0, '0:i64')
                         t3_2 = genIndexA(t3_1, t2_1, val_aggr)  # left side
                         right_aggr.append(t3_2)
-                elif semantic == 'inner':
-                    # print right_updated_value
-                    # print d['rightAggregates']
-                    # raw_input()
-                    right_aggr = readAggrNotGrouped(d['rightAggregates'], right_updated_value, t2_3, right_env)
-                    # right_aggr = right_updated_value
-                    stop(right_aggr)
+                    env_names =[] ; env_alias = []; env_types = []
+                    addEnvValuesFromVector(env_names, env_alias, env_types, d['leftAggregates' ],  left_aggr)
+                    addEnvValuesFromVector(env_names, env_alias, env_types, d['rightAggregates'], right_aggr)
+                    return encodeEnv('lambda_groupjoin', env_names, env_alias, env_types)
                 else:
                     pending('GroupJoin: semantic not supported: %s' % semantic)
-                env_names =[] ; env_alias = []; env_types = []
-                addEnvValuesFromVector(env_names, env_alias, env_types, d['leftAggregates' ],  left_aggr)
-                addEnvValuesFromVector(env_names, env_alias, env_types, d['rightAggregates'], right_aggr)
-                return encodeEnv('lambda_groupjoin', env_names, env_alias, env_types)
         # raise
         # # if left outer join (q13)
         # env_names =[] ; env_alias = []; env_types = []
@@ -1129,7 +1127,7 @@ def joinColumnsMultiple2(joinType, cond_list, env2):
         return [p0, p1, 'indexing', 'plain']
     elif joinType == 'left_antijoin':
         p0 = genIndex(t2, '0:i64')
-        p1 = genVector(genLength(p0), '1:bool')
+        p1 = genVector(genLength(left_alias[0]), '1:bool')
         p2 = genIndexA(p1, p0, '0:bool')
         return [p2, None, 'masking', 'plain']
     elif joinType == 'left_semijoin':
@@ -2036,6 +2034,7 @@ def fetch(k, d):
 
 def stringValue(typ, value, withType=True):
     global isOpSubstring
+    strValue = str(value)
     def date2date(d):
         global standard_date
         current_date = standard_date + timedelta(int(d) - 2451545)
@@ -2044,18 +2043,18 @@ def stringValue(typ, value, withType=True):
     if t == 'sym' and isOpSubstring:
         t = 'str' #chf
     if t == 'str':
-        z = '"' + value +'"'
+        z = '"%s"' % value
     elif t == 'char':
-        z = "'" + value + "'"
+        z = "'%c'" % value
     elif t == 'sym':
-        z = '`' + value if isSimpleSymbol(value) else '`"' + value + '"'
+        z = '`' + strValue if isSimpleSymbol(strValue) else '`"' + strValue + '"'
     elif t == 'd':
         z = date2date(value)
     elif t == 'f64': # Example: "type": [ "Numeric", 12, 2 ], "value": 2400 }
         digit = int(typ[2])
         z = '%g' % (float(value)/(10**digit))
     else:
-        z = str(value)
+        z = strValue
     return z+':'+t if withType else z
 
 def actionCompress(vid, cols, env):

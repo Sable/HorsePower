@@ -4,7 +4,7 @@
 |----|--------|:-:|:-:|:--:|------------------------------------------|-------------------------
 | 1  | Pass   | P |   | Y  | 0 join                                   |
 | 2  | Pass*  |   | P | Y  | 8 joins                                  | earlyprobe, is
-| 3  | Pass   |   | P |    | 1 join,  1 groupjoin                     |
+| 3  | Pass   |   | P | Y  | 1 join,  1 groupjoin                     |
 | 4  | Pass   | P |   | Y  | 1 leftsemijoin                           |
 | 5  | Pass   |   | P | Y  | 5 joins                                  |
 | 6  | Pass   | P |   | Y  | 0 join                                   |
@@ -18,7 +18,7 @@
 | 14 | Pass   | P |   | Y  | 1 join                                   |
 | 15 | Pass   |   | P | Y  | 2 joins                                  | 1 index join
 | 16 | Pass   | P |   | Y  | 1 join,  1 rightantijoin                 |
-| 17 | Pass*  |   | P |    | 2 joins, 1 groupjoin                     | groupby scan, magic?
+| 17 | Pass*  |   | P | Y  | 2 joins, 1 groupjoin                     | groupby scan, magic?
 | 18 | Pass   |   | P | Y  | 2 joins, 1 rightsemijoin                 | select
 | 19 | Pass   | P |   | Y  | 1 join                                   |
 | 20 | Pass*  |   | P | Y  | 2 joins, 1 leftsemijoin, 1 rightsemijoin | earlyprobe
