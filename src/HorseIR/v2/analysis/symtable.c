@@ -52,13 +52,23 @@ static void getCellInfo(List *list, InfoNode *in){
     }
 }
 
+static pShape getShapeByName(S name){
+    if(!strcmp(name, "list")) return listH;
+    else if(!strcmp(name, "table")) return tableH;
+    else if(!strcmp(name, "dict"))  return dictH;
+    else if(!strcmp(name, "enum"))  return enumH;
+    else EP("Unknown shape name: %s", name);
+}
+
 static InfoNode *getInfoNode(Node *n){
     InfoNode *x = NEW(InfoNode);
     if(n->val.type.cell){
         getCellInfo(n->val.type.cell, x);
+        //x->shape = newShapeNode(getShapeByName(n->val.type.typ), SN_ID, -1);
     }
     else {
         x->type = getType(n);
+        //x->shape = newShapeNode(vectorH, SN_ID, -1);
     }
     return x;
 }
@@ -292,8 +302,9 @@ static void scanDeclarationList(List *list, SymbolTable *st){
 static void scanVar(Node *n, SymbolTable *st){
     //P("var = %s\n", n->val.param.id);
     SymbolName *s = putSymbolName(st, n->val.param.id, localS);
+    Node *typ = n->val.param.typ;
     s->val.local = n;
-    scanStatement(n->val.param.typ, st);
+    scanStatement(typ, st);
     addSymbolNameList(symList, n->val.param.sn = s); // assign symbolname and add it to a list
 }
 
@@ -382,6 +393,13 @@ static Node *fetchLastStmt(Node *n){
     return x?x->val:NULL;
 }
 
+static void setReturnShape(InfoNodeList *list){
+    if(list) {
+        setReturnShape(list->next);
+        list->in->shape = newShapeNode(unknownH, -1, -1);
+    }
+}
+
 static void scanMethod(Node *n, SymbolTable *st){
     //SymbolName *s = putSymbol(st, n->val.method.fname, methodS);
     //s->val.method = n;
@@ -400,6 +418,7 @@ static void scanMethod(Node *n, SymbolTable *st){
     cleanReturnTypeList(rtnList);
     scanStatementList(n->val.method.typ, t);
     meta->returnTypes = rtnList->next; // no dummy
+    setReturnShape(meta->returnTypes); // set to unknown
 
     meta->lastStmt = fetchLastStmt(n->val.method.block);
     // collect all meta info

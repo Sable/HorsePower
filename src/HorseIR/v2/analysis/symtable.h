@@ -42,6 +42,7 @@ typedef struct MetaMethod{
     struct InfoNodeList *returnTypes;
     struct ChainList *chains;
     Node *lastStmt;
+    bool isCompiling, isCalled;
 }MetaMethod;
 
 //typedef struct InfoNode{

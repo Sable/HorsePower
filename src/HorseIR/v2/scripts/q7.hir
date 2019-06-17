@@ -9,7 +9,7 @@ module default{
       a5:? = @load_table(`nation:sym  ); // n2
       // supplier
       c00:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
-      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), i64);
+      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
       // lineitem
       c10:? = check_cast(@column_value(a1, `l_suppkey:sym  ), i64);
       c11:? = check_cast(@column_value(a1, `l_orderkey:sym ), enum);
@@ -97,8 +97,9 @@ module default{
       // 6.1 suppkey  : s_ and l_
       // 6.2 nationkey: s_ and n1_
       //t6_0:? = @join_index(@eq, {c00,c01}, {t5_8,t5_5});
-      kk0:? = @list(c00,c01);
-      kk1:? = @list(t5_8,t5_5);
+      t6_x:? = @fetch(c01);
+      kk0:? = @list(c00 , t6_x);
+      kk1:? = @list(t5_8, t5_5);
       t6_0:? = @join_index(@eq, kk0, kk1);
       t6_1:? = @index(t6_0, 0:i64);
       t6_7:? = @index(t6_0, 1:i64);

@@ -55,9 +55,9 @@ typedef struct FuncUnit{
 #define sameH(x,y) ((x)->type==(y)->type)
 
 // ShapeNode->kind
-#define SN_CONST 0
-#define SN_ID    1
-#define SN_SCAN  2
+#define SN_CONST 0  //  constSP
+#define SN_ID    1  // symbolSP
+#define SN_SCAN  2  //   scanSP
 
 #define isSizeConst(x) ((x)==SN_CONST)
 #define isSizeId(x)    ((x)==SN_ID)

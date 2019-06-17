@@ -14,7 +14,7 @@ module default{
       c01:? = check_cast(@column_value(a0, `p_type:sym   ), sym);
       // supplier
       c10:? = check_cast(@column_value(a1, `s_suppkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), i64);
+      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), enum);
       // lineitem
       c20:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
       c21:? = check_cast(@column_value(a2, `l_partkey:sym  ), i64);
@@ -56,8 +56,10 @@ module default{
       t1_4:? = @join_index(@eq, t0_6, t1_3);
       t1_5:? = @index(t1_4, 0:i32);
       t1_6:? = @index(t1_4, 1:i32);
-      t1_7:? = @compress(t1_2, c32);
-      t1_8:? = @fetch(t1_7);
+      //t1_7:? = @compress(t1_2, c32);
+      //t1_8:? = @fetch(t1_7);
+      t1_7:? = @fetch(c32);
+      t1_8:? = @compress(t1_2, t1_7);
       t1_9:? = @index(t1_8, t1_6);  // o_custkey
       t1_10:? = @index(t0_7, t1_5); // l_suppkey
       t1_11:? = @index(t0_8, t1_5); // l_extendedprice
@@ -91,7 +93,8 @@ module default{
       t5_0:? = @join_index(@eq, t4_3, c10);
       t5_1:? = @index(t5_0, 0:i32);
       t5_2:? = @index(t5_0, 1:i32);
-      t5_3:? = @index(c11 , t5_2);  // s_nationkey
+      t5_x:? = @fetch(c11);
+      t5_3:? = @index(t5_x, t5_2);  // s_nationkey
       t5_4:? = @index(t4_4, t5_1);  // l_extendedprice
       t5_5:? = @index(t4_5, t5_1);  // l_discount
       t5_6:? = @index(t4_6, t5_1);  // o_orderdate

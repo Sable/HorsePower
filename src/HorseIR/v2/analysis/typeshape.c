@@ -9,14 +9,18 @@ typedef InfoNode* (*AllFunc)(InfoNodeList*);
 
 static void scanList(List *list);
 static void scanNode(Node *n);
-static InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
-static void cleanInfoList(InfoNodeList *in_list);
+static void scanMethod(Node *n);
 static InfoNode *scanType(Node *n);
+static InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
+static void copyInfoNodeList(InfoNodeList *list, InfoNodeList *vals);
+static void cleanInfoList(InfoNodeList *in_list);
+static bool infoCompatible(InfoNode *x, InfoNode *y);
 
 static bool H_SHOW;
 InfoNodeList *currentInList;
 
 static Node *currentMethod;
+extern Node *entryMain;
 
 /*  ---- above declarations ---- */
 
@@ -77,6 +81,41 @@ static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
     }
 }
 
+static bool checkParamCompatible(SymbolNameList *args, InfoNodeList *list){
+    if(list){
+        bool r = checkParamCompatible(args->next, list->next);
+        if(!r) return false;
+        Node *var = args->symName->val.local;
+        Node *typ = var->val.param.typ;
+        // printInfoNode(typ->val.type.in);
+        // printInfoNode(list->in); getchar();
+        return infoCompatible(typ->val.type.in, list->in);
+    }
+    return true;
+}
+
+static InfoNodeList *propagateMethod(Node *n, InfoNodeList *inputList){
+    int numArg = totalInfo(inputList);
+    MetaMethod *meta = n->val.method.meta;
+    int valence = totalSymbolNames(meta->paramVars);
+    if(numArg == valence){
+        SymbolNameList *argList = meta->paramVars;
+        printInfoNode(inputList->next->in);
+        if(!checkParamCompatible(argList, inputList->next)){
+            EP("Type not compatible in parameters");
+        }
+        if(meta->isCompiling){
+            meta->isCalled = true;
+            return meta->returnTypes;
+        }
+        else {
+            scanMethod(n);
+            return meta->returnTypes;
+        }
+    }
+    else EP("Method valence mismatch: %d vs. %d\n", numArg, valence);
+}
+
 InfoNodeList *propagateType(Node *func, InfoNodeList *list){
     //printNode(func);
     char *funcName = func->val.name.id2;
@@ -87,6 +126,12 @@ InfoNodeList *propagateType(Node *func, InfoNodeList *list){
                 InfoNode *rtn = propagateBuiltin(funcName, list);
                 cleanInfoList(currentInList);
                 addToInfoList(currentInList, rtn);
+            } break;
+        case methodS:
+            {
+                InfoNodeList *rtns = propagateMethod(sn->val.method, list);
+                cleanInfoList(currentInList);
+                copyInfoNodeList(currentInList, rtns);
             } break;
         default: TODO("Support kind: %d\n", sn->kind);
     }
@@ -107,6 +152,39 @@ static void cleanInfoList(InfoNodeList *in_list){
     InfoNodeList *x = in_list->next;
     while(x){ InfoNodeList *t = x; x=x->next; free(t);}
     in_list->next = NULL;
+}
+
+static void copyInfoNodeList(InfoNodeList *list, InfoNodeList *vals){
+    if(vals){
+        copyInfoNodeList(list, vals->next);
+        addToInfoList(list, vals->in);
+    }
+}
+
+#define copyShapeNode(x, y) *(x)=*(y)  // a duplicate macro in typerule.c
+static InfoNode *dupInfoNode(InfoNode *x){
+    InfoNode *in = NEW(InfoNode);
+    in->type  = x->type;
+    in->subInfo = x->subInfo?dupInfoNode(x->subInfo):NULL;
+    in->next  = x->next?dupInfoNode(x->next):NULL;
+    in->shape = NEW(ShapeNode);
+    copyShapeNode(in->shape, x->shape);
+    return in;
+}
+
+static InfoNode *deepAddToInfoList(InfoNodeList *list, InfoNode *in){
+    InfoNodeList *x = NEW(InfoNodeList);
+    x->in = dupInfoNode(in);
+    x->next = list->next;
+    list->next = x;
+    return in;
+}
+
+static void deepCopyInfoNodeList(InfoNodeList *list, InfoNodeList *vals){
+    if(vals){
+        deepCopyInfoNodeList(list, vals->next);
+        deepAddToInfoList(list, vals->in);
+    }
 }
 
 static InfoNode *getInfoVector(Node *n){
@@ -153,7 +231,8 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
         return true;
     }
     else {
-        if(checkType(x,y) && checkShape(x,y)){
+        if(checkType(x,y) && checkShape(x,y)){ // shape not necessary
+        //if(checkType(x,y)){
             bool partSub = false, partNext = false;
             // sub field
             if(!x->subInfo && !y->subInfo){
@@ -162,16 +241,23 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
             else if(x->subInfo && y->subInfo){
                 partSub = infoCompatible(x->subInfo, y->subInfo);
             }
+            if(!partSub) return false;
             // next field
             if(!x->next && !y->next) {
                 partNext = true;
             }
             else if(x->next && y->next){
-                partSub = infoCompatible(x->next, y->next);
+                partNext = infoCompatible(x->next, y->next);
             }
-            return partSub && partNext;
+            return partNext; //  partSub && partNext
         }
-        else return false;
+        else {
+            P("------------\n");
+            printInfoNode(x);
+            printInfoNode(y);
+            EP("Shape incompatible: upon two types");
+            return false;
+        }
     }
 }
 
@@ -212,12 +298,45 @@ static void printInfoVars(List *list){
     }
 }
 
-static void scanModule(Node *n){ scanList(n->val.module.body ); }
+static void scanModule(Node *n){
+    scanList(n->val.module.body);
+}
+
+static bool compatibleReturns(InfoNodeList *oldIn, InfoNodeList *newIn){
+    if(oldIn){
+        bool r = compatibleReturns(oldIn->next, newIn->next);
+        return r?infoCompatible(oldIn->in, newIn->in):false;
+    }
+    return true;
+}
+
 static void scanMethod(Node *n){
+    if(H_DEBUG)
+        WP("Scanning method %s\n", n->val.method.fname);
     Node *prevNode = currentMethod;
     currentMethod = n;
-    scanNode(n->val.method.block);
+    MetaMethod *meta = n->val.method.meta;
+    meta->isCompiling = true;
+    meta->isCalled    = false;
+    InfoNodeList *rtns = NEW(InfoNodeList);
+    // scanNode(n->val.method.param); // TODO: main method has no params?
+    int c = 1;
+    while(c<3){
+        cleanInfoList(rtns);
+        deepCopyInfoNodeList(rtns, meta->returnTypes);
+        //printInfoNode(rtns->next->in); getchar(); P("after copy ...\n");
+        scanNode(n->val.method.block);
+        //P("-----\n");
+        //printInfoNode(rtns->next->in);
+        //printInfoNode(meta->returnTypes->in);
+        if(c == 1 && meta->isCalled) c = 2;
+        else break;
+    } // loop body executed 1 or 2 times
+    P("Method scanned round(s): %d\n", c);
+    meta->isCompiling = false;
+    meta->isCalled    = false;
     currentMethod = prevNode;
+    cleanInfoList(rtns); free(rtns);
 }
 
 #define scanListNode(n)   scanList(n->val.listS)
@@ -299,6 +418,7 @@ static void scanVector(Node *n){
 }
 
 static void scanCall(Node *n){
+    cleanInfoList(currentInList);
     Node *funcName = n->val.call.func;
     scanNode(n->val.call.param);
     propagateType(funcName, currentInList);
@@ -317,6 +437,7 @@ static void scanBlockStmt(Node *n){
 }
 
 static void scanReturnStmt(Node *n){
+    cleanInfoList(currentInList);
     scanListNode(n);
     MetaMethod *meta = currentMethod->val.method.meta;
     int numExpr = totalInfo(currentInList);
@@ -330,13 +451,14 @@ static void scanReturnStmt(Node *n){
     else EP("Method expects %d returns, but gets %d", numRtns, numExpr);
 }
 
+
 static void scanNode(Node *n){
     if(!n) R;
     switch(n->kind){
-        case    moduleK: scanModule      (n); break; //
-        case    methodK: scanMethod      (n); break; //
-        case      stmtK: scanAssignStmt  (n); break; //
-        case      castK: scanCast        (n); break; //
+        case    moduleK: scanModule      (n); break;
+        case    methodK: scanMethod      (n); break;
+        case      stmtK: scanAssignStmt  (n); break;
+        case      castK: scanCast        (n); break;
         case  exprstmtK: scanExprStmt    (n); break;
         case paramExprK: scanParams      (n); break;
         case      callK: scanCall        (n); break;
@@ -345,13 +467,13 @@ static void scanNode(Node *n){
         case    returnK: scanReturnStmt  (n); break;
         //case  continueK: scanContinueStmt(n); break;
         //case     breakK: scanBreakStmt   (n); break;
-        case        ifK: scanIfStmt      (n); break; //
-        case     whileK: scanWhileStmt   (n); break; //
-        case    repeatK: scanRepeatStmt  (n); break; //
+        case        ifK: scanIfStmt      (n); break;
+        case     whileK: scanWhileStmt   (n); break;
+        case    repeatK: scanRepeatStmt  (n); break;
         case      typeK: scanType        (n); break;
-        case     blockK: scanBlockStmt   (n); break; //
-        case    vectorK: scanVector      (n); break; //
-        case    globalK: scanGlobal      (n); break; //
+        case     blockK: scanBlockStmt   (n); break;
+        case    vectorK: scanVector      (n); break;
+        case    globalK: scanGlobal      (n); break;
     }
 }
 
@@ -373,6 +495,8 @@ static void init(){
 void propagateTypeShape(Prog *root){
     printBanner("Type Shape Propagation (After symbol table)");
     init();
-    scanList(root->module_list);
+    //scanList(root->module_list);
+    scanNode(entryMain);
+    getchar();
 }
 

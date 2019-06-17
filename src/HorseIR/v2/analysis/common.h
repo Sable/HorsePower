@@ -39,11 +39,13 @@ Type getSubType(InfoNode *x);
 ShapeNode *getSubShape(InfoNode *x);
 bool isSameShape(ShapeNode *x, ShapeNode *y);
 void freeInfoNode(InfoNode *in);
+void printShapeNode(ShapeNode *sn);
 
 #include "symtable.h"   // create symbol tables
 #include "typerule.h"   // define typeshape rules
 #include "typeshape.h"  // propagate type/shape rules
 #include "udchain.h"    // build use-def chain
 
+I totalSymbolNames(SymbolNameList *list);
 
 #endif

@@ -82,6 +82,8 @@ module default{
       t3_6:? = @index(t3_5, 0:i64);
       t3_7:? = @len(t2_5);
       t3_8:? = @vector(t3_7, 1:bool);
+      @print(t3_8);
+      @print(t3_6);
       t3_9:? = @index_a(t3_8, t3_6, 0:bool);
       t3_10:? = @compress(t3_9, t2_5); // l_orderkey
       t3_11:? = @compress(t3_9, t2_6); // l_suppkey
@@ -94,6 +96,8 @@ module default{
       // 4.2 l_suppkey <> l_suppkey3
       t4_0:? = @list(t3_10, t3_11);
       t4_1:? = @list(t1_k, c30);
+      @print(t4_0);
+      @print(t4_1);
       t4_2:? = @join_index(@eq@neq,t4_0,t4_1);
       t4_3:? = @index(t4_2, 0:i64);
       t4_4:? = @unique(t4_3);

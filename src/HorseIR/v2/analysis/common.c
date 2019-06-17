@@ -12,7 +12,7 @@ static void printTypeNode(InfoNode *x){
     }
 }
 
-static void printShapeNode(ShapeNode *sn){
+void printShapeNode(ShapeNode *sn){
     if(sn){
         switch(sn->type){
             case unknownH: P("shape(?,"); break;
@@ -79,5 +79,9 @@ void freeInfoNode(InfoNode *in){
     }
 }
 
+// no dummy
+I totalSymbolNames(SymbolNameList *list){
+    L c=0; while(list){c++; list=list->next;} R c;
+}
 
 

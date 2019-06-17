@@ -204,10 +204,6 @@ static G runStack;
 static L stackPtr, stackPeak;
 #define STACK_SIZE 67108864  // 64MB
 
-static L totalSymbolNames(SymbolNameList *list){
-    L c=0; while(list){c++; list=list->next;} R c;
-}
-
 static O saveToStackSub(SymbolNameList *list){
     if(!list) R ;
     L size = totalSymbolNames(list) * sizeof(V);
@@ -332,9 +328,21 @@ static O runCall(Node *n){
     //char *funcName = n->val.call.func;
     cleanVList(rtnList);
     cleanVList(paramList);
-    //P("size = %d\n", totalVList(rtnList)); getchar();
     if(param) runNode(param, NULL); 
+    //if(n->lineno == 66){
+    //    P("size = %d\n", totalVList(paramList)); getchar();
+    //    V p0 = paramList->next->v;
+    //    V p1 = paramList->next->next->v;
+    //    getInfoVar(p0);
+    //    getInfoVar(p1);
+    //    getchar();
+    //}
     invokeFunction(funcName, paramList);
+    //if(n->lineno == 64){
+    //    V r0 = rtnList->next->v;
+    //    getInfoVar(r0);
+    //    getchar();
+    //}
 }
 
 static L loadVector(List *list, V x, I t){

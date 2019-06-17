@@ -21,7 +21,7 @@ module default{
       c23:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);
       // supplier
       c30:? = check_cast(@column_value(a3, `s_suppkey:sym  ), i64);
-      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), i64);
+      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), enum);
       // nation
       c40:? = check_cast(@column_value(a4, `n_name:sym     ), sym);
       c41:? = check_cast(@column_value(a4, `n_nationkey:sym), i64);
@@ -63,7 +63,8 @@ module default{
       t4_0:? = @join_index(@eq, c30, t3_2);
       t4_1:? = @index(t4_0, 0:i64);
       t4_2:? = @index(t4_0, 1:i64);
-      t4_3:? = @index(c31  , t4_1); // s_nationkey
+      t4_x:? = @fetch(c31);
+      t4_3:? = @index(t4_x , t4_1); // s_nationkey
       t4_4:? = @index(t3_11, t4_2); // c_nationkey
       t4_5:? = @index(t3_9 , t4_2); // n_nationkey
       //t4_6:? = @eq(t4_3, t4_4);

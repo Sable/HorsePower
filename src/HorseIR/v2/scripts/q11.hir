@@ -8,7 +8,7 @@ module default{
     c01:? = check_cast(@column_value(a0,`n_name:sym)       , sym);
     c10:? = check_cast(@column_value(a1,`s_nationkey:sym)  , enum);
     c11:? = check_cast(@column_value(a1,`s_suppkey:sym)    , i64);
-    c20:? = check_cast(@column_value(a2,`ps_partkey:sym)   , i64);
+    c20:? = check_cast(@column_value(a2,`ps_partkey:sym)   , enum);
     c21:? = check_cast(@column_value(a2,`ps_suppkey:sym)   , enum);
     c22:? = check_cast(@column_value(a2,`ps_supplycost:sym), f64);
     c23:? = check_cast(@column_value(a2,`ps_availqty:sym)  , f64);
@@ -36,7 +36,8 @@ module default{
     t4_0:? = @values(c21);
     t4_1:? = @index(t0_2, t1_0);
     // 3. join: 1_ and 2_
-    t5_0:? = @compress(t4_1, c20);
+    t5_x:? = @fetch(c20);
+    t5_0:? = @compress(t4_1, t5_x);
     t5_1:? = @compress(t4_1, c22);
     t5_2:? = @compress(t4_1, c23);
     t5_3:? = @group(t5_0);

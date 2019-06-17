@@ -55,6 +55,10 @@ static char *otherFnName[] = {
 #define glueCodeLine(x)  do{genIndent(); resetCode(); SP(ptr, "%s\n",x); }while(0)
 #define glueAnyLine(...) do{genIndent(); glueAny(__VA_ARGS__);glueLine();}while(0)
 
+#define isTrueMacro     "isTrue"
+#define scanBreak(n)    glueCodeLine("break")
+#define scanContinue(n) glueCodeLine("continue")
+
 typedef struct CodeList{
     char code[128];
     struct CodeList *next;
@@ -217,15 +221,19 @@ static void scanFuncBuiltin(S func){
     }
 }
 
+static void scanFuncMethod(S func){
+    glueCode(func);
+}
+
 static void scanFuncName(Node *n){
     S moduleName = n->val.name.id1;
     S methodName = n->val.name.id2;
     SymbolKind sk = n->val.name.sn->kind;
-    if(sk == builtinS){
-        scanFuncBuiltin(methodName);
-    }
-    else {
-        TODO("Add support for a normal function name");
+    switch(sk){
+        case builtinS: scanFuncBuiltin(methodName); break;
+        case  methodS: scanFuncMethod (methodName); break;
+        default:
+        TODO("Add support for symbol kind: %d\n", sk); break;
     }
 }
 
@@ -308,7 +316,9 @@ static void scanReturn(Node *n){
 
 static void scanIf(Node *n){
     genIndent();
-    glueCode("if(isTrue(");  // isTrue is a macro
+    glueCode("if(");
+    glueCode(isTrueMacro); // isTrue is a macro
+    glueCode("(");
     scanNode(n->val.ifStmt.condExpr);
     glueCode("))");
     Node *thenBlock = n->val.ifStmt.thenBlock;
@@ -316,6 +326,26 @@ static void scanIf(Node *n){
     scanNode(thenBlock);
     if(elseBlock)
         scanNode(elseBlock);
+}
+
+static void scanWhile(Node *n){
+    genIndent();
+    glueCode("while(");
+    glueCode(isTrueMacro);
+    glueCode("(");
+    scanNode(n->val.whileStmt.condExpr);
+    glueCode("))");
+    scanNode(n->val.whileStmt.bodyBlock);
+}
+
+static void scanRepeat(Node *n){
+    genIndent();
+    glueCode("repeat(");
+    glueCode(isTrueMacro);
+    glueCode("(");
+    scanNode(n->val.repeatStmt.condExpr);
+    glueCode("))");
+    scanNode(n->val.repeatStmt.bodyBlock);
 }
 
 static void genStatement(Node *n, B f){
@@ -343,10 +373,10 @@ static void scanNode(Node *n){
         case    constK: scanConst     (n); break;
         case   returnK: scanReturn    (n); break;
         case       ifK: scanIf        (n); break;
-        //case    whileK: scanWhile     (n); break;
-        //case   RepeatK: scanRepeat    (n); break;
-        //case    BreakK: scanBreak     (n); break;
-        //case ContinueK: scanContinue  (n); break;
+        case    whileK: scanWhile     (n); break;
+        case   repeatK: scanRepeat    (n); break;
+        case    breakK: scanBreak     (n); break;
+        case continueK: scanContinue  (n); break;
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
     genStatement(n, false);
@@ -427,6 +457,9 @@ static void init(){
 }
 
 static void saveToFile(S path, S head, S code){
+    printBanner("Generated Code Below");
+    P("%s%s", head,code);
+    return ;
     FILE *fp = fopen(path, "w");
     FP(fp, "%s%s", head,code);
     fclose(fp);
@@ -435,7 +468,6 @@ static void saveToFile(S path, S head, S code){
 static void result(){
     resetCode();
     I size = ptr - code;
-    P("%s\n",code);
     P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
             percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
     saveToFile("out/gen.h", head, code);

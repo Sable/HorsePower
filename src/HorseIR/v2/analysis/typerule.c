@@ -208,11 +208,17 @@ bool checkType(InfoNode *x, InfoNode *y){
     return false;
 }
 
+#define copyShapeNode(x, y) *(x)=*(y)
+
+// maybe not used any more
 bool checkShape(InfoNode *x, InfoNode *y){
     ShapeNode *sx = x->shape;
     ShapeNode *sy = y->shape;
     if(sx){
-        if(sx->type != sy->type) return false;
+        if(sx->type == unknownH){
+            copyShapeNode(sx, sy);
+        }
+        else if(sx->type != sy->type) return false;
         else {
             switch(sx->kind){
                 case constSP:
@@ -225,8 +231,8 @@ bool checkShape(InfoNode *x, InfoNode *y){
                     if(sx->sizeScan != sy->sizeScan) { TODO("error size\n"); }
                     break;
             }
-            return true;
         }
+        return true;
     }
     else { // if null, copy y's shape
         x->shape = sy;
