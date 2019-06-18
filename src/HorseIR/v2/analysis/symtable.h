@@ -41,7 +41,6 @@ typedef struct MetaMethod{
     SymbolNameList *localVars;
     struct InfoNodeList *returnTypes;
     struct ChainList *chains;
-    Node *lastStmt;
     bool isCompiling, isCalled;
     bool isCompiled;
 }MetaMethod;

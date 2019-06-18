@@ -387,12 +387,6 @@ static void scanReturnStmt(Node *n, SymbolTable *st){
 //    while(p){P("- %s\n", p->symName->name); p=p->next;}
 //}
 
-
-static Node *fetchLastStmt(Node *n){
-    List *x = n->val.block.stmts;
-    return x?x->val:NULL;
-}
-
 static void setReturnShape(InfoNodeList *list){
     if(list) {
         setReturnShape(list->next);
@@ -420,7 +414,6 @@ static void scanMethod(Node *n, SymbolTable *st){
     meta->returnTypes = rtnList->next; // no dummy
     setReturnShape(meta->returnTypes); // set to unknown
 
-    meta->lastStmt = fetchLastStmt(n->val.method.block);
     // collect all meta info
     n->val.method.meta = meta;
 }

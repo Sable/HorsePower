@@ -14,11 +14,20 @@ static void scanNode(Node *n);
 static void scanList(List *list);
 static void genList(List *list, C sep);
 static void genVarList(List *list, C sep);
+
 extern List *compiledMethodList;
+extern OC   qOpts[99];
+extern int  numOpts;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
-#define scanBlock(n)     scanList(n->val.listS)
+
+// two macros moved the generated C macro "HORSE_UDF"
+//#define VAR_BEGIN "I h_prev_v = h_buff_v;"
+//#define VAR_END   "h_buff_v = h_prev_v;"
+#define C_MACRO_UDF "HORSE_UDF"
+#define NUM_VAR_ROW 4           // # of var declarations in a row
+
 /* ------ declaration above ------ */
 
 static char *monFnName[] = {
@@ -93,7 +102,7 @@ static void genMethodHead(Node *n){
     if(numRtn > 0)
         glueCode("V *h_rtn");
     if(numParam > 0){
-        if(numRtn > 0) glueCode(",");
+        if(numRtn > 0) glueCode(", ");
         genVarList(n->val.method.param->val.listS, comma);
     }
     glueMethodHead(line, ");\n");
@@ -137,15 +146,21 @@ static void genToc(){
 static void genList(List *list, C sep){
     if(list){
         genList(list->next, sep);
-        if(list->next) glueChar(sep);
+        if(list->next) glueAny("%c ",sep);
         scanNode(list->val);
     }
+}
+
+static void genVarArray(List *list, C sep){
+    glueCode("(V []){");
+    genList(list, sep);
+    glueCode("}");
 }
 
 static void genVarList(List *list, C sep){
     if(list){
         genList(list->next, sep);
-        if(list->next) glueChar(sep);
+        if(list->next) glueAny("%c ",sep);
         glueCode("V ");
         scanNode(list->val);
     }
@@ -154,8 +169,8 @@ static void genVarList(List *list, C sep){
 static int genListReturn(List *list, C sep, S text){
     if(list){
         int k = genListReturn(list->next, sep, text);
-        if(list->next) glueChar(sep);
-        glueAny("%s[%d]=",text,k);
+        if(list->next) glueAny("%c ",sep);
+        glueAny("%s[%d] = ",text,k);
         scanNode(list->val);
         return k+1;
     }
@@ -215,13 +230,19 @@ static void addStrConst(S s){
     SP(ptr, "\"%s\"", s);
 }
 
-static void genLocalVar(SymbolName *sn){
-    glueAnyLine("V %s = incV();", sn->name);
+static void genLocalVar(SymbolName *sn, I k){
+    if(k == 0) genIndent();
+    else if(k % NUM_VAR_ROW == 0){
+        glueLine(); genIndent();
+    }
+    glueAny("V %s = incV(); ", sn->name);
 }
 
 static void genLocalVars(Node *block){
     SymbolTable *st = block->val.block.st;
-    DOI(SymbolTableSize, if(st->table[i]) genLocalVar(st->table[i]))
+    I k=0;
+    DOI(SymbolTableSize, if(st->table[i]) genLocalVar(st->table[i], k++))
+    if(k % NUM_VAR_ROW != 0) glueLine();
 }
 
 /* ------ gen functions defined above ------ */
@@ -242,10 +263,10 @@ static void scanFuncBuiltin(S func){
 }
 
 static void scanFuncMethod(S func){
-    glueCode(func);
+    glueAny(C_MACRO_UDF "(%s", func);
 }
 
-static void scanFuncName(Node *n){
+static SymbolKind scanFuncName(Node *n){
     S moduleName = n->val.name.id1;
     S methodName = n->val.name.id2;
     SymbolKind sk = n->val.name.sn->kind;
@@ -255,17 +276,25 @@ static void scanFuncName(Node *n){
         default:
         TODO("Add support for symbol kind: %d\n", sk); break;
     }
+    return sk;
 }
 
 static void scanCall(Node *n){
     I prevNumArg = numArg;
-    scanFuncName(n->val.call.func);
+    SymbolKind sk = scanFuncName(n->val.call.func);
     glueCode("(");
-    genList(lhsVars, comma);
-    numArg = countNode(lhsVars);
+    if(sk == methodS) {
+        genVarArray(lhsVars, comma);
+        numArg = 1;
+    }
+    else {
+        genList(lhsVars, comma);
+        numArg = countNode(lhsVars);
+    }
     scanNode(n->val.call.param);
     numArg = prevNumArg;
     glueCode(")");
+    if(sk == methodS) glueCode(")");
 }
 
 static void scanVar(Node *n){
@@ -276,7 +305,7 @@ static void scanVar(Node *n){
 
 static void scanName(Node *n){
     if(numArg == 0) numArg = 1;
-    else if(numArg > 0) { glueChar(comma); numArg++; }
+    else if(numArg > 0) { glueAny("%c ", comma); numArg++; }
     glueCode(n->val.name.id2);
     // n->val.name.id1
     // n->val.name.id2
@@ -294,7 +323,7 @@ static void scanAssignStmt(Node *n){
 
 static void scanVector(Node *n){
     if(numArg == 0) numArg = 1;
-    else if(numArg > 0) { glueChar(comma); numArg++; }
+    else if(numArg > 0) { glueAny("%c ", comma); numArg++; }
     Node *typeNode = n->val.vec.typ;
     I c = countNode(n->val.vec.val);
     glueCode(genConstFunc(typeNode));
@@ -325,17 +354,16 @@ static void scanConst(Node *n){
 
 // TODO: think how to return multiple values
 static void scanReturn(Node *n){
-    B notLast = (n != currentMethod->val.method.meta->lastStmt);
     if(n->val.listS){
         //glueCode("return ");
         genListReturn(n->val.listS, comma, "h_rtn");
         glueChar(';');
+        glueLine();
     }
-    if(notLast) glueCode("goto END;");
+    glueCodeLine("return 0;");
 }
 
 static void scanIf(Node *n){
-    genIndent();
     glueCode("if(");
     glueCode(isTrueMacro); // isTrue is a macro
     glueCode("(");
@@ -343,53 +371,56 @@ static void scanIf(Node *n){
     glueCode(")){\n");
     Node *thenBlock = n->val.ifStmt.thenBlock;
     Node *elseBlock = n->val.ifStmt.elseBlock;
-    depth++;
     scanNode(thenBlock);
-    depth--;
     glueCodeLine("}");
     if(elseBlock){
         glueCodeLine("else {");
-        depth++;
         scanNode(elseBlock);
-        depth--;
         glueCodeLine("}");
     }
 }
 
 static void scanWhile(Node *n){
-    genIndent();
     glueCode("while(");
     glueCode(isTrueMacro);
     glueCode("(");
     scanNode(n->val.whileStmt.condExpr);
     glueCode(")){\n");
-    depth++;
     scanNode(n->val.whileStmt.bodyBlock);
-    depth--;
     glueCodeLine("}");
 }
 
 static void scanRepeat(Node *n){
-    genIndent();
     glueCode("repeat(");
     glueCode(isTrueMacro);
     glueCode("(");
     scanNode(n->val.repeatStmt.condExpr);
     glueCode(")){\n");
-    depth++;
     scanNode(n->val.repeatStmt.bodyBlock);
-    depth--;
     glueCodeLine("}");
+}
+
+static void scanBlock(Node *n){
+    depth++;
+    genLocalVars(n);
+    scanList(n->val.listS);
+    //P("last stmt %s\n", getNodeTypeStr(n->val.listS->val));
+    //Node *lastStmt = n->val.listS?n->val.listS->val:NULL;
+    //if(lastStmt && !instanceOf(lastStmt, returnK))
+    //    glueCodeLine(VAR_END);
+    depth--;
 }
 
 static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case returnK: if(f) genIndent();
-                      else glueLine(); break;
         case   stmtK: if(f) { genIndent(); glueCode("PROFILE("); }
                       else { glueCode(");"); glueLine(); } break;
+        case     ifK:
+        case  whileK:
+        case repeatK:
+        case returnK: if(f) genIndent(); break;
     }
 }
 
@@ -450,20 +481,17 @@ static void compileMethod(Node *n){
     //printSymbolNameList(n->val.method.meta->localVars);
     //genMethodHead(n->val.method.fname); // TODO: method name
     genMethodHead(n);
-    depth++;
-    glueCodeLine("I prevBuffS = buffS;");
-    genLocalVars(n->val.method.block);
+    //depth++;
+    //glueCodeLine("I prevBuffS = buffS;");
+    //genLocalVars(n->val.method.block);
     //if(n == entryMain) genTic();
     // stategy 1: naive
     scanNode(n->val.method.block);
     // stategy 2: optimize with chain info
     //compileChainList(chains);
-    if(!instanceOf(n->val.method.meta->lastStmt, returnK))
-        glueCodeLine("END:");
-    glueCodeLine("buffS = prevBuffS;");
-    glueCodeLine("return 0;");
-    //if(n == entryMain) genToc();
-    depth--;
+    //if(!instanceOf(n->val.method.meta->lastStmt, returnK))
+    //    glueCodeLine("END:");
+    //glueCodeLine("buffS = prevBuffS;");
     glueCodeLine("}\n");
     currentMethod = prevMethod;
 }
@@ -476,7 +504,7 @@ static void genEntry(){
     if(numRtns > 0){
         glueCodeLine("V rtns[99];");
         glueCodeLine("tic();");
-        glueCodeLine("horse_main(rtns);");
+        glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
         glueCodeLine("time_toc(\"The elapsed time (ms): %g\\n\", elapsed);");
         glueCodeLine("P(\"Output:\\n\");");
         glueAnyLine("DOI(%d, printV(rtns[i]))", numRtns);
@@ -484,6 +512,45 @@ static void genEntry(){
     glueCodeLine("return 0;");
     depth--;
     glueCodeLine("}");
+}
+
+static void saveToFile(S path, S head, S code){
+    printBanner("Generated Code Below");
+    P("%s%s", head,code);
+    return ;
+    FILE *fp = fopen(path, "w");
+    FP(fp, "%s%s", head,code);
+    fclose(fp);
+}
+
+static void dispStats(){
+    resetCode();
+    I size = ptr - code;
+    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
+        percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
+    if(size >= CODE_MAX_SIZE)
+        EP("Code buffer full!!!");
+}
+
+static void compileNaive(List *list){
+    if(list){ compileNaive(list->next); compileMethod(list->val); }
+}
+
+static void compileMain(){
+    if(numOpts > 0){
+        DOI(numOpts, { \
+            switch(qOpts[i]){ \
+            case OPT_FS: break; \
+            }})
+    }
+    else compileNaive(compiledMethodList->next);
+}
+
+static void dumpCode(){
+    //if(H_DEBUG) printChainList(); // display visited chains
+    genEntry();
+    dispStats();
+    saveToFile("out/gen.h", head, code);
 }
 
 static void init(){
@@ -498,33 +565,10 @@ static void init(){
     head[0]  = 0;
 }
 
-static void saveToFile(S path, S head, S code){
-    printBanner("Generated Code Below");
-    P("%s%s", head,code);
-    return ;
-    FILE *fp = fopen(path, "w");
-    FP(fp, "%s%s", head,code);
-    fclose(fp);
-}
-
-static void result(){
-    resetCode();
-    I size = ptr - code;
-    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
-            percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
-    saveToFile("out/gen.h", head, code);
-}
-
-static void compileMethods(List *list){
-    if(list){ compileMethods(list->next); compileMethod(list->val); }
-}
-
 I HorseCompiler(){
     printBanner("Compiling");
     init();
-    compileMethods(compiledMethodList->next);
-    genEntry();
-    //if(H_DEBUG) printChainList(); // display visited chains
-    result();
+    compileMain();
+    dumpCode();
     R 0;
 }
