@@ -21,6 +21,7 @@ InfoNodeList *currentInList;
 
 static Node *currentMethod;
 extern Node *entryMain;
+List *compiledMethodList;
 
 /*  ---- above declarations ---- */
 
@@ -310,6 +311,13 @@ static bool compatibleReturns(InfoNodeList *oldIn, InfoNodeList *newIn){
     return true;
 }
 
+static void addMethodToList(List *list, Node *n){
+    List *t = NEW(List);
+    t->val = n;
+    t->next = list->next;
+    list->next = t;
+}
+
 static void scanMethod(Node *n){
     if(H_DEBUG)
         WP("Scanning method %s\n", n->val.method.fname);
@@ -318,6 +326,10 @@ static void scanMethod(Node *n){
     MetaMethod *meta = n->val.method.meta;
     meta->isCompiling = true;
     meta->isCalled    = false;
+    if(!meta->isCompiled){
+        meta->isCompiled = true;
+        addMethodToList(compiledMethodList, n);
+    }
     InfoNodeList *rtns = NEW(InfoNodeList);
     // scanNode(n->val.method.param); // TODO: main method has no params?
     int c = 1;
@@ -489,6 +501,7 @@ static void init(){
     H_SHOW = true;
     currentMethod = NULL;
     currentInList = NEW(InfoNodeList);
+    compiledMethodList = NEW(List);
 }
 
 /* entry */
@@ -497,6 +510,5 @@ void propagateTypeShape(Prog *root){
     init();
     //scanList(root->module_list);
     scanNode(entryMain);
-    getchar();
 }
 

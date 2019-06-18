@@ -13,8 +13,12 @@ static Node *currentMethod;
 static void scanNode(Node *n);
 static void scanList(List *list);
 static void genList(List *list, C sep);
+static void genVarList(List *list, C sep);
+extern List *compiledMethodList;
 
-#define scanArgExpr(n) scanList(n->val.listS)
+#define scanArgExpr(n)   scanList(n->val.listS)
+#define scanParamExpr(n) scanList(n->val.listS)
+#define scanBlock(n)     scanList(n->val.listS)
 /* ------ declaration above ------ */
 
 static char *monFnName[] = {
@@ -74,7 +78,7 @@ static void genIndent(){ DOI(depth, glueCode("    ")); }
 
 static void glueMethodHead(S part1, S part2){
     if(htr[0]!=0) htr+=strlen(htr);
-    SP(head, "%s%s\n", part1, part2);
+    SP(htr, "%s%s\n", part1, part2);
 }
 
 static int countInfoNodeList(InfoNodeList *list){
@@ -82,10 +86,17 @@ static int countInfoNodeList(InfoNodeList *list){
 }
 
 static void genMethodHead(Node *n){
+    resetCode(); char *line = ptr;
     glueAny("static I horse_%s(", n->val.method.fname);
-    int total = countInfoNodeList(n->val.method.meta->returnTypes);
-    if(total > 0) glueCode("V *h_rtn");
-    glueMethodHead(ptr, ");\n");
+    int numRtn   = countInfoNodeList(n->val.method.meta->returnTypes);
+    int numParam = totalSymbolNames(n->val.method.meta->paramVars);
+    if(numRtn > 0)
+        glueCode("V *h_rtn");
+    if(numParam > 0){
+        if(numRtn > 0) glueCode(",");
+        genVarList(n->val.method.param->val.listS, comma);
+    }
+    glueMethodHead(line, ");\n");
     glueCode("){");
     glueLine();
 }
@@ -127,6 +138,15 @@ static void genList(List *list, C sep){
     if(list){
         genList(list->next, sep);
         if(list->next) glueChar(sep);
+        scanNode(list->val);
+    }
+}
+
+static void genVarList(List *list, C sep){
+    if(list){
+        genList(list->next, sep);
+        if(list->next) glueChar(sep);
+        glueCode("V ");
         scanNode(list->val);
     }
 }
@@ -320,12 +340,20 @@ static void scanIf(Node *n){
     glueCode(isTrueMacro); // isTrue is a macro
     glueCode("(");
     scanNode(n->val.ifStmt.condExpr);
-    glueCode("))");
+    glueCode(")){\n");
     Node *thenBlock = n->val.ifStmt.thenBlock;
     Node *elseBlock = n->val.ifStmt.elseBlock;
+    depth++;
     scanNode(thenBlock);
-    if(elseBlock)
+    depth--;
+    glueCodeLine("}");
+    if(elseBlock){
+        glueCodeLine("else {");
+        depth++;
         scanNode(elseBlock);
+        depth--;
+        glueCodeLine("}");
+    }
 }
 
 static void scanWhile(Node *n){
@@ -334,8 +362,11 @@ static void scanWhile(Node *n){
     glueCode(isTrueMacro);
     glueCode("(");
     scanNode(n->val.whileStmt.condExpr);
-    glueCode("))");
+    glueCode(")){\n");
+    depth++;
     scanNode(n->val.whileStmt.bodyBlock);
+    depth--;
+    glueCodeLine("}");
 }
 
 static void scanRepeat(Node *n){
@@ -344,8 +375,11 @@ static void scanRepeat(Node *n){
     glueCode(isTrueMacro);
     glueCode("(");
     scanNode(n->val.repeatStmt.condExpr);
-    glueCode("))");
+    glueCode(")){\n");
+    depth++;
     scanNode(n->val.repeatStmt.bodyBlock);
+    depth--;
+    glueCodeLine("}");
 }
 
 static void genStatement(Node *n, B f){
@@ -363,20 +397,22 @@ static void scanNode(Node *n){
     resetCode();
     genStatement(n, true);
     switch(n->kind){
-        case     callK: scanCall      (n); break;
-        case exprstmtK: scanExprStmt  (n); break;
-        case  argExprK: scanArgExpr   (n); break;
-        case      varK: scanVar       (n); break;
-        case     nameK: scanName      (n); break;
-        case     stmtK: scanAssignStmt(n); break;
-        case   vectorK: scanVector    (n); break;
-        case    constK: scanConst     (n); break;
-        case   returnK: scanReturn    (n); break;
-        case       ifK: scanIf        (n); break;
-        case    whileK: scanWhile     (n); break;
-        case   repeatK: scanRepeat    (n); break;
-        case    breakK: scanBreak     (n); break;
-        case continueK: scanContinue  (n); break;
+        case      callK: scanCall      (n); break;
+        case  exprstmtK: scanExprStmt  (n); break;
+        case   argExprK: scanArgExpr   (n); break;
+        case paramExprK: scanParamExpr (n); break;
+        case       varK: scanVar       (n); break;
+        case      nameK: scanName      (n); break;
+        case      stmtK: scanAssignStmt(n); break;
+        case    vectorK: scanVector    (n); break;
+        case     constK: scanConst     (n); break;
+        case    returnK: scanReturn    (n); break;
+        case        ifK: scanIf        (n); break;
+        case     whileK: scanWhile     (n); break;
+        case    repeatK: scanRepeat    (n); break;
+        case     breakK: scanBreak     (n); break;
+        case  continueK: scanContinue  (n); break;
+        case     blockK: scanBlock     (n); break;
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
     genStatement(n, false);
@@ -394,18 +430,21 @@ static void compileChain(Chain *chain){
     scanNode(chain->cur);
 }
 
-static void compileChainList(ChainList *list){
+static int compileChainList(ChainList *list){
     if(list){
         compileChainList(list->next);
-        //printChain(list->chain);
+        //printChain(list->chain); getchar();
         compileChain(list->chain);
     }
+    return 0;
 }
 
 static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
     ChainList *chains = n->val.method.meta->chains;
+    MetaMethod *meta = n->val.method.meta;
+    meta->isCompiled = true;
     //printChainList(chains);
     // show the list of all local variables
     //printSymbolNameList(n->val.method.meta->localVars);
@@ -415,7 +454,10 @@ static void compileMethod(Node *n){
     glueCodeLine("I prevBuffS = buffS;");
     genLocalVars(n->val.method.block);
     //if(n == entryMain) genTic();
-    compileChainList(chains);
+    // stategy 1: naive
+    scanNode(n->val.method.block);
+    // stategy 2: optimize with chain info
+    //compileChainList(chains);
     if(!instanceOf(n->val.method.meta->lastStmt, returnK))
         glueCodeLine("END:");
     glueCodeLine("buffS = prevBuffS;");
@@ -473,10 +515,14 @@ static void result(){
     saveToFile("out/gen.h", head, code);
 }
 
+static void compileMethods(List *list){
+    if(list){ compileMethods(list->next); compileMethod(list->val); }
+}
+
 I HorseCompiler(){
     printBanner("Compiling");
     init();
-    compileMethod(entryMain);
+    compileMethods(compiledMethodList->next);
     genEntry();
     //if(H_DEBUG) printChainList(); // display visited chains
     result();
