@@ -75,7 +75,7 @@ typedef enum TargetCode{
 }TC;
 
 typedef enum OptCode{
-    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_FS
+    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_ALL
 }OC;
 
 #include "h_type.h"

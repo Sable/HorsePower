@@ -14,7 +14,10 @@ static void runInterpreterCore(){
 
 static void runCompilerCore(){
     tic();
-    HorseCompiler();
+    if(numOpts < 1)
+        HorseCompilerNaive();     // compiler.c
+    else
+        HorseCompilerOptimized(); // optimizer.c
     time_toc("Compile time (ms): %g\n", elapsed);
 }
 
@@ -48,7 +51,6 @@ static void envCompiler(char *file){
     envInit(file);
     buildSymbolTable(root);
     propagateTypeShape(root);
-    buildUDChain(root);
     runCompilerCore();
 }
 

@@ -537,7 +537,7 @@ static void scanMethod(Node *n){
     //printFlow(flow);
     //printFlow(flow_sink);
     printChainList(chain_list); // print all chains
-    n->val.method.meta->chains = chain_list->next; // skip dummy
+    n->val.method.meta->chains = chain_list; // with dummy
     // TODO: assign chain_list to a method node
     // TODO: clean chain_list
 }

@@ -8,7 +8,8 @@ I HorseInterpreter();
 O runInterpreter();
 
 /* Compiler */
-I HorseCompiler();
+I HorseCompilerNaive();
+I HorseCompilerOptimized();
 
 /* Interpreter v2 */
 I HorseInterpreter2();

@@ -61,6 +61,8 @@ int  getLongOption(int argc, char *argv[]);
 void usage(int e);
 void version();
 
+const S getOptStr(OC x);
+
 extern OptionMode optMode;    // program mode
 extern int   qRun;            // number of runs
 extern char *qPath;           // file path

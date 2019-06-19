@@ -473,7 +473,7 @@ static int compileChainList(ChainList *list){
 static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
-    ChainList *chains = n->val.method.meta->chains;
+    //ChainList *chains = n->val.method.meta->chains;
     MetaMethod *meta = n->val.method.meta;
     meta->isCompiled = true;
     //printChainList(chains);
@@ -536,16 +536,6 @@ static void compileNaive(List *list){
     if(list){ compileNaive(list->next); compileMethod(list->val); }
 }
 
-static void compileMain(){
-    if(numOpts > 0){
-        DOI(numOpts, { \
-            switch(qOpts[i]){ \
-            case OPT_FS: break; \
-            }})
-    }
-    else compileNaive(compiledMethodList->next);
-}
-
 static void dumpCode(){
     //if(H_DEBUG) printChainList(); // display visited chains
     genEntry();
@@ -565,10 +555,11 @@ static void init(){
     head[0]  = 0;
 }
 
-I HorseCompiler(){
-    printBanner("Compiling");
+I HorseCompilerNaive(){
+    printBanner("Compiling without Optimizations");
     init();
-    compileMain();
+    compileNaive(compiledMethodList->next);
     dumpCode();
     R 0;
 }
+
