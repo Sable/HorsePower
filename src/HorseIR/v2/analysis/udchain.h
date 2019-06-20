@@ -37,5 +37,7 @@ void buildUDChain   (Prog *root);
 void printChainInfo (Chain *p);
 void printFlow      (ChainList *list);
 
+void addToChainList(ChainList *chains, Chain *c);
+
 
 #endif

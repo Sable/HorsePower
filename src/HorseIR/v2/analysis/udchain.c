@@ -24,7 +24,7 @@ static char *currentModuleName;
 static bool isLHS;
 static InfoNode *currentIn;
 
-static void addToChainList(ChainList *chains, Chain *c){
+void addToChainList(ChainList *chains, Chain *c){
     ChainList *x = NEW(ChainList);
     x->chain = c;
     x->next = chains->next;

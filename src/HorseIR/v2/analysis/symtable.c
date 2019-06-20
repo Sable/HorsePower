@@ -354,6 +354,7 @@ static void scanAssignStmt(Node *n, SymbolTable *st){
 
 static void scanCast(Node *n, SymbolTable *st){
     scanStatement(n->val.cast.exp, st);
+    scanStatement(n->val.cast.typ, st);
 }
 
 static void scanBlockStmt(Node *n, SymbolTable *st){

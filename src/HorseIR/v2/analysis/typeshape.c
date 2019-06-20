@@ -223,8 +223,10 @@ static InfoNode *getInfoFromNode(Node *n){
 // true : exactly same
 // false: not same
 static bool infoCompatible(InfoNode *x, InfoNode *y){
-    if(isW(y) || !y->shape)
+    if(isW(y) || !y->shape){
+        // TODO: Is a shape info necessary?
         EP("Right hand side shape unknown\n");
+    }
     if(isW(x)) {
         if(x->shape) free(x->shape);
         x->shape = y->shape; // specialize type from right side
@@ -273,13 +275,43 @@ static bool typelistCompatible(int num, List *x, InfoNodeList *list){
     // list: has dummy
     InfoNodeList *p = list->next;
     for(int i=0;i<num;i++){
-        Node *var0 = x->val;
-        InfoNode *in = p->in;
-        if(!typeCompatible(var0, in)) return false;
+        if(!typeCompatible(x->val, p->in)) return false;
         x = x->next;
         p = p->next;
     }
     return true;
+}
+
+static bool typeCastable(InfoNode *curIn, InfoNode *castIn){
+    if(isW(castIn))
+        EP("Cast type must be a specific type (not wildcard)");
+    if(isW(curIn)){
+        castIn->shape = curIn->shape;
+        return true;
+    }
+    else {
+        bool partSub = false, partNext = false;
+        if(checkType(curIn, castIn)){
+            // sub field
+            if(!curIn->subInfo && !castIn->subInfo){
+                partSub = true;
+            }
+            else if(curIn->subInfo && castIn->subInfo){
+                partSub = typeCastable(curIn->subInfo, castIn->subInfo);
+            }
+            if(!partSub) return false;
+            // next field
+            if(!curIn->next && !castIn->next){
+                partNext = true;
+            }
+            else if(curIn->next && castIn->next){
+                partNext = typeCastable(curIn->next, castIn->next);
+            }
+            castIn->shape = curIn->shape;
+            return partNext;
+        }
+        return false;
+    }
 }
 
 // both lists no dummy
@@ -372,6 +404,7 @@ static void scanAssignStmt(Node *n){
         else EP("Assignment need %d, but %d returned\n", numVar, numExpr);
     }
     else {
+        //printInfoNode(currentInList->next->in); getchar();
         if(numVar == 1 && typelistCompatible(1, vars, currentInList));
         else {
             printNode(n); EP("Type error in assignment\n");
@@ -397,6 +430,11 @@ static void scanGlobal(Node *n){
 
 static void scanCast(Node *n){
     scanNode(n->val.cast.exp);
+    InfoNode *castIn = getInfoFromNode(n->val.cast.typ);
+    InfoNode *curIn  = currentInList->next->in;
+    if(typeCastable(curIn, castIn)){ // if ok, copy shape
+        currentInList->next->in = castIn;
+    }
 }
 
 static void scanIfStmt(Node *n){

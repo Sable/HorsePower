@@ -5,6 +5,7 @@ extern B qIsTpch;
 extern I qTpchId;
 
 static void initTablesByQid(I id);
+static void initElementwiseFuncMap();
 
 /* helper functions */
 
@@ -27,6 +28,7 @@ void initBackend(){
 }
 
 void initGlobal(){
+    initElementwiseFuncMap();
     initBackend();
     if(qIsTpch)
         initTablesByQid(qTpchId);
@@ -72,6 +74,33 @@ void time_clear(){
     timeSlotId = 0;
 }
 #endif
+
+/* ---------------- Elementwise  -------------------- */
+const TypeUnary GroupElementwiseU[] = {
+    /* unary 32 */
+    absF, negF, ceilF, floorF, roundF, piF, notF,
+    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
+    atanF, coshF, sinhF, tanhF, acoshF, asinhF, atanhF,
+    dateF, yearF, monthF, dayF,
+    timeF, hourF, minuteF, secondF, millF
+};
+
+const TypeBinary GroupElementwiseB[] = {
+    /* binary 17 */
+    ltF, gtF, leqF, geqF, eqF, neqF, plusF, minusF, mulF, divF,
+    powerF, modF, andF, orF, nandF, norF, xorF
+};
+
+bool *ElementwiseUnaryMap;
+bool *ElementwiseBinaryMap;
+
+// TODO: need to free two maps?
+static void initElementwiseFuncMap(){
+    ElementwiseUnaryMap  = NEWL(bool, totalU);
+    ElementwiseBinaryMap = NEWL(bool, totalB);
+    DOI(sizeof(GroupElementwiseU)/sizeof(TypeUnary), ElementwiseUnaryMap[GroupElementwiseU[i]]=true)
+    DOI(sizeof(GroupElementwiseB)/sizeof(TypeBinary), ElementwiseBinaryMap[GroupElementwiseB[i]]=true)
+}
 
 /* ---------------- TPC-H related -------------------- */
 
