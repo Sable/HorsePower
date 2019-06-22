@@ -175,6 +175,7 @@ static Chain *findFusionDown(Chain *chain){
 static void findFusionSub(Chain *chain){
     Chain *bottom = findFusionDown(chain);
     if(bottom){
+        // if num of chains > 1, likely fusion
         P("bottom chain found:\n\t");
         printChain(bottom); getchar();
         findFusionUp(bottom);
@@ -187,13 +188,11 @@ static void findFusionSub(Chain *chain){
     }
 }
 
-
 static void findFusion(Chain *chain){
     Node *n = chain->cur;
     //printChain(chain); P("\n");
     if(instanceOf(n, stmtK)){
         findFusionSub(chain);
-        // if num of chains > 1, likely fusion
     }
 }
 

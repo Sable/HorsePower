@@ -50,6 +50,7 @@ static void envInterpreter(char *file){
 static void envCompiler(char *file){
     envInit(file);
     buildSymbolTable(root);
+    analyzeSR(root);
     propagateTypeShape(root);
     runCompilerCore();
 }

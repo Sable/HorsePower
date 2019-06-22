@@ -6,6 +6,7 @@
 /* Interpreter */
 I HorseInterpreter();
 O runInterpreter();
+V fetchVector(Node *n);
 
 /* Compiler */
 I HorseCompilerNaive();

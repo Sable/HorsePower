@@ -354,14 +354,18 @@ static L loadVector(List *list, V x, I t){
     R 0;
 }
 
-static O runVector(Node *n){
+V fetchVector(Node *n){
     I t = getHType(getType(n->val.vec.typ));
     List *items = n->val.vec.val;
     V x = allocNode();
     L size = totalElement(items);
     initV(x, t, size);
     loadVector(items, x, t);
-    addParam(paramList, x);
+    return x;
+}
+
+static O runVector(Node *n){
+    addParam(paramList, fetchVector(n));
 }
 
 
