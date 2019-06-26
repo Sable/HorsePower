@@ -8,13 +8,14 @@ analysis = analysis
 back     = backend
 transt   = translator
 util     = util
+opt      = optimizer
 
 exec_name = horse
 
 flex_file  = h.l
 bison_file = h.y
-h_files = $(front)/*.h $(back)/*.h $(analysis)/*.h $(transt)/*.h $(util)/*.h global.h
-c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c $(transt)/*.c $(util)/*.c global.c main.c
+h_files = $(front)/*.h $(back)/*.h $(analysis)/*.h $(opt)/*.h $(transt)/*.h $(util)/*.h global.h
+c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c $(opt)/*.c $(transt)/*.c $(util)/*.c global.c main.c
 include_files = -I"../../../libs/include/"
 include_libs  = ../../../libs/lib/libpcre2-8.a
 include_flags = -ll -fopenmp -std=c99 -lm -march=native -DPROFILE -D_POSIX_SOURCE

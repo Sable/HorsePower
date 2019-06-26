@@ -21,6 +21,7 @@ extern int  numOpts;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
+#define scanCast(n)      scanNode(n->val.cast.exp)
 
 // two macros moved the generated C macro "HORSE_UDF"
 //#define VAR_BEGIN "I h_prev_v = h_buff_v;"
@@ -242,7 +243,7 @@ static void genLocalVars(Node *block){
     SymbolTable *st = block->val.block.st;
     I k=0;
     DOI(SymbolTableSize, if(st->table[i]) genLocalVar(st->table[i], k++))
-    if(k % NUM_VAR_ROW != 0) glueLine();
+    glueLine();
 }
 
 /* ------ gen functions defined above ------ */
@@ -435,6 +436,7 @@ static void scanNode(Node *n){
         case       varK: scanVar       (n); break;
         case      nameK: scanName      (n); break;
         case      stmtK: scanAssignStmt(n); break;
+        case      castK: scanCast      (n); break;
         case    vectorK: scanVector    (n); break;
         case     constK: scanConst     (n); break;
         case    returnK: scanReturn    (n); break;

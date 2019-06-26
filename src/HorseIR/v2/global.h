@@ -83,6 +83,7 @@ void   time_clear();
 #include   "analysis/common.h"
 #include       "util/common.h"
 #include "translator/common.h"
+#include  "optimizer/common.h"
 
 void initGlobal();
 

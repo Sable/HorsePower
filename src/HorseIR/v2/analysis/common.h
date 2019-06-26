@@ -1,5 +1,5 @@
-#ifndef __A_COMMON__
-#define __A_COMMON__
+#ifndef __H_A_COMMON__
+#define __H_A_COMMON__
 
 #define DEF_VARS_MAX 64
 //int fetchVarNames(List *vars, Node *defVars[]);
@@ -42,7 +42,6 @@ void freeInfoNode(InfoNode *in);
 void printShapeNode(ShapeNode *sn);
 
 #include "symtable.h"   // create symbol tables
-#include "sr.h"         // strength reduction
 #include "typerule.h"   // define typeshape rules
 #include "typeshape.h"  // propagate type/shape rules
 #include "udchain.h"    // build use-def chain
