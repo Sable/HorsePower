@@ -48,15 +48,15 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleCeil        commonArith1
 #define ruleFloor       commonArith1
 #define ruleRound       commonArith1
-#define ruleConj        NULL
-#define ruleRecip       NULL
-#define ruleSignum      NULL
-#define rulePi          NULL
+#define ruleConj        propConj
+#define ruleRecip       propRecip
+#define ruleSignum      propSignum
+#define rulePi          commonRealClex
 #define ruleNot         commonBool1
-#define ruleLog         NULL
-#define ruleLog2        NULL
-#define ruleLog10       NULL
-#define ruleExp         NULL
+#define ruleLog         commonRealClex
+#define ruleLog2        commonRealClex
+#define ruleLog10       commonRealClex
+#define ruleExp         commonRealClex
 #define ruleCos         commonTrig
 #define ruleSin         commonTrig
 #define ruleTan         commonTrig
@@ -69,20 +69,20 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleAcosh       commonTrig
 #define ruleAsinh       commonTrig
 #define ruleAtanh       commonTrig
-#define ruleDate        NULL
+#define ruleDate        propDate
 #define ruleYear        propYear
-#define ruleMonth       NULL
-#define ruleDay         NULL
-#define ruleTime        NULL
-#define ruleHour        NULL
-#define ruleMinute      NULL
-#define ruleSecond      NULL
-#define ruleMill        NULL
+#define ruleMonth       propMonth
+#define ruleDay         propDay
+#define ruleTime        propTime
+#define ruleHour        propHour
+#define ruleMinute      propMinute
+#define ruleSecond      propSecond
+#define ruleMill        propMill
 #define ruleUnique      specialUnique  //return indices
-#define ruleStr         NULL
+#define ruleStr         propStr
 #define ruleLen         propLen
-#define ruleRange       NULL
-#define ruleFact        NULL
+#define ruleRange       propRange
+#define ruleFact        propFact
 #define ruleRand        NULL
 #define ruleSeed        NULL
 #define ruleFlip        NULL
@@ -136,6 +136,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleIndex       propIndex
 #define ruleColumnValue specialColumnValue
 #define ruleSubString   propSubString
+
 /* special */ 
 #define ruleEach        propEach
 #define ruleEachItem    propEachItem
@@ -147,7 +148,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleKtable      NULL
 #define ruleKeys        propKeys
 #define ruleValues      propValues
-#define ruleMeta        NULL
+#define ruleMeta        propMeta
 #define ruleLoadTable   specialLoadTable
 #define ruleFetch       propFetch
 #define ruleIndexA      propIndexA
@@ -158,12 +159,15 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define isT(n,t) (t==inType(n))
 
 #define isBT(n) isT(n,boolT)
-#define isIT(n) isT(n,i64T)||isT(n,i32T)||isT(n,i16T)
+#define isIT(n) isT(n,i64T)||isT(n,i32T)||isT(n,i16T)||isT(n,i8T)
 #define isFT(n) isT(n,f64T)||isT(n,f32T)
+#define is32(n) isT(n,f32T)||isT(n,i32T)||isT(n,i16T)||isT(n,i8T)
+#define is64(n) isT(n,i64T)||isT(n,f64T)
 #define isXT(n) isT(n,clexT)
 #define isCT(n) isT(n,charT)
 #define isST(n) isT(n,symT)||isT(n,strT)
-#define isDT(n) isT(n,monthT)||isT(n,dateT)
+#define isDT(n) isT(n,monthT)||isT(n,dateT)||isT(n,dtT)
+#define isTM(n) isT(n,timeT)||isT(n,minuteT)||isT(n,secondT)
 #define isNT(n) isT(n,dictT)
 #define isTT(n) isT(n,tableT)||isT(n,ktableT)
 #define sameT(x,y) (inType(x)==inType(y))
@@ -177,11 +181,14 @@ bool isRealIN    (InfoNode *n) {return isIT(n)||isFT(n)||isBT(n);}
 bool isNumericIN (InfoNode *n) {return isRealIN(n)||isClexIN(n);}
 bool isStringIN  (InfoNode *n) {return isST(n);} // TODO: split sym and str
 bool isDateIN    (InfoNode *n) {return isDT(n);}
+bool isTimeIN    (InfoNode *n) {return isTM(n);}
 bool isBasicIN   (InfoNode *n) {return 
-  isRealIN(n)||isCharIN(n)||isStringIN(n)||isDateIN(n);}
+  isRealIN(n)||isCharIN(n)||isStringIN(n)||isDateIN(n)||isTimeIN(n);}
 bool isDictIN    (InfoNode *n) {return isNT(n);}
 bool isFuncIN    (InfoNode *n) {return isT(n,funcT);}
 bool isTableIN   (InfoNode *n) {return isTT(n);}
+bool isReal32IN  (InfoNode *n) {return is32(n);}
+bool isReal64IN  (InfoNode *n) {return is64(n);}
 
 static InfoNode *newInfoNode(Type type, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
@@ -301,6 +308,24 @@ static InfoNode *commonBool1(InfoNode *x){
     return commonElemementUnary(x, &isBoolIN, boolT);
 }
 
+static InfoNode *commonRealClex(InfoNode *x){
+    Type rtnType;
+    if(isReal32IN(x)){
+        rtnType = f32T;
+    }
+    else if(isReal64IN(x)){
+        rtnType = f64T;
+    }
+    else if(isClexIN(x)){
+        rtnType = clexT;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
 static InfoNode *reductionSum(InfoNode *x){
     Type rtnType;
     if(isIntIN(x)||isBoolIN(x)) rtnType = i64T;
@@ -338,9 +363,37 @@ static InfoNode *propRaze(InfoNode *x){
     else return NULL;
 }
 
+static InfoNode *propStr(InfoNode *x){ 
+    return newInfoNode(strT, newShapeNode(vectorH, SN_CONST, 1));
+}
+
 /* return a scalar */
 static InfoNode *propLen(InfoNode *x){ 
     return newInfoNode(i64T, newShapeNode(vectorH, SN_CONST, 1));
+}
+
+static InfoNode *propRange(InfoNode *x){ 
+    Type rtnType;
+    if(isIntIN(x)){
+        rtnType = i64T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(i64T, newShapeNode(vectorH, SN_ID, -1));
+}
+
+static InfoNode *propFact(InfoNode *x){ 
+    Type rtnType;
+    if(isIntIN(x)){
+        rtnType = i64T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(i64T, inShape(x));
 }
 
 static InfoNode *propWhere(InfoNode *x){
@@ -379,11 +432,92 @@ static InfoNode *propMaxMin(InfoNode *x){
     return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
 }
 
-static InfoNode *propYear(InfoNode *x){
-    if(isDateIN(x)){
-        return newInfoNode(i64T, inShape(x));
+static InfoNode *propDate(InfoNode *x){
+    Type rtnType;
+    if(isT(x, dtT)){
+        rtnType = dateT;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
     }
     else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propYear(InfoNode *x){
+    Type rtnType;
+    if(isDateIN(x)){
+        rtnType = i16T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+#define propMonth propYear
+
+static InfoNode *propDay(InfoNode *x){
+    Type rtnType;
+    if(isT(x,dateT) && isT(x,dtT)){
+        rtnType = i16T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propTime(InfoNode *x){
+    Type rtnType;
+    if(isT(x, dtT)){
+        rtnType = timeT;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propHour(InfoNode *x){
+    Type rtnType;
+    if(isT(x, dtT) || isTimeIN(x)){
+        rtnType = i16T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+#define propMinute propHour
+
+static InfoNode *propSecond(InfoNode *x){
+    Type rtnType;
+    if(isT(x, dtT) || isT(x, secondT)){
+        rtnType = i16T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propMill(InfoNode *x){
+    Type rtnType;
+    if(isT(x, dtT)){
+        rtnType = i16T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
 }
 
 static InfoNode *propPrint(InfoNode *x){
@@ -397,6 +531,35 @@ static InfoNode *propPrint(InfoNode *x){
     return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
      // or @print returns nothing
 }
+
+static InfoNode *propConj(InfoNode *x){
+    Type rtnType;
+    if(isClexIN(x)){
+        rtnType = clexT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propRecip(InfoNode *x){
+    Type rtnType;
+    if(isReal32IN(x)){
+        rtnType = f32T;
+    }
+    else if(isReal64IN(x)){
+        rtnType = f64T;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *propSignum(InfoNode *x){
+    if(isRealIN(x)){
+        return newInfoNode(i8T, inShape(x));
+    }
+    else return NULL;
+}
+
 
 /* dyadic */
 static InfoNode *commonArith2(InfoNode *x, InfoNode *y){
@@ -681,6 +844,10 @@ static InfoNode *propValues(InfoNode *x){
 
 static InfoNode *propKeys(InfoNode *x){
     return propKeyValues(x, true);
+}
+
+static InfoNode *propMeta(InfoNode *x){
+    return newInfoNode(tableT, newShapeNode(tableH, SN_ID, -1));
 }
 
 static InfoNode *propIndex(InfoNode *x, InfoNode *y){
