@@ -15,6 +15,10 @@ Int -> i64
 _   -> domain error
 ```
 
+### Shape Rules
+
+[Monadic elementwise shape rules](../../../horseir/#monadic-elementwise)
+
 ### Examples
 
 ```no-highlight

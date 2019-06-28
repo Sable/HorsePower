@@ -20,5 +20,5 @@ _   -> domain error
 
 ```no-highlight
     @str((-1,2,3):i32)
-"-1,2,3":str
+"{"type": "i32", "value": [-1,2,3]}":str
 ```
