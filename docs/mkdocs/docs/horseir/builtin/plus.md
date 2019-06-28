@@ -2,7 +2,7 @@
 
 ### Description
 
-`plus(x,y)`
+`@plus(x,y)`
 
 - `x + y`
 
@@ -30,17 +30,17 @@ _             -> domain error
 !!! tip "Note"
     Type `bool` is promoted to `i16` before any operation.
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![plus](../types/plus.png)
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 ### Examples
 
 ```no-highlight
-plus((-1,2,3), 1)
-> (0,3,4)
+    @plus((-1,2,3):i32, 1:i32)
+(0,3,4):i32
 ```

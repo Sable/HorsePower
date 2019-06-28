@@ -2,7 +2,7 @@
 
 ### Description
 
-`like(x,y)`
+`@like(x,y)`
 
 - find all matched items in x based on the pattern y
 - x: a string, a list of strings, a symbol, or a list of symbols
@@ -33,18 +33,18 @@ sym , (str,sym) -> bool
 _   , _         -> domain error
 ```
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![any](../types/like.png)
 
 ### Shape Rules
 
-[Shape left rules](../shapes.md#shape-left)
+[Shape left rules](../../../horseir/#shape-left)
 
 
 ### Examples
 
 ```no-highlight
-like('hello world', '*lo')
-> 1:bool
+    @like("hello world":str, "*lo":str)
+1:bool
 ```

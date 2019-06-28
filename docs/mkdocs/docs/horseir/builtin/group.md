@@ -2,7 +2,7 @@
 
 ### Description
 
-`group(x)`
+`@group(x)`
 
 - group items/pairs in x
 - return a dict: unique key indices and list key indices
@@ -32,6 +32,6 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-group((-1,3,2,3))
-> [0:0,1:(1,3),2:2]:dict
+    group((-1,3,2,3):i32)
+[0:0,1:(1,3),2:2]:dict
 ```

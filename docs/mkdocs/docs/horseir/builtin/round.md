@@ -2,7 +2,7 @@
 
 ### Description
 
-`round(x)`
+`@round(x)`
 
 - round the value of x
 
@@ -22,8 +22,8 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-round((5.4,5.6):f32)
-> (5,6):f32
+    @round((5.4,5.6):f32)
+(5,6):f32
 ```
 
 ### External Links

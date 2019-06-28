@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-compress(boolean_vector, values)
+@compress(boolean_vector, values)
 ```
 
 - select from values based on the boolean vector (true values)
@@ -18,18 +18,18 @@ bool, Basic -> MaxType
 _   , _     -> domain error
 ```
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![compression](../types/compress.png)
 
 ### Shape Rules
 
-[Shape right rules](../shapes.md#shape-right)
+[Shape right rules](../../../horseir/#shape-right)
 
 ### Examples
 
 ```no-highlight
-compress((1,1,0):bool, (53,11,12))
-> (53,11):i64
+    @compress((1,1,0):bool, (53,11,12):i32)
+(53,11):i32
 ```
 

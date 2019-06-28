@@ -2,7 +2,7 @@
 
 ### Description
 
-`column_value(table_name, column_name)`
+`@column_value(table_name, column_name)`
 
 - get column value by given a column name
 

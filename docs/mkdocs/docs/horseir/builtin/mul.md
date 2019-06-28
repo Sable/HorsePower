@@ -2,7 +2,7 @@
 
 ### Description
 
-`mul(x,y)`
+`@mul(x,y)`
 
 - `x * y`, return floating-point values
 
@@ -20,7 +20,7 @@ _       ,_       -> domain error
 !!! tip "Note"
     Type `bool` is promoted to `i16` before any operation.
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![multiplication](../types/mul.png)
 
@@ -30,11 +30,11 @@ Table with details (See [type alias](../types.md))
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 ### Examples
 
 ```no-highlight
-mul((-1,2,3):i32, 0.5:f32)
-> (-0.5,1,1.5):f32
+    @mul((-1,2,3):i32, 0.5:f32)
+(-0.5,1,1.5):f32
 ```

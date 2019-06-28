@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-index_of(x, y)
+@index_of(x, y)
 ```
 
 find each item from y in x:
@@ -27,17 +27,17 @@ _    , _    -> domain error
 !!! danger "Future Work"
     Support the search between three string types: char, symbol, and string
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![index of](../types/indexof.png)
 
 ### Shape Rules
 
-[Shape right rules](../shapes.md#shape-right)
+[Shape right rules](../../../horseir/#shape-right)
 
 ### Examples
 
 ```no-highlight
-index_of((4,9,16), (3,4))
-> (3,0):i64
+    @index_of((4,9,16):i32, (3,4):i32)
+(3,0):i32
 ```

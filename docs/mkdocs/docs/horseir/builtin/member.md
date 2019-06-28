@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-member(x,y)
+@member(x,y)
 ```
 
 Equivalent to \( x \in y \)
@@ -29,17 +29,17 @@ time   , time    -> bool
 _      , _       -> domain error
 ```
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![member](../types/member.png)
 
 ### Shape Rules
 
-[Shape left rules](../shapes.md#shape-left)
+[Shape left rules](../../../horseir/#shape-left)
 
 ### Examples
 
 ```no-highlight
-member((-1,2,3):i32, (1,3,-1):i32)
-> (1,0,1):bool
+    @member((-1,2,3):i32, (1,3,-1):i32)
+(1,0,1):bool
 ```

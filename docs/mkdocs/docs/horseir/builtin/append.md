@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-append(x,y)
+@append(x,y)
 ```
 
 Append all items in y to x and return a new list
@@ -30,17 +30,17 @@ _      , _       -> domain error
 !!! note "Append with enum"
     append(enum<k0,v>, k1) is valid when 1) k0 and k1 are Real; or 2) k0 and k1 are the same type
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![any](../types/append.png)
 
 ### Shape Rules
 
-[Shape append rules](../shapes.md#shape-append)
+[Shape append rules](../../../horseir/#shape-append)
 
 ### Examples
 
 ```no-highlight
-append(0:i32, (-1,2,3):i32)
-> (0,-1,2,3):i32
+    @append(0:i32, (-1,2,3):i32)
+(0,-1,2,3):i32
 ```

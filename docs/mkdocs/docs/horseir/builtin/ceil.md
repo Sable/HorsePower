@@ -2,7 +2,7 @@
 
 ### Description
 
-`ceil(x)`
+`@ceil(x)`
 
 - ceiling the value of x
 
@@ -22,8 +22,8 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-ceil((-1.2,0,1.2):f32)
-> (-1,0,2):f32
+    @ceil((-1.2,0,1.2):f32)
+(-1,0,2):f32
 ```
 
 ### External Links

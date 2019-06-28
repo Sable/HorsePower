@@ -16,20 +16,20 @@ bool -> bool
 _    -> domain error
 ```
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![logic](../types/logic.png)
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 
 ### List of Functions
 
 #### and
 
-`and(x,y)`
+`@and(x,y)`
 
 ```no-highlight
       and((0,0,1):bool, 0:bool)
@@ -38,46 +38,46 @@ Table with details (See [type alias](../types.md))
 
 #### nand
 
-`nand(x,y)`
+`@nand(x,y)`
 
 ```no-highlight
-      nand((0,0,1):bool, 0:bool)
-> (1,1,1):bool
+      @nand((0,0,1):bool, 0:bool)
+(1,1,1):bool
 ```
 
 #### or
 
-`or(x,y)`
+`@or(x,y)`
 
 ```no-highlight
-      or((0,0,1):bool, 0:bool)
-> (0,0,1):bool
+      @or((0,0,1):bool, 0:bool)
+(0,0,1):bool
 ```
 
 #### nor
 
-`nor(x,y)`
+`@nor(x,y)`
 
 ```no-highlight
-      nor((0,0,1):bool, 0:bool)
-> (1,1,0):bool
+      @nor((0,0,1):bool, 0:bool)
+(1,1,0):bool
 ```
 
 #### not
 
-`not(x)`
+`@not(x)`
 
 ```no-highlight
-      not((0,0,1):bool)
-> (1,1,0):bool
+      @not((0,0,1):bool)
+(1,1,0):bool
 ```
 
 #### xor
 
-`xor(x,y)`
+`@xor(x,y)`
 
 ```no-highlight
-      xor((0,0,1):bool,0:bool)
-> (0,0,1):bool
+      @xor((0,0,1):bool,0:bool)
+(0,0,1):bool
 ```
 

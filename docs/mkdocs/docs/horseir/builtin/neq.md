@@ -27,13 +27,13 @@ _      , _       -> domain error
 !!! danger "Future Work"
     Support: (1) sym, str; (2) str, sym
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![lt](../types/eq.png)
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 ### Examples
 

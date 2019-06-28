@@ -2,7 +2,7 @@
 
 ### Description
 
-`unique(x)`
+`@unique(x)`
 
 - unique value of x (in indices)
 
@@ -30,6 +30,6 @@ _      -> domain error
 ### Examples
 
 ```no-highlight
-unique((-1,2,2,3,3):i16)
-> (0,1,3):i64
+    @unique((-1,2,2,3,3):i16)
+(0,1,3):i64
 ```

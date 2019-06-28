@@ -29,13 +29,13 @@ _       -> domain error
 ### Examples
 
 ```no-highlight
-reverse((4,9,16):i64)
-> (16,9,4):i64
+    @reverse((4,9,16):i32)
+(16,9,4):i32
 ```
 
 ### Note
 
 Optimization opportunities
 
-1. In-place reverse (e.g. `x = reverse(x)`)
+1. In-place reverse (e.g. `x = @reverse(x)`)
 

@@ -2,7 +2,7 @@
 
 ### Description
 
-`recip(x)`
+`@recip(x)`
 
 - reciprocal, divide(1,x)
 
@@ -22,6 +22,6 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-recip((-2,4,10):i32)
-> (-0.5,0.25,-0.1):f32
+    @recip((-2,4,10):i32)
+(-0.5,0.25,-0.1):f32
 ```

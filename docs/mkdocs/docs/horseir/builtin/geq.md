@@ -2,7 +2,7 @@
 
 ### Description
 
-`geq(x,y)`
+`@geq(x,y)`
 
 - `x >= y`, return boolean
 
@@ -23,17 +23,17 @@ time  , time   -> bool
 _     , _      -> domain error
 ```
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![lt](../types/lt.png)
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 ### Examples
 
 ```no-highlight
-geq((-1,0,3):i32, 0:i32)
-> (0,1,1):bool
+    @geq((-1,0,3):i32, 0:i32)
+(0,1,1):bool
 ```

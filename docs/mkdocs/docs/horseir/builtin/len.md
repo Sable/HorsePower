@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-len(x)
+@len(x)
 ```
 
 - if x is a table, return the number of rows of the table;
@@ -40,6 +40,6 @@ _      -> domain error
 ### Examples
 
 ```no-highlight
-len((-1,2,3):f32)
-> 3:i64
+    @len((-1,2,3):f32)
+3:i64
 ```

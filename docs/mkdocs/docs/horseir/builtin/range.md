@@ -2,7 +2,7 @@
 
 ### Description
 
-`range(x)`
+`@range(x)`
 
 - from `0 to x-1`, inclusive
 
@@ -16,6 +16,6 @@ _   -> domain error
 ### Examples
 
 ```no-highlight
-range(3:i16)
-> (0,1,2):i64
+    @range(3:i16)
+(0,1,2):i64
 ```

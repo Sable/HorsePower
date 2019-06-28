@@ -2,7 +2,7 @@
 
 ### Description
 
-`minus(x,y)`
+`@minus(x,y)`
 
 - `x - y`
 
@@ -22,23 +22,23 @@ dt    ,dt     -> i64
 hour  ,hour   -> i32
 second,second -> i32
 time  ,time   -> i32
-_         -> domain error
+_     ,_      -> domain error
 ```
 
 !!! tip "Note"
     Type `bool` is promoted to `i16` before any operation.
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![minus](../types/minus.png)
 
 ### Shape Rules
 
-[Dyadic elementwise shape rules](../shapes.md#dyadic-elementwise)
+[Dyadic elementwise shape rules](../../../horseir/#dyadic-elementwise)
 
 ### Examples
 
 ```no-highlight
-minus((-1,2,3), 1)
-> (-2,1,2)
+    @minus((-1,2,3):i32, 1:i32)
+(-2,1,2):i32
 ```

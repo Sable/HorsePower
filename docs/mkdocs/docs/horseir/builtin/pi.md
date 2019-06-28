@@ -2,7 +2,7 @@
 
 ### Description
 
-`pi(x)`
+`@pi(x)`
 
 - return `pi * x`
 - `pi = acos(-1.0)` in C
@@ -24,6 +24,6 @@ _       -> domain error
 ### Examples
 
 ```no-highlight
-pi((0,1):i32)
-> (0,3.1415926):f32
+    @pi((0,1):i32)
+(0,3.1415926):f32
 ```

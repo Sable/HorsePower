@@ -49,19 +49,18 @@ copyright:
 nav:
 - Home    : 'index.md'
 - Overview: 'overview.md'
-- SQL2IR  : 'sql2ir.md'
 - HorseIR : 
-    - IR Overview : 'horseir/spec.md'
-    - Naming       : 'horseir/naming.md'
-    - Types        : 'horseir/types.md'
-    - Shapes       : 'horseir/shapes.md'
+    - Overview     : 'horseir/index.md'
     - Functions    : 'horseir/functions.md'
     - Memory       : 'horseir/memory.md'
     - Database     : 'horseir/database.md'
-    - Pretty Print : 'horseir/pretty.md'
-#- HorseSQL: []
-#- HorseDB : []
-- Research  :
+    - Examples     : 'horseir/examples.md'
+- HorseSQL :
+    - Overview     : 'sql2ir/index.md'
+    - TPC-H        : 'sql2ir/tpch.md'
+- HorseSystem : 'system/index.md'
+- HorseRuntime: 'runtime/index.md'
+- Research:
     - HyPer        : 'research/hyper.md'
     - MonetDB      : 'research/monetdb.md'
     - PL           : 'research/pl.md'

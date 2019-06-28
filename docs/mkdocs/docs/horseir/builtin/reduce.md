@@ -74,8 +74,8 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-min((4,9,16):i32)
-> 4:i32
+    @min((4,9,16):i32)
+4:i32
 ```
 
 ## max
@@ -101,6 +101,6 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-min((4,9,16):i32)
-> 16:i32
+    @min((4,9,16):i32)
+16:i32
 ```

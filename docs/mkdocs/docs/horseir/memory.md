@@ -8,7 +8,7 @@ about resource allocation in the purpose of improving its throughput.  For an
 In-Memory Database system (IMDB), the memory management plays a crucial role in
 its holistic system design.
 
-In HorseIR, there is a rich set of data types (see [types](types.md)). Each
+In HorseIR, there is a rich set of data types (see [types](/horseir/#types)). Each
 type requires various bytes. From a programming language point of view, the
 "pay as you go" scheme is popular because programmers are responsible to choose
 proper data structures and algorithms to reduce the overhead in utilizing

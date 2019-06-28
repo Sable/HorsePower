@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-str(x)
+@str(x)
 ```
 
 - input with the value `x`, output string
@@ -19,6 +19,6 @@ _   -> domain error
 ### Examples
 
 ```no-highlight
-str((-1,2,3):i32)
-> "{[-1,2,3]}":str
+    @str((-1,2,3):i32)
+"-1,2,3":str
 ```

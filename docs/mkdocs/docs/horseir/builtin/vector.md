@@ -3,7 +3,7 @@
 ### Description
 
 ```no-highlight
-vector(n,x)
+@vector(n,x)
 ```
 
 - initialize a vector based on `x` with the length `n`
@@ -21,19 +21,19 @@ _  , _     -> domain error
 !!! tip "Note"
     `Int` on the left side must be a non-negative number.
 
-Table with details (See [type alias](../types.md))
+Table with details (See [type alias](../../../horseir/#types))
 
 ![vector](../types/vector.png)
 
 ### Shape Rules
 
-[Shape determined by left value rules](../shapes.md#shape-left-value)
+[Shape determined by left value rules](../../../horseir/#shape-left-value)
 
 ### Examples
 
 ```no-highlight
-vector(2:i32,(-1,2,3):i32)
-> (-1,2):i32
-vector(5:i32,(-1,2,3):i32)
-> (-1,2,3,-1,2):i32
+    @vector(2:i32,(-1,2,3):i32)
+(-1,2):i32
+    @vector(5:i32,(-1,2,3):i32)
+(-1,2,3,-1,2):i32
 ```

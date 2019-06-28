@@ -8,7 +8,7 @@
 ### Description
 
 ```no-highlight
-index(x,k)
+@index(x,k)
 ```
 
 - `x[k]`: fetch value from `x` with a given index `k`
@@ -41,14 +41,14 @@ _      , _   -> domain error
 ### Examples
 
 ```no-highlight
-    index((-1,2,3):i32,(2,1):i32)
-> (3,2):i32
+    @index((-1,2,3):i32,(2,1):i32)
+(3,2):i32
 ```
 
 ## index_a
 
 ```no-highlight
-index_a(x,k,m)
+@index_a(x,k,m)
 ```
 
 - is equivalent to `x[k]=m`
@@ -86,7 +86,7 @@ time   , Int , time
 
 ```no-highlight
     x:i32 = (-1,2,3):i32
-    index_a(x,(2,1):i32,0:i32)
+    @index_a(x,(2,1):i32,0:i32)
 > (-1,0,0):i32  // value: x
 ```
 

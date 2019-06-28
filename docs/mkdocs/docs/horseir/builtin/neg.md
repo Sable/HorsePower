@@ -2,7 +2,7 @@
 
 ### Description
 
-`neg(x)`
+`@neg(x)`
 
 - negative value of x
 
@@ -22,6 +22,6 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-neg((-1,2,3))
-> (1,-2,-3):i64
+    @neg((-1,2,3):i32)
+(1,-2,-3):i32
 ```

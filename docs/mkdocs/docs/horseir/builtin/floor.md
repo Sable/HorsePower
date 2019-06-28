@@ -2,7 +2,7 @@
 
 ### Description
 
-`floor(x)`
+`@floor(x)`
 
 - floor the value of x
 
@@ -22,8 +22,8 @@ _    -> domain error
 ### Examples
 
 ```no-highlight
-floor((-1.2,0,1.2):f32)
-> (-2,0,1):f32
+    @floor((-1.2,0,1.2):f32)
+(-2,0,1):f32
 ```
 
 ### External Links

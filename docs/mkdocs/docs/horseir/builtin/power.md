@@ -13,7 +13,7 @@ exp(x)  == power(e, x)
 
 Power with base and exponent
 
-- `power(base, exponent)`
+- `@power(base, exponent)`
 
 ### Type Rules
 
@@ -36,7 +36,7 @@ _    ,_    -> domain error
 ### Examples
 
 ```no-highlight
-power((2,3,4), 2)
+    @power((2,3,4):i32, 2:i32)
 > (4,9,16):f64
 ```
 
@@ -46,7 +46,7 @@ power((2,3,4), 2)
 
 Square root
 
-- `sqrt(value)`
+- `@sqrt(value)`
 
 
 ### Type Rules
@@ -65,8 +65,8 @@ f64  -> f64 / complex
 ### Example
 
 ```no-highlight
-sqrt((4,9,16):i32)
-> (2,3,4):f32
+    @sqrt((4,9,16):i32)
+(2,3,4):f32
 ```
 
 
@@ -76,7 +76,7 @@ sqrt((4,9,16):i32)
 
 Exponential
 
-- `exp(value)`
+- `@exp(value)`
 - base is Euler's number, e
 
 
@@ -96,7 +96,7 @@ f64  -> f64 / complex
 ### Example
 
 ```no-highlight
-exp(1:i32)
-> 2.7183:f32
+    @exp(1:i32)
+2.7183:f32
 ```
 

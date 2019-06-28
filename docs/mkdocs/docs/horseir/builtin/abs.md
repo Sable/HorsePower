@@ -62,12 +62,12 @@ _    -> domain error
 
 ### Shape Rules
 
-[Monadic elementwise shape rules](../shapes.md#monadic-elementwise)
+[Monadic elementwise shape rules](../../../horseir/#monadic-elementwise)
 
 
 ### Examples
 
 ```no-highlight
-    abs((-1,2,3))
-(1,2,3):i64
+    @abs((-1,2,3):i32)
+(1,2,3):i32
 ```

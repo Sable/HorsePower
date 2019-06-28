@@ -6,7 +6,7 @@
 
 Natural logarithm
 
-- `log(value)`
+- `@log(value)`
 - base is `e`
 
 ### Type Rules
@@ -29,7 +29,7 @@ _    -> domain error
 
 Logarithm
 
-- `log(value)`
+- `@log(value)`
 - base is 2
 
 ### Type Rules
@@ -58,7 +58,7 @@ log2((4,9,16):i32)
 
 Logarithm
 
-- `log10(value)`
+- `@log10(value)`
 - base is 10
 
 ### Type Rules
@@ -76,8 +76,8 @@ f64  -> f64 / complex
 ### Examples
 
 ```no-highlight
-log10((10,100,1000):i32)
-> (1,2,3):f32
+    @log10((10,100,1000):i32)
+(1,2,3):f32
 ```
 
 ## logb
@@ -86,7 +86,7 @@ log10((10,100,1000):i32)
 
 Natural logarithm
 
-- `logb(base, number)`
+- `@logb(base, number)`
 
 ### Type Rules
 

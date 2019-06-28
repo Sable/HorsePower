@@ -3,7 +3,7 @@
 
 ## 1. Type Alias
 
-See [type specifications](types.md)
+See [type specifications](../../../horseir/#types)
 
 <div class="left-column">
 <table>

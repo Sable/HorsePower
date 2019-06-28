@@ -5,7 +5,7 @@
 **Description**
 
 ```no-highlight
-list(...)
+@list(...)
 ```
 
 - Return a list with a given arbitrary number of arguments
@@ -19,8 +19,8 @@ list(...)
 **Examples**
 
 ```no-highlight
-list(`a`b`c:sym,(4,5,6):i32)
-> (`a`b`c:sym, (-1,2,3):i32):list
+    @list(`a`b`c:sym,(4,5,6):i32)
+(`a`b`c:sym, (-1,2,3):i32):list<?>
 ```
 
 ### enlist
@@ -28,7 +28,7 @@ list(`a`b`c:sym,(4,5,6):i32)
 **Description**
 
 ```no-highlight
-enlist(x)
+@enlist(x)
 ```
 
 - Return a list enclose `x`
@@ -64,8 +64,8 @@ _      -> domain error
 **Examples**
 
 ```no-highlight
-enlist((-1,2,3):i32)
-> ((-1,2,3):i32):list
+    @enlist((-1,2,3):i32)
+((-1,2,3):i32):list<i32>
 ```
 
 ### raze
@@ -73,7 +73,7 @@ enlist((-1,2,3):i32)
 **Description**
 
 ```no-highlight
-raze(x)
+@raze(x)
 ```
 
 - Return a vector if all items in `x` can be safely placed in a vector
@@ -105,15 +105,15 @@ _    -> domain error
 **Examples**
 
 ```no-highlight
-raze(enlist((-1,2,3):i32))
-> (-1,2,3):i32
+    @raze(enlist((-1,2,3):i32))
+(-1,2,3):i32
 ```
 
 ### tolist
 
 **Description**
 
-`tolist(x)`
+`@tolist(x)`
 
 - Converting a vector to a list
 - Each item in the vector becomes a cell in the list
@@ -143,8 +143,8 @@ _      -> domain error
 **Examples**
 
 ```no-highlight
-tolist((-1,2,3))
-> ((-1), (2), (3)):list<i64>
+    @tolist((-1,2,3):i32)
+((-1), (2), (3)):list<i32>
 ```
 
 ## each operations
@@ -157,7 +157,7 @@ tolist((-1,2,3))
 ### each
 
 ```no-highlight
-each(func, (a0,a1,...):list)  // operate func on each cell in the list
+@each(@func, (a0,a1,...):list)  // operate func on each cell in the list
 ```
 
 Result:
@@ -169,7 +169,7 @@ Result:
 ### each_item
 
 ```no-highlight
-each_item(func,(a0,a1,...):list,(b0,b1,...):list) // operate func on each pair
+@each_item(@func,(a0,a1,...):list,(b0,b1,...):list) // operate func on each pair
 ```
 
 Result:
@@ -181,7 +181,7 @@ Result:
 ### each_left
 
 ```no-highlight
-each_left(func,(a0,a1,...):list,B) // pairs: {a0,B}, {a1,B}, ...
+@each_left(@func,(a0,a1,...):list,B) // pairs: {a0,B}, {a1,B}, ...
 ```
 
 Result:
@@ -193,7 +193,7 @@ Result:
 ### each_right
 
 ```no-highlight
-each_right(func,A,(b0,b1,...):list) // pairs: {A,b0}, {A,b1}, ...
+@each_right(@func,A,(b0,b1,...):list) // pairs: {A,b0}, {A,b1}, ...
 ```
 
 Result:
