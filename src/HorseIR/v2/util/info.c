@@ -84,7 +84,7 @@ const char *getKindName(Kind x){
 //        CS(dateF); CS(yearF); CS(monthF); CS(dayF);
 //        CS(timeF); CS(hourF); CS(minuteF); CS(secondF); CS(millF);
 //        CS(uniqueF); CS(strF); CS(lenF); CS(rangeF); CS(factF); CS(randF); CS(seedF);
-//        CS(flipF); CS(reverseF); CS(whereF); CS(groupF); CS(countF); CS(sumF); CS(avgF);
+//        CS(flipF); CS(reverseF); CS(whereF); CS(groupF); CS(sumF); CS(avgF);
 //        CS(minF); CS(maxF); CS(razeF); CS(enlistF); CS(tolistF); CS(formatF); CS(keysF); CS(valuesF);
 //        CS(metaF); CS(loadTableF); CS(fetchF);
 //        /* binary */

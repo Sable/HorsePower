@@ -8,8 +8,8 @@ typedef I (*EachMonadic)(V,V,MonadicFunc);
 typedef I (*EachDyadic)(V,V,V,DyadicFunc);
 typedef I (*EachTriple)(V,V,V,V);
 
-#define MonFuncSize 61
-#define DyaFuncSize 33
+#define MonFuncSize totalU
+#define DyaFuncSize totalB
 #define OuterProduct  EachDyadic
 #define JoinOperation EachTriple
 #define LIMIT_ROW 20
@@ -39,25 +39,25 @@ static VList *paramList, *rtnList;
 
 /* ---- above declarations ---- */
 
-/* pfnRand, pfnSeed, pfnCount */
+/* pfnRand, pfnSeed */
 MonadicFunc monFunc[MonFuncSize] = {
     pfnAbs, pfnNeg, pfnCeil, pfnFloor, pfnRound, pfnConj, pfnRecip, pfnSignum,
     pfnPi  , pfnNot , pfnLog, pfnLog2, pfnLog10, pfnExp, pfnTrigCos,
     pfnTrigSin, pfnTrigTan, pfnTrigAcos, pfnTrigAsin, pfnTrigAtan,
     pfnHyperCosh, pfnHyperSinh, pfnHyperTanh, pfnHyperAcosh, pfnHyperAsinh,
     pfnHyperAtanh, pfnDate, pfnDateYear, pfnDateMonth, pfnDateDay, pfnTime,
-    pfnTimeHour, pfnTimeMinute, pfnTimeSecond, pfnTimeMill, pfnUnique, NULL,
-    pfnLen, pfnRange, pfnFact, NULL, NULL, pfnFlip, pfnReverse, pfnWhere,
-    pfnGroup, NULL, pfnSum, pfnAvg, pfnMin, pfnMax, pfnRaze, pfnEnlist,
-    pfnToList, NULL, pfnKeys, pfnValues, pfnMeta, pfnLoadTable, pfnFetch, pfnPrint
+    pfnTimeHour, pfnTimeMinute, pfnTimeSecond, pfnTimeMill, pfnUnique, pfnStr,
+    pfnLen, pfnRange, pfnFact, pfnRand, pfnSeed, pfnFlip, pfnReverse, pfnWhere,
+    pfnGroup, pfnSum, pfnAvg, pfnMin, pfnMax, pfnRaze,
+    pfnToList, pfnKeys, pfnValues, pfnMeta, pfnLoadTable, pfnFetch, pfnPrint
 };
 
 /* pfnRandk, pfnDrop, pfnTake, pfnDatetimeAdd, pfnDatetimeSub */
 DyadicFunc  dyaFunc[DyaFuncSize] = {
     pfnLt, pfnGt, pfnLeq, pfnGeq, pfnEq, pfnNeq, pfnPlus, pfnMinus, pfnMul,
     pfnDiv, pfnPower, pfnLogBase, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor,
-    pfnXor, NULL, pfnAppend, pfnLike, pfnCompress, NULL, pfnIndexOf, NULL,
-    NULL, pfnOrderBy, pfnMember, pfnVector, pfnMatch, pfnIndex, pfnColumnValue,
+    pfnXor, pfnAppend, pfnLike, pfnCompress, pfnRandK, pfnIndexOf, pfnTake,
+    pfnDrop, pfnOrderBy, pfnMember, pfnVector, pfnMatch, pfnIndex, pfnColumnValue,
     pfnSubString
 };
 

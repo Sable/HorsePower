@@ -1,21 +1,20 @@
 #include "../global.h"
 
-const char *FunctionUnaryStr[] = { /* unary 60 + 1 */
+const char *FunctionUnaryStr[] = { /* unary 58 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" ,
     "not", "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",
     "asin",  "atan", "cosh", "sinh", "tanh", "acosh", "asinh", "atanh", "date",
     "date_year", "date_month", "date_day", "time", "time_hour", "time_minute",
     "time_second", "time_mill", "unique", "str", "len", "range", "fact",
-    "rand", "seed", "flip", "reverse", "where", "group", "count", "sum", "avg",
-    "min", "max", "raze", "enlist", "tolist", "format", "keys", "values",
+    "rand", "seed", "flip", "reverse", "where", "group", "sum", "avg",
+    "min", "max", "raze", "tolist", "keys", "values",
     "meta", "load_table", "fetch", "print"
 };
 
-
-const char *FunctionBinaryStr[] = { /* binary 33 */
+const char *FunctionBinaryStr[] = { /* binary 32 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul",
     "div", "power", "logb", "mod", "and", "or", "nand", "nor" , "xor",
-    "datetime_diff", "append", "like", "compress", "randk", "index_of", "take",
+    "append", "like", "compress", "randk", "index_of", "take",
     "drop", "order", "member", "vector", "match", "index", "column_value",
     "sub_string"
 };
@@ -89,15 +88,12 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleReverse     NULL
 #define ruleWhere       propWhere
 #define ruleGroup       propGroup
-#define ruleCount       reductionCount
 #define ruleSum         reductionSum
 #define ruleAvg         propAvg
 #define ruleMin         propMaxMin
 #define ruleMax         propMaxMin
 #define ruleRaze        propRaze
-#define ruleEnlist      specialEnlist
 #define ruleTolist      NULL
-#define ruleFormat      NULL
 #define rulePrint       propPrint
 
 /* dyadic */ 
@@ -119,9 +115,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleNand        commonBool2
 #define ruleNor         commonBool2
 #define ruleXor         commonBool2
-#define ruleDtdiff      NULL
-#define ruleDtadd       NULL
-#define ruleDtsub       NULL
+#define ruleDtadd       commonDtChange
+#define ruleDtsub       commonDtChange
 #define ruleAppend      propAppend
 #define ruleLike        propLike
 #define ruleCompress    specialCompress
@@ -182,6 +177,7 @@ bool isNumericIN (InfoNode *n) {return isRealIN(n)||isClexIN(n);}
 bool isStringIN  (InfoNode *n) {return isST(n);} // TODO: split sym and str
 bool isDateIN    (InfoNode *n) {return isDT(n);}
 bool isTimeIN    (InfoNode *n) {return isTM(n);}
+bool isDtIN      (InfoNode *n) {return isDT(n)||isTM(n);}
 bool isBasicIN   (InfoNode *n) {return 
   isRealIN(n)||isCharIN(n)||isStringIN(n)||isDateIN(n)||isTimeIN(n);}
 bool isDictIN    (InfoNode *n) {return isNT(n);}
@@ -247,6 +243,7 @@ bool checkShape(InfoNode *x, InfoNode *y){
     }
 }
 
+// TODO: add support for subType (need to change to cell type)
 // two types with the same shape
 static InfoNode *newInfoNodeList(Type type, Type subType, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
@@ -333,14 +330,6 @@ static InfoNode *reductionSum(InfoNode *x){
     else if(isW(x)) rtnType = wildT;
     else return NULL;
     return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
-}
-
-static InfoNode *reductionCount(InfoNode *x){
-    return commonReduction(x, &isBasicIN, i64T);
-}
-
-static InfoNode *specialEnlist(InfoNode *x){
-    return commonReduction(x, &isBasicIN, listT);
 }
 
 static InfoNode *specialUnique(InfoNode *x){
@@ -886,10 +875,25 @@ static InfoNode *getNode(InfoNodeList *rt, int k){
     return rt->in;
 }
 
+static InfoNode *commonDtChange(InfoNodeList *in_list){
+    InfoNode *x = getNode(in_list, 2);
+    InfoNode *y = getNode(in_list, 1);
+    InfoNode *z = getNode(in_list, 0);
+    Type rtnType;
+    if(isDtIN(x) && isIntIN(y) && isT(z,symT)){
+        rtnType = inType(x);
+    }
+    else if(isW(x) || isW(y)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
+}
+
 static InfoNode *propEachDya(InfoNodeList *in_list, int side){
-    InfoNode *fn = getNode(in_list, 0);
+    InfoNode *fn = getNode(in_list, 2);
     InfoNode *x  = getNode(in_list, 1);
-    InfoNode *y  = getNode(in_list, 2);
+    InfoNode *y  = getNode(in_list, 0);
     if(isFuncIN(fn)){ /* TODO: add more accurate rules */
         if(side == 0){
             if(isListT(x) && isListT(y))
@@ -945,9 +949,9 @@ static InfoNode *propEnum(InfoNode *x, InfoNode *y){
 
 /* v[x] = y; */
 static InfoNode *propIndexA(InfoNodeList *in_list){
-    InfoNode *v = getNode(in_list, 0);
+    InfoNode *v = getNode(in_list, 2);
     InfoNode *x = getNode(in_list, 1);
-    InfoNode *y = getNode(in_list, 2);
+    InfoNode *y = getNode(in_list, 0);
     //P("type: v(%s), x(%s), y(%s)\n",getpTypeName(v->type),getpTypeName(x->type),getpTypeName(y->type));
     //P("shape: %d, %d\n", x->shape->type, y->shape->type); getchar();
     if(sameT(v,y) && isIntIN(x) && sameH(inShape(x),inShape(y))){
@@ -960,16 +964,19 @@ static InfoNode *propIndexA(InfoNodeList *in_list){
 }
 
 static InfoNode *propJoinIndex(InfoNodeList *in_list){
-    InfoNode *v = getNode(in_list, 0);
-    InfoNode *x = getNode(in_list, 1);
-    InfoNode *y = getNode(in_list, 2);
+    InfoNode *fn = getNode(in_list, 2);
+    InfoNode *x  = getNode(in_list, 1);
+    InfoNode *y  = getNode(in_list, 0);
     Type rtnType;
-    if(isW(x)||isW(y)){
-        rtnType = wildT;
+    if(isT(fn, funcT)){
+        if(isW(x)||isW(y)){
+            rtnType = wildT;
+        }
+        else {
+            rtnType = listT;
+        }
     }
-    else {
-        rtnType = listT;
-    }
+    else return NULL;
     return newInfoNodeList2(rtnType, i64T, newShapeNode(vectorH, SN_CONST, 2)); // length: 2; with sub
 }
 
@@ -1083,15 +1090,12 @@ void *fetchUnaryRules(TypeUnary x){
         CASE(  reverseF, ruleReverse)
         CASE(    whereF, ruleWhere)
         CASE(    groupF, ruleGroup)
-        CASE(    countF, ruleCount)
         CASE(      sumF, ruleSum)
         CASE(      avgF, ruleAvg)
         CASE(      minF, ruleMin)
         CASE(      maxF, ruleMax)
         CASE(     razeF, ruleRaze)
-        CASE(   enlistF, ruleEnlist)
         CASE(   tolistF, ruleTolist)
-        CASE(   formatF, ruleFormat)
         CASE(     keysF, ruleKeys)
         CASE(   valuesF, ruleValues)
         CASE(     metaF, ruleMeta)
@@ -1122,7 +1126,6 @@ void *fetchBinaryRules(TypeBinary x){
         CASE(    nandF, ruleNand)
         CASE(     norF, ruleNor)
         CASE(     xorF, ruleXor)
-        CASE(  dtdiffF, ruleDtdiff)
         CASE(  appendF, ruleAppend)
         CASE(    likeF, ruleLike)
         CASE(compressF, ruleCompress)

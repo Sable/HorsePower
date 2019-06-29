@@ -2,24 +2,25 @@
 #define __A_TYPERULE__
 
 /* consts */
-typedef enum TypeUnary { /* unary 60 + 1 */
+typedef enum TypeUnary { /* unary 58 */
     absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
     logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF,
     sinhF, tanhF, acoshF, asinhF, atanhF, dateF, yearF, monthF, dayF, timeF,
     hourF, minuteF, secondF, millF, uniqueF, strF, lenF, rangeF, factF, randF,
-    seedF, flipF, reverseF, whereF, groupF, countF, sumF, avgF, minF, maxF,
-    razeF, enlistF, tolistF, formatF, keysF, valuesF, metaF, loadTableF,
-    fetchF, printF,
+    seedF, flipF, reverseF, whereF, groupF, sumF, avgF, minF, maxF,
+    razeF, tolistF, keysF, valuesF, metaF, loadTableF, fetchF, printF,
     totalU
 }TypeUnary;
+// removed: countF/enlistF/format
 
-typedef enum TypeBinary { /* binary 33 */
+typedef enum TypeBinary { /* binary 32 */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
-    powerF, logbF, modF, andF, orF, nandF, norF, xorF, dtdiffF, appendF, likeF,
+    powerF, logbF, modF, andF, orF, nandF, norF, xorF, appendF, likeF,
     compressF, randkF, indexofF, takeF, dropF, orderF, memberF, vectorF,
     matchF, indexF, columnValueF, subStringF,
     totalB
 }TypeBinary;
+// removed: datetime_diff
 
 typedef enum TypeOther { /* special 14 */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF, ktableF,
