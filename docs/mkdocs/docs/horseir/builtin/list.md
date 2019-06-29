@@ -13,7 +13,8 @@
 **Type Rules**
 
 ```no-highlight
-(Any;...) -> list
+(Any;...) -> list<T>  // if all cells agree on one type T
+(Any;...) -> list<t0,t1,...>  // collect all cell types t0,t1,...
 ```
 
 **Examples**
@@ -21,51 +22,6 @@
 ```no-highlight
     @list(`a`b`c:sym,(4,5,6):i32)
 (`a`b`c:sym, (-1,2,3):i32):list<?>
-```
-
-### enlist
-
-**Description**
-
-```no-highlight
-@enlist(x)
-```
-
-- Return a list enclose `x`
-- Increase the depth of `x` by 1
-
-**Type Rules**
-
-```no-highlight
-bool   -> list<bool>
-i8     -> list<i8>
-i16    -> list<i16>     
-i32    -> list<i32>
-i64    -> list<i64>
-f32    -> list<f32>
-f64    -> list<f64>
-complex-> list<complex>
-sym    -> list<sym>
-str    -> list<str>
-month  -> list<month>
-date   -> list<date>
-dt     -> list<dt>
-minute -> list<minute>
-second -> list<second>
-time   -> list<time>
-list   -> list<list>
-dict   -> list<dict>
-enum   -> list<enum>
-table  -> list<table>
-ktable -> list<ktable>
-_      -> domain error
-```
-
-**Examples**
-
-```no-highlight
-    @enlist((-1,2,3):i32)
-((-1,2,3):i32):list<i32>
 ```
 
 ### raze

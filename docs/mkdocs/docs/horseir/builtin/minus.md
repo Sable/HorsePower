@@ -38,7 +38,24 @@ Table with details (See [type alias](../../../horseir/#types))
 
 ### Examples
 
+Real numbers
+
 ```no-highlight
     @minus((-1,2,3):i32, 1:i32)
 (-2,1,2):i32
 ```
+
+Date time
+
+```no-highlight
+    d1 = 2011.03.15:date
+    d2 = 2011.03.16:date
+    @minus(d1,d2)
+1:i32
+    t1 = 15:12:57.001:t
+    t2 = 15:12:57.101:t
+    @minus(t1,t2)
+100:i32
+```
+
+

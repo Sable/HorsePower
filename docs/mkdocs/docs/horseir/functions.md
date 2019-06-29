@@ -187,7 +187,6 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 16 | <script>hgFunc('nand(x,y)            ','NAND          ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#nand)|&#10004;| Y        |
 | 17 | <script>hgFunc('nor(x,y)             ','NOR           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#nor) |&#10004;| Y        |
 | 18 | <script>hgFunc('xor(x,y)             ','XOR           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#xor) |&#10004;| Y        |
-| 19 | <script>hgFunc('datetime\_diff(x,y)\*','Date time diff ');</script>   | (Calendar;Calendar) | I or L                        | [link](builtin/date.md#datetime-diff)|        |         |
 
 \* [Source, db functions](https://www.w3schools.com/sql/sql_ref_mysql.asp) | 
 \*\* CP: Comparable
@@ -230,11 +229,10 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 | No.| Function                                                     | Type of Arg(s)\*   | Type of Value                 | Details                      | Status | Parallel |
 | :-:| :----------------------------------------------------------- | :----------------- | :---------------------------- | :--------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('count(x)  ','Alias of @len     ');</script>  | See @len           | See @len                      | [link](builtin/len.md)       |&#10004;| N/A      |
-| 2  | <script>hgFunc('sum(x)    ','Sum of items in x ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#sum)|&#10004;| Y        |
-| 3  | <script>hgFunc('avg(x)    ','sum(x) / len(x)   ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#avg)|&#10004;| Y        |
-| 4  | <script>hgFunc('min(x)    ','Minimum           ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#min)|&#10004;| N        |
-| 5  | <script>hgFunc('max(x)    ','Maximum           ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#max)|&#10004;| N        |
+| 1  | <script>hgFunc('sum(x)    ','Sum of items in x ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#sum)|&#10004;| Y        |
+| 2  | <script>hgFunc('avg(x)    ','sum(x) / len(x)   ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#avg)|&#10004;| Y        |
+| 3  | <script>hgFunc('min(x)    ','Minimum           ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#min)|&#10004;| N        |
+| 4  | <script>hgFunc('max(x)    ','Maximum           ');</script>  | Real               | Same as argument              | [link](builtin/reduce.md#max)|&#10004;| N        |
 
 ### 3.4 List
 
@@ -242,14 +240,13 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | :-:| :-------------------------------------------------------------------------- | :------------------ | :------------------- | :-------------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;|          |
 | 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Any,...)           | List                 | [link](builtin/list.md#list)      |&#10004;|          |
-| 3  | <script>hgFunc('enlist(x)            ','Return a list (1-cell)  ');</script>| Any                 | List                 | [link](builtin/list.md#enlist)    |&#10004;|          |
-| 4  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
-| 5  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List)        | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
-| 6  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
-| 7  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
-| 8  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
-| 9  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | link                              |&#10004;| N        |
-| 10 | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
+| 3  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
+| 4  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List)        | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
+| 5  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
+| 6  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
+| 7  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
+| 8  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | link                              |&#10004;| N        |
+| 9  | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
 
 ## 4. Database Related
 
@@ -277,7 +274,6 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
 | 3  | <script>hgFunc('load\_csv        ','Load a csv file             ');</script> | String               | Table                | link                               |&#10004;| N        |
 | 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | Long (exit code)     | link                               |        | N        |
-| 5  | <script>hgFunc('format(x)        ','Format output (print(str(x))');</script> | Any                  | String               | link                               |        | N        |
-| 6  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
+| 5  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
 
 

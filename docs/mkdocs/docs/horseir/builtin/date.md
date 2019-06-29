@@ -189,29 +189,11 @@ _    -> domain error
 
 General operations for all datetime types.
 
-#### Keys
+### Keys
 
 ```no-highlight
 `year   `month   `day   `hour   `minute   `second   `mill
 ```
-
-### datetime diff
-
-Description: return the difference between two times
-
-```no-highlight
-    d1 = 2011.03.15:date
-    d2 = 2011.03.16:date
-    @datetime_diff(d1,d2)
-1:i32
-    t1 = 15:12:57.001:t
-    t2 = 15:12:57.101:t
-    @datetime_diff(t1,t2)
-100:i32
-```
-
-!!! tip "Note"
-    See function [minus](minus.md)
 
 ### datetime add
 
@@ -228,6 +210,17 @@ Description: add an interval to a time
 15.12.58.001:time
 ```
 
+Type rules
+
+```
+dt, Int, sym -> <determined by the first parameter>
+_            -> domain error
+```
+
+Shape rules
+
+- Return the same shape as the first parameter
+
 ### datetime sub
 
 Description: substract an interval to a time
@@ -243,3 +236,13 @@ Description: substract an interval to a time
 15:12:56.001:time
 ```
 
+Type rules
+
+```
+dt, Int, sym -> <determined by the first parameter>
+_            -> domain error
+```
+
+Shape rules
+
+- Return the same shape as the first parameter
