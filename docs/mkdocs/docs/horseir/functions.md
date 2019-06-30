@@ -246,7 +246,10 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 6  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
 | 7  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
 | 8  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | [link](builtin/match.md)          |&#10004;| N        |
+
+<!--
 | 9  | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
+-->
 
 ## 4. Database Related
 
@@ -258,7 +261,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable           | [link](builtin/advanced.md#ktable)|&#10004;| N        |
 | 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List             | [link](builtin/dbhelper.md#keys)  |&#10004;| ?(CHECKE)|
 | 6  | <script>hgFunc('values        ','Return value part        ');</script>  | Various                     | Various          | [link](builtin/dbhelper.md#values)|&#10004;| N        |
-| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table            | [link](builtin/dbhelper.md#meta)  |        |          |
+| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table            | [link](builtin/dbhelper.md#meta)  |&#10004;|          |
 | 8  | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various          | [link](builtin/dbhelper.md#fetch) |&#10004;| Y        |
 | 9  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various          | [link](builtin/dbhelper.md#column_value)|&#10004;| N  |
 | 10 | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable    | [link](builtin/dbhelper.md#load_table)  |&#10004;| N  |
@@ -273,7 +276,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 1  | <script>hgFunc('index(x,y)       ','List indexing (x[y])        ');</script> | Various              | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
 | 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
 | 3  | <script>hgFunc('load\_csv        ','Load a csv file             ');</script> | String               | Table                | link                               |&#10004;| N        |
-| 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | L (exit code)        | link                               |        | N        |
+| 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | L (exit code)        | link                               |&#10004;| N        |
 | 5  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
 | 6  | <script>hgFunc('any(x)','Return true if any value is true');</script>        | B                    | B                    | [link](builtin/bool.md#any)        |&#10004;| N        |
 | 7  | <script>hgFunc('all(x)','Return true if all values are true');</script>      | B                    | B                    | [link](builtin/bool.md#all)        |&#10004;| N        |
