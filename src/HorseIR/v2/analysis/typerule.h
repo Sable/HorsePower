@@ -22,9 +22,9 @@ typedef enum TypeBinary { /* binary 32 */
 }TypeBinary;
 // removed: datetime_diff
 
-typedef enum TypeOther { /* special 14 */
+typedef enum TypeOther { /* special 13 */
     eachF, eachItemF, eachLeftF, eachRightF, enumF, dictF, tableF, ktableF,
-    indexAF, listF, outerF, joinIndexF, dtaddF, dtsubF,
+    indexAF, listF, joinIndexF, dtaddF, dtsubF,
     totalO
 }TypeOther;
 
@@ -42,6 +42,7 @@ typedef struct FuncUnit{
 
 #define inType(n)  (n)->type
 #define inShape(n) (n)->shape
+#define inShapeType(x) inShape(x)->type
 
 #define isW(n)     (wildT==inType(n))
 #define isListT(n) (listT==inType(n))

@@ -19,9 +19,9 @@ const char *FunctionBinaryStr[] = { /* binary 32 */
     "sub_string"
 };
 
-const char *FunctionOtherStr[] = { /* special 14  */
+const char *FunctionOtherStr[] = { /* special 13  */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
-    "ktable", "index_a", "list", "outer", "join_index", "datetime_add",
+    "ktable", "index_a", "list", "join_index", "datetime_add",
     "datetime_sub"
 };
 
@@ -82,10 +82,10 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleLen         propLen
 #define ruleRange       propRange
 #define ruleFact        propFact
-#define ruleRand        NULL
-#define ruleSeed        NULL
-#define ruleFlip        NULL
-#define ruleReverse     NULL
+#define ruleRand        commonRand
+#define ruleSeed        commonRand
+#define ruleFlip        propFlip
+#define ruleReverse     propReverse
 #define ruleWhere       propWhere
 #define ruleGroup       propGroup
 #define ruleSum         reductionSum
@@ -93,7 +93,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleMin         propMaxMin
 #define ruleMax         propMaxMin
 #define ruleRaze        propRaze
-#define ruleTolist      NULL
+#define ruleTolist      propToList
 #define rulePrint       propPrint
 
 /* dyadic */ 
@@ -107,8 +107,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleMinus       commonArith2
 #define ruleMul         commonArith2
 #define ruleDiv         commonArith2
-#define rulePower       commonArith2
-#define ruleLogBase     NULL
+#define rulePower       commonPower
+#define ruleLogBase     commonPower
 #define ruleMod         commonArith2
 #define ruleAnd         commonBool2
 #define ruleOr          commonBool2
@@ -120,14 +120,14 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleAppend      propAppend
 #define ruleLike        propLike
 #define ruleCompress    specialCompress
-#define ruleRandk       NULL
+#define ruleRandk       propRandK
 #define ruleIndexof     propIndexof
-#define ruleTake        NULL
-#define ruleDrop        NULL
+#define ruleTake        commonTakeDrop
+#define ruleDrop        commonTakeDrop
 #define ruleOrder       propOrder
 #define ruleMember      propMember
 #define ruleVector      propVector
-#define ruleMatch       NULL
+#define ruleMatch       propMatch
 #define ruleIndex       propIndex
 #define ruleColumnValue specialColumnValue
 #define ruleSubString   propSubString
@@ -138,9 +138,9 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleEachLeft    propEachLeft
 #define ruleEachRight   propEachRight
 #define ruleEnum        propEnum
-#define ruleDict        NULL
+#define ruleDict        propDict
 #define ruleTable       specialTable
-#define ruleKtable      NULL
+#define ruleKtable      specialKTable
 #define ruleKeys        propKeys
 #define ruleValues      propValues
 #define ruleMeta        propMeta
@@ -148,7 +148,6 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleFetch       propFetch
 #define ruleIndexA      propIndexA
 #define ruleList        propList
-#define ruleOuter       NULL
 #define ruleJoinIndex   propJoinIndex
 
 #define isT(n,t) (t==inType(n))
@@ -343,11 +342,32 @@ static InfoNode *propGroup(InfoNode *x){
 }
 
 static InfoNode *propRaze(InfoNode *x){
+    Type rtnType;
     if(isListT(x)){
-        return newInfoNode(getSubType(x), newShapeNode(vectorH, SN_ID, -1));
+        rtnType = getSubType(x);
     }
     else if(isBasicIN(x)){
         return x;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
+}
+
+static InfoNode *propToList(InfoNode *x){ 
+    if(isBasicIN(x)){
+        Type rtnType = listT;
+        pShape rtnShape = listH;
+        ShapeNode *p = inShape(x);
+        if(isShapeV(p) && isSNConst(p))
+            return newInfoNode(rtnType, newShapeNode(rtnShape, SN_CONST, p->size));
+        else
+            return newInfoNode(rtnType, newShapeNode(rtnShape, SN_ID, -1));
+    }
+    else if(isW(x)){
+        return newInfoNode(wildT, NULL);
     }
     else return NULL;
 }
@@ -382,7 +402,53 @@ static InfoNode *propFact(InfoNode *x){
         rtnType = wildT;
     }
     else return NULL;
-    return newInfoNode(i64T, inShape(x));
+    return newInfoNode(rtnType, inShape(x));
+}
+
+static InfoNode *commonRand(InfoNode *x){ 
+    Type rtnType;
+    if(isIntIN(x)){
+        rtnType = i64T;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
+}
+
+static InfoNode *propFlip(InfoNode *x){
+    Type rtnType;
+    pShape rtnShape;
+    if(isDictIN(x)){
+        rtnType = tableT;
+        rtnShape = tableH;
+    }
+    else if(isTableIN(x)){
+        rtnType = dictT;   // TODO: Implement
+        rtnShape = dictH;
+    }
+    else if(isT(x,listT)){
+        rtnType = listT;
+        rtnShape = listH;
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(rtnShape, SN_ID, -1));
+}
+
+static InfoNode *propReverse(InfoNode *x){
+    Type rtnType;
+    if(isBasicIN(x)){
+        rtnType = inType(x);
+    }
+    else if(isW(x)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
 }
 
 static InfoNode *propWhere(InfoNode *x){
@@ -575,6 +641,19 @@ static InfoNode *commonBool2(InfoNode *x, InfoNode *y){
     return newInfoNode(rtnType, decideShapeElementwise(x,y));
 }
 
+static InfoNode *commonPower(InfoNode *x, InfoNode *y){
+    Type rtnType;
+    if(isRealIN(x) && isRealIN(y)){
+        Type maxType = MAX(inType(x), inType(y));
+        rtnType = (maxType==f64T || maxType==i64T)?f64T:f32T;
+    }
+    else if(isW(x) || isW(y)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, inShape(y));
+}
+
 static InfoNode *propMember(InfoNode *x, InfoNode *y){
     Type rtnType;
     //P("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
@@ -704,6 +783,11 @@ static InfoNode *propVector(InfoNode *x, InfoNode *y){
     else return NULL;
 }
 
+static InfoNode *propMatch(InfoNode *x, InfoNode *y){
+    // TODO: check wildT?
+    return newInfoNode(boolT, newShapeNode(vectorH, SN_CONST, 1));
+}
+
 // like(x,y) => size(x)
 static InfoNode *propLike(InfoNode *x, InfoNode *y){
     Type rtnType;
@@ -715,6 +799,30 @@ static InfoNode *propLike(InfoNode *x, InfoNode *y){
     }
     else return NULL;
     return newInfoNode(rtnType, decideShapeLeft(x,y));
+}
+
+static InfoNode *propRandK(InfoNode *x, InfoNode *y){
+    Type rtnType;
+    if(isIntIN(x) && isIntIN(y)){
+        rtnType = i64T;
+    }
+    else if(isW(x)||isW(y)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
+}
+
+static InfoNode *commonTakeDrop(InfoNode *x, InfoNode *y){
+    Type rtnType;
+    if(isIntIN(x)){
+        rtnType = inType(y);
+    }
+    else if(isW(x)||isW(y)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(inShapeType(y), SN_ID, -1)); // shape y
 }
 
 // indexof(x,y)
@@ -793,14 +901,27 @@ static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
 }
 
 static InfoNode *specialTable(InfoNode *x, InfoNode *y){
-    ShapeNode *rtnShape = newShapeNode(tableH, SN_ID, -1);
+    Type rtnType;
     if(isStringIN(x) && isListT(y)){
-        return newInfoNode(tableT, rtnShape);
+        rtnType = tableT;
     }
     else if(isW(x) || isW(y)){
-        return newInfoNode(wildT, rtnShape);
+        rtnType = wildT;
     }
     else return NULL;
+    return newInfoNode(rtnType, newShapeNode(tableH, SN_ID, -1));
+}
+
+static InfoNode *specialKTable(InfoNode *x, InfoNode *y){
+    Type rtnType;
+    if(isT(x,tableT) && isT(y,tableT)){
+        rtnType = ktableT;
+    }
+    else if(isW(x) || isW(y)){
+        rtnType = wildT;
+    }
+    else return NULL;
+    return newInfoNode(rtnType, newShapeNode(tableH, SN_ID, -1));
 }
 
 static InfoNode *propList(InfoNodeList *in_list){
@@ -947,6 +1068,13 @@ static InfoNode *propEnum(InfoNode *x, InfoNode *y){
     return newInfoNode(rtnType, inShape(y));
 }
 
+static InfoNode *propDict(InfoNode *x, InfoNode *y){
+    if(isW(x) || isW(y))
+        return newInfoNode(wildT, NULL);
+    else
+        return newInfoNode(dictT, newShapeNode(dictH, SN_ID, -1));
+}
+
 /* v[x] = y; */
 static InfoNode *propIndexA(InfoNodeList *in_list){
     InfoNode *v = getNode(in_list, 2);
@@ -1033,7 +1161,6 @@ int getValenceOther(TypeOther x){
         CASE(    tableF, 2);
         CASE(   ktableF, 0);
         CASE(   indexAF, 3);
-        CASE(    outerF, 3);
         CASE(joinIndexF, 3);
         CASE(     listF, -1); //any
         CASE(    dtaddF, 3);
@@ -1155,7 +1282,6 @@ void *fetchOtherRules(TypeOther x){
         CASE(      tableF, ruleTable)
         CASE(     ktableF, ruleKtable)
         CASE(     indexAF, ruleIndexA)
-        CASE(      outerF, ruleOuter)
         CASE(  joinIndexF, ruleJoinIndex)
         CASE(       listF, ruleList)
         CASE(      dtaddF, ruleDtadd)

@@ -10,7 +10,6 @@ typedef I (*EachTriple)(V,V,V,V);
 
 #define MonFuncSize totalU
 #define DyaFuncSize totalB
-#define OuterProduct  EachDyadic
 #define JoinOperation EachTriple
 #define LIMIT_ROW 20
 
@@ -157,7 +156,6 @@ V executeOther(TypeOther x, V *params, I numParams){
         /* anyadic */
         case        listF: return executeAny(&pfnList, params, numParams); break;
         /* others */
-        //case       outerF: return executeOuter(&pfnOuter, params); break;
         case   joinIndexF: return executeJoinIndex(&pfnJoinIndex, params); break;
         case       dtaddF: return executeTriple(&pfnDatetimeAdd, params); break;
         case       dtsubF: return executeTriple(&pfnDatetimeSub, params); break;
@@ -480,10 +478,13 @@ static InfoNode *getInfoNodeFromV(V x){
 
 static B checkReturnTypeSub(Node *n, V v){
     InfoNode *in = n->val.type.in;
-    InfoNode *nv = getInfoNodeFromV(v);
-    B rtn =  checkType(in, nv);
-    freeInfoNode(nv);
-    return rtn;
+    if(isW(in)) return true;
+    else {
+        InfoNode *nv = getInfoNodeFromV(v);
+        B rtn =  checkType(in, nv);
+        freeInfoNode(nv);
+        return rtn;
+    }
 }
 
 static O checkReturnType(List *nlist, VList *plist){
