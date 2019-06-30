@@ -198,13 +198,13 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | No.| Function                                                              | Type of Arg(s)\*            | Type of Value        | Details                       | Status | Parallel |
 | :-:| :-------------------------------------------------------------------- | :---------------------------| :------------------- | :---------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('unique(x)  ','Unique values          ');</script>     | Basic                       | L                    | [link](builtin/unique.md)     |&#10004;| P        |
-| 2  | <script>hgFunc('str(x)     ','Format                 ');</script>     | Any                         | S                    | [link](builtin/str.md)        |        |         |
+| 2  | <script>hgFunc('str(x)     ','Format                 ');</script>     | Any                         | S                    | [link](builtin/str.md)        |        |          |
 | 3  | <script>hgFunc('len(x)     ','Length                 ');</script>     | Any                         | L                    | [link](builtin/len.md)        |&#10004;| N        |
 | 4  | <script>hgFunc('range(x)   ','Iota                   ');</script>     | Int                         | L                    | [link](builtin/range.md)      |&#10004;| Y        |
 | 5  | <script>hgFunc('fact(x)    ','Factorial              ');</script>     | Int                         | L                    | [link](builtin/fact.md)       |&#10004;| Y        |
-| 6  | <script>hgFunc('rand(x)    ','Random number generator');</script>     | Int                         | Same as argument     | link                          |        |         |
-| 7  | <script>hgFunc('seed(x)    ','Random seed            ');</script>     | Int                         | L                    | link                          |        |         |
-| 8  | <script>hgFunc('flip(x)    ','Convert a dict to a table and vice versa');</script>   | Dict, Table  | Table or Dict        | link                          |        | Y        |
+| 6  | <script>hgFunc('rand(x)    ','Random number generator');</script>     | Int                         | Same as argument     | [link](builtin/random.md#rand)|&#10004;| N        |
+| 7  | <script>hgFunc('seed(x)    ','Random seed            ');</script>     | Int                         | L                    | [link](builtin/random.md#seed)|&#10004;| N        |
+| 8  | <script>hgFunc('flip(x)    ','Convert a dict to a table and vice versa');</script>   | Dict, Table  | Table or Dict        | [link](builtin/flip.md)       |&#10004;| N        |
 | 9  | <script>hgFunc('reverse(x) ','Reverse                ');</script>     | Basic                       | Same as argument     | [link](builtin/reverse.md)    |&#10004;| Y        |
 | 10 | <script>hgFunc('where(x)   ','Find all trues         ');</script>     | B                           | L                    | [link](builtin/where.md)      |&#10004;| P        |
 | 11 | <script>hgFunc('group(x)   ','Group items            ');</script>     | Basic                       | List<i64>            | [link](builtin/group.md)      |&#10004;| P        |
@@ -212,18 +212,18 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 ### 3.2 Binary
 
-| No.| Function                                                                | Type of Arg(s)\*            | Type of Value            | Details                      | Status | Parallel |
-| :-:| :---------------------------------------------------------------------- | :-------------------------- | :----------------------- | :--------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('append(x,y)    ','Append to a list          ');</script>| Various                     | Various                  | [link](builtin/append.md)    |&#10004;| Y        |
-| 2  | <script>hgFunc('like(x,y)      ','Patten x matches y        ');</script>| (String; String)            | B                        | [link](builtin/like.md)      |P       | ?(CHECKE)|
-| 3  | <script>hgFunc('compress(x,y)  ','Compress on y based on x  ');</script>| (B;Basic)                   | Same as the 2nd argument | [link](builtin/compress.md)  |&#10004;| ?        |
-| 4  | <script>hgFunc('randk(x,k)     ','rand(x) in k times        ');</script>| Pending                     | Pending                  | link                         |        |         |
-| 5  | <script>hgFunc('index\_of(x,y) ','index of y in x           ');</script>| (Basic;Basic)               | L                        | [link](builtin/indexof.md)   |&#10004;| Y        |
-| 6  | <script>hgFunc('take(k,x)      ','Take 1st/last k elem. of y');</script>| Pending                     | Pending                  | link                         |        |         |
-| 7  | <script>hgFunc('drop(k,x)      ','Drop 1st/last k elem. of y');</script>| Pending                     | Pending                  | link                         |        |         |
-| 8  | <script>hgFunc('order(x,y)     ','Sort x based on y         ');</script>| (Real;B)                    | L                        | [link](builtin/order.md)     |&#10004;| N        |
-| 9  | <script>hgFunc('member(x,y)    ','Member                    ');</script>| (Basic;Basic)               | B                        | [link](builtin/member.md)    |&#10004;| ?        |
-| 10 | <script>hgFunc('vector(x,y)    ','Init a vector             ');</script>| (L;Basic,List)              | Basic or List            | [link](builtin/vector.md)    |&#10004;| P        |
+| No.| Function                                                                | Type of Arg(s)\*            | Type of Value            | Details                        | Status | Parallel |
+| :-:| :---------------------------------------------------------------------- | :-------------------------- | :----------------------- | :----------------------------: | :----- | :------: |
+| 1  | <script>hgFunc('append(x,y)    ','Append to a list          ');</script>| Various                     | Various                  | [link](builtin/append.md)      |&#10004;| Y        |
+| 2  | <script>hgFunc('like(x,y)      ','Patten x matches y        ');</script>| (String; String)            | B                        | [link](builtin/like.md)        |P       | ?(CHECKE)|
+| 3  | <script>hgFunc('compress(x,y)  ','Compress on y based on x  ');</script>| (B;Basic)                   | Same as the 2nd argument | [link](builtin/compress.md)    |&#10004;| ?        |
+| 4  | <script>hgFunc('randk(x,k)     ','rand(x) in k times        ');</script>| (Int;Int)                   | L                        | [link](builtin/random.md#randk)|&#10004;| N        |
+| 5  | <script>hgFunc('index\_of(x,y) ','index of y in x           ');</script>| (Basic;Basic)               | L                        | [link](builtin/indexof.md)     |&#10004;| Y        |
+| 6  | <script>hgFunc('take(k,x)      ','Take 1st/last k elem. of y');</script>| (Int;Any)                   | Same as the 2nd argument | [link](builtin/take.md#take)   |&#10004;| Y        |
+| 7  | <script>hgFunc('drop(k,x)      ','Drop 1st/last k elem. of y');</script>| (Int;Any)                   | Same as the 2nd argument | [link](builtin/take.md#drop)   |&#10004;| Y        |
+| 8  | <script>hgFunc('order(x,y)     ','Sort x based on y         ');</script>| (Real;B)                    | L                        | [link](builtin/order.md)       |&#10004;| N        |
+| 9  | <script>hgFunc('member(x,y)    ','Member                    ');</script>| (Basic;Basic)               | B                        | [link](builtin/member.md)      |&#10004;| ?        |
+| 10 | <script>hgFunc('vector(x,y)    ','Init a vector             ');</script>| (L;Basic,List)              | Basic or List            | [link](builtin/vector.md)      |&#10004;| P        |
 
 ### 3.3 Reduction
 
@@ -245,7 +245,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 5  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
 | 6  | <script>hgFunc('each\_left(fn,x,y)   ','Each on left side       ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_left) |&#10004;| ?(CHECKE)|
 | 7  | <script>hgFunc('each\_right(fn,x,y)  ','Each on Right side      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_right)|&#10004;| ?(CHECKE)|
-| 8  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | link                              |&#10004;| N        |
+| 8  | <script>hgFunc('match(x,y)           ','Check if both match     ');</script>| (Any; Any)          | Bool                 | [link](builtin/match.md)          |&#10004;| N        |
 | 9  | <script>hgFunc('outer(fn,x,y)        ','General outer product   ');</script>| (Real; Real)        | List<?>              | [link](builtin/outer.md)          |&#10004;| N        |
 
 ## 4. Database Related
@@ -273,7 +273,9 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 1  | <script>hgFunc('index(x,y)       ','List indexing (x[y])        ');</script> | Various              | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
 | 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
 | 3  | <script>hgFunc('load\_csv        ','Load a csv file             ');</script> | String               | Table                | link                               |&#10004;| N        |
-| 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | Long (exit code)     | link                               |        | N        |
+| 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | L (exit code)        | link                               |        | N        |
 | 5  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
+| 6  | <script>hgFunc('any(x)','Return true if any value is true');</script>        | B                    | B                    | [link](builtin/bool.md#any)        |&#10004;| N        |
+| 7  | <script>hgFunc('all(x)','Return true if all values are true');</script>      | B                    | B                    | [link](builtin/bool.md#all)        |&#10004;| N        |
 
 
