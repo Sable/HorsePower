@@ -11,9 +11,7 @@ static void scanList(List *list);
 static void scanNode(Node *n);
 static void scanMethod(Node *n);
 static InfoNode *scanType(Node *n);
-static InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
 static void copyInfoNodeList(InfoNodeList *list, InfoNodeList *vals);
-static void cleanInfoList(InfoNodeList *in_list);
 static bool infoCompatible(InfoNode *x, InfoNode *y);
 
 static bool H_SHOW;
@@ -141,7 +139,7 @@ InfoNodeList *propagateType(Node *func, InfoNodeList *list){
 
 // --- below workspace
 
-static InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in){
+InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in){
     InfoNodeList *x = NEW(InfoNodeList);
     x->in = in;
     x->next = list->next;
@@ -149,7 +147,7 @@ static InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in){
     return in;
 }
 
-static void cleanInfoList(InfoNodeList *in_list){
+void cleanInfoList(InfoNodeList *in_list){
     InfoNodeList *x = in_list->next;
     while(x){ InfoNodeList *t = x; x=x->next; free(t);}
     in_list->next = NULL;
@@ -190,9 +188,18 @@ static void deepCopyInfoNodeList(InfoNodeList *list, InfoNodeList *vals){
 
 static InfoNode *getInfoVector(Node *n){
     int num = totalElement(n->val.vec.val);
-    InfoNode *in = scanType(n->val.vec.typ);
+    InfoNode *in = scanType(n->val.vec.typ);  // because of you?
     ShapeNode *sn = newShapeNode(vectorH, SN_CONST, num);
     in->shape = sn;
+    return in;
+}
+
+static InfoNode *getInfoFunc(Node *n){
+    int num = totalElement(n->val.listS);
+    InfoNode *in = NEW(InfoNode);
+    in->type  = funcT;
+    in->shape = newShapeNode(vectorH, SN_CONST, num);
+    in->funcs = n; // <---
     return in;
 }
 
@@ -216,8 +223,22 @@ static InfoNode *getInfoFromNode(Node *n){
     else if(instanceOf(n, varK)){
         return getInfoFromNode(n->val.param.typ);
     }
+    else if(instanceOf(n, funcK)){
+        return getInfoFunc(n);
+    }
     else { printNodeType(n); EP("Kind not supported\n"); }
     return NULL;
+}
+
+static void copyInfoNode(InfoNode *x, InfoNode* y){
+    if(x && y){
+        // ?? free old x->shape/subInfo/next
+        x->type    = y->type;
+        x->shape   = y->shape;
+        x->subInfo = y->subInfo;
+        x->next    = y->next;
+    }
+    else EP("x or y is NULL");
 }
 
 // true : exactly same
@@ -228,9 +249,7 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
         EP("Right hand side shape unknown\n");
     }
     if(isW(x)) {
-        if(x->shape) free(x->shape);
-        x->shape = y->shape; // specialize type from right side
-        x->type  = y->type;
+        copyInfoNode(x, y);
         return true;
     }
     else {
@@ -398,6 +417,7 @@ static void scanAssignStmt(Node *n){
     if(instanceOf(expr, callK)){
         int numExpr = totalInfo(currentInList);
         if(numVar == numExpr){
+            // <---- type copied here if type compatible  ....
             if(typelistCompatible(numVar, vars, currentInList));
             else EP("Type error in assignment\n");
         }
@@ -464,7 +484,11 @@ static void scanName(Node *n){
 }
 
 static void scanVector(Node *n){
-    getInfoVector(n);
+    getInfoVector(n); // 'scanType' inside has added the type
+}
+
+static void scanFunc(Node *n){
+    addToInfoList(currentInList, getInfoFunc(n));
 }
 
 static void scanCall(Node *n){
@@ -523,7 +547,9 @@ static void scanNode(Node *n){
         case      typeK: scanType        (n); break;
         case     blockK: scanBlockStmt   (n); break;
         case    vectorK: scanVector      (n); break;
+        case      funcK: scanFunc        (n); break;
         case    globalK: scanGlobal      (n); break;
+        default: TODO("Add more type: %s\n", getNodeTypeStr(n));
     }
 }
 

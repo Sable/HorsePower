@@ -5,9 +5,9 @@ module default{
     t6:f64 = check_cast(@column_value(t0,`l_quantity:sym), f64);
     t7:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
     t8:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
-    t12:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
-    t18:? = @geq(t12,1994-01-01:d);
-    t19:? = @lt(t12,1995-01-01:d);
+    t12:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t18:? = @geq(t12,1994-01-01:date);
+    t19:? = @lt(t12,1995-01-01:date);
     t20:? = @and(t18,t19);
     t21:? = @lt(t6,24:f64);
     t22:? = @geq(t8,0.05:f64);
@@ -20,7 +20,7 @@ module default{
     t43:? = @mul(t32,t33);
     t44:? = @sum(t43);
     t45:? = `revenue:sym;
-    t46:? = @enlist(t44);
+    t46:? = @list(t44);
     t47:? = @table(t45,t46);
     return t47;
   }

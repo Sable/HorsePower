@@ -192,6 +192,16 @@ static InfoNode *newInfoNode(Type type, ShapeNode *shape){
     return in;
 }
 
+static InfoNode *newInfoNodeAll(
+        Type type, ShapeNode *shape, InfoNode *sub, InfoNode *next){
+    InfoNode *in = NEW(InfoNode);
+    in->type     = type;
+    in->shape    = shape;
+    in->subInfo  = sub;
+    in->next     = next;
+    return in;
+}
+
 // x,y have diff types, but compatible
 static bool compatibleT(InfoNode *x, InfoNode *y){
     switch(inType(x)){
@@ -240,21 +250,6 @@ bool checkShape(InfoNode *x, InfoNode *y){
         x->shape = sy;
         return true;
     }
-}
-
-// TODO: add support for subType (need to change to cell type)
-// two types with the same shape
-static InfoNode *newInfoNodeList(Type type, Type subType, ShapeNode *shape){
-    InfoNode *in = NEW(InfoNode);
-    in->type  = type;
-    in->shape = shape;
-    in->next  = newInfoNode(subType, shape);
-    return in;
-}
-
-/* TODO: why 2? */
-static InfoNode *newInfoNodeList2(Type type, Type subType, ShapeNode *shape){
-    return newInfoNodeList(type, subType, shape);
 }
 
 ShapeNode *newShapeNode(pShape type, int kind, int size){
@@ -924,22 +919,29 @@ static InfoNode *specialKTable(InfoNode *x, InfoNode *y){
     return newInfoNode(rtnType, newShapeNode(tableH, SN_ID, -1));
 }
 
+/* 'Type t = -2;' leads to '0>t' returns false - very weird */
 static InfoNode *propList(InfoNodeList *in_list){
     /* get length */
-    int k = 0; InfoNodeList *temp = in_list; Type t = -1;
+    InfoNodeList *temp = in_list;
+    Type t = -2; int f = 0, k = 0;
     while(temp->next){
         k++; temp=temp->next;
-        if(t==-1) t=inType(temp->in);
-        else if(t>0 && t!=inType(temp->in)) t=-2;
+        if(f==0) { t=inType(temp->in); f = 1; }
+        else if(f>0 && t!=inType(temp->in)) { f = -1; }
     }
     ShapeNode *rtnShape = newShapeNode(vectorH, SN_CONST, k);
-    return newInfoNodeList(listT, 0>t?wildT:t, rtnShape);
+    return newInfoNodeAll(listT,
+                          rtnShape,
+                          newInfoNode(f<1?wildT:t, NULL),
+                          NULL);
 }
 
 static InfoNode *propKeyValues(InfoNode *x, bool f){
     if(isDictIN(x)){
-        if(f) return newInfoNode(i64T , newShapeNode(vectorH, SN_ID, -1));
-        else  return newInfoNodeList(listT, i64T, newShapeNode(listH, SN_ID, -1));
+        if(f) return newInfoNode(i64T, newShapeNode(vectorH, SN_ID, -1));
+        else return newInfoNodeAll(listT,
+                                    newShapeNode(listH, SN_ID, -1),
+                                    newInfoNode(i64T, NULL), NULL);
     }
     else if(isEnumT(x)){ /* TODO: need to pass info to keys */
         if(f) return newInfoNode(wildT, newShapeNode(unknownH, SN_ID, -1));
@@ -1016,19 +1018,44 @@ static InfoNode *propEachDya(InfoNodeList *in_list, int side){
     InfoNode *x  = getNode(in_list, 1);
     InfoNode *y  = getNode(in_list, 0);
     if(isFuncIN(fn)){ /* TODO: add more accurate rules */
-        if(side == 0){
-            if(isListT(x) && isListT(y))
-                return newInfoNodeList(listT, getSubType(x), x->shape);
+        Node *func = fn->funcs->val.listS->val; /* fix later, assume only one func  */
+        //printNode(func); getchar(); // func now is a nameK
+        if(side == 0){ // each_item
+            if(isListT(x) && isListT(y)){
+                InfoNodeList *args = NEW(InfoNodeList);
+                addToInfoList(args, x->subInfo);
+                addToInfoList(args, y->subInfo);
+                InfoNodeList *rtns = propagateType(func, args);
+                InfoNode *rtn = rtns->next->in;
+                /* TODO: clean args (fine), rtns(not allowed) */
+                return newInfoNodeAll(listT, x->shape, rtn, NULL);
+            }
             else return NULL;
         }
-        else if(side == 1){
-            if(isListT(x))
-                return newInfoNodeList(listT, getSubType(x), x->shape);
+        else if(side == 1){ // each_left
+            if(isListT(x)){
+                InfoNodeList *args = NEW(InfoNodeList);
+                addToInfoList(args, x->subInfo);
+                addToInfoList(args, y);
+                InfoNodeList *rtns = propagateType(func, args);
+                InfoNode *rtn = rtns->next->in;
+                return newInfoNodeAll(listT, x->shape, rtn, NULL);
+            }
             else return NULL;
         }
-        else if(side == 2){
-            if(isListT(y))
-                return newInfoNodeList(listT, getSubType(y), y->shape);
+        else if(side == 2){ // each_right
+            if(isListT(y)){
+                InfoNodeList *args = NEW(InfoNodeList);
+                addToInfoList(args, x);
+                addToInfoList(args, y->subInfo);
+                //printInfoNode(args->next->in);
+                //printInfoNode(args->next->next->in);
+                InfoNodeList *rtns = propagateType(func, args);
+                InfoNode *rtn = rtns->next->in;
+                //printInfoNode(rtn); getchar();
+                /* TODO: clean args (fine), rtns(not allowed) */
+                return newInfoNodeAll(listT, y->shape, rtn, NULL);
+            }
             else return NULL;
         }
         else return NULL;
@@ -1051,7 +1078,10 @@ static InfoNode *propEachRight(InfoNodeList *in_list){
 
 static InfoNode *propEach(InfoNode *fn, InfoNode *x){
     if(isFuncIN(fn) && isListT(x)){ /* TODO: add more accurate rules */
-        return newInfoNodeList(listT, getSubType(x), x->shape);
+        return newInfoNodeAll(listT,
+                              x->shape,
+                              newInfoNode(getSubType(x), NULL),
+                              NULL);
     }
     else return NULL;
 }
@@ -1105,7 +1135,10 @@ static InfoNode *propJoinIndex(InfoNodeList *in_list){
         }
     }
     else return NULL;
-    return newInfoNodeList2(rtnType, i64T, newShapeNode(vectorH, SN_CONST, 2)); // length: 2; with sub
+    return newInfoNodeAll(rtnType,
+                          newShapeNode(vectorH, SN_CONST, 2),
+                          newInfoNode(i64T,NULL),
+                          NULL); // length: 2; with sub
 }
 
 // check function strings and numbers

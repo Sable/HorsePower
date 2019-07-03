@@ -46,10 +46,13 @@ void printInfoNode(InfoNode *x){
 
 static InfoNode *getSubInfo(InfoNode *x){
     InfoNode *sub = x->subInfo;
-    if(sub && sub->next && sub->subInfo){
-        return sub;
+    if(sub){
+        if(sub->next || sub->subInfo)
+            EP("Not a simple info node");
+        else
+            return sub;
     }
-    else EP("Not a simple info node\n");
+    else EP("Cell not existed");
 }
 
 Type getSubType(InfoNode *x){

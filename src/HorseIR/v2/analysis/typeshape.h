@@ -54,5 +54,8 @@ int totalElement(List *list);      //   no dummy
 void propagateTypeShape(Prog *root);
 
 
+InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
+void cleanInfoList(InfoNodeList *in_list);
+
 #endif
 

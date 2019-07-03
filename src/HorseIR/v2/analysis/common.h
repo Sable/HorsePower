@@ -27,6 +27,7 @@ typedef struct InfoNode{
     struct ShapeNode *shape;
     struct InfoNode *subInfo;
     struct InfoNode *next;
+    Node *funcs;  /* when type == funcT, refer to a vector of funcs */
 }InfoNode;
 
 typedef struct InfoNodeList{

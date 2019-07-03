@@ -8,8 +8,8 @@ module default{
     t9:f64 = check_cast(@column_value(t0,`l_tax:sym), f64);
     t10:char = check_cast(@column_value(t0,`l_returnflag:sym), char);
     t11:char = check_cast(@column_value(t0,`l_linestatus:sym), char);
-    t12:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
-    t18:? = @leq(t12,1998-09-02:d);
+    t12:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t18:? = @leq(t12,1998-09-02:date);
     t23:? = @compress(t18,t6);
     t24:? = @compress(t18,t7);
     t25:? = @compress(t18,t8);

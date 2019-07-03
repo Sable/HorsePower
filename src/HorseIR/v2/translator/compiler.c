@@ -1,6 +1,5 @@
 #include "../global.h"
 
-#define out_stream stdout
 #define comma ','
 
 extern Node *entryMain;
@@ -32,42 +31,33 @@ extern int  numOpts;
 /* ------ declaration above ------ */
 
 static char *monFnName[] = {
-    "pfnAbs", "pfnNeg", "pfnCeil", "pfnFloor", "pfnRound", "pfnConj", "pfnRecip", "pfnSignum", "pfnPi"  , "pfnNot" ,
-    "pfnLog", "pfnLog2", "pfnLog10", "pfnExp", "pfnTrigCos", "pfnTrigSin", "pfnTrigTan", "pfnTrigAcos", "pfnTrigAsin", "pfnTrigAtan", "pfnHyperCosh", "pfnHyperSinh",
-    "pfnHyperTanh", "pfnHyperAcosh", "pfnHyperAsinh", "pfnHyperAtanh",
-    "pfnDate", "pfnDateYear", "pfnDateMonth", "pfnDateDay",
+    "pfnAbs", "pfnNeg", "pfnCeil", "pfnFloor", "pfnRound", "pfnConj",
+    "pfnRecip", "pfnSignum", "pfnPi"  , "pfnNot" , "pfnLog", "pfnLog2",
+    "pfnLog10", "pfnExp", "pfnTrigCos", "pfnTrigSin", "pfnTrigTan",
+    "pfnTrigAcos", "pfnTrigAsin", "pfnTrigAtan", "pfnHyperCosh",
+    "pfnHyperSinh", "pfnHyperTanh", "pfnHyperAcosh", "pfnHyperAsinh",
+    "pfnHyperAtanh", "pfnDate", "pfnDateYear", "pfnDateMonth", "pfnDateDay",
     "pfnTime", "pfnTimeHour", "pfnTimeMinute", "pfnTimeSecond", "pfnTimeMill",
-    "pfnUnique", NULL, "pfnLen", "pfnRange", "pfnFact", NULL, NULL, "pfnFlip", "pfnReverse",
-    "pfnWhere", "pfnGroup", NULL, "pfnSum", "pfnAvg", "pfnMin", "pfnMax", "pfnRaze", "pfnEnlist", "pfnToList",
-    NULL, "pfnKeys", "pfnValues", "pfnMeta", "pfnLoadTable", "pfnFetch", "pfnPrint"
+    "pfnUnique", "pfnStr", "pfnLen", "pfnRange", "pfnFact", "pfnRand",
+    "pfnSeed", "pfnFlip", "pfnReverse", "pfnWhere", "pfnGroup", "pfnSum",
+    "pfnAvg", "pfnMin", "pfnMax", "pfnRaze", "pfnToList", "pfnKeys",
+    "pfnValues", "pfnMeta", "pfnLoadTable", "pfnFetch", "pfnPrint"
 };
 
 static char *dyaFnName[] = {
-    "pfnLt", "pfnGt", "pfnLeq", "pfnGeq", "pfnEq", "pfnNeq", "pfnPlus", "pfnMinus", "pfnMul", "pfnDiv",
-    "pfnPower", "pfnLog2", "pfnMod", "pfnAnd", "pfnOr", "pfnNand", "pfnNor", "pfnXor",
-    NULL, 
-    "pfnAppend", "pfnLike", "pfnCompress", NULL, "pfnIndexOf", NULL, NULL, "pfnOrderBy",
-    "pfnMember", "pfnVector", "pfnMatch", "pfnIndex", "pfnColumnValue", "pfnSubString"
+    "pfnLt", "pfnGt", "pfnLeq", "pfnGeq", "pfnEq", "pfnNeq", "pfnPlus",
+    "pfnMinus", "pfnMul", "pfnDiv", "pfnPower", "pfnLog2", "pfnMod", "pfnAnd",
+    "pfnOr", "pfnNand", "pfnNor", "pfnXor", "pfnAppend", "pfnLike",
+    "pfnCompress", "pfnRandK", "pfnIndexOf", "pfnTake", "pfnDrop",
+    "pfnOrderBy", "pfnMember", "pfnVector", "pfnMatch", "pfnIndex",
+    "pfnColumnValue", "pfnSubString"
 };
 
 static char *otherFnName[] = {
-    "pfnEach", "pfnEachItem", "pfnEachLeft", "pfnEachRight", "pfnEnum", "pfnDict", "pfnTable",
-    "pfnKTable", "pfnIndexA", "pfnList", "pfnOuter", "pfnJoinIndex", "pfnDatetimeAdd", "pfnDatetimeSub"
+    "pfnEach", "pfnEachItem", "pfnEachLeft", "pfnEachRight", "pfnEnum",
+    "pfnDict", "pfnTable", "pfnKTable", "pfnIndexA", "pfnList", "pfnJoinIndex",
+    "pfnDatetimeAdd", "pfnDatetimeSub"
 };
-
-#define genStr(s) FP(out_stream, "%s", s)
-#define genLine() genStr("\n");
-
-#define glueCode(s)  strcat(ptr,s)
-#define glueLine()   strcat(ptr,"\n")
-#define cleanCode()  code[0]=0
-#define resetCode()  if(ptr[0]!=0) ptr+=strlen(ptr)
-#define glueChar(c)  do{resetCode(); ptr[0]=c; ptr[1]=0; ptr++;}while(0)
-#define glueInt(x)   do{resetCode(); SP(ptr, "%d", x);     }while(0)
-#define glueLong(x)  do{resetCode(); SP(ptr, "%lld", x);   }while(0)
-#define glueAny(...) do{resetCode(); SP(ptr, __VA_ARGS__); }while(0)
-#define glueCodeLine(x)  do{genIndent(); resetCode(); SP(ptr, "%s\n",x); }while(0)
-#define glueAnyLine(...) do{genIndent(); glueAny(__VA_ARGS__);glueLine();}while(0)
 
 #define isTrueMacro     "isTrue"
 #define scanBreak(n)    glueCodeLine("break")
@@ -133,15 +123,13 @@ static int countNode(List *list){
 
 static void genTic(){
     genIndent();
-    genStr("tic();");
-    genLine();
+    glueCodeLine("tic();");
 }
 
 static void genToc(){
     genIndent();
-    genStr("return toc();");
+    glueCodeLine("return toc();");
     //genStr("time_toc(\"The elapsed time: %g\\n\", elapsed);");
-    genLine();
 }
 
 static void genList(List *list, C sep){
@@ -345,9 +333,19 @@ static void scanConst(Node *n){
     char temp[99]; temp[0]=0;
     ConstValue *v = n->val.nodeC;
     switch(v->type){
-        case  strC: addStrConst(v->valS); break;
-        case  intC: SP(temp, "%d"  , v->valI); break;
-        case longC: SP(temp, "%lld", v->valL); break;
+        case    symC:
+        case    strC: addStrConst(v->valS); break;
+        case   dateC:
+        case  monthC:
+        case   timeC:
+        case minuteC:
+        case secondC:
+        case    intC: SP(temp, "%d"  , v->valI); break;
+        case  floatC: SP(temp, "%g"  , v->valF); break;
+        case     dtC:
+        case   longC: SP(temp, "%lld", v->valL); break;
+        case   clexC: SP(temp, v->valX[1]>=0?"%g+%g":"%g%g", \
+                              v->valX[0], v->valX[1]); break;
         default: EP("Add more constant types: %d\n", v->type);
     }
     if(temp[0]) glueCode(temp);

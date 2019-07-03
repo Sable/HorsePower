@@ -25,6 +25,11 @@ extern List *compiledMethodList;
 #define indent "    "
 #define indent2 indent indent
 
+#define CODE_MAX_SIZE 10240
+#define HEAD_MAX_SIZE 1024
+static char code[CODE_MAX_SIZE], *ptr;
+static int depth;
+
 /* ------ declaration above ------ */
 
 static PatternTree *initPatternTree(char *func1, char *func2, int n){
@@ -59,17 +64,14 @@ static void printPatternTree(PatternTree *ptree){
     printPatternTreeCore(ptree, 2);
 }
 
-static PatternTree *createFP0(){
-    return NULL;
-}
-
 static PatternTree *createFP1(){
+    P("// Pattern FP0\n");
     return NULL;
 }
 
 static PatternTree *createFP2(int op){
     if(op!=1&&op!=2){
-        EP("pattern 2 must have an option 1 or 2\n");
+        EP("pattern 2 must have an option 1 or 2");
     }
     P("// Pattern FP2\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
@@ -166,19 +168,42 @@ static Node *getParamFromChain(Chain *chain, int pos){
         Node *func = fetchFuncNode(chainNode(chain));
         if(!func) return NULL;
         List *params = fetchParams(chainNode(chain));
-        List *p0     = fetchParamsIndex(params, pos);
+        int reversedPos = totalElement(params) - pos;
+        List *p0     = fetchParamsIndex(params, reversedPos);
         if(p0 && instanceOf(p0->val, nameK))
             return p0->val;
+        else {
+            printChain(chain);
+            P("\n looking for pos %d, but find: ", reversedPos);
+            if(p0) printNode(p0->val);
+            //printNode(params->val);
+            //printNode(params->next->val);
+            //printNode(params->next->next->val);
+            P("total parameters: %d, pos: %d\n", totalElement(params), pos);
+            EP("only variable allowed (no func/literal)");
+        }
     }
     return NULL;
 }
 
+static SymbolName *fetchSymbolName(Node *n){
+    SymbolName *sn = NULL;
+    if(instanceOf(n, nameK)){
+        sn = n->val.name.sn;
+    }
+    else if(instanceOf(n, varK)){
+        sn = n->val.param.sn;
+    }
+    else TODO("Add impl.");
+    return sn;
+}
+
 static char *getNameStr(Node *n){
     // input nameK
-    SymbolName *sn = n->val.name.sn;
+    SymbolName *sn = fetchSymbolName(n);
     switch(sn->kind){
-        case   localS: return n->val.name.id2;
-        default: TODO("add impl.");
+        case   localS: return sn->name;
+        default: TODO("Add impl.");
     }
 }
 
@@ -202,7 +227,7 @@ static char getTypeCodeByIn(InfoNode *in){
 }
 
 static char getTypeCodeByName(Node *n){
-    SymbolName *sn = n->val.name.sn;
+    SymbolName *sn = fetchSymbolName(n);
     switch(sn->kind){
         case localS: {
                 Node * typ = sn->val.local->val.param.typ;
@@ -221,6 +246,12 @@ static void setAllChainVisited(PatternTree *ptree){
 
 /* ------ find patterns below ------ */
 
+static char *phNameFP2(char *z, char *invc, char *x0, char *x1){
+    char tmp[99];
+    SP(tmp, "%s(%s,(V []){%s,%s})", invc,z,x0,x1);
+    return strdup(tmp);
+}
+
 static char *phNameFP3(char *z, char *invc, char *x0, char *x1, char *y0, char *y1){
     char tmp[99];
     SP(tmp, "%s(%s,(V []){%s,%s}, (V []){%s,%s})", invc,z,x0,x1,y0,y1);
@@ -232,8 +263,52 @@ static char *phNameFP4(char *z, char *invc, char *x, char *y){
     return strdup(tmp);
 }
 
+static void genIndent(){ DOI(depth, glueCode("    ")); }
+
+static void genPattern2_C_Core(PatternTree *ptree, int op){
+    char tmp[99];
+    Chain *chain_x = ptree->child[0]->child[0]->chain;  // 
+    Chain *chain_y = ptree->child[0]->chain;            // 
+    Chain *chain_z = ptree->chain;                      //
+    Node *x0 = getParamFromChain(chain_x, 2); S x0s = getNameStr(x0);
+    Node *x1 = getParamFromChain(chain_x, 3); S x1s = getNameStr(x1);
+    Node *z0 = getParamFromChain(chain_z, 0); S z0s = getNameStr(z0);
+    C x0c = getTypeCodeByName(x0);
+    C z0c = getTypeCodeByName(z0);
+    //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
+    SP(tmp, "q%d_peephole_fp%d_%d", qid, op, phTotal);
+    glueAnyLine("L %s(V z, V *x, V *y){", tmp);
+    depth++;
+    glueAnyLine("// z -> %s", z0s);
+    glueAnyLine("V x0 = x[0]; // %s", x0s);
+    glueAnyLine("V x1 = x[1]; // %s", x1s);
+    glueAnyLine("initV(z, H_%c, vn(x1));", z0c);
+    if(op==1 || op==2){
+        glueAnyLine("DOP(vn(x1), {%c a=0; V t=vV(x1,i); DOJ(vn(t), a+=v%c(x0,vL(t,j))) v%c(z,i)=a%s;}) R 0;", x0c, x0c, z0c, op==2?"/vn(t)":"");
+    }
+    else if(op == 5){
+        TODO("Add pattern 5");
+    }
+    depth--;
+    glueAnyLine("}");
+    PhList[phTotal].invc = phNameFP2(z0s, tmp, x0s, x1s);
+    PhList[phTotal].targ = z0s;
+    phTotal++;
+    setAllChainVisited(ptree);
+}
+
+static void genPattern1_C(PatternTree *ptree){
+    // sum
+    genPattern2_C_Core(ptree, 1);
+}
+
+static void genPattern2_C(PatternTree *ptree){
+    // avg
+    genPattern2_C_Core(ptree, 2);
+}
+
 static void genPattern3_C(PatternTree *ptree){
-    char tmp[99], pfn[30];
+    char tmp[99];
     Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
     Chain *chain_y0 = ptree->child[1]->chain;            // 2nd param of compress
     Chain *chain_y1 = ptree->child[0]->child[0]->chain;  // 1st param of len
@@ -245,6 +320,21 @@ static void genPattern3_C(PatternTree *ptree){
     Node *z0 = getParamFromChain(chain_z , 0); S z0s = getNameStr(z0);
     //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
     SP(tmp, "q%d_peephole_%d", qid, phTotal);
+    glueAnyLine("L %s(V z, V *x, V *y){", tmp);
+    depth++;
+    glueAnyLine("// z -> %s", z0s);
+    glueAnyLine("V x0 = x[0]; // %s", x0s);
+    glueAnyLine("V x1 = x[1]; // %s", x1s);
+    glueAnyLine("V y0 = y[0]; // %s", y0s);
+    glueAnyLine("V y1 = y[1]; // %s", y1s);
+    glueAnyLine("L r0 = vn(y1);");
+    glueAnyLine("initV(z, H_B, r0);");
+    glueAnyLine("DOP(vn(y0), if(v%c(x0,i)<v%c(x1,i))v%c(z,vL(y0,i))=1) R 0;",
+            getTypeCodeByName(x0),getTypeCodeByName(x1),getTypeCodeByName(z0));
+    depth--;
+    glueAnyLine("}");
+    /*
+    SP(tmp, "q%d_peephole_%d", qid, phTotal);
     P("L %s(V z, V *x, V *y){\n", tmp);
     P(indent "// z -> %s\n", z0s);
     P(indent "V x0 = x[0]; // %s\n", x0s);
@@ -255,8 +345,10 @@ static void genPattern3_C(PatternTree *ptree){
     P(indent "initV(z, H_B, r0);\n");
     P(indent "DOP(vn(y0), if(v%c(x0,i)<v%c(x1,i))v%c(z,vL(y0,i))=1) R 0;\n}\n",
             getTypeCodeByName(x0),getTypeCodeByName(x1),getTypeCodeByName(z0));
+    */
     PhList[phTotal].invc = phNameFP3(z0s, tmp, x0s, x1s, y0s, y1s);
-    PhList[phTotal].targ = z0s;  phTotal++;
+    PhList[phTotal].targ = z0s;
+    phTotal++;
     setAllChainVisited(ptree);
 }
 
@@ -290,7 +382,8 @@ static void genPattern5_C(PatternTree *ptree){
 static void genPattern_C(PatternTree *ptree, I pid){
     //P("gen pattern pid = %d\n", pid);
     switch(pid){
-        //case 2: genPattern2(ptree); break; // q3
+        case 1: genPattern1_C(ptree); break;
+        case 2: genPattern2_C(ptree); break; // q3
         case 3: genPattern3_C(ptree); break;
         case 4: genPattern4_C(ptree); break;
         case 5: genPattern5_C(ptree); break; // q2
@@ -308,6 +401,7 @@ static void genPattern_ACC(PatternTree *ptree, I pid){
 }
 
 static void genPattern(PatternTree *ptree, I pid){
+    resetCode();
     switch(qTarg){
         case TARGET_C    : genPattern_C(ptree, pid);     break;
         case TARGET_LLVM : TODO("Support for LLVM\n");   break;
@@ -318,13 +412,17 @@ static void genPattern(PatternTree *ptree, I pid){
 }
 
 static char *getFirstParam(List *params){
-    Node *n = params->val;
-    if(instanceOf(n, funcK)){
-        int tot = totalElement(n->val.listS);
-        if(1 == tot){
-            Node *func = n->val.listS->val;
-            if(func->val.name.sn->kind == builtinS){
-                return func->val.name.id2;
+    // scan to the last list
+    while(params && params->next) params = params->next;
+    if(params){
+        Node *n = params->val;
+        if(instanceOf(n, funcK)){
+            int tot = totalElement(n->val.listS);
+            if(1 == tot){
+                Node *func = n->val.listS->val;
+                if(func->val.name.sn->kind == builtinS){
+                    return func->val.name.id2;
+                }
             }
         }
     }
@@ -364,11 +462,11 @@ static bool matchPattern(Chain *chain, PatternTree* ptree){
         //P("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
         if(numOfDefs == ptree->num){
             //P("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
-            //prettyPatternTree(ptree->child[i]);
-            //prettyNode(chainNode(chain->chain_defs[i]));
+            //prettyPatternTree(ptree->child[0]);
+            //printChain(chain->chain_defs[0]); P("\n");
             DOI(numOfDefs, \
                     if(!matchPattern(chain->chain_defs[i], ptree->child[i]))R false)
-            //P("return true\n");
+            //P("return true\n"); getchar();
             ptree->chain = chain; /* setup */
             return true;
         }
@@ -382,7 +480,7 @@ static void findPattern(ChainList *list, PatternTree* ptree, I pid){
         findPattern(list->next, ptree, pid);
         if(!isChainVisited(list->chain)){
             if(matchPattern(list->chain, ptree)){
-                P("Pattern %d found\n", pid);
+                P("Pattern %d found\n", pid); getchar();
                 genPattern(ptree, pid);
             }
         }
@@ -390,7 +488,7 @@ static void findPattern(ChainList *list, PatternTree* ptree, I pid){
 }
 
 static void analyzeChain(ChainList *list){
-    DOI(numPattern, findPattern(list, allPattern[i], i+3));
+    DOI(numPattern, findPattern(list, allPattern[i], i+1));
 }
 
 static void compileMethod(Node *n){
@@ -409,15 +507,13 @@ static void scanMethodList(List *list){
 static void initPatterns(){
 #define insertPattern(x) allPattern[numPattern++]=x
     numPattern = 0;
-    PatternTree *fp0 = createFP0();
-    PatternTree *fp1 = createFP1();
-    //PatternTree *fp2 = createFP2();
+    PatternTree *fp1 = createFP2(1);
+    PatternTree *fp2 = createFP2(2);
     PatternTree *fp3 = createFP3();
     PatternTree *fp4 = createFP4();
     PatternTree *fp5 = createFP5();
-    //insertPattern(fp0);
-    //insertPattern(fp1);
-    //insertPattern(fp2);
+    insertPattern(fp1);
+    insertPattern(fp2);
     insertPattern(fp3);
     insertPattern(fp4);
     insertPattern(fp5);
@@ -427,12 +523,29 @@ static void cleanPatterns(){
     DOI(numPattern, deletePatternTree(allPattern[i]))
 }
 
+static void dispStats(){
+    resetCode();
+    I size = ptr - code;
+    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
+        percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
+    if(size >= CODE_MAX_SIZE)
+        EP("Code buffer full!!!");
+}
+
+static void dumpCode(){
+    dispStats();
+    P("%s",code);
+}
+
 static void init(){
     currentMethod = NULL;
     phTotal = 0;
-    qid = qIsTpch?qTpchId:99;
+    qid     = qIsTpch?qTpchId:99;
+    depth   = 0;
+    code[0] = 0;
+    ptr     = code;
     initPatterns();
-    DOI(numPattern, {P("pattern %lld:\n",i+3);printPatternTree(allPattern[i]);})
+    DOI(numPattern, {P("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
 }
 
 void optPattern(){
@@ -440,6 +553,7 @@ void optPattern(){
     init();
     scanMethodList(compiledMethodList->next);
     cleanPatterns();
+    dumpCode();
 }
 
 
