@@ -5,9 +5,9 @@ module default{
     t3:i64 = check_cast(@column_value(t0,`l_partkey:sym), i64);
     t7:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
     t8:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
-    t12:d = check_cast(@column_value(t0,`l_shipdate:sym), d);
-    t18:? = @geq(t12,1995-09-01:d);
-    t19:? = @lt(t12,1995-10-01:d);
+    t12:date = check_cast(@column_value(t0,`l_shipdate:sym), d);
+    t18:? = @geq(t12,1995-09-01:date);
+    t19:? = @lt(t12,1995-10-01:date);
     t20:? = @and(t18,t19);
     t22:? = @compress(t20,t3);
     t26:? = @compress(t20,t7);

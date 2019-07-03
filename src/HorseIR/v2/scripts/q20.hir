@@ -28,8 +28,8 @@ module default{
       c41:? = check_cast(@column_value(a4, `p_name:sym     ), sym);
       // TODO: add compound enum for the two-column join (maybe)
       // 0. group by: {l_suppkey, l_partkey}
-      t0_0:? = @lt(c32, 1995-01-01:d);
-      t0_1:? = @geq(c32, 1994-01-01:d);
+      t0_0:? = @lt(c32, 1995-01-01:date);
+      t0_1:? = @geq(c32, 1994-01-01:date);
       t0_2:? = @and(t0_0, t0_1);
       t0_3:? = @compress(t0_2, c31);
       t0_4:? = @compress(t0_2, c30);

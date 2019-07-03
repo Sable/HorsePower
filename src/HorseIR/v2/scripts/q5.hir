@@ -38,8 +38,8 @@ module default{
       t1_1:? = @index(t0_2, t1_0);
       //t1_2:? = @compress(t1_1, t1_0); // index for nation
       // 2. custkey: c_ and o_
-      t2_0:? = @geq(c12, 1994-01-01:d);
-      t2_1:? = @lt(c12, 1995-01-01:d);
+      t2_0:? = @geq(c12, 1994-01-01:date);
+      t2_1:? = @lt(c12, 1995-01-01:date);
       t2_2:? = @and(t2_0, t2_1);
       t2_3:? = @values(c10);
       t2_4:? = @index(t1_1, t2_3);

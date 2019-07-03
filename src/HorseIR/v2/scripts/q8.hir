@@ -49,8 +49,8 @@ module default{
       t0_8:? = @index(c23 , t0_4); // l_extendedprice
       t0_9:? = @index(c24 , t0_4); // l_discount
       // 1. orderkey: l_ and o_
-      t1_0:? = @leq(c31, 1996-12-31:d);
-      t1_1:? = @geq(c31, 1995-01-01:d);
+      t1_0:? = @leq(c31, 1996-12-31:date);
+      t1_1:? = @geq(c31, 1995-01-01:date);
       t1_2:? = @and(t1_0, t1_1);
       t1_3:? = @compress(t1_2, c30);
       t1_4:? = @join_index(@eq, t0_6, t1_3);

@@ -244,6 +244,22 @@ static void setAllChainVisited(PatternTree *ptree){
     ptree->chain = NULL;
 }
 
+char *getMaxValue(C c){
+    switch(c){
+        case 'E': return "MAX_DBL";
+        case 'I': return "MAX_INT";
+        default: EP("Add impl.");
+    }
+}
+
+char *getMinValue(C c){
+    switch(c){
+        case 'E': return "MIN_DBL";
+        case 'I': return "MIN_INT";
+        default: EP("Add impl.");
+    }
+}
+
 /* ------ find patterns below ------ */
 
 static char *phNameFP2(char *z, char *invc, char *x0, char *x1){
@@ -283,11 +299,11 @@ static void genPattern2_C_Core(PatternTree *ptree, int op){
     glueAnyLine("V x0 = x[0]; // %s", x0s);
     glueAnyLine("V x1 = x[1]; // %s", x1s);
     glueAnyLine("initV(z, H_%c, vn(x1));", z0c);
-    if(op==1 || op==2){
+    if(op==1 || op==2){ // sum or avg
         glueAnyLine("DOP(vn(x1), {%c a=0; V t=vV(x1,i); DOJ(vn(t), a+=v%c(x0,vL(t,j))) v%c(z,i)=a%s;}) R 0;", x0c, x0c, z0c, op==2?"/vn(t)":"");
     }
-    else if(op == 5){
-        TODO("Add pattern 5");
+    else if(op == 5 || op == 6){ // min or max
+        glueAnyLine("DOP(vn(x1), {%c a=%s; V t=vV(x1,i); DOJ(vn(t), {%c t0=v%c(x0,vL(t,j)); if(t0%ca)a=t0;}) v%c(z,i)=a;}) R 0;", x0c, op==5?getMaxValue(x0c):getMinValue(x0c), x0c, x0c, op==5?'<':'>', z0c);
     }
     depth--;
     glueAnyLine("}");
@@ -353,7 +369,7 @@ static void genPattern3_C(PatternTree *ptree){
 }
 
 static void genPattern4_C(PatternTree *ptree){
-    char tmp[99], pfn[30];
+    char tmp[99];
     Chain *chain_x  = ptree->child[0]->child[0]->child[0]->chain;  // 2 params of each_right
     Chain *chain_z  = ptree->chain;  // 2 params of each_right
     Node *x0 = getParamFromChain(chain_x, 2); S x0s = getNameStr(x0);
@@ -361,22 +377,33 @@ static void genPattern4_C(PatternTree *ptree){
     Node *z0 = getParamFromChain(chain_z, 0); S z0s = getNameStr(z0);
     //P("x = %s, y = %s, z = %s\n", x,y,z);
     SP(tmp, "q%d_peephole_%d", qid, phTotal);
-    P("L %s(V z, V x, V y){\n", tmp);
-    P(indent "// z -> %s, x -> %s, y -> %s\n", z0s,x0s,y0s);
-    P(indent "L r0 = vn(y);\n");
-    P(indent "initV(z, H_L, r0);\n");
-    P(indent "DOP(r0, {V t=vV(y,i); L len=vn(t); L tot=0; B f[199]={0};\\\n");
-    P(indent2 "DOJ(len, if(!f[j]){ \\\n");
+    glueAnyLine("L %s(V z, V x, V y){", tmp);
+    depth++;
+    glueAnyLine("// z -> %s, x -> %s, y -> %s", z0s,x0s,y0s);
+    glueAnyLine("L r0 = vn(y);\n");
+    glueAnyLine("initV(z, H_L, r0);\n");
+    glueAnyLine("DOP(r0, {V t=vV(y,i); L len=vn(t); L tot=0; B f[199]={0};\\");
+    depth++;
+    glueAnyLine("DOJ(len, if(!f[j]){ \\");
     char x0c = getTypeCodeByName(x0);
-    P(indent2 "DOK(len, if(k!=j && v%c(x,vL(t,j))==v%c(x,vL(t,k))) f[k]=1)\\\n",x0c,x0c);
-    P(indent2 "f[j]=1; tot++;}) vL(z,i)=tot; }) R 0;\n}\n");
+    glueAnyLine("DOK(len, if(k!=j && v%c(x,vL(t,j))==v%c(x,vL(t,k))) f[k]=1)\\",x0c,x0c);
+    glueAnyLine("f[j]=1; tot++;}) vL(z,i)=tot; }) R 0;");
+    depth--; glueAnyLine("}");
+    depth--; glueAnyLine("}");
     PhList[phTotal].invc = phNameFP4(z0s, tmp, x0s, y0s);
-    PhList[phTotal].targ = z0s;  phTotal++;
+    PhList[phTotal].targ = z0s;
+    phTotal++;
     setAllChainVisited(ptree);
 }
 
 static void genPattern5_C(PatternTree *ptree){
-    TODO("pattern 5");
+    // min
+    genPattern2_C_Core(ptree, 5);
+}
+
+static void genPattern6_C(PatternTree *ptree){
+    // max
+    genPattern2_C_Core(ptree, 6);
 }
 
 static void genPattern_C(PatternTree *ptree, I pid){
@@ -387,6 +414,7 @@ static void genPattern_C(PatternTree *ptree, I pid){
         case 3: genPattern3_C(ptree); break;
         case 4: genPattern4_C(ptree); break;
         case 5: genPattern5_C(ptree); break; // q2
+        case 6: genPattern6_C(ptree); break;
         default: EP("Pattern not supported yet: %d\n", pid);
     }
 }

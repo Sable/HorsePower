@@ -19,7 +19,7 @@ module default{
     c23:? = check_cast(@column_value(a2,`l_shipdate:sym     ), d   );
     // custkey: c_ (key) and o_ (fkey)
     t0_0:? = @eq(c00, `"BUILDING":sym); // k_mask
-    t0_1:? = @lt(c10, 1995-03-15:d);    // f_mask
+    t0_1:? = @lt(c10, 1995-03-15:date);    // f_mask
     t0_2:? = @values(c12);
     t0_3:? = @compress(t0_1, t0_2);
     t0_4:? = @index(t0_0, t0_3);
@@ -40,7 +40,7 @@ module default{
     t1_8:? = @index(t0_9, t1_2);  // o_orderdate
     t1_9:? = @index(t0_10,t1_2);  // o_shippriority
     // scan right
-    t9_0:? = @gt(c23, 1995-03-15:d);
+    t9_0:? = @gt(c23, 1995-03-15:date);
     //t9_1:? = @compress(t9_0, c20);
     //t9_2:? = @fetch(t9_1); // l_orderkey
     t9_1:? = @fetch(c20);

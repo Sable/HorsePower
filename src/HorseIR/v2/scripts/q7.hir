@@ -72,8 +72,8 @@ module default{
       t4_6:? = @index(t3_6, t4_2); // n1_name
       t4_7:? = @index(t3_7, t4_2); // n2_name
       // 5. orderkey: o_ and l_
-      k0:?   = @leq(c14, 1996-12-31:d);
-      k1:?   = @geq(c14, 1995-01-01:d);
+      k0:?   = @leq(c14, 1996-12-31:date);
+      k1:?   = @geq(c14, 1995-01-01:date);
       k2:?   = @and(k0, k1);
       kk:?   = @fetch(c11);
       k3:?   = @compress(k2, kk);

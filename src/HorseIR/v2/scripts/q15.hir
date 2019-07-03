@@ -7,8 +7,8 @@ module default{
       c1:? = check_cast(@column_value(a0, `l_suppkey:sym      ), i64);
       c2:? = check_cast(@column_value(a0, `l_extendedprice:sym), f64);
       c3:? = check_cast(@column_value(a0, `l_discount:sym     ), f64);
-      t0:? = @geq(c0, 1996-01-01:d);
-      t1:? = @lt(c0, 1996-04-01:d);
+      t0:? = @geq(c0, 1996-01-01:date);
+      t1:? = @lt(c0, 1996-04-01:date);
       t2:? = @and(t0, t1);
       t3:? = @compress(t2, c1);
       g0:? = @group(t3);

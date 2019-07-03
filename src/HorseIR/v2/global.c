@@ -30,7 +30,7 @@ void initBackend(){
 void initGlobal(){
     initElementwiseFuncMap();
     initBackend();
-    if(qIsTpch)
+    if(optMode == InterpNaiveM && qIsTpch)
         initTablesByQid(qTpchId);
 }
 
