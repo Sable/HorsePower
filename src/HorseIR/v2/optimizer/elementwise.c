@@ -6,6 +6,8 @@ extern bool *ElementwiseUnaryMap;
 extern bool *ElementwiseBinaryMap;
 
 static Node *currentMethod;
+static I qid;
+static I phTotal;
 
 #define isChainVisited(c) (c->isVisited)
 #define chainNode(c)   (c)->cur
@@ -77,8 +79,23 @@ static int findUseByName(Chain *p, char *name){
     return c==1?x:-1;
 }
 
-static void findFusionUp(Chain *chain){
-    if(chain->isVisited) return;
+typedef struct codegen_node{
+    Node *n;
+    int pnum; // # of parameter
+    struct codegen_node *pnode[5]; // parameter nodes
+}gNode;
+
+gNode *initgNode(Node *n){
+    gNode *x = NEW(gNode);
+    x->n = n;
+    x->pnum = totalElement(fetchParams(n));
+    if(x->pnum >= 5)
+        EP("Not enough space");
+    return x;
+}
+
+static gNode *findFusionUp(Chain *chain){
+    if(chain->isVisited) return NULL;
     else chain->isVisited = true;
     Node *n = chain->cur;
     if(instanceOf(n, stmtK)){
@@ -88,16 +105,20 @@ static void findFusionUp(Chain *chain){
         else if(instanceOf(expr, castK)){
             expr = expr->val.cast.exp;
         }
-        else return ;
+        else return NULL;
         Node *func = expr->val.call.func;
         SymbolKind sk = getNameKind(func);
         if(!(sk == builtinS && isElementwise(getName2(func))))
-            return ; // if not an elemetnwsie func
-        List *param = expr->val.call.param->val.listS;
+            return NULL; // if not an elemetnwsie func
+        //List *param = expr->val.call.param->val.listS;
+        List *param = fetchParams(n);
         //printChainUses(chain); getchar();
-        printBanner("Gotcha");
-        printChain(chain); P("\n");
+        // -- useful debugging
+        //printBanner("Gotcha");
+        //printChain(chain); P("\n");
+        gNode *rt = initgNode(chainNode(chain));
         bool isOK = true;
+        int cnt = 0;
         while(param){
             Node *p = param->val;
             if(instanceOf(p, nameK)){
@@ -107,17 +128,21 @@ static void findFusionUp(Chain *chain){
                     //P("c4 = %d, s = %s\n", c, getName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
-                        findFusionUp(chain->chain_defs[c]);
+                        rt->pnode[cnt] = findFusionUp(chain->chain_defs[c]);
                     }
                 }
                 else isOK = false;
             }
-            if(!isOK) return;  // stop and exit
+            else rt->pnode[cnt] = NULL;
+            if(!isOK) {free(rt); return NULL;}  // stop and exit
             param = param->next;
+            cnt++;
         }
+        return rt;
         // isOK == true
         // isOK == true, good ==> save
     }
+    return NULL;
 }
 
 static Chain *findFusionDown(Chain *chain){
@@ -172,14 +197,130 @@ static Chain *findFusionDown(Chain *chain){
     return NULL;
 }
 
+static B isOK2Fuse(gNode *rt){
+    // condition: more than 1 stmt
+    DOI(rt->pnum, if(rt->pnode[i])R 1) R 0;
+}
+
+static void genCodeNode(Node *n);
+static void genCodeList(List *list);
+
+
+static void genCodeList(List *list){
+    if(list){ genCodeList(list->next); genCodeNode(list->val); }
+}
+
+// copy from: compiler.c/scanConst
+static void genCodeConst(Node *n){
+    ConstValue *v = n->val.nodeC;
+    switch(v->type){
+        case    symC:
+        case    strC: P("%s",v->valS); break;
+        case   dateC:
+        case  monthC:
+        case   timeC:
+        case minuteC:
+        case secondC:
+        case    intC: P("%d"  , v->valI); break;
+        case  floatC: P("%g"  , v->valF); break;
+        case     dtC:
+        case   longC: P("%lld", v->valL); break;
+        case   clexC: P(v->valX[1]>=0?"%g+%g":"%g%g", \
+                              v->valX[0], v->valX[1]); break;
+        default: EP("Add more constant types: %d\n", v->type);
+    }
+}
+
+static void genCodeVector(Node *n){
+    genCodeList(n->val.vec.val);
+}
+
+static void genCodeName(Node *n, I id){
+    C code = getTypeCodeByName(n);
+    P("v%c(x%d,i)", code, id);
+}
+
+static void genCodeNode(Node *n){
+    switch(n->kind){
+        case vectorK: genCodeVector(n); break;
+        case  constK: genCodeConst (n); break;
+        default: TODO("Add impl. for %s", getNodeTypeStr(n));
+    }
+}
+
+static I varNum;
+static S varNames[99];
+static S fuseInvc;
+
+static L searchName(S *names, S s){
+    DOI(varNum, if(!strcmp(names[i],s))R i) R -1;
+}
+
+static B isDuplicated(S *names, S s){
+    return searchName(names, s) >= 0;
+}
+
+static S genInvocation(S targ, S func, S *names, I num){
+    C temp[199]; S ptr = temp;
+    ptr += SP(ptr, "%s(%s, (V[]){",func,targ);
+    DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
+    SP(ptr, "})");
+    return strdup(temp);
+}
+
+// TODO: remove duplicated items (only distinct values wanted)
+static void totalInputs(gNode *rt, S *names){
+    List *params = fetchParams(rt->n);
+    DOI(rt->pnum, {I k=i2-i-1; gNode *t=rt->pnode[k]; \
+            if(t) totalInputs(t,names); \
+            else {Node *p = fetchParamsIndex(params,k)->val; \
+                if(instanceOf(p,nameK)){ \
+                  if(!isDuplicated(names,getName2(p))) \
+                    names[varNum++]=getName2(p);}} })
+}
+
+static void genCodeElem(gNode *rt, B isRT){
+    Node *n  = rt->n;
+    C temp[99];
+    if(isRT){
+        Node *z0 = getParamFromNode(n,0); S z0s = getNameStr(z0);
+        C z0c = getTypeCodeByName(z0);
+        SP(temp, "q%d_elementwise_%d",qid,phTotal++);
+        P("I %s(V z, V *x){\n",temp);
+        varNum = 0;
+        totalInputs(rt, varNames);
+        DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        P(indent "DOP(vn(z), v%c(z,i)=",z0c);
+        // setup invocation for final fusion
+        fuseInvc = genInvocation(z0s, temp, varNames, varNum);
+    }
+    Node *fn = fetchFuncNode(n);
+    P("%s(", genFuncNameC(getName2(fn)));
+    List *params = fetchParams(n);
+    DOI(rt->pnum, {if(i>0)P(","); I k=i2-i-1; gNode *t=rt->pnode[k]; \
+            if(t) genCodeElem(t,0); \
+            else {Node *p = fetchParamsIndex(params,k)->val; \
+                if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,getName2(p))); \
+                else genCodeNode(p);} })
+    P(")");
+    if(isRT){
+        P(") R 0;\n");
+        P("}\n");
+    }
+}
+
 static void findFusionSub(Chain *chain){
     Chain *bottom = findFusionDown(chain);
     if(bottom){
         // if num of chains > 1, likely fusion
-        P("bottom chain found:\n\t");
-        printChain(bottom); getchar();
-        findFusionUp(bottom);
-        P("------\n");
+        gNode *rt = findFusionUp(bottom);
+        if(rt && isOK2Fuse(rt)){
+            P("bottom chain found:\n");
+            //printChain(bottom); getchar();
+            genCodeElem(rt,1);
+            P("Fusion invocation: %s\n", fuseInvc);
+            getchar();
+        }
     }
     else {
         chain->isVisited = true;
@@ -217,8 +358,13 @@ static void scanMethodList(List *list){
     if(list) { scanMethodList(list->next); compileMethod(list->val); }
 }
 
+static void init(){
+    qid = qIsTpch?qTpchId:99;
+}
+
 // entry: fuse elementwise
 void optElementwise(){
+    init();
     scanMethodList(compiledMethodList->next);
 }
 

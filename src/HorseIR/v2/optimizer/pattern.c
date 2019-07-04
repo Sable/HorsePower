@@ -22,9 +22,6 @@ extern List *compiledMethodList;
 #define chainNode(c)      (c->cur)
 #define setVisited(c, v)  c->isVisited=v
 
-#define indent "    "
-#define indent2 indent indent
-
 #define CODE_MAX_SIZE 10240
 #define HEAD_MAX_SIZE 1024
 static char code[CODE_MAX_SIZE], *ptr;
@@ -108,133 +105,13 @@ static PatternTree *createFP5(){
     return rt;
 }
 
-static Node *fetchFuncNode(Node *n){
-    if(instanceOf(n, stmtK)){
-        Node *rhs = n->val.assignStmt.expr;
-        if(instanceOf(rhs, callK)){
-            return rhs->val.call.func;
-        }
-        else if(instanceOf(rhs, castK)){
-            Node *t = rhs->val.cast.exp;
-            return instanceOf(t, callK)?t->val.call.func:NULL;
-        }
-    }
-    return NULL;
-}
-
-static List *fetchParams(Node *n){
-    if(instanceOf(n, stmtK)){
-        Node *rhs = n->val.assignStmt.expr;
-        if(instanceOf(rhs, castK)){
-            rhs = rhs->val.cast.exp;
-        }
-        if(instanceOf(rhs, callK)){
-            return rhs->val.call.param->val.listS;
-        }
-        // TODO: any other cases?
-    }
-    return NULL;
-}
-
-static List *fetchParamsIndex(List *list, int pos){
-    if(list){
-        return (pos>0)?fetchParamsIndex(list->next, pos-1):list;
-    }
-    return NULL;
-}
-
-static char *fetchFuncName(Node *n){
-    if(instanceOf(n, nameK)){
-        SymbolName *sn = n->val.name.sn;
-        if(sn->kind == builtinS){
-            return n->val.name.id2;
-        }
-    }
-    return NULL;
-}
-
 /*
  * 0: targ
  * 1: 1st param
  * 2: 2nd param
  */
-static Node *getParamFromChain(Chain *chain, int pos){
-    if(instanceOf(chainNode(chain), stmtK)){
-        List *vars = chainNode(chain)->val.assignStmt.vars;
-        Node *targ = NULL;
-        if(1 == totalElement(vars)) targ = vars->val;
-        else EP("only one targ expected");
-        if(pos == 0) return targ;
-        Node *func = fetchFuncNode(chainNode(chain));
-        if(!func) return NULL;
-        List *params = fetchParams(chainNode(chain));
-        int reversedPos = totalElement(params) - pos;
-        List *p0     = fetchParamsIndex(params, reversedPos);
-        if(p0 && instanceOf(p0->val, nameK))
-            return p0->val;
-        else {
-            printChain(chain);
-            P("\n looking for pos %d, but find: ", reversedPos);
-            if(p0) printNode(p0->val);
-            //printNode(params->val);
-            //printNode(params->next->val);
-            //printNode(params->next->next->val);
-            P("total parameters: %d, pos: %d\n", totalElement(params), pos);
-            EP("only variable allowed (no func/literal)");
-        }
-    }
-    return NULL;
-}
-
-static SymbolName *fetchSymbolName(Node *n){
-    SymbolName *sn = NULL;
-    if(instanceOf(n, nameK)){
-        sn = n->val.name.sn;
-    }
-    else if(instanceOf(n, varK)){
-        sn = n->val.param.sn;
-    }
-    else TODO("Add impl.");
-    return sn;
-}
-
-static char *getNameStr(Node *n){
-    // input nameK
-    SymbolName *sn = fetchSymbolName(n);
-    switch(sn->kind){
-        case   localS: return sn->name;
-        default: TODO("Add impl.");
-    }
-}
-
-static char getTypeCodeByIn(InfoNode *in){
-#define isBasicType(x) (!(x)->subInfo && !(x)->next)
-    if(isBasicType(in)){
-        switch(in->type){
-            case  boolT: return 'B';
-            case   i32T: return 'I';
-            case   i64T: return 'L';
-            case   f32T: return 'F';
-            case   f64T: return 'E';
-            case monthT: return 'M';
-            case  charT: return 'C';
-            case   symT: return 'Q';
-            case   strT: return 'S';
-            case  dateT: return 'D';
-            default: TODO("add type: %d\n", in->type);
-        }
-    }
-}
-
-static char getTypeCodeByName(Node *n){
-    SymbolName *sn = fetchSymbolName(n);
-    switch(sn->kind){
-        case localS: {
-                Node * typ = sn->val.local->val.param.typ;
-                return getTypeCodeByIn(typ->val.type.in);
-             }
-        default: TODO("add impl.");
-    }
+static Node *getParamFromChain(Chain *chain, I pos){
+    return getParamFromNode(chainNode(chain), pos);
 }
 
 static void setAllChainVisited(PatternTree *ptree){
@@ -242,22 +119,6 @@ static void setAllChainVisited(PatternTree *ptree){
     DOI(ptree->num, setAllChainVisited(ptree->child[i]))
     if(strcmp(ptree->func1, "?")) setVisited(chain, true);
     ptree->chain = NULL;
-}
-
-char *getMaxValue(C c){
-    switch(c){
-        case 'E': return "MAX_DBL";
-        case 'I': return "MAX_INT";
-        default: EP("Add impl.");
-    }
-}
-
-char *getMinValue(C c){
-    switch(c){
-        case 'E': return "MIN_DBL";
-        case 'I': return "MIN_INT";
-        default: EP("Add impl.");
-    }
 }
 
 /* ------ find patterns below ------ */
