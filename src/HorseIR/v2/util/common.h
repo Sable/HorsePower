@@ -54,7 +54,7 @@ void freeHorseArray(HA x);
 /* options.c */
 typedef enum OptionMode{
     UnknownM, InterpNaiveM, CompilerM, InterpJITM, PrettyPrintM, DotPrintM,
-    VersionM, HelperM, ExperimentM
+    VersionM, HelperM, ExperimentM, StatsM
 }OptionMode;
 
 int  getLongOption(int argc, char *argv[]);
@@ -71,9 +71,13 @@ extern OC    qOpts[99];       // list of optimizations
 extern int   numOpts;         // number of optimizations
 extern bool  qIsTpch;         // is tpch
 extern int   qTpchId;         // if(qIsTpch) id
+extern char *qStats;          // dump or load
 
 #define GOOD_TRY() usage(0)
 #define BAD_TRY()  usage(1)
+
+/* stats.c */
+void handleStats(S cmd);
 
 #ifdef  __cplusplus
 }

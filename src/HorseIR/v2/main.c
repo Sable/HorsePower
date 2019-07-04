@@ -76,6 +76,7 @@ int main(int argc, char *argv[]){
             case   InterpJITM: TODO("interpreter jit mode\n"); break;
             case PrettyPrintM: envPrettyPrint(qPath); break;
             case    DotPrintM: envDotPrint(qPath);    break;
+            case       StatsM: handleStats(qStats);   break;
             case  ExperimentM: TODO("experiment\n");  break;
             case     VersionM: version();   break;
             case      HelperM: GOOD_TRY();  break;

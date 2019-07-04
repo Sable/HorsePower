@@ -12,6 +12,7 @@ OC    qOpts[99];
 int numOpts;
 bool qIsTpch;
 int qTpchId;
+char *qStats;
 
 static int longFlag; // set by '--verbose'
 static char *qOpt[99];
@@ -58,12 +59,18 @@ static void usageDotPrinter(){
     dispLine(0, INDENT, "--dot", "Enable dot printer");
 }
 
+static void usageStats(){
+    WP("\nRun with a stats manager:\n");
+    dispLine(0, INDENT, "--stats <load/dump>", "Load/dump stats");
+}
+
 void usage(int e){
     WP("Usage: ./horse <option> [parameter]  \n");
     usageInterp();
     usageCompiler();
     usagePrettyPrinter();
     usageDotPrinter();
+    usageStats();
     WP("\nOthers:\n");
     dispLine(0, INDENT, "-h, --help", "Print this information");
     dispLine(0, INDENT, "-v, --version", "Print HorseIR version");
@@ -73,7 +80,8 @@ void usage(int e){
 /* no_argument, required_argument and optional_argument */
 static struct option long_options[] = {
     {"dot" , no_argument, &longFlag, 0},
-    {"tpch", required_argument, &longFlag, 1},
+    {"tpch",  required_argument, &longFlag, 1},
+    {"stats", required_argument, &longFlag, 2},
     {"help"        , no_argument      , 0, 'h'},
     {"version"     , no_argument      , 0, 'v'},
     {"compiler"    , no_argument      , 0, 'c'},
@@ -96,6 +104,7 @@ static char *strMode(OptionMode mode){
         case     VersionM: return "Version";
         case      HelperM: return "Helper";
         case  ExperimentM: return "Experiment";
+        case       StatsM: return "Stats";
         default: EP("Unknown mode: %d\n", mode);
     }
 }
@@ -156,6 +165,12 @@ static int validatePretty(){
     return 0;
 }
 
+static int validateStats(){
+    if(qStats && (!strcmp(qStats, "dump") || !strcmp(qStats, "load")));
+    else BAD_TRY();
+    return 0;
+}
+
 static int validateOptions(){
     // TODO: add validation rules
     switch(optMode){
@@ -164,6 +179,7 @@ static int validateOptions(){
         case   InterpJITM: return validateInterpJIT();
         case PrettyPrintM: return validatePretty();
         case    DotPrintM: return validateDot();
+        case       StatsM: return validateStats();
         case     VersionM: break;
         case      HelperM: break;
         case  ExperimentM: break;
@@ -186,6 +202,8 @@ static void getLongOptionVerbose(int x){
             case 0: optMode = setMode(optMode, DotPrintM); break;
             case 1: qTpchId = atoi(optarg);
                     qIsTpch = (qTpchId>0 && qTpchId<=22);  break;
+            case 2: optMode = setMode(optMode, StatsM);
+                    qStats  = strdup(optarg);              break;
             default: EP("Option index unknown: %d\n", index);
         }
     }
@@ -200,6 +218,7 @@ static void init(){
     qTpchId  = 0;
     qIsTpch  = false;
     numOpts  = 0;
+    qStats   = NULL;
 }
 
 int getLongOption(int argc, char *argv[]){
@@ -219,7 +238,7 @@ int getLongOption(int argc, char *argv[]){
             case 'r': qRun    = atoi(optarg);   break;
             case 'f': qPath   = strdup(optarg); break;
             case 'o': qOpt[numOpts++] = strdup(optarg); break;
-            default: return 1;
+            default: P("c = %d\n",c); return 1;
         }
     }
     return validateOptions();

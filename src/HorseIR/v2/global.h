@@ -86,5 +86,6 @@ void   time_clear();
 #include  "optimizer/common.h"
 
 void initGlobal();
+void initStats();
 
 #endif

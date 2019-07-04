@@ -6,6 +6,7 @@ extern I qTpchId;
 
 static void initTablesByQid(I id);
 static void initElementwiseFuncMap();
+static void initTablesAll();
 
 /* helper functions */
 
@@ -32,6 +33,23 @@ void initGlobal(){
     initBackend();
     if(optMode == InterpNaiveM && qIsTpch)
         initTablesByQid(qTpchId);
+}
+
+void initStats(){
+    initElementwiseFuncMap();
+    initBackend();
+    initTablesAll();
+}
+
+static void initTablesAll(){
+    initTableByName((S)"region");
+    initTableByName((S)"nation");
+    initTableByName((S)"customer");
+    initTableByName((S)"orders");
+    initTableByName((S)"lineitem");
+    initTableByName((S)"part");
+    initTableByName((S)"supplier");
+    initTableByName((S)"partsupp");
 }
 
 #ifndef my_tic
@@ -322,14 +340,7 @@ static void initTablesByQid(I id){
     }
     else if(id==99){ // init all tables
         // EP("loading all tables\n");
-        initTableByName((S)"region");
-        initTableByName((S)"nation");
-        initTableByName((S)"customer");
-        initTableByName((S)"orders");
-        initTableByName((S)"lineitem");
-        initTableByName((S)"part");
-        initTableByName((S)"supplier");
-        initTableByName((S)"partsupp");
+        initTablesAll();
         addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey" );
         addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey" );
         addFKey("region"  , "r_regionkey", "nation"  , "n_regionkey");
