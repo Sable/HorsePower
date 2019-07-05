@@ -55,15 +55,28 @@ static void envCompiler(char *file){
     runCompilerCore();
 }
 
-static void envPrettyPrint(char *file){
+static void utlPrettyPrint(char *file){
     envInit(file);
     printProg(root);
 }
 
-static void envDotPrint(char *file){
+static void utlDotPrint(char *file){
     envInit(file);
     TODO("dot print\n");
     //dotProg(root);
+}
+
+static void utlStats(char *qStats){
+    handleStats(qStats);
+}
+
+static void envUtility(OptionUtility opt){
+    switch(opt){
+        case PrettyPrintU: utlPrettyPrint(qPath); break;
+        case         DotU: utlDotPrint(qPath);    break;
+        case       StatsU: utlStats(qStats);      break;
+        default: EP("Utility function unknown");
+    }
 }
 
 int main(int argc, char *argv[]){
@@ -74,13 +87,11 @@ int main(int argc, char *argv[]){
             case InterpNaiveM: envInterpreter(qPath); break;
             case    CompilerM: envCompiler(qPath);    break;
             case   InterpJITM: TODO("interpreter jit mode\n"); break;
-            case PrettyPrintM: envPrettyPrint(qPath); break;
-            case    DotPrintM: envDotPrint(qPath);    break;
-            case       StatsM: handleStats(qStats);   break;
             case  ExperimentM: TODO("experiment\n");  break;
             case     VersionM: version();   break;
             case      HelperM: GOOD_TRY();  break;
             case     UnknownM:  BAD_TRY();  break;
+            case     UtilityM: envUtility(optUtl);   break;
             default: EP("Option mode not supported: %d\n", optMode);
         }
     }

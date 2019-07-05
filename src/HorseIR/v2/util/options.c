@@ -5,6 +5,7 @@
 #endif
 
 OptionMode optMode;
+OptionUtility optUtl;
 int   qRun;
 char *qPath;
 TC    qTarg;
@@ -19,7 +20,7 @@ static char *qOpt[99];
 
 #define INDENT 29
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
-#define usage_n() dispLine(1, INDENT, "-f, --file <filename>", "Set a query file")
+#define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Set a query file")
 #define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations (default: all): fe or fp");
 
 void version(){
@@ -38,39 +39,51 @@ static void dispLine(int level, int left, char *shortMsg, char *longMsg){
 static void usageInterp(){
     WP("\nRun with an interpreter:\n");
     dispLine(0, INDENT, "-t, --interpreter", "Enable interpreter");
-    usage_n();
+    usage_n(1);
     dispLine(2, INDENT, "-r, --run <runs>", "Number of runs (default 1)");
 }
 
 static void usageCompiler(){
     WP("\nRun with a compiler:\n");
     dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler with target c/llvm/openacc/cuda/opencl");
-    usage_n(); usage_o();
-    WP("\nRun with a pretty printer:\n");
+    usage_n(1); usage_o();
 }
 
 static void usagePrettyPrinter(){
-    dispLine(0, INDENT, "-p, --pretty", "Enable pretty printer");
-    usage_n();
+    //WP("\nRun with a pretty printer:\n");
+    //WP("\n");
+    dispLine(1, INDENT, "--pretty", "Enable pretty printer");
+    usage_n(2);
 }
 
 static void usageDotPrinter(){
-    WP("\nRun with a dot printer:\n");
-    dispLine(0, INDENT, "--dot", "Enable dot printer");
+    //WP("\nRun with a dot printer:\n");
+    //WP("\n");
+    dispLine(1, INDENT, "--dot", "Enable dot printer");
 }
 
 static void usageStats(){
-    WP("\nRun with a stats manager:\n");
-    dispLine(0, INDENT, "--stats <load/dump>", "Load/dump stats");
+    //WP("\nRun with a stats manager:\n");
+    //WP("\n");
+    dispLine(1, INDENT, "--stats <load/dump>", "Load/dump stats");
+}
+
+static void usageUtility(){
+    WP("\nRun with a utility manager:\n");
+    dispLine(0, INDENT, "-u, --utility", "Enable utility manager (pretty/dot/stats)");
+    usagePrettyPrinter();
+    usageDotPrinter();
+    usageStats();
 }
 
 void usage(int e){
     WP("Usage: ./horse <option> [parameter]  \n");
     usageInterp();
     usageCompiler();
-    usagePrettyPrinter();
-    usageDotPrinter();
-    usageStats();
+    usageUtility();
+    //usagePrettyPrinter();
+    //usageDotPrinter();
+    //usageStats();
     WP("\nOthers:\n");
     dispLine(0, INDENT, "-h, --help", "Print this information");
     dispLine(0, INDENT, "-v, --version", "Print HorseIR version");
@@ -79,17 +92,19 @@ void usage(int e){
 
 /* no_argument, required_argument and optional_argument */
 static struct option long_options[] = {
-    {"dot" , no_argument, &longFlag, 0},
-    {"tpch",  required_argument, &longFlag, 1},
-    {"stats", required_argument, &longFlag, 2},
+    {"dot"         , no_argument      , &longFlag, 0},
+    {"tpch"        , required_argument, &longFlag, 1},
+    {"stats"       , required_argument, &longFlag, 2},
+    {"pretty"      , no_argument      , &longFlag, 3},
+    {"meta"        , no_argument      , &longFlag, 4},
     {"help"        , no_argument      , 0, 'h'},
     {"version"     , no_argument      , 0, 'v'},
     {"compiler"    , no_argument      , 0, 'c'},
     {"interpreter" , no_argument      , 0, 't'},
-    {"pretty"      , no_argument      , 0, 'p'},
     {"runs"        , required_argument, 0, 'r'},
     {"file"        , required_argument, 0, 'f'},
     {"opt"         , required_argument, 0, 'o'},
+    {"utility"     , required_argument, 0, 'u'},
     {0, 0, 0, 0}
 };
 
@@ -99,12 +114,10 @@ static char *strMode(OptionMode mode){
         case InterpNaiveM: return "Interpreter Naive";
         case    CompilerM: return "Compiler";
         case   InterpJITM: return "Interpreter JIT";
-        case PrettyPrintM: return "Pretty Printer";
-        case    DotPrintM: return "Dot Printer";
         case     VersionM: return "Version";
         case      HelperM: return "Helper";
         case  ExperimentM: return "Experiment";
-        case       StatsM: return "Stats";
+        case     UtilityM: return "Utility";
         default: EP("Unknown mode: %d\n", mode);
     }
 }
@@ -171,15 +184,22 @@ static int validateStats(){
     return 0;
 }
 
+static int validateUtility(){
+    switch(optUtl){
+        case PrettyPrintU: validatePretty(); break;
+        case         DotU: validateDot();    break;
+        case       StatsU: validateStats();  break;
+        default: EP("Unknown utility funciton");
+    }
+}
+
 static int validateOptions(){
     // TODO: add validation rules
     switch(optMode){
         case InterpNaiveM: return validateInterp();
         case    CompilerM: return validateCompiler();
         case   InterpJITM: return validateInterpJIT();
-        case PrettyPrintM: return validatePretty();
-        case    DotPrintM: return validateDot();
-        case       StatsM: return validateStats();
+        case     UtilityM: return validateUtility();
         case     VersionM: break;
         case      HelperM: break;
         case  ExperimentM: break;
@@ -195,15 +215,23 @@ static OptionMode setMode(OptionMode opt, OptionMode mode){
     exit(1);
 }
 
+static void setUtility(OptionUtility u){
+    if(optUtl == UnknownU)
+        optUtl = u;
+    else if(optUtl != u)
+        EP("Utility function has been chosen");
+}
+
 static void getLongOptionVerbose(int x){
     if(long_options[x].flag != 0){
         int index = long_options[x].val;
         switch(index){
-            case 0: optMode = setMode(optMode, DotPrintM); break;
+            case 0: setUtility(DotU);                      break;
             case 1: qTpchId = atoi(optarg);
                     qIsTpch = (qTpchId>0 && qTpchId<=22);  break;
-            case 2: optMode = setMode(optMode, StatsM);
+            case 2: setUtility(StatsU);
                     qStats  = strdup(optarg);              break;
+            case 3: setUtility(PrettyPrintU);              break;
             default: EP("Option index unknown: %d\n", index);
         }
     }
@@ -219,21 +247,22 @@ static void init(){
     qIsTpch  = false;
     numOpts  = 0;
     qStats   = NULL;
+    optUtl   = UnknownU;
 }
 
 int getLongOption(int argc, char *argv[]){
     int c, option_index  = 0;
     init();
-    while((c=getopt_long(argc, argv,"hvtpr:c:f:o:x:", long_options, &option_index)) != -1){
+    while((c=getopt_long(argc, argv,"hvtur:c:f:o:x:", long_options, &option_index)) != -1){
         if(numOpts >= 99) EP("Buffer overflow\n");
         switch(c){
             case 0: getLongOptionVerbose(option_index); break;
             case 't': optMode = setMode(optMode, InterpNaiveM); break;
             case 'c': optMode = setMode(optMode,    CompilerM);\
                       qTarg   = getTargetCode(optarg);          break;
+            case 'u': optMode = setMode(optMode,     UtilityM); break;
             case 'v': optMode = setMode(optMode,     VersionM); break;
             case 'h': optMode = setMode(optMode,      HelperM); break;
-            case 'p': optMode = setMode(optMode, PrettyPrintM); break;
             case 'x': optMode = setMode(optMode,  ExperimentM); break;
             case 'r': qRun    = atoi(optarg);   break;
             case 'f': qPath   = strdup(optarg); break;

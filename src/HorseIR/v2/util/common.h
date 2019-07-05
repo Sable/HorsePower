@@ -10,6 +10,18 @@
 extern "C" {
 #endif
 
+typedef struct horse_json{
+    int kind, size;
+    char *key;
+    union{
+        char *field;
+        char **field_list;
+        struct horse_json *child;
+        struct horse_json **child_list;
+    };
+    struct horse_json *next;
+}JSON;
+
 #define percent(a,b) ((a)*100.0/(b))
 
 ///* profile.c */
@@ -53,9 +65,13 @@ void freeHorseArray(HA x);
 
 /* options.c */
 typedef enum OptionMode{
-    UnknownM, InterpNaiveM, CompilerM, InterpJITM, PrettyPrintM, DotPrintM,
-    VersionM, HelperM, ExperimentM, StatsM
+    UnknownM, InterpNaiveM, CompilerM, InterpJITM,
+    VersionM, HelperM, ExperimentM, UtilityM
 }OptionMode;
+
+typedef enum {
+    UnknownU, PrettyPrintU, DotU, StatsU
+}OptionUtility;
 
 int  getLongOption(int argc, char *argv[]);
 void usage(int e);
@@ -64,6 +80,7 @@ void version();
 const S getOptStr(OC x);
 
 extern OptionMode optMode;    // program mode
+extern OptionUtility optUtl;  // utility option
 extern int   qRun;            // number of runs
 extern char *qPath;           // file path
 extern TC    qTarg;           // one target
@@ -78,6 +95,22 @@ extern char *qStats;          // dump or load
 
 /* stats.c */
 void handleStats(S cmd);
+
+/* json.c */
+#define newJSONKeyValue(k,v)    newJSON0(k,v)
+#define newJSONKeyVector(k,n,v) newJSON1(k,n,v)
+#define newJSONKeyJSON(k,v)     newJSON2(k,v)
+#define newJSONKeyList(k,n,v)   newJSON3(k,n,v)
+
+void demoJSON();
+void printJSON(JSON *x);
+JSON *newJSON0(char *key, char *val);
+JSON *newJSON1(char *key, int size, char **val);
+JSON *newJSON2(char *key, JSON *val);
+JSON *newJSON3(char *key, int size, JSON **val);
+JSON *addJSONField(JSON *x, JSON *n);
+JSON *initJSON();
+
 
 #ifdef  __cplusplus
 }
