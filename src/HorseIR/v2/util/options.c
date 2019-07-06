@@ -20,7 +20,7 @@ static char *qOpt[99];
 
 #define INDENT 29
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
-#define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Set a query file")
+#define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
 #define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations (default: all): fe or fp");
 
 void version(){

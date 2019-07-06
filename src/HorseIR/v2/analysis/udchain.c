@@ -286,6 +286,15 @@ void printChainInfo(Chain *p){
     P("  %s visited\n", p->isVisited?"Is":"Not");
 }
 
+void printChainExtra(ChainExtra *x){
+    P("Function Decl:\n");
+    P("%s\n\n", x->funcDecl);
+    P("Function Invc:\n");
+    P("%s\n\n", x->funcInvc);
+    P("Function Body:\n");
+    P("%s\n\n", x->funcFunc);
+}
+
 static void printChainUses(Chain *p){
     DOI(p->useSize, {P(" --> "); printChain(p->chain_uses[i]); P("\n"); })
 }
@@ -298,7 +307,7 @@ static int printFlowBody(ChainList *list){
     if(list){
         int lineno = printFlowBody(list->next);
         Chain *p = list->chain;
-        P("[%3d] %d, %lld: ",lineno, p->isVisited, (L)list->chain->cur);
+        P("[%3d] %d, %lld: ", lineno, p->isVisited, (L)list->chain->cur);
         printChain(p);     P("\n");
         printChainUses(p);
         printChainDefs(p); P("\n");

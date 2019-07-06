@@ -25,6 +25,14 @@ Type getTypeFromV(V x){
     }
 }
 
+const char *getExtraKind(GenKind x){
+    switch(x){
+        case NativeG: return "Native";
+        case   SkipG: return "Skip";
+        case    OptG: return "Opt";
+        default: EP("Unknown kind: %d\n", x);
+    }
+}
 
 //const char *getpTypeName(pType x){
 //    if(x >= totalT){

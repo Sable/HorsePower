@@ -1,6 +1,8 @@
 #ifndef __H_UDCHAIN__
 #define __H_UDCHAIN__
 
+typedef enum { NativeG, SkipG, OptG } GenKind;
+
 typedef struct NameList{
     char *name;
     struct NameList *next;
@@ -16,6 +18,13 @@ typedef struct Chain {
     bool isVisited;
     //InfoNodeList *info;
 }Chain;
+
+typedef struct ChainExtra{
+    GenKind kind;
+    char *funcDecl;
+    char *funcFunc;
+    char *funcInvc;
+}ChainExtra;
 
 typedef struct ChainList {
     Chain *chain;
@@ -35,7 +44,8 @@ typedef struct FlowList{
 
 void buildUDChain   (Prog *root);
 void printChainInfo (Chain *p);
-void printFlow      (ChainList *list);
+void printFlow      (ChainList *x);
+void printChainExtra(ChainExtra *extra);
 
 void addToChainList(ChainList *chains, Chain *c);
 

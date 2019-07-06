@@ -2,6 +2,9 @@
 
 extern Prog *root;
 
+#define hashOptSize (1<<12)  // 4K
+sHashTable *hashOpt;
+
 static void printBannerLocal(S msg){
     WP("/*==== ");
     WP("Optimizing %s", msg);
@@ -23,6 +26,7 @@ static bool isOptimizeAll(){
 
 static void init(){
     buildUDChain(root);
+    hashOpt = initSimpleHash(hashOptSize);
 }
 
 I HorseCompilerOptimized(){
@@ -34,6 +38,8 @@ I HorseCompilerOptimized(){
     else {
         DOI(numOpts, optimizerMain(qOpts[i]));
     }
+    profileSimpleHash(hashOpt);
+    genOptimizedCode();
     R 0;
 }
 

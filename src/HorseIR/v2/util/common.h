@@ -22,6 +22,16 @@ typedef struct horse_json{
     struct horse_json *next;
 }JSON;
 
+typedef struct simple_hash_node{
+    L key, val;
+    struct simple_hash_node *next;
+}sHashNode;
+
+typedef struct simple_hash_table{
+    sHashNode **table;
+    L size;
+}sHashTable;
+
 #define percent(a,b) ((a)*100.0/(b))
 
 ///* profile.c */
@@ -45,6 +55,7 @@ typedef struct horse_json{
 /* info.c */
 const char *getTypeName(I x);
 Type getTypeFromV(V x);
+const char *getExtraKind(GenKind x);
 //const char *getpTypeName (pType x);
 const char *getKindName(Kind x);
 //const char *getpFuncName (pFunc x);
@@ -111,6 +122,11 @@ JSON *newJSON3(char *key, int size, JSON **val);
 JSON *addJSONField(JSON *x, JSON *n);
 JSON *initJSON();
 
+/* simplehash */
+sHashTable* initSimpleHash(L size);
+O addToSimpleHash  (sHashTable *st, L key, L val);
+L lookupSimpleHash (sHashTable *st, L key);
+O profileSimpleHash(sHashTable *st);
 
 #ifdef  __cplusplus
 }

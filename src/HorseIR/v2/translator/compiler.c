@@ -17,6 +17,7 @@ static void genVarList(List *list, C sep);
 extern List *compiledMethodList;
 extern OC   qOpts[99];
 extern int  numOpts;
+extern sHashTable *hashOpt;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
@@ -68,17 +69,25 @@ typedef struct CodeList{
     struct CodeList *next;
 }CodeList;
 
-#define CODE_MAX_SIZE 10240
 #define HEAD_MAX_SIZE 1024
+#define FUNC_MAX_SIZE 10240
+#define CODE_MAX_SIZE 10240
+static char head_code[HEAD_MAX_SIZE], *htr;
+static char func_code[FUNC_MAX_SIZE], *ftr;
 static char code[CODE_MAX_SIZE], *ptr;
-static char head[HEAD_MAX_SIZE], *htr;
 static CodeList *codeList;
 
 static void genIndent(){ DOI(depth, glueCode("    ")); }
 
+#define resetPtr(x) if(x[0]!=0) x+=strlen(x)
 static void glueMethodHead(S part1, S part2){
-    if(htr[0]!=0) htr+=strlen(htr);
+    resetPtr(htr);
     SP(htr, "%s%s\n", part1, part2);
+}
+
+static void glueMethodFunc(S func){
+    resetPtr(ftr);
+    SP(ftr, "%s\n", func);
 }
 
 static int countInfoNodeList(InfoNodeList *list){
@@ -96,7 +105,7 @@ static void genMethodHead(Node *n){
         if(numRtn > 0) glueCode(", ");
         genVarList(n->val.method.param->val.listS, comma);
     }
-    glueMethodHead(line, ");\n");
+    glueMethodHead(line, ");");
     glueCode("){");
     glueLine();
 }
@@ -232,6 +241,17 @@ static void genLocalVars(Node *block){
     I k=0;
     DOI(SymbolTableSize, if(st->table[i]) genLocalVar(st->table[i], k++))
     glueLine();
+}
+
+static void genProfileStmt(B f){
+    if(f) { genIndent(); glueCode("PROFILE("); }
+    else { glueCode(");"); glueLine(); }
+}
+
+static void genCodeExtra(ChainExtra *extra){
+    glueMethodHead(extra->funcDecl, "");
+    genProfileStmt(1); glueCode(extra->funcInvc); genProfileStmt(0);
+    glueMethodFunc(extra->funcFunc);
 }
 
 /* ------ gen functions defined above ------ */
@@ -414,8 +434,7 @@ static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case   stmtK: if(f) { genIndent(); glueCode("PROFILE("); }
-                      else { glueCode(");"); glueLine(); } break;
+        case   stmtK: genProfileStmt(f); break;
         case     ifK:
         case  whileK:
         case repeatK:
@@ -423,7 +442,23 @@ static void genStatement(Node *n, B f){
     }
 }
 
+static B checkSimpleHash(Node *n){
+    L x = lookupSimpleHash(hashOpt,(L)n);
+    if(x){
+        ChainExtra *extra = (ChainExtra*)x;
+        //P("kind = %s\n", getExtraKind(extra->kind)); getchar();
+        switch(extra->kind){
+            case NativeG: R 0;
+            case   SkipG: R 1;
+            case    OptG: genCodeExtra(extra); R 1;
+            default: EP("Unknown kind: %d\n", extra->kind);
+        }
+    }
+    R 0;
+}
+
 static void scanNode(Node *n){
+    if(checkSimpleHash(n)) R ;
     resetCode();
     genStatement(n, true);
     switch(n->kind){
@@ -444,6 +479,7 @@ static void scanNode(Node *n){
         case     breakK: scanBreak     (n); break;
         case  continueK: scanContinue  (n); break;
         case     blockK: scanBlock     (n); break;
+        case      funcK: break;  // TODO
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
     genStatement(n, false);
@@ -459,6 +495,7 @@ static void scanList(List *list){
 // TODO: utilize information stored in chains
 static void compileChain(Chain *chain){
     scanNode(chain->cur);
+
 }
 
 static int compileChainList(ChainList *list){
@@ -514,22 +551,27 @@ static void genEntry(){
     glueCodeLine("}");
 }
 
-static void saveToFile(S path, S head, S code){
+static void saveToFile(S path, S head, S func, S code){
     printBanner("Generated Code Below");
-    P("%s%s", head,code);
+    P("%s\n%s\n%s\n", head,func,code);
     return ;
     FILE *fp = fopen(path, "w");
     FP(fp, "%s%s", head,code);
     fclose(fp);
 }
 
-static void dispStats(){
-    resetCode();
-    I size = ptr - code;
-    P("Profile:\n>> Used buffer %.2lf%% [%d/%d]\n", \
-        percent(size,CODE_MAX_SIZE), size, CODE_MAX_SIZE);
-    if(size >= CODE_MAX_SIZE)
+static void dispStatsBuff(L cur, L total, S name){
+    P("Profile:\n>> Used buffer %s %.2lf%% [%lld/%lld]\n", \
+        name, percent(cur,total), cur, total);
+    if(cur >= total)
         EP("Code buffer full!!!");
+}
+
+static void dispStats(){
+    resetCode(); resetPtr(htr); resetPtr(ftr);
+    dispStatsBuff(htr-head_code, HEAD_MAX_SIZE, "head");
+    dispStatsBuff(ftr-func_code, FUNC_MAX_SIZE, "func");
+    dispStatsBuff(ptr-code     , CODE_MAX_SIZE, "code");
 }
 
 static void compileNaive(List *list){
@@ -540,7 +582,7 @@ static void dumpCode(){
     //if(H_DEBUG) printChainList(); // display visited chains
     genEntry();
     dispStats();
-    saveToFile("out/gen.h", head, code);
+    saveToFile("out/gen.h", head_code, func_code, code);
 }
 
 static void init(){
@@ -550,9 +592,16 @@ static void init(){
     lhsVars  = NULL;
     codeList = NEW(CodeList);
     ptr      = code;
-    code[0]  = 0;
-    htr      = head;
-    head[0]  = 0;
+    code[0]  = head_code[0] = func_code[0] = 0;
+    htr      = head_code;
+    ftr      = func_code;
+}
+
+I genOptimizedCode(){
+    init();
+    compileNaive(compiledMethodList->next);
+    dumpCode();
+    R 0;
 }
 
 I HorseCompilerNaive(){

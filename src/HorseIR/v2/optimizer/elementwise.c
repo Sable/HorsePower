@@ -9,6 +9,11 @@ static Node *currentMethod;
 static I qid;
 static I phTotal;
 
+#define CODE_MAX_SIZE 10240
+static char code[CODE_MAX_SIZE], *ptr;
+
+extern sHashTable *hashOpt;
+
 #define isChainVisited(c) (c->isVisited)
 #define chainNode(c)   (c)->cur
 #define getNameKind(n) (n)->val.name.sn->kind
@@ -80,15 +85,15 @@ static int findUseByName(Chain *p, char *name){
 }
 
 typedef struct codegen_node{
-    Node *n;
+    Node *node;
     int pnum; // # of parameter
     struct codegen_node *pnode[5]; // parameter nodes
 }gNode;
 
-gNode *initgNode(Node *n){
+gNode *initgNode(Node *node){
     gNode *x = NEW(gNode);
-    x->n = n;
-    x->pnum = totalElement(fetchParams(n));
+    x->node  = node;
+    x->pnum  = totalElement(fetchParams(node));
     if(x->pnum >= 5)
         EP("Not enough space");
     return x;
@@ -215,17 +220,17 @@ static void genCodeConst(Node *n){
     ConstValue *v = n->val.nodeC;
     switch(v->type){
         case    symC:
-        case    strC: P("%s",v->valS); break;
+        case    strC: glueAny("%s",v->valS); break;
         case   dateC:
         case  monthC:
         case   timeC:
         case minuteC:
         case secondC:
-        case    intC: P("%d"  , v->valI); break;
-        case  floatC: P("%g"  , v->valF); break;
+        case    intC: glueAny("%d"  , v->valI); break;
+        case  floatC: glueAny("%g"  , v->valF); break;
         case     dtC:
-        case   longC: P("%lld", v->valL); break;
-        case   clexC: P(v->valX[1]>=0?"%g+%g":"%g%g", \
+        case   longC: glueAny("%lld", v->valL); break;
+        case   clexC: glueAny(v->valX[1]>=0?"%g+%g":"%g%g", \
                               v->valX[0], v->valX[1]); break;
         default: EP("Add more constant types: %d\n", v->type);
     }
@@ -237,7 +242,7 @@ static void genCodeVector(Node *n){
 
 static void genCodeName(Node *n, I id){
     C code = getTypeCodeByName(n);
-    P("v%c(x%d,i)", code, id);
+    glueAny("v%c(x%d,i)", code, id);
 }
 
 static void genCodeNode(Node *n){
@@ -250,7 +255,6 @@ static void genCodeNode(Node *n){
 
 static I varNum;
 static S varNames[99];
-static S fuseInvc;
 
 static L searchName(S *names, S s){
     DOI(varNum, if(!strcmp(names[i],s))R i) R -1;
@@ -260,7 +264,7 @@ static B isDuplicated(S *names, S s){
     return searchName(names, s) >= 0;
 }
 
-static S genInvocation(S targ, S func, S *names, I num){
+static S genInvc(S targ, S func, S *names, I num){
     C temp[199]; S ptr = temp;
     ptr += SP(ptr, "%s(%s, (V[]){",func,targ);
     DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
@@ -268,9 +272,15 @@ static S genInvocation(S targ, S func, S *names, I num){
     return strdup(temp);
 }
 
+static S genDecl(S func, C del){
+    C temp[199]; 
+    SP(temp, "static I %s(V z, V *x)%c", func, del);
+    return strdup(temp);
+}
+
 // TODO: remove duplicated items (only distinct values wanted)
 static void totalInputs(gNode *rt, S *names){
-    List *params = fetchParams(rt->n);
+    List *params = fetchParams(rt->node);
     DOI(rt->pnum, {I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) totalInputs(t,names); \
             else {Node *p = fetchParamsIndex(params,k)->val; \
@@ -280,33 +290,41 @@ static void totalInputs(gNode *rt, S *names){
 }
 
 static void genCodeElem(gNode *rt, B isRT){
-    Node *n  = rt->n;
+    ChainExtra *extra = NEW(ChainExtra);
+    extra->kind = isRT?OptG:SkipG;
+    Node *n = rt->node;
     C temp[99];
     if(isRT){
         Node *z0 = getParamFromNode(n,0); S z0s = getNameStr(z0);
         C z0c = getTypeCodeByName(z0);
         SP(temp, "q%d_elementwise_%d",qid,phTotal++);
-        P("I %s(V z, V *x){\n",temp);
+        glueCode(genDecl(temp, '{')); glueLine();
         varNum = 0;
         totalInputs(rt, varNames);
-        DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
-        P(indent "DOP(vn(z), v%c(z,i)=",z0c);
+        DOI(varNum, glueAny(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        glueAny(indent "DOP(vn(z), v%c(z,i)=",z0c);
+        //DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        //P(indent "DOP(vn(z), v%c(z,i)=",z0c);
         // setup invocation for final fusion
-        fuseInvc = genInvocation(z0s, temp, varNames, varNum);
+        extra->funcDecl = genDecl(temp, ';');
+        extra->funcInvc = genInvc(z0s, temp, varNames, varNum);
     }
     Node *fn = fetchFuncNode(n);
-    P("%s(", genFuncNameC(getName2(fn)));
+    //P("%s(", genFuncNameC(getName2(fn)));
+    glueAny("%s(", genFuncNameC(getName2(fn)));
     List *params = fetchParams(n);
-    DOI(rt->pnum, {if(i>0)P(","); I k=i2-i-1; gNode *t=rt->pnode[k]; \
-            if(t) genCodeElem(t,0); \
+    DOI(rt->pnum, {if(i>0)glueChar(','); I k=i2-i-1; gNode *t=rt->pnode[k]; \
+            if(t) genCodeElem(t,false); \
             else {Node *p = fetchParamsIndex(params,k)->val; \
                 if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,getName2(p))); \
                 else genCodeNode(p);} })
-    P(")");
+    glueChar(')');
     if(isRT){
-        P(") R 0;\n");
-        P("}\n");
+        glueCode(") R 0;\n}");
+        extra->funcFunc = strdup(code);
     }
+    addToSimpleHash(hashOpt, (L)(rt->node), (L)extra); // insert to hash
+    //printChainExtra(extra);
 }
 
 static void findFusionSub(Chain *chain){
@@ -317,8 +335,8 @@ static void findFusionSub(Chain *chain){
         if(rt && isOK2Fuse(rt)){
             P("bottom chain found:\n");
             //printChain(bottom); getchar();
-            genCodeElem(rt,1);
-            P("Fusion invocation: %s\n", fuseInvc);
+            cleanCode(); ptr = code;
+            genCodeElem(rt,true);
             getchar();
         }
     }
@@ -349,9 +367,9 @@ static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
     ChainList *chains = n->val.method.meta->chains;
-    //printChainList(chains);
     analyzeChain(chains->next);
     currentMethod = prevMethod;
+    //printChainList(chains); getchar(); // TODO: printChainListBasic
 }
 
 static void scanMethodList(List *list){

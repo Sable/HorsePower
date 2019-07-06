@@ -11,6 +11,7 @@ V fetchVector(Node *n);
 /* Compiler */
 I HorseCompilerNaive();
 I HorseCompilerOptimized();
+I genOptimizedCode();
 
 /* Interpreter v2 */
 I HorseInterpreter2();
