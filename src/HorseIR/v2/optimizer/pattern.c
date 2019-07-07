@@ -12,7 +12,7 @@ typedef struct PatternTree{
 static Node *currentMethod;
 static PatternTree *allPattern[99];
 static int numPattern;
-static PeepholeNode PhList[99];
+//static PeepholeNode PhList[99];
 static int phTotal;
 static int qid;
 
@@ -184,7 +184,7 @@ static void genPattern2_C_Core(PatternTree *ptree, int op){
     C x0c = getTypeCodeByName(x0);
     C z0c = getTypeCodeByName(z0);
     //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
-    SP(tmp, "q%d_peephole_fp%d_%d", qid, op, phTotal);
+    SP(tmp, "q%d_peephole_fp%d_%d", qid, op, phTotal++);
     glueCode(genDecl2(tmp, '{')); glueLine();
     depth++;
     glueAnyLine("// z -> %s", z0s);
@@ -229,7 +229,7 @@ static void genPattern3_C(PatternTree *ptree){
     Node *y1 = getParamFromChain(chain_y1, 1); S y1s = getNameStr(y1);
     Node *z0 = getParamFromChain(chain_z , 0); S z0s = getNameStr(z0);
     //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
-    SP(tmp, "q%d_peephole_%d", qid, phTotal);
+    SP(tmp, "q%d_peephole_%d", qid, phTotal++);
     glueCode(genDecl2(tmp,'{')); glueLine();
     depth++;
     glueAnyLine("// z -> %s", z0s);
@@ -259,7 +259,7 @@ static void genPattern4_C(PatternTree *ptree){
     Node *y0 = getParamFromChain(chain_x, 3); S y0s = getNameStr(y0);
     Node *z0 = getParamFromChain(chain_z, 0); S z0s = getNameStr(z0);
     //P("x = %s, y = %s, z = %s\n", x,y,z);
-    SP(tmp, "q%d_peephole_%d", qid, phTotal);
+    SP(tmp, "q%d_peephole_%d", qid, phTotal++);
     glueCode(genDecl3(tmp,'{')); glueLine();
     //glueAnyLine("L %s(V z, V x, V y){", tmp);
     depth++;

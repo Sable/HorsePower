@@ -11,6 +11,7 @@ static Node *currentMethod;
 
 static void scanNode(Node *n);
 static void scanList(List *list);
+static void scanList1(List *list, Node *first);
 static void genList(List *list, C sep);
 static void genVarList(List *list, C sep);
 
@@ -185,9 +186,9 @@ char getTypeAlias(Type t){
         case  f32T: return 'F';
         case  f64T: return 'E';
         case  strT: return 'S';
-        case  symT: return 'Q';
+        case  symT: return 'S'; // Q -> S
         case charT: return 'C';
-        case dateT: return 'D';
+        case dateT: return 'I'; // D -> I
         default: EP("Add more types: %d\n", t);
     }
 }
@@ -288,6 +289,10 @@ static SymbolKind scanFuncName(Node *n){
     return sk;
 }
 
+static Node* getLastNodeFromList(List *list){
+    while(list && list->next) list = list->next; R list?list->val:0;
+}
+
 static void scanCall(Node *n){
     I prevNumArg = numArg;
     SymbolKind sk = scanFuncName(n->val.call.func);
@@ -295,12 +300,18 @@ static void scanCall(Node *n){
     if(sk == methodS) {
         genVarArray(lhsVars, comma);
         numArg = 1;
+        scanNode(n->val.call.param); // argExprK
     }
     else {
         genList(lhsVars, comma);
         numArg = countNode(lhsVars);
+        List *args = n->val.call.param->val.listS;
+        Node *first = getLastNodeFromList(args);
+        if(first && instanceOf(first, funcK)){
+            scanList1(args, first);
+        }
+        else scanNode(n->val.call.param); // argExprK
     }
-    scanNode(n->val.call.param);
     numArg = prevNumArg;
     glueCode(")");
     if(sk == methodS) glueCode(")");
@@ -430,6 +441,18 @@ static void scanBlock(Node *n){
     depth--;
 }
 
+
+static void scanFunc(Node *n){
+    if(1==totalElement(n->val.listS)){
+        Node *first = n->val.listS->val;
+        glueCode(", ");
+        scanFuncName(first);
+    }
+    else EP("Add impl.");
+}
+
+
+
 static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
@@ -479,7 +502,7 @@ static void scanNode(Node *n){
         case     breakK: scanBreak     (n); break;
         case  continueK: scanContinue  (n); break;
         case     blockK: scanBlock     (n); break;
-        case      funcK: break;  // TODO
+        case      funcK: scanFunc      (n); break;
         default: EP("Add more node types: %s\n", getNodeTypeStr(n));
     }
     genStatement(n, false);
@@ -491,6 +514,21 @@ static void scanList(List *list){
         scanNode(list->val);
     }
 }
+
+static void scanListFirst(List *list){
+    // scan all items except the last item
+    if(list){
+        scanListFirst(list->next);
+        if(list->next)
+            scanNode(list->val);
+    }
+}
+
+static void scanList1(List *list, Node *first){
+    scanListFirst(list);
+    scanNode(first); // put the first node last
+}
+
 
 // TODO: utilize information stored in chains
 static void compileChain(Chain *chain){

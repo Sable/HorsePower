@@ -37,6 +37,7 @@ static VList *paramList, *rtnList;
 // TODO: test a variable is used before assigned
 
 /* ---- above declarations ---- */
+// string arrays in compiler.c
 
 /* pfnRand, pfnSeed */
 MonadicFunc monFunc[MonFuncSize] = {
@@ -441,6 +442,7 @@ static S getFuncNameStr(Node *funcName){
     //printV(literalSymbol(sn->name)); getchar();
     switch(sn->kind){
         case builtinS: return sn->name; 
+        case  methodS: return sn->name;
         default: EP("Add more support for %d\n", sn->kind);
     }
 }
