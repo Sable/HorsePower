@@ -1,9 +1,6 @@
 #include "../global.h"
 
-extern Prog *root;
 extern List *compiledMethodList;
-extern bool *ElementwiseUnaryMap;
-extern bool *ElementwiseBinaryMap;
 
 static Node *currentMethod;
 static I qid;
@@ -14,8 +11,6 @@ static char code[CODE_MAX_SIZE], *ptr;
 
 extern sHashTable *hashOpt;
 
-#define isChainVisited(c) (c->isVisited)
-#define chainNode(c)   (c)->cur
 #define getNameKind(n) (n)->val.name.sn->kind
 #define getName1(n)    (n)->val.name.id1
 #define getName2(n)    (n)->val.name.id2
@@ -24,16 +19,6 @@ extern sHashTable *hashOpt;
 #define getVarName(n)  (n)->val.param.id
 
 /* ------ declaration above ------ */
-
-bool isElementwise(char *funcName){
-    FuncUnit x;
-    getFuncIndexByName(funcName, &x);
-    switch(x.kind){
-        case 1: return ElementwiseUnaryMap [x.u];
-        case 2: return ElementwiseBinaryMap[x.b];
-    }
-    return false;
-}
 
 static void printChainUses(Chain *p){
     DOI(p->useSize, {P(" --> "); printChain(p->chain_uses[i]); P("\n"); })
@@ -58,7 +43,7 @@ static bool isMatchedDef(Chain *p, char *name){
     return false;
 }
 
-static int findDefByName(Chain *p, char *name){
+int findDefByName(Chain *p, char *name){
     int c = 0, x = -1;
     DOI(p->defSize, if(isMatchedDef(p->chain_defs[i], name)){c++; x=i;})
     return c==1?x:-1;
@@ -84,10 +69,10 @@ static int findUseByName(Chain *p, char *name){
     return c==1?x:-1;
 }
 
-typedef struct codegen_node{
+typedef struct codegen_gnode{
     Node *node;
     int pnum; // # of parameter
-    struct codegen_node *pnode[5]; // parameter nodes
+    struct codegen_gnode *pnode[5]; // parameter nodes
 }gNode;
 
 gNode *initgNode(Node *node){
@@ -100,9 +85,9 @@ gNode *initgNode(Node *node){
 }
 
 static gNode *findFusionUp(Chain *chain){
-    if(chain->isVisited) return NULL;
+    if(isChainVisited(chain)) return NULL;
     else chain->isVisited = true;
-    Node *n = chain->cur;
+    Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
         List *vars = n->val.assignStmt.vars;
         Node *expr = n->val.assignStmt.expr;
@@ -151,7 +136,7 @@ static gNode *findFusionUp(Chain *chain){
 }
 
 static Chain *findFusionDown(Chain *chain){
-    Node *n = chain->cur;
+    Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
         List *vars = n->val.assignStmt.vars;
         Node *expr = n->val.assignStmt.expr;
@@ -348,7 +333,7 @@ static void findFusionSub(Chain *chain){
 }
 
 static void findFusion(Chain *chain){
-    Node *n = chain->cur;
+    Node *n = chainNode(chain);
     //printChain(chain); P("\n");
     if(instanceOf(n, stmtK)){
         findFusionSub(chain);
@@ -382,6 +367,7 @@ static void init(){
 
 // entry: fuse elementwise
 void optElementwise(){
+    printBanner("Fusion Elementwise");
     init();
     scanMethodList(compiledMethodList->next);
 }

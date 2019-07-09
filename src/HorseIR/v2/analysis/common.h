@@ -35,9 +35,11 @@ typedef struct InfoNodeList{
     struct InfoNodeList *next;
 }InfoNodeList;
 
-void printInfoNode(InfoNode *x);
-Type getSubType(InfoNode *x);
-ShapeNode *getSubShape(InfoNode *x);
+/* analysis/common.c */
+void       printInfoNode(InfoNode *x);
+Type       getSubType(InfoNode *x);
+ShapeNode* getSubShape(InfoNode *x);
+
 bool isSameShape(ShapeNode *x, ShapeNode *y);
 void freeInfoNode(InfoNode *in);
 void printShapeNode(ShapeNode *sn);
@@ -48,5 +50,8 @@ void printShapeNode(ShapeNode *sn);
 #include "udchain.h"    // build use-def chain
 
 I totalSymbolNames(SymbolNameList *list);
+
+/* typeshape.c */
+InfoNode*  getInfoFromNode(Node *n);
 
 #endif

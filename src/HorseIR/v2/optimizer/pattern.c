@@ -19,10 +19,6 @@ static int qid;
 extern List *compiledMethodList;
 extern sHashTable *hashOpt;
 
-#define isChainVisited(x) (x)->isVisited
-#define chainNode(c)      (c->cur)
-#define setVisited(c, v)  c->isVisited=v
-
 #define CODE_MAX_SIZE 10240
 #define HEAD_MAX_SIZE 1024
 static char code[CODE_MAX_SIZE], *ptr;

@@ -14,8 +14,10 @@ static void printBannerLocal(S msg){
 static void optimizerMain(OC opt){
     printBannerLocal(getOptStr(opt));
     switch(opt){
-        case OPT_FE: optElementwise(); break;
-        case OPT_FP: optPattern();     break;
+        case OPT_FE: optElementwise();    break; // compiledMethodList
+        case OPT_FP: optPattern();        break; // compiledMethodList
+        case OPT_FD: optDeep();           break; // compiledMethodList
+        case OPT_SR: optSReduction(root); break;
         default: TODO("Add impl. %s",  getOptStr(opt));
     }
 }

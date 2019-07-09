@@ -203,7 +203,7 @@ static InfoNode *getInfoFunc(Node *n){
     return in;
 }
 
-static InfoNode *getInfoFromNode(Node *n){
+InfoNode* getInfoFromNode(Node *n){
     if(instanceOf(n, typeK)){
         return n->val.type.in;
     }
@@ -226,7 +226,7 @@ static InfoNode *getInfoFromNode(Node *n){
     else if(instanceOf(n, funcK)){
         return getInfoFunc(n);
     }
-    else { printNodeType(n); EP("Kind not supported\n"); }
+    else EP("Not supported: %s", getNodeTypeStr(n));
     return NULL;
 }
 

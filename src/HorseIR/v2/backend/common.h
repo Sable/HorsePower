@@ -74,10 +74,6 @@ typedef enum TargetCode{
     TARGET_ACC, TARGET_CUDA, TARGET_CL
 }TC;
 
-typedef enum OptCode{
-    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_ALL
-}OC;
-
 #include "h_type.h"
 
 /* macros */ 

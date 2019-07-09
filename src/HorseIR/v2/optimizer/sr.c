@@ -1,5 +1,5 @@
 #include "../global.h"
-
+ 
 static void scanNode(Node *n);
 static void scanList(List *list);
 
@@ -118,7 +118,7 @@ static void scanList(List *list){
 static void init(){ }
 
 /* entry */
-void analyzeSR(Prog *root){
+void optSReduction(Prog *root){
     printBanner("Strength Reduction");
     init();
     scanList(root->module_list);

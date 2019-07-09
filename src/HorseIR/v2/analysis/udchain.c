@@ -545,7 +545,7 @@ static void scanMethod(Node *n){
     scanNode(n->val.method.block, flow);
     //printFlow(flow);
     //printFlow(flow_sink);
-    printChainList(chain_list); // print all chains
+    //printChainList(chain_list); // print all chains
     n->val.method.meta->chains = chain_list; // with dummy
     // TODO: assign chain_list to a method node
     // TODO: clean chain_list
@@ -554,7 +554,7 @@ static void scanMethod(Node *n){
 static void setCurrentNode(Node *n, Node *val){
     switch(n->kind){
         case     stmtK:
-        case     castK:
+        //case     castK:
         case exprstmtK:
         case   returnK:
         case       ifK:

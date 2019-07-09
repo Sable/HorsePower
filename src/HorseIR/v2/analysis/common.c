@@ -36,6 +36,8 @@ void printShapeNode(ShapeNode *sn){
     }
 }
 
+/* InfoNode */
+
 void printInfoNode(InfoNode *x){
     P("\t{");
     printTypeNode(x);

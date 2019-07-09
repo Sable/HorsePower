@@ -1,15 +1,22 @@
 #ifndef __H_O_COMMON__
 #define __H_O_COMMON__
 
+// TODO: the struct below should be removed (bcz of no use)
 typedef struct FuseNode {
     S targ, invc;
 }OptNode, FuseNode, PeepholeNode;
+
+/* macros */
+#define chainNode(c)      (c)->cur
+#define isChainVisited(c) (c->isVisited)
+#define setVisited(c, v)  (c)->isVisited=v
 
 /* declarations below */
 
 O optElementwise();
 O optPattern();
-O analyzeSR(Prog *root);
+O optDeep();
+O optSReduction(Prog *root);
 
 S getMaxValue(C c);
 S getMinValue(C c);
@@ -23,6 +30,9 @@ List *fetchParams      (Node *n);
 Node *fetchFuncNode    (Node *n);
 Node *fetchFuncSingle  (Node *n);
 List *fetchParamsIndex (List *list, I pos);
+
+B isElementwise(S funcName);
+I findDefByName(Chain *p, S name);
 
 
 #endif

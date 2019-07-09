@@ -195,7 +195,8 @@ char getTypeAlias(Type t){
 
 static char getTypeAliasFromNode(Node *n){
     InfoNode *in = n->val.type.in;
-    if(!in->subInfo) return getTypeAlias(in->type);
+    if(!in->subInfo)
+        return getTypeAlias(in->type);
     else EP("Type problem");
 }
 

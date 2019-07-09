@@ -133,6 +133,7 @@ static TC getTargetCode(S target){
 static OC getOptCode(S opt){
     if(!strcmp(opt, "fe")) R OPT_FE;
     else if(!strcmp(opt, "fp")) R OPT_FP;
+    else if(!strcmp(opt, "fd")) R OPT_FD;
     else if(!strcmp(opt, "sr")) R OPT_SR;
     else if(!strcmp(opt, "all")) R OPT_ALL;
     else R OPT_NA;
