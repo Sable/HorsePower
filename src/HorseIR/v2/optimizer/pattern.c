@@ -384,9 +384,11 @@ static bool matchPattern(Chain *chain, PatternTree* ptree){
     return false;
 }
 
-static void findPattern(ChainList *list, PatternTree* ptree, I pid){
+/* pattern 1: pattern trees */
+
+static void findPattern1(ChainList *list, PatternTree* ptree, I pid){
     if(list){
-        findPattern(list->next, ptree, pid);
+        findPattern1(list->next, ptree, pid);
         if(!isChainVisited(list->chain)){
             if(matchPattern(list->chain, ptree)){
                 //P("Pattern %d found\n", pid); getchar();
@@ -397,9 +399,92 @@ static void findPattern(ChainList *list, PatternTree* ptree, I pid){
     }
 }
 
+/* pattern 2: common index */
+
+#define getName1(n) (n)->val.name.id1
+#define getName2(n) (n)->val.name.id2
+
+static B sameVar(Node *x, Node *y){
+    if(instanceOf(x,nameK)){
+        if(instanceOf(y,nameK)){
+            if(getName1(x) && getName1(y)){
+                if(strcmp(getName1(x), getName1(y))) R 0;
+            }
+            return !strcmp(getName2(x), getName2(y));
+        }
+        else if(instanceOf(y, varK)){
+            return !strcmp(getName2(x), y->val.param.id);
+        }
+    }
+    R 0;
+}
+
+static B isValidPatternIndex(Chain *x, Node *n){
+    if(instanceOf(chainNode(x), stmtK)){
+        Node *call = getStmtCall(chainNode(x));
+        if(call){
+            Node *func = getCallFunc(call);
+            SymbolKind sk = getNameKind(func);
+            if(sk == builtinS && !strcmp(getName2(func),"index")){
+                Node *p = call->val.call.param->val.listS->val; // 2nd param
+                R sameVar(p, n);
+                // TODO: check 1st param is needed before
+                // TODO: within current code block
+            }
+        }
+    }
+    R 0;
+}
+
+static B allUsesValidIndex(Chain *chain, Node *n){
+    //printNode(chainNode(chain));
+    //DOI(chain->useSize, P("use[%lld] = %d\n",i,isValidPatternIndex(chain->chain_uses[i],n)));
+    //getchar();
+    DOI(chain->useSize, if(!isValidPatternIndex(chain->chain_uses[i],n))R 0) R 1;
+}
+
+static void genPatternIndex(Chain *chain, Node *n){
+    DOI(chain->useSize, {printChain(chain->chain_uses[i]); P("\n");}) getchar();
+    TODO("Impl. code gen for the pattern 'index'");  // example input: q1
+}
+
+static void searchAndGenPatternIndex(Chain *chain, Node *n){
+    if(allUsesValidIndex(chain,n)){
+        genPatternIndex(chain, n);
+    }
+    // else, partial fulfillment should be allowed as well
+}
+
+static bool matchPatternIndex(Chain *chain){
+    if(chain->useSize > 1){
+        //printNode(chainNode(chain)); getchar();
+        Node *n = chainNode(chain);
+        if(instanceOf(n, stmtK)){
+            List *vars = n->val.assignStmt.vars;
+            while(vars){
+                searchAndGenPatternIndex(chain, vars->val);
+                vars = vars->next;
+            }
+        }
+    }
+    return 0;
+}
+
+static void findPattern2(ChainList *list){
+    if(list){
+        findPattern2(list->next);
+        Chain *chain = list->chain;
+        if(!isChainVisited(chain)){
+            matchPatternIndex(chain);
+        }
+    }
+}
+
 static void analyzeChain(ChainList *list){
     // TODO: findPatternCompress
-    DOI(numPattern, findPattern(list, allPattern[i], i+1));
+    //DOI(numPattern, findPattern1(list, allPattern[i], i+1));
+    // specific pattern
+    findPattern2(list);
 }
 
 static void compileMethod(Node *n){

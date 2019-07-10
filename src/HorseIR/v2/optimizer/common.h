@@ -35,5 +35,9 @@ List *fetchParamsIndex (List *list, I pos);
 B isElementwise(S funcName);
 I findDefByName(Chain *p, S name);
 
+Node* getStmtCall(Node *stmt);
+#define getCallFunc(x) x->val.call.func
+#define getNameKind(n) (n)->val.name.sn->kind
+
 
 #endif
