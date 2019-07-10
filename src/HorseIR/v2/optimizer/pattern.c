@@ -19,7 +19,6 @@ extern List *compiledMethodList;
 extern sHashTable *hashOpt;
 
 #define CODE_MAX_SIZE 10240
-#define HEAD_MAX_SIZE 1024
 static char code[CODE_MAX_SIZE], *ptr;
 static int depth;
 
@@ -443,9 +442,65 @@ static B allUsesValidIndex(Chain *chain, Node *n){
     DOI(chain->useSize, if(!isValidPatternIndex(chain->chain_uses[i],n))R 0) R 1;
 }
 
+static S genDecl(S func, C del){
+    C temp[199]; 
+    SP(temp, "static I %s(V *z, V *x, V y)%c", func, del);
+    return strdup(temp);
+}
+
+static S genLocals(S funcName, Chain *chain, Node *n){
+    char temp[199]; S t = temp;
+    t += SP(t, "%s((V []){", funcName);
+    DOI(chain->useSize, { 
+            Node *n  = chainNode(chain->chain_uses[i]);
+            Node *z0 = getParamFromNode(n, 0);
+            S z0s = getNameStr(z0); t += SP(t, (i==0?"%s":", %s"), z0s);
+            glueAnyLine("z%lld = z[%lld]; // %s",i+1,i+1,z0s); })
+    t += SP(t, "}, (V []){");
+    DOI(chain->useSize, { 
+            Node *n  = chainNode(chain->chain_uses[i]);
+            Node *x0 = getParamFromNode(n, 1);
+            S x0s = getNameStr(x0); t += SP(t, (i==0?"%s":", %s"), x0s);
+            glueAnyLine("x%lld = x[%lld]; // %s",i+1,i+1,x0s); })
+    S y0s = getNameStr(n);
+    t += SP(t, "}, %s)", y0s);
+    R strdup(temp);
+}
+
 static void genPatternIndex(Chain *chain, Node *n){
-    DOI(chain->useSize, {printChain(chain->chain_uses[i]); P("\n");}) getchar();
-    TODO("Impl. code gen for the pattern 'index'");  // example input: q1
+    cleanCode(); ptr = code;
+    //DOI(chain->useSize, {printChain(chain->chain_uses[i]); P("\n");}) getchar();
+    //TODO("Impl. code gen for the pattern 'index'");  // example input: q1
+    char temp[199];
+    SP(temp, "q%d_patternindex_%d", qid, phTotal++);
+    glueCodeLine(genDecl(temp, '{'));
+    depth++;
+    S invc = genLocals(temp, chain, n);
+    glueCodeLine("DOI(vn(z), {");
+    C y0c = getTypeCodeByName(n);
+    depth++;
+    DOI(chain->useSize, {
+            Node *n = chainNode(chain->chain_uses[i]);
+            Node *z0 = getParamFromNode(n, 0); C z0c = getTypeCodeByName(z0);
+            Node *x0 = getParamFromNode(n, 1); C x0c = getTypeCodeByName(x0);
+            glueAnyLine("v%c(z%lld,i) = v%c(x%lld, v%c(y,i));", z0c,i+1,x0c,i+1,y0c); })
+    depth--;
+    glueCodeLine("})");
+    glueCodeLine("R 0;");
+    depth--;
+    glueCodeLine("}");
+    // add to hash tables
+    DOI(chain->useSize, {
+            ChainExtra *extra = NEW(ChainExtra);
+            if(i==0) {
+                extra->kind = OptG; 
+                extra->funcInvc = invc;
+                extra->funcDecl = genDecl(temp, ';');
+                extra->funcFunc = strdup(code);
+            }
+            else extra->kind = SkipG;
+            Node *n = chainNode(chain->chain_uses[i]);
+            addToSimpleHash(hashOpt, (L)n, (L)extra);})
 }
 
 static void searchAndGenPatternIndex(Chain *chain, Node *n){
