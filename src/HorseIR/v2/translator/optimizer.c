@@ -4,6 +4,9 @@ extern Prog *root;
 
 #define hashOptSize (1<<12)  // 4K
 sHashTable *hashOpt;
+I qid, phTotal;
+
+/* ---------- Above declarations ----------  */
 
 static void printBannerLocal(S msg){
     WP("/*==== ");
@@ -29,6 +32,8 @@ static bool isOptimizeAll(){
 static void init(){
     buildUDChain(root);
     hashOpt = initSimpleHash(hashOptSize);
+    qid     = qIsTpch?qTpchId:99;
+    phTotal = 0;
 }
 
 I HorseCompilerOptimized(){

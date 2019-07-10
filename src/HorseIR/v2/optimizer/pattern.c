@@ -13,8 +13,7 @@ static Node *currentMethod;
 static PatternTree *allPattern[99];
 static int numPattern;
 //static PeepholeNode PhList[99];
-static int phTotal;
-static int qid;
+extern int qid, phTotal;
 
 extern List *compiledMethodList;
 extern sHashTable *hashOpt;
@@ -437,8 +436,6 @@ static void cleanPatterns(){
 
 static void init(){
     currentMethod = NULL;
-    phTotal = 0;
-    qid     = qIsTpch?qTpchId:99;
     depth   = 0;
     code[0] = 0;
     ptr     = code;

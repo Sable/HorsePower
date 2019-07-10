@@ -23,7 +23,8 @@ S getMinValue(C c);
 S getNameStr       (Node *n);
 C getTypeCodeByName(Node *n);
 
-S genFuncNameC(S fn);
+S genFuncNameC   (S fn);
+S genFuncNameDeep(S fn);
 
 Node *getParamFromNode (Node *n, I pos);
 List *fetchParams      (Node *n);

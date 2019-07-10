@@ -3,8 +3,7 @@
 extern List *compiledMethodList;
 
 static Node *currentMethod;
-static I qid;
-static I phTotal;
+extern I qid, phTotal;
 
 #define CODE_MAX_SIZE 10240
 static char code[CODE_MAX_SIZE], *ptr;
@@ -278,7 +277,7 @@ static void genCodeElem(gNode *rt, B isRT){
     ChainExtra *extra = NEW(ChainExtra);
     extra->kind = isRT?OptG:SkipG;
     Node *n = rt->node;
-    C temp[99];
+    C temp[199];
     if(isRT){
         Node *z0 = getParamFromNode(n,0); S z0s = getNameStr(z0);
         C z0c = getTypeCodeByName(z0);
@@ -362,7 +361,6 @@ static void scanMethodList(List *list){
 }
 
 static void init(){
-    qid = qIsTpch?qTpchId:99;
 }
 
 // entry: fuse elementwise
