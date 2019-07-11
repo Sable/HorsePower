@@ -398,7 +398,7 @@ static void findPattern1(ChainList *list, PatternTree* ptree, I pid){
     }
 }
 
-/* pattern 2: common index */
+/* pattern 2: common compress */
 
 #define getName1(n) (n)->val.name.id1
 #define getName2(n) (n)->val.name.id2
@@ -417,6 +417,117 @@ static B sameVar(Node *x, Node *y){
     }
     R 0;
 }
+
+
+static B isValidPatternCompress(Chain *x, Node *n){
+    if(instanceOf(chainNode(x), stmtK)){
+        Node *call = getStmtCall(chainNode(x));
+        if(call){
+            Node *func = getCallFunc(call);
+            SymbolKind sk = getNameKind(func);
+            if(sk == builtinS && !strcmp(getName2(func),"compress")){
+                Node *p = call->val.call.param->val.listS->next->val; // 1st param
+                R sameVar(p, n);
+            }
+        }
+    }
+    R 0;
+}
+
+static S genDeclCompress(S func, C del){
+    C temp[199]; 
+    SP(temp, "static I %s(V *z, V x, V *y)%c", func, del);
+    return strdup(temp);
+}
+
+static B allUsesValidCompress(Chain *chain, Node *n){
+    DOI(chain->useSize, if(!isValidPatternCompress(chain->chain_uses[i],n))R 0) R 1;
+}
+
+static S genLocalCompress(S funcName, Chain *chain, Node *n){
+    char temp[199]; S t = temp;
+    t += SP(t, "%s((V []){", funcName);
+    DOI(chain->useSize, { 
+            Node *n  = chainNode(chain->chain_uses[i]);
+            Node *z0 = getParamFromNode(n, 0);
+            S z0s = getNameStr(z0); t += SP(t, (i==0?"%s":", %s"), z0s);
+            glueAnyLine("z%lld = z[%lld]; // %s",i+1,i+1,z0s); })
+    S x0s = getNameStr(n);
+    t += SP(t, "}, %s, (V []){", x0s);
+    DOI(chain->useSize, { 
+            Node *n  = chainNode(chain->chain_uses[i]);
+            Node *y0 = getParamFromNode(n, 2);
+            S y0s = getNameStr(y0); t += SP(t, (i==0?"%s":", %s"), y0s);
+            glueAnyLine("y%lld = y[%lld]; // %s",i+1,i+1,y0s); })
+    t += SP(t, "})");
+    R strdup(temp);
+}
+
+static void genPatternCompress(Chain *chain, Node *n){
+    cleanCode(); ptr = code;
+    char temp[199];
+    SP(temp, "q%d_patterncompress_%d", qid, phTotal++);
+    glueCodeLine(genDeclCompress(temp, '{'));
+    depth++;
+    S invc = genLocalCompress(temp, chain, n);
+    glueCodeLine("DOI(vn(z), {");
+    C x0c = getTypeCodeByName(n);
+    depth++;
+    // TODO: fix 'Compress' op
+    DOI(chain->useSize, {
+            Node *n = chainNode(chain->chain_uses[i]);
+            Node *z0 = getParamFromNode(n, 0); C z0c = getTypeCodeByName(z0);
+            Node *y0 = getParamFromNode(n, 2); C y0c = getTypeCodeByName(y0);
+            glueAnyLine("v%c(z%lld,i) = Compress(v%c(x,i), v%c(y,%lld));", z0c,i+1,x0c,y0c,i+1); })
+    depth--;
+    glueCodeLine("})");
+    glueCodeLine("R 0;");
+    depth--;
+    glueCodeLine("}");
+    // add to hash tables
+    DOI(chain->useSize, {
+            ChainExtra *extra = NEW(ChainExtra);
+            if(i==0) {
+                extra->kind = OptG; 
+                extra->funcInvc = invc;
+                extra->funcDecl = genDeclCompress(temp, ';');
+                extra->funcFunc = strdup(code);
+            }
+            else extra->kind = SkipG;
+            Node *n = chainNode(chain->chain_uses[i]);
+            addToSimpleHash(hashOpt, (L)n, (L)extra);})
+}
+
+static void searchAndGenPatternCompress(Chain* chain, Node *n){
+    if(allUsesValidCompress(chain,n)){
+        genPatternCompress(chain, n);
+    }
+}
+
+static void matchPatternCompress(Chain *chain){
+    if(chain->useSize > 1){
+        Node *n = chainNode(chain);
+        if(instanceOf(n, stmtK)){
+            List *vars = n->val.assignStmt.vars;
+            while(vars){
+                searchAndGenPatternCompress(chain, vars->val);
+                vars = vars->next;
+            }
+        }
+    }
+}
+
+static void findPattern2(ChainList *list){
+    if(list){
+        findPattern2(list->next);
+        Chain *chain = list->chain;
+        if(!isChainVisited(chain)){
+            matchPatternCompress(chain);
+        }
+    }
+}
+
+/* pattern 3: common index */
 
 static B isValidPatternIndex(Chain *x, Node *n){
     if(instanceOf(chainNode(x), stmtK)){
@@ -442,7 +553,7 @@ static B allUsesValidIndex(Chain *chain, Node *n){
     DOI(chain->useSize, if(!isValidPatternIndex(chain->chain_uses[i],n))R 0) R 1;
 }
 
-static S genDecl(S func, C del){
+static S genDeclIndex(S func, C del){
     C temp[199]; 
     SP(temp, "static I %s(V *z, V *x, V y)%c", func, del);
     return strdup(temp);
@@ -473,7 +584,7 @@ static void genPatternIndex(Chain *chain, Node *n){
     //TODO("Impl. code gen for the pattern 'index'");  // example input: q1
     char temp[199];
     SP(temp, "q%d_patternindex_%d", qid, phTotal++);
-    glueCodeLine(genDecl(temp, '{'));
+    glueCodeLine(genDeclIndex(temp, '{'));
     depth++;
     S invc = genLocals(temp, chain, n);
     glueCodeLine("DOI(vn(z), {");
@@ -495,7 +606,7 @@ static void genPatternIndex(Chain *chain, Node *n){
             if(i==0) {
                 extra->kind = OptG; 
                 extra->funcInvc = invc;
-                extra->funcDecl = genDecl(temp, ';');
+                extra->funcDecl = genDeclIndex(temp, ';');
                 extra->funcFunc = strdup(code);
             }
             else extra->kind = SkipG;
@@ -510,7 +621,7 @@ static void searchAndGenPatternIndex(Chain *chain, Node *n){
     // else, partial fulfillment should be allowed as well
 }
 
-static bool matchPatternIndex(Chain *chain){
+static void matchPatternIndex(Chain *chain){
     if(chain->useSize > 1){
         //printNode(chainNode(chain)); getchar();
         Node *n = chainNode(chain);
@@ -522,12 +633,11 @@ static bool matchPatternIndex(Chain *chain){
             }
         }
     }
-    return 0;
 }
 
-static void findPattern2(ChainList *list){
+static void findPattern3(ChainList *list){
     if(list){
-        findPattern2(list->next);
+        findPattern3(list->next);
         Chain *chain = list->chain;
         if(!isChainVisited(chain)){
             matchPatternIndex(chain);
@@ -538,8 +648,9 @@ static void findPattern2(ChainList *list){
 static void analyzeChain(ChainList *list){
     // TODO: findPatternCompress
     //DOI(numPattern, findPattern1(list, allPattern[i], i+1));
-    // specific pattern
-    findPattern2(list);
+    // specific patterns
+    findPattern2(list); // compress
+    //findPattern3(list); // index
 }
 
 static void compileMethod(Node *n){
