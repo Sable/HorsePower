@@ -13,7 +13,7 @@ static void scanList(List *list);
 
 static bool isFuncName(Node *n, char *name){
     SymbolName *sn = n->val.name.sn;
-    return sn->kind == builtinS && !strcmp(n->val.name.id2, name);
+    return sn->kind == builtinS && sEQ(n->val.name.id2, name);
 }
 
 static void updateFuncName(Node *n, char *newName){

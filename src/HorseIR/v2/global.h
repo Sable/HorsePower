@@ -67,6 +67,8 @@ void   time_clear();
 #define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stdout,__VA_ARGS__);               }while(0) 
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
+#define sEQ(x,y)  (!strcmp(x,y))   // string equal
+#define sNEQ(x,y) (0!=strcmp(x,y)) // string not equal
 
 /* For debugging */
 #define printBanner(s) P("/*==== "s" ====*/\n")

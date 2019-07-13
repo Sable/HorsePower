@@ -1,5 +1,10 @@
 #include "../global.h"
 
+typedef struct CodeList{
+    C code[128];
+    struct CodeList *next;
+}CodeList;
+
 #define comma ','
 
 extern Node *entryMain;
@@ -17,7 +22,7 @@ static void genVarList(List *list, C sep);
 
 extern List *compiledMethodList;
 extern OC   qOpts[99];
-extern int  numOpts;
+extern I    numOpts;
 extern sHashTable *hashOpt;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
@@ -30,55 +35,21 @@ extern sHashTable *hashOpt;
 #define C_MACRO_UDF "HORSE_UDF"
 #define NUM_VAR_ROW 4           // # of var declarations in a row
 
-/* ------ declaration above ------ */
-
-static char *monFnName[] = {
-    "pfnAbs", "pfnNeg", "pfnCeil", "pfnFloor", "pfnRound", "pfnConj",
-    "pfnRecip", "pfnSignum", "pfnPi"  , "pfnNot" , "pfnLog", "pfnLog2",
-    "pfnLog10", "pfnExp", "pfnTrigCos", "pfnTrigSin", "pfnTrigTan",
-    "pfnTrigAcos", "pfnTrigAsin", "pfnTrigAtan", "pfnHyperCosh",
-    "pfnHyperSinh", "pfnHyperTanh", "pfnHyperAcosh", "pfnHyperAsinh",
-    "pfnHyperAtanh", "pfnDate", "pfnDateYear", "pfnDateMonth", "pfnDateDay",
-    "pfnTime", "pfnTimeHour", "pfnTimeMinute", "pfnTimeSecond", "pfnTimeMill",
-    "pfnUnique", "pfnStr", "pfnLen", "pfnRange", "pfnFact", "pfnRand",
-    "pfnSeed", "pfnFlip", "pfnReverse", "pfnWhere", "pfnGroup", "pfnSum",
-    "pfnAvg", "pfnMin", "pfnMax", "pfnRaze", "pfnToList", "pfnKeys",
-    "pfnValues", "pfnMeta", "pfnLoadTable", "pfnFetch", "pfnPrint"
-};
-
-static char *dyaFnName[] = {
-    "pfnLt", "pfnGt", "pfnLeq", "pfnGeq", "pfnEq", "pfnNeq", "pfnPlus",
-    "pfnMinus", "pfnMul", "pfnDiv", "pfnPower", "pfnLog2", "pfnMod", "pfnAnd",
-    "pfnOr", "pfnNand", "pfnNor", "pfnXor", "pfnAppend", "pfnLike",
-    "pfnCompress", "pfnRandK", "pfnIndexOf", "pfnTake", "pfnDrop",
-    "pfnOrderBy", "pfnMember", "pfnVector", "pfnMatch", "pfnIndex",
-    "pfnColumnValue", "pfnSubString"
-};
-
-static char *otherFnName[] = {
-    "pfnEach", "pfnEachItem", "pfnEachLeft", "pfnEachRight", "pfnEnum",
-    "pfnDict", "pfnTable", "pfnKTable", "pfnIndexA", "pfnList", "pfnJoinIndex",
-    "pfnDatetimeAdd", "pfnDatetimeSub"
-};
-
 #define isTrueMacro     "isTrue"
 #define scanBreak(n)    glueCodeLine("break")
 #define scanContinue(n) glueCodeLine("continue")
 
-typedef struct CodeList{
-    char code[128];
-    struct CodeList *next;
-}CodeList;
-
 #define HEAD_MAX_SIZE 1024
 #define FUNC_MAX_SIZE 10240
 #define CODE_MAX_SIZE 10240
-static char head_code[HEAD_MAX_SIZE], *htr;
-static char func_code[FUNC_MAX_SIZE], *ftr;
-static char code[CODE_MAX_SIZE], *ptr;
+static C head_code[HEAD_MAX_SIZE], *htr;
+static C func_code[FUNC_MAX_SIZE], *ftr;
+static C code[CODE_MAX_SIZE], *ptr;
 static CodeList *codeList;
 
 static void genIndent(){ DOI(depth, glueCode("    ")); }
+
+/* ------ declaration above ------ */
 
 #define resetPtr(x) if(x[0]!=0) x+=strlen(x)
 static void glueMethodHead(S part1, S part2){
@@ -91,15 +62,15 @@ static void glueMethodFunc(S func){
     SP(ftr, "%s\n", func);
 }
 
-static int countInfoNodeList(InfoNodeList *list){
+static I countInfoNodeList(InfoNodeList *list){
     if(list) return 1 + countInfoNodeList(list->next); return 0;
 }
 
 static void genMethodHead(Node *n){
-    resetCode(); char *line = ptr;
+    resetCode(); S line = ptr;
     glueAny("static I horse_%s(", n->val.method.fname);
-    int numRtn   = countInfoNodeList(n->val.method.meta->returnTypes);
-    int numParam = totalSymbolNames(n->val.method.meta->paramVars);
+    I numRtn   = countInfoNodeList(n->val.method.meta->returnTypes);
+    I numParam = totalSymbolNames(n->val.method.meta->paramVars);
     if(numRtn > 0)
         glueCode("V *h_rtn");
     if(numParam > 0){
@@ -126,7 +97,7 @@ static void storeCode(S s){
 }
 
 // no dummy
-static int countNode(List *list){
+static I countNode(List *list){
     if(list) return 1 + countNode(list->next);
     return 0;
 }
@@ -165,9 +136,9 @@ static void genVarList(List *list, C sep){
     }
 }
 
-static int genListReturn(List *list, C sep, S text){
+static I genListReturn(List *list, C sep, S text){
     if(list){
-        int k = genListReturn(list->next, sep, text);
+        I k = genListReturn(list->next, sep, text);
         if(list->next) glueAny("%c ",sep);
         glueAny("%s[%d] = ",text,k);
         scanNode(list->val);
@@ -176,7 +147,7 @@ static int genListReturn(List *list, C sep, S text){
     return 0;
 }
 
-char getTypeAlias(Type t){
+C getTypeAlias(Type t){
     switch(t){
         case boolT: return 'B';
         case   i8T: return 'J';
@@ -193,14 +164,14 @@ char getTypeAlias(Type t){
     }
 }
 
-static char getTypeAliasFromNode(Node *n){
+static C getTypeAliasFromNode(Node *n){
     InfoNode *in = n->val.type.in;
     if(!in->subInfo)
         return getTypeAlias(in->type);
     else EP("Type problem");
 }
 
-static char *genConstFunc(Node *n){
+static S genConstFunc(Node *n){
     InfoNode *in = n->val.type.in;
     if(!in->subInfo){
         switch(in->type){
@@ -263,14 +234,7 @@ static void scanExprStmt(Node *n){
 }
 
 static void scanFuncBuiltin(S func){
-    FuncUnit x;
-    getFuncIndexByName(func, &x);
-    switch(x.kind){
-        case 1: glueCode(  monFnName[x.u]); break;
-        case 2: glueCode(  dyaFnName[x.b]); break;
-        case 3: glueCode(otherFnName[x.t]); break;
-        default: EP("kind not found: %d\n", x.kind);
-    }
+    glueCode(getBuiltinStr(func));
 }
 
 static void scanFuncMethod(S func){
@@ -291,27 +255,29 @@ static SymbolKind scanFuncName(Node *n){
 }
 
 static Node* getLastNodeFromList(List *list){
-    while(list && list->next) list = list->next; R list?list->val:0;
+    while(list && list->next)
+        list = list->next;
+    R list?list->val:0;
 }
 
 static void scanCall(Node *n){
     I prevNumArg = numArg;
-    SymbolKind sk = scanFuncName(n->val.call.func);
+    SymbolKind sk = scanFuncName(getCallFunc(n));
     glueCode("(");
     if(sk == methodS) {
         genVarArray(lhsVars, comma);
         numArg = 1;
-        scanNode(n->val.call.param); // argExprK
+        scanNode(getCallParam(n)); // argExprK
     }
     else {
         genList(lhsVars, comma);
         numArg = countNode(lhsVars);
-        List *args = n->val.call.param->val.listS;
+        List *args = getCallParam(n)->val.listS;
         Node *first = getLastNodeFromList(args);
         if(first && instanceOf(first, funcK)){
             scanList1(args, first);
         }
-        else scanNode(n->val.call.param); // argExprK
+        else scanNode(getCallParam(n)); // argExprK
     }
     numArg = prevNumArg;
     glueCode(")");
@@ -344,7 +310,10 @@ static void scanAssignStmt(Node *n){
 
 static void scanVector(Node *n){
     if(numArg == 0) numArg = 1;
-    else if(numArg > 0) { glueAny("%c ", comma); numArg++; }
+    else if(numArg > 0) {
+        glueAny("%c ", comma);
+        numArg++;
+    }
     Node *typeNode = n->val.vec.typ;
     I c = countNode(n->val.vec.val);
     glueCode(genConstFunc(typeNode));
@@ -362,7 +331,7 @@ static void scanVector(Node *n){
 }
 
 static void scanConst(Node *n){
-    char temp[99]; temp[0]=0;
+    C temp[99]; temp[0]=0;
     ConstValue *v = n->val.nodeC;
     switch(v->type){
         case    symC:
@@ -537,7 +506,7 @@ static void compileChain(Chain *chain){
 
 }
 
-static int compileChainList(ChainList *list){
+static I compileChainList(ChainList *list){
     if(list){
         compileChainList(list->next);
         //printChain(list->chain); getchar();
@@ -574,7 +543,7 @@ static void compileMethod(Node *n){
 
 static void genEntry(){
     resetCode();
-    int numRtns = countInfoNodeList(entryMain->val.method.meta->returnTypes);
+    I numRtns = countInfoNodeList(entryMain->val.method.meta->returnTypes);
     glueCodeLine("I horse_entry(){");
     depth++;
     if(numRtns > 0){

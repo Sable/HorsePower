@@ -1,80 +1,73 @@
 #include "../global.h"
 
+typedef struct codegen_gnode{
+    Node *node;
+    I pnum; // # of parameter
+    struct codegen_gnode *pnode[5]; // parameter nodes
+}gNode;
+
 extern List *compiledMethodList;
-
-static Node *currentMethod;
 extern I qid, phTotal;
-
-#define CODE_MAX_SIZE 10240
-static char code[CODE_MAX_SIZE], *ptr;
-
 extern sHashTable *hashOpt;
 
-#define getNameKind(n) (n)->val.name.sn->kind
-#define getName1(n)    (n)->val.name.id1
-#define getName2(n)    (n)->val.name.id2
+extern I varNum;
+extern S varNames[99];
+extern C code[CODE_MAX_SIZE], *ptr;
 
-#define getVarKind(n)  (n)->val.param.sn->kind
-#define getVarName(n)  (n)->val.param.id
+static Node *currentMethod;
 
 /* ------ declaration above ------ */
 
 static void printChainUses(Chain *p){
-    DOI(p->useSize, {P(" --> "); printChain(p->chain_uses[i]); P("\n"); })
+    DOI(chainUseSize(p), {P(" --> "); printChain(chainUse(p,i)); P("\n"); })
 }
 
 static void printChainDefs(Chain *p){
-    DOI(p->defSize, {P(" <-- "); printChain(p->chain_defs[i]); P("\n"); })
+    DOI(chainDefSize(p), {P(" <-- "); printChain(chainDef(p,i)); P("\n"); })
 }
 
-static bool isMatchedDef(Chain *p, char *name){
-    List *vars = chainNode(p)->val.assignStmt.vars;
+static B isMatchedDef(Chain *p, char *name){
+    List *vars = getStmtVars(chainNode(p));
     while(vars){
         Node *n = vars->val;
         if(instanceOf(n, nameK) && getNameKind(n) == localS){
-            if(!strcmp(name, getName2(n))) return true;
+            if(sEQ(name, getName2(n))) return true;
         }
         else if(instanceOf(n, varK) && getVarKind(n) == localS){
-            if(!strcmp(name, getVarName(n))) return true;
+            if(sEQ(name, getVarName(n))) return true;
         }
         vars = vars->next;
     }
     return false;
 }
 
-int findDefByName(Chain *p, char *name){
-    int c = 0, x = -1;
+I findDefByName(Chain *p, char *name){
+    I c = 0, x = -1;
     DOI(p->defSize, if(isMatchedDef(p->chain_defs[i], name)){c++; x=i;})
     return c==1?x:-1;
 }
 
-static bool isMatchedUse(Chain *p, char *name){
+static B isMatchedUse(Chain *p, char *name){
     if(!instanceOf(chainNode(p), stmtK)) return false;
-    Node *expr  = chainNode(p)->val.assignStmt.expr;
+    Node *expr  = getStmtExpr(chainNode(p));
     List *param = expr->val.call.param->val.listS;
     while(param){
         Node *n = param->val;
         if(instanceOf(n, nameK) && getNameKind(n) == localS){
-            if(!strcmp(name, getName2(n))) return true;
+            if(sEQ(name, getName2(n))) return true;
         }
         param = param->next;
     }
     return false;
 }
 
-static int findUseByName(Chain *p, char *name){
-    int c = 0, x = -1;
-    DOI(p->useSize, if(isMatchedUse(p->chain_uses[i], name)){c++; x=i;})
+static I findUseByName(Chain *p, char *name){
+    I c = 0, x = -1;
+    DOI(p->useSize, if(isMatchedUse(chainUse(p,i), name)){c++; x=i;})
     return c==1?x:-1;
 }
 
-typedef struct codegen_gnode{
-    Node *node;
-    int pnum; // # of parameter
-    struct codegen_gnode *pnode[5]; // parameter nodes
-}gNode;
-
-gNode *initgNode(Node *node){
+static gNode *initgNode(Node *node){
     gNode *x = NEW(gNode);
     x->node  = node;
     x->pnum  = totalElement(fetchParams(node));
@@ -88,14 +81,9 @@ static gNode *findFusionUp(Chain *chain){
     else chain->isVisited = true;
     Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
-        List *vars = n->val.assignStmt.vars;
-        Node *expr = n->val.assignStmt.expr;
-        if(instanceOf(expr, callK));
-        else if(instanceOf(expr, castK)){
-            expr = expr->val.cast.exp;
-        }
-        else return NULL;
-        Node *func = expr->val.call.func;
+        List *vars = getStmtVars(n);
+        Node *call = getStmtCall(n);
+        Node *func = getCallFunc(call);
         SymbolKind sk = getNameKind(func);
         if(!(sk == builtinS && isElementwise(getName2(func))))
             return NULL; // if not an elemetnwsie func
@@ -106,14 +94,14 @@ static gNode *findFusionUp(Chain *chain){
         //printBanner("Gotcha");
         //printChain(chain); P("\n");
         gNode *rt = initgNode(chainNode(chain));
-        bool isOK = true;
-        int cnt = 0;
+        B isOK = true;
+        I cnt = 0;
         while(param){
             Node *p = param->val;
             if(instanceOf(p, nameK)){
                 SymbolKind sk = getNameKind(p);
                 if(sk == localS){
-                    int c = findDefByName(chain, getName2(p));
+                    I c = findDefByName(chain, getName2(p));
                     //P("c4 = %d, s = %s\n", c, getName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
@@ -137,23 +125,18 @@ static gNode *findFusionUp(Chain *chain){
 static Chain *findFusionDown(Chain *chain){
     Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
-        List *vars = n->val.assignStmt.vars;
-        Node *expr = n->val.assignStmt.expr;
-        if(instanceOf(expr, callK)) ;
-        else if(instanceOf(expr, castK)){
-            expr = expr->val.cast.exp;
-        }
-        else return NULL;
-        Node *func = expr->val.call.func;
+        List *vars = getStmtVars(n);
+        Node *call = getStmtCall(n);
+        Node *func = getCallFunc(call);
         SymbolKind sk = getNameKind(func);
         if(!(sk == builtinS && isElementwise(getName2(func))))
             return NULL; // if not an elemetnwsie func
-        bool isOK = true;
+        B isOK = true;
         while(vars){
             Node *p = vars->val;
             if(instanceOf(p, varK)){
                 if(p->val.param.sn->kind == localS){
-                    int c = findUseByName(chain, getVarName(p));
+                    I c = findUseByName(chain, getVarName(p));
                     //P("c1 = %d, s = %s\n", c, getVarName(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
@@ -165,7 +148,7 @@ static Chain *findFusionDown(Chain *chain){
             }
             else if(instanceOf(p, nameK)){
                 if(getNameKind(p) == localS){
-                    int c = findUseByName(chain, getName2(p));
+                    I c = findUseByName(chain, getName2(p));
                     //P("c2 = %d, s = %s\n", c, getName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
@@ -191,77 +174,6 @@ static B isOK2Fuse(gNode *rt){
     DOI(rt->pnum, if(rt->pnode[i])R 1) R 0;
 }
 
-static void genCodeNode(Node *n);
-static void genCodeList(List *list);
-
-
-static void genCodeList(List *list){
-    if(list){ genCodeList(list->next); genCodeNode(list->val); }
-}
-
-// copy from: compiler.c/scanConst
-static void genCodeConst(Node *n){
-    ConstValue *v = n->val.nodeC;
-    switch(v->type){
-        case    symC:
-        case    strC: glueAny("%s",v->valS); break;
-        case   dateC:
-        case  monthC:
-        case   timeC:
-        case minuteC:
-        case secondC:
-        case    intC: glueAny("%d"  , v->valI); break;
-        case  floatC: glueAny("%g"  , v->valF); break;
-        case     dtC:
-        case   longC: glueAny("%lld", v->valL); break;
-        case   clexC: glueAny(v->valX[1]>=0?"%g+%g":"%g%g", \
-                              v->valX[0], v->valX[1]); break;
-        default: EP("Add more constant types: %d\n", v->type);
-    }
-}
-
-static void genCodeVector(Node *n){
-    genCodeList(n->val.vec.val);
-}
-
-static void genCodeName(Node *n, I id){
-    C code = getTypeCodeByName(n);
-    glueAny("v%c(x%d,i)", code, id);
-}
-
-static void genCodeNode(Node *n){
-    switch(n->kind){
-        case vectorK: genCodeVector(n); break;
-        case  constK: genCodeConst (n); break;
-        default: TODO("Add impl. for %s", getNodeTypeStr(n));
-    }
-}
-
-static I varNum;
-static S varNames[99];
-
-static L searchName(S *names, S s){
-    DOI(varNum, if(!strcmp(names[i],s))R i) R -1;
-}
-
-static B isDuplicated(S *names, S s){
-    return searchName(names, s) >= 0;
-}
-
-static S genInvc(S targ, S func, S *names, I num){
-    C temp[199]; S ptr = temp;
-    ptr += SP(ptr, "%s(%s, (V[]){",func,targ);
-    DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
-    SP(ptr, "})");
-    return strdup(temp);
-}
-
-static S genDecl(S func, C del){
-    C temp[199]; 
-    SP(temp, "static I %s(V z, V *x)%c", func, del);
-    return strdup(temp);
-}
-
 // TODO: remove duplicated items (only distinct values wanted)
 static void totalInputs(gNode *rt, S *names){
     List *params = fetchParams(rt->node);
@@ -282,7 +194,7 @@ static void genCodeElem(gNode *rt, B isRT){
         Node *z0 = getParamFromNode(n,0); S z0s = getNameStr(z0);
         C z0c = getTypeCodeByName(z0);
         SP(temp, "q%d_elementwise_%d",qid,phTotal++);
-        glueCode(genDecl(temp, '{')); glueLine();
+        glueCode(genDeclSingle(temp, '{')); glueLine();
         varNum = 0;
         totalInputs(rt, varNames);
         DOI(varNum, glueAny(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
@@ -290,8 +202,8 @@ static void genCodeElem(gNode *rt, B isRT){
         //DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
         //P(indent "DOP(vn(z), v%c(z,i)=",z0c);
         // setup invocation for final fusion
-        extra->funcDecl = genDecl(temp, ';');
-        extra->funcInvc = genInvc(z0s, temp, varNames, varNum);
+        extra->funcDecl = genDeclSingle(temp, ';');
+        extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
     }
     Node *fn = fetchFuncNode(n);
     //P("%s(", genFuncNameC(getName2(fn)));
@@ -350,7 +262,7 @@ static void analyzeChain(ChainList *list){
 static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
-    ChainList *chains = n->val.method.meta->chains;
+    ChainList *chains = getMethodChainList(n);
     analyzeChain(chains->next);
     currentMethod = prevMethod;
     //printChainList(chains); getchar(); // TODO: printChainListBasic
@@ -361,6 +273,7 @@ static void scanMethodList(List *list){
 }
 
 static void init(){
+    currentMethod = NULL;
 }
 
 // entry: fuse elementwise

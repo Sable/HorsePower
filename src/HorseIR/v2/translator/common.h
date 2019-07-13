@@ -12,6 +12,7 @@ V fetchVector(Node *n);
 I HorseCompilerNaive();
 I HorseCompilerOptimized();
 I genOptimizedCode();
+S getBuiltinStr(S func);
 
 /* Interpreter v2 */
 I HorseInterpreter2();

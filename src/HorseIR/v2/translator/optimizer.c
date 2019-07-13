@@ -2,9 +2,10 @@
 
 extern Prog *root;
 
-#define hashOptSize (1<<12)  // 4K
 sHashTable *hashOpt;
 I qid, phTotal;
+
+#define hashOptSize (1<<12)  // 4K
 
 /* ---------- Above declarations ----------  */
 
@@ -25,7 +26,7 @@ static void optimizerMain(OC opt){
     }
 }
 
-static bool isOptimizeAll(){
+static B isOptimizeAll(){
     DOI(numOpts, if(qOpts[i] == OPT_ALL) R true) R false;
 }
 

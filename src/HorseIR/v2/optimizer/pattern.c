@@ -3,28 +3,24 @@
 /* Pattern: general */
 
 typedef struct PatternTree{
-    int num;                    // number of child nodes
-    char *func1, *func2;        // functin names
+    I num;                    // number of child nodes
+    S func1, func2;        // functin names
     struct PatternTree **child; // child nodes
     Chain *chain;
 }PatternTree;
 
 static Node *currentMethod;
 static PatternTree *allPattern[99];
-static int numPattern;
-//static PeepholeNode PhList[99];
-extern int qid, phTotal;
+static I numPattern, depth;
 
 extern List *compiledMethodList;
 extern sHashTable *hashOpt;
-
-#define CODE_MAX_SIZE 10240
-static char code[CODE_MAX_SIZE], *ptr;
-static int depth;
+extern I qid, phTotal;
+extern C code[CODE_MAX_SIZE], *ptr;
 
 /* ------ declaration above ------ */
 
-static PatternTree *initPatternTree(char *func1, char *func2, int n){
+static PatternTree *initPatternTree(S func1, S func2, I n){
     PatternTree *x = (PatternTree*)malloc(sizeof(PatternTree));
     x->func1 = strdup(func1);
     x->func2 = func2?strdup(func2):NULL;
@@ -42,7 +38,7 @@ static void deletePatternTree(PatternTree *ptree){
     free(ptree);
 }
 
-static void printPatternTreeCore(PatternTree *ptree, int dep){
+static void printPatternTreeCore(PatternTree *ptree, I dep){
     if(ptree){
         DOI(dep, P(" "))
         P("(%s, %s, %d)\n", \
@@ -61,7 +57,7 @@ static PatternTree *createFP1(){
     return NULL;
 }
 
-static PatternTree *createFP2(int op){
+static PatternTree *createFP2(I op){
     if(op!=1&&op!=2){
         EP("pattern 2 must have an option 1 or 2");
     }
@@ -112,7 +108,7 @@ static Node *getParamFromChain(Chain *chain, I pos){
 static void setAllChainVisitedNonRT(PatternTree *ptree){
     Chain *chain = ptree->chain;
     DOI(ptree->num, setAllChainVisitedNonRT(ptree->child[i]))
-    if(strcmp(ptree->func1, "?")) {
+    if(sNEQ(ptree->func1, "?")) {
         setVisited(chain, true);
         ChainExtra *extra = NEW(ChainExtra);
         extra->kind = SkipG;
@@ -167,8 +163,8 @@ static S genDecl3(S func, C del){
 
 static void genIndent(){ DOI(depth, glueCode("    ")); }
 
-static void genPattern2_C_Core(PatternTree *ptree, int op){
-    char tmp[99];
+static void genPattern2_C_Core(PatternTree *ptree, I op){
+    C tmp[199];
     Chain *chain_x = ptree->child[0]->child[0]->chain;  // 
     Chain *chain_y = ptree->child[0]->chain;            // 
     Chain *chain_z = ptree->chain;                      //
@@ -195,9 +191,6 @@ static void genPattern2_C_Core(PatternTree *ptree, int op){
     glueAnyLine("}");
     S invc = phNameFP2(z0s, tmp, x0s, x1s);
     S decl = genDecl2(tmp,';');
-    //PhList[phTotal].invc = phNameFP2(z0s, tmp, x0s, x1s);
-    //PhList[phTotal].targ = z0s;
-    //phTotal++;
     setAllChainVisited(ptree, invc, decl, strdup(code));
 }
 
@@ -212,7 +205,7 @@ static void genPattern2_C(PatternTree *ptree){
 }
 
 static void genPattern3_C(PatternTree *ptree){
-    char tmp[99];
+    C tmp[199];
     Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
     Chain *chain_y0 = ptree->child[1]->chain;            // 2nd param of compress
     Chain *chain_y1 = ptree->child[0]->child[0]->chain;  // 1st param of len
@@ -239,14 +232,11 @@ static void genPattern3_C(PatternTree *ptree){
     glueAnyLine("}");
     S invc = phNameFP3(z0s, tmp, x0s, x1s, y0s, y1s);
     S decl = genDecl2(tmp,';');
-    //PhList[phTotal].invc = phNameFP3(z0s, tmp, x0s, x1s, y0s, y1s);
-    //PhList[phTotal].targ = z0s;
-    //phTotal++;
     setAllChainVisited(ptree, invc, decl, strdup(code));
 }
 
 static void genPattern4_C(PatternTree *ptree){
-    char tmp[99];
+    C tmp[199];
     Chain *chain_x  = ptree->child[0]->child[0]->child[0]->chain;  // 2 params of each_right
     Chain *chain_z  = ptree->chain;  // 2 params of each_right
     Node *x0 = getParamFromChain(chain_x, 2); S x0s = getNameStr(x0);
@@ -270,9 +260,6 @@ static void genPattern4_C(PatternTree *ptree){
     depth--; glueAnyLine("}");
     S invc = phNameFP4(z0s, tmp, x0s, y0s);
     S decl = genDecl3(tmp,';');
-    //PhList[phTotal].invc = phNameFP4(z0s, tmp, x0s, y0s);
-    //PhList[phTotal].targ = z0s;
-    //phTotal++;
     setAllChainVisited(ptree, invc, decl, strdup(code));
 }
 
@@ -319,13 +306,13 @@ static void genPattern(PatternTree *ptree, I pid){
     }
 }
 
-static char *getFirstParam(List *params){
+static S getFirstParam(List *params){
     // scan to the last list
     while(params && params->next) params = params->next;
     if(params){
         Node *n = params->val;
         if(instanceOf(n, funcK)){
-            int tot = totalElement(n->val.listS);
+            I tot = totalElement(n->val.listS);
             if(1 == tot){
                 Node *func = n->val.listS->val;
                 if(func->val.name.sn->kind == builtinS){
@@ -337,7 +324,7 @@ static char *getFirstParam(List *params){
     return NULL;
 }
 
-static bool matchChain2(Chain *chain, char *func1, char *func2){
+static B matchChain2(Chain *chain, S func1, S func2){
     if(isChainVisited(chain)) return false;
     if(instanceOf(chainNode(chain), stmtK)){
         Node *expr = chainNode(chain)->val.assignStmt.expr;
@@ -348,15 +335,15 @@ static bool matchChain2(Chain *chain, char *func1, char *func2){
         Node *func = rhs->val.call.func;
         SymbolName *sn = func->val.name.sn;
         if(sn->kind != builtinS) return false;
-        char *funcName = func->val.name.id2;
+        S funcName = func->val.name.id2;
         //P("Input: %s, %s\n", funcName, func1);
-        if(!strcmp(funcName, func1) || !strcmp(func1, "?")) {
+        if(sEQ(funcName, func1) || sEQ(func1, "?")) {
             // match func2
             if(func2){
                 List *params = rhs->val.call.param->val.listS;
-                char *firstP = getFirstParam(params);
+                S firstP = getFirstParam(params);
                 //P("--> matched?: %s, %s | %s, %s\n", funcName, func1, firstP, func2);
-                return firstP?!strcmp(func2, firstP):false;
+                return firstP?sEQ(func2, firstP):false;
             }
             else return true;
         }
@@ -364,9 +351,9 @@ static bool matchChain2(Chain *chain, char *func1, char *func2){
     return false;
 }
 
-static bool matchPattern(Chain *chain, PatternTree* ptree){
+static B matchPattern(Chain *chain, PatternTree* ptree){
     if(matchChain2(chain, ptree->func1, ptree->func2)){
-        int numOfDefs = ptree->num==0?0:chain->defSize;
+        I numOfDefs = ptree->num==0?0:chain->defSize;
         //P("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
         if(numOfDefs == ptree->num){
             //P("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
@@ -400,19 +387,16 @@ static void findPattern1(ChainList *list, PatternTree* ptree, I pid){
 
 /* pattern 2: common compress */
 
-#define getName1(n) (n)->val.name.id1
-#define getName2(n) (n)->val.name.id2
-
 static B sameVar(Node *x, Node *y){
     if(instanceOf(x,nameK)){
         if(instanceOf(y,nameK)){
             if(getName1(x) && getName1(y)){
-                if(strcmp(getName1(x), getName1(y))) R 0;
+                if(sNEQ(getName1(x), getName1(y))) R 0;
             }
-            return !strcmp(getName2(x), getName2(y));
+            return sEQ(getName2(x), getName2(y));
         }
         else if(instanceOf(y, varK)){
-            return !strcmp(getName2(x), y->val.param.id);
+            return sEQ(getName2(x), y->val.param.id);
         }
     }
     R 0;
@@ -425,7 +409,7 @@ static B isValidPatternCompress(Chain *x, Node *n){
         if(call){
             Node *func = getCallFunc(call);
             SymbolKind sk = getNameKind(func);
-            if(sk == builtinS && !strcmp(getName2(func),"compress")){
+            if(sk == builtinS && sEQ(getName2(func),"compress")){
                 Node *p = call->val.call.param->val.listS->next->val; // 1st param
                 R sameVar(p, n);
             }
@@ -445,7 +429,7 @@ static B allUsesValidCompress(Chain *chain, Node *n){
 }
 
 static S genLocalCompress(S funcName, Chain *chain, Node *n){
-    char temp[199]; S t = temp;
+    C temp[199]; S t = temp;
     t += SP(t, "%s((V []){", funcName);
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
@@ -465,7 +449,7 @@ static S genLocalCompress(S funcName, Chain *chain, Node *n){
 
 static void genPatternCompress(Chain *chain, Node *n){
     cleanCode(); ptr = code;
-    char temp[199];
+    C temp[199];
     SP(temp, "q%d_patterncompress_%d", qid, phTotal++);
     glueCodeLine(genDeclCompress(temp, '{'));
     depth++;
@@ -535,7 +519,7 @@ static B isValidPatternIndex(Chain *x, Node *n){
         if(call){
             Node *func = getCallFunc(call);
             SymbolKind sk = getNameKind(func);
-            if(sk == builtinS && !strcmp(getName2(func),"index")){
+            if(sk == builtinS && sEQ(getName2(func),"index")){
                 Node *p = call->val.call.param->val.listS->val; // 2nd param
                 R sameVar(p, n);
                 // TODO: check 1st param is needed before
@@ -560,7 +544,7 @@ static S genDeclIndex(S func, C del){
 }
 
 static S genLocals(S funcName, Chain *chain, Node *n){
-    char temp[199]; S t = temp;
+    C temp[199]; S t = temp;
     t += SP(t, "%s((V []){", funcName);
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
@@ -582,7 +566,7 @@ static void genPatternIndex(Chain *chain, Node *n){
     cleanCode(); ptr = code;
     //DOI(chain->useSize, {printChain(chain->chain_uses[i]); P("\n");}) getchar();
     //TODO("Impl. code gen for the pattern 'index'");  // example input: q1
-    char temp[199];
+    C temp[199];
     SP(temp, "q%d_patternindex_%d", qid, phTotal++);
     glueCodeLine(genDeclIndex(temp, '{'));
     depth++;
@@ -645,12 +629,15 @@ static void findPattern3(ChainList *list){
     }
 }
 
+/*
+ * Pattern: compress(2) and index(3) have very similar code
+ */
 static void analyzeChain(ChainList *list){
     // TODO: findPatternCompress
     //DOI(numPattern, findPattern1(list, allPattern[i], i+1));
     // specific patterns
     findPattern2(list); // compress
-    //findPattern3(list); // index
+    findPattern3(list); // index
 }
 
 static void compileMethod(Node *n){
