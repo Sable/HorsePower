@@ -82,6 +82,7 @@ def scanOutput(d, env):
         if num == 1:
             v0 = getValuesV(t[0], env)
             v1 = t[0]['value']['id']
+            typ = getTypeFromEnv(v1, env)
         elif num == 2:
             if t[1]['type'] == 'as':
                 typ = getExprType(t[0])
@@ -97,7 +98,7 @@ def scanOutput(d, env):
         env_alias.append(v0)
         env_table.append(tab)
         env_cols.append(col)
-        env_types.append('myType')
+        env_types.append(typ)
     return encodeEnv(env_table, env_cols, env_alias, env_types)
 
 def scanSimpleBlock(d, env):
@@ -173,11 +174,11 @@ def getTableCols(cols, table):
         rtn.append(getIdName(col['value'], table))
     return rtn
 
-def getTableAlias(cols, table_alias, table_name):
+def getTableAlias(cols, table_alias, table):
     global db_tpch
     rtn = []
     for col in cols:
-        rtn.append(genColumnValue(table_alias, '`'+col+':sym', db_tpch[table_name][col]))
+        rtn.append(genColumnValue(table_alias, '`'+col+':sym', db_tpch[table][col]))
     return rtn
 
 def getTableTabs(cols, table):
@@ -189,7 +190,7 @@ def getTableTabs(cols, table):
 def getTableTypes(cols, table):
     rtn = []
     for col in cols:
-        rtn.append('myType')   # pesudo type, fix later
+        rtn.append(db_tpch[table][col])
     return rtn
 
 # delete
@@ -322,9 +323,20 @@ def genArrayWithOp(cell, op):
 
 def getExprType(d):
     return {
-        "decimal": "float",
+        "decimal": "f32",
         "date"   : "date"
-    }.get(d['type'], "unknownType")
+    }.get(d['type'], "?")
+
+def getTypeFromEnv(d, env):
+    id0, id1 = d
+    idx = getEnvName(env).index(id1)
+    if idx >= 0:
+        if id0 == getEnvTable(env)[idx]:
+            return getEnvType(env)[idx]
+        else:
+            unexpected('table needs %s, but %s found' % (id0, getEnvTable(env)[idx]))
+    else:
+        unexpected('%s.%s not found' % (id0,id1))
 
 def getExpr(expr, env):
     def genExpr3(d):
