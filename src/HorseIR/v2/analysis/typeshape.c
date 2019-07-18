@@ -23,16 +23,16 @@ List *compiledMethodList;
 
 /*  ---- above declarations ---- */
 
-int totalElement(List *list){ // no dummy
-    int c=0; while(list){c++; list=list->next;} return c;
+I totalElement(List *list){ // no dummy
+    I c=0; while(list){c++; list=list->next;} return c;
 }
 
-int totalInfoNoDummy(InfoNodeList *list){
-    int c=0; while(list){list=list->next; c++;} return c;
+I totalInfoNoDummy(InfoNodeList *list){
+    I c=0; while(list){list=list->next; c++;} return c;
 }
 
-int totalInfo(InfoNodeList *list){
-    int c=0; while(list->next){list=list->next; c++;} return c;
+I totalInfo(InfoNodeList *list){
+    I c=0; while(list->next){list=list->next; c++;} return c;
 }
 
 static InfoNode *getNode(InfoNodeList *list, int k){
@@ -395,7 +395,7 @@ static void scanMethod(Node *n){
         if(c == 1 && meta->isCalled) c = 2;
         else break;
     } // loop body executed 1 or 2 times
-    P("Method scanned round(s): %d\n", c);
+    P("Method scanned round(s): %d\n", c); //getchar();
     meta->isCompiling = false;
     meta->isCalled    = false;
     currentMethod = prevNode;

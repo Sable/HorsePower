@@ -252,7 +252,7 @@ bool checkShape(InfoNode *x, InfoNode *y){
     }
 }
 
-ShapeNode *newShapeNode(pShape type, int kind, int size){
+ShapeNode *newShapeNode(ShapeType type, int kind, int size){
     ShapeNode *sn = NEW(ShapeNode);
     sn->type = type;
     sn->kind = kind;
@@ -354,7 +354,7 @@ static InfoNode *propRaze(InfoNode *x){
 static InfoNode *propToList(InfoNode *x){ 
     if(isBasicIN(x)){
         Type rtnType = listT;
-        pShape rtnShape = listH;
+        ShapeType rtnShape = listH;
         ShapeNode *p = inShape(x);
         if(isShapeV(p) && isSNConst(p))
             return newInfoNode(rtnType, newShapeNode(rtnShape, SN_CONST, p->size));
@@ -414,7 +414,7 @@ static InfoNode *commonRand(InfoNode *x){
 
 static InfoNode *propFlip(InfoNode *x){
     Type rtnType;
-    pShape rtnShape;
+    ShapeType rtnShape;
     if(isDictIN(x)){
         rtnType = tableT;
         rtnShape = tableH;

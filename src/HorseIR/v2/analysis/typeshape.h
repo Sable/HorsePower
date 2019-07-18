@@ -1,61 +1,18 @@
 #ifndef __H_TYPESHAPE__
 #define __H_TYPESHAPE__
 
-//typedef enum ShapeType {
-//    unknownH, vectorH, listH, enumH, dictH, tableH
-//}pShape;
-//
-//typedef struct ShapeNode{
-//    pShape type;
-//    //bool isId;
-//    int kind;
-//    union {
-//        int size;     /* (kind=0) actual literal size */
-//        int sizeId;   /* (kind=1) sequential size id  */
-//        int sizeScan; /* (kind=2) size after compress */
-//    };
-//}ShapeNode;
-
-//typedef struct TypeShapeNode{
-//    Type type;
-//    ShapeNode *shape;
-//    struct TypeShapeNode *sub;
-//    struct TypeShapeNode *next;
-//}TypeShapeNode;
-
-//typedef struct InfoNode{
-//    char *name;
-//    TypeShapeNode *node;
-//}InfoNode;
-
-
-//typedef struct ShapeNodeSub{
-//    bool isSame; /* true if all sub cells have the same shape */
-//    int  sizeId;
-//}ShapeNodeSub;
-//
-//typedef struct TypeShapeNode{
-//         char *name;
-//        pType  type, subtype;
-//    ShapeNode *shape;
-// ShapeNodeSub *subshape;
-//}InfoNode;
-
-//typedef struct TypeShapeNodeList{
-//    InfoNode *in;
-//    struct TypeShapeNodeList *next;
-//}InfoNodeList;
+/* InfoNode has been moved to analysis/common.h */
 
 /* signatures */
 
 InfoNodeList *propagateType(Node *func, InfoNodeList *list);
-int totalInfo(InfoNodeList *list); // skip dummy
-int totalElement(List *list);      //   no dummy
-void propagateTypeShape(Prog *root);
+I totalInfo(InfoNodeList *list); // skip dummy
+I totalElement(List *list);      //   no dummy
+O propagateTypeShape(Prog *root);
 
 
 InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
-void cleanInfoList(InfoNodeList *in_list);
+O cleanInfoList(InfoNodeList *in_list);
 
 #endif
 

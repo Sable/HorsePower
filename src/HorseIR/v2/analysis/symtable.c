@@ -52,7 +52,7 @@ static void getCellInfo(List *list, InfoNode *in){
     }
 }
 
-static pShape getShapeByName(S name){
+static ShapeType getShapeByName(S name){
     if(!strcmp(name, "list")) return listH;
     else if(!strcmp(name, "table")) return tableH;
     else if(!strcmp(name, "dict"))  return dictH;

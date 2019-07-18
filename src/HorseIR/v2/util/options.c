@@ -21,10 +21,15 @@ static char *qOpt[99];
 #define INDENT 29
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
-#define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations (default: all): fe or fp");
+#define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:"); \
+                  dispLine(0, INDENT, "", "- sr : strength reduction"); \
+                  dispLine(0, INDENT, "", "- fe : fusion elementwise"); \
+                  dispLine(0, INDENT, "", "- fp : fusion with patterns"); \
+                  dispLine(0, INDENT, "", "- fd : fusion deep"); \
+                  dispLine(0, INDENT, "", "- all: all above optimizations"); \
 
 void version(){
-    P("HorseIR version: 0.2.0\n");
+    P("HorseIR version: 0.2.1\n");
 }
 
 static void dispLine(int level, int left, char *shortMsg, char *longMsg){
@@ -45,7 +50,7 @@ static void usageInterp(){
 
 static void usageCompiler(){
     WP("\nRun with a compiler:\n");
-    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler with target c/llvm/openacc/cuda/opencl");
+    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler with target: cpu");
     usage_n(1); usage_o();
 }
 

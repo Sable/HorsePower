@@ -37,6 +37,8 @@ typedef struct FuseNode {
 #define getCallFunc(n)  (n)->val.call.func
 #define getCallParam(n) (n)->val.call.param
 
+#define getNodeList(n) (n)->val.listS
+
 /* declarations below */
 
 O optElementwise();
@@ -57,6 +59,10 @@ List *fetchParams      (Node *n);
 Node *fetchFuncNode    (Node *n);
 Node *fetchFuncSingle  (Node *n);
 List *fetchParamsIndex (List *list, I pos);
+
+Node *getNodeFirstParam(Node *n);
+Node *getSingleFunc    (Node *funcs);
+Node *fetchEachFuncNode(Node *n);
 
 B isElementwise(S funcName);
 I findDefByName(Chain *p, S name);

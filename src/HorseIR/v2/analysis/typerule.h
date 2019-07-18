@@ -78,7 +78,7 @@ typedef struct FuncUnit{
 
 void checkFuncNumber();
 void *fetchTypeRules(char *name, int* num);
-ShapeNode *newShapeNode(pShape type, int kind, int size);
+ShapeNode *newShapeNode(ShapeType type, int kind, int size);
 bool checkType(InfoNode *x, InfoNode *y);
 bool checkShape(InfoNode *x, InfoNode *y);
 int  getValence(FuncUnit *x);

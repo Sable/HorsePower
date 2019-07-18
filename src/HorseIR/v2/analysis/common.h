@@ -4,16 +4,16 @@
 #define DEF_VARS_MAX 64
 //int fetchVarNames(List *vars, Node *defVars[]);
 
-typedef enum ShapeType {
+typedef enum {
     unknownH, vectorH, listH, enumH, dictH, tableH
-}pShape;
+}ShapeType;
 
-typedef enum ShapeKind {
+typedef enum {
     constSP, symbolSP, scanSP
 }ShapeKind;
 
 typedef struct ShapeNode{
-    pShape type;
+    ShapeType type;
     ShapeKind kind;
     union {
         int size;     /* (kind=0)  constSP: actual literal size */
