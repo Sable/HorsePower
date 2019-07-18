@@ -16,28 +16,56 @@ typedef struct FuseNode {
 #define isChainVisited(c) (c->isVisited)
 #define setVisited(c, v)  (c)->isVisited=v
 
+// node: module
+#define getModuleName(n)  (n)->module.id    // S
+#define getModuleBody(n)  (n)->module.body  // List
+
+// node: import
+#define getImportName(n)  (n)->import.module  // S
+#define getImportItems(n) (n)->import.content // List
+
 // node: methodK
-#define getMethodMeta(x) (x)->val.method.meta
-#define getMethodChainList(x) getMethodMeta(x)->chains
+#define getMethodName(n)        (n)->val.method.fname  // S
+#define getMethodReturnTypes(n) (n)->val.method.typ    // List
+#define getMethodParameters(n)  (n)->val.method.param  // Node
+#define getMethodBlock(n)       (n)->val.method.block  // Node
+#define getMethodMeta(n)        (n)->val.method.meta   // MetaMethod 
+#define getMethodChainList(n)   getMethodMeta(n)->chains
 
 // node: stmtK
-#define getStmtVars(n) (n->val.assignStmt.vars)
-#define getStmtExpr(n) (n->val.assignStmt.expr)
+#define getStmtVars(n)   (n)->val.assignStmt.vars
+#define getStmtExpr(n)   (n)->val.assignStmt.expr
 
 // node: nameK
-#define getName1(n)    (n)->val.name.id1
-#define getName2(n)    (n)->val.name.id2
-#define getNameKind(n) (n)->val.name.sn->kind
+#define getName1(n)      (n)->val.name.id1        // S
+#define getName2(n)      (n)->val.name.id2        // S
+#define getNameKind(n)   (n)->val.name.sn->kind   // SymbolKind
 
 // node: varK
-#define getVarKind(n)  (n)->val.param.sn->kind
-#define getVarName(n)  (n)->val.param.id
+#define getVarKind(n)    (n)->val.param.sn->kind  // SymbolKind
+#define getVarName(n)    (n)->val.param.id        // S
 
 // node: callK
-#define getCallFunc(n)  (n)->val.call.func
-#define getCallParam(n) (n)->val.call.param
+#define getCallFunc(n)   (n)->val.call.func       // Node
+#define getCallParam(n)  (n)->val.call.param      // Node
 
-#define getNodeList(n) (n)->val.listS
+// node: list-based (funcK)
+#define getNodeList(n)   (n)->val.listS           // List
+
+// node: gloalK
+#define getGlobalName(n) (n)->val.global.id       // S
+#define getGlobalType(n) (n)->val.global.typ      // Node
+#define getGlobalOp(n)   (n)->val.global.op       // Node
+
+// node: typeK
+#define getTypeInfo(n)   (n)->val.type.in
+
+// node: castK
+#define getCastExpr(n)   (n)->val.cast.exp        // Node
+#define getCastType(n)   (n)->val.cast.typ        // Node
+
+// node: exprStmtK
+#define getExprStmt(n)   (n)->val.exprStmt.expr   // Node
 
 /* declarations below */
 
