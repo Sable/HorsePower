@@ -2,7 +2,6 @@
 #define __H_A_COMMON__
 
 #define DEF_VARS_MAX 64
-//int fetchVarNames(List *vars, Node *defVars[]);
 
 typedef enum {
     unknownH, vectorH, listH, enumH, dictH, tableH
@@ -49,7 +48,11 @@ void printShapeNode(ShapeNode *sn);
 #include "typeshape.h"  // propagate type/shape rules
 #include "udchain.h"    // build use-def chain
 
-I totalSymbolNames(SymbolNameList *list);
+I totalList (List *list);                    //   no dummy
+I totalList1(List *list);                    // with dummy
+I totalInfoNodeList (InfoNodeList *list);    //   no dummy
+I totalInfoNodeList1(InfoNodeList *list);    // with dummy
+I totalSymbolNameList(SymbolNameList *list); //   no dummy
 
 /* typeshape.c */
 InfoNode*  getInfoFromNode(Node *n);

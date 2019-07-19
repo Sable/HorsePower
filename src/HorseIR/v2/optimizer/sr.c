@@ -50,11 +50,11 @@ static bool patternPower(Node *n){
     Node *funcName = n->val.call.func;
     Node *funcParam= n->val.call.param;
     List *p1 = funcParam->val.listS; // 2nd param
-    int numParam = totalElement(p1);
+    int numParam = totalList(p1);
     if(isFuncName(funcName, "power") && numParam == 2){
         List *p0 = p1->next; // 1st param
         if(instanceOf(p1->val, vectorK) \
-            && isIntegerNumber(fetchVector(p1->val), 2)){
+            && isIntegerNumber(getVector(p1->val), 2)){
             updateFuncName(funcName, "mul");
             List *x = dupParam(p0);
             x->next = p0;
@@ -65,7 +65,7 @@ static bool patternPower(Node *n){
     else if(isFuncName(funcName, "mul") && numParam == 2){
         List *p0 = p1->next;
         if(instanceOf(p1->val, vectorK) \
-            && isIntegerNumber(fetchVector(p1->val), 2)){
+            && isIntegerNumber(getVector(p1->val), 2)){
             updateFuncName(funcName, "plus");
             List *x = dupParam(p0);
             x->next = p0;
@@ -73,7 +73,7 @@ static bool patternPower(Node *n){
             return true;
         }
         else if(instanceOf(p0->val, vectorK) \
-            && isIntegerNumber(fetchVector(p0->val), 2)){
+            && isIntegerNumber(getVector(p0->val), 2)){
             updateFuncName(funcName, "plus");
             List *x = dupParam(p1);
             p1->next = x;

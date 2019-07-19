@@ -312,7 +312,7 @@ static S getFirstParam(List *params){
     if(params){
         Node *n = params->val;
         if(instanceOf(n, funcK)){
-            I tot = totalElement(n->val.listS);
+            I tot = totalList(n->val.listS);
             if(1 == tot){
                 Node *func = n->val.listS->val;
                 if(func->val.name.sn->kind == builtinS){
@@ -390,13 +390,13 @@ static void findPattern1(ChainList *list, PatternTree* ptree, I pid){
 static B sameVar(Node *x, Node *y){
     if(instanceOf(x,nameK)){
         if(instanceOf(y,nameK)){
-            if(getName1(x) && getName1(y)){
-                if(sNEQ(getName1(x), getName1(y))) R 0;
+            if(nodeName1(x) && nodeName1(y)){
+                if(sNEQ(nodeName1(x), nodeName1(y))) R 0;
             }
-            return sEQ(getName2(x), getName2(y));
+            return sEQ(nodeName2(x), nodeName2(y));
         }
         else if(instanceOf(y, varK)){
-            return sEQ(getName2(x), y->val.param.id);
+            return sEQ(nodeName2(x), y->val.param.id);
         }
     }
     R 0;
@@ -407,9 +407,9 @@ static B isValidPatternCompress(Chain *x, Node *n){
     if(instanceOf(chainNode(x), stmtK)){
         Node *call = getStmtCall(chainNode(x));
         if(call){
-            Node *func = getCallFunc(call);
-            SymbolKind sk = getNameKind(func);
-            if(sk == builtinS && sEQ(getName2(func),"compress")){
+            Node *func = nodeCallFunc(call);
+            SymbolKind sk = nodeNameKind(func);
+            if(sk == builtinS && sEQ(nodeName2(func),"compress")){
                 Node *p = call->val.call.param->val.listS->next->val; // 1st param
                 R sameVar(p, n);
             }
@@ -517,9 +517,9 @@ static B isValidPatternIndex(Chain *x, Node *n){
     if(instanceOf(chainNode(x), stmtK)){
         Node *call = getStmtCall(chainNode(x));
         if(call){
-            Node *func = getCallFunc(call);
-            SymbolKind sk = getNameKind(func);
-            if(sk == builtinS && sEQ(getName2(func),"index")){
+            Node *func = nodeCallFunc(call);
+            SymbolKind sk = nodeNameKind(func);
+            if(sk == builtinS && sEQ(nodeName2(func),"index")){
                 Node *p = call->val.call.param->val.listS->val; // 2nd param
                 R sameVar(p, n);
                 // TODO: check 1st param is needed before

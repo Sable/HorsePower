@@ -1203,7 +1203,7 @@ int getValenceOther(TypeOther x){
     }
 }
 
-void *fetchUnaryRules(TypeUnary x){
+static void *getUnaryRules(TypeUnary x){
     switch(x){ /* monadic */
         CASE(      absF, ruleAbs)
         CASE(      negF, ruleNeg)
@@ -1266,7 +1266,7 @@ void *fetchUnaryRules(TypeUnary x){
     }
 }
 
-void *fetchBinaryRules(TypeBinary x){
+static void *getBinaryRules(TypeBinary x){
     switch(x){ /* dyadic */
         CASE(      ltF, ruleLt)
         CASE(      gtF, ruleGt)
@@ -1304,7 +1304,7 @@ void *fetchBinaryRules(TypeBinary x){
     }
 }
 
-void *fetchOtherRules(TypeOther x){
+static void *getOtherRules(TypeOther x){
     switch(x){ /* special */
         CASE(       eachF, ruleEach)
         CASE(   eachItemF, ruleEachItem)
@@ -1332,16 +1332,16 @@ int getValence(FuncUnit *x){
     return -1;
 }
 
-void *fetchTypeRules(char *name, int* num){
+void *getTypeRules(char *name, int* num){
     FuncUnit x;
     getFuncIndexByName(name, &x);
     switch(x.kind){
         case 1: *num = 1;
-                return fetchUnaryRules(x.u);
+                return getUnaryRules(x.u);
         case 2: *num = 2;
-                return fetchBinaryRules(x.b);
+                return getBinaryRules(x.b);
         case 3: *num = getValenceOther(x.t);
-                return fetchOtherRules(x.t);
+                return getOtherRules(x.t);
         DEFAULT(x->kind)
     }
 }

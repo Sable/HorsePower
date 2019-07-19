@@ -3,9 +3,7 @@
 static void printTypeNode(InfoNode *x){
     printType(x->type);
     if(x->subInfo){
-        P("<");
-        printTypeNode(x->subInfo);
-        P(">");
+        P("<"); printTypeNode(x->subInfo); P(">");
     }
     if(x->next){
         P(","); printTypeNode(x->next);
@@ -84,9 +82,28 @@ void freeInfoNode(InfoNode *in){
     }
 }
 
-// no dummy
-I totalSymbolNames(SymbolNameList *list){
-    L c=0; while(list){c++; list=list->next;} R c;
+// I totalList(List *list){
+//     R list?(1+totalList(list->next)):0;
+// }
+
+I totalList(List *list){ // no dummy
+    I c=0; while(list){c++; list=list->next;} R c;
+}
+
+I totalList1(List *list){ // with dummy
+    I c=0; while(list=list->next)c++; R c;
+}
+
+I totalInfoNodeList(InfoNodeList *list){ // no dummy
+    I c=0; while(list){c++; list=list->next;} R c;
+}
+
+I totalInfoNodeList1(InfoNodeList *list){ // with dummy
+    I c=0; while(list=list->next)c++; R c;
+}
+
+I totalSymbolNameList(SymbolNameList *list){ // no dummy
+    I c=0; while(list){c++; list=list->next;} R c;
 }
 
 

@@ -1,12 +1,13 @@
 #include "../global.h"
 
-static void scanStatement(Node *n, SymbolTable *st);
+static void scanStatement    (Node *n, SymbolTable *st);
 static void scanStatementList(List *list, SymbolTable *st);
-static InfoNode *getInfoNode(Node *n);
-static void scanName(Node *n, SymbolTable *st);
+static void scanName         (Node *n, SymbolTable *st);
+static InfoNode *getInfoNode (Node *n);
 
-SymbolTable *rootSymbolTable;
-SymbolDecl *globalDecls;
+static SymbolTable    *rootSymbolTable;
+static SymbolDecl     *globalDecls;
+static SymbolNameList *symList;
 
 /* declarations above */
 
@@ -53,10 +54,10 @@ static void getCellInfo(List *list, InfoNode *in){
 }
 
 static ShapeType getShapeByName(S name){
-    if(!strcmp(name, "list")) return listH;
-    else if(!strcmp(name, "table")) return tableH;
-    else if(!strcmp(name, "dict"))  return dictH;
-    else if(!strcmp(name, "enum"))  return enumH;
+    if(sEQ(name, "list"))       R listH;
+    else if(sEQ(name, "table")) R tableH;
+    else if(sEQ(name, "dict"))  R dictH;
+    else if(sEQ(name, "enum"))  R enumH;
     else EP("Unknown shape name: %s", name);
 }
 
@@ -72,8 +73,6 @@ static InfoNode *getInfoNode(Node *n){
     }
     return x;
 }
-
-SymbolNameList *symList;
 
 static void cleanSymbolNameList(SymbolNameList *list){
     //if(list && list->next){ cleanSymbolNameList(list->next); free(list->next); list->next = NULL; }
@@ -138,19 +137,9 @@ static SymbolTable *initSymbolTable(){
     return t;
 }
 
-//SymbolTables *initChildTable(Symboltable t){
-//    SymbolTables *s = NEW(SymbolTables);
-//    s->child = t;
-//    return s;
-//}
-
 static SymbolTable *scopeSymbolTable(Node *n, SymbolTable *st){
     SymbolTable *t = initSymbolTable();
     t->parent = st;
-    /* insert */
-    //SymbolTables *s = initChildTable(t);
-    //s->next = st->children;
-    //st->children = s;
     return t;
 }
 
@@ -184,12 +173,12 @@ SymbolName *getSymbolName(SymbolTable *st, char *name){
     return getSymbolName(st->parent, name);
 }
 
-static bool defSymbol(SymbolTable *st, char *name){
+static B defSymbol(SymbolTable *st, char *name){
     int i = simpleHash(name);
     for(SymbolName *s = st->table[i]; s; s = s->next){
-        if(!strcmp(s->name, name)) return 1;
+        if(!strcmp(s->name, name)) return true;
     }
-    return 0;
+    return false;
 }
 
 static void checkFuncName(Node *funcName, SymbolTable *st){

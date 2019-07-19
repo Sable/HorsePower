@@ -76,12 +76,13 @@ typedef struct FuncUnit{
 
 /* signatures */
 
-void checkFuncNumber();
-void *fetchTypeRules(char *name, int* num);
+O  checkFuncNumber();
+B  checkType(InfoNode *x, InfoNode *y);
+B  checkShape(InfoNode *x, InfoNode *y);
+I  getValence(FuncUnit *x);
+O  getFuncIndexByName(char *name, FuncUnit *x);
+O *getTypeRules(char *name, int* num);
+
 ShapeNode *newShapeNode(ShapeType type, int kind, int size);
-bool checkType(InfoNode *x, InfoNode *y);
-bool checkShape(InfoNode *x, InfoNode *y);
-int  getValence(FuncUnit *x);
-void getFuncIndexByName(char *name, FuncUnit *x);
 
 #endif

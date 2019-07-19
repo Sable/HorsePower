@@ -45,42 +45,16 @@ typedef struct MetaMethod{
     bool isCompiled;
 }MetaMethod;
 
-//typedef struct InfoNode{
-//    Type type;
-//    struct ShapeNode *shape;
-//    struct InfoNode *subInfo;
-//    struct InfoNode *next;
-//}InfoNode;
-
-//typedef struct TypeNode{
-//    Type type;
-//    struct ShapeNode *shape;
-//    struct TypeNode *subType;
-//    struct TypeNode *next;
-//}TypeNode;
-//
-//typedef struct InfoTypeList{
-//    TypeNode *tn;
-//    struct InfoTypeList *next;
-//}InfoTypeList;
-
-//typedef struct InfoNodeList{
-//    InfoNode *in;
-//    struct InfoNodeList *next;
-//}InfoNodeList;
-
 /* declarations */
-void buildSymbolTable(Prog *root);
-extern SymbolTable *rootSymbolTable;
-
-char *strName2 (char *id1, char *id2);
-char *strName  (Node *n);
-
 SymbolName *getSymbolName(SymbolTable *st, char *name);
 SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind);
 
-void printSymbolName(SymbolName *sn);
-void printSymbolNameList(SymbolNameList *list);
+O buildSymbolTable(Prog *root); 
+O printSymbolName(SymbolName *sn);
+O printSymbolNameList(SymbolNameList *list);
+
+S strName2 (S id1, S id2);
+S strName  (Node *n);
 
 #endif
 

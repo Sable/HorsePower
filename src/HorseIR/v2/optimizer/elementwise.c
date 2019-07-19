@@ -27,14 +27,14 @@ static void printChainDefs(Chain *p){
 }
 
 static B isMatchedDef(Chain *p, char *name){
-    List *vars = getStmtVars(chainNode(p));
+    List *vars = nodeStmtVars(chainNode(p));
     while(vars){
         Node *n = vars->val;
-        if(instanceOf(n, nameK) && getNameKind(n) == localS){
-            if(sEQ(name, getName2(n))) return true;
+        if(instanceOf(n, nameK) && nodeNameKind(n) == localS){
+            if(sEQ(name, nodeName2(n))) return true;
         }
-        else if(instanceOf(n, varK) && getVarKind(n) == localS){
-            if(sEQ(name, getVarName(n))) return true;
+        else if(instanceOf(n, varK) && nodeVarKind(n) == localS){
+            if(sEQ(name, nodeVarName(n))) return true;
         }
         vars = vars->next;
     }
@@ -49,12 +49,12 @@ I findDefByName(Chain *p, char *name){
 
 static B isMatchedUse(Chain *p, char *name){
     if(!instanceOf(chainNode(p), stmtK)) return false;
-    Node *expr  = getStmtExpr(chainNode(p));
+    Node *expr  = nodeStmtExpr(chainNode(p));
     List *param = expr->val.call.param->val.listS;
     while(param){
         Node *n = param->val;
-        if(instanceOf(n, nameK) && getNameKind(n) == localS){
-            if(sEQ(name, getName2(n))) return true;
+        if(instanceOf(n, nameK) && nodeNameKind(n) == localS){
+            if(sEQ(name, nodeName2(n))) return true;
         }
         param = param->next;
     }
@@ -70,7 +70,7 @@ static I findUseByName(Chain *p, char *name){
 static gNode *initgNode(Node *node){
     gNode *x = NEW(gNode);
     x->node  = node;
-    x->pnum  = totalElement(fetchParams(node));
+    x->pnum  = totalList(getParams(node));
     if(x->pnum >= 5)
         EP("Not enough space");
     return x;
@@ -81,14 +81,14 @@ static gNode *findFusionUp(Chain *chain){
     else chain->isVisited = true;
     Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
-        List *vars = getStmtVars(n);
+        List *vars = nodeStmtVars(n);
         Node *call = getStmtCall(n);
-        Node *func = getCallFunc(call);
-        SymbolKind sk = getNameKind(func);
-        if(!(sk == builtinS && isElementwise(getName2(func))))
+        Node *func = nodeCallFunc(call);
+        SymbolKind sk = nodeNameKind(func);
+        if(!(sk == builtinS && isElementwise(nodeName2(func))))
             return NULL; // if not an elemetnwsie func
         //List *param = expr->val.call.param->val.listS;
-        List *param = fetchParams(n);
+        List *param = getParams(n);
         //printChainUses(chain); getchar();
         // -- useful debugging
         //printBanner("Gotcha");
@@ -99,10 +99,10 @@ static gNode *findFusionUp(Chain *chain){
         while(param){
             Node *p = param->val;
             if(instanceOf(p, nameK)){
-                SymbolKind sk = getNameKind(p);
+                SymbolKind sk = nodeNameKind(p);
                 if(sk == localS){
-                    I c = findDefByName(chain, getName2(p));
-                    //P("c4 = %d, s = %s\n", c, getName2(p)); getchar();
+                    I c = findDefByName(chain, nodeName2(p));
+                    //P("c4 = %d, s = %s\n", c, nodeName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         rt->pnode[cnt] = findFusionUp(chain->chain_defs[c]);
@@ -125,19 +125,19 @@ static gNode *findFusionUp(Chain *chain){
 static Chain *findFusionDown(Chain *chain){
     Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
-        List *vars = getStmtVars(n);
+        List *vars = nodeStmtVars(n);
         Node *call = getStmtCall(n);
-        Node *func = getCallFunc(call);
-        SymbolKind sk = getNameKind(func);
-        if(!(sk == builtinS && isElementwise(getName2(func))))
+        Node *func = nodeCallFunc(call);
+        SymbolKind sk = nodeNameKind(func);
+        if(!(sk == builtinS && isElementwise(nodeName2(func))))
             return NULL; // if not an elemetnwsie func
         B isOK = true;
         while(vars){
             Node *p = vars->val;
             if(instanceOf(p, varK)){
                 if(p->val.param.sn->kind == localS){
-                    I c = findUseByName(chain, getVarName(p));
-                    //P("c1 = %d, s = %s\n", c, getVarName(p)); getchar();
+                    I c = findUseByName(chain, nodeVarName(p));
+                    //P("c1 = %d, s = %s\n", c, nodeVarName(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         Chain *foundChain = findFusionDown(chain->chain_uses[c]);
@@ -147,9 +147,9 @@ static Chain *findFusionDown(Chain *chain){
                 else isOK = false;
             }
             else if(instanceOf(p, nameK)){
-                if(getNameKind(p) == localS){
-                    I c = findUseByName(chain, getName2(p));
-                    //P("c2 = %d, s = %s\n", c, getName2(p)); getchar();
+                if(nodeNameKind(p) == localS){
+                    I c = findUseByName(chain, nodeName2(p));
+                    //P("c2 = %d, s = %s\n", c, nodeName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         Chain *foundChain = findFusionDown(chain->chain_uses[c]);
@@ -176,13 +176,13 @@ static B isOK2Fuse(gNode *rt){
 
 // TODO: remove duplicated items (only distinct values wanted)
 static void totalInputs(gNode *rt, S *names){
-    List *params = fetchParams(rt->node);
+    List *params = getParams(rt->node);
     DOI(rt->pnum, {I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) totalInputs(t,names); \
-            else {Node *p = fetchParamsIndex(params,k)->val; \
+            else {Node *p = getParamsIndex(params,k)->val; \
                 if(instanceOf(p,nameK)){ \
-                  if(!isDuplicated(names,getName2(p))) \
-                    names[varNum++]=getName2(p);}} })
+                  if(!isDuplicated(names,nodeName2(p))) \
+                    names[varNum++]=nodeName2(p);}} })
 }
 
 static void genCodeElem(gNode *rt, B isRT){
@@ -205,14 +205,14 @@ static void genCodeElem(gNode *rt, B isRT){
         extra->funcDecl = genDeclSingle(temp, ';');
         extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
     }
-    Node *fn = fetchFuncNode(n);
-    //P("%s(", genFuncNameC(getName2(fn)));
-    glueAny("%s(", genFuncNameC(getName2(fn)));
-    List *params = fetchParams(n);
+    Node *fn = getFuncNode(n);
+    //P("%s(", genFuncNameC(nodeName2(fn)));
+    glueAny("%s(", genFuncNameC(nodeName2(fn)));
+    List *params = getParams(n);
     DOI(rt->pnum, {if(i>0)glueChar(','); I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) genCodeElem(t,false); \
-            else {Node *p = fetchParamsIndex(params,k)->val; \
-                if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,getName2(p))); \
+            else {Node *p = getParamsIndex(params,k)->val; \
+                if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,nodeName2(p))); \
                 else genCodeNode(p);} })
     glueChar(')');
     if(isRT){
@@ -262,7 +262,7 @@ static void analyzeChain(ChainList *list){
 static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
-    ChainList *chains = getMethodChainList(n);
+    ChainList *chains = nodeMethodChainList(n);
     analyzeChain(chains->next);
     currentMethod = prevMethod;
     //printChainList(chains); getchar(); // TODO: printChainListBasic

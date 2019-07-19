@@ -17,55 +17,58 @@ typedef struct FuseNode {
 #define setVisited(c, v)  (c)->isVisited=v
 
 // node: module
-#define getModuleName(n)  (n)->module.id    // S
-#define getModuleBody(n)  (n)->module.body  // List
+#define nodeModuleName(n)  (n)->module.id    // S
+#define nodeModuleBody(n)  (n)->module.body  // List
 
 // node: import
-#define getImportName(n)  (n)->import.module  // S
-#define getImportItems(n) (n)->import.content // List
+#define nodeImportName(n)  (n)->import.module  // S
+#define nodeImportItems(n) (n)->import.content // List
 
 // node: methodK
-#define getMethodName(n)        (n)->val.method.fname  // S
-#define getMethodReturnTypes(n) (n)->val.method.typ    // List
-#define getMethodParameters(n)  (n)->val.method.param  // Node
-#define getMethodBlock(n)       (n)->val.method.block  // Node
-#define getMethodMeta(n)        (n)->val.method.meta   // MetaMethod 
-#define getMethodChainList(n)   getMethodMeta(n)->chains
+#define nodeMethodName(n)        (n)->val.method.fname  // S
+#define nodeMethodReturnTypes(n) (n)->val.method.typ    // List
+#define nodeMethodParameters(n)  (n)->val.method.param  // Node
+#define nodeMethodBlock(n)       (n)->val.method.block  // Node
+#define nodeMethodMeta(n)        (n)->val.method.meta   // MetaMethod 
+#define nodeMethodChainList(n)   nodeMethodMeta(n)->chains
 
 // node: stmtK
-#define getStmtVars(n)   (n)->val.assignStmt.vars
-#define getStmtExpr(n)   (n)->val.assignStmt.expr
+#define nodeStmtVars(n)   (n)->val.assignStmt.vars
+#define nodeStmtExpr(n)   (n)->val.assignStmt.expr
 
 // node: nameK
-#define getName1(n)      (n)->val.name.id1        // S
-#define getName2(n)      (n)->val.name.id2        // S
-#define getNameKind(n)   (n)->val.name.sn->kind   // SymbolKind
+#define nodeName1(n)      (n)->val.name.id1        // S
+#define nodeName2(n)      (n)->val.name.id2        // S
+#define nodeNameKind(n)   (n)->val.name.sn->kind   // SymbolKind
 
 // node: varK
-#define getVarKind(n)    (n)->val.param.sn->kind  // SymbolKind
-#define getVarName(n)    (n)->val.param.id        // S
+#define nodeVarName(n)    (n)->val.param.id        // S
+#define nodeVarType(n)    (n)->val.param.typ       // Node
+#define nodeVarSymbol(n)  (n)->val.param.sn        // SymbolName
+#define nodeVarKind(n)    nodeVarSymbol(n)->kind   // SymbolKind
 
 // node: callK
-#define getCallFunc(n)   (n)->val.call.func       // Node
-#define getCallParam(n)  (n)->val.call.param      // Node
+#define nodeCallFunc(n)   (n)->val.call.func       // Node
+#define nodeCallParam(n)  (n)->val.call.param      // Node
 
 // node: list-based (funcK)
-#define getNodeList(n)   (n)->val.listS           // List
+#define nodeList(n)       (n)->val.listS           // List
 
 // node: gloalK
-#define getGlobalName(n) (n)->val.global.id       // S
-#define getGlobalType(n) (n)->val.global.typ      // Node
-#define getGlobalOp(n)   (n)->val.global.op       // Node
+#define nodeGlobalName(n) (n)->val.global.id       // S
+#define nodeGlobalType(n) (n)->val.global.typ      // Node
+#define nodeGlobalOp(n)   (n)->val.global.op       // Node
 
 // node: typeK
-#define getTypeInfo(n)   (n)->val.type.in
+#define nodeTypeInfo(n)   (n)->val.type.in         // InfoNode
+#define nodeTypeCells(n)  (n)->val.type.cell       // List
 
 // node: castK
-#define getCastExpr(n)   (n)->val.cast.exp        // Node
-#define getCastType(n)   (n)->val.cast.typ        // Node
+#define nodeCastExpr(n)   (n)->val.cast.exp        // Node
+#define nodeCastType(n)   (n)->val.cast.typ        // Node
 
 // node: exprStmtK
-#define getExprStmt(n)   (n)->val.exprStmt.expr   // Node
+#define nodeExprStmt(n)   (n)->val.exprStmt.expr   // Node
 
 /* declarations below */
 
@@ -83,14 +86,14 @@ S genFuncNameC   (S fn);
 S genFuncNameDeep(S fn);
 
 Node *getParamFromNode (Node *n, I pos);
-List *fetchParams      (Node *n);
-Node *fetchFuncNode    (Node *n);
-Node *fetchFuncSingle  (Node *n);
-List *fetchParamsIndex (List *list, I pos);
+List *getParams        (Node *n);  // --> getNodeParams
+Node *getFuncNode      (Node *n);
+Node *getFuncSingle    (Node *n);  // clean
+List *getParamsIndex   (List *list, I pos);
 
 Node *getNodeFirstParam(Node *n);
 Node *getSingleFunc    (Node *funcs);
-Node *fetchEachFuncNode(Node *n);
+Node *getEachFuncNode  (Node *n);
 
 B isElementwise(S funcName);
 I findDefByName(Chain *p, S name);
@@ -106,5 +109,7 @@ O genCodeNode   (Node *n);
 O genCodeList   (List *list);
 O genCodeName   (Node *n, I id);
 S genInvcSingle (S targ, S func, S *names, I num);
+
+SymbolName *getNodeSymbolName(Node *n);
 
 #endif

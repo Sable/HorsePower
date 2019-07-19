@@ -172,8 +172,8 @@ static O showLine(Node *n){
     printNode(n);
 }
 
-static I totalVList(VList *x){ // skip dummy
-    I c=0; while(x->next){c++; x=x->next;} R c;
+static I totalVList1(VList *list){ // with dummy
+    I c=0; while(list=list->next){c++; list=list->next;} R c;
 }
 
 static O addParam(VList *list, V x){
@@ -205,7 +205,7 @@ static L stackPtr, stackPeak;
 
 static O saveToStackSub(SymbolNameList *list){
     if(!list) R ;
-    L size = totalSymbolNames(list) * sizeof(V);
+    L size = totalSymbolNameList(list) * sizeof(V);
     if(stackPtr + size < STACK_SIZE){
         V *x = (V*)(runStack + stackPtr);
         L i = 0;
@@ -229,7 +229,7 @@ static O saveToStack(Node *method){
 }
 
 static O loadFromStackSub(SymbolNameList *list){
-    L size = totalSymbolNames(list) * sizeof(V);
+    L size = totalSymbolNameList(list) * sizeof(V);
     stackPtr -= size;
     V *x = (V*)(runStack + stackPtr);
     L i = 0;
@@ -268,8 +268,8 @@ static I getParamsSub(VList *list, V *rtn){
     return 0;
 }
 
-static V *getParams(VList *list){
-    I tot = totalVList(list);
+static V *getParamsV(VList *list){
+    I tot = totalVList1(list);
     V *vals = NEW2(V0, tot);
     getParamsSub(list, vals);
     return vals;
@@ -279,8 +279,8 @@ static V invokeBuiltin(char *funcName, VList *list){
     FuncUnit fu;
     getFuncIndexByName(funcName, &fu);
     I valence = getValence(&fu);
-    I numArg = totalVList(list);
-    V *params = getParams(list);
+    I numArg = totalVList1(list);
+    V *params = getParamsV(list);
     if(numArg == valence || valence == -1){ //-1: any
         switch(fu.kind){
             case 1: return executeMon(monFunc[fu.u], params);
@@ -353,18 +353,18 @@ static L loadVector(List *list, V x, I t){
     R 0;
 }
 
-V fetchVector(Node *n){
+V getVector(Node *n){
     I t = getHType(getType(n->val.vec.typ));
     List *items = n->val.vec.val;
     V x = allocNode();
-    L size = totalElement(items);
+    L size = totalList(items);
     initV(x, t, size);
     loadVector(items, x, t);
     return x;
 }
 
 static O runVector(Node *n){
-    addParam(paramList, fetchVector(n));
+    addParam(paramList, getVector(n));
 }
 
 
@@ -386,7 +386,7 @@ static O assignVars(List *vars, VList *list){
 
 static O checkRtns(List *vars, VList *list){
     I numVars = totalVar(vars);
-    I numRtns = totalVList(list);
+    I numRtns = totalVList1(list);
     if(numVars == numRtns){
         assignVars(vars, list->next);
     }
@@ -445,10 +445,6 @@ static S getFuncNameStr(Node *funcName){
         case  methodS: return sn->name;
         default: EP("Add more support for %d\n", sn->kind);
     }
-}
-
-static I totalList(List *list){
-    R list?(1+totalList(list->next)):0;
 }
 
 static O addFuncList(List *list, V x, I dep){

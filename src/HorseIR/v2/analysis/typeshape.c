@@ -23,28 +23,16 @@ List *compiledMethodList;
 
 /*  ---- above declarations ---- */
 
-I totalElement(List *list){ // no dummy
-    I c=0; while(list){c++; list=list->next;} return c;
-}
-
-I totalInfoNoDummy(InfoNodeList *list){
-    I c=0; while(list){list=list->next; c++;} return c;
-}
-
-I totalInfo(InfoNodeList *list){
-    I c=0; while(list->next){list=list->next; c++;} return c;
-}
-
 static InfoNode *getNode(InfoNodeList *list, int k){
     while(list->next && k>=0){ list=list->next; k--; }
     return list->in;
 }
 
 static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
-    int numArg = totalInfo(list);
+    int numArg = totalInfoNodeList1(list);
     int valence = -2;
     InfoNode *newNode = NULL;
-    void* funcRtn = fetchTypeRules(funcName, &valence);  /* entry */
+    void* funcRtn = getTypeRules(funcName, &valence);  /* entry */
     if(!funcRtn) {
         EP("Error type rules found in *%s*\n", funcName);
     }
@@ -94,9 +82,9 @@ static bool checkParamCompatible(SymbolNameList *args, InfoNodeList *list){
 }
 
 static InfoNodeList *propagateMethod(Node *n, InfoNodeList *inputList){
-    int numArg = totalInfo(inputList);
+    int numArg = totalInfoNodeList1(inputList);
     MetaMethod *meta = n->val.method.meta;
-    int valence = totalSymbolNames(meta->paramVars);
+    int valence = totalSymbolNameList(meta->paramVars);
     if(numArg == valence){
         SymbolNameList *argList = meta->paramVars;
         printInfoNode(inputList->next->in);
@@ -187,7 +175,7 @@ static void deepCopyInfoNodeList(InfoNodeList *list, InfoNodeList *vals){
 }
 
 static InfoNode *getInfoVector(Node *n){
-    int num = totalElement(n->val.vec.val);
+    int num = totalList(n->val.vec.val);
     InfoNode *in = scanType(n->val.vec.typ);  // because of you?
     ShapeNode *sn = newShapeNode(vectorH, SN_CONST, num);
     in->shape = sn;
@@ -195,7 +183,7 @@ static InfoNode *getInfoVector(Node *n){
 }
 
 static InfoNode *getInfoFunc(Node *n){
-    int num = totalElement(n->val.listS);
+    int num = totalList(n->val.listS);
     InfoNode *in = NEW(InfoNode);
     in->type  = funcT;
     in->shape = newShapeNode(vectorH, SN_CONST, num);
@@ -413,9 +401,9 @@ static void scanAssignStmt(Node *n){
     Node *expr = n->val.assignStmt.expr;
     scanNode(expr);
     /* handle returns */
-    int numVar = totalElement(vars);
+    int numVar = totalList(vars);
     if(instanceOf(expr, callK)){
-        int numExpr = totalInfo(currentInList);
+        int numExpr = totalInfoNodeList1(currentInList);
         if(numVar == numExpr){
             // <---- type copied here if type compatible  ....
             if(typelistCompatible(numVar, vars, currentInList));
@@ -438,7 +426,7 @@ static void scanAssignStmt(Node *n){
 static void scanGlobal(Node *n){
     scanNode(n->val.global.op);
     /* handle returns */
-    int numExpr = totalInfo(currentInList);
+    int numExpr = totalInfoNodeList1(currentInList);
     InfoNode *lhs = getInfoFromNode(n->val.global.typ);  // don't use scanType(..)
     InfoNode *rhs = currentInList->next?currentInList->next->in:NULL;
     if(numExpr == 1 && infoCompatible(lhs, rhs));
@@ -514,8 +502,8 @@ static void scanReturnStmt(Node *n){
     cleanInfoList(currentInList);
     scanListNode(n);
     MetaMethod *meta = currentMethod->val.method.meta;
-    int numExpr = totalInfo(currentInList);
-    int numRtns = totalInfoNoDummy(meta->returnTypes);
+    int numExpr = totalInfoNodeList1(currentInList);
+    int numRtns = totalInfoNodeList(meta->returnTypes);
     if(numExpr == numRtns){
         if(numRtns > 0){
             if(typeInfoNodeListCompatible(meta->returnTypes, currentInList->next));

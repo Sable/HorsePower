@@ -70,7 +70,7 @@ static void genMethodHead(Node *n){
     resetCode(); S line = ptr;
     glueAny("static I horse_%s(", n->val.method.fname);
     I numRtn   = countInfoNodeList(n->val.method.meta->returnTypes);
-    I numParam = totalSymbolNames(n->val.method.meta->paramVars);
+    I numParam = totalSymbolNameList(n->val.method.meta->paramVars);
     if(numRtn > 0)
         glueCode("V *h_rtn");
     if(numParam > 0){
@@ -147,7 +147,7 @@ static I genListReturn(List *list, C sep, S text){
     return 0;
 }
 
-C getTypeAlias(Type t){
+static C obtainTypeAlias(Type t){
     switch(t){
         case boolT: return 'B';
         case   i8T: return 'J';
@@ -164,14 +164,14 @@ C getTypeAlias(Type t){
     }
 }
 
-static C getTypeAliasFromNode(Node *n){
+static C getNodeTypeAlias(Node *n){
     InfoNode *in = n->val.type.in;
     if(!in->subInfo)
-        return getTypeAlias(in->type);
+        return obtainTypeAlias(in->type);
     else EP("Type problem");
 }
 
-static S genConstFunc(Node *n){
+static S obtainLiteralFunc(Node *n){
     InfoNode *in = n->val.type.in;
     if(!in->subInfo){
         switch(in->type){
@@ -262,22 +262,22 @@ static Node* getLastNodeFromList(List *list){
 
 static void scanCall(Node *n){
     I prevNumArg = numArg;
-    SymbolKind sk = scanFuncName(getCallFunc(n));
+    SymbolKind sk = scanFuncName(nodeCallFunc(n));
     glueCode("(");
     if(sk == methodS) {
         genVarArray(lhsVars, comma);
         numArg = 1;
-        scanNode(getCallParam(n)); // argExprK
+        scanNode(nodeCallParam(n)); // argExprK
     }
     else {
         genList(lhsVars, comma);
         numArg = countNode(lhsVars);
-        List *args = getCallParam(n)->val.listS;
+        List *args = nodeCallParam(n)->val.listS;
         Node *first = getLastNodeFromList(args);
         if(first && instanceOf(first, funcK)){
             scanList1(args, first);
         }
-        else scanNode(getCallParam(n)); // argExprK
+        else scanNode(nodeCallParam(n)); // argExprK
     }
     numArg = prevNumArg;
     glueCode(")");
@@ -316,7 +316,7 @@ static void scanVector(Node *n){
     }
     Node *typeNode = n->val.vec.typ;
     I c = countNode(n->val.vec.val);
-    glueCode(genConstFunc(typeNode));
+    glueCode(obtainLiteralFunc(typeNode));
     if(c == 1){
         glueCode("(");
         genList(n->val.vec.val, comma);
@@ -324,7 +324,7 @@ static void scanVector(Node *n){
     }
     else if(c > 1){
         glueCode("Vector(");
-        resetCode(); SP(ptr, "%d, (%c []){", c, getTypeAliasFromNode(typeNode));
+        resetCode(); SP(ptr, "%d, (%c []){", c, getNodeTypeAlias(typeNode));
         genList(n->val.vec.val, comma);
         glueCode("})");
     }
@@ -413,7 +413,7 @@ static void scanBlock(Node *n){
 
 
 static void scanFunc(Node *n){
-    if(1==totalElement(n->val.listS)){
+    if(1==totalList(n->val.listS)){
         Node *first = n->val.listS->val;
         glueCode(", ");
         scanFuncName(first);
