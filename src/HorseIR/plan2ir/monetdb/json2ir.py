@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from util     import *
 
 db_tpch = {}
-as_map  = {}
+as_map  = {}  # id0.id1: currently only use id1 as key
 
 def scanMain(d, env):
     if 'operator' in d:
@@ -311,6 +311,7 @@ def getExprValue(v, env):
                 "count"   : "count"
             }.get(func, "<func>")
         else:
+            print args
             unexpected("Argument inbalanced: %d vs. %d" % (len(args),num))
 
     def isBinaryFunc(func):
@@ -329,22 +330,41 @@ def getExprValue(v, env):
         reduction_op_list = [ 'sum', 'avg', 'count' ]
         return (func in reduction_op_list)
 
+    def getArgValues(args, env):
+        global as_map
+        rtn = []
+        prev = None
+        for x in args:
+            typ = x['type']
+            if typ == 'as':
+                if prev:
+                    t = getValuesV(x, env)
+                    as_map[t[1]] = prev
+                    prev = None
+                else:
+                    unexpected('Previous node not found for as')
+            else:
+                prev = getValuesV(x, env)
+                rtn.append(prev)
+        return rtn
+    # start
     expr = v['value']
     func = getIdName(expr['function'])
+    args = getArgValues(expr['args'], env)
     if isBinaryFunc(func):
-        op = checkFunc(func, expr['args'], 2)
-        v0 = getValuesV(expr['args'][0], env)
-        v1 = getValuesV(expr['args'][1], env)
+        op = checkFunc(func, args, 2)
+        v0 = args[0]
+        v1 = args[1]
         return genDyadic(op, v0, v1)
     elif isUnaryFunc(func):
-        op = checkFunc(func, expr['args'], 1)
-        v0 = getValuesV(expr['args'][0], env)
+        op = checkFunc(func, args, 1)
+        v0 = args[0]
         if isReduction(op):
             return { "kind": "aggr", "op": op, "num": 1, "values": [v0] }
         else:
             return genMonadic(op, v0)
     elif isNilFunc(func):
-        op = checkFunc(func, expr['args'], 0)
+        op = checkFunc(func, args, 0)
         if isReduction(op):
             return { "kind": "aggr", "op": op, "num": 0, "values": [] }
         else:

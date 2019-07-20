@@ -4,7 +4,8 @@ usage(){
     printf '%s\n' \
         "Usage: $0 <cmd>" "" \
         "  1) $0 <qid>        # python m2ir.py plans/<qid>.plan" "" \
-        "  2) $0 <cmd> <qid>  # cmd: dump/show/dot" ""
+        "  2) $0 <cmd> <qid>  # cmd: dump/show/dot" "" \
+        "Example: kind=aida $0 show 6"
     exit 1
 }
 
@@ -15,7 +16,7 @@ fi
 if [ $kind = "tpch" ]; then
     file_dir="plans/q"
 else
-    file_dir="/tmp/aida-q"
+    file_dir="/mnt/local/script-tpch/aida/plans/monetdb/q"
 fi
 
 if [ "$#" -eq 1 ]; then
