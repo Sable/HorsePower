@@ -109,12 +109,19 @@ def scanProject():
     consume(')')
     exprs = scanProjectExprs()
     if (not isLastToken()) and curToken() == '[':
-        exprs.append(scanProjectExprs())
-    return {
-        'operator'  : 'project',
-        'input'     : content,
-        'output'    : exprs
-    }
+        # add an additional field 'order'
+        return {
+            'operator'  : 'project',
+            'input'     : content,
+            'output'    : exprs,
+            'order'     : scanProjectExprs()
+        }
+    else:
+        return {
+            'operator'  : 'project',
+            'input'     : content,
+            'output'    : exprs
+        }
 
 def scanSelect():
     consume('(')

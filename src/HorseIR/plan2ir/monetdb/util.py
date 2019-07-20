@@ -38,10 +38,25 @@ def strSymbolVec(x):
     elif len(x) > 1:
         temp = '`' + x[0]
         for t in x[1:]:
-            temp = temp + ', `' + t
-        return '(' + t + '):sym'
+            temp = temp + ',`' + t
+        return '(' + temp + '):sym'
     else:
         unexpected('Vector is empty: %d' % len(x))
+
+def strLiterals(x, typ):
+    num = len(x)
+    if num == 1:
+        return '%s:%s' % (x[0],typ)
+    elif num > 1:
+        temp = x[0]
+        for t in x[1:]:
+            temp = temp + ',' + t
+        return '(%s):%s' % (temp,typ)
+    else:
+        unexpected('Vector is empty: %d' % num)
+
+def str2bool(x):
+    return '1' if x == 'asc' else '0'
 
 """
 Handle exceptions
@@ -57,7 +72,7 @@ def unexpected(msg):
     errorMsg(msg, 'Unexpected')
 
 def warning(msg):
-    errorMsg(msg, 'Warning')
+    print '[Warning] %s' % msg
 
 def wrong(msg):
     errorMsg(msg, 'Wrong')

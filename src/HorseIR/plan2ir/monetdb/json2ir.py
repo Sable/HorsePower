@@ -30,15 +30,22 @@ def scanMain(d, env):
         unexpected("No operator found.")
 
 def scanProject(d, env):
-    return scanOutput(d['output'], env)
+    newEnv = scanOutput(d['output'], env)
+    if 'order' in d:
+        return scanOrder(d['order'], newEnv)
+    else:
+        return newEnv
 
 def scanGroupby(d, env):
     b1 = d['block1']
     b2 = d['block2']
     if emptyList(b1):
-        return scanSimpleBlock(b2, env)
+        env2 = scanBlock(b2, env)
+        return combineGroupEnv(None, env2)
     else:
-        unexpected("Support b1")
+        env2 = scanBlock(b2, env)
+        env1 = scanBlock(b1, env)
+        return combineGroupEnv(env1, env2)
     pass
 
 def scanSelect(d, env):
@@ -75,10 +82,29 @@ def scanLeftouterjoin(d, env):
     pass
 
 def scanOutput(d, env):
-    global as_map  # THINK: a real global or clean here?
+    return scanBlock(d, env)
+
+def scanBlock(d, env):
+    global as_map  # THINK: a real global or clean here? as_map.clear()
     env_alias = []; env_table = []; env_cols = []; env_types = []
     for t in d:
         num = len(t)
+        if num > 0 and isinstance(t[0], list):
+            # vector for asc/desc
+            for vec in t:
+                for d in vec:
+                    if 'order' in d:
+                        v0 = getValuesV(d, env)
+                        v1 = d['value']['id']
+                        typ = getTypeFromEnv(v1, env)
+                    else:
+                        unexpected('unknown')
+                    tab,col = v1
+                    env_alias.append({"kind":"sort", "values":v0})
+                    env_table.append(tab)
+                    env_cols.append(col)
+                    env_types.append(typ)
+            continue
         if num == 1:
             v0 = getValuesV(t[0], env)
             v1 = t[0]['value']['id']
@@ -88,29 +114,37 @@ def scanOutput(d, env):
                 typ = getExprType(t[0])
                 v0 = getValuesV(t[0], env)
                 v1 = getValuesV(t[1], env) #id0.id1
-                as_map[v1[1]] = v0
+                if not isinstance(v0, dict):
+                    as_map[v1[1]] = v0
             else:
                 unexpected('Need "as"')
         else:
             unexpected('Add support num: %d' % num)
         #print v0,v1
         tab,col = v1
-        env_alias.append(v0)
+        env_alias.append(v0)  # could be dict in aggregation
         env_table.append(tab)
         env_cols.append(col)
         env_types.append(typ)
     return encodeEnv(env_table, env_cols, env_alias, env_types)
 
-def scanSimpleBlock(d, env):
-    printEnv(env)
-    newEnv = scanOutput(d, env)
-    printEnv(newEnv)
-    stop('here')
-    return newEnv
+def scanOrder(d, env):
+    order_alias = []
+    order_sort  = []
+    for vec in d:
+        for d in vec:
+            if 'order' in d:
+                order_alias.append(getValuesV(d, env))
+                order_sort.append(str2bool(d['order']))
+            else:
+                unexpected('unknown')
+    a0 = genSort(genList(order_alias), strLiterals(order_sort, 'bool'))
+    return updateEnvWithIndex(a0, env)
 
 # return final results
 def scanHeader(env):
-    # printEnv(env)
+    printEnv(env)
+    stop('header')
     a0 = genLiteral(strSymbolVec(getEnvName(env)))
     a1 = genList(getEnvAlias(env))
     a2 = genTable(a0, a1)
@@ -138,6 +172,18 @@ def updateEnvWithMask(mask, env):
                      getEnvType(env),
                      mask,
                      getEnvAlias(env)) #update alias
+
+def updateEnvWithAlias(new_alias, env):
+    new_env = copy.deepcopy(env)
+    new_env['cols_a'] = new_alias
+    return new_env
+
+def updateEnvWithIndex(indx, env):
+    alias = getEnvAlias(env)
+    new_alias = []
+    for x in alias:
+        new_alias.append(genIndex(x, indx))
+    return updateEnvWithAlias(new_alias, env)
 
 def actionCompress(vid, cols, env):
     alias = []
@@ -210,7 +256,14 @@ def getLiteralDate(v, env):
 def getIntervalMonth(v, env):
     return getLiteralValue(v, env)
 
+def getIntervalSec(v, env):
+    warning('Need check interval')
+    return getLiteralValue(v, env)
+
 def getDecimal(v, env):
+    return getLiteralValue(v, env)
+
+def getDouble(v, env):
     return getLiteralValue(v, env)
 
 def getLiteralTiny(v, env):
@@ -221,13 +274,14 @@ def getNameVar(v, env):
     if 'id' in v['value']:
         id0, id1 = v['value']['id'] # id0.id1
     else:
+        id0 = None
         id1 = v['value']  # type: string (i.e. var)
     if id1 in as_map:
         return as_map[id1]
     else:
         indx = getEnvName(env).index(id1)
         if indx >= 0 :
-            if getEnvTable(env)[indx] == id0:
+            if id0 == None or getEnvTable(env)[indx] == id0:
                 return getEnvAlias(env)[indx]
             else:
                 unexpected('column %s need table %s, but %s found' % (id1,id0,getEnvTable(env)[indx]))
@@ -252,7 +306,9 @@ def getExprValue(v, env):
                 "sql_add" : "plus" ,
                 "sql_sub" : "minus",
                 "sql_mul" : "mul"  ,
-                "sum"     : "sum"
+                "sum"     : "sum"  ,
+                "avg"     : "avg"  ,
+                "count"   : "count"
             }.get(func, "<func>")
         else:
             unexpected("Argument inbalanced: %d vs. %d" % (len(args),num))
@@ -262,8 +318,16 @@ def getExprValue(v, env):
         return (func in binary_op_list)
 
     def isUnaryFunc(func):
-        unary_op_list = [ 'sum' ]
+        unary_op_list = [ 'sum', 'avg' ]
         return (func in unary_op_list)
+
+    def isNilFunc(func):
+        nil_op_list = [ 'count' ]
+        return (func in nil_op_list)
+
+    def isReduction(func):
+        reduction_op_list = [ 'sum', 'avg', 'count' ]
+        return (func in reduction_op_list)
 
     expr = v['value']
     func = getIdName(expr['function'])
@@ -275,7 +339,16 @@ def getExprValue(v, env):
     elif isUnaryFunc(func):
         op = checkFunc(func, expr['args'], 1)
         v0 = getValuesV(expr['args'][0], env)
-        return genMonadic(op, v0)
+        if isReduction(op):
+            return { "kind": "aggr", "op": op, "num": 1, "values": [v0] }
+        else:
+            return genMonadic(op, v0)
+    elif isNilFunc(func):
+        op = checkFunc(func, expr['args'], 0)
+        if isReduction(op):
+            return { "kind": "aggr", "op": op, "num": 0, "values": [] }
+        else:
+            return genNiladic(op)
     else:
         unexpected("Support func %s" % func)
     pass
@@ -290,10 +363,14 @@ def getValuesV(v, env):
             return getLiteralDate(v, env)
         elif t == 'decimal':
             return getDecimal(v, env)
+        elif t == 'double':
+            return getDouble(v, env)
         elif t == 'tinyint':
             return getLiteralTiny(v, env)
         elif t == 'month_interval':
             return getIntervalMonth(v, env)
+        elif t == 'sec_interval':
+            return getIntervalSec(v, env)
         elif t == 'name':
             return getNameVar(v, env)
         elif t == 'binary_op':
@@ -447,6 +524,67 @@ def initDatabase():
         'l_comment'       : 'str'
     }
 
+def combineGroupEnv(env1, env2):
+    def genCodeNormal(x):
+        op  = x['op']
+        val = x['values']
+        num = x['num']
+        if num == 1:
+            return genMonadic(op, val[0])
+        elif num == 2:
+            return genDyadic(op, val[0], val[1])
+        elif num == 0:
+            return genNiladic(op)
+        else:
+            unexpected("unknown ...")
+    def genCodeVector():
+        alias2 = getEnvAlias(env2)
+        new_alias = []
+        for x in alias2:
+            if isinstance(x, dict):
+                new_alias.append(genCodeNormal(x))
+            else:
+                unexpected("unknown")
+        stop(new_alias)
+        return new_alias
+    def genCodeEach(x, indx):
+        op  = x['op']
+        val = x['values']
+        if op == 'sum':
+            a0 = genEachRight('@index', val[0], indx)
+            a1 = genEach     ('@sum'  , a0)
+            r0 = genRaze     (a1)
+        elif op == 'avg':
+            a0 = genEachRight('@index', val[0], indx)
+            a1 = genEach     ('@avg'  , a0)
+            r0 = genRaze     (a1)
+        elif op == 'count':
+            a0 = genEach     ('@len'  , indx)
+            r0 = genRaze     (a0)
+        else:
+            unexpected("Support %s" % op)
+        return r0
+    def genCodeReduction(key, val):
+        alias2 = getEnvAlias(env2)
+        new_alias = []
+        for x in alias2:
+            if isinstance(x, dict):
+                new_alias.append(genCodeEach(x, val))
+            else:
+                new_alias.append(genIndex(x, key))
+        return new_alias
+    if env1 != None:
+        # ...
+        printEnv(env1)
+        printEnv(env2)
+        t0 = genList(getEnvAlias(env1))
+        t1 = genGroup(t0)
+        t2 = genKeys(t1)
+        t3 = genValues(t1)
+        return updateEnvWithAlias(genCodeReduction(t2, t3), env2)
+    else:
+        # printEnv(env2)
+        return updateEnvWithAlias(genCodeVector(), env2)
 
 def compile(src):
     initDatabase()
