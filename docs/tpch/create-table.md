@@ -13,6 +13,14 @@
 
 ## Details of tables
 
+Note DECIMAL as shown below one of three different ways.
+
+- DECIMAL - Precision defaults to 38, Scale defaults to 0
+- DECIMAL(p) - Scale defaults to 0
+- DECIMAL(p, s) - Precision and Scale are defined by the user
+
+See more [database types](http://www.cs.toronto.edu/~nn/csc309-20085/guide/pointbase/docs/html/htmlfiles/dev_datatypesandconversionsFIN.html).
+
 ### nation
 
 ```sql
