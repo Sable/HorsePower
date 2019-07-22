@@ -7,26 +7,45 @@ from parsing  import *
 from datetime import date, timedelta
 from util     import *
 
-db_tpch = {}
-as_map  = {}  # id0.id1: currently only use id1 as key
+db_tpch      = {}
+as_map       = {}  # id0.id1: currently only use id1 as key
+primary_key  = {}
+foreign_key  = {}
 
 def scanMain(d, env):
     if 'operator' in d:
         op = d['operator']
         print op
-        newEnv = scanMain(d['input'], env) if 'input' in d else env
-        if   op == 'project'       : rtn = scanProject      (d, newEnv)
-        elif op == 'groupby'       : rtn = scanGroupby      (d, newEnv)
-        elif op == 'select'        : rtn = scanSelect       (d, newEnv)
-        elif op == 'table'         : rtn = scanTable        (d, newEnv)
-        elif op == 'top'           : rtn = scanTop          (d, newEnv)
-        elif op == 'joinidx'       : rtn = scanJoinidx      (d, newEnv)
-        elif op == 'join'          : rtn = scanJoin         (d, newEnv)
-        elif op == 'semijoin'      : rtn = scanSemijoin     (d, newEnv)
-        elif op == 'antijoin'      : rtn = scanAntijoin     (d, newEnv)
-        elif op == 'leftouterjoin' : rtn = scanLeftouterjoin(d, newEnv)
+        if 'input' in d:
+            child = d['input']
+            newEnvs = []
+            if isinstance(child, list):
+                for t in child:
+                    newEnvs.append(scanMain(t, env))
+            else:
+                newEnvs.append(scanMain(child, env))
+            num = len(newEnvs)
+            if num == 1:
+                env1 = newEnvs[0]
+            elif num == 2:
+                env2 = newEnvs
+            else:
+                unexpected("Support envs more than 2: %d" % num)
+        else:
+            env1 = env
+        if   op == 'project'       : rtn = scanProject      (d, env1)
+        elif op == 'groupby'       : rtn = scanGroupby      (d, env1)
+        elif op == 'select'        : rtn = scanSelect       (d, env1)
+        elif op == 'table'         : rtn = scanTable        (d, env1)
+        elif op == 'top'           : rtn = scanTop          (d, env1)
+        elif op == 'joinidx'       : rtn = scanJoinidx      (d, env2)
+        elif op == 'join'          : rtn = scanJoin         (d, env2)
+        elif op == 'semijoin'      : rtn = scanSemijoin     (d, env2)
+        elif op == 'antijoin'      : rtn = scanAntijoin     (d, env2)
+        elif op == 'leftouterjoin' : rtn = scanLeftouterjoin(d, env2)
         return rtn
     else:
+        print json.dumps(d)
         unexpected("No operator found.")
 
 def scanProject(d, env):
@@ -53,32 +72,46 @@ def scanSelect(d, env):
     return updateEnvWithMask(mask, env)
 
 def scanTable(d, env):
-    table         = getTableName (d['table'])
-    current_table = genLoadTable (table) # table id
-    table_cols    = getTableCols (d['columns'], table)
-    table_names   = getTableTabs (table_cols, table)
-    table_alias   = getTableAlias(table_cols, current_table, table)
-    table_types   = getTableTypes(table_cols, table)
+    table       = getTableName (d['table'])
+    table_alias = genLoadTable (table) # table id
+    table_cols  = getTableCols (d['columns'], table)
+    table_names = getTableTabs (table_cols, table)
+    table_types  = getTableTypes(table_cols, table)
+    table_alias  = getTableAlias(table_alias, table_cols, table_types)
     #print table_cols, table_alias
     #stop('scanTable')
     return encodeEnv(table_names, table_cols, table_alias, table_types)
 
 def scanTop(d, env):
+    todo('top')
     pass
 
 def scanJoinidx(d, env):
+    todo('join index')
     pass
 
-def scanJoin(d, env):
+def scanJoin(d, env2):
+    todo('join')
     pass
 
-def scanSemijoin(d, env):
+def scanSemijoin(d, env2):
+    #printEnv(env0)
+    #printEnv(env1)
+    #print d['condition']
+    cond = d['condition']
+    num = len(cond)
+    if num == 3: # binary + single condition
+        return handleSemiJoin(cond, env2)
+    else:
+        unexpected("Support num != 3: %d" % num)
     pass
 
 def scanAntijoin(d, env):
+    todo('antijoin')
     pass
 
 def scanLeftouterjoin(d, env):
+    todo('left outerjoin')
     pass
 
 def scanOutput(d, env):
@@ -86,7 +119,7 @@ def scanOutput(d, env):
 
 def scanBlock(d, env):
     global as_map  # THINK: a real global or clean here? as_map.clear()
-    env_alias = []; env_table = []; env_cols = []; env_types = []
+    env_alias = []; env_table = []; env_cols = []; env_types = []; env_maska = []
     for t in d:
         num = len(t)
         if num > 0 and isinstance(t[0], list):
@@ -95,25 +128,31 @@ def scanBlock(d, env):
                 for d in vec:
                     if 'order' in d:
                         v0 = getValuesV(d, env)
-                        v1 = d['value']['id']
-                        typ = getTypeFromEnv(v1, env)
+                        indx = findIdInEnv(d['value']['id'], env)
                     else:
                         unexpected('unknown')
-                    tab,col = v1
                     env_alias.append({"kind":"sort", "values":v0})
-                    env_table.append(tab)
-                    env_cols.append(col)
-                    env_types.append(typ)
+                    env_table.append(getEnvTable(env)[indx])
+                    env_cols.append(getEnvName(env)[indx])
+                    env_types.append(getEnvType(env)[indx])
+                    env_maska.append(getEnvMaskA(env)[indx])
             continue
         if num == 1:
             v0 = getValuesV(t[0], env)
             v1 = t[0]['value']['id']
-            typ = getTypeFromEnv(v1, env)
+            tab,col = v1
+            indx  = findIdInEnv(v1, env)
+            typ   = getEnvType(env)[indx]
+            maska = getEnvMaskA(env)[indx]
+            #typ = getEnvType(env)[indx] #typ = getTypeFromEnv(v1, env)
+            #maska = getEnvMaskA(env)[indx]
         elif num == 2:
             if t[1]['type'] == 'as':
                 typ = getExprType(t[0])
                 v0 = getValuesV(t[0], env)
                 v1 = getValuesV(t[1], env) #id0.id1
+                tab,col = v1
+                maska = None  # unknown currently
                 if not isinstance(v0, dict):
                     as_map[v1[1]] = v0
             else:
@@ -121,12 +160,13 @@ def scanBlock(d, env):
         else:
             unexpected('Add support num: %d' % num)
         #print v0,v1
-        tab,col = v1
         env_alias.append(v0)  # could be dict in aggregation
         env_table.append(tab)
         env_cols.append(col)
         env_types.append(typ)
-    return encodeEnv(env_table, env_cols, env_alias, env_types)
+        env_maska.append(maska)
+    # keep mask and maska
+    return encodeEnv(env_table, env_cols , env_alias, env_types, getEnvMask(env), env_maska)
 
 def scanOrder(d, env):
     order_alias = []
@@ -185,6 +225,36 @@ def updateEnvWithIndex(indx, env):
         new_alias.append(genIndex(x, indx))
     return updateEnvWithAlias(new_alias, env)
 
+def updateEnvWithMaskMask(mask, env):
+    alias = actionCompress(mask, getEnvMaskA(env), env)
+    return encodeEnv(getEnvTable(env),
+                     getEnvName(env),
+                     alias,
+                     getEnvType(env),
+                     mask,
+                     getEnvMaskA(env))
+
+def updateEnvWithInfo(info, env2):
+    def updateEnvWithInfoMask():
+        if info0 and info1:
+            todo('Support')
+        elif info0:
+            # case semi-join: [p0, None, 'masking']
+            printEnv(env0)
+            print info0
+            return updateEnvWithMaskMask(info0, env0)
+        elif info1:
+            return updateEnvWithMaskMask(info1, env1)
+        else:
+            unexpected("Both sides are none")
+    # start
+    info0, info1, kind = info
+    env0,env1 = env2
+    if kind == 'masking':
+        return updateEnvWithInfoMask()
+    else:
+        todo('support kind: %s' % kind)
+
 def actionCompress(vid, cols, env):
     alias = []
     for c in cols:
@@ -203,10 +273,18 @@ def getEnumValue(x, env):
     else:
         return x
 
+def isName(x):
+    return True if 'type' in x and x['type'] == 'name' else False
+
+def isProperty(x, p):
+    return True if 'property' in x and x['property'] == p else False
+
 def getIdName(name, first='sys'):
-    id = name['id']
-    if id[0] == first:
-        return id[1]
+    id0,id1 = name['id']
+    if id1 == '%TID%':
+        return None
+    if id0 == first:
+        return id1
     else:
         unexpected('Not a valid %s.<name>' % first)
 
@@ -214,17 +292,22 @@ def getTableName(names):
     return getIdName(names)
 
 def getTableCols(cols, table):
+    """
+    Ignore any column field if it does not have a 'name' field
+    """
     rtn = []
     for col in cols:
         # maybe: check col's type
-        rtn.append(getIdName(col['value'], table))
+        if isName(col) and not isProperty(col, 'hashidx'):
+            id = getIdName(col['value'], table)
+            if id:
+                rtn.append(id)
     return rtn
 
-def getTableAlias(cols, table_alias, table):
-    global db_tpch
+def getTableAlias(table_alias, cols, types):
     rtn = []
-    for col in cols:
-        rtn.append(genColumnValue(table_alias, '`'+col+':sym', db_tpch[table][col]))
+    for c,col in enumerate(cols):
+        rtn.append(genColumnValue(table_alias, '`'+col+':sym', types[c]))
     return rtn
 
 def getTableTabs(cols, table):
@@ -236,7 +319,10 @@ def getTableTabs(cols, table):
 def getTableTypes(cols, table):
     rtn = []
     for col in cols:
-        rtn.append(db_tpch[table][col])
+        if isOkAny2Enum(table, col):
+            rtn.append('enum')
+        else:
+            rtn.append(db_tpch[table][col])
     return rtn
 
 # delete
@@ -463,6 +549,33 @@ def getTableCond(conds, env):
         cell.append(getExpr(cond, env))
     return genArrayWithOp(cell, 'and')
 
+"""
+Init
+"""
+def initRelations():
+    global primary_key, foreign_key
+    primary_key = {}  # dictionary
+    primary_key['region']   = ['r_regionkey']
+    primary_key['nation']   = ['n_nationkey']
+    primary_key['part']     = ['p_partkey']
+    primary_key['supplier'] = ['s_suppkey']
+    primary_key['partsupp'] = ['ps_partkey', 'ps_suppkey']
+    primary_key['customer'] = ['c_custkey']
+    primary_key['lineitem'] = ['l_orderkey', 'l_linenumber']
+    primary_key['orders']   = ['o_orderkey']
+    foreign_key = {} # foreign keys
+    def pack(c0, t1, c1):
+        return [c0, t1, c1] if isinstance(c0, list) else [[c0], t1, [c1]]
+    foreign_key['nation']   = [pack('n_regionkey', 'region'  , 'r_regionkey')]
+    foreign_key['supplier'] = [pack('s_nationkey', 'nation'  , 'n_nationkey')]
+    foreign_key['customer'] = [pack('c_nationkey', 'nation'  , 'n_nationkey')]
+    foreign_key['partsupp'] = [pack('ps_suppkey' , 'supplier', 's_suppkey'  ),
+                               pack('ps_partkey' , 'part'    , 'p_partkey'  )]
+    foreign_key['orders']   = [pack('o_custkey'  , 'customer', 'c_custkey'  )]
+    foreign_key['lineitem'] = [pack('l_orderkey' , 'orders'  , 'o_orderkey'),
+                               pack(['l_partkey', 'l_suppkey'], 'partsupp', ['ps_partkey', 'ps_suppkey'])]
+    pass
+
 def initDatabase():
     global db_tpch
     # TODO: change str to sym for some columns
@@ -544,6 +657,117 @@ def initDatabase():
         'l_comment'       : 'str'
     }
 
+def getEnvId(x, env2):
+    if isName(x):
+        id0,id1 = x['value']['id']
+        env0, env1 = env2
+        if id1 in getEnvName(env0) and id0 == getEnvTable(env0)[getEnvName(env0).index(id1)]:
+            return 0
+        if id1 in getEnvName(env1) and id0 == getEnvTable(env1)[getEnvName(env1).index(id1)]:
+            return 1
+    unexpected("Unknown x: %s" % x)
+
+def findIdInEnv(id, env):
+    id0,id1 = id
+    tables = getEnvTable(env)
+    names  = getEnvName(env)
+    for c,x in enumerate(names):
+        if x == id1 and tables[c] == id0:
+            return c
+    todo('Not found %s.%s' % (id0,id1))
+
+def handleSemiJoin(cond, env2):
+    def genSemiJoinLeft2Right(id0, id1, left_env, right_env):
+        printRelation(id0, id1)
+        mask0 = getEnvMask(left_env)
+        mask1 = getEnvMask(right_env)
+        index0 = findIdInEnv(id0,  left_env)
+        index1 = findIdInEnv(id1, right_env)
+        if mask0 and mask1:
+            alias0 = getEnvMaskA(left_env)[index0]   # key
+            alias1 = getEnvMaskA(right_env)[index1]  # fkey
+            print alias0, alias1, mask0, mask1
+            a0 = genValues(alias1)
+            a1 = genCompress(mask1, a0)
+            a2 = genVector(genLength(mask0), '0:bool')
+            a3 = genIndexA(a2, a1, '1:bool')
+            p0 = genAnd(mask0, a3)
+        elif mask0:
+            alias0 = getEnvMaskA(left_env)[index0]   # key
+            alias1 = getEnvAlias(right_env)[index1]  # fkey
+            a0 = genVector(genLength(mask0), '0:bool')
+            a1 = genIndexA(a0, alias1, '1:bool')
+            p0 = genAnd(mask0, a1)
+        elif mask1:
+            alias0 = getEnvAlias(left_env)[index0]   # key
+            alias1 = getEnvMaskA(right_env)[index1]  # fkey
+            a0 = genCompress(mask1, alias0)
+            a1 = genVector(genLength(alias0), '0:bool')
+            p0 = genIndexA(a1, a0, '1:bool')
+        else:
+            alias0 = getEnvAlias(left_env)[index0]   # key
+            alias1 = getEnvAlias(right_env)[index1]  # fkey
+            a0 = genVector(genLength(alias0), '0:bool')
+            p0 = genIndexA(a0, alias1, '1:bool')
+        return [p0, None, 'masking']
+    arg0,op,arg1 = cond
+    indx0 = getEnvId(arg0, env2)
+    indx1 = getEnvId(arg1, env2)
+    left_env, right_env = env2
+    if indx0 != indx1:
+        if indx0 == 1: # swap
+            arg0, arg1 = [arg1, arg0]
+    else:
+        unexpected("Columns %s and %s come from the same table" % (arg0, arg1))
+    horse_op = op['value']
+    alias0 = getValuesV(arg0,  left_env)
+    alias1 = getValuesV(arg1, right_env)
+    id0 = getNameId(arg0)
+    id1 = getNameId(arg1)
+    if horse_op == '=':
+        if checkRelationWithId(id0, id1):
+            info = genSemiJoinLeft2Right(id0, id1, left_env, right_env)
+        elif checkRelationWithId(id1, id0):
+            printRelation(id1, id0)
+            info = genSemiJoinLeft2Right(id1, id0, right_env, left_env)
+        else:
+            # general case
+            todo('Add support')
+    else:
+        unexpected('Support non-equal: %s' % horse_op)
+    return updateEnvWithInfo(info, env2)
+
+def checkRelationWithId(left, right):
+    return checkRelation(left[0], left[1], right[0], right[1])
+
+def checkRelation(left_table, left_name, right_table, right_name):
+    global primary_key, foreign_key
+    left_name  = left_name
+    right_name = right_name
+    left_col   = packColumnName(left_name)
+    right_col  = packColumnName(right_name)
+    if left_table in primary_key and right_table in foreign_key:
+        if sameListString(primary_key[left_table],left_col):
+            fkeys = foreign_key[right_table]
+            for fk in fkeys:
+                if fk[1] == left_table and sameListString(fk[0], right_col) and sameListString(fk[2], left_col):
+                    return True
+    return False
+
+def isOkAny2Enum(tab, col):
+    return checkForeignKey(tab, col)
+
+def checkForeignKeyWithID(id): # id: table.col
+    return checkForeignKey(id[0], id[1])
+
+def checkForeignKey(table, name):
+    global foreign_key
+    if table in foreign_key:
+        for x in foreign_key[table]:
+            if sameListString(x[0], packColumnName(name)):
+                return True
+    return False
+
 def combineGroupEnv(env1, env2):
     def genCodeNormal(x):
         op  = x['op']
@@ -606,8 +830,12 @@ def combineGroupEnv(env1, env2):
         # printEnv(env2)
         return updateEnvWithAlias(genCodeVector(), env2)
 
-def compile(src):
+def init():
     initDatabase()
+    initRelations()
+
+def compile(src):
+    init()
     scanHeader(scanMain(src, {})) # {} dict
     printAllCode()
 

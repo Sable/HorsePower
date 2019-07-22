@@ -11,6 +11,9 @@ def getEnvType (env): return env['cols_t']
 def getEnvMask (env): return env['mask']
 def getEnvMaskA(env): return env['mask_a']
 
+def debug(msg=''):
+    sys.stderr.write('// %s\n' % msg)
+
 def printEnv(env):
     print 'Environment node: {mask: "%s"}' % (getEnvMask(env))
     table = env['tables']
@@ -24,6 +27,21 @@ def printEnv(env):
     else:
         for x in range(len(alias)):
             print ' %10s.%-16s : %-5s -> %3s' % (table[x],names[x],types[x],alias[x])
+
+def m2p(x):
+    return {
+        #'[': 'geq',
+        #'(': 'gt',
+        #']': 'leq',
+        #')': 'lt',
+        #'<': 'lt',
+        #'>': 'gt',
+        '=': 'eq'
+        #'>=': 'geq',
+        #'<=': 'leq',
+        #'<>': 'neq',
+        #'is': 'eq' # q17
+    }.get(x, '<unknown_%s>' % x)
 
 """
 Tiny functions
@@ -57,6 +75,35 @@ def strLiterals(x, typ):
 
 def str2bool(x):
     return '1' if x == 'asc' else '0'
+
+"""
+check if two strings/list strings are the same
+"""
+def sameListString(a, b):
+    if isinstance(a, basestring) and isinstance(b, basestring):
+        return a == b
+    elif isinstance(a, list) and isinstance(b, list) and len(a)==len(b):
+        for x in range(len(a)):
+            if not sameListString(a[x], b[x]): return False
+        return True
+    else: return False
+
+def packColumnName(x):
+    return x if isinstance(x, list) else [x]
+
+def getNameId(x):
+    if 'type' in x and x['type'] == 'name':
+        return x['value']['id']
+    else:
+        unexpected("A name is expected: %s" % x)
+
+def printRelation(key_id, fkey_id):
+    left_table, left_name = key_id
+    right_table, right_name = fkey_id
+    debug('%s.%s (fkey) -> %s.%s(key)' % (right_table, right_name, left_table, left_name))
+    
+def printJSON(x):
+    print json.dumps(x, sort_keys=False, indent=2)
 
 """
 Handle exceptions

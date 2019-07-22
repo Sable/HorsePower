@@ -213,6 +213,8 @@ def scanTableColumns():
     consume('[')
     while not tryToken(']'):
         item = scanItem()
+        if not item:
+            continue
         if item['type'] == 'joinidx':
             lastIndx = len(columns) - 1
             columns[lastIndx] = {
@@ -251,6 +253,8 @@ def scanSelectStmt():
         cur = curToken()
         if cur == ',' or cur == ']': break
         item = scanItem()
+        if not item:
+            continue
         if isinstance(item, dict) and item['type'] == 'arith':
             item['op'] = numOp
             numOp = numOp + 1
@@ -266,6 +270,12 @@ def isBinaryOp(cur):
     return True if cur in [ '<', '<=', '=', '!=', '>', '>=', 'in', 'or' ] else False
 
 def scanItem():
+    #def checkItem(x):
+    #    if x['type'] in [ 'JOINIDX' ]:
+    #        return None
+    #    if 'property' in x and x['property'] == 'hashidx':
+    #        return None
+    #    return x
     item = scanItemCore()
     if item == 'p_partkey':
         stop()
@@ -359,7 +369,9 @@ def scanItemCore():
 def fetchExpr(func):
     items = []
     while not tryToken(')'):
-        items.append(scanItem())
+        item = scanItem()
+        if item:
+            items.append(item)
         tryToken(',')
     return { "function": func, "args": items }
 
