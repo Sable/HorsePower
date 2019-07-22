@@ -42,7 +42,7 @@ def scanMain(d, env):
         elif op == 'join'          : rtn = scanJoin         (d, env2)
         elif op == 'semijoin'      : rtn = scanSemijoin     (d, env2)
         elif op == 'antijoin'      : rtn = scanAntijoin     (d, env2)
-        elif op == 'leftouterjoin' : rtn = scanLeftouterjoin(d, env2)
+        elif op == 'leftouterjoin' : rtn = scanLeftouterjoin(d, env2) # only q13
         return rtn
     else:
         print json.dumps(d)
@@ -90,7 +90,13 @@ def scanJoinidx(d, env):
     todo('join index')
     pass
 
+"""
+TODO: understand how to interpret conditions for joins
+"""
 def scanJoin(d, env2):
+    printEnv(env2[0])
+    printEnv(env2[1])
+    print d
     todo('join')
     pass
 
@@ -111,6 +117,10 @@ def scanAntijoin(d, env):
     pass
 
 def scanLeftouterjoin(d, env):
+    # only q13.
+    left_env, right_env = env
+    printEnv(left_env)
+    printEnv(right_env)
     todo('left outerjoin')
     pass
 
@@ -386,6 +396,25 @@ def getNameVar(v, env):
         else:
             unexpected('column %s not found' % id1)
 
+def getItemClob(v, env):
+    val = v['value']
+    typ = val['type']
+    if typ == 'string':
+        if len(val['value']) == 0:
+            return None
+        else:
+            return ("'%s':str" % val['value'])  # gen const string
+    elif typ == 'char':
+        return getValuesV(val['value'], env)
+    else:
+        unexpected('unknown type: %s' % typ)
+
+def getFilter(v, env):
+    op = v['value']
+    return {
+        "like": "like"
+    }.get(op, "<unkown filter: %s" % op)
+
 def getBinaryOp(v, env):
     op = v['value']
     return {
@@ -396,6 +425,25 @@ def getBinaryOp(v, env):
         "=" : "eq" ,
         "!=": "neq"
         }.get(op, "<unknown binary op: %s" % op)
+
+def getArgValues(args, env):
+    global as_map
+    rtn = []
+    prev = None
+    for x in args:
+        typ = x['type']
+        if typ == 'as':
+            if prev:
+                t = getValuesV(x, env)
+                as_map[t[1]] = prev
+                prev = None
+            else:
+                unexpected('Previous node not found for as')
+        else:
+            prev = getValuesV(x, env)
+            rtn.append(prev)
+    stop(rtn)
+    return rtn
 
 def getExprValue(v, env):
     def checkFunc(func, args, num):
@@ -428,23 +476,6 @@ def getExprValue(v, env):
         reduction_op_list = [ 'sum', 'avg', 'count' ]
         return (func in reduction_op_list)
 
-    def getArgValues(args, env):
-        global as_map
-        rtn = []
-        prev = None
-        for x in args:
-            typ = x['type']
-            if typ == 'as':
-                if prev:
-                    t = getValuesV(x, env)
-                    as_map[t[1]] = prev
-                    prev = None
-                else:
-                    unexpected('Previous node not found for as')
-            else:
-                prev = getValuesV(x, env)
-                rtn.append(prev)
-        return rtn
     # start
     expr = v['value']
     func = getIdName(expr['function'])
@@ -474,6 +505,9 @@ def getExprValue(v, env):
 def getAs(v, env):
     return v['value']['id']
 
+def getLiteralChar(v, env):
+    return ("'%s'" % v['value'])
+
 def getValuesV(v, env):
     if 'type' in v:
         t = v['type']
@@ -498,9 +532,29 @@ def getValuesV(v, env):
         elif t == 'as':
             return getAs(v, env)
         elif t == 'string':   # variable
-            return getNameVar(v, env)
+            return getNameVar(v, env) 
+        elif t == 'char':
+            return getLiteralChar(v, env)
+        elif t == 'clob':
+            return getItemClob(v, env)
+        elif t == 'filter':
+            return getFilter(v, env)
         else:
+            print v
             unexpected('Add support for %s' % t)
+    elif isinstance(v, list):
+        items = getArgValues(v, env) # q13
+        num = len(items)
+        if num == 1:
+            return items[0]
+        elif num == 2:
+            if not items[1]:
+                return items[0]
+        cellType = v[0]['type']
+        if cellType == 'char':
+            return strLiterals(items, 'str')
+        else:
+            unexpected('Unknown case: %s' % v)
     else:
         return v
 
@@ -538,7 +592,10 @@ def getExpr(expr, env):
         v0 = getValuesV(d[0], env)
         v1 = getValuesV(d[1], env) # op1
         v2 = getValuesV(d[2], env)
-        return genDyadic(v1, v0, v2)
+        if 'neg' in d[1] and d[1]['neg'] == 1:
+            return genNot(genDyadic(v1, v0, v2))
+        else:
+            return genDyadic(v1, v0, v2)
     def genExpr5(d):
         v0 = getValuesV(d[0], env)
         v1 = getValuesV(d[1], env) # op1
@@ -829,7 +886,6 @@ def combineGroupEnv(env1, env2):
                 new_alias.append(genCodeNormal(x))
             else:
                 unexpected("unknown")
-        stop(new_alias)
         return new_alias
     def genCodeEach(x, indx):
         op  = x['op']
