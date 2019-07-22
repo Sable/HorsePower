@@ -260,7 +260,7 @@ def scanSelectStmt():
             numOp = numOp + 1
         stmt.append(item)
     numStmt = len(stmt)
-    if not numStmt in [1, 2, 3, 5]:
+    if not numStmt in [1, 2, 3, 4, 5]:
         print len(stmt), stmt
         todo("add support")
     return stmt

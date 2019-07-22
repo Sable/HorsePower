@@ -247,11 +247,23 @@ def updateEnvWithInfo(info, env2):
             return updateEnvWithMaskMask(info1, env1)
         else:
             unexpected("Both sides are none")
+    def updateEnvWithInfoKeep():
+        if info0 and info1:
+            todo('keep and merge both')
+        elif info0:
+            return env0
+        elif info1:
+            return env1
+        else:
+            unexpected("Both sides are none")
     # start
     info0, info1, kind = info
     env0,env1 = env2
+    # masking/keep/indexing/...
     if kind == 'masking':
         return updateEnvWithInfoMask()
+    elif kind == 'keep':
+        return updateEnvWithInfoKeep()
     else:
         todo('support kind: %s' % kind)
 
@@ -677,39 +689,69 @@ def findIdInEnv(id, env):
     todo('Not found %s.%s' % (id0,id1))
 
 def handleSemiJoin(cond, env2):
-    def genSemiJoinLeft2Right(id0, id1, left_env, right_env):
+    def genSemiJoinSides(id0, id1, left_env, right_env, side):
         printRelation(id0, id1)
         mask0 = getEnvMask(left_env)
         mask1 = getEnvMask(right_env)
         index0 = findIdInEnv(id0,  left_env)
         index1 = findIdInEnv(id1, right_env)
         if mask0 and mask1:
-            alias0 = getEnvMaskA(left_env)[index0]   # key
-            alias1 = getEnvMaskA(right_env)[index1]  # fkey
-            print alias0, alias1, mask0, mask1
-            a0 = genValues(alias1)
-            a1 = genCompress(mask1, a0)
-            a2 = genVector(genLength(mask0), '0:bool')
-            a3 = genIndexA(a2, a1, '1:bool')
-            p0 = genAnd(mask0, a3)
+            alias0 = getEnvMaskA(left_env)[index0]
+            alias1 = getEnvMaskA(right_env)[index1]
+            # print alias0, alias1, mask0, mask1
+            if side == 'key-to-fkey':
+                # alias0 (key), alias1 (fkey)
+                a0 = genValues(alias1)
+                a1 = genCompress(mask1, a0)
+                a2 = genVector(genLength(mask0), '0:bool')
+                a3 = genIndexA(a2, a1, '1:bool')
+                p0 = genAnd(mask0, a3)
+            else:
+                # alias0 (fkey), alias1 (key)
+                a0 = genValues(alias0)
+                a1 = genIndex(mask1, a0)
+                p0 = genAnd(mask0, a1)
         elif mask0:
-            alias0 = getEnvMaskA(left_env)[index0]   # key
-            alias1 = getEnvAlias(right_env)[index1]  # fkey
-            a0 = genVector(genLength(mask0), '0:bool')
-            a1 = genIndexA(a0, alias1, '1:bool')
-            p0 = genAnd(mask0, a1)
+            alias0 = getEnvMaskA(left_env)[index0]
+            alias1 = getEnvAlias(right_env)[index1]
+            if side == 'key-to-fkey':
+                # alias0 (key), alias1 (fkey)
+                a0 = genVector(genLength(mask0), '0:bool')
+                a2 = genIndexA(a1, alias1, '1:bool')
+                p0 = genAnd(mask0, a1)
+            else:
+                # alias0 (fkey), alias1 (key)
+                p0 = mask0
         elif mask1:
-            alias0 = getEnvAlias(left_env)[index0]   # key
-            alias1 = getEnvMaskA(right_env)[index1]  # fkey
-            a0 = genCompress(mask1, alias0)
-            a1 = genVector(genLength(alias0), '0:bool')
-            p0 = genIndexA(a1, a0, '1:bool')
+            alias0 = getEnvAlias(left_env)[index0]
+            alias1 = getEnvMaskA(right_env)[index1]
+            if side == 'key-to-fkey':
+                # alias0 (key), alias1 (fkey)
+                a0 = genCompress(mask1, alias0)
+                a1 = genVector(genLength(alias0), '0:bool')
+                p0 = genIndexA(a1, a0, '1:bool')
+            else:
+                # alias0 (fkey), alias1 (key)
+                a0 = genValue(alias0)
+                p0 = genIndex(mask1, a0)
         else:
-            alias0 = getEnvAlias(left_env)[index0]   # key
-            alias1 = getEnvAlias(right_env)[index1]  # fkey
-            a0 = genVector(genLength(alias0), '0:bool')
-            p0 = genIndexA(a0, alias1, '1:bool')
+            # no mask for both sides
+            if side == 'key-to-fkey':
+                return ['left', None, 'keep']   # take left_env
+            else:
+                return [None, 'right', 'keep']  # take right_env
         return [p0, None, 'masking']
+
+    def genSemiJoinGeneral(id0, id1, left_env, right_env):
+        mask0 = getEnvMask(left_env)
+        mask1 = getEnvMask(right_env)
+        index0 = findIdInEnv(id0, left_env)
+        index1 = findIdInEnv(id1, right_env)
+        alias0 = getEnvAlias(left_env)[index0]
+        alias1 = getEnvAlias(right_env)[index1]
+        p0 = genMember(alias0, alias1) # left rule
+        return [p0, None, 'masking']
+
     arg0,op,arg1 = cond
     indx0 = getEnvId(arg0, env2)
     indx1 = getEnvId(arg1, env2)
@@ -726,13 +768,11 @@ def handleSemiJoin(cond, env2):
     id1 = getNameId(arg1)
     if horse_op == '=':
         if checkRelationWithId(id0, id1):
-            info = genSemiJoinLeft2Right(id0, id1, left_env, right_env)
+            info = genSemiJoinSides(id0, id1, left_env, right_env, 'key-to-fkey')
         elif checkRelationWithId(id1, id0):
-            printRelation(id1, id0)
-            info = genSemiJoinLeft2Right(id1, id0, right_env, left_env)
+            info = genSemiJoinSides(id0, id1, left_env, right_env, 'fkey-to-key')
         else:
-            # general case
-            todo('Add support')
+            info = genSemiJoinGeneral(id0, id1, left_env, right_env)
     else:
         unexpected('Support non-equal: %s' % horse_op)
     return updateEnvWithInfo(info, env2)
