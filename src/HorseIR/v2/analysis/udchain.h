@@ -36,6 +36,11 @@ typedef struct FlowList{
     struct FlowList *next;
 }FlowList;
 
+typedef struct ChainBasicBlock {
+    L bbId; /* basic block id */
+    Chain *entry, *last;
+}ChainBlock;
+
 //void printChainList();
 //void printChainInfo(Chain *chain, char opt);
 

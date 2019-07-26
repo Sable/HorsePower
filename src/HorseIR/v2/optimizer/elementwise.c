@@ -70,7 +70,7 @@ static I findUseByName(Chain *p, char *name){
 static gNode *initgNode(Node *node){
     gNode *x = NEW(gNode);
     x->node  = node;
-    x->pnum  = totalList(getParams(node));
+    x->pnum  = totalList(getNodeParams(node));
     if(x->pnum >= 5)
         EP("Not enough space");
     return x;
@@ -88,7 +88,7 @@ static gNode *findFusionUp(Chain *chain){
         if(!(sk == builtinS && isElementwise(nodeName2(func))))
             return NULL; // if not an elemetnwsie func
         //List *param = expr->val.call.param->val.listS;
-        List *param = getParams(n);
+        List *param = getNodeParams(n);
         //printChainUses(chain); getchar();
         // -- useful debugging
         //printBanner("Gotcha");
@@ -176,7 +176,7 @@ static B isOK2Fuse(gNode *rt){
 
 // TODO: remove duplicated items (only distinct values wanted)
 static void totalInputs(gNode *rt, S *names){
-    List *params = getParams(rt->node);
+    List *params = getNodeParams(rt->node);
     DOI(rt->pnum, {I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) totalInputs(t,names); \
             else {Node *p = getParamsIndex(params,k)->val; \
@@ -191,7 +191,7 @@ static void genCodeElem(gNode *rt, B isRT){
     Node *n = rt->node;
     C temp[199];
     if(isRT){
-        Node *z0 = getParamFromNode(n,0); S z0s = getNameStr(z0);
+        Node *z0 = getNodeItemIndex(n,0); S z0s = getNameStr(z0);
         C z0c = getTypeCodeByName(z0);
         SP(temp, "q%d_elementwise_%d",qid,phTotal++);
         glueCode(genDeclSingle(temp, '{')); glueLine();
@@ -205,10 +205,9 @@ static void genCodeElem(gNode *rt, B isRT){
         extra->funcDecl = genDeclSingle(temp, ';');
         extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
     }
-    Node *fn = getFuncNode(n);
-    //P("%s(", genFuncNameC(nodeName2(fn)));
-    glueAny("%s(", genFuncNameC(nodeName2(fn)));
-    List *params = getParams(n);
+    Node *fn = getNodeFunc(n);
+    glueAny("%s(", getFuncNameC(nodeName2(fn)));
+    List *params = getNodeParams(n);
     DOI(rt->pnum, {if(i>0)glueChar(','); I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) genCodeElem(t,false); \
             else {Node *p = getParamsIndex(params,k)->val; \

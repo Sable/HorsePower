@@ -1,20 +1,15 @@
 #ifndef __H_O_COMMON__
 #define __H_O_COMMON__
 
-// TODO: the struct below should be removed (bcz of no use)
-typedef struct FuseNode {
-    S targ, invc;
-}OptNode, FuseNode, PeepholeNode;
-
 /* macros */
-#define chainNode(c)      (c)->cur
-#define chainUseSize(c)   (c)->useSize
-#define chainDefSize(c)   (c)->defSize
-#define chainUse(c,i)     (c)->chain_uses[i]
-#define chainDef(c,i)     (c)->chain_defs[i]
+#define chainNode(c)       (c)->cur
+#define chainUseSize(c)    (c)->useSize
+#define chainDefSize(c)    (c)->defSize
+#define chainUse(c,i)      (c)->chain_uses[i]
+#define chainDef(c,i)      (c)->chain_defs[i]
 
-#define isChainVisited(c) (c->isVisited)
-#define setVisited(c, v)  (c)->isVisited=v
+#define isChainVisited(c)  (c->isVisited)
+#define setVisited(c, v)   (c)->isVisited=v
 
 // node: module
 #define nodeModuleName(n)  (n)->module.id    // S
@@ -77,19 +72,18 @@ O optPattern();
 O optDeep();
 O optSReduction(Prog *root);
 
-S getMaxValue(C c);
-S getMinValue(C c);
+S obtainMaxValue(C c);
+S obtainMinValue(C c);
+
 S getNameStr       (Node *n);
-C getTypeCodeByName(Node *n);
+C getTypeCodeByName(Node *n); 
+S getFuncNameC     (S fn);
+S getFuncNameDeep  (S fn);
 
-S genFuncNameC   (S fn);
-S genFuncNameDeep(S fn);
-
-Node *getParamFromNode (Node *n, I pos);
-List *getParams        (Node *n);  // --> getNodeParams
-Node *getFuncNode      (Node *n);
-Node *getFuncSingle    (Node *n);  // clean
-List *getParamsIndex   (List *list, I pos);
+Node *getNodeItemIndex(Node *n, I pos);
+List *getNodeParams   (Node *n);
+Node *getNodeFunc     (Node *n);
+List *getParamsIndex  (List *list, I pos);
 
 Node *getNodeFirstParam(Node *n);
 Node *getSingleFunc    (Node *funcs);

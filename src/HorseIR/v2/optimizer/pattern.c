@@ -102,7 +102,7 @@ static PatternTree *createFP5(){
  * 2: 2nd param
  */
 static Node *getParamFromChain(Chain *chain, I pos){
-    return getParamFromNode(chainNode(chain), pos);
+    return getNodeItemIndex(chainNode(chain), pos);
 }
 
 static void setAllChainVisitedNonRT(PatternTree *ptree){
@@ -185,7 +185,7 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
         glueAnyLine("DOP(vn(x1), {%c a=0; V t=vV(x1,i); DOJ(vn(t), a+=v%c(x0,vL(t,j))) v%c(z,i)=a%s;}) R 0;", x0c, x0c, z0c, op==2?"/vn(t)":"");
     }
     else if(op == 5 || op == 6){ // min or max
-        glueAnyLine("DOP(vn(x1), {%c a=%s; V t=vV(x1,i); DOJ(vn(t), {%c t0=v%c(x0,vL(t,j)); if(t0%ca)a=t0;}) v%c(z,i)=a;}) R 0;", x0c, op==5?getMaxValue(x0c):getMinValue(x0c), x0c, x0c, op==5?'<':'>', z0c);
+        glueAnyLine("DOP(vn(x1), {%c a=%s; V t=vV(x1,i); DOJ(vn(t), {%c t0=v%c(x0,vL(t,j)); if(t0%ca)a=t0;}) v%c(z,i)=a;}) R 0;", x0c, op==5?obtainMaxValue(x0c):obtainMinValue(x0c), x0c, x0c, op==5?'<':'>', z0c);
     }
     depth--;
     glueAnyLine("}");
@@ -433,14 +433,14 @@ static S genLocalCompress(S funcName, Chain *chain, Node *n){
     t += SP(t, "%s((V []){", funcName);
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
-            Node *z0 = getParamFromNode(n, 0);
+            Node *z0 = getNodeItemIndex(n, 0);
             S z0s = getNameStr(z0); t += SP(t, (i==0?"%s":", %s"), z0s);
             glueAnyLine("z%lld = z[%lld]; // %s",i+1,i+1,z0s); })
     S x0s = getNameStr(n);
     t += SP(t, "}, %s, (V []){", x0s);
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
-            Node *y0 = getParamFromNode(n, 2);
+            Node *y0 = getNodeItemIndex(n, 2);
             S y0s = getNameStr(y0); t += SP(t, (i==0?"%s":", %s"), y0s);
             glueAnyLine("y%lld = y[%lld]; // %s",i+1,i+1,y0s); })
     t += SP(t, "})");
@@ -460,8 +460,8 @@ static void genPatternCompress(Chain *chain, Node *n){
     // TODO: fix 'Compress' op
     DOI(chain->useSize, {
             Node *n = chainNode(chain->chain_uses[i]);
-            Node *z0 = getParamFromNode(n, 0); C z0c = getTypeCodeByName(z0);
-            Node *y0 = getParamFromNode(n, 2); C y0c = getTypeCodeByName(y0);
+            Node *z0 = getNodeItemIndex(n, 0); C z0c = getTypeCodeByName(z0);
+            Node *y0 = getNodeItemIndex(n, 2); C y0c = getTypeCodeByName(y0);
             glueAnyLine("v%c(z%lld,i) = Compress(v%c(x,i), v%c(y,%lld));", z0c,i+1,x0c,y0c,i+1); })
     depth--;
     glueCodeLine("})");
@@ -548,13 +548,13 @@ static S genLocals(S funcName, Chain *chain, Node *n){
     t += SP(t, "%s((V []){", funcName);
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
-            Node *z0 = getParamFromNode(n, 0);
+            Node *z0 = getNodeItemIndex(n, 0);
             S z0s = getNameStr(z0); t += SP(t, (i==0?"%s":", %s"), z0s);
             glueAnyLine("z%lld = z[%lld]; // %s",i+1,i+1,z0s); })
     t += SP(t, "}, (V []){");
     DOI(chain->useSize, { 
             Node *n  = chainNode(chain->chain_uses[i]);
-            Node *x0 = getParamFromNode(n, 1);
+            Node *x0 = getNodeItemIndex(n, 1);
             S x0s = getNameStr(x0); t += SP(t, (i==0?"%s":", %s"), x0s);
             glueAnyLine("x%lld = x[%lld]; // %s",i+1,i+1,x0s); })
     S y0s = getNameStr(n);
@@ -576,8 +576,8 @@ static void genPatternIndex(Chain *chain, Node *n){
     depth++;
     DOI(chain->useSize, {
             Node *n = chainNode(chain->chain_uses[i]);
-            Node *z0 = getParamFromNode(n, 0); C z0c = getTypeCodeByName(z0);
-            Node *x0 = getParamFromNode(n, 1); C x0c = getTypeCodeByName(x0);
+            Node *z0 = getNodeItemIndex(n, 0); C z0c = getTypeCodeByName(z0);
+            Node *x0 = getNodeItemIndex(n, 1); C x0c = getTypeCodeByName(x0);
             glueAnyLine("v%c(z%lld,i) = v%c(x%lld, v%c(y,i));", z0c,i+1,x0c,i+1,y0c); })
     depth--;
     glueCodeLine("})");
