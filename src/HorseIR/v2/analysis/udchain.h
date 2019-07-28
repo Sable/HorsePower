@@ -26,7 +26,7 @@ typedef struct ChainExtra{
     char *funcInvc;
 }ChainExtra;
 
-typedef struct ChainList {
+typedef struct ChainList{
     Chain *chain;
     struct ChainList *next;
 }ChainList;
@@ -36,10 +36,14 @@ typedef struct FlowList{
     struct FlowList *next;
 }FlowList;
 
-typedef struct ChainBasicBlock {
+typedef struct ChainBasicBlock{
     L bbId; /* basic block id */
     Chain *entry, *last;
 }ChainBlock;
+
+typedef struct CallGraph{
+    /* pending */
+}CallGraph;
 
 //void printChainList();
 //void printChainInfo(Chain *chain, char opt);

@@ -173,7 +173,7 @@ static O showLine(Node *n){
 }
 
 static I totalVList1(VList *list){ // with dummy
-    I c=0; while(list=list->next){c++; list=list->next;} R c;
+    I c=0; while(list=list->next)c++; R c;
 }
 
 static O addParam(VList *list, V x){

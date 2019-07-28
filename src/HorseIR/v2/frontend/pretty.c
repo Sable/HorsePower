@@ -308,7 +308,6 @@ static void prettyNodeBuff(char *b, Node *n){
     if(!n) R ; // NULL, do nothing
     switch(n->kind){
         case       stmtK:
-        case       castK:
         case     returnK:
         case     importK:
         case         ifK:
