@@ -65,6 +65,7 @@ static void usageDotPrinter(){
     //WP("\nRun with a dot printer:\n");
     //WP("\n");
     dispLine(1, INDENT, "--dot", "Enable dot printer");
+    usage_n(2);
 }
 
 static void usageStats(){

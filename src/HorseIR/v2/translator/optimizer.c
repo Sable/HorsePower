@@ -1,8 +1,8 @@
 #include "../global.h"
 
 extern Prog *root;
+extern sHashTable *hashOpt;
 
-sHashTable *hashOpt;
 I qid, phTotal;
 
 #define hashOptSize (1<<12)  // 4K

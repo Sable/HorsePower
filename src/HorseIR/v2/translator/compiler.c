@@ -23,7 +23,8 @@ static void genVarList(List *list, C sep);
 extern List *compiledMethodList;
 extern OC   qOpts[99];
 extern I    numOpts;
-extern sHashTable *hashOpt;
+
+sHashTable *hashOpt;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
@@ -103,12 +104,10 @@ static I countNode(List *list){
 }
 
 static void genTic(){
-    genIndent();
     glueCodeLine("tic();");
 }
 
 static void genToc(){
-    genIndent();
     glueCodeLine("return toc();");
     //genStr("time_toc(\"The elapsed time: %g\\n\", elapsed);");
 }
@@ -451,7 +450,7 @@ static B checkSimpleHash(Node *n){
 }
 
 static void scanNode(Node *n){
-    if(checkSimpleHash(n)) R ;
+    if(hashOpt && checkSimpleHash(n)) R ; // if mode for optimization
     resetCode();
     genStatement(n, true);
     switch(n->kind){
@@ -603,6 +602,7 @@ static void init(){
     code[0]  = head_code[0] = func_code[0] = 0;
     htr      = head_code;
     ftr      = func_code;
+    hashOpt  = NULL;
 }
 
 I genOptimizedCode(){

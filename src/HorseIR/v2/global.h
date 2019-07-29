@@ -76,7 +76,7 @@ void   time_clear();
 /* time functions */
 #define tic() my_tic()
 #define toc() my_toc(1)
-#define time_toc(...) do{E elapsed=my_toc(0);P(__VA_ARGS__);}while(0)
+#define time_toc(...) do{E elapsed=my_toc(0);P("// ");P(__VA_ARGS__);}while(0)
 
 #include "frontend/tree.h"
 #include "frontend/weed.h"
