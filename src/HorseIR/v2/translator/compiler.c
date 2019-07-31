@@ -135,6 +135,13 @@ static void genVarList(List *list, C sep){
     }
 }
 
+static void genVarSingle(List *list){
+    if(!list->next){
+        scanNode(list->val);
+    }
+    else EP("Single var expected.");
+}
+
 static I genListReturn(List *list, C sep, S text){
     if(list){
         I k = genListReturn(list->next, sep, text);
@@ -215,14 +222,14 @@ static void genLocalVars(Node *block){
     glueLine();
 }
 
-static void genProfileStmt(B f){
-    if(f) { genIndent(); glueCode("PROFILE("); }
+static void genProfileStmt(B f, I c){
+    if(f) { genIndent(); glueAny("PROFILE(%d, ",c); }
     else { glueCode(");"); glueLine(); }
 }
 
-static void genCodeExtra(ChainExtra *extra){
+static void genCodeExtra(ChainExtra *extra, I lineno){
     glueMethodHead(extra->funcDecl, "");
-    genProfileStmt(1); glueCode(extra->funcInvc); genProfileStmt(0);
+    genProfileStmt(1,lineno); glueCode(extra->funcInvc); genProfileStmt(0,-1);
     glueMethodFunc(extra->funcFunc);
 }
 
@@ -297,12 +304,24 @@ static void scanName(Node *n){
     // n->val.name.id2
 }
 
+static void scanStmtCopy(Node *n){
+    List *lhs = nodeStmtVars(n);
+    Node *rhs = nodeStmtExpr(n);
+    glueCode("copyV(");
+    genVarSingle(lhs); glueChar(comma); scanNode(rhs); // lhs: single var
+    glueCode(")");
+}
+
 static void scanAssignStmt(Node *n){
     B prevNeedInd= needInd;
     needInd = false;
     List *prevVars = lhsVars;
-    lhsVars = n->val.assignStmt.vars;
-    scanNode(n->val.assignStmt.expr);
+    lhsVars = nodeStmtVars(n); //n->val.assignStmt.vars;
+    Node *rhsExpr = nodeStmtExpr(n);
+    if(instanceOf(rhsExpr, callK))
+        scanNode(rhsExpr);
+    else
+        scanStmtCopy(n);
     needInd = prevNeedInd;
     lhsVars = prevVars;
 }
@@ -426,7 +445,7 @@ static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case   stmtK: genProfileStmt(f); break;
+        case   stmtK: genProfileStmt(f,n->lineno); break;
         case     ifK:
         case  whileK:
         case repeatK:
@@ -442,7 +461,7 @@ static B checkSimpleHash(Node *n){
         switch(extra->kind){
             case NativeG: R 0;
             case   SkipG: R 1;
-            case    OptG: genCodeExtra(extra); R 1;
+            case    OptG: genCodeExtra(extra, n->lineno); R 1;
             default: EP("Unknown kind: %d\n", extra->kind);
         }
     }
@@ -543,17 +562,18 @@ static void compileMethod(Node *n){
 static void genEntry(){
     resetCode();
     I numRtns = countInfoNodeList(entryMain->val.method.meta->returnTypes);
-    glueCodeLine("I horse_entry(){");
+    glueCodeLine("E horse_entry(){");
     depth++;
     if(numRtns > 0){
         glueCodeLine("V rtns[99];");
         glueCodeLine("tic();");
         glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
-        glueCodeLine("time_toc(\"The elapsed time (ms): %g\\n\", elapsed);");
+        glueCodeLine("E elapsed = calc_toc();");
+        glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
         glueCodeLine("P(\"Output:\\n\");");
         glueAnyLine("DOI(%d, printV(rtns[i]))", numRtns);
     }
-    glueCodeLine("return 0;");
+    glueCodeLine("return elapsed;");
     depth--;
     glueCodeLine("}");
 }
@@ -562,9 +582,9 @@ static void saveToFile(S path, S head, S func, S code){
     printBanner("Generated Code Below");
     P("%s\n%s\n%s\n", head,func,code);
     return ;
-    FILE *fp = fopen(path, "w");
-    FP(fp, "%s%s", head,code);
-    fclose(fp);
+    //FILE *fp = fopen(path, "w");
+    //FP(fp, "%s%s", head,code);
+    //fclose(fp);
 }
 
 static void dispStatsBuff(L cur, L total, S name){
@@ -581,8 +601,8 @@ static void dispStats(){
     dispStatsBuff(ptr-code     , CODE_MAX_SIZE, "code");
 }
 
-static void compileNaive(List *list){
-    if(list){ compileNaive(list->next); compileMethod(list->val); }
+static void compileCode(List *list){
+    if(list){ compileCode(list->next); compileMethod(list->val); }
 }
 
 static void dumpCode(){
@@ -602,12 +622,11 @@ static void init(){
     code[0]  = head_code[0] = func_code[0] = 0;
     htr      = head_code;
     ftr      = func_code;
-    hashOpt  = NULL;
 }
 
 I genOptimizedCode(){
     init();
-    compileNaive(compiledMethodList->next);
+    compileCode(compiledMethodList->next);
     dumpCode();
     R 0;
 }
@@ -615,7 +634,8 @@ I genOptimizedCode(){
 I HorseCompilerNaive(){
     printBanner("Compiling without Optimizations");
     init();
-    compileNaive(compiledMethodList->next);
+    hashOpt = NULL; // disable opt
+    compileCode(compiledMethodList->next);
     dumpCode();
     R 0;
 }

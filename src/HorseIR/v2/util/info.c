@@ -34,6 +34,42 @@ const char *getExtraKind(GenKind x){
     }
 }
 
+Type getType(Node *x){
+    if(!x) EP("Empty type node found\n");
+    if(x->val.type.isWild) R wildT;
+    else if(x->val.type.cell) {
+        TODO("Cell types not allowed.\n");
+    }
+    else {
+        char *typ = x->val.type.typ;
+        if(!strcmp(typ, "bool")) R boolT;
+        else if(!strcmp(typ, "i8"     )) R i8T;
+        else if(!strcmp(typ, "i16"    )) R i16T;
+        else if(!strcmp(typ, "i32"    )) R i32T;
+        else if(!strcmp(typ, "i64"    )) R i64T;
+        else if(!strcmp(typ, "f32"    )) R f32T;
+        else if(!strcmp(typ, "f64"    )) R f64T;
+        else if(!strcmp(typ, "complex")) R clexT;
+        else if(!strcmp(typ, "char"   )) R charT;
+        else if(!strcmp(typ, "sym"    )) R symT;
+        else if(!strcmp(typ, "str"    )) R strT;
+        else if(!strcmp(typ, "date"   )) R dateT;
+        else if(!strcmp(typ, "month"  )) R monthT;
+        else if(!strcmp(typ, "dt"     )) R dtT;
+        else if(!strcmp(typ, "minute" )) R minuteT;
+        else if(!strcmp(typ, "second" )) R secondT;
+        else if(!strcmp(typ, "time"   )) R timeT;
+        else if(!strcmp(typ, "list"   )) R listT;
+        else if(!strcmp(typ, "dict"   )) R dictT;
+        else if(!strcmp(typ, "enum"   )) R enumT;
+        else if(!strcmp(typ, "table"  )) R tableT;
+        else if(!strcmp(typ, "ktable" )) R ktableT;
+        else if(!strcmp(typ, "func"   )) R funcT;
+        else EP("Invalid type: %s\n", typ);
+    }
+    R 0;
+}
+
 //const char *getpTypeName(pType x){
 //    if(x >= totalT){
 //        EP("pType not defined: %d (total %d)\n", x, totalT);

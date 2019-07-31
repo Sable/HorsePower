@@ -281,7 +281,6 @@ static gNode *findFusionUpList(Chain *chain){
     R NULL;
 }
 
-
 typedef enum {
     unknownR, sumR, avgR, minR, maxR, allR, anyR
 } ReductionKind;
@@ -608,11 +607,11 @@ static void findFusionSub(Chain *chain){
     // TODO: need top to bottom to check if fusion is allowed
                 gNode *rt = findFusionUp(chain, true);
                 if(rt && isOK2Fuse(rt)){
-                    P("Fusion vector found:\n");
+                    P("Fusion deep found:\n");
                     //printNode(rt->node); getchar();
                     cleanCode(); ptr = code;
                     genCodeDeep(rt, true);
-                    getchar();
+                    //getchar();
                 }
             }
             else if(isCallRaze(call)){
@@ -719,7 +718,6 @@ static void init(){
 }
 
 void optDeep(){
-    printBanner("Fusion Deep");
     init();
     scanMethodList(compiledMethodList->next);
 }

@@ -41,7 +41,7 @@ static I horse_main(V *h_rtn){
 
 E horse_entry(){
     V rtns[99];
-    my_tic();
+    tic();
     HORSE_UDF(horse_main(rtns));
     E elapsed = calc_toc();
     P("The elapsed time (ms): %g\n", elapsed);

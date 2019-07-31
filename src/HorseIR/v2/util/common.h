@@ -59,6 +59,7 @@ typedef enum OptCode{
 /* info.c */
 const char *getTypeName(I x);
 Type getTypeFromV(V x);
+Type getType(Node *x);  /* used in udchain */
 const char *getExtraKind(GenKind x);
 //const char *getpTypeName (pType x);
 const char *getKindName(Kind x);
@@ -92,7 +93,7 @@ int  getLongOption(int argc, char *argv[]);
 void usage(int e);
 void version();
 
-const S getOptStr(OC x);
+const S obtainOptStr(OC x);
 
 extern OptionMode optMode;    // program mode
 extern OptionUtility optUtl;  // utility option

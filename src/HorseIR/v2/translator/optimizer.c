@@ -16,13 +16,13 @@ static void printBannerLocal(S msg){
 }
 
 static void optimizerMain(OC opt){
-    printBannerLocal(getOptStr(opt));
+    printBannerLocal(obtainOptStr(opt));
     switch(opt){
         case OPT_FE: optElementwise();    break; // compiledMethodList
         case OPT_FP: optPattern();        break; // compiledMethodList
         case OPT_FD: optDeep();           break; // compiledMethodList
         case OPT_SR: optSReduction(root); break;
-        default: TODO("Add impl. %s",  getOptStr(opt));
+        default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }
 
@@ -41,10 +41,12 @@ I HorseCompilerOptimized(){
     printBanner("Start Optimizing");
     init();
     if(isOptimizeAll()){
-        TODO("Add impl.");
+#define AllSize 3
+        OC ListOfAllOpt[AllSize] = {OPT_SR, OPT_FD, OPT_FP};
+        DOI(AllSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts
     }
     else {
-        DOI(numOpts, optimizerMain(qOpts[i]));
+        DOI(numOpts, optimizerMain(qOpts[i]))
     }
     profileSimpleHash(hashOpt);
     genOptimizedCode();

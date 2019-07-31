@@ -136,7 +136,7 @@ static TC getTargetCode(S target){
     else R TARGET_NA;
 }
 
-static OC getOptCode(S opt){
+static OC obtainOptCode(S opt){
     if(!strcmp(opt, "fe")) R OPT_FE;
     else if(!strcmp(opt, "fp")) R OPT_FP;
     else if(!strcmp(opt, "fd")) R OPT_FD;
@@ -145,11 +145,12 @@ static OC getOptCode(S opt){
     else R OPT_NA;
 }
 
-const S getOptStr(OC x){
+const S obtainOptStr(OC x){
     switch(x){
+        case OPT_SR : R "Strength Reduction";
         case OPT_FE : R "Fusion Elementwise";
         case OPT_FP : R "Fusion with Patterns";
-        case OPT_SR : R "Strength Reduction";
+        case OPT_FD : R "Fusion Deep";
         case OPT_ALL: R "All Optimizations On";
         default: R "Unknown Optimizations";
     }
@@ -158,7 +159,7 @@ const S getOptStr(OC x){
 static int validateOptimization(){
     if(numOpts > 0){
         DOI(numOpts, \
-            if(OPT_NA == (qOpts[i]=getOptCode(qOpt[i]))) \
+            if(OPT_NA == (qOpts[i]=obtainOptCode(qOpt[i]))) \
                 EP("Unknown optimizaiton: %s\n", qOpt[i]))
     }
     return 0;

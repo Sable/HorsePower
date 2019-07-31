@@ -127,6 +127,7 @@ static Chain *findFusionDown(Chain *chain){
     if(instanceOf(n, stmtK)){
         List *vars = nodeStmtVars(n);
         Node *call = getStmtCall(n);
+        if(!call) return NULL;
         Node *func = nodeCallFunc(call);
         SymbolKind sk = nodeNameKind(func);
         if(!(sk == builtinS && isElementwise(nodeName2(func))))
@@ -232,7 +233,7 @@ static void findFusionSub(Chain *chain){
             //printChain(bottom); getchar();
             cleanCode(); ptr = code;
             genCodeElem(rt,true);
-            getchar();
+            //getchar();
         }
     }
     else {
@@ -277,7 +278,6 @@ static void init(){
 
 // entry: fuse elementwise
 void optElementwise(){
-    printBanner("Fusion Elementwise");
     init();
     scanMethodList(compiledMethodList->next);
 }

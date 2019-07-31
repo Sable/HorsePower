@@ -4,7 +4,6 @@ B isReadBin  = false;
 extern B qIsTpch;
 extern I qTpchId;
 
-static void initTablesByQid(I id);
 static void initElementwiseFuncMap();
 static void initTablesAll();
 
@@ -312,7 +311,7 @@ static void initQ22(){
     addFKey("customer", "c_custkey", "orders", "o_custkey");
 }
 
-static void initTablesByQid(I id){
+void initTablesByQid(I id){
     tic();
     if(id>=0 && id<=22){
         switch(id){

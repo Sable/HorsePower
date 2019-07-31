@@ -117,9 +117,8 @@ static void scanList(List *list){
 
 static void init(){ }
 
-/* entry */
+/* entry: strength reduction */
 void optSReduction(Prog *root){
-    printBanner("Strength Reduction");
     init();
     scanList(root->module_list);
 }
