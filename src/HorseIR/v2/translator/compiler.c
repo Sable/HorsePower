@@ -318,7 +318,7 @@ static void scanAssignStmt(Node *n){
     List *prevVars = lhsVars;
     lhsVars = nodeStmtVars(n); //n->val.assignStmt.vars;
     Node *rhsExpr = nodeStmtExpr(n);
-    if(instanceOf(rhsExpr, callK))
+    if(instanceOf(rhsExpr, callK) || instanceOf(rhsExpr,castK))
         scanNode(rhsExpr);
     else
         scanStmtCopy(n);

@@ -71,7 +71,7 @@ module default{
     t118:? = @mul(t106,t117);
     t119:? = @sum(t118);
     t120:? = `revenue:sym;
-    t121:? = @enlist(t119);
+    t121:? = @list(t119);
     t122:? = @table(t120,t121);
     return t122;
   }
