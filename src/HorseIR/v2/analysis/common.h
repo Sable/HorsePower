@@ -15,9 +15,9 @@ typedef struct ShapeNode{
     ShapeType type;
     ShapeKind kind;
     union {
-        int size;     /* (kind=0)  constSP: actual literal size */
-        int sizeId;   /* (kind=1) symbolSP: sequential size id  */
-        int sizeScan; /* (kind=2)   scanSP: size after compress */
+        int size;       /* (kind=0)  constSP: actual literal size */
+        int sizeId;     /* (kind=1) symbolSP: sequential size id  */
+        int sizeScan;   /* (kind=2)   scanSP: size after compress */
     };
 }ShapeNode;
 

@@ -37,9 +37,9 @@ const char *getExtraKind(GenKind x){
 Type getType(Node *x){
     if(!x) EP("Empty type node found\n");
     if(x->val.type.isWild) R wildT;
-    else if(x->val.type.cell) {
-        TODO("Cell types not allowed.\n");
-    }
+    //else if(x->val.type.cell) {
+    //    TODO("Cell types not allowed.\n");
+    //}
     else {
         char *typ = x->val.type.typ;
         if(!strcmp(typ, "bool")) R boolT;

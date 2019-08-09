@@ -2,15 +2,15 @@ module default{
   import Builtin.*;
   def main() : table{
     t0:? = @load_table(`orders:sym);
-    t6:date = check_cast(@column_value(t0,`o_orderdate:sym), d);
+    t6:date = check_cast(@column_value(t0,`o_orderdate:sym), date);
     t7:sym = check_cast(@column_value(t0,`o_orderpriority:sym), sym);
     t11:? = @geq(t6,1993-07-01:date);
     t12:? = @lt(t6,1993-10-01:date);
     t13:? = @and(t11,t12);
     t23:? = @load_table(`lineitem:sym);
-    t24:enum = check_cast(@column_value(t23,`l_orderkey:sym), enum);
-    t36:date = check_cast(@column_value(t23,`l_commitdate:sym), d);
-    t37:date = check_cast(@column_value(t23,`l_receiptdate:sym), d);
+    t24:enum<i32> = check_cast(@column_value(t23,`l_orderkey:sym), enum<i32>);
+    t36:date = check_cast(@column_value(t23,`l_commitdate:sym), date);
+    t37:date = check_cast(@column_value(t23,`l_receiptdate:sym), date);
     t41:? = @lt(t36,t37);
     t58:? = @values(t24);
     t59:? = @keys(t24);

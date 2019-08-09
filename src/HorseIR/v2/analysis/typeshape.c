@@ -21,6 +21,8 @@ static Node *currentMethod;
 extern Node *entryMain;
 List *compiledMethodList;
 
+sHashTable *hashScan, *hashMeta;
+
 /*  ---- above declarations ---- */
 
 static InfoNode *getNode(InfoNodeList *list, int k){
@@ -232,9 +234,11 @@ static void copyInfoNode(InfoNode *x, InfoNode* y){
 // true : exactly same
 // false: not same
 static bool infoCompatible(InfoNode *x, InfoNode *y){
-    if(isW(y) || !y->shape){
+    if(isW(y) || (x->shape && !y->shape)){
         // TODO: Is a shape info necessary?
-        EP("Right hand side shape unknown\n");
+        printInfoNode(x);
+        printInfoNode(y);
+        EP("Right hand side type or shape unknown\n");
     }
     if(isW(x)) {
         copyInfoNode(x, y);
@@ -437,8 +441,8 @@ static void scanGlobal(Node *n){
 }
 
 static void scanCast(Node *n){
-    scanNode(n->val.cast.exp);
-    InfoNode *castIn = getInfoFromNode(n->val.cast.typ);
+    scanNode(nodeCastExpr(n));
+    InfoNode *castIn = getInfoFromNode(nodeCastType(n));
     InfoNode *curIn  = currentInList->next->in;
     if(typeCastable(curIn, castIn)){ // if ok, copy shape
         currentInList->next->in = castIn;
@@ -554,6 +558,8 @@ static void init(){
     currentMethod = NULL;
     currentInList = NEW(InfoNodeList);
     compiledMethodList = NEW(List);
+    hashScan = initSimpleHash(512); // a magic number
+    hashMeta = initSimpleHash(512); // a magic number
 }
 
 /* entry */

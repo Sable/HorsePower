@@ -1,12 +1,26 @@
 #include "../global.h"
 
+static void printTypeNode(InfoNode *x);
+
+static void printTypeNodeNext(InfoNode *x){
+    if(x){
+        printTypeNodeNext(x->next);
+        P(","); printTypeNode(x);
+    }
+}
+
+static void printTypeNodeSub(InfoNode *x){
+    printTypeNode(x);
+    printTypeNodeNext(x->next);
+    //while(x->next){ // sequential
+    //    P(","); printTypeNode(x->next); x = x->next;
+    //}
+}
+
 static void printTypeNode(InfoNode *x){
     printType(x->type);
     if(x->subInfo){
-        P("<"); printTypeNode(x->subInfo); P(">");
-    }
-    if(x->next){
-        P(","); printTypeNode(x->next);
+        P("<"); printTypeNodeSub(x->subInfo); P(">");
     }
 }
 
@@ -37,9 +51,9 @@ void printShapeNode(ShapeNode *sn){
 /* InfoNode */
 
 void printInfoNode(InfoNode *x){
-    P("\t{");
+    P("\t{type: ");
     printTypeNode(x);
-    P("; ");
+    P("; shape: ");
     printShapeNode(x->shape);
     P("}\n");
 }

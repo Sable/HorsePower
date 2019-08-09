@@ -417,7 +417,7 @@ static void printTypeBuff(char *b, Type x){
 void printType(Type x){
     buff[0]=0;
     printTypeBuff(buff, x);
-    P("type(%s)",buff);
+    P("%s",buff); // type(%s)
 }
 
 

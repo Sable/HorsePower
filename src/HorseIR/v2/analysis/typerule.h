@@ -37,10 +37,18 @@ typedef struct FuncUnit{
     };
 }FuncUnit;
 
+typedef struct {
+    Type type;
+    union{
+        struct dictMeta { int keyId, valId;  } dictMeta;
+    };
+}MetaData;
 
 /* macros */
 
 #define inType(n)  (n)->type
+#define inCell(x)  (x)->subInfo
+#define inNext(x)  (x)->next
 #define inShape(n) (n)->shape
 #define inShapeType(x) inShape(x)->type
 

@@ -28,28 +28,21 @@ char *strName2(char *id1, char *id2){
     return strcat(strcat(strcpy(name2, id1), "."), id2);
 }
 
+// TODO: remove
+static int countNext(InfoNode *in){
+    int c=0; while(in->next){c++; in=in->next;} return c;
+}
+
 // types 
-static void addCellInfo(InfoNode *in, InfoNode *x){
-    x->next = in->next;
-    in->next = x;
-}
-
-static void addSubInfo(InfoNode *in, InfoNode *x){
-    x->next = in->subInfo;
-    in->subInfo= x;
-}
-
-static void getSubInfo(Node *n, InfoNode *in){
-    InfoNode *x = getInfoNode(n);
-    addSubInfo(in, x);
-}
-
 static void getCellInfo(List *list, InfoNode *in){
     if(list){
         getCellInfo(list->next, in);
-        InfoNode *sub = NEW(InfoNode);
-        getSubInfo(list->val, sub);
-        addCellInfo(in, sub);
+        InfoNode *newIn = getInfoNode(list->val);
+        if(in->subInfo){
+            newIn->next = in->subInfo->next;
+            in->subInfo->next = newIn;
+        }
+        else in->subInfo = newIn;
     }
 }
 
@@ -63,13 +56,11 @@ static ShapeType getShapeByName(S name){
 
 static InfoNode *getInfoNode(Node *n){
     InfoNode *x = NEW(InfoNode);
+    x->type = getType(n);
     if(n->val.type.cell){
         getCellInfo(n->val.type.cell, x);
-        //x->shape = newShapeNode(getShapeByName(n->val.type.typ), SN_ID, -1);
-    }
-    else {
-        x->type = getType(n);
-        //x->shape = newShapeNode(vectorH, SN_ID, -1);
+        //printInfoNode(x); 
+        //getchar();
     }
     return x;
 }

@@ -31,6 +31,8 @@ const int BinarySize = sizeof(FunctionBinaryStr)/sizeof(char*);
 const int  OtherSize = sizeof( FunctionOtherStr)/sizeof(char*);
 
 static int shapeId = 0;
+static int scanId  = 100; /* starting from 100, must > 0 bcz of simple hash */
+extern sHashTable *hashScan, *hashMeta; /* declared in typeshape.c */
 
 typedef bool (*TypeCond)(InfoNode *);
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
@@ -263,7 +265,7 @@ ShapeNode *newShapeNode(ShapeType type, int kind, int size){
         case   tableH:
               //P("kind = %d, size = %d\n", kind, size); getchar();
               if(isSNId(sn))
-                  sn->sizeId = size<0?(shapeId++):size;
+                  sn->sizeId = size<0?shapeId++:size;
               else if(isSNConst(sn))
                   sn->size = size;
               else if(isSNScan(sn))
@@ -275,6 +277,20 @@ ShapeNode *newShapeNode(ShapeType type, int kind, int size){
     }
     return sn;
 }
+
+ShapeNode *newShapeNodeScan(ShapeNode *x){
+    /* map(x, size) */
+    int curId = lookupSimpleHash(hashScan, (L)x);
+    if(!curId){ // not found
+        addToSimpleHash(hashScan, (L)x, curId=scanId++);
+    }
+    ShapeNode *sn = NEW(ShapeNode);
+    sn->type = vectorH; // default
+    sn->kind = SN_SCAN; // default
+    sn->sizeScan = curId;
+    return sn;
+}
+
 
 /* monadic */
 static InfoNode *commonElemementUnary(InfoNode *x, TypeCond cond, Type t){
@@ -724,15 +740,28 @@ static ShapeNode *decideShapeAppend(InfoNode *x, InfoNode *y){
 
 static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
     if(isSNId(x) && isSNId(y)){
-        return newShapeNode(vectorH, SN_SCAN, x->sizeId==y->sizeId?x->sizeId:-1);
+        if(x->sizeId == y->sizeId)
+            return newShapeNodeScan(x);
+        else
+            EP("scan shape sizes must be the same: %d vs %d", x->sizeId, y->sizeId);
     }
     else if(isSNConst(x) && isSNConst(y)){
         if(x->size == y->size)
             return newShapeNode(vectorH, SN_ID, -1);
         else
-            EP("shape size not equal for comrpess: %d vs %d\n", x->size, y->size);
+            EP("shape size not equal for comrpess: %d vs %d", x->size, y->size);
     }
-    else EP("unknown ShapeNode for compress\n");
+    else if(isSNScan(x) && isSNScan(y)){
+        if(x->sizeScan == y->sizeScan)
+            return newShapeNodeScan(x);
+        else
+            EP("scan shape sizes must be the same: %d vs %d", x->sizeScan, y->sizeScan);
+    }
+    else {
+        printShapeNode(x);
+        printShapeNode(y);
+        EP("unknown ShapeNode for compress");
+    }
 }
 
 static ShapeNode *decideShapeCompress(InfoNode *x, InfoNode *y){
@@ -936,6 +965,15 @@ static InfoNode *propList(InfoNodeList *in_list){
                           NULL);
 }
 
+// for example, enum<i32>
+static B isCellTypeSimple(InfoNode *x){
+    if(inCell(x) && !inNext(x)){
+        InfoNode *sub = inCell(x);
+        return !inCell(sub) && !inNext(sub); // both NULL
+    }
+    return false;
+}
+
 static InfoNode *propKeyValues(InfoNode *x, bool f){
     if(isDictIN(x)){
         if(f) return newInfoNode(i64T, newShapeNode(vectorH, SN_ID, -1));
@@ -944,8 +982,24 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
                                     newInfoNode(i64T, NULL), NULL);
     }
     else if(isEnumT(x)){ /* TODO: need to pass info to keys */
-        if(f) return newInfoNode(wildT, newShapeNode(unknownH, SN_ID, -1));
-        else  return newInfoNode( i64T, inShape(x));
+        if(f) { // pass key
+            int d = lookupSimpleHash(hashMeta, (L)x);
+            int rtnId = d?((MetaData*)d)->dictMeta.keyId:-1;
+            if(rtnId == -1){
+                MetaData *newMeta = NEW(Meta);
+                newMeta->dictMeta.keyId = shapeId;
+                addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+            }
+            if(isCellTypeSimple(x))
+                return newInfoNode(inType(inCell(x)),
+                                    newShapeNode(vectorH, SN_ID, rtnId));
+            else
+                return newInfoNode(wildT,
+                                    newShapeNode(unknownH, SN_ID, rtnId));
+        }
+        else { // pass value
+            return newInfoNode( i64T, inShape(x));
+        }
     }
     else EP("[propKeyValues] adding support for type %d\n", inType(x));
 }
@@ -954,6 +1008,7 @@ static InfoNode *propValues(InfoNode *x){
     return propKeyValues(x, false);
 }
 
+// TODO: what if keys(x) twice that returns two different IDs (need to be fixed)
 static InfoNode *propKeys(InfoNode *x){
     return propKeyValues(x, true);
 }

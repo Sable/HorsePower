@@ -8,7 +8,6 @@
 InfoNodeList *propagateType(Node *func, InfoNodeList *list);
 O propagateTypeShape(Prog *root);
 
-
 InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
 O cleanInfoList(InfoNodeList *in_list);
 
