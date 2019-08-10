@@ -37,10 +37,10 @@ typedef struct FuncUnit{
     };
 }FuncUnit;
 
+/* support more precise shape information */
 typedef struct {
-    Type type;
     union{
-        struct dictMeta { int keyId, valId;  } dictMeta;
+        struct enumMeta { int keyId; } enumMeta;
     };
 }MetaData;
 

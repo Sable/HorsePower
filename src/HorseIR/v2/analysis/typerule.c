@@ -974,6 +974,24 @@ static B isCellTypeSimple(InfoNode *x){
     return false;
 }
 
+/*
+ * function `key`  : returns keyId as its shape id
+ * function `fetch`: return the same shape as its enum
+ * function `value`: return the same shape as its enum
+*/
+static I getEnumKeyIdFromMeta(InfoNode *x){
+    L d = lookupSimpleHash(hashMeta, (L)x);
+    if(d){
+        return ((MetaData*)d)->enumMeta.keyId;
+    }
+    else {
+        MetaData *newMeta = NEW(MetaData);
+        newMeta->enumMeta.keyId = shapeId++;
+        addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+        return newMeta->enumMeta.keyId;
+    }
+}
+
 static InfoNode *propKeyValues(InfoNode *x, bool f){
     if(isDictIN(x)){
         if(f) return newInfoNode(i64T, newShapeNode(vectorH, SN_ID, -1));
@@ -983,13 +1001,7 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
     }
     else if(isEnumT(x)){ /* TODO: need to pass info to keys */
         if(f) { // pass key
-            int d = lookupSimpleHash(hashMeta, (L)x);
-            int rtnId = d?((MetaData*)d)->dictMeta.keyId:-1;
-            if(rtnId == -1){
-                MetaData *newMeta = NEW(Meta);
-                newMeta->dictMeta.keyId = shapeId;
-                addToSimpleHash(hashMeta, (L)x, (L)newMeta);
-            }
+            I rtnId = getEnumKeyIdFromMeta(x);
             if(isCellTypeSimple(x))
                 return newInfoNode(inType(inCell(x)),
                                     newShapeNode(vectorH, SN_ID, rtnId));
@@ -998,7 +1010,7 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
                                     newShapeNode(unknownH, SN_ID, rtnId));
         }
         else { // pass value
-            return newInfoNode( i64T, inShape(x));
+            return newInfoNode(i64T, inShape(x));
         }
     }
     else EP("[propKeyValues] adding support for type %d\n", inType(x));
@@ -1006,6 +1018,11 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
 
 static InfoNode *propValues(InfoNode *x){
     return propKeyValues(x, false);
+}
+
+static InfoNode *propFetch(InfoNode *x){
+    Type rtnType = isCellTypeSimple(x)?inType(inCell(x)):wildT;
+    return newInfoNode(rtnType, inShape(x));
 }
 
 // TODO: what if keys(x) twice that returns two different IDs (need to be fixed)
@@ -1039,12 +1056,6 @@ static InfoNode *propIndex(InfoNode *x, InfoNode *y){
         else return newInfoNode(x->type, y->shape);
     }
     else return NULL;
-}
-
-/* TODO: all return i64 */
-static InfoNode *propFetch(InfoNode *x){
-    WP("fetch: all return i64\n");
-    return newInfoNode(i64T, inShape(x));
 }
 
 /* copy from typeshape.c, TODO: combine later */
