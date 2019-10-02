@@ -11,6 +11,7 @@ db_tpch      = {}
 as_map       = {}  # id0.id1: currently only use id1 as key
 primary_key  = {}
 foreign_key  = {}
+udf_list     = []
 
 def scanMain(d, env):
     if 'operator' in d:
@@ -153,7 +154,7 @@ def scanBlock(d, env):
             tab,col = v1
             indx  = findIdInEnv(v1, env)
             typ   = getEnvType(env)[indx]
-            maska = getEnvMaskA(env)[indx]
+            maska = getEnvMaskA(env)[indx] if getEnvMask(env) else []
             #typ = getEnvType(env)[indx] #typ = getTypeFromEnv(v1, env)
             #maska = getEnvMaskA(env)[indx]
         elif num == 2:
@@ -194,7 +195,7 @@ def scanOrder(d, env):
 # return final results
 def scanHeader(env):
     printEnv(env)
-    stop('header')
+    #stop('header')
     a0 = genLiteral(strSymbolVec(getEnvName(env)))
     a1 = genList(getEnvAlias(env))
     a2 = genTable(a0, a1)
@@ -442,7 +443,7 @@ def getArgValues(args, env):
         else:
             prev = getValuesV(x, env)
             rtn.append(prev)
-    stop(rtn)
+    #stop(rtn)
     return rtn
 
 def getExprValue(v, env):
@@ -475,6 +476,10 @@ def getExprValue(v, env):
     def isReduction(func):
         reduction_op_list = [ 'sum', 'avg', 'count' ]
         return (func in reduction_op_list)
+    
+    def isUDF(func):
+        global udf_list
+        return (func in udf_list)
 
     # start
     expr = v['value']
@@ -498,6 +503,8 @@ def getExprValue(v, env):
             return { "kind": "aggr", "op": op, "num": 0, "values": [] }
         else:
             return genNiladic(op)
+    elif isUDF(func):
+        return genAnyCall(func, args)
     else:
         unexpected("Support func %s" % func)
     pass
@@ -725,6 +732,28 @@ def initDatabase():
         'l_shipmode'      : 'sym' ,
         'l_comment'       : 'str'
     }
+    initDatabaseUDF()
+    registerUDF()
+    pass
+
+def initDatabaseUDF():
+    global db_tpch
+    db_tpch['table_bs'] = {
+        'sptprice'   : 'f64',
+        'strike'     : 'f64',
+        'rate'       : 'f64',
+        'divq'       : 'f64',
+        'volatility' : 'f64',
+        'time'       : 'f64',
+        'optiontype' : 'char',
+        'divs'       : 'f64',
+        'dgrefval'   : 'f64'
+    }
+    pass
+
+def registerUDF():
+    global udf_list
+    udf_list.append('compute_bs_scalar')
 
 def getEnvId(x, env2):
     if isName(x):
@@ -926,6 +955,17 @@ def combineGroupEnv(env1, env2):
         # printEnv(env2)
         return updateEnvWithAlias(genCodeVector(), env2)
 
+def printWithBanner():
+    size = 50
+    msg = 'Code Generated Below'
+    remain = size - len(msg) - 2
+    del_left  = '-' * (remain / 2)
+    del_right = '-' * (remain - len(del_left))
+    print '/* %s %s %s */' % (del_left,msg,del_right)
+    printAllCode()
+    print '/*', ('+'*size), '*/'
+
+
 def init():
     initDatabase()
     initRelations()
@@ -933,5 +973,5 @@ def init():
 def compile(src):
     init()
     scanHeader(scanMain(src, {})) # {} dict
-    printAllCode()
+    printWithBanner()
 

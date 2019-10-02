@@ -62,6 +62,11 @@ def isUnaryOps(op):
         'not': True
     }.get(op, False)
 
+def readFromStdin():
+    lines = []
+    for line in sys.stdin:
+        lines.append(line)
+    return lines
 
 # def stringLiteral(x, sep=','):
 #     literal_set = x['const_value']
@@ -251,6 +256,7 @@ def wrong(msg):
 def todo(msg):
     debug('[TODO]: %s' % msg)
 
-def stop(msg):
-    print msg
+def stop(msg=''):
+    if msg:
+        print msg
     raw_input('stop ...')

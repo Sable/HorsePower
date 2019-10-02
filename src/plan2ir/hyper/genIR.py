@@ -99,6 +99,7 @@ def scanValuesRef(v, env):
     # return genCopy(alias)
 
 def scanValuesConst(v, withType=True):
+    print v; stop();
     typ = v['value']['type']
     val = v['value']['value']
     return stringValue(typ, val, withType)

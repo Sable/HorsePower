@@ -362,6 +362,7 @@ def scanItemCore():
     elif isID(cur):
         return { "type": "string", "value": fetchToken() }
     else:
+        print cur
         printCur()
         wrong('unknown')
     pass

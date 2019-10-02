@@ -30,10 +30,15 @@
     }
 }
 
-%token <stringconst> kSELECT kFROM kWHERE kGROUPBY kORDERBY kHAVING kLIMIT kDISTINCT kAS kIN kNOT kLIKE kBETWEEN kIS kNULL kDATE kCASE kWHEN kTHEN kELSE kEND kAND kOR kINTERVAL kEXISTS kEXTRACT kSUBSTRING kFOR kLEFTJOIN kRIGHTJOIN kON kCREATE kDROP kVIEW
+%token <stringconst> kSELECT kFROM kWHERE kGROUPBY kORDERBY kHAVING kLIMIT
+%token <stringconst> kDISTINCT kAS kIN kNOT kLIKE kBETWEEN kIS kNULL kDATE kCASE kWHEN kTHEN kELSE
+%token <stringconst> kEND kAND kOR kINTERVAL kEXISTS kEXTRACT kSUBSTRING kFOR kLEFTJOIN kRIGHTJOIN
+%token <stringconst> kON kCREATE kDROP kVIEW kASC kDESC
+
 %token <stringconst> fAVG fSUM fCOUNT fMIN fMAX
+
 %token <stringconst> aNOT2 aLE aGE aLT aGT aEQ aNOT
-%token <stringconst> tID tSTRING tSINGLE kASC kDESC
+%token <stringconst> tID tSTRING tSINGLE
 %token <intconst>    tINT
 %token <floatconst>  tFLOAT
 
@@ -47,7 +52,9 @@
 
 %% 
 
-program            : sql_view_list sql_query ';' sql_view_list
+program            : sql_view_list
+                     sql_query ';'
+                     sql_view_list
 ;
 
 sql_query          : kSELECT select_expr_list

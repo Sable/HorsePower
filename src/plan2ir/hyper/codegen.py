@@ -89,11 +89,14 @@ def genTriple(description, value_0, value_1, value_2):
     insertUse(value_2, targ)
     return targ
 
-def genList(value_list):
-    targ = genAssignment('@list(%s)' % stringList(value_list))
+def genAnyCall(func, value_list):
+    targ = genAssignment('@%s(%s)' % (func,stringList(value_list)))
     for v in value_list:
         insertUse(v, targ)
     return targ
+
+def genList(value_list):
+    return genAnyCall('list', value_list)
 
 def genLiteral(value_literal):
     targ = genAssignment(value_literal)
