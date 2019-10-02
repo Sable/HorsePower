@@ -1,0 +1,8 @@
+// 1 : wrong date and datetime format - month
+
+module datetime {
+    def date(){
+        x0:d = 2019-00:d; // wrong month
+    }
+}
+

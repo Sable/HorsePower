@@ -1,0 +1,33 @@
+// 17 : fibonacci
+
+module fib {
+    import Builtin.*;
+
+    def foo(n:i32):i32{
+        f:bool = @gt(n, 1:i32);
+        if(f){
+            x0:i32 = @minus(n, 1:i32);
+            z0:i32 = @foo(x0);  // foo(n-1)
+            x1:i32 = @minus(n, 2:i32);
+            z1:i32 = @foo(x1);  // foo(n-2)
+            z2:i32 = @plus(z0, z1);
+            return z2;
+        }
+        else {
+            return 1:i32;
+        }
+    }
+
+    def main():i32 {
+        x:i32 = @foo(11:i32);
+        return x;
+    }
+    /*
+     * Expected:
+     *           8 -> 34
+     *           9 -> 55
+     *          10 -> 89
+     *          11 -> 144
+     */
+}
+

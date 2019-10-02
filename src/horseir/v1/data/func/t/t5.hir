@@ -1,0 +1,12 @@
+// 5 : imports
+
+module default {
+    import Builtin.*; /* built in */
+
+    import foo.z; /* foo: single */
+
+    import bar.z; /* bar: single */
+
+    import baz.{a,b,c}; /* baz: multiple */
+}
+

@@ -1,0 +1,20 @@
+// 16 : interpreter - if/else
+
+module simple_if{
+    import Builtin.*;
+
+    def main():i32 {
+        x0:i32 = @minus(2:i32, 1:i32);
+        x1:i32 = @plus(x0, x0);
+        x2:bool = @gt(x1, 10:i32);
+        if(x2){
+            return x0; // expect: 1
+        }
+        else {
+            z:i32 = @plus(x1, x1);
+            return z; // expect: 4
+        }
+        return x1; // expect: 2
+    }
+}
+

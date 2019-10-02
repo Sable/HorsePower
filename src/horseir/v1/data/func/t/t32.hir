@@ -1,0 +1,9 @@
+// 32 : hello world
+
+module helloworld{
+    import Builtin.*;
+    def main(){
+        @print("hello world":str);
+    }
+}
+

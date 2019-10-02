@@ -1,0 +1,9 @@
+// 23 : var decl
+
+module var_decl{
+    def main(){
+        var x:i32;
+        var y, z:f32;
+    }
+}
+

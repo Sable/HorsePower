@@ -1,0 +1,19 @@
+// 12 : mutiple definitions (basic) - no return type defined
+
+module var_decl{
+    def main(){
+        x:bool = 0:bool;
+        var z:i32;
+        if(x){
+            z = 0:i32;
+        }
+        else {
+            z = 1:i32;
+        }
+        return z;
+    }
+}
+
+// expect: (1) no return type defined for method 'main'
+//         or
+//         (2) return type mismatch

@@ -1,0 +1,20 @@
+// 39 : Optimizations I (constant propagation)
+
+module optimization{
+    import Builtin.*;
+    def main():i64{
+        x0:i64 = (1,2,3):i64;
+        x1:i64 = @plus(x0, x0);
+        x2:i64 = @len(x1);
+        return x2;
+    }
+}
+
+/*
+ * The value of x2 can be determined statically because of x0.
+ * What if x0 is a variable with unknown size, the value of x2
+ * should be determined by x0 (i.e. x2 = @len(x0)).
+ *
+ * Value analysis probably is a general way to solve the problem.
+ */
+

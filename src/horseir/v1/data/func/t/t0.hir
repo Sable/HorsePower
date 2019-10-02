@@ -1,0 +1,23 @@
+// 0: method declaration
+
+module default{
+
+  def try0() : i32 {
+  }
+
+  def try1(x:i32) : i32 {
+  }
+
+  def try2(x:i32, y:f64) : f32 {
+  }
+
+  def try3(x:i32, y:f64) : f32,i32 {
+  }
+
+  def try4(x:list<i32>, y:list<?>) : ?,i32 {
+  }
+
+  def main() : table{
+  }
+}
+

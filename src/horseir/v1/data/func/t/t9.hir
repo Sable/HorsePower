@@ -1,0 +1,22 @@
+// 9 : name table
+
+module default{
+
+  //import x.*;
+  //import x.*; // import once
+  //import default.*; // allowed
+
+  def foo(x:i32, y:f64) : i32 {
+      x:i32 = 1:i32; // allowed
+      new1:f32 = @plus(x, y);
+      new2:i32 = x;
+  }
+
+  def bar(a:f32, b:str, c:i32) : i32 {
+      //x = 2:i32; // need to be declared before use
+  }
+}
+
+// module default{ // a duplicated module name
+// }
+

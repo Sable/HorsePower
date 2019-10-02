@@ -1,0 +1,18 @@
+// 34 : each operator
+
+module each{
+    import Builtin.*;
+    def main():i64{
+        x0:i32 = (1,2,3):i32;
+        x1:i32 = (4,5,6):i32;
+        x2:i32 = @list(x0,x1);
+        x4:i32 = @each(@sum, x2);
+        x5:i32 = @raze(x4);
+        return x5;
+    }
+}
+
+/*
+ * TODO: x5 expects type i32, but @sum returns i64
+ */
+

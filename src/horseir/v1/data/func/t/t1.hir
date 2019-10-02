@@ -1,0 +1,20 @@
+// 1: basic if-else statement
+
+module default{
+  import Builtin.*;
+
+  def test_1() : bool{
+      x1:i32 = @plus(1:i32, 2:i32);
+      x2:bool = @gt(x1, 2:i32);
+      if ( x2 ) {
+          x3:bool = 1:bool;
+      }
+      else {
+          x3:bool = 0:bool;
+      }
+      return x3;
+  }
+}
+
+
+
