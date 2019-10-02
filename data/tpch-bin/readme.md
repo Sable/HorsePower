@@ -10,7 +10,7 @@ Description
 
 ***Note***
 
-- The binary data file is created by HorseIR utility functions which imports
-  tables in the text format and saves its binary format in to this folder.
+- The binary data file is created by HorseIR utility functions which import
+  a table in the text format and save its binary format to this folder.
 
 
