@@ -2,8 +2,7 @@
  * Impl. for symbols
  * - Balance tree
  */
-#ifndef __H_SYMBOL__
-#define __H_SYMBOL__
+#pragma once
 
 #ifdef	__cplusplus
 extern "C" {
@@ -58,6 +57,4 @@ L compareSymbol(L x, L y);
 
 #ifdef	__cplusplus
 }
-#endif
-
 #endif

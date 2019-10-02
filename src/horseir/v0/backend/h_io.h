@@ -1,5 +1,4 @@
-#ifndef __H_IO__
-#define __H_IO__
+#pragma once
 
 #ifdef	__cplusplus
 extern "C" {
@@ -36,29 +35,21 @@ V readMatrix          (S fileName);
 #define printDict(x)  printDictItem(x,ALL)
 #define printEnum(x)  printEnumItem(x,ALL)
 
-L printType2          (L x);
+L printType           (L x);
 L printTag            (L x);
 L printBasicItem      (V x, L k);
 L printInfo           (V x);
-L printBasicValue     (V x, L k, B hasTag);
+L printBasicValue     (V x, B hasTag);
 L printStrItem        (V x, L k);
 L printListItem       (V x, L k);
 L printDictItem       (V x, L k);
 L printEnumItem       (V x, L k);
 L printValueItem      (V x, L k);
 L printV              (V x);
-L printV2             (V x, L n);
-L printV3             (V x, L a, L b, B isR);
 L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);
-L printFormat         (V x, I op);
-
-void serializeV(V x, FILE *fp);
-void readSerializeV(V x, FILE *fp);
 
 #ifdef	__cplusplus
 }
-#endif
-
 #endif
