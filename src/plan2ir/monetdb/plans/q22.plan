@@ -1,0 +1,33 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 309 # length
+project (
+| group by (
+| | project (
+| | | project (
+| | | | antijoin (
+| | | | | project (
+| | | | | | semijoin (
+| | | | | | | project (
+| | | | | | | | select (
+| | | | | | | | | table(sys.customer) [ "customer"."c_custkey" NOT NULL HASHCOL , "customer"."c_phone" NOT NULL, "customer"."c_acctbal" NOT NULL ] COUNT 
+| | | | | | | | ) [ sys.substring(char["customer"."c_phone" NOT NULL] as "customer"."c_phone", int "1", int "2") in (char(15) "13", char(15) "13", char(15) "31", char(15) "23", char(15) "29", char(15) "30", char(15) "18", char(15) "17") ]
+| | | | | | | ) [ "customer"."c_custkey" NOT NULL HASHCOL , "customer"."c_phone" NOT NULL, "customer"."c_acctbal" NOT NULL ],
+| | | | | | | project (
+| | | | | | | | group by (
+| | | | | | | | | project (
+| | | | | | | | | | select (
+| | | | | | | | | | | table(sys.customer) [ "customer"."c_phone" NOT NULL, "customer"."c_acctbal" NOT NULL ] COUNT 
+| | | | | | | | | | ) [ "customer"."c_acctbal" NOT NULL > decimal(15,2)[decimal(2,1) "0"], sys.substring(char["customer"."c_phone" NOT NULL] as "customer"."c_phone", int "1", int "2") in (char(15) "13", char(15) "13", char(15) "31", char(15) "23", char(15) "29", char(15) "30", char(15) "18", char(15) "17") ]
+| | | | | | | | | ) [ "customer"."c_acctbal" NOT NULL ]
+| | | | | | | | ) [  ] [ sys.avg no nil (double["customer"."c_acctbal" NOT NULL] as "customer"."c_acctbal") as "L5"."L5" ]
+| | | | | | | ) [ "L5" as "L6"."L5" ]
+| | | | | | ) [ double(53,2)["customer"."c_acctbal" NOT NULL] > "L6"."L5" ]
+| | | | | ) [ "customer"."c_custkey" NOT NULL HASHCOL , "customer"."c_phone" NOT NULL, "customer"."c_acctbal" NOT NULL ],
+| | | | | table(sys.orders) [ "orders"."o_custkey" NOT NULL, "orders"."%TID%" NOT NULL as "L30"."%TID%", "orders"."%orders_o_custkey_fkey" NOT NULL JOINIDX sys.orders.orders_o_custkey_fkey as "L31"."%orders_o_custkey_fkey" ] COUNT 
+| | | | ) [ "orders"."o_custkey" NOT NULL = "customer"."c_custkey" NOT NULL HASHCOL  ]
+| | | ) [ char["customer"."c_phone" NOT NULL] as "L27"."L27", sys.substring("L27"."L27", int "1", int "2") as "custsale"."cntrycode", "customer"."c_acctbal" NOT NULL as "custsale"."c_acctbal" ]
+| | ) [ "custsale"."cntrycode", "custsale"."c_acctbal" NOT NULL ]
+| ) [ "custsale"."cntrycode" ] [ "custsale"."cntrycode", sys.count() NOT NULL as "L20"."L20", sys.sum no nil ("custsale"."c_acctbal" NOT NULL) NOT NULL as "L23"."L23" ]
+) [ "custsale"."cntrycode", "L20" NOT NULL as "L21"."numcust", "L23" NOT NULL as "L24"."totacctbal" ] [ "custsale"."cntrycode" ASC ]

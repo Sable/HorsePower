@@ -1,0 +1,195 @@
+{
+  "operator": "project",
+  "input": {
+    "operator": "groupby",
+    "input": {
+      "operator": "project",
+      "input": {
+        "operator": "select",
+        "input": {
+          "operator": "table",
+          "table": {
+            "id": [ "sys", "lineitem" ]
+          },
+          "columns": [
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_quantity" ] }
+            },
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_extendedprice" ] }
+            },
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_discount" ] }
+            },
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_shipdate" ] }
+            }
+        ]
+      },
+      "conditions": [
+          [
+            { "type": "date", "value": "1994-01-01" },
+            { "type": "binary_op", "value": "<=" },
+            { "isNull": "notnull", "type": "name", "value": { "id": [ "lineitem", "l_shipdate" ] } },
+            { "type": "binary_op", "value": "<" },
+            { "type": "expr",
+              "value": {
+                "function": { "id": [ "sys", "sql_add" ] },
+                "args": [
+                  { "type": "date", "value": "1994-01-01" },
+                  { "type": "month_interval", "value": "12" }
+                ]
+              }
+            }
+        ],
+        [
+            {
+              "type": "decimal",
+              "value": {
+                "type": "expr",
+                "value": {
+                  "function": {
+                    "id": [ "sys", "sql_sub" ]
+                  },
+                  "args": [
+                    { "type": "decimal", "value": { "type": "decimal", "value": "6" } },
+                    { "type": "decimal", "value": "1" }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "binary_op",
+              "value": "<="
+            },
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_discount" ] }
+            },
+            {
+              "type": "binary_op",
+              "value": "<="
+            },
+            {
+              "type": "decimal",
+              "value": {
+                "type": "expr",
+                "value": {
+                  "function": { "id": [ "sys", "sql_add" ] },
+                  "args": [
+                    { "type": "decimal", "value": { "type": "decimal", "value": "6" } },
+                    { "type": "decimal", "value": "1" }
+                  ]
+                }
+              }
+            }
+        ],
+        [
+            {
+              "isNull": "notnull",
+              "type": "name",
+              "value": { "id": [ "lineitem", "l_quantity" ] }
+            },
+            {
+              "type": "binary_op",
+              "value": "<"
+            },
+            {
+              "type": "decimal",
+              "value": { "type": "tinyint", "value": "24" }
+            }
+        ]
+      ]
+    },
+      "output": [
+        [
+          {
+            "isNull": "notnull", "type": "name", "value": { "id": [ "lineitem", "l_extendedprice" ] }
+          }
+        ],
+        [
+          {
+            "isNull": "notnull", "type": "name", "value": { "id": [ "lineitem", "l_discount" ] }
+          }
+        ],
+        [
+          {
+            "type": "decimal",
+            "value": {
+                "isNull": "notnull", "type": "name", "value": { "id": [ "lineitem", "l_extendedprice" ] }
+            }
+          },
+          {
+            "type": "as",
+            "value": { "id": [ "L6", "L6" ] }
+          }
+        ],
+        [
+          {
+            "type": "expr",
+            "value": {
+              "function": { "id": [ "sys", "sql_mul" ] },
+              "args": [
+                {
+                  "type": "name",
+                  "value": { "id": [ "L6", "L6" ] }
+                },
+                {
+                  "isNull": "notnull",
+                  "type": "name",
+                  "value": { "id": [ "lineitem", "l_discount" ] }
+                }
+              ]
+            }
+          },
+          {
+            "type": "as",
+            "value": { "id": [ "L7", "L7" ] }
+          }
+        ]
+      ]
+    },
+    "block2": [
+      [
+        {
+          "type": "expr",
+          "value": {
+            "function": { "id": [ "sys", "sum" ] },
+            "args": [
+              {
+                "type": "name",
+                "value": { "id": [ "L7", "L7" ] }
+              }
+            ]
+          }
+        },
+        {
+          "type": "as",
+          "value": { "id": [ "L3", "L3" ] }
+        }
+      ]
+    ],
+    "block1": [ ]
+  },
+  "output": [
+    [
+      {
+        "type": "string",
+        "value": "L3"
+      },
+      {
+        "type": "as",
+        "value": { "id": [ "L4", "revenue" ] }
+      }
+    ]
+  ]
+}

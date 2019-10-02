@@ -1,0 +1,31 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 327 # length
+REF 1 (2)
+project (
+| group by (
+| | project (
+| | | select (
+| | | | table(sys.lineitem) [ "lineitem"."l_suppkey" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "lineitem"."l_discount" NOT NULL, "lineitem"."l_shipdate" NOT NULL ] COUNT 
+| | | ) [ date "1996-01-01" <= "lineitem"."l_shipdate" NOT NULL < date "1996-04-01" ]
+| | ) [ "lineitem"."l_suppkey" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "lineitem"."l_discount" NOT NULL, decimal(33,2)["lineitem"."l_extendedprice" NOT NULL] as "L30"."L30", sys.sql_sub(decimal(15,2)[tinyint "1"], "lineitem"."l_discount" NOT NULL) as "L31"."L31", sys.sql_mul("L30"."L30", "L31"."L31") as "L32"."L32" ]
+| ) [ "lineitem"."l_suppkey" NOT NULL ] [ "lineitem"."l_suppkey" NOT NULL, sys.sum no nil ("L32"."L32") as "L4"."L4" ]
+) [ "lineitem"."l_suppkey" NOT NULL as "revenue"."supplier_no", "L4" as "revenue"."total_revenue" ]
+project (
+| semijoin (
+| | project (
+| | | join (
+| | | | table(sys.supplier) [ "supplier"."s_suppkey" NOT NULL HASHCOL , "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL, "supplier"."s_phone" NOT NULL ] COUNT ,
+| | | | & REF 1  
+| | | ) [ "supplier"."s_suppkey" NOT NULL HASHCOL  = "revenue"."supplier_no" NOT NULL ]
+| | ) [ "supplier"."s_suppkey" NOT NULL HASHCOL , "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL, "supplier"."s_phone" NOT NULL, "revenue"."total_revenue" ],
+| | project (
+| | | group by (
+| | | | project (
+| | | | | & REF 1 
+| | | | ) [ "revenue"."total_revenue" ]
+| | | ) [  ] [ sys.max no nil ("revenue"."total_revenue") as "L13"."L13" ]
+| | ) [ "L13" as "L14"."L13" ]
+| ) [ "revenue"."total_revenue" = "L14"."L13" ]
+) [ "supplier"."s_suppkey" NOT NULL HASHCOL , "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL, "supplier"."s_phone" NOT NULL, "revenue"."total_revenue" ] [ "supplier"."s_suppkey" ASC NOT NULL HASHCOL  ]

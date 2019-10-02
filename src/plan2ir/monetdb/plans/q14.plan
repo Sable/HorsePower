@@ -1,0 +1,18 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 587 # length
+project (
+| project (
+| | group by (
+| | | project (
+| | | | join (
+| | | | | select (
+| | | | | | table(sys.lineitem) [ "lineitem"."l_partkey" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "lineitem"."l_discount" NOT NULL, "lineitem"."l_shipdate" NOT NULL ] COUNT 
+| | | | | ) [ date "1995-09-01" <= "lineitem"."l_shipdate" NOT NULL < sys.sql_add(date "1995-09-01", month_interval "1") ],
+| | | | | table(sys.part) [ "part"."p_partkey" NOT NULL HASHCOL , "part"."p_type" NOT NULL ] COUNT 
+| | | | ) [ "lineitem"."l_partkey" NOT NULL = "part"."p_partkey" NOT NULL HASHCOL  ]
+| | | ) [ "lineitem"."l_extendedprice" NOT NULL, "lineitem"."l_discount" NOT NULL, "part"."p_type" NOT NULL, sys.like("part"."p_type" NOT NULL, char "PROMO%") as "L12"."L12", sys.isnull("L12"."L12") as "L13"."L13", decimal(33,2)["lineitem"."l_extendedprice" NOT NULL] as "L14"."L14", sys.sql_sub(decimal(15,2)[tinyint "1"], "lineitem"."l_discount" NOT NULL) as "L15"."L15", sys.ifthenelse("L13"."L13", boolean "false", "L12"."L12") as "L16"."L16", sys.sql_mul("L14"."L14", "L15"."L15") as "L17"."L17", sys.ifthenelse("L16"."L16", "L17"."L17", decimal(33,4)[tinyint "0"]) as "L20"."L20" ]
+| | ) [  ] [ sys.sum no nil ("L20"."L20") as "L3"."L3", sys.sum no nil ("L17"."L17") as "L4"."L4" ]
+| ) [ decimal(38,9)[sys.sql_mul("L3", decimal(4,1) "1000")] as "L7"."L7", sys.sql_div("L7"."L7", "L4") as "L5"."promo_revenue" ]
+) [ "L5"."promo_revenue" ]

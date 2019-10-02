@@ -1,0 +1,26 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 347 # length
+project (
+| group by (
+| | project (
+| | | join (
+| | | | table(sys.lineitem) [ "lineitem"."l_quantity" NOT NULL, "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ] COUNT ,
+| | | | semijoin (
+| | | | | join (
+| | | | | | table(sys.orders) [ "orders"."o_orderkey" NOT NULL HASHCOL , "orders"."o_totalprice" NOT NULL, "orders"."o_orderdate" NOT NULL, "orders"."%TID%" NOT NULL, "orders"."%orders_o_custkey_fkey" NOT NULL JOINIDX sys.orders.orders_o_custkey_fkey ] COUNT ,
+| | | | | | table(sys.customer) [ "customer"."c_custkey" NOT NULL HASHCOL , "customer"."c_name" NOT NULL, "customer"."%TID%" NOT NULL ] COUNT 
+| | | | | ) [ "orders"."%orders_o_custkey_fkey" NOT NULL = "customer"."%TID%" NOT NULL JOINIDX sys.orders.orders_o_custkey_fkey ],
+| | | | | project (
+| | | | | | select (
+| | | | | | | group by (
+| | | | | | | | table(sys.lineitem) [ "lineitem"."l_orderkey" NOT NULL HASHCOL , "lineitem"."l_quantity" NOT NULL ] COUNT 
+| | | | | | | ) [ "lineitem"."l_orderkey" NOT NULL HASHCOL  ] [ "lineitem"."l_orderkey" NOT NULL HASHCOL , sys.sum no nil ("lineitem"."l_quantity" NOT NULL) NOT NULL as "L10"."L10" ]
+| | | | | | ) [ "L10" NOT NULL > decimal(38,2)[smallint "300"] ]
+| | | | | ) [ "lineitem"."l_orderkey" NOT NULL as "L11"."L11" ]
+| | | | ) [ "orders"."o_orderkey" NOT NULL HASHCOL  = "L11"."L11" NOT NULL ]
+| | | ) [ "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL = "orders"."%TID%" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ]
+| | ) [ "customer"."c_custkey" NOT NULL HASHCOL , "customer"."c_name" NOT NULL, "orders"."o_orderkey" NOT NULL HASHCOL , "orders"."o_totalprice" NOT NULL, "orders"."o_orderdate" NOT NULL, "lineitem"."l_quantity" NOT NULL ]
+| ) [ "customer"."c_custkey" NOT NULL HASHCOL , "orders"."o_orderkey" NOT NULL HASHCOL  ] [ "customer"."c_name" NOT NULL, "customer"."c_custkey" NOT NULL HASHCOL , "orders"."o_orderkey" NOT NULL HASHCOL , "orders"."o_orderdate" NOT NULL, "orders"."o_totalprice" NOT NULL, sys.sum no nil ("lineitem"."l_quantity" NOT NULL) NOT NULL as "L20"."L20" ]
+) [ "customer"."c_name" NOT NULL, "customer"."c_custkey" NOT NULL, "orders"."o_orderkey" NOT NULL, "orders"."o_orderdate" NOT NULL, "orders"."o_totalprice" NOT NULL, "L20" NOT NULL as "L21"."L20" ] [ "orders"."o_totalprice" NOT NULL, "orders"."o_orderdate" ASC NOT NULL ]

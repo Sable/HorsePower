@@ -1,0 +1,36 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 402 # length
+project (
+| group by (
+| | project (
+| | | project (
+| | | | select (
+| | | | | join (
+| | | | | | join (
+| | | | | | | join (
+| | | | | | | | join (
+| | | | | | | | | join (
+| | | | | | | | | | table(sys.supplier) [ "supplier"."s_suppkey" NOT NULL HASHCOL , "supplier"."%supplier_s_nationkey_fkey" NOT NULL JOINIDX sys.supplier.supplier_s_nationkey_fkey ] COUNT ,
+| | | | | | | | | | select (
+| | | | | | | | | | | table(sys.lineitem) [ "lineitem"."l_suppkey" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "lineitem"."l_discount" NOT NULL, "lineitem"."l_shipdate" NOT NULL, "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ] COUNT 
+| | | | | | | | | | ) [ date "1995-01-01" <= "lineitem"."l_shipdate" NOT NULL <= date "1996-12-31" ]
+| | | | | | | | | ) [ "supplier"."s_suppkey" NOT NULL HASHCOL  = "lineitem"."l_suppkey" NOT NULL ],
+| | | | | | | | | table(sys.orders) [ "orders"."%TID%" NOT NULL, "orders"."%orders_o_custkey_fkey" NOT NULL JOINIDX sys.orders.orders_o_custkey_fkey ] COUNT 
+| | | | | | | | ) [ "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL = "orders"."%TID%" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ],
+| | | | | | | | select (
+| | | | | | | | | table(sys.nation) [ "nation"."n_name" NOT NULL as "n1"."n_name", "nation"."%TID%" NOT NULL as "n1"."%TID%" ] COUNT 
+| | | | | | | | ) [ "n1"."n_name" NOT NULL in (char(25) "FRANCE", char(25) "GERMANY") ]
+| | | | | | | ) [ "supplier"."%supplier_s_nationkey_fkey" NOT NULL = "n1"."%TID%" NOT NULL JOINIDX sys.supplier.supplier_s_nationkey_fkey ],
+| | | | | | | table(sys.customer) [ "customer"."%TID%" NOT NULL, "customer"."%customer_c_nationkey_fkey" NOT NULL JOINIDX sys.customer.customer_c_nationkey_fkey ] COUNT 
+| | | | | | ) [ "orders"."%orders_o_custkey_fkey" NOT NULL = "customer"."%TID%" NOT NULL JOINIDX sys.orders.orders_o_custkey_fkey ],
+| | | | | | select (
+| | | | | | | table(sys.nation) [ "nation"."n_name" NOT NULL as "n2"."n_name", "nation"."%TID%" NOT NULL as "n2"."%TID%" ] COUNT 
+| | | | | | ) [ "n2"."n_name" NOT NULL in (char(25) "GERMANY", char(25) "FRANCE") ]
+| | | | | ) [ "customer"."%customer_c_nationkey_fkey" NOT NULL = "n2"."%TID%" NOT NULL JOINIDX sys.customer.customer_c_nationkey_fkey ]
+| | | | ) [ ("n1"."n_name" NOT NULL = char(25) "FRANCE", "n2"."n_name" NOT NULL = char(25) "GERMANY") or ("n1"."n_name" NOT NULL = char(25) "GERMANY", "n2"."n_name" NOT NULL = char(25) "FRANCE") ]
+| | | ) [ "n1"."n_name" NOT NULL as "shipping"."supp_nation", "n2"."n_name" NOT NULL as "shipping"."cust_nation", sys.year("lineitem"."l_shipdate" NOT NULL) as "shipping"."l_year", decimal(33,2)["lineitem"."l_extendedprice" NOT NULL] as "L21"."L21", sys.sql_sub(decimal(15,2)[tinyint "1"], "lineitem"."l_discount" NOT NULL) as "L22"."L22", sys.sql_mul("L21"."L21", "L22"."L22") as "shipping"."volume" ]
+| | ) [ "shipping"."supp_nation" NOT NULL, "shipping"."cust_nation" NOT NULL, "shipping"."l_year", "shipping"."volume" ]
+| ) [ "shipping"."supp_nation" NOT NULL, "shipping"."cust_nation" NOT NULL, "shipping"."l_year" ] [ "shipping"."supp_nation" NOT NULL, "shipping"."cust_nation" NOT NULL, "shipping"."l_year", sys.sum no nil ("shipping"."volume") as "L15"."L15" ]
+) [ "shipping"."supp_nation" NOT NULL, "shipping"."cust_nation" NOT NULL, "shipping"."l_year", "L15" as "L16"."revenue" ] [ "shipping"."supp_nation" ASC NOT NULL, "shipping"."cust_nation" ASC NOT NULL, "shipping"."l_year" ASC ]

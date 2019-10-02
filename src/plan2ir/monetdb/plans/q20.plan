@@ -1,0 +1,41 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 641 # length
+project (
+| project (
+| | join (
+| | | semijoin (
+| | | | table(sys.supplier) [ "supplier"."s_suppkey" NOT NULL HASHCOL , "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL, "supplier"."%supplier_s_nationkey_fkey" NOT NULL JOINIDX sys.supplier.supplier_s_nationkey_fkey ] COUNT ,
+| | | | project (
+| | | | | select (
+| | | | | | project (
+| | | | | | | group by (
+| | | | | | | | join (
+| | | | | | | | | project (
+| | | | | | | | | | project (
+| | | | | | | | | | | semijoin (
+| | | | | | | | | | | | table(sys.partsupp) [ "partsupp"."ps_partkey" NOT NULL HASHCOL , "partsupp"."ps_suppkey" NOT NULL, "partsupp"."ps_availqty" NOT NULL, "partsupp"."%partsupp_ps_partkey_ps_suppkey_pkey" NOT NULL HASHIDX  ] COUNT ,
+| | | | | | | | | | | | project (
+| | | | | | | | | | | | | select (
+| | | | | | | | | | | | | | table(sys.part) [ "part"."p_partkey" NOT NULL HASHCOL , "part"."p_name" NOT NULL ] COUNT 
+| | | | | | | | | | | | | ) [ (clob[char["part"."p_name" NOT NULL]] as "part"."p_name") FILTER like (clob "forest%", clob "") ]
+| | | | | | | | | | | | ) [ "part"."p_partkey" NOT NULL HASHCOL  as "L23"."L23" ]
+| | | | | | | | | | | ) [ "partsupp"."ps_partkey" NOT NULL HASHCOL  = "L23"."L23" NOT NULL HASHCOL  ]
+| | | | | | | | | | ) [ "partsupp"."ps_partkey" NOT NULL HASHCOL , "partsupp"."ps_suppkey" NOT NULL, "partsupp"."ps_availqty" NOT NULL, "partsupp"."%partsupp_ps_partkey_ps_suppkey_pkey" NOT NULL HASHIDX  ]
+| | | | | | | | | ) [ "partsupp"."ps_partkey" NOT NULL HASHCOL , "partsupp"."ps_suppkey" NOT NULL, "partsupp"."ps_availqty" NOT NULL, "partsupp"."%partsupp_ps_partkey_ps_suppkey_pkey" NOT NULL HASHIDX , sys.identity("partsupp"."ps_partkey" NOT NULL) HASHCOL  as "L47"."L47" ],
+| | | | | | | | | select (
+| | | | | | | | | | table(sys.lineitem) [ "lineitem"."l_partkey" NOT NULL, "lineitem"."l_suppkey" NOT NULL, "lineitem"."l_quantity" NOT NULL, "lineitem"."l_shipdate" NOT NULL, "lineitem"."%TID%" NOT NULL as "L37"."%TID%", "lineitem"."%lineitem_l_orderkey_l_linenumber_pkey" NOT NULL HASHIDX  as "L40"."%lineitem_l_orderkey_l_linenumber_pkey", "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey as "L41"."%lineitem_l_orderkey_fkey", "lineitem"."%lineitem_l_partkey_l_suppkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_partkey_l_suppkey_fkey as "L42"."%lineitem_l_partkey_l_suppkey_fkey" ] COUNT 
+| | | | | | | | | ) [ date "1994-01-01" <= "lineitem"."l_shipdate" NOT NULL < sys.sql_add(date "1994-01-01", month_interval "12") ]
+| | | | | | | | ) [ "partsupp"."ps_partkey" NOT NULL HASHCOL  = "lineitem"."l_partkey" NOT NULL HASHCOL , "partsupp"."ps_suppkey" NOT NULL = "lineitem"."l_suppkey" NOT NULL HASHCOL  ]
+| | | | | | | ) [ "L47"."L47" ] [ "partsupp"."ps_suppkey" NOT NULL, "partsupp"."ps_availqty" NOT NULL, "L47"."L47" HASHCOL , sys.sum no nil ("lineitem"."l_quantity" NOT NULL) NOT NULL as "L27"."L27" ]
+| | | | | | ) [ "partsupp"."ps_suppkey" NOT NULL, "partsupp"."ps_availqty" NOT NULL, sys.sql_mul("L27" NOT NULL, decimal(2,1) "5") as "L30"."L30" ]
+| | | | | ) [ decimal(38,3)["partsupp"."ps_availqty" NOT NULL] > "L30"."L30" ]
+| | | | ) [ "partsupp"."ps_suppkey" NOT NULL as "L32"."L32" ]
+| | | ) [ "supplier"."s_suppkey" NOT NULL HASHCOL  = "L32"."L32" NOT NULL ],
+| | | select (
+| | | | table(sys.nation) [ "nation"."n_name" NOT NULL, "nation"."%TID%" NOT NULL ] COUNT 
+| | | ) [ "nation"."n_name" NOT NULL = char(25) "CANADA" ]
+| | ) [ "supplier"."%supplier_s_nationkey_fkey" NOT NULL = "nation"."%TID%" NOT NULL JOINIDX sys.supplier.supplier_s_nationkey_fkey ]
+| ) [ "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL ]
+) [ "supplier"."s_name" NOT NULL, "supplier"."s_address" NOT NULL ] [ "supplier"."s_name" ASC NOT NULL ]

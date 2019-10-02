@@ -1,0 +1,301 @@
+{
+   "operator":"project",
+   "input":{
+      "operator":"groupby",
+      "input":{
+         "operator":"project",
+         "input":{
+            "operator":"project",
+            "input":{
+               "operator":"join",
+               "input":[
+                  {
+                     "operator":"select",
+                     "input":{
+                        "operator":"table",
+                        "table":{ "id":[ "sys", "lineitem" ] },
+                        "columns":[
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipdate" ] } },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_commitdate" ] } },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_receiptdate" ] } },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } },
+                           { "operator":"joinidx",
+                              "right":{ "type":"expr", "value":{ "id":[ "sys", "lineitem", "lineitem_l_orderkey_fkey" ] } },
+                              "left":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "%lineitem_l_orderkey_fkey" ] } }
+                           }
+                        ]
+                     },
+                     "conditions":[
+                        [
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipdate" ] } },
+                           { "type":"binary_op", "value":"<" },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_commitdate" ] } },
+                           { "type":"binary_op", "value":"<" },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_receiptdate" ] } }
+                        ],
+                        [
+                           { "type":"date", "value":"1994-01-01" },
+                           { "type":"binary_op", "value":"<=" },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_receiptdate" ] } },
+                           { "type":"binary_op", "value":"<" },
+                           { "type":"expr",
+                              "value":{
+                                 "function":{ "id":[ "sys", "sql_add" ] },
+                                 "args":[
+                                    { "type":"date", "value":"1994-01-01" },
+                                    { "type":"month_interval", "value":"12" }
+                                 ]
+                              }
+                           }
+                        ],
+                        [
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } },
+                           { "type":"binary_op", "value":"in" },
+                           [
+                              { "type":"char", "value":"MAIL" },
+                              { "type":"char", "value":"MAIL" },
+                              { "type":"char", "value":"SHIP" }
+                           ]
+                        ]
+                     ]
+                  },
+                  {
+                     "operator":"table",
+                     "table":{ "id":[ "sys", "orders" ] },
+                     "columns":[
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "%TID%" ] } }
+                     ]
+                  }
+               ],
+               "condition":[
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "%lineitem_l_orderkey_fkey" ] } },
+                  { "type":"binary_op", "value":"=" },
+                  {
+                     "operator":"joinidx",
+                     "right":{ "type":"expr", "value":{ "id":[ "sys", "lineitem", "lineitem_l_orderkey_fkey" ] } },
+                     "left":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "%TID%" ] } }
+                  }
+               ]
+            },
+            "output":[
+               [
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+               ],
+               [
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+               ]
+            ]
+         },
+         "output":[
+            [
+               { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+            ],
+            [
+               { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "=" ] },
+                     "args":[
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } },
+                        { "type":"char", "value":"1-URGENT" }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L14", "L14" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "=" ] },
+                     "args":[
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } },
+                        { "type":"char", "value":"2-HIGH" }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L15", "L15" ] } }
+            ],
+            [
+               { "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "or" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L14", "L14" ] } },
+                        { "type":"name", "value":{ "id":[ "L15", "L15" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L16", "L16" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "isnull" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L16", "L16" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L17", "L17" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "ifthenelse" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L17", "L17" ] } },
+                        { "type":"boolean", "value":"false" },
+                        { "type":"name", "value":{ "id":[ "L16", "L16" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L20", "L20" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "ifthenelse" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L20", "L20" ] } },
+                        { "type":"tinyint", "value":"1" },
+                        { "type":"tinyint", "value":"0" }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L21", "L21" ] } }
+            ],
+            [
+               { "type":"expr", "value":{ "id":[ "sys", "<" ] } },
+               { "type":"binary_op", "value":">" },
+               [
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } },
+                  { "type":"char", "value":"1-URGENT" }
+               ],
+               { "type":"as", "value":{ "id":[ "L22", "L22" ] } }
+            ],
+            [
+               { "type":"expr", "value":{ "id":[ "sys", "<" ] } },
+               { "type":"binary_op", "value":">" },
+               [
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } },
+                  { "type":"char", "value":"2-HIGH" }
+               ],
+               { "type":"as", "value":{ "id":[ "L23", "L23" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "and" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L22", "L22" ] } },
+                        { "type":"name", "value":{ "id":[ "L23", "L23" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L24", "L24" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "isnull" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L24", "L24" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L25", "L25" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "ifthenelse" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L25", "L25" ] } },
+                        { "type":"boolean", "value":"false" },
+                        { "type":"name", "value":{ "id":[ "L24", "L24" ] } }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L26", "L26" ] } }
+            ],
+            [
+               {
+                  "type":"expr",
+                  "value":{
+                     "function":{ "id":[ "sys", "ifthenelse" ] },
+                     "args":[
+                        { "type":"name", "value":{ "id":[ "L26", "L26" ] } },
+                        { "type":"tinyint", "value":"1" },
+                        { "type":"tinyint", "value":"0" }
+                     ]
+                  }
+               },
+               { "type":"as", "value":{ "id":[ "L27", "L27" ] } }
+            ]
+         ]
+      },
+      "block2":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+         ],
+         [
+            {
+               "type":"expr",
+               "value":{
+                  "function":{ "id":[ "sys", "sum" ] },
+                  "args":[
+                     { "type":"name", "value":{ "id":[ "L21", "L21" ] } }
+                  ]
+               }
+            },
+            { "type":"as", "value":{ "id":[ "L5", "L5" ] } }
+         ],
+         [
+            {
+               "type":"expr",
+               "value":{
+                  "function":{ "id":[ "sys", "sum" ] },
+                  "args":[
+                     { "type":"name", "value":{ "id":[ "L27", "L27" ] } }
+                  ]
+               }
+            },
+            { "type":"as", "value":{ "id":[ "L10", "L10" ] } }
+         ]
+      ],
+      "block1":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+         ]
+      ]
+   },
+   "order":[
+      [
+         { "isNull":"notnull", "type":"name", "order":"asc", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+      ]
+   ],
+   "output":[
+      [
+         { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipmode" ] } }
+      ],
+      [
+         { "type":"string", "value":"L5" },
+         { "type":"as", "value":{ "id":[ "L6", "high_line_count" ] } }
+      ],
+      [
+         { "type":"string", "value":"L10" },
+         { "type":"as", "value":{ "id":[ "L11", "low_line_count" ] } }
+      ]
+   ]
+}

@@ -1,0 +1,18 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 611 # length
+project (
+| group by (
+| | semijoin (
+| | | project (
+| | | | select (
+| | | | | table(sys.orders) [ "orders"."o_orderkey" NOT NULL HASHCOL , "orders"."o_orderdate" NOT NULL, "orders"."o_orderpriority" NOT NULL ] COUNT 
+| | | | ) [ date "1993-07-01" <= "orders"."o_orderdate" NOT NULL < sys.sql_add(date "1993-07-01", month_interval "3") ]
+| | | ) [ "orders"."o_orderkey" NOT NULL HASHCOL , "orders"."o_orderpriority" NOT NULL ],
+| | | select (
+| | | | table(sys.lineitem) [ "lineitem"."l_orderkey" NOT NULL HASHCOL , "lineitem"."l_commitdate" NOT NULL, "lineitem"."l_receiptdate" NOT NULL, "lineitem"."%TID%" NOT NULL as "L12"."%TID%", "lineitem"."%lineitem_l_orderkey_l_linenumber_pkey" NOT NULL HASHIDX  as "L13"."%lineitem_l_orderkey_l_linenumber_pkey", "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey as "L14"."%lineitem_l_orderkey_fkey", "lineitem"."%lineitem_l_partkey_l_suppkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_partkey_l_suppkey_fkey as "L15"."%lineitem_l_partkey_l_suppkey_fkey" ] COUNT 
+| | | ) [ "lineitem"."l_commitdate" NOT NULL < "lineitem"."l_receiptdate" NOT NULL ]
+| | ) [ "lineitem"."l_orderkey" NOT NULL HASHCOL  = "orders"."o_orderkey" NOT NULL HASHCOL  ]
+| ) [ "orders"."o_orderpriority" NOT NULL ] [ "orders"."o_orderpriority" NOT NULL, sys.count() NOT NULL as "L7"."L7" ]
+) [ "orders"."o_orderpriority" NOT NULL, "L7" NOT NULL as "L10"."order_count" ] [ "orders"."o_orderpriority" ASC NOT NULL ]

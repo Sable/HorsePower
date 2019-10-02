@@ -1,0 +1,18 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 864 # length
+project (
+| group by (
+| | project (
+| | | project (
+| | | | join (
+| | | | | select (
+| | | | | | table(sys.lineitem) [ "lineitem"."l_shipdate" NOT NULL, "lineitem"."l_commitdate" NOT NULL, "lineitem"."l_receiptdate" NOT NULL, "lineitem"."l_shipmode" NOT NULL, "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ] COUNT 
+| | | | | ) [ "lineitem"."l_shipdate" NOT NULL < "lineitem"."l_commitdate" NOT NULL < "lineitem"."l_receiptdate" NOT NULL, date "1994-01-01" <= "lineitem"."l_receiptdate" NOT NULL < sys.sql_add(date "1994-01-01", month_interval "12"), "lineitem"."l_shipmode" NOT NULL in (char(10) "MAIL", char(10) "MAIL", char(10) "SHIP") ],
+| | | | | table(sys.orders) [ "orders"."o_orderpriority" NOT NULL, "orders"."%TID%" NOT NULL ] COUNT 
+| | | | ) [ "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL = "orders"."%TID%" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey ]
+| | | ) [ "orders"."o_orderpriority" NOT NULL, "lineitem"."l_shipmode" NOT NULL ]
+| | ) [ "orders"."o_orderpriority" NOT NULL, "lineitem"."l_shipmode" NOT NULL, sys.=("orders"."o_orderpriority" NOT NULL, char(15) "1-URGENT") as "L14"."L14", sys.=("orders"."o_orderpriority" NOT NULL, char(15) "2-HIGH") as "L15"."L15", sys.or("L14"."L14", "L15"."L15") as "L16"."L16", sys.isnull("L16"."L16") as "L17"."L17", sys.ifthenelse("L17"."L17", boolean "false", "L16"."L16") as "L20"."L20", sys.ifthenelse("L20"."L20", tinyint "1", tinyint "0") as "L21"."L21", sys.<>("orders"."o_orderpriority" NOT NULL, char(15) "1-URGENT") as "L22"."L22", sys.<>("orders"."o_orderpriority" NOT NULL, char(15) "2-HIGH") as "L23"."L23", sys.and("L22"."L22", "L23"."L23") as "L24"."L24", sys.isnull("L24"."L24") as "L25"."L25", sys.ifthenelse("L25"."L25", boolean "false", "L24"."L24") as "L26"."L26", sys.ifthenelse("L26"."L26", tinyint "1", tinyint "0") as "L27"."L27" ]
+| ) [ "lineitem"."l_shipmode" NOT NULL ] [ "lineitem"."l_shipmode" NOT NULL, sys.sum no nil ("L21"."L21") as "L5"."L5", sys.sum no nil ("L27"."L27") as "L10"."L10" ]
+) [ "lineitem"."l_shipmode" NOT NULL, "L5" as "L6"."high_line_count", "L10" as "L11"."low_line_count" ] [ "lineitem"."l_shipmode" ASC NOT NULL ]

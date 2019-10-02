@@ -1,0 +1,132 @@
+{
+   "operator":"project",
+   "input":{
+      "operator":"groupby",
+      "input":{
+         "operator":"semijoin",
+         "input":[
+            {
+               "operator":"project",
+               "input":{
+                  "operator":"select",
+                  "input":{
+                     "operator":"table",
+                     "table":{ "id":[ "sys", "orders" ] },
+                     "columns":[
+                        { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "orders", "o_orderkey" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderdate" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+                     ]
+                  },
+                  "conditions":[
+                     [
+                        { "type":"date", "value":"1993-07-01" },
+                        { "type":"binary_op", "value":"<=" },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderdate" ] } },
+                        { "type":"binary_op", "value":"<" },
+                        { "type":"expr",
+                           "value":{
+                              "function":{ "id":[ "sys", "sql_add" ] },
+                              "args":[
+                                 { "type":"date", "value":"1993-07-01" },
+                                 { "type":"month_interval", "value":"3" }
+                              ]
+                           }
+                        }
+                     ]
+                  ]
+               },
+               "output":[
+                  [
+                     { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "orders", "o_orderkey" ] } }
+                  ],
+                  [
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+                  ]
+               ]
+            },
+            {
+               "operator":"select",
+               "input":{
+                  "operator":"table",
+                  "table":{ "id":[ "sys", "lineitem" ] },
+                  "columns":[
+                     { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "lineitem", "l_orderkey" ] } },
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_commitdate" ] } },
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_receiptdate" ] } },
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "%TID%" ] } },
+                     { "type":"as", "value":{ "id":[ "L12", "%TID%" ] } },
+                     { "isNull":"notnull", "property":"hashidx", "type":"name", "value":{ "id":[ "lineitem", "%lineitem_l_orderkey_l_linenumber_pkey" ] } },
+                     { "type":"as", "value":{ "id":[ "L13", "%lineitem_l_orderkey_l_linenumber_pkey" ] } },
+                     { "operator":"joinidx",
+                        "right":{
+                            "type":"expr", "value":{ "id":[ "sys", "lineitem", "lineitem_l_orderkey_fkey" ] }
+                        },
+                        "left" :{
+                            "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "%lineitem_l_orderkey_fkey" ] }
+                        }
+                     },
+                     { "type":"as", "value":{ "id":[ "L14", "%lineitem_l_orderkey_fkey" ] } },
+                     { "operator":"joinidx",
+                        "right":{
+                           "type":"expr", "value":{ "id":[ "sys", "lineitem", "lineitem_l_partkey_l_suppkey_fkey" ] }
+                        },
+                        "left":{
+                           "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "%lineitem_l_partkey_l_suppkey_fkey" ] }
+                        }
+                     },
+                     {
+                        "type":"as", "value":{ "id":[ "L15", "%lineitem_l_partkey_l_suppkey_fkey" ] }
+                     }
+                  ]
+               },
+               "conditions":[
+                  [
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_commitdate" ] } },
+                     { "type":"binary_op", "value":"<" },
+                     { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_receiptdate" ] } }
+                  ]
+               ]
+            }
+         ],
+         "condition":[
+            { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "lineitem", "l_orderkey" ] } },
+            { "type":"binary_op", "value":"=" },
+            { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "orders", "o_orderkey" ] } }
+         ]
+      },
+      "block2":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+         ],
+         [
+            { "isNull":"notnull", "type":"expr",
+               "value":{
+                  "function":{ "id":[ "sys", "count" ] },
+                  "args":[ ]
+               }
+            },
+            { "type":"as", "value":{ "id":[ "L7", "L7" ] } }
+         ]
+      ],
+      "block1":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+         ]
+      ]
+   },
+   "order":[
+      [
+         { "isNull":"notnull", "type":"name", "order":"asc", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+      ]
+   ],
+   "output":[
+      [
+         { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_orderpriority" ] } }
+      ],
+      [
+         { "isNull":"notnull", "type":"string", "value":"L7" },
+         { "type":"as", "value":{ "id":[ "L10", "order_count" ] } }
+      ]
+   ]
+}

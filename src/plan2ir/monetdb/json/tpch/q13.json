@@ -1,0 +1,127 @@
+{
+   "operator":"project",
+   "input":{
+      "operator":"groupby",
+      "input":{
+         "operator":"project",
+         "input":{
+            "operator":"groupby",
+            "input":{
+               "operator":"leftouterjoin",
+               "input":[
+                  {
+                     "operator":"table",
+                     "table":{ "id":[ "sys", "customer" ] },
+                     "columns":[
+                        { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "customer", "c_custkey" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "customer", "%TID%" ] } }
+                     ]
+                  },
+                  {
+                     "operator":"select",
+                     "input":{
+                        "operator":"table",
+                        "table":{ "id":[ "sys", "orders" ] },
+                        "columns":[
+                           { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "orders", "o_orderkey" ] } },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_comment" ] } },
+                           { "operator":"joinidx",
+                              "right":{ "type":"expr", "value":{ "id":[ "sys", "orders", "orders_o_custkey_fkey" ] } },
+                              "left":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "%orders_o_custkey_fkey" ] } }
+                           }
+                        ]
+                     },
+                     "conditions":[
+                        [
+                           [
+                              { "type":"clob", "value":{ "type":"char", "value":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "o_comment" ] } } } },
+                              { "type":"as", "value":{ "id":[ "orders", "o_comment" ] } }
+                           ],
+                           { "neg":1, "type":"filter", "value":"like" },
+                           [
+                              { "type":"clob", "value":{ "type":"string", "value":"%special%requests%" } },
+                              { "type":"clob", "value":{ "type":"string", "value":"" } }
+                           ]
+                        ]
+                     ]
+                  }
+               ],
+               "condition":[
+                  { "isNull":"notnull", "type":"name", "value":{ "id":[ "orders", "%orders_o_custkey_fkey" ] } },
+                  { "type":"binary_op", "value":"=" },
+                  { "operator":"joinidx",
+                     "right":{ "type":"expr", "value":{ "id":[ "sys", "orders", "orders_o_custkey_fkey" ] } },
+                     "left":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "customer", "%TID%" ] } }
+                  }
+               ]
+            },
+            "block2":[
+               [
+                  { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "customer", "c_custkey" ] } }
+               ],
+               [
+                  {
+                     "isNull":"notnull",
+                     "type":"expr",
+                     "value":{
+                        "function":{ "id":[ "sys", "count" ] },
+                        "args":[
+                           { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "orders", "o_orderkey" ] } }
+                        ]
+                     }
+                  },
+                  { "type":"as", "value":{ "id":[ "L3", "L3" ] } }
+               ]
+            ],
+            "block1":[
+               [
+                  { "isNull":"notnull", "property":"hashcol", "type":"name", "value":{ "id":[ "customer", "c_custkey" ] } }
+               ]
+            ]
+         },
+         "output":[
+            [
+               { "isNull":"notnull", "type":"string", "value":"L3" },
+               { "type":"as", "value":{ "id":[ "c_orders", "c_count" ] } }
+            ]
+         ]
+      },
+      "block2":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "c_orders", "c_count" ] } }
+         ],
+         [
+            { "isNull":"notnull",
+               "type":"expr",
+               "value":{
+                  "function":{ "id":[ "sys", "count" ] },
+                  "args":[ ]
+               }
+            },
+            { "type":"as", "value":{ "id":[ "L7", "L7" ] } }
+         ]
+      ],
+      "block1":[
+         [
+            { "isNull":"notnull", "type":"name", "value":{ "id":[ "c_orders", "c_count" ] } }
+         ]
+      ]
+   },
+   "order":[
+      [
+         { "isNull":"notnull", "type":"name", "value":{ "id":[ "L10", "custdist" ] } }
+      ],
+      [
+         { "isNull":"notnull", "type":"name", "value":{ "id":[ "c_orders", "c_count" ] } }
+      ]
+   ],
+   "output":[
+      [
+         { "isNull":"notnull", "type":"name", "value":{ "id":[ "c_orders", "c_count" ] } }
+      ],
+      [
+         { "isNull":"notnull", "type":"string", "value":"L7" },
+         { "type":"as", "value":{ "id":[ "L10", "custdist" ] } }
+      ]
+   ]
+}

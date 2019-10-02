@@ -1,0 +1,29 @@
+% .plan # table_name
+% rel # name
+% clob # type
+% 1433 # length
+project (
+| project (
+| | group by (
+| | | project (
+| | | | select (
+| | | | | project (
+| | | | | | group by (
+| | | | | | | join (
+| | | | | | | | table(sys.lineitem) [ "lineitem"."l_orderkey" NOT NULL HASHCOL  as "L16"."l_orderkey", "lineitem"."l_partkey" NOT NULL as "L17"."l_partkey", "lineitem"."l_suppkey" NOT NULL as "L20"."l_suppkey", "lineitem"."l_linenumber" NOT NULL as "L21"."l_linenumber", "lineitem"."l_quantity" NOT NULL as "L22"."l_quantity", "lineitem"."l_extendedprice" NOT NULL as "L23"."l_extendedprice", "lineitem"."l_discount" NOT NULL as "L24"."l_discount", "lineitem"."l_tax" NOT NULL as "L25"."l_tax", "lineitem"."l_returnflag" NOT NULL as "L26"."l_returnflag", "lineitem"."l_linestatus" NOT NULL as "L27"."l_linestatus", "lineitem"."l_shipdate" NOT NULL as "L30"."l_shipdate", "lineitem"."l_commitdate" NOT NULL as "L31"."l_commitdate", "lineitem"."l_receiptdate" NOT NULL as "L32"."l_receiptdate", "lineitem"."l_shipinstruct" NOT NULL as "L33"."l_shipinstruct", "lineitem"."l_shipmode" NOT NULL as "L34"."l_shipmode", "lineitem"."l_comment" NOT NULL as "L35"."l_comment", "lineitem"."%TID%" NOT NULL as "L36"."%TID%", "lineitem"."%lineitem_l_orderkey_l_linenumber_pkey" NOT NULL HASHIDX  as "L37"."%lineitem_l_orderkey_l_linenumber_pkey", "lineitem"."%lineitem_l_orderkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_orderkey_fkey as "L40"."%lineitem_l_orderkey_fkey", "lineitem"."%lineitem_l_partkey_l_suppkey_fkey" NOT NULL JOINIDX sys.lineitem.lineitem_l_partkey_l_suppkey_fkey as "L41"."%lineitem_l_partkey_l_suppkey_fkey" ] COUNT ,
+| | | | | | | | project (
+| | | | | | | | | join (
+| | | | | | | | | | select (
+| | | | | | | | | | | table(sys.part) [ "part"."p_partkey" NOT NULL HASHCOL , "part"."p_brand" NOT NULL, "part"."p_container" NOT NULL ] COUNT 
+| | | | | | | | | | ) [ "part"."p_brand" NOT NULL = char(10) "Brand#23", "part"."p_container" NOT NULL = char(10) "MED BOX" ],
+| | | | | | | | | | table(sys.lineitem) [ "lineitem"."l_orderkey" NOT NULL HASHCOL , "lineitem"."l_partkey" NOT NULL, "lineitem"."l_quantity" NOT NULL, "lineitem"."l_extendedprice" NOT NULL ] COUNT 
+| | | | | | | | | ) [ "part"."p_partkey" NOT NULL HASHCOL  = "lineitem"."l_partkey" NOT NULL ]
+| | | | | | | | ) [ "lineitem"."l_orderkey" NOT NULL HASHCOL , "lineitem"."l_quantity" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "part"."p_partkey" NOT NULL HASHCOL , sys.identity("lineitem"."l_orderkey" NOT NULL) HASHCOL  as "L52"."L52" ]
+| | | | | | | ) [ "L17"."l_partkey" NOT NULL = "part"."p_partkey" NOT NULL HASHCOL  ]
+| | | | | | ) [ "L52"."L52" ] [ "lineitem"."l_quantity" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "L52"."L52" HASHCOL , sys.avg no nil (double["L22"."l_quantity" NOT NULL] as "lineitem"."l_quantity") as "L5"."L5" ]
+| | | | | ) [ "lineitem"."l_quantity" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, sys.sql_mul("L5", double(53,1) "0.200000") as "L6"."L6" ]
+| | | | ) [ double(53,2)["lineitem"."l_quantity" NOT NULL] < "L6"."L6" ]
+| | | ) [ "lineitem"."l_quantity" NOT NULL, "lineitem"."l_extendedprice" NOT NULL, "L6"."L6" ]
+| | ) [  ] [ sys.sum no nil ("lineitem"."l_extendedprice" NOT NULL) NOT NULL as "L11"."L11" ]
+| ) [ decimal(38,5)["L11" NOT NULL] as "L15"."L15", sys.sql_div("L15"."L15", decimal(38,2)[decimal(2,1) "70"]) as "L12"."avg_yearly" ]
+) [ "L12"."avg_yearly" ]

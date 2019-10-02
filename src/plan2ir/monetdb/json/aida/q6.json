@@ -1,0 +1,99 @@
+{
+   "operator":"project",
+   "input":{
+      "operator":"groupby",
+      "input":{
+         "operator":"project",
+         "input":{
+            "operator":"project",
+            "input":{
+               "operator":"project",
+               "input":{
+                  "operator":"select",
+                  "input":{
+                     "operator":"table",
+                     "table":{ "id":[ "sys", "lineitem" ] },
+                     "columns":[
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_quantity" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_extendedprice" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_discount" ] } },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipdate" ] } }
+                     ]
+                  },
+                  "conditions":[
+                     [
+                        { "type":"date", "value":"1994-01-01" },
+                        { "type":"binary_op", "value":"<=" },
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_shipdate" ] } },
+                        { "type":"binary_op", "value":"<" },
+                        { "type":"date", "value":"1995-01-01" }
+                     ],
+                     [
+                        { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_quantity" ] } },
+                        { "type":"binary_op", "value":"<" },
+                        { "type":"decimal", "value":{ "type":"tinyint", "value":"24" } }
+                     ],
+                     [
+                        { "type":"double", "value":"0.050000" },
+                        { "type":"binary_op", "value":"<=" },
+                        { "type":"double", "value":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_discount" ] } } },
+                        { "type":"binary_op", "value":"<=" },
+                        { "type":"double", "value":"0.070000" }
+                     ]
+                  ]
+               },
+               "output":[
+                  [ { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_extendedprice" ] } } ],
+                  [ { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_discount" ] } } ]
+               ]
+            },
+            "output":[
+               [
+                  { "type":"decimal", "value":{ "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_extendedprice" ] } } },
+                  { "type":"as", "value":{ "id":[ "L52", "L52" ] } }
+               ],
+               [
+                  {
+                     "type":"expr",
+                     "value":{
+                        "function":{ "id":[ "sys", "sql_mul" ] },
+                        "args":[
+                           { "type":"name", "value":{ "id":[ "L52", "L52" ] } },
+                           { "isNull":"notnull", "type":"name", "value":{ "id":[ "lineitem", "l_discount" ] } },
+                           { "type":"as", "value":{ "id":[ "_tmp_a02ba39a", "l_discount" ] } }
+                        ]
+                     }
+                  },
+                  { "type":"as", "value":{ "id":[ "_tmp_507bfe4f", "rev" ] } }
+               ]
+            ]
+         },
+         "output":[
+            [
+               { "type":"name", "value":{ "id":[ "_tmp_507bfe4f", "rev" ] } }
+            ]
+         ]
+      },
+      "block2":[
+         [
+            {
+               "type":"expr",
+               "value":{
+                  "function":{ "id":[ "sys", "sum" ] },
+                  "args":[
+                     { "type":"name", "value":{ "id":[ "_tmp_507bfe4f", "rev" ] } }
+                  ]
+               }
+            },
+            { "type":"as", "value":{ "id":[ "L47", "L47" ] } }
+         ]
+      ],
+      "block1":[ ]
+   },
+   "output":[
+      [
+         { "type":"string", "value":"L47" },
+         { "type":"as", "value":{ "id":[ "L50", "revenue" ] } }
+      ]
+   ]
+}
