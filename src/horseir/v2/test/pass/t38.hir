@@ -1,0 +1,17 @@
+// 38 : multiple random numbers
+
+module randomk{
+    import Builtin.*;
+    def main():?{
+        x0:i64 = @randk(10:i32, 100:i32);  // linear search
+        @print(x0);
+        x1:i64 = @randk(10:i32, 10000:i32); // linear search
+        @print(x1);
+        x2:i64 = @randk(10:i32, 20:i32); // reservoir sampling
+        @print(x2);
+        x3:i64 = @randk(1000:i32, 10000:i32); // reservoir sampling
+        @print(x3);
+        return x0;
+    }
+}
+

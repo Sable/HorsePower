@@ -1,0 +1,16 @@
+// 20 : break statement
+
+module repeat_stmt {
+    import Builtin.*;
+
+    def main():i32{
+        x:i32 = 0:i32;
+        y:bool = 0:bool;
+        repeat(5:i32){
+            x = @plus(x, 2:i32);
+            y = @gt(x, 7:i32);
+            if(y) break;
+        }
+        return x; // expect 8:i32
+    }
+}

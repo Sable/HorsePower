@@ -1,0 +1,21 @@
+// 21 : continue
+
+module continue_stmt {
+    import Builtin.*;
+
+    def main():i32{
+        x:i32 = 0:i32;
+        t:bool = @lt(x, 5:i32);
+        while(t){
+            f:bool = @eq(x, 2:i32);
+            if(f){
+                x = @plus(x, 10:i32);
+                continue;
+            }
+            x = @plus(x, 1:i32);
+            t = @lt(x, 5:i32);
+        }
+        return x; // expect: 13:i32
+    }
+
+}

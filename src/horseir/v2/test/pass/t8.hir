@@ -1,0 +1,11 @@
+// 8 : simple plus
+
+module simple {
+    import Builtin.*;
+
+    def main() {
+        x0:i32 = @plus(1:i32, 9:i32);
+        @print(x0);
+    }
+}
+

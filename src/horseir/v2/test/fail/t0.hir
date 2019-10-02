@@ -1,0 +1,9 @@
+// 0 : wrong constant (value + type)
+
+module default {
+    def main() {
+        x0:i32 = (0,1):str; // mismatched type
+        x1:i32 = 0;         // int
+    }
+}
+

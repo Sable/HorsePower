@@ -1,0 +1,16 @@
+// 11 : mutiple definitions (basic) - local var z
+
+module var_decl{
+    def main(){
+        x:bool = 0:bool;
+        if(x){
+            z:i32 = 0:i32;
+        }
+        else {
+            z:i32 = 1:i32;
+        }
+        return z;
+    }
+}
+
+// expect: Name z needs to be declared before used

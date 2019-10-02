@@ -1,0 +1,43 @@
+// 11 : symbol tables - funcA/B/C
+
+module funcA {
+    global a:i32 = 0:i32;
+
+    def foo(){
+        x0:i32 = 0:i32;
+    }
+
+    def bar(){
+        y0:i32 = 0:i32;
+    }
+}
+
+module funcB {
+    global b:i32 = 1:i32;
+    
+    def foo(){
+        x0:i32 = 1:i32;
+    }
+
+    def bar(){
+        y0:i32 = 1:i32;
+    }
+}
+
+module funcC {
+    import funcA.*;
+    import funcB.*;
+
+    def main(){
+        @foo();       // funcC.foo
+        @funcA.foo(); // funcA.foo
+        @bar();       // funcB.bar
+        @funcB.bar(); // funcB.bar
+    }
+
+    def foo(){
+        x0:i32 = 2:i32;
+    }
+}
+
+

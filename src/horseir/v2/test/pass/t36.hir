@@ -1,0 +1,14 @@
+// 36 : sr pattern power
+
+module strength_reduction{
+    import Builtin.*;
+
+    def main():i32{
+        x:i32 = (1,2,3):i32;
+        y:i32 = @power(x, 2:i32);
+        z:i32 = @mul(y, 2:i16);
+        p:i32 = check_cast(@mul(2:i32, z), i32);
+        return p;
+    }
+}
+

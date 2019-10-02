@@ -1,0 +1,8 @@
+// 2 : month - wrong year
+// syntax error
+
+module datetime {
+    def date(){
+        x0:m = 20190-00:m; // wrong year
+    }
+}

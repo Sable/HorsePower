@@ -1,0 +1,13 @@
+// 6 : assignment with underscore 1
+
+module underscore{
+    def foo() : i32, i32{
+        return 0:i32, 1:i32;
+    }
+
+    def main() : i32{
+        x:i32, _:i32 = @foo();
+        return x;
+    }
+}
+

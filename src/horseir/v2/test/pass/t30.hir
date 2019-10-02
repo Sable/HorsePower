@@ -1,0 +1,18 @@
+// 30 : udchain repeat
+
+module udchain_while{
+    def main():i32{
+        x:i32 = 10:i32;   // S0
+        var z:i32;        // S1
+        repeat(x){        // S2
+            z = 0:i32;    // S3
+            x = 0:i32;    // S4
+        }
+        return z;         // S5
+    }
+}
+
+/*
+ * repeat(x) - has two defs: S0 and S4
+ */
+

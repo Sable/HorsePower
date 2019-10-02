@@ -1,0 +1,22 @@
+// 22 : while statement 2
+
+module while_stmt {
+    import Builtin.*;
+
+    def main():i32{
+        x:i32 = 0:i32;
+        t:bool = @lt(x, 5:i32);
+        while(t){
+            x = @plus(x, 1:i32);
+            t = @lt(x, 5:i32);
+            while(t){
+                x = @plus(x, 1:i32);
+                t = @lt(x, 5:i32);
+            }
+        }
+        return x; // expect: 5:i32
+        x = 100000:i32;  // not executed
+    }
+
+}
+

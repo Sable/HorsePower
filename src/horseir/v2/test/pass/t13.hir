@@ -1,0 +1,13 @@
+// 13 : types with wildcards
+
+module typeshape {
+    import Builtin.*;
+    global gg:i16 = 1:i16;
+
+    def main(){
+        z0:? = @mul(1:i32, 2:i32);
+        z1:? = @plus(z0, 1:i32);
+        z2:? = @minus(z0, gg);
+    }
+}
+

@@ -1,0 +1,11 @@
+// 33 : simple 2 adds
+
+module simple_add2{
+    import Builtin.*;
+    def main():i32{
+        x0:i32 = @plus(1:i32, (1,2,3):i32);
+        x1:i32 = @plus(x0, 10:i32);
+        return x1;    // expect: (12,13,14):i32
+    }
+}
+

@@ -1,0 +1,16 @@
+// 12 : symbol table
+
+module dummy {
+    import Builtin.*;
+    def add(x:i32, y:i32){
+    }
+
+    global gg:i32 = 1:i32;
+
+    def main(){
+        z0:i32 = @add(1:i32, 2:i32);
+        z1:i32 = @plus(z0, 1:i32);
+        //z0 = @add(z0, gg);
+    }
+}
+

@@ -1,0 +1,9 @@
+// 7 : assignment with underscore 2
+
+module underscore{
+    def main() : i32{
+        x:i32 = _;
+        return x;
+    }
+}
+

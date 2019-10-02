@@ -1,0 +1,18 @@
+// 29 : udchain while - 2
+
+module udchain_while{
+    def main():i32{
+        x:bool = 1:bool;  // S0
+        var z:i32;        // S1
+        while(x){         // S2
+            z = 0:i32;    // S3
+            x = 0:bool;   // S4
+        }
+        return z;         // S5
+    }
+}
+
+/*
+ * while(x) - has two defs: S0 and S4
+ */
+

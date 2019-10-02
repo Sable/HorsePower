@@ -1,0 +1,15 @@
+// 14 : mutual imports
+
+module A{
+    import B.*;
+    def fooA(){
+    }
+}
+
+module B{
+    import A.*;
+    def fooB(){
+    }
+}
+
+

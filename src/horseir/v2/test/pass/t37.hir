@@ -1,0 +1,16 @@
+// 37 : single random
+
+module random{
+    import Builtin.*;
+    def main():?{
+        x0:i64 = @rand(100:i32);
+        @print(x0);
+        x1:i64 = @rand(100:i32);
+        @print(x1);
+        x2:i64 = @rand(100:i32);
+        @print(x2);
+        return x2;
+    }
+}
+
+
