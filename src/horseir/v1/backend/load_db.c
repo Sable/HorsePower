@@ -1,5 +1,5 @@
 #include "../global.h"
-C CSV_FILE_ROOT[] = "../data/tpch/db";
+C CSV_FILE_ROOT[] = "../../../data/tpch/db";
 L CSV_FILE_SCALE = 1;
 L TEST_RUNS = 1;
 extern B isReadBin;
@@ -235,7 +235,7 @@ L metaTable(V x, S tableName){
 /* load from bin */
 L initTableFromBin(S tableName){
     char temp[99];
-    SP(temp, "../data/tpch-bin/db1/%s.bin",tableName);
+    SP(temp, "../../../data/tpch-bin/db1/%s.bin",tableName);
     FILE *fp = fopen(temp, "rb");
     if(!fp) EP("File ../data/tpch-bin/db1/%s.bin open fails\n",tableName);
     V x = allocNode();

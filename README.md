@@ -82,32 +82,28 @@ In HorsePower, we focus on the following parts.
 - gcc 8.1.0 or higher
 - uuid-dev library
 
-#### Step 1. Download libraries
+#### Install Libraries
+
+Installation with the following command line  **about 13 mins**
 
     (cd libs && sh deploy_linux.sh)
 
-Installation time (On Sable-Intel)  **about 13 mins**
+After installation, new folders created as follows.
 
-    > time (cd libs && sh deploy_linux.sh)
-    
-    real     13m0.499s
-    user     11m8.760s
-    sys      1m13.444s
+    - libs/include
+    - libs/lib
+    - libs/antlr4
+    - libs/pcre2
 
-New folders created
+#### Build and Run
 
-    libs/include
-    libs/lib
-    libs/antlr4
-    libs/pcre2
+There are multiple versions developing under `src/horseir/`.
+For each version, you can find a running script `run.sh` which builds an
+executable and runs it with proper parameters.
 
-#### Step 2. Build Front-end
+The usage of the script can be found by typing
 
-    (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make lib -C ../../backend && make)
-
-#### Step 3. Build Back-end
-
-    (cd src/HorseIR && make && ./horse)
+    (cd src/horseir/v2 && ./run.sh)      # show usage
 
 ### External Links
 
