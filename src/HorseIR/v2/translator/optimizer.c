@@ -20,7 +20,7 @@ static void optimizerMain(OC opt){
     switch(opt){
         case OPT_FE: optElementwise();    break; // compiledMethodList
         case OPT_FP: optPattern();        break; // compiledMethodList
-        case OPT_FD: optDeep();           break; // compiledMethodList
+        case OPT_FA: optAuto();           break; // compiledMethodList
         case OPT_SR: optSReduction(root); break;
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
@@ -37,13 +37,13 @@ static void init(){
     phTotal = 0;
 }
 
+#define AllOptSize 3
 I HorseCompilerOptimized(){
     printBanner("Start Optimizing");
     init();
     if(isOptimizeAll()){
-#define AllSize 3
-        OC ListOfAllOpt[AllSize] = {OPT_SR, OPT_FD, OPT_FP};
-        DOI(AllSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts
+        OC ListOfAllOpt[AllOptSize] = {OPT_SR, OPT_FA, OPT_FP};
+        DOI(AllOptSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts
     }
     else {
         DOI(numOpts, optimizerMain(qOpts[i]))

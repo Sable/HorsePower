@@ -180,7 +180,10 @@ static InfoNode *getInfoVector(Node *n){
     int num = totalList(n->val.vec.val);
     InfoNode *in = scanType(n->val.vec.typ);  // because of you?
     ShapeNode *sn = newShapeNode(vectorH, SN_CONST, num);
-    in->shape = sn;
+    sn->consts = n;  // <-- pass constant values
+    in->shape  = sn;
+    //P("consts = %lld", (L)(in->consts));
+    //printNode(n); printInfoNode(in); getchar();
     return in;
 }
 

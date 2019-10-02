@@ -19,6 +19,7 @@ typedef struct ShapeNode{
         int sizeId;     /* (kind=1) symbolSP: sequential size id  */
         int sizeScan;   /* (kind=2)   scanSP: size after compress */
     };
+    Node *consts;       /* when kind == constSP, refer to a vector of constants */
 }ShapeNode;
 
 typedef struct InfoNode{
@@ -26,7 +27,7 @@ typedef struct InfoNode{
     struct ShapeNode *shape;
     struct InfoNode *subInfo;
     struct InfoNode *next;
-    Node *funcs;  /* when type == funcT, refer to a vector of funcs */
+    Node *funcs;   /* when type == funcT, refer to a vector of funcs   */
 }InfoNode;
 
 typedef struct InfoNodeList{

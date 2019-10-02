@@ -199,6 +199,8 @@ static void genCodeElem(gNode *rt, B isRT){
         varNum = 0;
         totalInputs(rt, varNames);
         DOI(varNum, glueAny(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        /* TODO: shape maybe not vn(x0) */
+        glueAny(indent "initV(z, H_%c, vn(x0));\n", z0c); 
         glueAny(indent "DOP(vn(z), v%c(z,i)=",z0c);
         //DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
         //P(indent "DOP(vn(z), v%c(z,i)=",z0c);

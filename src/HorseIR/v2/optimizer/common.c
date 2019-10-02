@@ -181,7 +181,7 @@ static S obtainFuncElem(S fn){
     R NULL;
 }
 
-static S obtainFuncDeep(S fn){
+static S obtainFuncAuto(S fn){
     S x = obtainFuncElem(fn);
     if(x) R x;
     if(sEQ(fn, "index"))  R "INDEX";
@@ -197,12 +197,11 @@ S getFuncNameC(S fn){
     else TODO("Add impl. for %s", fn);
 }
 
-S getFuncNameDeep(S fn){
-    S macro = obtainFuncDeep(fn);
+S getFuncNameAuto(S fn){
+    S macro = obtainFuncAuto(fn);
     if(macro) return macro;
     else TODO("Add impl. for %s\n", fn);
 }
-
 
 B isElementwise(S funcName){
     FuncUnit x;
@@ -215,10 +214,9 @@ B isElementwise(S funcName){
 }
 
 /* ---------- common in optimizations ---------- */
-C code[CODE_MAX_SIZE], *ptr;
-
-I varNum;
-S varNames[99];
+extern C code[CODE_MAX_SIZE], *ptr;
+extern I varNum;
+extern S varNames[99];
 
 S genDeclSingle(S func, C del){
     C temp[199]; 

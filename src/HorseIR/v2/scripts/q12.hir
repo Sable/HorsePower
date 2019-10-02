@@ -3,9 +3,9 @@ module default{
   def main() : table{
     t0:? = @load_table(`lineitem:sym);
     t1:enum = check_cast(@column_value(t0,`l_orderkey:sym), enum);
-    t12:date = check_cast(@column_value(t0,`l_shipdate:sym), d);
-    t13:date = check_cast(@column_value(t0,`l_commitdate:sym), d);
-    t14:date = check_cast(@column_value(t0,`l_receiptdate:sym), d);
+    t12:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t13:date = check_cast(@column_value(t0,`l_commitdate:sym), date);
+    t14:date = check_cast(@column_value(t0,`l_receiptdate:sym), date);
     t16:sym = check_cast(@column_value(t0,`l_shipmode:sym), sym);
     t18:? = (`MAIL,`SHIP):sym;
     t19:? = @member(t16,t18); // @member(t18,t16);

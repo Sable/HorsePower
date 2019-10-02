@@ -40,7 +40,8 @@ typedef struct FuncUnit{
 /* support more precise shape information */
 typedef struct {
     union{
-        struct enumMeta { int keyId; } enumMeta;
+        struct enumMeta  { int keyId;   }  enumMeta;
+        struct tableMeta { int tableId; } tableMeta;
     };
 }MetaData;
 

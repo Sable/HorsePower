@@ -69,7 +69,7 @@
 
 O optElementwise();
 O optPattern();
-O optDeep();
+O optAuto();
 O optSReduction(Prog *root);
 
 S obtainMaxValue(C c);
@@ -78,7 +78,7 @@ S obtainMinValue(C c);
 S getNameStr       (Node *n);
 C getTypeCodeByName(Node *n); 
 S getFuncNameC     (S fn);
-S getFuncNameDeep  (S fn);
+S getFuncNameAuto  (S fn);
 
 Node *getNodeItemIndex(Node *n, I pos);
 List *getNodeParams   (Node *n);

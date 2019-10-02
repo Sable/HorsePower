@@ -189,8 +189,10 @@ bool isReal64IN  (InfoNode *n) {return is64(n);}
 
 static InfoNode *newInfoNode(Type type, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
-    in->type = type;
-    in->shape = shape;
+    in->type    = type;
+    in->shape   = shape;
+    in->subInfo = NULL;
+    in->next    = NULL;
     return in;
 }
 
@@ -471,7 +473,8 @@ static InfoNode *propWhere(InfoNode *x){
         rtnType = wildT;
     }
     else return NULL;
-    return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
+    return newInfoNode(rtnType, newShapeNodeScan(inShape(x)));
+    //return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
 }
 
 static InfoNode *propAvg(InfoNode *x){
@@ -758,8 +761,8 @@ static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
             EP("scan shape sizes must be the same: %d vs %d", x->sizeScan, y->sizeScan);
     }
     else {
-        printShapeNode(x);
-        printShapeNode(y);
+        printShapeNode(x); P("\n");
+        printShapeNode(y); P("\n");
         EP("unknown ShapeNode for compress");
     }
 }
@@ -893,23 +896,109 @@ static InfoNode *propSubString(InfoNode *x, InfoNode *y){
 
 /* special */
 
+// table x:
+//    column "name1" --> table "name2"  (mapping)
+
+typedef struct RelationNode {
+    S foreign;  // foreign table
+    S primary;  // primary table
+    S key;      // relation key (single key)
+}RelationNode;
+
+static RelationNode **tableRelation;
+static I  relationSize;
+static S tableInfo[199];
+#define relationSizeMax 10
+
+RelationNode *newRelationNode(S foreign, S primary, S key){
+    RelationNode *r = NEW(RelationNode);
+    r->foreign = foreign;
+    r->primary = primary;
+    r->key     = key;
+    return r;
+}
+
+void addRelation(S f, S p, S k){
+    if(relationSize < relationSizeMax)
+        tableRelation[relationSize++] = newRelationNode(f, p, k);
+    else
+        EP("There are more than %d relations (need to increase)", relationSizeMax);
+}
+
+static void initTableRelations(){
+    RelationNode **tableRelation = NEW2(RelationNode, relationSizeMax);
+    addRelation("lineitem", "order", "orderkey");
+}
+
+static S findPrimaryTableName(S foreign, S key){
+    DOI(relationSize, \
+            if(sEQ(foreign, tableRelation[i].foreign) && 
+               sEQ(key, tableRelation[i].key)) R tableRelation[i].primary)
+    R NULL;
+}
+
+
+static B isString1IN(InfoNode *x){
+    R (isStringIN(x) && inShape(x)->kind == constSP && inShape(x)->size == 1);
+}
+
+static S getString1IN(InfoNode *x){
+    // consts -> vector -> first node -> constant -> string
+    R inShape(x)->consts->val.vec.val->val->val.nodeC->valS;
+}
+
+static L getTableIdFromTableName(S tableName){
+    Q tableSymId = getSymbol(tableName);
+    // negative keys for avoiding collisions with enum
+    L d = lookupSimpleHash(hashMeta, -1*(L)tableSymId);
+    I tableId = -1;
+    if(d){
+        tableId = ((MetaData *)d)->tableMeta.tableId;
+    }
+    else {
+        MetaData *newMeta = NEW(MetaData);
+        newMeta->tableMeta.tableId = tableId = shapeId++;
+        addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+    }
+    return tableId;
+}
+
 static InfoNode *specialLoadTable(InfoNode *x){
-    if(isStringIN(x)){
-        return newInfoNode(tableT, newShapeNode(tableH, SN_ID, -1));
+    if(isString1IN(x)){
+        S tableName  = getString1IN(x);
+        L tableId    = getTableIdFromTableName(tableName);
+        tableInfo[tableId] = strdup(tableName);
+        return newInfoNode(tableT, newShapeNode(tableH, SN_ID, tableId));
     }
     else return NULL;
 }
 
+static InfoNode* setEnumKey(InfoNode *x, L key){
+    MetaData *newMeta = NEW(MetaData);
+    newMeta->enumMeta.keyId = key;
+    addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+}
+
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
-    //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n");
-    ShapeNode *rtnShape = newShapeNode(vectorH, SN_ID, inShape(x)->sizeId);
-    if(isTableIN(x) && isStringIN(y)){
-        return newInfoNode(wildT, rtnShape);
+    //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n"); getchar();
+    Type rtnType;  B isForeignKey = false; L primaryKeyId = -1;
+    if(isTableIN(x) && isString1IN(y)){
+        S   tableName = tableInfo[x->shape->sizeId];
+        S  columnName = getString1IN(y);
+        S primaryName = findPrimaryTableName(tableName, columnName);
+        if(primaryName){
+            isForeignKey = true;
+            primaryKeyId = getTableIdFromTableName(primaryName);
+        }
+        rtnType = wildT;
     }
     else if(isW(x) || isW(y)){
-        return newInfoNode(wildT, rtnShape);
+        rtnType = wildT;
     }
     else return NULL;
+    if(isForeignKey){
+    }
+    return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, inShape(x)->sizeId));
 }
 
 static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
@@ -1002,6 +1091,7 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
     else if(isEnumT(x)){ /* TODO: need to pass info to keys */
         if(f) { // pass key
             I rtnId = getEnumKeyIdFromMeta(x);
+            //P("return ID: %d\n", rtnId); getchar();
             if(isCellTypeSimple(x))
                 return newInfoNode(inType(inCell(x)),
                                     newShapeNode(vectorH, SN_ID, rtnId));
@@ -1013,7 +1103,7 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
             return newInfoNode(i64T, inShape(x));
         }
     }
-    else EP("[propKeyValues] adding support for type %d\n", inType(x));
+    else EP("Add support for type %d\n", inType(x));
 }
 
 static InfoNode *propValues(InfoNode *x){
@@ -1036,10 +1126,10 @@ static InfoNode *propMeta(InfoNode *x){
 
 static InfoNode *propIndex(InfoNode *x, InfoNode *y){
     if(isIntIN(y)){
-        if(isListT(x) && isShapeScalar(y->shape)){
+        if(isListT(x) && isShapeScalar(inShape(y))){
             ShapeNode *subShape = getSubShape(x);
             ShapeNode *rtnShape = NULL;
-            if(subShape && isSameShape(x->shape, subShape)){ // special
+            if(subShape && isSameShape(inShape(x), subShape)){ // special
                 if(subShape->sizeId < 0){
                     rtnShape = newShapeNode(isListS(x)?listH:vectorH, SN_ID, -1);  //S: subtype
                     subShape->sizeId = rtnShape->sizeId;
@@ -1154,14 +1244,18 @@ static InfoNode *propEach(InfoNode *fn, InfoNode *x){
 
 static InfoNode *propEnum(InfoNode *x, InfoNode *y){
     Type rtnType;
+    InfoNode *subInfo;
     if(sameT(x,y) && isBasicIN(x) && isBasicIN(y)){
         rtnType = enumT;
+        subInfo = newInfoNodeAll(inType(x), inShape(y), NULL, NULL);
+        // insert for example, enum<i32>
     }
     else if(isW(x) || isW(y)){
         rtnType = wildT;
+        subInfo = NULL;
     }
     else return NULL;
-    return newInfoNode(rtnType, inShape(y));
+    return newInfoNodeAll(rtnType, inShape(y), subInfo, NULL);
 }
 
 static InfoNode *propDict(InfoNode *x, InfoNode *y){
@@ -1201,10 +1295,12 @@ static InfoNode *propJoinIndex(InfoNodeList *in_list){
         }
     }
     else return NULL;
-    return newInfoNodeAll(rtnType,
-                          newShapeNode(vectorH, SN_CONST, 2),
-                          newInfoNode(i64T,NULL),
-                          NULL); // length: 2; with sub
+    ShapeNode *listShape = newShapeNode(listH, SN_CONST, 2);
+    ShapeNode *cellShape = newShapeNode(vectorH, SN_ID, -1);
+    // length: 2; with two cells
+    InfoNode *rtnInfo = newInfoNodeAll(
+            rtnType, listShape, newInfoNode(i64T, cellShape), NULL);
+    return rtnInfo;
 }
 
 // check function strings and numbers

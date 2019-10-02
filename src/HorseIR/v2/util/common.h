@@ -33,7 +33,7 @@ typedef struct simple_hash_table{
 }sHashTable;
 
 typedef enum OptCode{
-    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_FD, OPT_ALL
+    OPT_NA, OPT_SR, OPT_FE, OPT_FP, OPT_FA, OPT_ALL
 }OC;
 
 #define percent(a,b) ((a)*100.0/(b))
@@ -129,9 +129,9 @@ JSON *initJSON();
 
 /* simplehash */
 sHashTable* initSimpleHash(L size);
-O addToSimpleHash  (sHashTable *st, L key, L val);
-L lookupSimpleHash (sHashTable *st, L key);
-O profileSimpleHash(sHashTable *st);
+O addToSimpleHash   (sHashTable *st, L key, L val);
+L lookupSimpleHash  (sHashTable *st, L key);
+O profileSimpleHash (sHashTable *st);
 
 #ifdef  __cplusplus
 }

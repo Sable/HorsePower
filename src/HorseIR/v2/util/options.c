@@ -23,9 +23,9 @@ static char *qOpt[99];
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
 #define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:"); \
                   dispLine(0, INDENT, "", "- sr : strength reduction"); \
-                  dispLine(0, INDENT, "", "- fe : fusion elementwise"); \
+                  dispLine(0, INDENT, "", "- fe : elementwise fusion"); \
                   dispLine(0, INDENT, "", "- fp : fusion with patterns"); \
-                  dispLine(0, INDENT, "", "- fd : fusion deep"); \
+                  dispLine(0, INDENT, "", "- fa : automatic operator fusion"); \
                   dispLine(0, INDENT, "", "- all: all above optimizations"); \
 
 void version(){
@@ -139,7 +139,7 @@ static TC getTargetCode(S target){
 static OC obtainOptCode(S opt){
     if(!strcmp(opt, "fe")) R OPT_FE;
     else if(!strcmp(opt, "fp")) R OPT_FP;
-    else if(!strcmp(opt, "fd")) R OPT_FD;
+    else if(!strcmp(opt, "fa")) R OPT_FA;
     else if(!strcmp(opt, "sr")) R OPT_SR;
     else if(!strcmp(opt, "all")) R OPT_ALL;
     else R OPT_NA;
@@ -148,9 +148,9 @@ static OC obtainOptCode(S opt){
 const S obtainOptStr(OC x){
     switch(x){
         case OPT_SR : R "Strength Reduction";
-        case OPT_FE : R "Fusion Elementwise";
+        case OPT_FE : R "Elementwise Fusion";
         case OPT_FP : R "Fusion with Patterns";
-        case OPT_FD : R "Fusion Deep";
+        case OPT_FA : R "Automatic Operator Fusion";
         case OPT_ALL: R "All Optimizations On";
         default: R "Unknown Optimizations";
     }
