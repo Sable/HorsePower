@@ -8,23 +8,22 @@ array programming offers a promising option for performance speedup with
 fine-grained parallelism.
 
 
-## Quick entries
+## Quick Entries
 
 - Design:
     [Grammar](src/HorseIR/frontend/grammar/HorseIR.g4)
-    | [IR Design](docs/mkdocs/docs/horseir/)
-    | [Valid examples](src/HorseIR/tests/valid)
-    | [TPC-H](docs/tpch)
-    | [Reference](docs/mkdocs/docs)
+    | [IR design](docs/mkdocs/docs/horseir/)
     | [IR Type](docs/horsetype)
-    |
+    | [TPC-H](docs/tpch)
+    | [TPC-H examples](src/horseir/v2/tests/)
+    | [Reference](http://www.sable.mcgill.ca/~hanfeng.c/horse/docs/horseir/)
+
 - Implementation: 
     [Details](docs/implementation)
     | [Project libraries](libs/)
-    |
+
 - Paper:
     [Related](docs/study)
-    |
 
 
 ## Project Overview
@@ -32,6 +31,9 @@ fine-grained parallelism.
 In the summer 2017, we started this project from scratch.  We planned to build
 the framework in the first three months (12 weeks). Thus, we could have another
 month to improve it and draft several technical reports.
+
+<p align="center"><img src="docs/figures/horse-flow.png" /></p>
+<p align="center">Figure 1. The workflow of the Horse framework.</p>
 
 Figure 1 describes the workflow of the Horse framework.  A candidate for the
 source language is our *Horse* language which is an extension of standard SQL.
@@ -43,8 +45,6 @@ optimizations take place before bitcode is generated.  On the other hand, the
 interpreter is able to output result on the fly, so that it could save the
 compilation time.  That means it may be faster than compiled code.
 
-<p align="center"><img src="docs/figures/horse-flow.png" /></p>
-<p align="center">Figure 1. The workflow of the Horse framework.</p>
 
 <!--
 Figure 2 introduces the design of three levels of IRs.  The workflow dependence
@@ -72,17 +72,14 @@ In HorsePower, we focus on the following parts.
 ### Settings
 
 - Platform       : Cross-platform
-- Languages      : C/C++
-- Auto tool      : ANTLR4
+- Tools          : C/C++, Flex & Bison
 - Parallelism    : OpenMP/Pthread/CUDA/OpenCL
 - Conventions    : [docs/conventions](docs/conventions)
 - GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
 
-### Deployment
+### Configurations
 
-Requirements (suggest)
-
-- gcc 5.4 or higher
+- gcc 8.1.0 or higher
 - uuid-dev library
 
 #### Step 1. Download libraries
@@ -104,15 +101,15 @@ New folders created
     libs/antlr4
     libs/pcre2
 
-#### Step 2. Build front-end
+#### Step 2. Build Front-end
 
     (cd src/HorseIR/frontend && mkdir -p build && cd build && cmake ../ && make lib -C ../../backend && make)
 
-#### Step 3. Build back-end
+#### Step 3. Build Back-end
 
     (cd src/HorseIR && make && ./horse)
 
-### External links
+### External Links
 
 Software
 
@@ -136,8 +133,4 @@ SQL front-end
 - [H2 database](http://www.h2database.com/html/grammar.html) | H2: an in-memory db written in Java
 - [hyrise/sql-parser](https://github.com/hyrise/sql-parser)
 
-### Chat room
 
-[Enter here](https://gitter.im/Sable/HorsePower)
-
-Let's rock the summer 2017!
