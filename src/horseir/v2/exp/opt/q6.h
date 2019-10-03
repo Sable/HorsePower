@@ -13,8 +13,10 @@ static I q6_deepfusion_0(V z, V *x){
     /*
      * when generating parallel code, a reduction operation is needed
      */
-    DOI(vn(x0), if(AND(AND(AND(GEQ(vD(x0,i),19940101),LT(vD(x0,i),19950101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))){\
+    //DOI(vn(x0), if(AND(AND(AND(GEQ(vD(x0,i),19940101),LT(vD(x0,i),19950101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))){\
         c+=MUL(vE(x3,i),vE(x2,i));})
+    DOP(vn(x0), if(AND(AND(AND(GEQ(vD(x0,i),19940101),LT(vD(x0,i),19950101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))){\
+        c+=MUL(vE(x3,i),vE(x2,i));}, reduction(+:c))
     vE(z,0) = c;
     R 0;
 }

@@ -932,8 +932,8 @@ static void initTableRelations(){
 
 static S findPrimaryTableName(S foreign, S key){
     DOI(relationSize, \
-            if(sEQ(foreign, tableRelation[i].foreign) && 
-               sEQ(key, tableRelation[i].key)) R tableRelation[i].primary)
+            if(sEQ(foreign, tableRelation[i]->foreign) && 
+               sEQ(key, tableRelation[i]->key)) R tableRelation[i]->primary)
     R NULL;
 }
 
@@ -949,8 +949,9 @@ static S getString1IN(InfoNode *x){
 
 static L getTableIdFromTableName(S tableName){
     Q tableSymId = getSymbol(tableName);
+    L hashKey = -1*(L)tableSymId;
     // negative keys for avoiding collisions with enum
-    L d = lookupSimpleHash(hashMeta, -1*(L)tableSymId);
+    L d = lookupSimpleHash(hashMeta, hashKey);
     I tableId = -1;
     if(d){
         tableId = ((MetaData *)d)->tableMeta.tableId;
@@ -958,7 +959,7 @@ static L getTableIdFromTableName(S tableName){
     else {
         MetaData *newMeta = NEW(MetaData);
         newMeta->tableMeta.tableId = tableId = shapeId++;
-        addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+        addToSimpleHash(hashMeta, hashKey, (L)newMeta);
     }
     return tableId;
 }
@@ -980,26 +981,42 @@ static InfoNode* setEnumKey(InfoNode *x, L key){
 }
 
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
-    //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n"); getchar();
-    Type rtnType;  B isForeignKey = false; L primaryKeyId = -1;
+    Type rtnType;
     if(isTableIN(x) && isString1IN(y)){
-        S   tableName = tableInfo[x->shape->sizeId];
-        S  columnName = getString1IN(y);
-        S primaryName = findPrimaryTableName(tableName, columnName);
-        if(primaryName){
-            isForeignKey = true;
-            primaryKeyId = getTableIdFromTableName(primaryName);
-        }
         rtnType = wildT;
     }
     else if(isW(x) || isW(y)){
         rtnType = wildT;
     }
     else return NULL;
-    if(isForeignKey){
-    }
     return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, inShape(x)->sizeId));
 }
+
+// improve it later
+// static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
+//     //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n"); getchar();
+//     Type rtnType;  B isForeignKey = false; L primaryKeyId = -1;
+//     if(isTableIN(x) && isString1IN(y)){
+//         S   tableName = tableInfo[x->shape->sizeId];
+//         S  columnName = getString1IN(y);
+//         S primaryName = findPrimaryTableName(tableName, columnName);
+//         if(primaryName){
+//             isForeignKey = true;
+//             primaryKeyId = getTableIdFromTableName(primaryName);
+//         }
+//         rtnType = wildT;
+//     }
+//     else if(isW(x) || isW(y)){
+//         rtnType = wildT;
+//     }
+//     else return NULL;
+//     InfoNode *rtn = newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, inShape(x)->sizeId));
+//     //if(isForeignKey){
+//     //    return setEnumKey(rtn, p
+//     //}
+//     TODO("Add actual return InfoNode");
+//     return NULL;
+// }
 
 static InfoNode *specialCompress(InfoNode *x, InfoNode *y){
     Type rtnType; //ShapeNode *rtnShape=y->shape;
