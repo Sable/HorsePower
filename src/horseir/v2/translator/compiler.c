@@ -5,8 +5,6 @@ typedef struct CodeList{
     struct CodeList *next;
 }CodeList;
 
-#define comma ','
-
 extern Node *entryMain;
 
 static I depth;
@@ -35,6 +33,7 @@ sHashTable *hashOpt;
 //#define VAR_END   "h_buff_v = h_prev_v;"
 #define C_MACRO_UDF "HORSE_UDF"
 #define NUM_VAR_ROW 4           // # of var declarations in a row
+#define NUM_CHAR_LINE 128
 
 #define isTrueMacro     "isTrue"
 #define scanBreak(n)    glueCodeLine("break")
@@ -48,11 +47,90 @@ static C func_code[FUNC_MAX_SIZE], *ftr;
 static C code[CODE_MAX_SIZE], *ptr;
 static CodeList *codeList;
 
-static void genIndent(){ DOI(depth, glueCode("    ")); }
-
 /* ------ declaration above ------ */
 
 #define resetPtr(x) if(x[0]!=0) x+=strlen(x)
+
+static void addToCodeList(CodeList *list, CodeList *c){
+    c->next = list->next;
+    list->next = c;
+}
+
+static void storeCode(S s){
+    if(strlen(code) < NUM_CHAR_LINE) { // 128
+        CodeList *c = NEW(CodeList);
+        strcpy(c->code, s);
+        addToCodeList(codeList, c);
+    }
+    else EP("A line of the code should be less than %d", NUM_CHAR_LINE);
+}
+
+static C obtainTypeAlias(Type t){
+    switch(t){
+        case boolT: R 'B';
+        case   i8T: R 'J';
+        case  i16T: R 'H';
+        case  i32T: R 'I';
+        case  i64T: R 'L';
+        case  f32T: R 'F';
+        case  f64T: R 'E';
+        case  strT: R 'S';
+        case  symT: R 'S'; // Q -> S
+        case charT: R 'C';
+        case dateT: R 'I'; // D -> I
+        default: EP("Add more types: %d\n", t);
+    }
+}
+
+static C obtainNodeTypeAlias(Node *n){
+    InfoNode *in = n->val.type.in;
+    if(!in->subInfo)
+        return obtainTypeAlias(in->type);
+    else EP("Type problem");
+}
+
+static S obtainTypeShort(Type t){
+    switch(t){
+        case boolT: R "Bool";
+        case   i8T: R "I8";
+        case  i16T: R "I16";
+        case  i32T: R "I32";
+        case  i64T: R "I64";
+        case  f32T: R "F32";
+        case  f64T: R "F64";
+        case  strT: R "String";
+        case  symT: R "Symbol";
+        case charT: R "Char";
+        case dateT: R "Date";
+        default: EP("Add more types: %d\n", t);
+    }
+    return NULL;
+}
+
+static S obtainLiteralFunc(Node *n, B isScalar){
+    InfoNode *in = n->val.type.in;
+    if(!in->subInfo){
+        C tmp[99];
+        SP(tmp, isScalar?"Literal%s":"LiteralVector%s", obtainTypeShort(in->type));
+        return strdup(tmp);
+    }
+    else EP("Type problem");
+}
+
+static void addStrConst(S s){
+    L size = strlen(s) + 2 + 1;
+    L preSize = ptr - code;
+    if(size + preSize > CODE_MAX_SIZE)
+        EP("size is more than expected: %lld vs. %d", size + preSize, CODE_MAX_SIZE);
+    SP(ptr, "\"%s\"", s);
+}
+
+/* ------ helper functions above ------ */
+
+static void genIndent(){
+    DOI(depth, glueCode("    "));
+}
+
 static void glueMethodHead(S part1, S part2){
     resetPtr(htr);
     SP(htr, "%s%s\n", part1, part2);
@@ -63,44 +141,20 @@ static void glueMethodFunc(S func){
     SP(ftr, "%s\n", func);
 }
 
-static I countInfoNodeList(InfoNodeList *list){
-    if(list) return 1 + countInfoNodeList(list->next); return 0;
-}
-
 static void genMethodHead(Node *n){
     resetCode(); S line = ptr;
     glueAny("static I horse_%s(", n->val.method.fname);
-    I numRtn   = countInfoNodeList(n->val.method.meta->returnTypes);
-    I numParam = totalSymbolNameList(n->val.method.meta->paramVars);
+    I numRtn   = totalInfoNodeList(nodeMethodMeta(n)->returnTypes);
+    I numParam = totalSymbolNameList(nodeMethodMeta(n)->paramVars);
     if(numRtn > 0)
         glueCode("V *h_rtn");
     if(numParam > 0){
         if(numRtn > 0) glueCode(", ");
-        genVarList(n->val.method.param->val.listS, comma);
+        genVarList(nodeMethodParameters(n)->val.listS, comma);
     }
     glueMethodHead(line, ");");
     glueCode("){");
     glueLine();
-}
-
-static void addToCodeList(CodeList *list, CodeList *c){
-    c->next = list->next;
-    list->next = c;
-}
-
-static void storeCode(S s){
-    if(strlen(code) < 128) {
-        CodeList *c = NEW(CodeList);
-        SP(c->code, "%s", s);
-        addToCodeList(codeList, c);
-    }
-    else EP("A line of the code should be less than 128\n");
-}
-
-// no dummy
-static I countNode(List *list){
-    if(list) return 1 + countNode(list->next);
-    return 0;
 }
 
 static void genTic(){
@@ -161,65 +215,6 @@ static I genListReturn(List *list, C sep, S text){
     return 0;
 }
 
-static C obtainTypeAlias(Type t){
-    switch(t){
-        case boolT: return 'B';
-        case   i8T: return 'J';
-        case  i16T: return 'H';
-        case  i32T: return 'I';
-        case  i64T: return 'L';
-        case  f32T: return 'F';
-        case  f64T: return 'E';
-        case  strT: return 'S';
-        case  symT: return 'S'; // Q -> S
-        case charT: return 'C';
-        case dateT: return 'I'; // D -> I
-        default: EP("Add more types: %d\n", t);
-    }
-}
-
-static C getNodeTypeAlias(Node *n){
-    InfoNode *in = n->val.type.in;
-    if(!in->subInfo)
-        return obtainTypeAlias(in->type);
-    else EP("Type problem");
-}
-
-static S obtainTypeShort(Type t){
-    switch(t){
-        case boolT: return "Bool";
-        case   i8T: return "I8";
-        case  i16T: return "I16";
-        case  i32T: return "I32";
-        case  i64T: return "I64";
-        case  f32T: return "F32";
-        case  f64T: return "F64";
-        case  strT: return "String";
-        case  symT: return "Symbol";
-        case charT: return "Char";
-        case dateT: return "Date";
-        default: EP("Add more types: %d\n", t);
-    }
-    return NULL;
-}
-
-static S obtainLiteralFunc(Node *n, B isScalar){
-    InfoNode *in = n->val.type.in;
-    if(!in->subInfo){
-        C tmp[99]; SP(tmp, isScalar?"Literal%s":"LiteralVector%s", obtainTypeShort(in->type));
-        return strdup(tmp);
-    }
-    else EP("Type problem");
-}
-
-static void addStrConst(S s){
-    L size = strlen(s) + 2 + 1;
-    L preSize = ptr - code;
-    if(size + preSize > CODE_MAX_SIZE)
-        EP("size is more than expected: %lld vs. %d\n", size + preSize, CODE_MAX_SIZE);
-    SP(ptr, "\"%s\"", s);
-}
-
 static void genLocalVar(SymbolName *sn, I k){
     if(k == 0) genIndent();
     else if(k % NUM_VAR_ROW == 0){
@@ -232,15 +227,19 @@ static void genLocalVar(SymbolName *sn, I k){
 static void genLocalVars(Node *block){
     SymbolTable *st = block->val.block.st;
     I k=0;
-    DOI(SymbolTableSize, { SymbolName *sn = st->table[i]; \
+    DOI(SymbolTableSize, { SymbolName *sn = st->table[i];
             while(sn){genLocalVar(sn, k++); sn=sn->next;}} )
     glueLine();
     //P("total decl vars = %d\n", k); getchar();
 }
 
 static void genProfileStmt(B f, I c){
-    if(f) { genIndent(); glueAny("PROFILE(%d, ",c); }
-    else { glueCode(");"); glueLine(); }
+    if(f) {
+        genIndent(); glueAny("PROFILE(%d, ",c);
+    }
+    else {
+        glueCode(");"); glueLine();
+    }
 }
 
 static void genCodeExtra(ChainExtra *extra, I lineno){
@@ -251,6 +250,37 @@ static void genCodeExtra(ChainExtra *extra, I lineno){
     glueMethodFunc(extra->funcFunc);
 }
 
+static void genStatement(Node *n, B f){
+    switch(n->kind){
+        case   callK: if(f){ if(needInd) genIndent(); }
+                      else { if(needInd) { glueCode(";"); glueLine(); }  } break;
+        case   stmtK: genProfileStmt(f,n->lineno); break;
+        case     ifK:
+        case  whileK:
+        case repeatK:
+        case returnK: if(f) genIndent(); break;
+    }
+}
+
+static void genEntry(){
+    resetCode();
+    I numRtns = totalInfoNodeList(entryMain->val.method.meta->returnTypes);
+    glueCodeLine("E horse_entry(){");
+    depth++;
+    if(numRtns > 0){
+        glueCodeLine("V rtns[99];");
+        glueCodeLine("tic();");
+        glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
+        glueCodeLine("E elapsed = calc_toc();");
+        glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
+        glueCodeLine("P(\"Output:\\n\");");
+        glueAnyLine("DOI(%d, printV(rtns[i]))", numRtns);
+    }
+    glueCodeLine("return elapsed;");
+    depth--;
+    glueCodeLine("}");
+}
+
 /* ------ gen functions defined above ------ */
 
 static void scanExprStmt(Node *n){
@@ -258,7 +288,7 @@ static void scanExprStmt(Node *n){
 }
 
 static void scanFuncBuiltin(S func){
-    glueCode(getBuiltinStr(func));
+    glueCode(obtainBuiltinName(func));
 }
 
 static void scanFuncMethod(S func){
@@ -266,22 +296,24 @@ static void scanFuncMethod(S func){
 }
 
 static SymbolKind scanFuncName(Node *n){
-    S moduleName = n->val.name.id1;
-    S methodName = n->val.name.id2;
-    SymbolKind sk = n->val.name.sn->kind;
+    S moduleName = nodeName1(n);
+    S methodName = nodeName2(n);
+    SymbolKind sk = nodeNameKind(n);
     switch(sk){
         case builtinS: scanFuncBuiltin(methodName); break;
         case  methodS: scanFuncMethod (methodName); break;
         default:
-        TODO("Add support for symbol kind: %d\n", sk); break;
+        TODO("Add support for symbol kind: %d", sk); break;
     }
     return sk;
 }
 
-static Node* getLastNodeFromList(List *list){
-    while(list && list->next)
-        list = list->next;
-    R list?list->val:0;
+static Node* getFirstNodeFromList(List *list){
+    if(list){
+        while(list->next) list=list->next;
+        R list->val;
+    }
+    else R NULL;
 }
 
 static void scanCall(Node *n){
@@ -295,13 +327,13 @@ static void scanCall(Node *n){
         S funcName = nodeName2(nodeCallFunc(n));
         genList(lhsVars, comma);
         List *args = nodeList(nodeCallParam(n));
-        I numArg = countNode(args);
+        I numArg = totalList(args);
         if(!strcmp(funcName, "list")){
             glueAny(", %d, ",numArg);
             genVarArray(args, comma);
         }
         else {
-            Node *first = getLastNodeFromList(args);
+            Node *first = getFirstNodeFromList(args);
             if(first && instanceOf(first, funcK)){
                 scanList1(args, first);
             }
@@ -321,9 +353,7 @@ static void scanVar(Node *n){
 static void scanName(Node *n){
     //if(numArg == 0) numArg = 1;
     //else if(numArg > 0) { glueAny("%c ", comma); numArg++; }
-    glueCode(n->val.name.id2);
-    // n->val.name.id1
-    // n->val.name.id2
+    glueCode(nodeName2(n));
 }
 
 static void scanStmtCopy(Node *n){
@@ -355,7 +385,7 @@ static void scanVector(Node *n){
     //    numArg++;
     //}
     Node *typeNode = n->val.vec.typ;
-    I c = countNode(n->val.vec.val);
+    I c = totalList(n->val.vec.val);
     glueCode(obtainLiteralFunc(typeNode, c==1));
     if(c == 1){
         glueCode("(");
@@ -363,7 +393,7 @@ static void scanVector(Node *n){
         glueCode(")");
     }
     else if(c > 1){
-        resetCode(); SP(ptr, "(%d, (%c []){", c, getNodeTypeAlias(typeNode));
+        resetCode(); SP(ptr, "(%d, (%c []){", c, obtainNodeTypeAlias(typeNode));
         genList(n->val.vec.val, comma);
         glueCode("})");
     }
@@ -450,7 +480,6 @@ static void scanBlock(Node *n){
     depth--;
 }
 
-
 static void scanFunc(Node *n){
     if(1==totalList(n->val.listS)){
         Node *first = n->val.listS->val;
@@ -458,20 +487,6 @@ static void scanFunc(Node *n){
         scanFuncName(first);
     }
     else EP("Add impl.");
-}
-
-
-
-static void genStatement(Node *n, B f){
-    switch(n->kind){
-        case   callK: if(f){ if(needInd) genIndent(); }
-                      else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case   stmtK: genProfileStmt(f,n->lineno); break;
-        case     ifK:
-        case  whileK:
-        case repeatK:
-        case returnK: if(f) genIndent(); break;
-    }
 }
 
 static B checkSimpleHash(Node *n){
@@ -582,34 +597,6 @@ static void compileMethod(Node *n){
     currentMethod = prevMethod;
 }
 
-static void genEntry(){
-    resetCode();
-    I numRtns = countInfoNodeList(entryMain->val.method.meta->returnTypes);
-    glueCodeLine("E horse_entry(){");
-    depth++;
-    if(numRtns > 0){
-        glueCodeLine("V rtns[99];");
-        glueCodeLine("tic();");
-        glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
-        glueCodeLine("E elapsed = calc_toc();");
-        glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
-        glueCodeLine("P(\"Output:\\n\");");
-        glueAnyLine("DOI(%d, printV(rtns[i]))", numRtns);
-    }
-    glueCodeLine("return elapsed;");
-    depth--;
-    glueCodeLine("}");
-}
-
-static void saveToFile(S path, S head, S func, S code){
-    printBanner("Generated Code Below");
-    P("%s\n%s\n%s\n", head,func,code);
-    return ;
-    //FILE *fp = fopen(path, "w");
-    //FP(fp, "%s%s", head,code);
-    //fclose(fp);
-}
-
 static void dispStatsBuff(L cur, L total, S name){
     P("Profile:\n>> Used buffer %s %.2lf%% [%lld/%lld]\n", \
         name, percent(cur,total), cur, total);
@@ -626,6 +613,15 @@ static void dispStats(){
 
 static void compileCode(List *list){
     if(list){ compileCode(list->next); compileMethod(list->val); }
+}
+
+static void saveToFile(S path, S head, S func, S code){
+    printBanner("Generated Code Below");
+    P("%s\n%s\n%s\n", head,func,code);
+    return ;
+    //FILE *fp = fopen(path, "w");
+    //FP(fp, "%s%s", head,code);
+    //fclose(fp);
 }
 
 static void dumpCode(){

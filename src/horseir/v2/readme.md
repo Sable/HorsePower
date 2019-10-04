@@ -49,7 +49,7 @@ Leading words for macros/functions
 - `load`   : a function loads one or more values in bulks
 - `fill`   : a function loads one value at a time
 - `gen`    : a function generates and saves strings
-- `glue`   : a macro writes strings to a buffer
+- `glue`   : a macro / function writes strings to a buffer
 - `print`  : a macro / function prints data to stdin
 - `scan`   : a function iterates tree nodes
 - `total`  : a function counts # of list (ends with 1 means `with dummy`, otherwise `no dummy`)

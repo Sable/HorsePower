@@ -129,7 +129,7 @@ O loadConst(Node *n, V x, L k, I t){
     }
 }
 
-S getBuiltinStr(S func){
+S obtainBuiltinName(S func){
     FuncUnit x;
     getFuncIndexByName(func, &x);
     switch(x.kind){

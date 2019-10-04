@@ -2,6 +2,7 @@
 #define __H_TRANSLATOR__
 
 /* declaration */
+S obtainBuiltinName(S func);
 
 /* Interpreter */
 I HorseInterpreter();
@@ -12,10 +13,9 @@ V getVector(Node *n);
 I HorseCompilerNaive();
 I HorseCompilerOptimized();
 I genOptimizedCode();
-S getBuiltinStr(S func);
 
 /* Interpreter v2 */
-I HorseInterpreter2();
+//I HorseInterpreter2();
 
 
 /* helper functions */

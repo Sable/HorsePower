@@ -22,7 +22,6 @@ static char *qOpt[99];
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
 #define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:"); \
-                  dispLine(0, INDENT, "", "- sr : strength reduction"); \
                   dispLine(0, INDENT, "", "- fe : elementwise fusion"); \
                   dispLine(0, INDENT, "", "- fp : fusion with patterns"); \
                   dispLine(0, INDENT, "", "- fa : automatic operator fusion"); \
@@ -112,38 +111,36 @@ static struct option long_options[] = {
 
 static char *strMode(OptionMode mode){
     switch(mode){
-        case     UnknownM: return "Unknown";
-        case InterpNaiveM: return "Interpreter Naive";
-        case    CompilerM: return "Compiler";
-        case   InterpJITM: return "Interpreter JIT";
-        case     VersionM: return "Version";
-        case      HelperM: return "Helper";
-        case  ExperimentM: return "Experiment";
-        case     UtilityM: return "Utility";
+        case     UnknownM: R "Unknown";
+        case InterpNaiveM: R "Interpreter Naive";
+        case    CompilerM: R "Compiler";
+        case   InterpJITM: R "Interpreter JIT";
+        case     VersionM: R "Version";
+        case      HelperM: R "Helper";
+        case  ExperimentM: R "Experiment";
+        case     UtilityM: R "Utility";
         default: EP("Unknown mode: %d\n", mode);
     }
 }
 
 static TC getTargetCode(S target){
-    if(!strcmp(target, "cpu")) R TARGET_C;
-    else if(!strcmp(target, "llvm")) R TARGET_LLVM;
-    else if(!strcmp(target, "openacc")) R TARGET_ACC;
-    else if(!strcmp(target, "opencl")) R TARGET_CL;
+    if(sEQ(target, "cpu")) R TARGET_C;
+    else if(sEQ(target, "llvm")) R TARGET_LLVM;
+    else if(sEQ(target, "openacc")) R TARGET_ACC;
+    else if(sEQ(target, "opencl")) R TARGET_CL;
     else R TARGET_NA;
 }
 
 static OC obtainOptCode(S opt){
-    if(!strcmp(opt, "fe")) R OPT_FE;
-    else if(!strcmp(opt, "fp")) R OPT_FP;
-    else if(!strcmp(opt, "fa")) R OPT_FA;
-    else if(!strcmp(opt, "sr")) R OPT_SR;
-    else if(!strcmp(opt, "all")) R OPT_ALL;
+    if(sEQ(opt, "fe")) R OPT_FE;
+    else if(sEQ(opt, "fp")) R OPT_FP;
+    else if(sEQ(opt, "fa")) R OPT_FA;
+    else if(sEQ(opt, "all")) R OPT_ALL;
     else R OPT_NA;
 }
 
 const S obtainOptStr(OC x){
     switch(x){
-        case OPT_SR : R "Strength Reduction";
         case OPT_FE : R "Elementwise Fusion";
         case OPT_FP : R "Fusion with Patterns";
         case OPT_FA : R "Automatic Operator Fusion";
@@ -171,7 +168,7 @@ static int validateInterp(){
 
 static int validateCompiler(){
     if(TARGET_NA == qTarg)
-        EP("Compiler target must be provided correctly: cpu or gpu\n");
+        EP("Compiler target must be provided correctly: cpu or gpu");
     //P("qPath = %s, qRun = %d\n", qPath,qRun);
     if(!qPath || qRun <= 0) BAD_TRY();
     return validateOptimization();
@@ -183,7 +180,7 @@ static int validatePretty(){
 }
 
 static int validateStats(){
-    if(qStats && (!strcmp(qStats, "dump") || !strcmp(qStats, "load")));
+    if(qStats && (sEQ(qStats, "dump") || sEQ(qStats, "load")));
     else BAD_TRY();
     return 0;
 }
@@ -208,15 +205,14 @@ static int validateOptions(){
         case      HelperM: break;
         case  ExperimentM: break;
         case     UnknownM: break;
-        default: TODO("Add support for validating %s\n", strMode(optMode));
+        default: TODO("Add support for validating %s", strMode(optMode));
     }
     return 0;
 }
 
 static OptionMode setMode(OptionMode opt, OptionMode mode){
     if(opt == UnknownM || opt == mode) return mode;
-    P("Please choose one mode: %s or %s\n", strMode(opt), strMode(mode));
-    exit(1);
+    EP("Please choose one mode: %s or %s", strMode(opt), strMode(mode));
 }
 
 static void setUtility(OptionUtility u){
@@ -236,7 +232,7 @@ static void getLongOptionVerbose(int x){
             case 2: setUtility(StatsU);
                     qStats  = strdup(optarg);              break;
             case 3: setUtility(PrettyPrintU);              break;
-            default: EP("Option index unknown: %d\n", index);
+            default: EP("Option index unknown: %d", index);
         }
     }
 }
@@ -258,7 +254,8 @@ int getLongOption(int argc, char *argv[]){
     int c, option_index  = 0;
     init();
     while((c=getopt_long(argc, argv,"hvtur:c:f:o:x:", long_options, &option_index)) != -1){
-        if(numOpts >= 99) EP("Buffer overflow\n");
+        if(numOpts >= 99)
+            EP("Buffer overflow: %d >= 99", numOpts);
         switch(c){
             case 0: getLongOptionVerbose(option_index); break;
             case 't': optMode = setMode(optMode, InterpNaiveM); break;
@@ -271,9 +268,9 @@ int getLongOption(int argc, char *argv[]){
             case 'r': qRun    = atoi(optarg);   break;
             case 'f': qPath   = strdup(optarg); break;
             case 'o': qOpt[numOpts++] = strdup(optarg); break;
-            default: P("c = %d\n",c); return 1;
+            default: WP("c = %d\n",c); R 1;
         }
     }
-    return validateOptions();
+    R validateOptions();
 }
 

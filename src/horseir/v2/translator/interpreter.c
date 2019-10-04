@@ -426,9 +426,9 @@ static O runName(Node *n){
     if(!n->val.name.isUS){
         SymbolName *sn = n->val.name.sn;
         if(sn->value) addParam(paramList, sn->value);
-        else EP("Variable must be initialized before used: %s\n", sn->name);
+        else EP("Variable must be initialized before used: %s", sn->name);
     }
-    else EP("Underscore '" USCORE "' can't be used in a name reference\n");
+    else EP("Underscore '%s' can't be used in a name reference", uscore);
 }
 
 static V initSymVector(S s){

@@ -7,7 +7,6 @@ static bool toC      = false;
 #define BUFF_SIZE 10240
 static char buff[BUFF_SIZE];
 
-#define comma ','
 #define nospace 0
 
 #define echo(b,n)        strcat(b,n)

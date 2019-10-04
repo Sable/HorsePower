@@ -235,7 +235,7 @@ static void weedVector(Node *x){
     while(p){
         if(!weedConst(p->val, t)){
             printNode(x);
-            EP("Literal type or range error: (expect %s, find %s)\n", \
+            EP("Literal type or range error: (expect %s, find %s)", \
                     getTypeStr2(t),getConstTypeStr(p->val));
         }
         p = p->next;
@@ -244,8 +244,8 @@ static void weedVector(Node *x){
 
 static void weedVar(Node *x){
     char *name = x->val.param.id;
-    if(!strcmp(name, USCORE))
-        EP("Underscore '" USCORE "' shouldn't have any type.\n");
+    if(!strcmp(name, uscore))
+        EP("Underscore '%s' shouldn't have any type.", uscore);
 }
 
 static void weedStmt(Node *stmt){
@@ -322,8 +322,8 @@ static void weedName(Node *x){
     else {
         char *id1 = x->val.name.id1;
         char *id2 = x->val.name.id2;
-        if(!strcmp(id2, USCORE) || !strcmp(id1, USCORE))
-            EP("Underscore '" USCORE "' can't be used in a global name reference\n");
+        if(sEQ(id2, uscore) || sEQ(id1, uscore))
+            EP("Underscore '%s' can't be used in a global name reference.", uscore);
     }
 }
 

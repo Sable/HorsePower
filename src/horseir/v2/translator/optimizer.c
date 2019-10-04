@@ -1,5 +1,8 @@
 #include "../global.h"
 
+#define AllOptSize 2
+static const OC ListOfAllOpt[AllOptSize] = {OPT_FA, OPT_FP};
+
 extern Prog *root;
 extern sHashTable *hashOpt;
 
@@ -21,7 +24,6 @@ static void optimizerMain(OC opt){
         case OPT_FE: optElementwise();    break; // compiledMethodList
         case OPT_FP: optPattern();        break; // compiledMethodList
         case OPT_FA: optAuto();           break; // compiledMethodList
-        case OPT_SR: optSReduction(root); break;
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }
@@ -37,12 +39,10 @@ static void init(){
     phTotal = 0;
 }
 
-#define AllOptSize 3
 I HorseCompilerOptimized(){
     printBanner("Start Optimizing");
     init();
     if(isOptimizeAll()){
-        OC ListOfAllOpt[AllOptSize] = {OPT_SR, OPT_FA, OPT_FP};
         DOI(AllOptSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts
     }
     else {

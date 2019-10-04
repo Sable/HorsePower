@@ -51,7 +51,6 @@ void   time_clear();
 #define NEWL(typ,n) (typ* )newM(sizeof(typ)*(n))
 #define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))
 #define CaseLine(x) case x: R #x
-#define USCORE "_"  // constant: underscore
 
 #define P printf
 #define R return
@@ -78,6 +77,10 @@ void   time_clear();
 #define toc() my_toc(1)
 #define calc_toc() my_toc(0)
 #define time_toc(...) do{E elapsed=calc_toc();P("// ");P(__VA_ARGS__);}while(0)
+
+/* constants */
+#define uscore "_"  // underscore
+#define comma  ','
 
 #include "frontend/tree.h"
 #include "frontend/weed.h"
