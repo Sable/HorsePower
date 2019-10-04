@@ -78,7 +78,11 @@ static void printJSONPairCore(JSON *x, int dep){
 }
 
 static void printJSONPair(JSON *x, int dep){
-    if(x){ printJSONPair(x->next,dep); if(x->next)P(",\n"); printJSONPairCore(x,dep); }
+    if(x){
+        printJSONPair(x->next,dep);
+        if(x->next) P(",\n");
+        printJSONPairCore(x,dep);
+    }
 }
 
 static void printJSONCore(JSON *x, int dep){

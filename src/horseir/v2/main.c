@@ -54,6 +54,10 @@ static void envCompiler(char *file){
     runCompilerCore();
 }
 
+static void envVersion(){
+    P("HorseIR version: 0.2.1\n");
+}
+
 static void utlPrettyPrint(char *file){
     envInit(file);
     printProg(root);
@@ -61,7 +65,7 @@ static void utlPrettyPrint(char *file){
 
 static void utlDotPrint(char *file){
     envInit(file);
-    TODO("dot print\n");
+    TODO("dot print");
     //dotProg(root);
 }
 
@@ -85,13 +89,13 @@ int main(int argc, char *argv[]){
         switch(optMode){
             case InterpNaiveM: envInterpreter(qPath); break;
             case    CompilerM: envCompiler(qPath);    break;
-            case   InterpJITM: TODO("interpreter jit mode\n"); break;
-            case  ExperimentM: TODO("experiment\n");  break;
-            case     VersionM: version();   break;
+            case   InterpJITM: TODO("interpreter jit mode"); break;
+            case  ExperimentM: TODO("experiment");  break;
+            case     VersionM: envVersion();break;
+            case     UtilityM: envUtility(optUtl);   break;
             case      HelperM: GOOD_TRY();  break;
             case     UnknownM:  BAD_TRY();  break;
-            case     UtilityM: envUtility(optUtl);   break;
-            default: EP("Option mode not supported: %d\n", optMode);
+            default: EP("Option mode not supported: %d", optMode);
         }
     }
     return 0;

@@ -1345,9 +1345,30 @@ static bool searchBinary(char *funcName, FuncUnit *x){
 }
 
 static bool searchOther(char *funcName, FuncUnit *x){
-    int k = findNameFromSet(funcName, FunctionOtherStr, BinarySize);
+    int k = findNameFromSet(funcName, FunctionOtherStr, OtherSize);
     if(k>=0){ x->kind = 3; x->t = k; return true; }
     return false;
+}
+
+const S obtainTypeUnary(TypeUnary t){
+    if(t>=0 && t<UnarySize)
+        return strdup(FunctionUnaryStr[t]);
+    else
+        EP("TypeUnary must be in range [0, %d)", UnarySize);
+}
+
+const S obtainTypeBinary(TypeBinary t){
+    if(t>=0 && t<BinarySize)
+        return strdup(FunctionBinaryStr[t]);
+    else
+        EP("TypeBinary must be in range [0, %d)", BinarySize);
+}
+
+const S obtainTypeOther(TypeOther t){
+    if(t>=0 && t<OtherSize)
+        return strdup(FunctionOtherStr[t]);
+    else
+        EP("TypeOther must be in range [0, %d)", OtherSize);
 }
 
 void getFuncIndexByName(char *name, FuncUnit *x){

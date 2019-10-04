@@ -146,22 +146,23 @@ static V executeEachMon(EachMonadic f, V *p){
 V executeOther(TypeOther x, V *params, I numParams){
     switch(x){
         /* monadic */
-        case        eachF: return executeEachMon(&pfnEach   , params); break;
+        case        eachF: return executeEachMon(&pfnEach, params); break;
         /* dyadic */
-        case        enumF: return executeDya(&pfnEnum       , params); break;
-        case       tableF: return executeDya(&pfnTable      , params); break;
-        case   eachRightF: return executeEachDya(&pfnEachRight , params); break;
-        case    eachLeftF: return executeEachDya(&pfnEachLeft  , params); break;
-        case    eachItemF: return executeEachDya(&pfnEachItem  , params); break;
-        case      indexAF: return executeIndexA(params); break;
+        case        enumF: return executeDya(&pfnEnum  , params); break;
+        case       tableF: return executeDya(&pfnTable , params); break;
+        case      ktableF: return executeDya(&pfnKTable, params); break;
+        case        dictF: return executeDya(&pfnDict  , params); break;
+        case   eachRightF: return executeEachDya(&pfnEachRight, params); break;
+        case    eachLeftF: return executeEachDya(&pfnEachLeft , params); break;
+        case    eachItemF: return executeEachDya(&pfnEachItem , params); break;
         /* anyadic */
         case        listF: return executeAny(&pfnList, params, numParams); break;
         /* others */
+        case      indexAF: return executeIndexA(params); break;
         case   joinIndexF: return executeJoinIndex(&pfnJoinIndex, params); break;
         case       dtaddF: return executeTriple(&pfnDatetimeAdd, params); break;
         case       dtsubF: return executeTriple(&pfnDatetimeSub, params); break;
-        /* dictF, ktableF */
-        default: EP("pending ... for %d\n", x);
+        default: EP("Pending ... for %s", obtainTypeOther(x));
     }
     R NULL;
 }

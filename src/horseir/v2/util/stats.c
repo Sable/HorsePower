@@ -123,7 +123,6 @@ static void dumpStats(){
     DOI(listTableCur, tables[i]=scanTable(listTable[i].sid, listTable[i].table))
     addJSONField(rt, newJSONKeyList("tables", listTableCur, tables));
     printJSON(rt);
-    P("Data dumped done.\n");
 }
 
 static void loadStats(){

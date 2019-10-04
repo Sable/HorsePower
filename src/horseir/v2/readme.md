@@ -20,7 +20,7 @@ Source code folders
 ```
 - analysis  : program analysis
 - backend   : library support for primitive functions
-- frontend  : parsing and pretty printer
+- frontend  : parser and pretty printer
 - optimizer : program optimizations after analyses
 - scripts   : SQL queries from tpch and aquery 
 - translator: interpreter, compiler, and optimizer

@@ -91,7 +91,6 @@ typedef enum {
 
 int  getLongOption(int argc, char *argv[]);
 void usage(int e);
-void version();
 
 const S obtainOptStr(OC x);
 

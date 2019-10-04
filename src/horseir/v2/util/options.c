@@ -28,10 +28,6 @@ static char *qOpt[99];
                   dispLine(0, INDENT, "", "- fa : automatic operator fusion"); \
                   dispLine(0, INDENT, "", "- all: all above optimizations"); \
 
-void version(){
-    P("HorseIR version: 0.2.1\n");
-}
-
 static void dispLine(int level, int left, char *shortMsg, char *longMsg){
     int indents[] = { 2, 4, 6, 8 };
     if(level < 0 || level >  3) EP("lead must be between [0, 3]\n");

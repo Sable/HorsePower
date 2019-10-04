@@ -94,4 +94,8 @@ O *getTypeRules(char *name, int* num);
 
 ShapeNode *newShapeNode(ShapeType type, int kind, int size);
 
+const S obtainTypeUnary (TypeUnary  t);
+const S obtainTypeBinary(TypeBinary t);
+const S obtainTypeOther (TypeOther  t);
+
 #endif
