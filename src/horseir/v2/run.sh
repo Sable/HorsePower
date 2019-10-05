@@ -3,15 +3,13 @@
 usage() {
     printf '%s\n' \
         "Usage: $0 <cmd>" "" \
-        " 1) $0 front               ## build flex & bison" "" \
-        " 2.1) $0 interp  t/f <id>  ## test with benchmarks in tests/(t/f)/t<id>.hir" "" \
-        " 2.2) $0 interp  q   <id>  ## test with TPC-H queries in <path>.hir" "" \
-        " 3.1) $0 compile t/f <id>  ## test with benchmarks in tests/(t/f)/t<id>.hir" "" \
-        " 3.2) $0 compile q   <id>  ## test with TPC-H queries in <path>.hir" "" \
-        " 4.1) $0 opt     t/f <id>  ## compiler with optimizer" "" \
-        " 4.2) $0 opt     q   <id>  ## compiler with optimizer" "" \
-        " 5) $0 stats  <load/dump>  ## load/dump stats" ""\
-        " 6) $0 cloc                ## show the number of lines of code" ""
+        " 1) $0 front                   ## build flex & bison" "" \
+        " 2) $0 interp  q/t/f <id>      ## test with benchmarks (q: scripts, t: tests/pass, f:tests/fail)" "" \
+        " 3) $0 compile q/t/f <id>      ## compile code without any optimizations" "" \
+        " 4) $0 opt     q/t/f <id>      ## compile code with optimizations" "" \
+        " 5) $0 stats load/dump         ## load/dump statistical information" "" \
+        " 6) $0 print <item> q/t/f <id> ## print item (pretty/dot/symboltable/typeshape)" "" \
+        " 7) $0 cloc                    ## show the number of lines of code" ""
 
     echo "Example: run=1 sf=1 thread=1 ./run.sh interp q 6"
     echo "         opt=fa ./run.sh opt q 6   # automatic fusion for q6"
@@ -22,9 +20,9 @@ runInterpreter() {
     cmd=$1; tid=$2; sf=$3; run=$4; th=$5
     #echo $0  # --> ./run.sh
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -t -f ./tests/t/t${tid}.hir)
+        (set -x && ./horse -t -f ./tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -t -f ./tests/f/t${tid}.hir)
+        (set -x && ./horse -t -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -t -f ./scripts/q${tid}.hir --tpch=${tid})
@@ -36,9 +34,9 @@ runInterpreter() {
 runCompiler() {
     cmd=$1; tid=$2
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -c cpu -f ./tests/t/t${tid}.hir)
+        (set -x && ./horse -c cpu -f ./tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -c cpu -f ./tests/f/t${tid}.hir)
+        (set -x && ./horse -c cpu -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu -f ./scripts/q${tid}.hir --tpch=${tid})
@@ -51,9 +49,9 @@ runOptimizer() {
     cmd=$1; tid=$2; opt=$3
     opts="-o $opt"
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -c cpu ${opts} -f ./tests/t/t${tid}.hir)
+        (set -x && ./horse -c cpu ${opts} -f ./tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -c cpu ${opts} -f ./tests/f/t${tid}.hir)
+        (set -x && ./horse -c cpu ${opts} -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu ${opts} -f ./scripts/q${tid}.hir --tpch=${tid})
@@ -68,6 +66,19 @@ runStats() {
         (set -x && ./horse -u --stats=dump)
     elif [ $cmd = "load" ]; then
         (set -x && ./horse -u --stats=load)
+    else
+        usage
+    fi
+}
+
+runPrinter() {
+    item=$1; cmd=$2; tid=$3;
+    if [ $cmd = "t" ]; then
+        (set -x && ./horse -u -f ./tests/pass/t${tid}.hir --print=${item})
+    elif [ $cmd = "f" ]; then
+        (set -x && ./horse -u -f ./tests/fail/t${tid}.hir --print=${item})
+    elif [ $cmd = "q" ]; then
+        (set -x && ./horse -u -f ./scripts/q${tid}.hir --tpch=${tid} --print=${item})
     else
         usage
     fi
@@ -119,6 +130,13 @@ elif [ $# -eq 3 ]; then
         runCompiler $2 $3
     elif [ $mod = "opt" ]; then
         runOptimizer $2 $3 $opt
+    else
+        usage
+    fi
+elif [ $# -eq 4 ]; then
+    mod=$1
+    if [ $mod = "print" ]; then
+        runPrinter $2 $3 $4
     else
         usage
     fi

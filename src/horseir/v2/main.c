@@ -60,19 +60,19 @@ static void envVersion(){
 
 static void utlPrinter(char *qItem, char *file){
     envInit(file);
-    if(sEQ(qItem, "symboltable")){
-        buildSymbolTable(root);
-    }
-    else if(sEQ(qItem, "typeshape")){
-        buildSymbolTable(root);
-        propagateTypeShape(root, true);
-    }
-    else if(sEQ(qItem, "pretty")){
+    if(sEQ(qItem, "pretty")){
         printProg(root);
     }
     else if(sEQ(qItem, "dot")){
         TODO("dot print");
         //dotProg(root);
+    }
+    else if(sEQ(qItem, "symboltable")){
+        buildSymbolTable(root);
+    }
+    else if(sEQ(qItem, "typeshape")){
+        buildSymbolTable(root);
+        propagateTypeShape(root, true);
     }
     else EP("Unknown item for printer: %s", qItem);
 }

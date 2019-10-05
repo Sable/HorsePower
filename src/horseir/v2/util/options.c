@@ -10,9 +10,9 @@ int   qRun;
 char *qPath;
 TC    qTarg;
 OC    qOpts[99];
-int numOpts;
-bool qIsTpch;
-int qTpchId;
+int   numOpts;
+bool  qIsTpch;
+int   qTpchId;
 char *qCmd;
 
 static int longFlag; // set by '--verbose'
@@ -40,7 +40,7 @@ static void usageInterp(){
 
 static void usageCompiler(){
     WP("\nRun with a compiler:\n");
-    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler with target: cpu");
+    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler target (cpu)");
     usage_n(1);
     dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:");
     dispLine(0, INDENT, "", "> fe  : elementwise fusion");
@@ -82,7 +82,12 @@ void usage(int e){
     exit(e);
 }
 
-/* no_argument, required_argument and optional_argument */
+/*
+ * See discussion: https://stackoverflow.com/a/1052750/4111149
+ *   no_argument       : space or '='
+ *   required_argument : space or '='
+ *   optional_argument : '='
+ */
 static struct option long_options[] = {
     {"tpch"        , required_argument, &longFlag, 0},
     {"stats"       , required_argument, &longFlag, 1},
@@ -176,8 +181,8 @@ static int validateStats(){
 
 static int validateUtility(){
     switch(optUtl){
-        case PrinterU: validatePrinter();   break;
-        case   StatsU: validateStats();     break;
+        case PrinterU: validatePrinter(); break;
+        case   StatsU: validateStats();   break;
         default: EP("Unknown utility funciton");
     }
 }
