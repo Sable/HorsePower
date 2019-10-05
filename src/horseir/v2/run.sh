@@ -10,7 +10,8 @@ usage() {
         " 3.2) $0 compile q   <id>  ## test with TPC-H queries in <path>.hir" "" \
         " 4.1) $0 opt     t/f <id>  ## compiler with optimizer" "" \
         " 4.2) $0 opt     q   <id>  ## compiler with optimizer" "" \
-        " 5) $0 stats  <load/dump>  ## load/dump stats" ""
+        " 5) $0 stats  <load/dump>  ## load/dump stats" ""\
+        " 6) $0 cloc                ## show the number of lines of code" ""
 
     echo "Example: run=1 sf=1 thread=1 ./run.sh interp q 6"
     echo "         opt=fa ./run.sh opt q 6   # automatic fusion for q6"
@@ -72,6 +73,7 @@ runStats() {
     fi
 }
 
+
 if [ -z $sf ]; then
     sf=1
 fi
@@ -97,6 +99,8 @@ if [ $# -eq 1 ]; then
     cmd=$1
     if [ $cmd = "front" ]; then
         (set -x && make test)
+    elif [ $cmd = "cloc" ]; then
+        (set -x && cloc backend frontend analysis util translator optimizer global.c global.h main.c)
     else
         usage
     fi

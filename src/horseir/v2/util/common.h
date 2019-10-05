@@ -86,7 +86,7 @@ typedef enum OptionMode{
 }OptionMode;
 
 typedef enum {
-    UnknownU, PrettyPrintU, DotU, StatsU
+    UnknownU, StatsU, PrinterU
 }OptionUtility;
 
 int  getLongOption(int argc, char *argv[]);
@@ -103,13 +103,14 @@ extern OC    qOpts[99];       // list of optimizations
 extern int   numOpts;         // number of optimizations
 extern bool  qIsTpch;         // is tpch
 extern int   qTpchId;         // if(qIsTpch) id
-extern char *qStats;          // dump or load
+extern char *qCmd;            // dump or load
 
 #define GOOD_TRY() usage(0)
 #define BAD_TRY()  usage(1)
 
 /* stats.c */
-void handleStats(S cmd);
+void loadStats();
+void dumpStats();
 
 /* json.c */
 #define newJSONKeyValue(k,v)    newJSON0(k,v)

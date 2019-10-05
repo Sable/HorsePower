@@ -235,7 +235,6 @@ static void findFusionSub(Chain *chain){
             //printChain(bottom); getchar();
             cleanCode(); ptr = code;
             genCodeElem(rt,true);
-            //getchar();
         }
     }
     else {

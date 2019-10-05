@@ -17,6 +17,10 @@ typedef struct gNode_list{
     struct gNode_list *next;
 }gNodeList;
 
+typedef enum {
+    unknownR, sumR, avgR, minR, maxR, allR, anyR
+} ReductionKind;
+
 extern List *compiledMethodList;
 extern I qid, phTotal;
 extern sHashTable *hashOpt;
@@ -268,24 +272,22 @@ static gNode *findFusionEach(Chain *chain, B isRT){
     R NULL;
 }
 
+// TODO: fix list fusion
 static gNode *findFusionUpList(Chain *chain){
-    if(isChainVisited(chain)) R NULL;
-    else setVisited(chain, true);
-    //printChain(chain); getchar();
-    Node *n = chainNode(chain);
-    if(instanceOf(n, stmtK)){
-        List *param = getNodeParams(n);
-        if(chainDefSize(chain) == 1){
-            Chain *next = chainDef(chain, 0);
-            R findFusionEach(next, true);
+    if(isChainVisited(chain)) {
+        setVisited(chain, true);
+        //printChain(chain); getchar();
+        Node *n = chainNode(chain);
+        if(instanceOf(n, stmtK)){
+            List *param = getNodeParams(n);
+            if(chainDefSize(chain) == 1){
+                Chain *next = chainDef(chain, 0);
+                R findFusionEach(next, true);
+            }
         }
     }
     R NULL;
 }
-
-typedef enum {
-    unknownR, sumR, avgR, minR, maxR, allR, anyR
-} ReductionKind;
 
 static ReductionKind getReductionKind(S name){
     if(sEQ(name, "sum")) R sumR;
@@ -599,56 +601,49 @@ static void genCodeAutoList(gNodeList *list, I size){
     }
 }
 
-static void findFusionSub(Chain *chain){
-    Node *n = chainNode(chain);
-    if(instanceOf(n, stmtK)){
-        Node *call = getStmtCall(n);
-        if(call){
-            if(getCallKind(call)){
-    //printChain(chain);
-    //P("\nrt: %d, isOK2Fuse(rt): %d\n", rt != 0, rt?isOK2Fuse(rt):0); getchar();
-    // TODO: need top to bottom to check if fusion is allowed
-                gNode *rt = findFusionUp(chain, true);
-                if(rt && isOK2Fuse(rt)){
-                    P("Fusion auto found:\n");
-                    //printNode(rt->node); getchar();
-                    cleanCode(); ptr = code;
-                    genCodeAuto(rt, true);
-                    //getchar();
-                }
+ // chainNode(chain) is stmtK
+static void findFusion(Chain *chain){
+    Node *call = getStmtCall(chainNode(chain));
+    if(call){
+        if(getCallKind(call)){
+//printChain(chain);
+//P("\nrt: %d, isOK2Fuse(rt): %d\n", rt != 0, rt?isOK2Fuse(rt):0); getchar();
+// TODO: need top to bottom to check if fusion is allowed
+            gNode *rt = findFusionUp(chain, true);
+            if(rt && isOK2Fuse(rt)){
+                WP("Fusion auto found:\n");
+                //printNode(rt->node); getchar();
+                cleanCode(); ptr = code;
+                genCodeAuto(rt, true);
+                //getchar();
             }
-            else if(isCallRaze(call)){
-                gNode *rt = findFusionUpList(chain);
-                if(rt && isOK2Fuse(rt)){
-                    P("Fusion list found: \n");
-                    insertgNode(glist, rt);
-                    //DOI(rt->pnum, P("[%lld] %d\n", i,rt->pnode[i]!=NULL))
-                    //cleanCode(); ptr = code;
-                    //genCodeDeepList(rt, true);
-                    //getchar();
-                }
+        }
+        else if(isCallRaze(call)){
+            gNode *rt = findFusionUpList(chain);
+            if(rt && isOK2Fuse(rt)){
+                WP("Fusion list found: \n");
+                insertgNode(glist, rt);
+                //DOI(rt->pnum, P("[%lld] %d\n", i,rt->pnode[i]!=NULL))
+                //cleanCode(); ptr = code;
+                //genCodeDeepList(rt, true);
+                //getchar();
             }
         }
     }
 }
 
-static void findFusion(Chain *chain){
-    if(instanceOf(chainNode(chain), stmtK)){
-        findFusionSub(chain);
-    }
-    //InfoNode *in = getInfoFromNode(chainNode(chain));
-}
-
 static void analyzeChainBottomUp(ChainList *list){
 /* order: bottom to up */
     while(list){
-        if(!isChainVisited(list->chain))
-            findFusion(list->chain);
+        Chain *chain = list->chain;
+        if(!isChainVisited(chain) && instanceOf(chainNode(chain), stmtK)){
+            findFusion(chain);
+        }
         list = list->next;
     }
 }
 
-static I numListFusion(gNodeList *x){
+static I totalFusionList(gNodeList *x){
     x = x->next;
     I c = 0; while(x) { c++; x = x->next; } R c;
 }
@@ -671,11 +666,11 @@ B sameLastNodes(gNodeList *a, gNodeList *b){
 
 /* scan all gNodeList to find which 'lists' can be fused again */
 static void genCodeListFusion(gNodeList *x){
-    I num = numListFusion(x);
+    I num = totalFusionList(x);
     B *flag = NEWL(B, num);
+    WP("# of list fusion: %d\n", num);
     gNodeList *tmp = NEW(gNodeList);
-    P("# of list fusion: %d\n", num);
-    gNodeList *a = x->next;
+    gNodeList *a   = x->next;
     I c = 0;
     while(a){
         if(!flag[c]) {

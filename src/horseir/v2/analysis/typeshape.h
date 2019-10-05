@@ -6,7 +6,7 @@
 /* signatures */
 
 InfoNodeList *propagateType(Node *func, InfoNodeList *list);
-O propagateTypeShape(Prog *root);
+O propagateTypeShape(Prog *root, B isShow);
 
 InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in);
 O cleanInfoList(InfoNodeList *in_list);

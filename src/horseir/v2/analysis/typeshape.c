@@ -557,7 +557,6 @@ static void scanList(List *list){
 
 static void init(){
     checkFuncNumber();
-    H_SHOW = true;
     currentMethod = NULL;
     currentInList = NEW(InfoNodeList);
     compiledMethodList = NEW(List);
@@ -565,11 +564,14 @@ static void init(){
     hashMeta = initSimpleHash(512); // a magic number
 }
 
-/* entry */
-void propagateTypeShape(Prog *root){
-    printBanner("Type Shape Propagation (After symbol table)");
+/*
+ * entry:
+ *   if(isShow) display type shape info
+ */
+O propagateTypeShape(Prog *root, B isShow){
+    printBanner("Type Shape Propagation"); // after constructing symbol tables
     init();
-    //scanList(root->module_list);
+    H_SHOW = isShow;
     scanNode(entryMain);
 }
 

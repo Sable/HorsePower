@@ -13,19 +13,14 @@ OC    qOpts[99];
 int numOpts;
 bool qIsTpch;
 int qTpchId;
-char *qStats;
+char *qCmd;
 
 static int longFlag; // set by '--verbose'
 static char *qOpt[99];
 
-#define INDENT 29
+#define INDENT 31
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
-#define usage_o() dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:"); \
-                  dispLine(0, INDENT, "", "- fe : elementwise fusion"); \
-                  dispLine(0, INDENT, "", "- fp : fusion with patterns"); \
-                  dispLine(0, INDENT, "", "- fa : automatic operator fusion"); \
-                  dispLine(0, INDENT, "", "- all: all above optimizations"); \
 
 static void dispLine(int level, int left, char *shortMsg, char *longMsg){
     int indents[] = { 2, 4, 6, 8 };
@@ -46,21 +41,21 @@ static void usageInterp(){
 static void usageCompiler(){
     WP("\nRun with a compiler:\n");
     dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler with target: cpu");
-    usage_n(1); usage_o();
+    usage_n(1);
+    dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:");
+    dispLine(0, INDENT, "", "> fe  : elementwise fusion");
+    dispLine(0, INDENT, "", "> fp  : fusion with patterns");
+    dispLine(0, INDENT, "", "> fa  : automatic operator fusion");
+    dispLine(0, INDENT, "", "> all : all above optimizations");
 }
 
-static void usagePrettyPrinter(){
-    //WP("\nRun with a pretty printer:\n");
-    //WP("\n");
-    dispLine(1, INDENT, "--pretty", "Enable pretty printer");
-    usage_n(2);
-}
-
-static void usageDotPrinter(){
-    //WP("\nRun with a dot printer:\n");
-    //WP("\n");
-    dispLine(1, INDENT, "--dot", "Enable dot printer");
-    usage_n(2);
+static void usagePrinter(){
+    usage_n(1);
+    dispLine(2, INDENT, "--print <item>", "Enable printer to print:");
+    dispLine(0, INDENT, "", "> pretty      : pretty programs");
+    dispLine(0, INDENT, "", "> dot         : dependence graphs in dot");
+    dispLine(0, INDENT, "", "> symboltable : symbol tables");
+    dispLine(0, INDENT, "", "> typeshape   : types and shapes");
 }
 
 static void usageStats(){
@@ -71,9 +66,8 @@ static void usageStats(){
 
 static void usageUtility(){
     WP("\nRun with a utility manager:\n");
-    dispLine(0, INDENT, "-u, --utility", "Enable utility manager (pretty/dot/stats)");
-    usagePrettyPrinter();
-    usageDotPrinter();
+    dispLine(0, INDENT, "-u, --utility", "Enable utility manager (printer/stats)");
+    usagePrinter();
     usageStats();
 }
 
@@ -82,9 +76,6 @@ void usage(int e){
     usageInterp();
     usageCompiler();
     usageUtility();
-    //usagePrettyPrinter();
-    //usageDotPrinter();
-    //usageStats();
     WP("\nOthers:\n");
     dispLine(0, INDENT, "-h, --help", "Print this information");
     dispLine(0, INDENT, "-v, --version", "Print HorseIR version");
@@ -93,11 +84,9 @@ void usage(int e){
 
 /* no_argument, required_argument and optional_argument */
 static struct option long_options[] = {
-    {"dot"         , no_argument      , &longFlag, 0},
-    {"tpch"        , required_argument, &longFlag, 1},
-    {"stats"       , required_argument, &longFlag, 2},
-    {"pretty"      , no_argument      , &longFlag, 3},
-    {"meta"        , no_argument      , &longFlag, 4},
+    {"tpch"        , required_argument, &longFlag, 0},
+    {"stats"       , required_argument, &longFlag, 1},
+    {"printer"     , required_argument, &longFlag, 2},
     {"help"        , no_argument      , 0, 'h'},
     {"version"     , no_argument      , 0, 'v'},
     {"compiler"    , no_argument      , 0, 'c'},
@@ -159,7 +148,6 @@ static int validateOptimization(){
 }
 
 #define validateInterpJIT validateInterp
-#define validateDot       validatePretty
 
 static int validateInterp(){
     if(!qPath || qRun <= 0) BAD_TRY();
@@ -174,22 +162,22 @@ static int validateCompiler(){
     return validateOptimization();
 }
 
-static int validatePretty(){
+// qCmd can be checked later
+static int validatePrinter(){
     if(!qPath) BAD_TRY();
     return 0;
 }
 
 static int validateStats(){
-    if(qStats && (sEQ(qStats, "dump") || sEQ(qStats, "load")));
+    if(qCmd && (sEQ(qCmd, "dump") || sEQ(qCmd, "load")));
     else BAD_TRY();
     return 0;
 }
 
 static int validateUtility(){
     switch(optUtl){
-        case PrettyPrintU: validatePretty(); break;
-        case         DotU: validateDot();    break;
-        case       StatsU: validateStats();  break;
+        case PrinterU: validatePrinter();   break;
+        case   StatsU: validateStats();     break;
         default: EP("Unknown utility funciton");
     }
 }
@@ -226,12 +214,12 @@ static void getLongOptionVerbose(int x){
     if(long_options[x].flag != 0){
         int index = long_options[x].val;
         switch(index){
-            case 0: setUtility(DotU);                      break;
-            case 1: qTpchId = atoi(optarg);
+            case 0: qTpchId = atoi(optarg);
                     qIsTpch = (qTpchId>0 && qTpchId<=22);  break;
-            case 2: setUtility(StatsU);
-                    qStats  = strdup(optarg);              break;
-            case 3: setUtility(PrettyPrintU);              break;
+            case 1: setUtility(StatsU);
+                    qCmd    = strdup(optarg);  break;
+            case 2: setUtility(PrinterU);
+                    qCmd    = strdup(optarg);  break;
             default: EP("Option index unknown: %d", index);
         }
     }
@@ -246,7 +234,7 @@ static void init(){
     qTpchId  = 0;
     qIsTpch  = false;
     numOpts  = 0;
-    qStats   = NULL;
+    qCmd     = NULL;
     optUtl   = UnknownU;
 }
 

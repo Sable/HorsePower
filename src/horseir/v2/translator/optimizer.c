@@ -40,7 +40,7 @@ static void init(){
 }
 
 I HorseCompilerOptimized(){
-    printBanner("Start Optimizing");
+    printBanner("Start Optimizr");
     init();
     if(isOptimizeAll()){
         DOI(AllOptSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts

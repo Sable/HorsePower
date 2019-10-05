@@ -115,7 +115,7 @@ static JSON* scanTable(Q id, V table){
     return tab;
 }
 
-static void dumpStats(){
+void dumpStats(){
     initStats();
     JSON *rt = initJSON();
     addJSONField(rt, newJSONKeyValue("database", "TPC-H"));
@@ -125,14 +125,8 @@ static void dumpStats(){
     printJSON(rt);
 }
 
-static void loadStats(){
+void loadStats(){
     demoJSON();
-}
-
-void handleStats(S cmd){
-    if(!strcmp(cmd, "dump")) dumpStats();
-    else if(!strcmp(cmd, "load")) loadStats();
-    else EP("Add impl. for %s", qStats);
 }
 
 

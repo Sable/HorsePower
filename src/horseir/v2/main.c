@@ -50,7 +50,7 @@ static void envInterpreter(char *file){
 static void envCompiler(char *file){
     envInit(file);
     buildSymbolTable(root);
-    propagateTypeShape(root);
+    propagateTypeShape(root, false);
     runCompilerCore();
 }
 
@@ -58,26 +58,35 @@ static void envVersion(){
     P("HorseIR version: 0.2.1\n");
 }
 
-static void utlPrettyPrint(char *file){
+static void utlPrinter(char *qItem, char *file){
     envInit(file);
-    printProg(root);
-}
-
-static void utlDotPrint(char *file){
-    envInit(file);
-    TODO("dot print");
-    //dotProg(root);
+    if(sEQ(qItem, "symboltable")){
+        buildSymbolTable(root);
+    }
+    else if(sEQ(qItem, "typeshape")){
+        buildSymbolTable(root);
+        propagateTypeShape(root, true);
+    }
+    else if(sEQ(qItem, "pretty")){
+        printProg(root);
+    }
+    else if(sEQ(qItem, "dot")){
+        TODO("dot print");
+        //dotProg(root);
+    }
+    else EP("Unknown item for printer: %s", qItem);
 }
 
 static void utlStats(char *qStats){
-    handleStats(qStats);
+    if(sEQ(qStats, "dump")) dumpStats();
+    else if(sEQ(qStats, "load")) loadStats();
+    else EP("Unknown cmd for stats printer: %s", qStats);
 }
 
 static void envUtility(OptionUtility opt){
     switch(opt){
-        case PrettyPrintU: utlPrettyPrint(qPath); break;
-        case         DotU: utlDotPrint(qPath);    break;
-        case       StatsU: utlStats(qStats);      break;
+        case   StatsU: utlStats   (qCmd); break;
+        case PrinterU: utlPrinter (qCmd, qPath); break;
         default: EP("Utility function unknown");
     }
 }
