@@ -80,21 +80,20 @@ C getTypeCodeByName(Node *n);
 S getFuncNameC     (S fn);
 S getFuncNameAuto  (S fn);
 
-Node *getNodeItemIndex(Node *n, I pos);
-List *getNodeParams   (Node *n);
-Node *getNodeFunc     (Node *n);
-List *getParamsIndex  (List *list, I pos);
+Node* getNodeItemIndex(Node *n, I pos);
+List* getNodeParams   (Node *n);
+Node* getNodeFunc     (Node *n);
+List* getParamsIndex  (List *list, I pos);
 
-Node *getNodeFirstParam(Node *n);
-Node *getSingleFunc    (Node *funcs);
-Node *getEachFuncNode  (Node *n);
+Node* getNodeFirstParam(Node *n);
+Node* getSingleFunc    (Node *funcs);
+Node* getEachFuncNode  (Node *n);
 
 B isElementwise(S funcName);
 I findDefByName(Chain *p, S name);
 
 Node* getStmtCall(Node *stmt);
 
-#define CODE_MAX_SIZE 10240  // C code[CODE_MAX_SIZE]
 S genDeclSingle (S func, C del);
 B isDuplicated  (S *names, S s);
 L searchName    (S *names, S s);

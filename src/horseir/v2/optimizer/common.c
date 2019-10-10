@@ -19,14 +19,14 @@ S obtainMinValue(C c){
     }
 }
 
-List *getParamsIndex(List *list, I pos){
+List* getParamsIndex(List *list, I pos){
     if(list){
         return (pos>0)?getParamsIndex(list->next, pos-1):list;
     }
     return NULL;
 }
 
-List *getNodeParams(Node *n){
+List* getNodeParams(Node *n){
     if(instanceOf(n, stmtK)){
         Node *rhs = n->val.assignStmt.expr;
         if(instanceOf(rhs, castK)){
@@ -40,7 +40,7 @@ List *getNodeParams(Node *n){
     return NULL;
 }
 
-Node *getNodeFunc(Node *n){
+Node* getNodeFunc(Node *n){
     if(instanceOf(n, stmtK)){
         Node *rhs = n->val.assignStmt.expr;
         if(instanceOf(rhs, callK)){
@@ -54,7 +54,7 @@ Node *getNodeFunc(Node *n){
     return NULL;
 }
 
-Node *getNodeFirstParam(Node *n){
+Node* getNodeFirstParam(Node *n){
     List *params = nodeList(n->val.call.param);
     while(params && params->next){
         params = params->next;
@@ -62,14 +62,14 @@ Node *getNodeFirstParam(Node *n){
     R params?params->val:0;
 }
 
-Node *getSingleFunc(Node *funcs){
+Node* getSingleFunc(Node *funcs){
     if(totalList(nodeList(funcs)) == 1){
         return nodeList(funcs)->val;
     }
     else R 0;
 }
 
-Node *getEachFuncNode(Node *n){
+Node* getEachFuncNode(Node *n){
     Node *call = getStmtCall(n);
     return getSingleFunc(getNodeFirstParam(call));
 }
@@ -128,8 +128,8 @@ S getNameStr(Node *n){
     }
 }
 
-static char obtainTypeCodeByIn(InfoNode *in){
 #define isBasicType(x) (!(x)->subInfo && !(x)->next)
+static char obtainTypeCodeByIn(InfoNode *in){
     if(isBasicType(in)){
         switch(in->type){
             case  boolT: return 'B';
@@ -214,9 +214,9 @@ B isElementwise(S funcName){
 }
 
 /* ---------- common in optimizations ---------- */
-extern C code[CODE_MAX_SIZE], *ptr;
-extern I varNum;
-extern S varNames[99];
+C code[CODE_MAX_SIZE], *ptr;
+I varNum;
+S varNames[99];
 
 S genDeclSingle(S func, C del){
     C temp[199]; 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# ./horse -c cpu -f ./scripts/pl/BlkSchls.hir
+
 usage() {
     printf '%s\n' \
         "Usage: $0 <cmd>" "" \
@@ -12,7 +14,8 @@ usage() {
         " 7) $0 cloc                    ## show the number of lines of code" ""
 
     echo "Example: run=1 sf=1 thread=1 ./run.sh interp q 6"
-    echo "         opt=fa ./run.sh opt q 6   # automatic fusion for q6"
+    echo "         opt=fa ./run.sh opt q 6      ## automatic fusion for q6"
+    echo "         ./run.sh print typeshape q 6 ## print type and shape only"
     exit 1
 }
 

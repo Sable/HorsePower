@@ -1223,9 +1223,10 @@ static InfoNode *propEachDya(InfoNodeList *in_list, int side){
                 addToInfoList(args, y->subInfo);
                 //printInfoNode(args->next->in);
                 //printInfoNode(args->next->next->in);
+                //printNode(func);
                 InfoNodeList *rtns = propagateType(func, args);
                 InfoNode *rtn = rtns->next->in;
-                //printInfoNode(rtn); getchar();
+                //printInfoNode(rtn); stop("check rtn info");
                 /* TODO: clean args (fine), rtns(not allowed) */
                 return newInfoNodeAll(listT, y->shape, rtn, NULL);
             }
@@ -1249,12 +1250,20 @@ static InfoNode *propEachRight(InfoNodeList *in_list){
     return propEachDya(in_list,2);
 }
 
+/* TODO: free allocated memory */
 static InfoNode *propEach(InfoNode *fn, InfoNode *x){
-    if(isFuncIN(fn) && isListT(x)){ /* TODO: add more accurate rules */
-        return newInfoNodeAll(listT,
-                              x->shape,
-                              newInfoNode(getSubType(x), NULL),
-                              NULL);
+    if(isFuncIN(fn) && isListT(x)){
+        // fetch function
+        Node *func = fn->funcs->val.listS->val;
+        // fetch args and save to arg list
+        InfoNodeList *args = NEW(InfoNodeList);
+        addToInfoList(args, x->subInfo);
+        // pass func and args to type and shape propagation
+        InfoNodeList *rtns = propagateType(func, args);
+        // handle return type and shape
+        InfoNode *rtn = rtns->next->in;
+        // create a new info node and return
+        return newInfoNodeAll(listT, x->shape, rtn, NULL);
     }
     else return NULL;
 }

@@ -41,7 +41,6 @@ sHashTable *hashOpt;
 
 #define HEAD_MAX_SIZE 1024
 #define FUNC_MAX_SIZE 10240
-#define CODE_MAX_SIZE 10240
 static C head_code[HEAD_MAX_SIZE], *htr;
 static C func_code[FUNC_MAX_SIZE], *ftr;
 static C code[CODE_MAX_SIZE], *ptr;
@@ -412,6 +411,7 @@ static void scanConst(Node *n){
         case secondC:
         case    intC: SP(temp, "%d"  , v->valI); break;
         case  floatC: SP(temp, "%g"  , v->valF); break;
+        case   charC: SP(temp, "'%c'", v->valS[0]); break;
         case     dtC:
         case   longC: SP(temp, "%lld", v->valL); break;
         case   clexC: SP(temp, v->valX[1]>=0?"%g+%g":"%g%g", \

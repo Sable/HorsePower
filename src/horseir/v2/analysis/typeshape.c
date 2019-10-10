@@ -61,7 +61,7 @@ static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
         AllFunc func = (AllFunc)funcRtn;
         newNode = func(list);
     }
-    else EP("Builtin function valence mismatch: %d vs. %d\n", numArg, valence);
+    else EP("Builtin function valence mismatch (%s): %d vs. %d\n", funcName, numArg, valence);
     // return
     if(newNode) return newNode;
     else {
@@ -131,7 +131,7 @@ InfoNodeList *propagateType(Node *func, InfoNodeList *list){
 
 InfoNode *addToInfoList(InfoNodeList *list, InfoNode *in){
     InfoNodeList *x = NEW(InfoNodeList);
-    x->in = in;
+    x->in   = in;
     x->next = list->next;
     list->next = x;
     return in;

@@ -68,6 +68,7 @@ void   time_clear();
 #define FS(x)     FT("%s",x)
 #define sEQ(x,y)  (!strcmp(x,y))   // string equal
 #define sNEQ(x,y) (0!=strcmp(x,y)) // string not equal
+#define stop(...) do{P("%-15s>> ",__FUNCTION__); P(__VA_ARGS__); getchar();}while(0)
 
 /* For debugging */
 #define printBanner(s) P("/*==== "s" ====*/\n")
@@ -81,6 +82,7 @@ void   time_clear();
 /* constants */
 #define uscore "_"  // underscore
 #define comma  ','
+#define CODE_MAX_SIZE 10240
 
 #include "frontend/tree.h"
 #include "frontend/weed.h"

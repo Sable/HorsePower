@@ -188,39 +188,6 @@ L readTpchTables(){
     R 0;
 }
 
-L initTableByName(S tableName){
-    if(!findTableByName(getSymbol(tableName))){
-        P("Loading table %s\n",tableName);
-        if(isReadBin){
-            P(">> Reading from bin\n");
-            initTableFromBin(tableName);
-        }
-        else{
-            if(!strcmp(tableName, "region"))
-                readTableRegion();
-            else if(!strcmp(tableName, "nation"))
-                readTableNation();
-            else if(!strcmp(tableName, "customer"))
-                readTableCustomer();
-            else if(!strcmp(tableName, "orders"))
-                readTableOrders();
-            else if(!strcmp(tableName, "lineitem"))
-                readTableLineitem();
-            else if(!strcmp(tableName, "part"))
-                readTablePart();
-            else if(!strcmp(tableName, "supplier"))
-                readTableSupplier();
-            else if(!strcmp(tableName, "partsupp"))
-                readTablePartsupp();
-            else EP("Table %s NOT FOUND\n",tableName);
-        }
-    }
-    else {
-        P("Table %s has been loaded\n",tableName);
-    }
-    R 0;
-}
-
 L metaTable(V x, S tableName){
     V keyV = getTableKeys(x);
     V valV = getTableVals(x);
@@ -246,5 +213,62 @@ L initTableFromBin(S tableName){
     R 0;
 }
 
+/* load pl tables */
+
+static L readTableBlackScholes(){
+    C CSV_LINE[128]; SP(CSV_LINE, "/home/sable/hanfeng.c/github/benchmark-udf/data/in_1M.tbl");
+    P("File: %s\n", CSV_LINE);
+    L TYPE_LINE[]  = {H_FLT, H_FLT, H_FLT, H_FLT, H_FLT, H_FLT,
+                      H_C  , H_FLT, H_FLT};
+    const L NUM_COL_LINE = 9;
+    Q SYM_LIST_LINE[NUM_COL_LINE];
+    const C* PRE_DEFINED[] = {
+        "sptprice", "strike", "rate", "divq", "volatility", "time",
+        "optiontype", "divs", "dgrefval"
+    };
+
+    initDBTable(NUM_COL_LINE, PRE_DEFINED, SYM_LIST_LINE);
+    V tableBlackScholes = readCSV(CSV_LINE, NUM_COL_LINE, TYPE_LINE, SYM_LIST_LINE);
+    registerTable((S)"blackscholes", tableBlackScholes);
+    R 0;
+}
+
+
+/* load tables */
+
+L initTableByName(S tableName){
+    if(!findTableByName(getSymbol(tableName))){
+        P("Loading table %s\n",tableName);
+        if(isReadBin){
+            P(">> Reading from bin\n");
+            initTableFromBin(tableName);
+        }
+        else{
+            if(sEQ(tableName, "region"))
+                readTableRegion();
+            else if(sEQ(tableName, "nation"))
+                readTableNation();
+            else if(sEQ(tableName, "customer"))
+                readTableCustomer();
+            else if(sEQ(tableName, "orders"))
+                readTableOrders();
+            else if(sEQ(tableName, "lineitem"))
+                readTableLineitem();
+            else if(sEQ(tableName, "part"))
+                readTablePart();
+            else if(sEQ(tableName, "supplier"))
+                readTableSupplier();
+            else if(sEQ(tableName, "partsupp"))
+                readTablePartsupp();
+            else if(sEQ(tableName, "blackscholes"))
+                readTableBlackScholes();
+            else EP("Table %s NOT FOUND\n",tableName);
+        }
+    }
+    else {
+        P("Table %s has been loaded\n",tableName);
+    }
+    R 0;
+}
 
 

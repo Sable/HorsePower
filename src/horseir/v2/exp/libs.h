@@ -8,12 +8,18 @@
 //#define PROFILE(c, n, stmt) P("Line: %d\n",c); V n = allocNode(); stmt
 #ifdef NO_PROFILE_INFO
     #define PROFILE(c, stmt) stmt
+    #define PROFILE_UDF(c, stmt) stmt
 #else
     #define PROFILE(c,stmt) { my_tic(); \
         I e=stmt; if(e) printErrMsg(e); \
         E t0=my_toc(0); \
         if(t0>=0.1) P("[Profiling] Line %d: %g ms\n", c,t0); \
         else P("[Profiling] Line %d:\n", c); }
+    #define PROFILE_UDF(c,stmt) { L cur=buffS; \
+        my_tic(); I e=stmt; if(e) printErrMsg(e); \
+        E t0=my_toc(0); buffS=cur; \
+        if(t0>=0.1) P("[Profiling UDF] Line %d: %g ms\n", c,t0); \
+        else P("[Profiling UDF] Line %d:\n", c); }
 #endif
 
 #define DOP_ACC(n, x, ...) {L i2=n; \
@@ -36,6 +42,7 @@ static V LiteralI32 (I x) { LiteralSingle(I, i); }
 static V LiteralI64 (L x) { LiteralSingle(L, l); }
 static V LiteralF32 (F x) { LiteralSingle(F, f); }
 static V LiteralF64 (E x) { LiteralSingle(E, e); }
+static V LiteralChar(E x) { LiteralSingle(C, c); }
 static V LiteralSymbol(S s) {Q x=getSymbol(s); LiteralSingle(Q, q);}
 
 #define LiteralVector(T) {V z=incV(); initV(z, H_##T, n); DOI(n, v##T(z,i) = x[i]) R z;}
@@ -46,6 +53,7 @@ static V LiteralVectorI32 (I n, I *x) { LiteralVector(I); }
 static V LiteralVectorI64 (I n, L *x) { LiteralVector(L); }
 static V LiteralVectorF32 (I n, F *x) { LiteralVector(F); }
 static V LiteralVectorF64 (I n, E *x) { LiteralVector(E); }
+static V LiteralVectorSymbol(I n, S *s) { V z=incV(); initV(z, H_Q, n); DOI(n, vQ(z,i)=getSymbol(s[i])) R z; }
 
 
 /* macros for fusion */
