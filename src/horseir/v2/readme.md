@@ -25,6 +25,7 @@ Source code folders
 - scripts   : SQL queries from tpch and aquery 
 - translator: interpreter, compiler, and optimizer
 - util      : utility functions
+- llvm      : llvm codegen support
 ```
 
 Trivial folders

@@ -10,8 +10,7 @@ Versions
 
 ***Note***
 
-- Each folder is independent from others
-- Each folder contains individual tests for the specific version
+- Each version is independent from others and contains individual tests
 
 
 
