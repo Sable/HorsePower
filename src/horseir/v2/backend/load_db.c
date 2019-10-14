@@ -1,11 +1,24 @@
 #include "../global.h"
-C CSV_FILE_ROOT[] = "../../../data/tpch/db";
-L CSV_FILE_SCALE = 1;
-L TEST_RUNS = 1;
-extern B isReadBin;
 
 #define H_INT H_I
 #define H_FLT H_E
+#define setTpchPath(path,table)    setDataPath(path,"tpch",table,"tbl")
+#define setTpchBinPath(path,table) setDataPath(path,"tpch-bin",table,"bin")
+
+L CSV_FILE_SCALE = 1;
+L TEST_RUNS      = 1;
+extern B isReadBin;
+
+static O setDataPath(S path, S folder, S tableName, S format){
+    const S base = getenv("HORSE_BASE");
+    if(base){
+        SP(path, "%s/data/%s/db%lld/%s.%s", base, folder, CSV_FILE_SCALE, tableName, format);
+    }
+    else{
+        EP("Set project base directory: export HORSE_BASE=/path/to/HorsePower\n" \
+           "\t- Data path: $HORSE_BASE/data/%s/db*/*.%s",folder,format);
+    }
+}
 
 static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
     DOI(n, insertSym(createSymbol((S)PRE_DEFINED[i])));
@@ -15,8 +28,7 @@ static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
 }
 
 static L readTableRegion(){
-    // C CSV_LINE[] = "data/tpch/db1/region.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/region.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "region");
     L TYPE_LINE[]  = {H_INT, H_Q, H_S};
     const L NUM_COL_LINE = 3;
     Q SYM_LIST_LINE[NUM_COL_LINE];
@@ -31,8 +43,7 @@ static L readTableRegion(){
 }
 
 static L readTableNation(){
-    // C CSV_LINE[] = "data/tpch/db1/nation.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/nation.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "nation");
     L TYPE_LINE[]  = {H_INT, H_Q, H_INT, H_S};
     const L NUM_COL_LINE = 4;
     Q SYM_LIST_LINE[NUM_COL_LINE];
@@ -47,8 +58,7 @@ static L readTableNation(){
 }
 
 static L readTableCustomer(){
-    // C CSV_LINE[] = "data/tpch/db1/customer.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/customer.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "customer");
     L TYPE_LINE[]  = {H_INT, H_Q, H_S, H_INT,\
                       H_S, H_FLT, H_Q, H_S};
     const L NUM_COL_LINE = 8;
@@ -65,9 +75,7 @@ static L readTableCustomer(){
 }
 
 static L readTableOrders(){
-    // C CSV_LINE[] = "data/tpch/db1/orders.tbl";
-    // C CSV_LINE[] = "data/test-tables/orders-small.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/orders.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "orders");
     L TYPE_LINE[]  = {H_INT, H_INT, H_C, H_FLT,\
                       H_D, H_Q, H_S, H_INT, H_S};
     const L NUM_COL_LINE = 9;
@@ -84,9 +92,7 @@ static L readTableOrders(){
 }
 
 static L readTableLineitem(){
-    // C CSV_LINE[] = "data/tpch/db1/lineitem.tbl";
-    // C CSV_LINE[] = "data/test-tables/lineitem-small.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/lineitem.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "lineitem");
     L TYPE_LINE[]  = {H_INT, H_INT, H_INT, H_INT, \
                       H_FLT, H_FLT, H_FLT, H_FLT, \
                       H_C, H_C, H_D, H_D, \
@@ -107,8 +113,7 @@ static L readTableLineitem(){
 }
 
 static L readTablePart(){
-    // C CSV_LINE[] = "data/tpch/db1/part.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/part.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "part");
     L TYPE_LINE[]  = {H_INT, H_S, H_S, H_Q, \
                       H_Q, H_INT, H_Q, H_FLT, H_S };
     const L NUM_COL_LINE = 9;
@@ -125,8 +130,7 @@ static L readTablePart(){
 }
 
 static L readTableSupplier(){
-    // C CSV_LINE[] = "data/tpch/db1/supplier.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/supplier.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "supplier");
     L TYPE_LINE[]  = {H_INT, H_S, H_S, H_INT, \
                       H_S, H_FLT, H_S };
     const L NUM_COL_LINE = 7;
@@ -143,8 +147,7 @@ static L readTableSupplier(){
 }
 
 static L readTablePartsupp(){
-    // C CSV_LINE[] = "data/tpch/db1/partsupp.tbl";
-    C CSV_LINE[128]; SP(CSV_LINE, "%s%lld/partsupp.tbl", CSV_FILE_ROOT, CSV_FILE_SCALE);
+    C CSV_LINE[128]; setTpchPath(CSV_LINE, "partsupp");
     L TYPE_LINE[]  = {H_INT, H_INT, H_INT, H_FLT, H_S};
     const L NUM_COL_LINE = 5;
     Q SYM_LIST_LINE[NUM_COL_LINE];
@@ -158,15 +161,17 @@ static L readTablePartsupp(){
     R 0;
 }
 
-const C* tpchName[] = { "Region",   "Nation",   "Customer", \
-                        "Orders",   "Lineitem", "Part",     \
-                        "Supplier", "Partsupp" };
+static const S tpchName[] = { \
+    "region",   "nation",   "customer", \
+    "orders",   "lineitem", "part",     \
+    "supplier", "partsupp" };
 
-L (*tpchDB[8])() = { readTableRegion,  readTableNation  , readTableCustomer, \
-                     readTableOrders,  readTableLineitem, readTablePart, \
-                     readTableSupplier,readTablePartsupp };
+static L (*tpchDB[8])() = { \
+    readTableRegion,  readTableNation  , readTableCustomer, \
+    readTableOrders,  readTableLineitem, readTablePart, \
+    readTableSupplier,readTablePartsupp };
 
-L readTpchTables(){
+static L readTpchTables(){
     // P("reading table region\n");
     // readTableRegion();
     // P("reading table nation\n");
@@ -201,10 +206,9 @@ L metaTable(V x, S tableName){
 
 /* load from bin */
 L initTableFromBin(S tableName){
-    char temp[99];
-    SP(temp, "../../../data/tpch-bin/db1/%s.bin",tableName);
-    FILE *fp = fopen(temp, "rb");
-    if(!fp) EP("File ../data/tpch-bin/db1/%s.bin open fails\n",tableName);
+    C path[99]; setTpchBinPath(path, tableName);
+    FILE *fp = fopen(path, "rb");
+    if(!fp) EP("File %s open fails\n",path);
     V x = allocNode();
     readSerializeV(x, fp);
     fclose(fp);

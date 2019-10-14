@@ -108,6 +108,9 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 export OMP_NUM_THREADS=$thread
 
+# set base directory
+export HORSE_BASE=~/github/HorsePower
+
 ## Entry: main
 if [ $# -eq 1 ]; then
     cmd=$1
