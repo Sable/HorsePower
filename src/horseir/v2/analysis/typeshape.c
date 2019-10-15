@@ -89,7 +89,7 @@ static InfoNodeList *propagateMethod(Node *n, InfoNodeList *inputList){
     int valence = totalSymbolNameList(meta->paramVars);
     if(numArg == valence){
         SymbolNameList *argList = meta->paramVars;
-        printInfoNode(inputList->next->in);
+        if(H_SHOW) printInfoNode(inputList->next->in);
         if(!checkParamCompatible(argList, inputList->next)){
             EP("Type not compatible in parameters");
         }
@@ -390,7 +390,7 @@ static void scanMethod(Node *n){
         if(c == 1 && meta->isCalled) c = 2;
         else break;
     } // loop body executed 1 or 2 times
-    P("Method scanned round(s): %d\n", c); //getchar();
+    if(H_SHOW) P("Method scanned round(s): %d\n", c); //getchar();
     meta->isCompiling = false;
     meta->isCalled    = false;
     currentMethod = prevNode;
@@ -422,11 +422,12 @@ static void scanAssignStmt(Node *n){
         //printInfoNode(currentInList->next->in); getchar();
         if(numVar == 1 && typelistCompatible(1, vars, currentInList));
         else {
-            printNode(n); EP("Type error in assignment\n");
+            printNode(n);
+            EP("Type error in assignment\n");
         }
     }
     //printInfoNode(currentInList->next->in);
-    printInfoVars(vars);
+    if(H_SHOW) printInfoVars(vars);
     cleanInfoList(currentInList);
 }
 
