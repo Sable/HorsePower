@@ -31,13 +31,15 @@ sHashTable *hashOpt;
 // two macros moved the generated C macro "HORSE_UDF"
 //#define VAR_BEGIN "I h_prev_v = h_buff_v;"
 //#define VAR_END   "h_buff_v = h_prev_v;"
-#define C_MACRO_UDF "HORSE_UDF"
+#define C_MACRO_UDF  "HORSE_UDF"  // macro(lineno, call, callback)
+#define C_MACRO_TIME "PROFILE"
 #define NUM_VAR_ROW 4           // # of var declarations in a row
 #define NUM_CHAR_LINE 128
 
 #define isTrueMacro     "isTrue"
 #define scanBreak(n)    glueCodeLine("break")
 #define scanContinue(n) glueCodeLine("continue")
+#define isNodeUDF(n)  instanceOf(nodeStmtExpr(n), callK)
 
 #define HEAD_MAX_SIZE 1024
 #define FUNC_MAX_SIZE 10240
@@ -124,6 +126,18 @@ static void addStrConst(S s){
     SP(ptr, "\"%s\"", s);
 }
 
+static B isNodeMethod(Node *n){
+    if(instanceOf(n, stmtK)){
+        Node *expr = nodeStmtExpr(n);
+        if(instanceOf(expr, callK)){
+            Node *func = nodeCallFunc(expr); // nameK
+            SymbolKind sk = nodeNameKind(func);
+            return sk == methodS;
+        }
+    }
+    return false;
+}
+
 /* ------ helper functions above ------ */
 
 static void genIndent(){
@@ -181,17 +195,34 @@ static void genListEach(List *list, C sep){
     }
 }
 
+// (V []){ x,y,... }
 static void genVarArray(List *list, C sep){
     glueCode("(V []){");
     genList(list, sep);
     glueCode("}");
 }
 
+static void genVarStoreDep(List *list, I dep){
+    if(list){
+        genVarStoreDep(list->next, dep+1);
+        if(dep > 0) glueCode(" ");
+        scanNode(list->val);
+        glueAny("=tempV[%d];", dep);
+    }
+}
+
+static void genVarStore(List *list){
+    glueAny("{");
+    genVarStoreDep(list, 0);
+    glueAny("}");
+}
+
+
 static void genVarList(List *list, C sep){
     if(list){
-        genList(list->next, sep);
+        genVarList(list->next, sep);
         if(list->next) glueAny("%c ",sep);
-        glueCode("V ");
+        glueCode("V "); 
         scanNode(list->val);
     }
 }
@@ -229,23 +260,33 @@ static void genLocalVars(Node *block){
     DOI(SymbolTableSize, { SymbolName *sn = st->table[i];
             while(sn){genLocalVar(sn, k++); sn=sn->next;}} )
     glueLine();
+    glueIndent(); glueAny("V tempV[10]; // temporary return vars"); glueLine();
     //P("total decl vars = %d\n", k); getchar();
 }
 
-static void genProfileStmt(B f, I c){
+static void genProfileStmt(B f, I c, S macro){
     if(f) {
-        genIndent(); glueAny("PROFILE(%d, ",c);
+        genIndent(); glueAny("%s(%d, ",macro,c);
     }
     else {
         glueCode(");"); glueLine();
     }
 }
 
+static void genPrefixMacro(Node *n, B f, I c){
+    if(isNodeMethod(n)){
+        genProfileStmt(f,c,C_MACRO_UDF);
+    }
+    else {
+        genProfileStmt(f,c,C_MACRO_TIME);
+    }
+}
+
 static void genCodeExtra(ChainExtra *extra, I lineno){
     glueMethodHead(extra->funcDecl, "");
-    genProfileStmt(1,lineno);
+    genProfileStmt(1,lineno,C_MACRO_TIME);
     glueCode(extra->funcInvc);
-    genProfileStmt(0,-1);
+    genProfileStmt(0,-1,C_MACRO_TIME);
     glueMethodFunc(extra->funcFunc);
 }
 
@@ -253,7 +294,7 @@ static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case   stmtK: genProfileStmt(f,n->lineno); break;
+        case   stmtK: genPrefixMacro(n,f,n->lineno); break;
         case     ifK:
         case  whileK:
         case repeatK:
@@ -269,7 +310,7 @@ static void genEntry(){
     if(numRtns > 0){
         glueCodeLine("V rtns[99];");
         glueCodeLine("tic();");
-        glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
+        glueAnyLine("%s(0, horse_main(rtns), {});",C_MACRO_UDF);
         glueCodeLine("E elapsed = calc_toc();");
         glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
         glueCodeLine("P(\"Output:\\n\");");
@@ -291,7 +332,7 @@ static void scanFuncBuiltin(S func){
 }
 
 static void scanFuncMethod(S func){
-    glueAny(C_MACRO_UDF "(%s", func);
+    glueAny("horse_%s", func);
 }
 
 static SymbolKind scanFuncName(Node *n){
@@ -319,15 +360,16 @@ static void scanCall(Node *n){
     SymbolKind sk = scanFuncName(nodeCallFunc(n));
     glueCode("(");
     if(sk == methodS) {
-        genVarArray(lhsVars, comma);
-        scanNode(nodeCallParam(n)); // argExprK
+        //genVarArray(lhsVars, comma);
+        glueAny("tempV%c ", comma);
+        genList(nodeList(nodeCallParam(n)), comma);
     }
     else {
         S funcName = nodeName2(nodeCallFunc(n));
         genList(lhsVars, comma);
         List *args = nodeList(nodeCallParam(n));
         I numArg = totalList(args);
-        if(!strcmp(funcName, "list")){
+        if(sEQ(funcName, "list")){
             glueAny(", %d, ",numArg);
             genVarArray(args, comma);
         }
@@ -340,7 +382,10 @@ static void scanCall(Node *n){
         }
     }
     glueCode(")");
-    if(sk == methodS) glueCode(")");
+    if(sk == methodS){
+        glueCode(", ");
+        genVarStore(lhsVars);
+    }
 }
 
 static void scanVar(Node *n){

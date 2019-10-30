@@ -36,6 +36,26 @@ Trivial folders
 - libs  : an experiment to create a big library for built-in functions with all types of parameters
 ```
 
+## Temporary Folder
+
+Overview
+
+```
+    tmp/
+        udf/
+```
+
+***Note***: New sub-folders can be added freely.
+
+### User-defined Functions
+
+Workspace `tmp/udf` is created for testing generated C code from HorseIR programs.
+
+Run compiler to fetch C code
+
+    ./horse -c cpu -f scripts/udf/q6_proc.hir
+
+
 
 ## Naming Convensions
 
