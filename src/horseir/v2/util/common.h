@@ -78,6 +78,7 @@ void freeHorseArray(HA x);
 
 /* dot.c */
 void dotProg(Prog *root);
+void dotProgMermaid(Prog *root);
 
 /* options.c */
 typedef enum OptionMode{

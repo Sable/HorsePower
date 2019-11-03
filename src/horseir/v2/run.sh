@@ -10,9 +10,9 @@ usage() {
         " 3) $0 compile q/t/f <id>      ## compile code without any optimizations" "" \
         " 4) $0 opt     q/t/f <id>      ## compile code with optimizations" "" \
         " 5) $0 stats load/dump         ## load/dump statistical information" "" \
-        " 6) $0 print <item> q/t/f <id> ## print item (pretty/dot/symboltable/typeshape)" "" \
+        " 6) $0 print <item> q/t/f <id> ## print item (pretty/dot/mermaid/symboltable/typeshape)" "" \
         " 7) $0 cloc                    ## show the number of lines of code" "" \
-        " 8) $0 utility <cmd>           ## (pretty/dot/symboltable/typeshape)" ""
+        " 8) $0 utility <cmd>           ## (pretty/dot/mermaid/symboltable/typeshape)" ""
 
     echo "Example: run=1 sf=1 thread=1 ./run.sh interp q 6"
     echo "         opt=fa ./run.sh opt q 6      ## automatic fusion for q6"

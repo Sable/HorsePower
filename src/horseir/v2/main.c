@@ -64,10 +64,10 @@ static void utlPrinter(char *qItem, char *file){
         printProg(root);
     }
     else if(sEQ(qItem, "dot")){
-        buildSymbolTable(root);
-        propagateTypeShape(root, false);
-        buildUDChain(root);
         dotProg(root);
+    }
+    else if(sEQ(qItem, "mermaid")){
+        dotProgMermaid(root);
     }
     else if(sEQ(qItem, "symboltable")){
         buildSymbolTable(root);

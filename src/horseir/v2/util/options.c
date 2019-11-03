@@ -54,6 +54,7 @@ static void usagePrinter(){
     dispLine(2, INDENT, "--print <item>", "Enable printer to print:");
     dispLine(0, INDENT, "", "> pretty      : pretty programs");
     dispLine(0, INDENT, "", "> dot         : dependence graphs in dot");
+    dispLine(0, INDENT, "", "> mermaid     : mermaid dot");
     dispLine(0, INDENT, "", "> symboltable : symbol tables");
     dispLine(0, INDENT, "", "> typeshape   : types and shapes");
 }
