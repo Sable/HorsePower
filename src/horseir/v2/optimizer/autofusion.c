@@ -1106,7 +1106,7 @@ static O genCodeListFusion(){
 static void compileMethod(Node *n){
     ChainList *chains = nodeMethodChainList(n);
     //printChainList(chains); getchar();
-    analyzeChainBottomUp(chains->next);
+    analyzeChainBottomUp(chains);
     //genCodeListFusion(glist);
     genCodeListFusion();
 }

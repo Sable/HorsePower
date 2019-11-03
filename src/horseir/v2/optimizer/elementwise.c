@@ -264,7 +264,7 @@ static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
     ChainList *chains = nodeMethodChainList(n);
-    analyzeChain(chains->next);
+    analyzeChain(chains);
     currentMethod = prevMethod;
     //printChainList(chains); getchar(); // TODO: printChainListBasic
 }

@@ -546,7 +546,7 @@ static void scanMethod(Node *n){
     //printFlow(flow);
     //printFlow(flow_sink);
     //printChainList(chain_list); // print all chains
-    n->val.method.meta->chains = chain_list; // with dummy
+    n->val.method.meta->chains = chain_list->next; // no dummy
     // TODO: assign chain_list to a method node
     // TODO: clean chain_list
 }
@@ -613,7 +613,7 @@ static void scanList(List *list, ChainList *flow){
 static void init(){
     isLHS = false;
     currentModuleName = NULL;
-    flow_sink = NEW(ChainList);
+     flow_sink = NEW(ChainList);
     chain_list = NEW(ChainList);
     flow_list_input = NEW(FlowList);
     flow_list_exit  = NEW(FlowList);

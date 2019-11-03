@@ -67,7 +67,7 @@ extern "C" {
 
 #define FUNC1(x) I (*x)(V,V)
 #define FUNC2(x) I (*x)(V,V,V)
-#define CHECKE(x) { L e=x; if(e) R e; }
+#define CHECKE(x) { I e=x; if(e) R e; }
 
 I pfnLoadTable     (V z, V x);
 I pfnList          (V z, L n, V x[]);

@@ -604,7 +604,6 @@ static void scanList1(List *list, Node *first){
 // TODO: utilize information stored in chains
 static void compileChain(Chain *chain){
     scanNode(chain->cur);
-
 }
 
 static I compileChainList(ChainList *list){
