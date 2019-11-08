@@ -41,8 +41,8 @@ module default{
       t0_0:? = @eq(c01, `"ECONOMY ANODIZED STEEL":sym);
       t0_1:? = @compress(t0_0, c00);
       t0_2:? = @join_index(@eq, t0_1, c21);
-      t0_3:? = @index(t0_2, 0:i32);
-      t0_4:? = @index(t0_2, 1:i32);
+      t0_3:? = @index(t0_2, 0:i64);
+      t0_4:? = @index(t0_2, 1:i64);
       t0_5:? = @fetch(c22);
       t0_6:? = @index(t0_5, t0_4); // l_orderkey
       t0_7:? = @index(c20 , t0_4); // l_suppkey
@@ -54,8 +54,8 @@ module default{
       t1_2:? = @and(t1_0, t1_1);
       t1_3:? = @compress(t1_2, c30);
       t1_4:? = @join_index(@eq, t0_6, t1_3);
-      t1_5:? = @index(t1_4, 0:i32);
-      t1_6:? = @index(t1_4, 1:i32);
+      t1_5:? = @index(t1_4, 0:i64);
+      t1_6:? = @index(t1_4, 1:i64);
       //t1_7:? = @compress(t1_2, c32);
       //t1_8:? = @fetch(t1_7);
       t1_7:? = @fetch(c32);
@@ -68,8 +68,8 @@ module default{
       t1_14:? = @index(t1_13, t1_6);// o_orderdate
       // 2. custkey: o_ and c_
       t2_0:? = @join_index(@eq, t1_9, c40);
-      t2_1:? = @index(t2_0, 0:i32);
-      t2_2:? = @index(t2_0, 1:i32);
+      t2_1:? = @index(t2_0, 0:i64);
+      t2_2:? = @index(t2_0, 1:i64);
       t2_3:? = @fetch(c41);
       t2_4:? = @index(t2_3 , t2_2); // c_nationkey
       t2_5:? = @index(t1_10, t2_1); // l_suppkey
@@ -83,16 +83,16 @@ module default{
       t3_3:? = @compress(t3_2, c50); // n1.nationkey
       // 4. nationkey
       t4_0:? = @join_index(@eq, t3_3, t2_4);
-      t4_1:? = @index(t4_0, 0:i32);
-      t4_2:? = @index(t4_0, 1:i32);
+      t4_1:? = @index(t4_0, 0:i64);
+      t4_2:? = @index(t4_0, 1:i64);
       t4_3:? = @index(t2_5, t4_2);  // l_suppkey
       t4_4:? = @index(t2_6, t4_2);  // l_extendedprice
       t4_5:? = @index(t2_7, t4_2);  // l_discount
       t4_6:? = @index(t2_8, t4_2);  // o_orderdate
       // 5. suppkey: xx_ and s_
       t5_0:? = @join_index(@eq, t4_3, c10);
-      t5_1:? = @index(t5_0, 0:i32);
-      t5_2:? = @index(t5_0, 1:i32);
+      t5_1:? = @index(t5_0, 0:i64);
+      t5_2:? = @index(t5_0, 1:i64);
       t5_x:? = @fetch(c11);
       t5_3:? = @index(t5_x, t5_2);  // s_nationkey
       t5_4:? = @index(t4_4, t5_1);  // l_extendedprice
@@ -100,14 +100,14 @@ module default{
       t5_6:? = @index(t4_6, t5_1);  // o_orderdate
       // 6. nationkey: n2_ and xx_
       t6_0:? = @join_index(@eq, c60, t5_3);
-      t6_1:? = @index(t6_0, 0:i32);
-      t6_2:? = @index(t6_0, 1:i32);
+      t6_1:? = @index(t6_0, 0:i64);
+      t6_2:? = @index(t6_0, 1:i64);
       t6_3:? = @index(c61 , t6_1);
       t6_4:? = @index(t5_4, t6_2);  // l_extendedprice
       t6_5:? = @index(t5_5, t6_2);  // l_discount
       t6_6:? = @index(t5_6, t6_2);  // o_orderdate
       // 7. value
-      t7_0:? = @minus(1:i32, t6_5);
+      t7_0:? = @minus(1:i64, t6_5);
       t7_1:? = @mul(t6_4, t7_0);
       t7_2:? = @date_year(t6_6);
       // table: all_nations

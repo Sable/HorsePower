@@ -8,7 +8,7 @@ module default{
     t12:? = @lt(t6,1993-10-01:date);
     t13:? = @and(t11,t12);
     t23:? = @load_table(`lineitem:sym);
-    t24:enum<i32> = check_cast(@column_value(t23,`l_orderkey:sym), enum<i32>);
+    t24:enum<i64> = check_cast(@column_value(t23,`l_orderkey:sym), enum<i64>);
     t36:date = check_cast(@column_value(t23,`l_commitdate:sym), date);
     t37:date = check_cast(@column_value(t23,`l_receiptdate:sym), date);
     t41:? = @lt(t36,t37);

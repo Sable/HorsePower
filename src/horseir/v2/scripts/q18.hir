@@ -23,7 +23,7 @@ module default{
       t0_3:? = @each_right(@index, c21, t0_2);
       t0_4:? = @each(@sum, t0_3);
       t0_5:? = @raze(t0_4);
-      t0_6:? = @gt(t0_5, 300:i32);
+      t0_6:? = @gt(t0_5, 300:i64);
       t0_7:? = @compress(t0_6, t0_1);
       t0_8:? = @index(t0_k, t0_7);
       // 1. orderkey: 0_ and o_
