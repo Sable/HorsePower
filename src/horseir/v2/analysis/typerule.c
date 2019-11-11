@@ -1337,7 +1337,7 @@ void checkFuncNumber(){
 }
 
 static int findNameFromSet(char *funcName, const char *set[], int size){
-    DOI(size, if(!strcmp(funcName, set[i])) return i)
+    DOI(size, if(sEQ(funcName, set[i])) return i)
     return -1;
 }
 
@@ -1382,11 +1382,11 @@ const S obtainTypeOther(TypeOther t){
 
 void getFuncIndexByName(char *name, FuncUnit *x){
     if(!searchUnary(name,x) && !searchBinary(name,x) && !searchOther(name,x)){
-        if(!strcmp(name, "le"))
+        if(sEQ(name, "le"))
             WP("Do you mean 'leq' instead of 'le'?\n");
-        else if(!strcmp(name, "ge"))
+        else if(sEQ(name, "ge"))
             WP("Do you mean 'geq' instead of 'ge'?\n");
-        else if(!strcmp(name, "sub"))
+        else if(sEQ(name, "sub"))
             WP("Do you mean 'minus' instead of 'sub'?\n");
         EP("Function name not found in built-in: %s\n", name);
     }

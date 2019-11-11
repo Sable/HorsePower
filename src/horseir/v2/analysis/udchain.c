@@ -43,7 +43,7 @@ static bool isInNameList(NameList *x, char *s){
     if(x){
         while(x->next){
             x = x->next;
-            if(!strcmp(x->name, s)) return 1;
+            if(sEQ(x->name, s)) return 1;
         }
     }
     return 0;

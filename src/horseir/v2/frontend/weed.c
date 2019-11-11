@@ -244,7 +244,7 @@ static void weedVector(Node *x){
 
 static void weedVar(Node *x){
     char *name = x->val.param.id;
-    if(!strcmp(name, uscore))
+    if(sEQ(name, uscore))
         EP("Underscore '%s' shouldn't have any type.", uscore);
 }
 
@@ -283,7 +283,7 @@ static void weedGlobal(Node *x){
 
 static void weedMethod(Node *x){
     //printNodeType(x);
-    if(!strcmp(x->val.method.fname, "main")){
+    if(sEQ(x->val.method.fname, "main")){
         if(cntMain == 0){ entryMain = x; cntMain++; }
         else EP("Only one main method expected in modules.\n");
     }
