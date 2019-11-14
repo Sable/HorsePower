@@ -11,7 +11,7 @@
 /* declared in h_lib.h: HI, HN */
 
 const I HASH_A = 1223106847;
-const I HASH_M = (1LL << 32)-5;
+const I HASH_M = (I)((1LL << 32)-5);
 
 L *LARGE_BUFF; // used in merge sort
 
@@ -255,12 +255,12 @@ L profileHash(HN ht, L htSize){
         if(c!=0) nonZero++; totElem+=c; \
         if(c>0 && c<minValue) minValue=c; \
         if(c>maxValue) maxValue=c; })
-    PP("\n");
+    WP("\n");
     printBanner("Hash table profiling report");
-    PP("> Hash table size   : %lld\n",htSize);
-    PP("> Hash table density: %g%% (%lld/%lld)\n",nonZero*100.0/htSize,nonZero,htSize);
-    PP("> No. items per line: [%lld, %lld]\n",minValue,maxValue);
-    PP("> Avg elem. per line: %.1lf (%lld/%lld)\n",totElem*1.0/nonZero,totElem,nonZero);
+    WP("> Hash table size   : %lld\n",htSize);
+    WP("> Hash table density: %g%% (%lld/%lld)\n",nonZero*100.0/htSize,nonZero,htSize);
+    WP("> No. items per line: [%lld, %lld]\n",minValue,maxValue);
+    WP("> Avg elem. per line: %.1lf (%lld/%lld)\n",totElem*1.0/nonZero,totElem,nonZero);
     B isVerbose=false;
     if(isVerbose){
         L c=0, c2=0, c3=0;
@@ -269,14 +269,14 @@ L profileHash(HN ht, L htSize){
               while(p){k++; p=p->inext;} c+=k+1; c2+=k; c3+=k>0; t=hN(t);}})
         P("> total = %lld, print (%lld / %lld) = %.1lf\n", c,c2,c3,1.0*c2/c3);
     }
-    PP("\n"); R 0;
+    WP("\n"); R 0;
 }
 
 static L profileInt(V x){
     if(xp == H_LL){
         L vmax = LLONG_MIN, vmin = LLONG_MAX;
         DOI(vn(x), {if(vmax<vL(x,i))vmax=vL(x,i); if(vmin>vL(x,i))vmin=vL(x,i);})
-        PP(">> len=%lld, max=%lld, min=%lld\n", xn,vmax,vmin);
+        WP(">> len=%lld, max=%lld, min=%lld\n", xn,vmax,vmin);
     }
     else WP("type not supported: %s\n", getTypeName(xp));
     R 0;
@@ -1561,14 +1561,14 @@ I lib_join_index_compare(V z0, V z1, V x, V y, I op){
  * y0: vLen
  */
 I lib_join_index_hash_many(V z0, V z1, V x, V y, V f){
-    PP("experiment: lib_join_index_hash_many\n");
+    WP("experiment: lib_join_index_hash_many\n");
     L fx=getFirstEqual(f); L f0=vQ(f,fx);
     V x0=vV(x,fx), y0=vV(y,fx);
     L sLen=vn(x0), vLen=vn(y0), typ=vp(x0);
     void *src=sG(x0), *val=sG(y0);
-    //PP("Profiling x: "); profileInt(x);
-    //PP("Profiling y: "); profileInt(y);
-    //PP("xLen = %lld, yLen = %lld\n", sLen,vLen);
+    //WP("Profiling x: "); profileInt(x);
+    //WP("Profiling y: "); profileInt(y);
+    //WP("xLen = %lld, yLen = %lld\n", sLen,vLen);
     HN hashT;
     L hashLen = getHashTableSize(sLen);
     L hashMask = hashLen - 1;
@@ -1605,7 +1605,7 @@ tic();
          HI t0=tempH[i]; while(t0){p++; if(compareOpRow(x,y,tempK[i],i,f)){vL(z0,p)=t0->ival;vL(z1,p)=i;}t0=t0->inext;} \
          offset[tid]=p+1; })
 time_toc("Step 3: hash finish %g ms\n", elapsed);
-    //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
+    //WP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     profileHash(hashT, hashLen);
     free(tempK);
     free(tempH);
@@ -1646,9 +1646,9 @@ I lib_join_index_basic(V z0, V z1, V x, V y, B isEq){
     //    writeToFileForDebug(x, "join-r.txt");
     //    writeToFileForDebug(y, "join-s.txt");
     //}
-    //PP("Profiling x: "); profileInt(x);
-    //PP("Profiling y: "); profileInt(y);
-    PP("xLen = %lld, yLen = %lld\n", sLen,vLen);
+    //WP("Profiling x: "); profileInt(x);
+    //WP("Profiling y: "); profileInt(y);
+    WP("xLen = %lld, yLen = %lld\n", sLen,vLen);
     //DOI(vn(x), if(vL(x,i)<74){P("stop at x: %lld\n",vL(x,i)); getchar();})
     //DOI(vn(y), if(vL(y,i)==1){P("see y == 1 at y[%lld]\n",i); break;}) getchar();
     HN hashT; E elapsed;
@@ -1713,7 +1713,7 @@ tic();
 //    }
 time_toc("Step 3: Hash finish\n");
     //TIME_SHOW("Step 3: hash finish");
-    //PP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
+    //WP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
     //P("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)
     //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0);\
@@ -1778,6 +1778,7 @@ I lib_join_dummy2(V x, V y){
         getInfoVar(x); getInfoVar(y);
         EP("dummy2 only supports: list(I,I) join list(I,I)\n");
     }
+    R 0;
 }
 
 /*
@@ -1802,6 +1803,7 @@ I lib_join_dummy3(V x, V y){
         getInfoVar(x); getInfoVar(y);
         EP("dummy3 only supports: list(E,I) join list(E,I)\n");
     }
+    R 0;
 }
 
 

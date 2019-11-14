@@ -79,7 +79,7 @@ static C obtainTypeAlias(Type t){
         case  symT: R 'S'; // Q -> S
         case charT: R 'C';
         case dateT: R 'I'; // D -> I
-        default: EP("Add more types: %d\n", t);
+        default: EP("Add more types: %d", t);
     }
 }
 
@@ -103,7 +103,7 @@ static S obtainTypeShort(Type t){
         case  symT: R "Symbol";
         case charT: R "Char";
         case dateT: R "Date";
-        default: EP("Add more types: %d\n", t);
+        default: EP("Add more types: %d", t);
     }
     return NULL;
 }
@@ -299,6 +299,7 @@ static void genStatement(Node *n, B f){
         case  whileK:
         case repeatK:
         case returnK: if(f) genIndent(); break;
+        default: break;
     }
 }
 
@@ -461,7 +462,7 @@ static void scanConst(Node *n){
         case   longC: SP(temp, "%lld", v->valL); break;
         case   clexC: SP(temp, v->valX[1]>=0?"%g+%g":"%g%g", \
                               v->valX[0], v->valX[1]); break;
-        default: EP("Add more constant types: %d\n", v->type);
+        default: EP("Add more constant types: %d", v->type);
     }
     if(temp[0]) glueCode(temp);
 }
@@ -543,7 +544,7 @@ static B checkSimpleHash(Node *n){
             case NativeG: R 0;
             case   SkipG: R 1;
             case    OptG: genCodeExtra(extra, n->lineno); R 1;
-            default: EP("Unknown kind: %d\n", extra->kind);
+            default: EP("Unknown kind: %d", extra->kind);
         }
     }
     R 0;
@@ -572,7 +573,7 @@ static void scanNode(Node *n){
         case  continueK: scanContinue  (n); break;
         case     blockK: scanBlock     (n); break;
         case      funcK: scanFunc      (n); break;
-        default: EP("Add more node types: %s\n", getNodeTypeStr(n));
+        default: EP("Add more node types: %s", getNodeTypeStr(n));
     }
     genStatement(n, false);
 }
@@ -642,7 +643,8 @@ static void compileMethod(Node *n){
 }
 
 static void dispStatsBuff(L cur, L total, S name){
-    P("Profile:\n>> Used buffer %s %.2lf%% [%lld/%lld]\n", \
+    WP("Profile:\n");
+    WP(Indent4 ">> Used buffer %s %.2lf%% [%lld/%lld]\n", \
         name, percent(cur,total), cur, total);
     if(cur >= total)
         EP("Code buffer full!!!");
@@ -659,20 +661,19 @@ static void compileCode(List *list){
     if(list){ compileCode(list->next); compileMethod(list->val); }
 }
 
-static void saveToFile(S path, S head, S func, S code){
-    printBanner("Generated Code Below");
-    P("%s\n%s\n%s\n", head,func,code);
-    return ;
-    //FILE *fp = fopen(path, "w");
-    //FP(fp, "%s%s", head,code);
-    //fclose(fp);
-}
+// static void saveToFile(S path, S head, S func, S code){
+//     FILE *fp = fopen(path, "w");
+//     FP(fp, "%s%s", head,code);
+//     fclose(fp);
+// }
 
 static void dumpCode(){
     //if(H_DEBUG) printChainList(); // display visited chains
     genEntry();
     dispStats();
-    saveToFile("out/gen.h", head_code, func_code, code);
+    //saveToFile("out/gen.h", head_code, func_code, code);
+    printBanner("Generated Code Below");
+    P("%s\n%s\n%s\n", head_code, func_code, code);
 }
 
 static void init(){

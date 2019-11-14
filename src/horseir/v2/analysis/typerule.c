@@ -38,7 +38,7 @@ typedef bool (*TypeCond)(InfoNode *);
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 
 #define CASE(k, x) case k: return x;
-#define DEFAULT(x) EP("NOT found:" #x);
+#define DEFAULT(x) default: EP("NOT found: %s",x)
 
 // rules
 #define commonTrig commonArith1
@@ -214,6 +214,7 @@ static bool compatibleT(InfoNode *x, InfoNode *y){
         case  i64T: return isT(y,boolT)||isT(y,i16T)||isT(y,i32T);
         case  f32T: return isIntIN(y);
         case  f64T: return isIntIN(y)||isT(y,f32T);
+        default: break;
     }
     return false;
 }
@@ -978,6 +979,7 @@ static InfoNode* setEnumKey(InfoNode *x, L key){
     MetaData *newMeta = NEW(MetaData);
     newMeta->enumMeta.keyId = key;
     addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+    return x;
 }
 
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
@@ -1407,8 +1409,7 @@ int getValenceOther(TypeOther x){
         CASE(     listF, -1); //any
         CASE(    dtaddF, 3);
         CASE(    dtsubF, 3);
-        CASE(    printF, 1);
-        DEFAULT(x);
+        DEFAULT(obtainTypeOther(x));
     }
 }
 
@@ -1471,7 +1472,7 @@ static void *getUnaryRules(TypeUnary x){
         CASE(loadTableF, ruleLoadTable)
         CASE(    fetchF, ruleFetch)
         CASE(  printF, rulePrint)
-        DEFAULT(x)
+        DEFAULT(obtainTypeUnary(x));
     }
 }
 
@@ -1509,7 +1510,7 @@ static void *getBinaryRules(TypeBinary x){
         CASE(   indexF, ruleIndex)
         CASE(columnValueF, ruleColumnValue)
         CASE(  subStringF, ruleSubString)
-        DEFAULT(x);
+        DEFAULT(obtainTypeBinary(x));
     }
 }
 
@@ -1528,7 +1529,7 @@ static void *getOtherRules(TypeOther x){
         CASE(       listF, ruleList)
         CASE(      dtaddF, ruleDtadd)
         CASE(      dtsubF, ruleDtsub)
-        DEFAULT(x);
+        DEFAULT(obtainTypeOther(x));
     }
 }
 
@@ -1551,7 +1552,7 @@ void *getTypeRules(char *name, int* num){
                 return getBinaryRules(x.b);
         case 3: *num = getValenceOther(x.t);
                 return getOtherRules(x.t);
-        DEFAULT(x->kind)
+        default: EP("Not supported: %d", x.kind);
     }
 }
 

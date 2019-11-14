@@ -19,9 +19,9 @@ O profileSimpleHash(sHashTable *st){
             L x=countSimpleNode(st->table[i]);\
             if(minv>x) minv=x; \
             if(maxv<x) maxv=x; c++;})
-    P("Profile simple hash\n");
-    P(indent "size: %g %% (%lld/%lld)\n", percent(c,st->size),c,st->size);
-    P(indent "range: [%lld,%lld]\n",minv,maxv);
+    WP("Profile simple hash\n");
+    WP(indent "size: %g %% (%lld/%lld)\n", percent(c,st->size),c,st->size);
+    WP(indent "range: [%lld,%lld]\n",minv,maxv);
 }
 
 #define ROTL64(x,n) ((x>>n)|(x<<(64-n)))

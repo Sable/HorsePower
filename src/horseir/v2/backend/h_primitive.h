@@ -191,7 +191,7 @@ I pfnTable         (V z, V x, V y);
 I pfnEnum          (V z, V x, V y);
 I pfnKTable        (V z, V x, V y);
 
-I pfnMember        (V z, V x, V y);
+I pfnMember        (V z, V y, V x);
 I pfnVector        (V z, V x, V y);
 
 I pfnDatetimeAdd   (V z, V x, V y, V m);

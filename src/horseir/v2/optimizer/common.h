@@ -1,7 +1,12 @@
 #ifndef __H_O_COMMON__
 #define __H_O_COMMON__
 
-/* macros */
+/* debugging macros */
+#define debugPattern false   // pattern.c
+#define debugAuto    false   // autofusion.c
+#define debugElem    false   // elementwise.c
+
+/* node macros */
 #define chainNode(c)       (c)->cur
 #define chainUseSize(c)    (c)->useSize
 #define chainDefSize(c)    (c)->defSize

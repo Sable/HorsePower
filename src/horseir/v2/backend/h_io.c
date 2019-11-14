@@ -374,7 +374,7 @@ static L printListFlatItem(V x, L k){
             V g2=vg2(x); L a1=a0+vL(x,i); \
             P("("); printV3(g2,a0,a1,false); P(")"); a0=a1;})
     }
-    else { EP("Pending flat list print\n"); }
+    else { EP("Pending flat list print"); }
     FS("):list"); R 0;
 }
 
@@ -385,7 +385,7 @@ static L printListNormalItem(V x, L k){
     FS("):list"); R 0;
 }
 
-L printListItem(V x, L k){
+O printListItem(V x, L k){
     if(isListFlat(x)) printListFlatItem(x, k);
     else printListNormalItem(x, k);
 }
@@ -455,7 +455,7 @@ L printV3(V x, L k0, L k1, B isR){
         if(xn < k1) printV(x);
         else { B f = 0;
           DOI3(k0, k1, {if(i>k0)FS(" ");if(printValueItem(x, i)){f=1;break;};});
-          if(f) EP("Type is not supported: %s\n", getTypeName(xp)); } break;
+          if(f) EP("Type is not supported: %s", getTypeName(xp)); } break;
     }
     if(isR) FS("\n"); R 0;
 }
@@ -581,12 +581,12 @@ static void printCSV(V x){;}
 static void printXML(V x){;}
 //static void printJSON(V x){;}
 
-L printFormat(V x, I op){
+O printFormat(V x, I op){
     switch(op){
         case 0: printCSV(x); break;
         case 1: printXML(x); break;
         //case 2: printJSON(x);break; // TODO
-        default: EP("format not supported: %d\n", op);
+        default: EP("format not supported: %d", op);
     }
 }
 
@@ -684,7 +684,7 @@ void serializeV(V x, FILE *fp){
         caseX serializeBasic(x, fp); break;
         caseA serializeA    (x, fp); break;
         caseG serializeG    (x, fp); break;
-        default: EP("type not supported: %s\n", getTypeName(xp));
+        default: EP("type not supported: %s", getTypeName(xp));
     }
 }
 
@@ -695,7 +695,7 @@ void serializeV(V x, FILE *fp){
 
 static void readDataBySize(void *ptr, L t_size, L size, FILE *fp){
     if(size != fread(ptr, t_size, size, fp)){
-        EP("fread error\n");
+        EP("fread error");
     }
 }
 
@@ -764,7 +764,7 @@ void readSerializeV(V x, FILE *fp){
         caseX readSerializeBasic(x, fp); break; 
         caseA readSerializeA    (x, fp); break; 
         caseG readSerializeG    (x, fp); break; 
-        default: EP("[readSerializeV] not support type: %s\n", getTypeName(xp));
+        default: EP("[readSerializeV] not support type: %s", getTypeName(xp));
     }
 }
 

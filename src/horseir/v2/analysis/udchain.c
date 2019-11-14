@@ -569,6 +569,7 @@ static void setCurrentNode(Node *n, Node *val){
                     addToChainList(chain_list, currentChain);
                 }
             } break;
+        default: break;
     }
 }
 
@@ -598,6 +599,7 @@ static void scanNode(Node *n, ChainList *flow){
         case       varK: scanVar       (n,flow); break; //
         case    globalK: scanGlobal    (n); break; //
         /* TODO: add more kinds if possible */
+        default: break;
     }
     //setCurrentNode(n, NULL);
     currentChain = prevChain;

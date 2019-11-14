@@ -24,6 +24,10 @@
   #endif
 #endif
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,17 +65,16 @@ void   time_clear();
 #define WP(...)   do{FP(stderr,__VA_ARGS__);}while(0)  // warning
 #define FLine()   FP(stderr, "\n")
 #define INFO(s)   FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
-#define EP(...)   do{INFO("[ERROR]");  FP(stderr,__VA_ARGS__); FLine(); exit(1);}while(0)  // error
-#define TODO(...) do{INFO("[TODO]");   FP(stderr,__VA_ARGS__); FLine(); exit(2);}while(0)  // todo
-#define PP(...)   do{/*INFO("[DEBUG]");*/ FP(stdout,__VA_ARGS__);               }while(0) 
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
 #define sEQ(x,y)  (!strcmp(x,y))   // string equal
 #define sNEQ(x,y) (0!=strcmp(x,y)) // string not equal
-#define stop(...) do{P("%-15s>> ",__FUNCTION__); P(__VA_ARGS__); getchar();}while(0)
 
 /* For debugging */
-#define printBanner(s) P("/*==== "s" ====*/\n")
+#define printBanner(s) WP("/*==== "s" ====*/\n")
+#define EP(...)   do{INFO("[ERROR]");  FP(stderr,__VA_ARGS__); FLine(); exit(1);}while(0)  // error
+#define TODO(...) do{INFO("[TODO]");   FP(stderr,__VA_ARGS__); FLine(); exit(2);}while(0)  // todo
+#define STOP(...) do{P("%-15s>> ",__FUNCTION__); P(__VA_ARGS__); getchar();}while(0)
 
 /* time functions */
 #define tic() my_tic()
@@ -82,6 +85,8 @@ void   time_clear();
 /* constants */
 #define uscore "_"  // underscore
 #define comma  ','
+#define Indent2 "  "
+#define Indent4 "    "
 #define CODE_MAX_SIZE 10240
 
 #include "frontend/tree.h"
@@ -97,5 +102,9 @@ void initGlobal();
 void initBackend();
 void initStats();
 void initTablesByQid(I id);
+
+#ifdef	__cplusplus
+}
+#endif
 
 #endif

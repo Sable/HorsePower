@@ -42,7 +42,6 @@ runCompiler() {
     elif [ $cmd = "f" ]; then
         (set -x && ./horse -c cpu -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu -f ./scripts/q${tid}.hir --tpch=${tid})
     else
         usage
@@ -57,7 +56,6 @@ runOptimizer() {
     elif [ $cmd = "f" ]; then
         (set -x && ./horse -c cpu ${opts} -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu ${opts} -f ./scripts/q${tid}.hir --tpch=${tid})
     else
         usage

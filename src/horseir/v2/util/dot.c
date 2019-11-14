@@ -24,9 +24,6 @@ static S curFuncName;
 
 extern List *compiledMethodList;
 
-#define Indent2 "  "
-#define Indent4 Indent2 Indent2
-
 /* ----------------- declaration above ----------------- */
 
 static StrList *newList(S msg){
@@ -36,7 +33,7 @@ static StrList *newList(S msg){
     R n;
 }
 
-static StrList *addList(StrList *src, StrList *n){
+static void addList(StrList *src, StrList *n){
     n->next = src->next;
     src->next = n;
 }
@@ -145,7 +142,7 @@ static I findMethodId(List *list, S name, I id){
 }
 
 static I findMethodIdByName(List *list, S name){
-    findMethodId(list, name, 0);
+    R findMethodId(list, name, 0);
 }
 
 static void dotScanFunc(Node *n){

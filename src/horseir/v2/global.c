@@ -32,6 +32,7 @@ void initGlobal(){
     switch(optMode){
         case InterpNaiveM:
         case    CompilerM: initBackend(); break;
+        default: break;
     }
     if(optMode == InterpNaiveM && qIsTpch)
         initTablesByQid(qTpchId);
@@ -93,6 +94,7 @@ double my_toc(bool isPrint){
 void time_clear(){
     timeSlotId = 0;
 }
+
 #endif
 
 /* ---------------- Elementwise  -------------------- */

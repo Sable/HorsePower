@@ -65,28 +65,28 @@ static V executeMon(MonadicFunc f, V *p){
     V z = NEW(V0);
     I status = (*f)(z,p[0]);
     if(status==0) return z;
-    else {P("[Monadic]"); printErrMsg(status);}
+    else {P("[Monadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeDya(DyadicFunc f, V *p){
     V z = NEW(V0);
     I status = (*f)(z, p[0], p[1]);
     if(status==0) return z;
-    else {P("[Dyadic]"); printErrMsg(status);}
+    else {P("[Dyadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeAny(AnyadicFunc f, V *p, L n){
     V z = NEW(V0);
     I status = (*f)(z, n, p);
     if(status==0) return z;
-    else {P("[Anyadic]"); printErrMsg(status);}
+    else {P("[Anyadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeIndexA(V *p){
     V z = NEW(V0);
     I status = pfnIndexA(z, p[0], p[1], p[2]);
     if(status==0) return z;
-    else {P("[IndexA]"); printErrMsg(status);}
+    else {P("[IndexA]"); printErrMsg(status); return 0;}
 }
 
 static V executeTriple(EachTriple f, V *p){
@@ -94,7 +94,7 @@ static V executeTriple(EachTriple f, V *p){
     V z = NEW(V0);
     I status = (*f)(z, p[0], p[1], p[2]);
     if(status==0) return z;
-    else {printErrMsg(status);}
+    else {printErrMsg(status); return 0;}
 }
 
 static V executeJoinIndex(JoinOperation f, V *p){
@@ -102,7 +102,7 @@ static V executeJoinIndex(JoinOperation f, V *p){
     V z = NEW(V0);
     I status = (*f)(z, p[1], p[2], p[0]);
     if(status==0) return z;
-    else {printErrMsg(status);}
+    else {printErrMsg(status); return 0;}
 }
 
 static V executeEachDya(EachDyadic f, V *p){
@@ -174,7 +174,7 @@ static O showLine(Node *n){
 }
 
 static I totalVList1(VList *list){ // with dummy
-    I c=0; while(list=list->next)c++; R c;
+    I c=0; while((list=list->next))c++; R c;
 }
 
 static O addParam(VList *list, V x){
@@ -291,6 +291,7 @@ static V invokeBuiltin(char *funcName, VList *list){
     }
     else EP("valence error: %d expected, but %d found\n", valence, numArg);
     // TODO: free params
+    return 0;
 }
 
 static O copyParamToRtn(VList *param, VList *rtn){
@@ -462,12 +463,12 @@ static O runFunc(Node *n){
     addParam(paramList, x);
 }
 
-static B checkInfoNodeWithValue(InfoNode *in, V v){
-    // check main type and cell types with return types
-    if(!in->subInfo && !in->next){
-    }
-    else TODO("Need to check cell types\n");
-}
+// static B checkInfoNodeWithValue(InfoNode *in, V v){
+//     // check main type and cell types with return types
+//     if(!in->subInfo && !in->next){
+//     }
+//     else TODO("Need to check cell types\n");
+// }
 
 static InfoNode *getInfoNodeFromV(V x){
     InfoNode *in = NEW(InfoNode);

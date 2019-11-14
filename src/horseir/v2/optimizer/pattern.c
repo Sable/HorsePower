@@ -12,6 +12,7 @@ typedef struct PatternTree{
 static Node *currentMethod;
 static PatternTree *allPattern[99];
 static I numPattern, depth;
+static B isACC;
 
 extern List *compiledMethodList;
 extern sHashTable *hashOpt;
@@ -40,20 +41,21 @@ static void deletePatternTree(PatternTree *ptree){
 
 static void printPatternTreeCore(PatternTree *ptree, I dep){
     if(ptree){
-        DOI(dep, P(" "))
+        DOI(dep*2+2, P(" "))
         P("(%s, %s, %d)\n", \
                 ptree->func1?ptree->func1:"NULL", \
                 ptree->func2?ptree->func2:"NULL", ptree->num);
-        DOI(ptree->num, printPatternTreeCore(ptree->child[i], dep+2))
+        DOI(ptree->num, printPatternTreeCore(ptree->child[i], dep+1))
     }
 }
 
 static void printPatternTree(PatternTree *ptree){
-    printPatternTreeCore(ptree, 2);
+    printPatternTreeCore(ptree, 0);
 }
 
 static PatternTree *createFP1(){
-    P("// Pattern FP0\n");
+    if(debugPattern)
+        P("// Pattern FP0\n");
     return NULL;
 }
 
@@ -61,7 +63,8 @@ static PatternTree *createFP2(I op){
     if(op!=1&&op!=2){
         EP("pattern 2 must have an option 1 or 2");
     }
-    P("// Pattern FP2\n");
+    if(debugPattern)
+        P("// Pattern FP2\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", op==1?"sum":op==2?"avg":NULL, 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
@@ -69,7 +72,8 @@ static PatternTree *createFP2(I op){
 }
 
 static PatternTree *createFP3(){
-    P("// Pattern FP3\n");
+    if(debugPattern)
+        P("// Pattern FP3\n");
     PatternTree *rt = initPatternTree("index_a", NULL, 2);
     rt->child[0] = initPatternTree("vector", NULL, 1);
     rt->child[0]->child[0] = initPatternTree("len", NULL, 0);
@@ -80,7 +84,8 @@ static PatternTree *createFP3(){
 }
 
 static PatternTree *createFP4(){
-    P("// Pattern FP4\n");
+    if(debugPattern)
+        P("// Pattern FP4\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", "len", 1);
     rt->child[0]->child[0] = initPatternTree("each", "unique", 1);
@@ -90,7 +95,8 @@ static PatternTree *createFP4(){
 
 static PatternTree *createFP5(I op){
 #define getFP5op(op,a,b,c) op==0?a:op==1?b:c
-    P("// Pattern FP%d\n", getFP5op(op,5,6,7));
+    if(debugPattern)
+        P("// Pattern FP%d\n", getFP5op(op,5,6,7));
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", getFP5op(op,"min","max","len"), 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
@@ -165,6 +171,9 @@ static S genDecl3(S func, C del){
 static void genIndent(){ DOI(depth, glueCode("    ")); }
 
 static void genPattern2_C_Core(PatternTree *ptree, I op){
+    if(isACC){
+        TODO("Add directives for pattern 2");
+    }
     C tmp[199];
     Chain *chain_x = ptree->child[0]->child[0]->chain;  // 
     Chain *chain_y = ptree->child[0]->chain;            // 
@@ -194,7 +203,7 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
     else if(op == 7){
         glueAnyLine("DOP(vn(y), vL(z,i)=vn(vV(y,i))) R 0;");
     }
-    else EP("Add support for op = %d", op);
+    else EP("Add support: op = %d", op);
     depth--;
     glueAnyLine("}");
     S invc = phNameFP2(z0s, tmp, x0s, y1s);
@@ -213,6 +222,9 @@ static void genPattern2_C(PatternTree *ptree){
 }
 
 static void genPattern3_C(PatternTree *ptree){
+    if(isACC){
+        TODO("Add directives for pattern 3");
+    }
     C tmp[199];
     Chain *chain_x  = ptree->child[1]->child[0]->chain;  // 2 params of lt
     Chain *chain_y0 = ptree->child[1]->chain;            // 2nd param of compress
@@ -244,6 +256,9 @@ static void genPattern3_C(PatternTree *ptree){
 }
 
 static void genPattern4_C(PatternTree *ptree){
+    if(isACC){
+        TODO("Add directives for pattern 4");
+    }
     C tmp[199];
     Chain *chain_x  = ptree->child[0]->child[0]->child[0]->chain;  // 2 params of each_right
     Chain *chain_z  = ptree->chain;  // 2 params of each_right
@@ -296,27 +311,20 @@ static void genPattern_C(PatternTree *ptree, I pid){
         case 5: genPattern5_C(ptree); break; // q2
         case 6: genPattern6_C(ptree); break;
         case 7: genPattern7_C(ptree); break;
-        default: EP("Pattern not supported yet: %d\n", pid);
-    }
-}
-
-static void genPattern_ACC(PatternTree *ptree, I pid){
-    switch(pid){
-        case 3: TODO("OpenACC code gen for pattern 3\n");
-        case 4: TODO("OpenACC code gen for pattern 4\n");
-        case 5: TODO("OpenACC code gen for pattern 5\n");
-        default: EP("Pattern not supported yet: %d\n", pid);
+        default: EP("Pattern not supported yet: %d", pid);
     }
 }
 
 static void genPattern(PatternTree *ptree, I pid){
     resetCode();
+    isACC = false;
     switch(qTarg){
-        case TARGET_C    : genPattern_C(ptree, pid);     break;
-        case TARGET_LLVM : TODO("Support for LLVM\n");   break;
-        case TARGET_ACC  : genPattern_ACC(ptree, pid);   break;
-        case TARGET_CL   : TODO("Support for OpenCL\n"); break;
-        default: EP("TARGET platform is unknown: %d\n", qTarg);
+        case TARGET_C    : genPattern_C(ptree, pid); break;
+        case TARGET_ACC  : isACC = true;
+                           genPattern_C(ptree, pid); break;
+        case TARGET_LLVM : TODO("Support for LLVM");        break;
+        case TARGET_CL   : TODO("Support for OpenCL");      break;
+        default: EP("TARGET platform is unknown: %d", qTarg);
     }
 }
 
@@ -500,16 +508,11 @@ static void genPatternCompress(Chain *chain, Node *n){
 }
 
 static void searchAndGenPatternCompress(Chain* chain, Node *n){
-    printNode(chainNode(chain));
-    printNode(n);
+    //printNode(chainNode(chain));
+    //printNode(n);
     if(allUsesValidCompress(chain,n)){
-        P("Yes\n");
         genPatternCompress(chain, n);
     }
-    else {
-        P("No\n");
-    }
-    getchar();
 }
 
 static void matchPatternCompress(Chain *chain){
@@ -713,7 +716,9 @@ static void init(){
     code[0] = 0;
     ptr     = code;
     initPatterns();
-    DOI(numPattern, {P("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
+    if(debugPattern){
+        DOI(numPattern, {P("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
+    }
 }
 
 void optPattern(){

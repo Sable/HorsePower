@@ -2282,7 +2282,7 @@ I pfnKTable(V z, V x, V y){
 
 
 #define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
-I pfnMember(V z, V y, V x){ /* <--- (y,x) NOT (x,y)  */
+I pfnMember(V z, V y, V x){ /* return left shape */
     //P("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
     //printV(x); printV(y); getchar();
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){

@@ -211,11 +211,15 @@ static void genCodeElem(gNode *rt, B isRT){
     Node *fn = getNodeFunc(n);
     glueAny("%s(", getFuncNameC(nodeName2(fn)));
     List *params = getNodeParams(n);
-    DOI(rt->pnum, {if(i>0)glueChar(','); I k=i2-i-1; gNode *t=rt->pnode[k]; \
-            if(t) genCodeElem(t,false); \
-            else {Node *p = getParamsIndex(params,k)->val; \
-                if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,nodeName2(p))); \
-                else genCodeNode(p);} })
+    DOI(rt->pnum, { if(i>0) glueChar(comma); \
+        I k=i2-i-1; gNode *t=rt->pnode[k]; \
+        if(t) genCodeElem(t,false); \
+        else { \
+             Node *p = getParamsIndex(params,k)->val; \
+             if(instanceOf(p,nameK)) genCodeName(p,searchName(varNames,nodeName2(p))); \
+             else genCodeNode(p);
+        } \
+    })
     glueChar(')');
     if(isRT){
         glueCode(") R 0;\n}");

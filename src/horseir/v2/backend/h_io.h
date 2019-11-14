@@ -42,7 +42,7 @@ L printBasicItem      (V x, L k);
 L printInfo           (V x);
 L printBasicValue     (V x, L k, B hasTag);
 L printStrItem        (V x, L k);
-L printListItem       (V x, L k);
+O printListItem       (V x, L k);
 L printDictItem       (V x, L k);
 L printEnumItem       (V x, L k);
 L printValueItem      (V x, L k);
@@ -52,7 +52,7 @@ L printV3             (V x, L a, L b, B isR);
 L printTable          (V x);
 L printKTable         (V x);
 L printTablePretty    (V x, L rowLimit);
-L printFormat         (V x, I op);
+O printFormat         (V x, I op);
 
 void serializeV(V x, FILE *fp);
 void readSerializeV(V x, FILE *fp);

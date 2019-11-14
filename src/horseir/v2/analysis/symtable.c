@@ -104,10 +104,12 @@ char *strName(Node *n){
 void printSymbolName(SymbolName *sn){
     P("symbol: %s, kind: %s\n", sn->name, strSymbolKind(sn->kind));
     switch(sn->kind){
-        case moduleS: printNode(sn->val.module); break;
-        case methodS: printNode(sn->val.method); break;
-        case globalS: printNode(sn->val.global); break;
-        case  localS: printNode(sn->val.local); break;
+        case  moduleS: printNode(sn->val.module); break;
+        case  methodS: printNode(sn->val.method); break;
+        case  globalS: printNode(sn->val.global); break;
+        case   localS: printNode(sn->val.local); break;
+        case builtinS: break;
+        default: EP("Not supported: %d", sn->kind);
     }
     P("\n");
 }
@@ -267,6 +269,7 @@ static void scanDeclaration(Node *n, SymbolTable *st){
         case moduleK: scanModuleDecl(n, st); break;
         case methodK: scanMethodDecl(n, st); break;
         case globalK: scanGlobalDecl(n, st); break;
+        default: EP("Not supported: %d", n->kind);
     }
 }
 
@@ -480,6 +483,7 @@ static void scanStatement(Node *n, SymbolTable *st){
         case    vectorK: scanVector      (n, st); break;
         //case  continueK: scanContinueStmt(n, st); break;
         //case     breakK: scanBreakStmt   (n, st); break;
+        default: break;
     }
 }
 

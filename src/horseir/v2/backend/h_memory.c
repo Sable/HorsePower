@@ -80,7 +80,7 @@ G allocMem(G heap, L *cur, L top, I typ, L len){
 #define CHUNK_MASK 0xF
 #define CHUNK_SIZE 4
     L size = getTypeSize(typ, len);
-    if(size & CHUNK_MASK !=0) {
+    if((size & CHUNK_MASK) !=0) {
         size = ((size>>CHUNK_SIZE)+1)<<CHUNK_SIZE;
     }
     G g = NULL;

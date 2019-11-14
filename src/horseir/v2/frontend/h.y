@@ -26,7 +26,7 @@
     extern Prog *root;
     int yylex(); /* defined in lex.yy.c */
 
-    void yyerror() {
+    void yyerror(char const *yymsg) {
         fprintf(stderr, "[Syntax Error] line %d near %s\n", yylineno, yytext);
         exit(1);
     }

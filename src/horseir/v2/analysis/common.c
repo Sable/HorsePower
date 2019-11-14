@@ -42,6 +42,7 @@ void printShapeNode(ShapeNode *sn){
                            else if(isSNScan(sn)) P("scan:%d",sn->sizeScan);
                            else EP("kind not supported: %d\n", sn->kind);
                            P(")"); break;
+            default: break;
             //case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);
             //               else P("%d)",sn->size); break;
         }
@@ -105,7 +106,7 @@ I totalList(List *list){ // no dummy
 }
 
 I totalList1(List *list){ // with dummy
-    I c=0; while(list=list->next)c++; R c;
+    I c=0; while((list=list->next))c++; R c;
 }
 
 I totalInfoNodeList(InfoNodeList *list){ // no dummy
@@ -113,7 +114,7 @@ I totalInfoNodeList(InfoNodeList *list){ // no dummy
 }
 
 I totalInfoNodeList1(InfoNodeList *list){ // with dummy
-    I c=0; while(list=list->next)c++; R c;
+    I c=0; while((list=list->next))c++; R c;
 }
 
 I totalSymbolNameList(SymbolNameList *list){ // no dummy

@@ -118,6 +118,7 @@ static bool weedDate(int x){
             case 10: R checkDay(dd, 31); break; //
             case 11: R checkDay(dd, 30); break;
             case 12: R checkDay(dd, 31); break; //
+            default: R 0;
         }
     }
     else R 0;
@@ -154,7 +155,7 @@ static bool weedClex(float *x){
 
 static bool weedString(char *x){
     while(*x){
-        char c = *x; if(c<0 || c>255) R 0; x++;
+        char c = *x; if(c < 0) R 0; x++;
     }
     R 1;
 }

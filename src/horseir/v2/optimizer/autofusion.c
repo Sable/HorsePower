@@ -424,7 +424,7 @@ static void genCodeScanCond(Node *p, gNode *g){
 static void genCodeParamReversed(List *list, gNode *rt, I dep){
     if(list){
         genCodeParamReversed(list->next, rt, dep+1);
-        if(list->next) glueChar(',');
+        if(list->next) glueChar(comma);
         //P("dep = %d\n", dep);
         gNode *t = rt->pnode[dep];
         if(t) genCodeAuto(t, false);
@@ -552,7 +552,7 @@ static void genCodeAutoListParam1(List *list, gNode *rt, L id){
     //DOI(total, {P("%lld\n",i); printNode(rtn[i]);}) getchar();
     // important: reversed in rt->pnode
     DOIa(total, {gNode *t=rt->pnode[total-i-1]; \
-            if(i>1) glueChar(','); \
+            if(i>1) glueChar(comma); \
             if(t) genCodeAutoListNode(t, id); \
             else genCodeBody(rtn[i], t); })
     // TODO: free rtn
@@ -723,7 +723,7 @@ static void loadLocalVars(gNode *rt){
 static void genCodeAutoList(gNodeList *list, I size){
     C temp[199];
     /* list: no dummy node */
-    stop("size = %d\n", size);
+    STOP("size = %d\n", size);
     if(size > 0){
         gNodeList *plist = list;
         // 1st pass: scan and store all local vars
@@ -733,11 +733,11 @@ static void genCodeAutoList(gNodeList *list, I size){
         SP(temp, "q%d_autofusion_list_%d",qid,phTotal++);
         glueCode(genDeclSingle(temp, '{')); glueLine();
         printNode(list->g->node);
-        stop("check first");
+        STOP("check first");
         ChainExtra *extra = addToChainExtra(list->g, OptG);
         extra->funcDecl = genDeclSingle(temp, ';');
         extra->funcInvc = temp;
-        //stop("code = \"%s\"\n", code);
+        //STOP("code = \"%s\"\n", code);
         plist = list;
         DOI(size, {gNode *x=plist->g; C temp[99]; \
                    if(i>0)addToChainExtra(x,SkipG);\
@@ -798,7 +798,7 @@ static void genCodeAutoListSingleLen(gNode *rt){
         }
         else TODO("Support multiple vars");
     }
-    else EP("The numLast > 0, but %d found", numLast);
+    else EP("The numLast > 0, but %lld found", numLast);
 }
 
 static void copyLocalVarsToListNode(fListNode *f){
@@ -842,7 +842,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
     Node *z0 = getNodeItemIndex(cur, 0);
     S z0s = getNameStr(z0);
     C z0c = getTypeCodeByName(z0);
-    //stop("z0s = %s, z0c = %c", z0s, z0c);
+    //STOP("z0s = %s, z0c = %c", z0s, z0c);
     Node *r0 = findIteratorNode(rt);
     I r0x = getNameIndex(r0);
     if(sEQ(rt->funcName,"len")){
@@ -857,7 +857,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
     extra->funcFunc = strdup(code);
     extra->funcDecl = genDeclSingle(temp, ';');
     extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
-    stop("code = %s", code);
+    STOP("code = %s", code);
     phTotal++;
 }
 
@@ -873,7 +873,7 @@ static void findFusion(Chain *chain){
 // TODO: need top to bottom to check if fusion is allowed
             gNode *rt = findFusionUp(chain, true);
             if(rt && isOK2Fuse(rt)){
-                stop("Fusion auto found:");
+                //STOP("Fusion auto found:");
                 //printNode(rt->node); getchar();
                 clearFusion();
                 genCodeAuto(rt, true);
@@ -888,7 +888,7 @@ static void findFusion(Chain *chain){
                 // include raze
                 //insertgNode(glist, rt);
                 //printgNodeList();
-                //stop("Fusion list found:");
+                //STOP("Fusion list found:");
             }
         }
     }
@@ -994,7 +994,7 @@ static O genCodeListSingle(fListNode *f){
     extra->funcFunc = strdup(code);
     extra->funcDecl = genDeclSingle(temp, ';');
     extra->funcInvc = genInvcSingle(z0s, temp, f->varNames, f->varNum);
-    //stop("code = %s", code);
+    //STOP("code = %s", code);
 }
 
 static B findRepeatName(S *names, I n, S str){
@@ -1076,7 +1076,7 @@ static O genCodeListMultiple(fListNode **fList, I num){
     // extra->funcFunc = ...
     // extra->funcDecl = ...
     // extra->funcinvc = ...
-    stop("code = %s",code);
+    STOP("code = %s",code);
     TODO("impl. soon");
 }
 

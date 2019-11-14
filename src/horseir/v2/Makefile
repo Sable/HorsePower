@@ -1,5 +1,5 @@
 # library: -lfl (Linux) or -ll (MacOS)
-all: debug
+all: clang-plus-debug
 
 test: flex bison
 
@@ -20,6 +20,8 @@ c_files = $(front)/*.c $(back)/*.c $(analysis)/*.c $(opt)/*.c $(transt)/*.c $(ut
 include_files = -I"../../../libs/include/"
 include_libs  = ../../../libs/lib/libpcre2-8.a
 include_flags = -ll -fopenmp -std=c99 -lm -march=native -DPROFILE -D_POSIX_SOURCE
+flag_clang    = -ll -fopenmp -std=c99 -lm -march=native -DPROFILE -D_POSIX_SOURCE
+flag_clang_plus = -ll -fopenmp -std=c++11 -march=native -DPROFILE -D_POSIX_SOURCE
 
 flex: $(front)/$(flex_file)
 	cd $(front) && flex -o lex.yy.c $(flex_file)
@@ -40,6 +42,25 @@ release: flex bison $(h_files)
 		$(include_files) \
 		$(include_libs)  \
 		$(include_flags)
+
+clang-debug:  flex bison $(h_files)
+	clang-6 -g $(c_files) -o $(exec_name) \
+		$(include_files) \
+		$(include_libs)  \
+		$(flag_clang)
+
+clang-release:  flex bison $(h_files)
+	clang-6 -O3 $(c_files) -o $(exec_name) \
+		$(include_files) \
+		$(include_libs)  \
+		$(flag_clang)
+
+# TODO: fix compatible issues with C code
+clang-plus-debug: flex bison $(h_files)
+	clang++-6 -g $(c_files) -o $(exec_name) \
+		$(include_files) \
+		$(include_libs)  \
+		$(flag_clang_plus)
 
 # ---------------- library functions ---------------- #
 
