@@ -110,10 +110,12 @@ static void jit_example(){
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
     HorseJIT theJIT;
+    tic();
     auto H = theJIT.addModule(std::move(theModule));
+    time_toc("JIT load time (ms): %g\n", elapsed);
     //InitializeModuleAndPassManager();
     int (*foo)(int, int) = (int (*)(int, int)) theJIT.getSymbolAddress("demo");
-    P("demo result: %d", foo(4,5));
+    P("demo result: %d\n", foo(4,5));
 }
 
 static void demo(){
