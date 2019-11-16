@@ -22,10 +22,10 @@ static char *qOpt[99];
 //#define usage_q() dispLine(1, INDENT, "-q <qid>", "TPC-H query id `data/` (-q or -n)")
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
 
-static void dispLine(int level, int left, char *shortMsg, char *longMsg){
-    int indents[] = { 2, 4, 6, 8 };
+static void dispLine(I level, I left, char *shortMsg, char *longMsg){
+    I indents[] = { 2, 4, 6, 8 };
     if(level < 0 || level >  3) EP("lead must be between [0, 3]\n");
-    int leads = indents[level];
+    I leads = indents[level];
     DOI(leads, WP(" ")); WP("%s", shortMsg);
     DOI(left-strlen(shortMsg)-leads, WP(" "));
     WP("%s\n", longMsg);
@@ -54,6 +54,7 @@ static void usagePrinter(){
     dispLine(2, INDENT, "--print <item>", "Enable printer to print:");
     dispLine(0, INDENT, "", "> pretty      : pretty programs");
     dispLine(0, INDENT, "", "> dot         : dependence graphs in dot");
+    dispLine(0, INDENT, "", "> mermaid     : mermaid dot");
     dispLine(0, INDENT, "", "> symboltable : symbol tables");
     dispLine(0, INDENT, "", "> typeshape   : types and shapes");
 }
@@ -71,7 +72,7 @@ static void usageUtility(){
     usageStats();
 }
 
-void usage(int e){
+void usage(I e){
     WP("Usage: ./horse <option> [parameter]  \n");
     usageInterp();
     usageCompiler();
@@ -81,6 +82,33 @@ void usage(int e){
     dispLine(0, INDENT, "-v, --version", "Print HorseIR version");
     exit(e);
 }
+
+/* I/O redirect, need unistd.h */
+
+#define fd_stdin  0
+#define fd_stdout 1
+#define fd_stderr 2
+
+B isRedirected(){
+    R !isatty(fd_stdin) || !isatty(fd_stdout) || !isatty(fd_stderr);
+}
+
+B isInputRedirected(){
+    R !isatty(fd_stdin);
+}
+
+B isOutputRedirected(){
+    R !isatty(fd_stdout) || !isatty(fd_stderr);
+}
+
+B isStdoutRedirected(){
+    R !isatty(fd_stdout);
+}
+
+B isStderrRedirected(){
+    R !isatty(fd_stderr);
+}
+
 
 /*
  * See discussion: https://stackoverflow.com/a/1052750/4111149
@@ -143,51 +171,52 @@ const S obtainOptStr(OC x){
     }
 }
 
-static int validateOptimization(){
+static I validateOptimization(){
     if(numOpts > 0){
         DOI(numOpts, \
             if(OPT_NA == (qOpts[i]=obtainOptCode(qOpt[i]))) \
                 EP("Unknown optimizaiton: %s\n", qOpt[i]))
     }
-    return 0;
+    R 0;
 }
 
 #define validateInterpJIT validateInterp
 
-static int validateInterp(){
+static I validateInterp(){
     if(!qPath || qRun <= 0) BAD_TRY();
-    return 0;
+    R 0;
 }
 
-static int validateCompiler(){
+static I validateCompiler(){
     if(TARGET_NA == qTarg)
         EP("Compiler target must be provided correctly: cpu or gpu");
     //P("qPath = %s, qRun = %d\n", qPath,qRun);
     if(!qPath || qRun <= 0) BAD_TRY();
-    return validateOptimization();
+    R validateOptimization();
 }
 
 // qCmd can be checked later
-static int validatePrinter(){
+static I validatePrinter(){
     if(!qPath) BAD_TRY();
-    return 0;
+    R 0;
 }
 
-static int validateStats(){
+static I validateStats(){
     if(qCmd && (sEQ(qCmd, "dump") || sEQ(qCmd, "load")));
     else BAD_TRY();
-    return 0;
+    R 0;
 }
 
-static int validateUtility(){
+static I validateUtility(){
     switch(optUtl){
         case PrinterU: validatePrinter(); break;
         case   StatsU: validateStats();   break;
         default: EP("Unknown utility funciton");
     }
+    R 0;
 }
 
-static int validateOptions(){
+static I validateOptions(){
     // TODO: add validation rules
     switch(optMode){
         case InterpNaiveM: return validateInterp();
@@ -200,7 +229,7 @@ static int validateOptions(){
         case     UnknownM: break;
         default: TODO("Add support for validating %s", strMode(optMode));
     }
-    return 0;
+    R 0;
 }
 
 static OptionMode setMode(OptionMode opt, OptionMode mode){
@@ -215,9 +244,9 @@ static void setUtility(OptionUtility u){
         EP("Utility function has been chosen");
 }
 
-static void getLongOptionVerbose(int x){
+static void getLongOptionVerbose(I x){
     if(long_options[x].flag != 0){
-        int index = long_options[x].val;
+        I index = long_options[x].val;
         switch(index){
             case 0: qTpchId = atoi(optarg);
                     qIsTpch = (qTpchId>0 && qTpchId<=22);  break;
@@ -243,8 +272,8 @@ static void init(){
     optUtl   = UnknownU;
 }
 
-int getLongOption(int argc, char *argv[]){
-    int c, option_index  = 0;
+I getLongOption(I argc, C *argv[]){
+    I c, option_index  = 0;
     init();
     while((c=getopt_long(argc, argv,"hvtur:c:f:o:x:", long_options, &option_index)) != -1){
         if(numOpts >= 99)

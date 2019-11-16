@@ -265,7 +265,7 @@ static void prettyConst(char *b, ConstValue *c){
         case secondC: printSecond(c->valI); break;
         case   timeC: printTime(c->valI);   break;
         case     dtC: printDT(c->valL);     break;
-        defulat: EP("Invalid type: %d\n", c->type);
+        default: EP("Invalid type: %d\n", c->type); break;
     }
 }
 
@@ -318,6 +318,7 @@ static void prettyNodeBuff(char *b, Node *n){
         case     globalK:
         case    varDeclK:
         case     methodK: printDepth(b); break;
+        default: break; // do thing, but skip clang's warning
     }
     resetBuff(b);
     switch(n->kind){

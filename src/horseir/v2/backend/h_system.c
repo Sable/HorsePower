@@ -13,14 +13,14 @@ L listTableCur;
 
 L H_CORE = 1;
 
-static void getNumberOfCore(){
+static void setNumberOfCore(){
     #pragma omp parallel
     {
         L tid = omp_get_thread_num();
         if(0==tid)
             H_CORE = omp_get_num_threads();
     }
-    WP("# of cores: %lld\n", (L)H_CORE);
+    WP("# of cores: %lld\n", H_CORE);
 }
 
 static void deleteSys(){
@@ -974,37 +974,36 @@ I inferPi(I t){
 
 /* Error messages */
 
-#define errCaseCell(label, msg)\
+#define errCase(label, msg)\
     case label: EP("Error: " msg ".\n"); break
 
 void printErrMsg(I eid){
     switch(eid){
-        errCaseCell(E_DOMAIN,          "Domain error"       );
-        errCaseCell(E_GENERAL,         "General error"      );
-        errCaseCell(E_INDEX,           "Index error"        );
-        errCaseCell(E_DIV_ZERO,        "Divide zero"        );
-        errCaseCell(E_LENGTH,          "Length error"       );
-        errCaseCell(E_TYPE,            "Type error"         );
-        errCaseCell(E_NULL_VALUE,      "Null value error"   );
-        errCaseCell(E_LIKE_PATTERN,    "Like pattern error" );
-        errCaseCell(E_MATCH,           "Columns not match"  );
-        errCaseCell(E_ENUM_INDEX,      "Enum index error"   );
-        errCaseCell(E_RAZE_LIST,       "Raze list error"    );
-        errCaseCell(E_UNKNOWN,         "Unknown error"      );
-        errCaseCell(E_TABLE_NOT_FOUND, "Table not found"    );
-        errCaseCell(E_COL_NOT_FOUND,   "Column not found"   );
-        errCaseCell(E_NOT_IMPL,        "Not implement yet"  );
-        default: EP("Error code not specified: %d\n", eid);
+        errCase(E_DOMAIN,          "Domain error"       );
+        errCase(E_GENERAL,         "General error"      );
+        errCase(E_INDEX,           "Index error"        );
+        errCase(E_DIV_ZERO,        "Divide zero"        );
+        errCase(E_LENGTH,          "Length error"       );
+        errCase(E_TYPE,            "Type error"         );
+        errCase(E_NULL_VALUE,      "Null value error"   );
+        errCase(E_LIKE_PATTERN,    "Like pattern error" );
+        errCase(E_MATCH,           "Columns not match"  );
+        errCase(E_ENUM_INDEX,      "Enum index error"   );
+        errCase(E_RAZE_LIST,       "Raze list error"    );
+        errCase(E_UNKNOWN,         "Unknown error"      );
+        errCase(E_TABLE_NOT_FOUND, "Table not found"    );
+        errCase(E_COL_NOT_FOUND,   "Column not found"   );
+        errCase(E_NOT_IMPL,        "Not implement yet"  );
+        default: EP("Error code not specified: %d", eid);
     }
 }
 
-
 void initSys(){
-    listTable = (ListT)malloc(sizeof(ListT0) * NUM_LIST_TABLE);
+    listTable    = NEWL(ListT0, NUM_LIST_TABLE);
     listTableCur = 0;
+    H_TARGET     = TARGET_NA;
     //omp_set_num_threads(1);
-    getNumberOfCore();
-    H_TARGET = TARGET_NA;
+    setNumberOfCore(); // set H_CORE
     time_clear();
 }
 

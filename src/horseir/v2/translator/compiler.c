@@ -31,13 +31,15 @@ sHashTable *hashOpt;
 // two macros moved the generated C macro "HORSE_UDF"
 //#define VAR_BEGIN "I h_prev_v = h_buff_v;"
 //#define VAR_END   "h_buff_v = h_prev_v;"
-#define C_MACRO_UDF "HORSE_UDF"
+#define C_MACRO_UDF  "HORSE_UDF"  // macro(lineno, call, callback)
+#define C_MACRO_TIME "PROFILE"
 #define NUM_VAR_ROW 4           // # of var declarations in a row
 #define NUM_CHAR_LINE 128
 
 #define isTrueMacro     "isTrue"
 #define scanBreak(n)    glueCodeLine("break")
 #define scanContinue(n) glueCodeLine("continue")
+#define isNodeUDF(n)  instanceOf(nodeStmtExpr(n), callK)
 
 #define HEAD_MAX_SIZE 1024
 #define FUNC_MAX_SIZE 10240
@@ -77,7 +79,7 @@ static C obtainTypeAlias(Type t){
         case  symT: R 'S'; // Q -> S
         case charT: R 'C';
         case dateT: R 'I'; // D -> I
-        default: EP("Add more types: %d\n", t);
+        default: EP("Add more types: %d", t);
     }
 }
 
@@ -101,7 +103,7 @@ static S obtainTypeShort(Type t){
         case  symT: R "Symbol";
         case charT: R "Char";
         case dateT: R "Date";
-        default: EP("Add more types: %d\n", t);
+        default: EP("Add more types: %d", t);
     }
     return NULL;
 }
@@ -122,6 +124,18 @@ static void addStrConst(S s){
     if(size + preSize > CODE_MAX_SIZE)
         EP("size is more than expected: %lld vs. %d", size + preSize, CODE_MAX_SIZE);
     SP(ptr, "\"%s\"", s);
+}
+
+static B isNodeMethod(Node *n){
+    if(instanceOf(n, stmtK)){
+        Node *expr = nodeStmtExpr(n);
+        if(instanceOf(expr, callK)){
+            Node *func = nodeCallFunc(expr); // nameK
+            SymbolKind sk = nodeNameKind(func);
+            return sk == methodS;
+        }
+    }
+    return false;
 }
 
 /* ------ helper functions above ------ */
@@ -181,17 +195,34 @@ static void genListEach(List *list, C sep){
     }
 }
 
+// (V []){ x,y,... }
 static void genVarArray(List *list, C sep){
     glueCode("(V []){");
     genList(list, sep);
     glueCode("}");
 }
 
+static void genVarStoreDep(List *list, I dep){
+    if(list){
+        genVarStoreDep(list->next, dep+1);
+        if(dep > 0) glueCode(" ");
+        scanNode(list->val);
+        glueAny("=tempV[%d];", dep);
+    }
+}
+
+static void genVarStore(List *list){
+    glueAny("{");
+    genVarStoreDep(list, 0);
+    glueAny("}");
+}
+
+
 static void genVarList(List *list, C sep){
     if(list){
-        genList(list->next, sep);
+        genVarList(list->next, sep);
         if(list->next) glueAny("%c ",sep);
-        glueCode("V ");
+        glueCode("V "); 
         scanNode(list->val);
     }
 }
@@ -229,23 +260,33 @@ static void genLocalVars(Node *block){
     DOI(SymbolTableSize, { SymbolName *sn = st->table[i];
             while(sn){genLocalVar(sn, k++); sn=sn->next;}} )
     glueLine();
+    glueIndent(); glueAny("V tempV[10]; // temporary return vars"); glueLine();
     //P("total decl vars = %d\n", k); getchar();
 }
 
-static void genProfileStmt(B f, I c){
+static void genProfileStmt(B f, I c, S macro){
     if(f) {
-        genIndent(); glueAny("PROFILE(%d, ",c);
+        genIndent(); glueAny("%s(%d, ",macro,c);
     }
     else {
         glueCode(");"); glueLine();
     }
 }
 
+static void genPrefixMacro(Node *n, B f, I c){
+    if(isNodeMethod(n)){
+        genProfileStmt(f,c,C_MACRO_UDF);
+    }
+    else {
+        genProfileStmt(f,c,C_MACRO_TIME);
+    }
+}
+
 static void genCodeExtra(ChainExtra *extra, I lineno){
     glueMethodHead(extra->funcDecl, "");
-    genProfileStmt(1,lineno);
+    genProfileStmt(1,lineno,C_MACRO_TIME);
     glueCode(extra->funcInvc);
-    genProfileStmt(0,-1);
+    genProfileStmt(0,-1,C_MACRO_TIME);
     glueMethodFunc(extra->funcFunc);
 }
 
@@ -253,11 +294,12 @@ static void genStatement(Node *n, B f){
     switch(n->kind){
         case   callK: if(f){ if(needInd) genIndent(); }
                       else { if(needInd) { glueCode(";"); glueLine(); }  } break;
-        case   stmtK: genProfileStmt(f,n->lineno); break;
+        case   stmtK: genPrefixMacro(n,f,n->lineno); break;
         case     ifK:
         case  whileK:
         case repeatK:
         case returnK: if(f) genIndent(); break;
+        default: break;
     }
 }
 
@@ -269,7 +311,7 @@ static void genEntry(){
     if(numRtns > 0){
         glueCodeLine("V rtns[99];");
         glueCodeLine("tic();");
-        glueAnyLine("%s(horse_main(rtns));",C_MACRO_UDF);
+        glueAnyLine("%s(0, horse_main(rtns), {});",C_MACRO_UDF);
         glueCodeLine("E elapsed = calc_toc();");
         glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
         glueCodeLine("P(\"Output:\\n\");");
@@ -291,7 +333,7 @@ static void scanFuncBuiltin(S func){
 }
 
 static void scanFuncMethod(S func){
-    glueAny(C_MACRO_UDF "(%s", func);
+    glueAny("horse_%s", func);
 }
 
 static SymbolKind scanFuncName(Node *n){
@@ -319,15 +361,16 @@ static void scanCall(Node *n){
     SymbolKind sk = scanFuncName(nodeCallFunc(n));
     glueCode("(");
     if(sk == methodS) {
-        genVarArray(lhsVars, comma);
-        scanNode(nodeCallParam(n)); // argExprK
+        //genVarArray(lhsVars, comma);
+        glueAny("tempV%c ", comma);
+        genList(nodeList(nodeCallParam(n)), comma);
     }
     else {
         S funcName = nodeName2(nodeCallFunc(n));
         genList(lhsVars, comma);
         List *args = nodeList(nodeCallParam(n));
         I numArg = totalList(args);
-        if(!strcmp(funcName, "list")){
+        if(sEQ(funcName, "list")){
             glueAny(", %d, ",numArg);
             genVarArray(args, comma);
         }
@@ -340,7 +383,10 @@ static void scanCall(Node *n){
         }
     }
     glueCode(")");
-    if(sk == methodS) glueCode(")");
+    if(sk == methodS){
+        glueCode(", ");
+        genVarStore(lhsVars);
+    }
 }
 
 static void scanVar(Node *n){
@@ -416,7 +462,7 @@ static void scanConst(Node *n){
         case   longC: SP(temp, "%lld", v->valL); break;
         case   clexC: SP(temp, v->valX[1]>=0?"%g+%g":"%g%g", \
                               v->valX[0], v->valX[1]); break;
-        default: EP("Add more constant types: %d\n", v->type);
+        default: EP("Add more constant types: %d", v->type);
     }
     if(temp[0]) glueCode(temp);
 }
@@ -498,7 +544,7 @@ static B checkSimpleHash(Node *n){
             case NativeG: R 0;
             case   SkipG: R 1;
             case    OptG: genCodeExtra(extra, n->lineno); R 1;
-            default: EP("Unknown kind: %d\n", extra->kind);
+            default: EP("Unknown kind: %d", extra->kind);
         }
     }
     R 0;
@@ -527,7 +573,7 @@ static void scanNode(Node *n){
         case  continueK: scanContinue  (n); break;
         case     blockK: scanBlock     (n); break;
         case      funcK: scanFunc      (n); break;
-        default: EP("Add more node types: %s\n", getNodeTypeStr(n));
+        default: EP("Add more node types: %s", getNodeTypeStr(n));
     }
     genStatement(n, false);
 }
@@ -559,7 +605,6 @@ static void scanList1(List *list, Node *first){
 // TODO: utilize information stored in chains
 static void compileChain(Chain *chain){
     scanNode(chain->cur);
-
 }
 
 static I compileChainList(ChainList *list){
@@ -598,7 +643,8 @@ static void compileMethod(Node *n){
 }
 
 static void dispStatsBuff(L cur, L total, S name){
-    P("Profile:\n>> Used buffer %s %.2lf%% [%lld/%lld]\n", \
+    WP("Profile:\n");
+    WP(Indent4 ">> Used buffer %s %.2lf%% [%lld/%lld]\n", \
         name, percent(cur,total), cur, total);
     if(cur >= total)
         EP("Code buffer full!!!");
@@ -615,20 +661,19 @@ static void compileCode(List *list){
     if(list){ compileCode(list->next); compileMethod(list->val); }
 }
 
-static void saveToFile(S path, S head, S func, S code){
-    printBanner("Generated Code Below");
-    P("%s\n%s\n%s\n", head,func,code);
-    return ;
-    //FILE *fp = fopen(path, "w");
-    //FP(fp, "%s%s", head,code);
-    //fclose(fp);
-}
+// static void saveToFile(S path, S head, S func, S code){
+//     FILE *fp = fopen(path, "w");
+//     FP(fp, "%s%s", head,code);
+//     fclose(fp);
+// }
 
 static void dumpCode(){
     //if(H_DEBUG) printChainList(); // display visited chains
     genEntry();
     dispStats();
-    saveToFile("out/gen.h", head_code, func_code, code);
+    //saveToFile("out/gen.h", head_code, func_code, code);
+    printBanner("Generated Code Below");
+    P("%s\n%s\n%s\n", head_code, func_code, code);
 }
 
 static void init(){

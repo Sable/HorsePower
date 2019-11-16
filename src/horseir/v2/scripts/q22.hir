@@ -20,7 +20,7 @@ module default{
     t47:? = @gt(t33,t25);
     t48:? = @and(t47,t38);
     t49:? = @load_table(`orders:sym);
-    t51:? = check_cast(@column_value(t49,`o_custkey:sym), enum<i32,i32>);
+    t51:? = check_cast(@column_value(t49,`o_custkey:sym), enum<i64,i64>);
     t60:? = @values(t51);
     t61:? = @index_a(t48,t60,0:bool);
     t66:? = @compress(t61,t32);

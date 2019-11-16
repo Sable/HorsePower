@@ -104,10 +104,12 @@ char *strName(Node *n){
 void printSymbolName(SymbolName *sn){
     P("symbol: %s, kind: %s\n", sn->name, strSymbolKind(sn->kind));
     switch(sn->kind){
-        case moduleS: printNode(sn->val.module); break;
-        case methodS: printNode(sn->val.method); break;
-        case globalS: printNode(sn->val.global); break;
-        case  localS: printNode(sn->val.local); break;
+        case  moduleS: printNode(sn->val.module); break;
+        case  methodS: printNode(sn->val.method); break;
+        case  globalS: printNode(sn->val.global); break;
+        case   localS: printNode(sn->val.local); break;
+        case builtinS: break;
+        default: EP("Not supported: %d", sn->kind);
     }
     P("\n");
 }
@@ -145,7 +147,7 @@ SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind){
     //if(kind != builtinS)
     //  P("put string: %s ==> %d ==> %lld\n", name,i,(long long)(st->table[i]));
     for(SymbolName *s = st->table[i]; s; s = s->next){
-        if(!strcmp(s->name, name)) EP("Name existed: %s\n",name);
+        if(sEQ(s->name, name)) EP("Name existed: %s\n",name);
     }
     SymbolName *s = (SymbolName*)malloc(sizeof(SymbolName));
     s->name  = name;
@@ -158,7 +160,7 @@ SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind){
 SymbolName *getSymbolName(SymbolTable *st, char *name){
     int i = simpleHash(name);
     for(SymbolName *s = st->table[i]; s; s = s->next){
-        if(!strcmp(s->name, name)) return s;
+        if(sEQ(s->name, name)) return s;
     }
     if(st->parent == NULL) return NULL;
     return getSymbolName(st->parent, name);
@@ -167,7 +169,7 @@ SymbolName *getSymbolName(SymbolTable *st, char *name){
 static B defSymbol(SymbolTable *st, char *name){
     int i = simpleHash(name);
     for(SymbolName *s = st->table[i]; s; s = s->next){
-        if(!strcmp(s->name, name)) return true;
+        if(sEQ(s->name, name)) return true;
     }
     return false;
 }
@@ -205,7 +207,7 @@ static void addDecls(SymbolTable *table, char *name){
 static SymbolDecl *findDecls(char *name){
     SymbolDecl *x = globalDecls->next;
     while(x){
-        if(!strcmp(x->moduleName, name)) return x;
+        if(sEQ(x->moduleName, name)) return x;
         x = x->next;
     }
     return NULL;
@@ -267,6 +269,7 @@ static void scanDeclaration(Node *n, SymbolTable *st){
         case moduleK: scanModuleDecl(n, st); break;
         case methodK: scanMethodDecl(n, st); break;
         case globalK: scanGlobalDecl(n, st); break;
+        default: EP("Not supported: %d", n->kind);
     }
 }
 
@@ -480,6 +483,7 @@ static void scanStatement(Node *n, SymbolTable *st){
         case    vectorK: scanVector      (n, st); break;
         //case  continueK: scanContinueStmt(n, st); break;
         //case     breakK: scanBreakStmt   (n, st); break;
+        default: break;
     }
 }
 

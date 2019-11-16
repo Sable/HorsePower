@@ -38,7 +38,7 @@ typedef bool (*TypeCond)(InfoNode *);
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 
 #define CASE(k, x) case k: return x;
-#define DEFAULT(x) EP("NOT found:" #x);
+#define DEFAULT(x) default: EP("NOT found: %s",x)
 
 // rules
 #define commonTrig commonArith1
@@ -214,6 +214,7 @@ static bool compatibleT(InfoNode *x, InfoNode *y){
         case  i64T: return isT(y,boolT)||isT(y,i16T)||isT(y,i32T);
         case  f32T: return isIntIN(y);
         case  f64T: return isIntIN(y)||isT(y,f32T);
+        default: break;
     }
     return false;
 }
@@ -954,11 +955,11 @@ static L getTableIdFromTableName(S tableName){
     L d = lookupSimpleHash(hashMeta, hashKey);
     I tableId = -1;
     if(d){
-        tableId = ((MetaData *)d)->tableMeta.tableId;
+        tableId = ((MetaData *)d)->meta.tableMeta.tableId;
     }
     else {
         MetaData *newMeta = NEW(MetaData);
-        newMeta->tableMeta.tableId = tableId = shapeId++;
+        newMeta->meta.tableMeta.tableId = tableId = shapeId++;
         addToSimpleHash(hashMeta, hashKey, (L)newMeta);
     }
     return tableId;
@@ -976,8 +977,9 @@ static InfoNode *specialLoadTable(InfoNode *x){
 
 static InfoNode* setEnumKey(InfoNode *x, L key){
     MetaData *newMeta = NEW(MetaData);
-    newMeta->enumMeta.keyId = key;
+    newMeta->meta.enumMeta.keyId = key;
     addToSimpleHash(hashMeta, (L)x, (L)newMeta);
+    return x;
 }
 
 static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
@@ -1088,13 +1090,13 @@ static B isCellTypeSimple(InfoNode *x){
 static I getEnumKeyIdFromMeta(InfoNode *x){
     L d = lookupSimpleHash(hashMeta, (L)x);
     if(d){
-        return ((MetaData*)d)->enumMeta.keyId;
+        return ((MetaData*)d)->meta.enumMeta.keyId;
     }
     else {
         MetaData *newMeta = NEW(MetaData);
-        newMeta->enumMeta.keyId = shapeId++;
+        newMeta->meta.enumMeta.keyId = shapeId++;
         addToSimpleHash(hashMeta, (L)x, (L)newMeta);
-        return newMeta->enumMeta.keyId;
+        return newMeta->meta.enumMeta.keyId;
     }
 }
 
@@ -1337,7 +1339,7 @@ void checkFuncNumber(){
 }
 
 static int findNameFromSet(char *funcName, const char *set[], int size){
-    DOI(size, if(!strcmp(funcName, set[i])) return i)
+    DOI(size, if(sEQ(funcName, set[i])) return i)
     return -1;
 }
 
@@ -1382,11 +1384,11 @@ const S obtainTypeOther(TypeOther t){
 
 void getFuncIndexByName(char *name, FuncUnit *x){
     if(!searchUnary(name,x) && !searchBinary(name,x) && !searchOther(name,x)){
-        if(!strcmp(name, "le"))
+        if(sEQ(name, "le"))
             WP("Do you mean 'leq' instead of 'le'?\n");
-        else if(!strcmp(name, "ge"))
+        else if(sEQ(name, "ge"))
             WP("Do you mean 'geq' instead of 'ge'?\n");
-        else if(!strcmp(name, "sub"))
+        else if(sEQ(name, "sub"))
             WP("Do you mean 'minus' instead of 'sub'?\n");
         EP("Function name not found in built-in: %s\n", name);
     }
@@ -1407,8 +1409,7 @@ int getValenceOther(TypeOther x){
         CASE(     listF, -1); //any
         CASE(    dtaddF, 3);
         CASE(    dtsubF, 3);
-        CASE(    printF, 1);
-        DEFAULT(x);
+        DEFAULT(obtainTypeOther(x));
     }
 }
 
@@ -1471,7 +1472,7 @@ static void *getUnaryRules(TypeUnary x){
         CASE(loadTableF, ruleLoadTable)
         CASE(    fetchF, ruleFetch)
         CASE(  printF, rulePrint)
-        DEFAULT(x)
+        DEFAULT(obtainTypeUnary(x));
     }
 }
 
@@ -1509,7 +1510,7 @@ static void *getBinaryRules(TypeBinary x){
         CASE(   indexF, ruleIndex)
         CASE(columnValueF, ruleColumnValue)
         CASE(  subStringF, ruleSubString)
-        DEFAULT(x);
+        DEFAULT(obtainTypeBinary(x));
     }
 }
 
@@ -1528,7 +1529,7 @@ static void *getOtherRules(TypeOther x){
         CASE(       listF, ruleList)
         CASE(      dtaddF, ruleDtadd)
         CASE(      dtsubF, ruleDtsub)
-        DEFAULT(x);
+        DEFAULT(obtainTypeOther(x));
     }
 }
 
@@ -1551,7 +1552,7 @@ void *getTypeRules(char *name, int* num){
                 return getBinaryRules(x.b);
         case 3: *num = getValenceOther(x.t);
                 return getOtherRules(x.t);
-        DEFAULT(x->kind)
+        default: EP("Not supported: %d", x.kind);
     }
 }
 

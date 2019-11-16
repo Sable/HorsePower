@@ -54,6 +54,12 @@ static void envCompiler(char *file){
     runCompilerCore();
 }
 
+static void envInitDot(){
+    buildSymbolTable(root);
+    propagateTypeShape(root, false);
+    buildUDChain(root);
+}
+
 static void envVersion(){
     P("HorseIR version: 0.2.1\n");
 }
@@ -64,8 +70,12 @@ static void utlPrinter(char *qItem, char *file){
         printProg(root);
     }
     else if(sEQ(qItem, "dot")){
-        TODO("dot print");
-        //dotProg(root);
+        envInitDot();
+        dotProg();
+    }
+    else if(sEQ(qItem, "mermaid")){
+        envInitDot();
+        dotProgMermaid();
     }
     else if(sEQ(qItem, "symboltable")){
         buildSymbolTable(root);

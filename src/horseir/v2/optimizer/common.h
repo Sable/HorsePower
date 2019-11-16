@@ -1,7 +1,12 @@
 #ifndef __H_O_COMMON__
 #define __H_O_COMMON__
 
-/* macros */
+/* debugging macros */
+#define debugPattern false   // pattern.c
+#define debugAuto    false   // autofusion.c
+#define debugElem    false   // elementwise.c
+
+/* node macros */
 #define chainNode(c)       (c)->cur
 #define chainUseSize(c)    (c)->useSize
 #define chainDefSize(c)    (c)->defSize
@@ -12,20 +17,20 @@
 #define setVisited(c, v)   (c)->isVisited=v
 
 // node: module
-#define nodeModuleName(n)  (n)->module.id    // S
-#define nodeModuleBody(n)  (n)->module.body  // List
+#define nodeModuleName(n)  (n)->val.module.id    // S
+#define nodeModuleBody(n)  (n)->val.module.body  // List
 
 // node: import
 #define nodeImportName(n)  (n)->import.module  // S
 #define nodeImportItems(n) (n)->import.content // List
 
 // node: methodK
-#define nodeMethodName(n)        (n)->val.method.fname  // S
-#define nodeMethodReturnTypes(n) (n)->val.method.typ    // List
-#define nodeMethodParameters(n)  (n)->val.method.param  // Node
-#define nodeMethodBlock(n)       (n)->val.method.block  // Node
-#define nodeMethodMeta(n)        (n)->val.method.meta   // MetaMethod 
-#define nodeMethodChainList(n)   nodeMethodMeta(n)->chains
+#define nodeMethodName(n)        (n)->val.method.fname      // S
+#define nodeMethodReturnTypes(n) (n)->val.method.typ        // List
+#define nodeMethodParameters(n)  (n)->val.method.param      // Node
+#define nodeMethodBlock(n)       (n)->val.method.block      // Node
+#define nodeMethodMeta(n)        (n)->val.method.meta       // MetaMethod 
+#define nodeMethodChainList(n)   nodeMethodMeta(n)->chains  // no dummy
 
 // node: stmtK
 #define nodeStmtVars(n)   (n)->val.assignStmt.vars

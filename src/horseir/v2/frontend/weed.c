@@ -118,6 +118,7 @@ static bool weedDate(int x){
             case 10: R checkDay(dd, 31); break; //
             case 11: R checkDay(dd, 30); break;
             case 12: R checkDay(dd, 31); break; //
+            default: R 0;
         }
     }
     else R 0;
@@ -154,7 +155,7 @@ static bool weedClex(float *x){
 
 static bool weedString(char *x){
     while(*x){
-        char c = *x; if(c<0 || c>255) R 0; x++;
+        char c = *x; if(c < 0) R 0; x++;
     }
     R 1;
 }
@@ -244,7 +245,7 @@ static void weedVector(Node *x){
 
 static void weedVar(Node *x){
     char *name = x->val.param.id;
-    if(!strcmp(name, uscore))
+    if(sEQ(name, uscore))
         EP("Underscore '%s' shouldn't have any type.", uscore);
 }
 
@@ -283,7 +284,7 @@ static void weedGlobal(Node *x){
 
 static void weedMethod(Node *x){
     //printNodeType(x);
-    if(!strcmp(x->val.method.fname, "main")){
+    if(sEQ(x->val.method.fname, "main")){
         if(cntMain == 0){ entryMain = x; cntMain++; }
         else EP("Only one main method expected in modules.\n");
     }

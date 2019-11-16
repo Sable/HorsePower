@@ -225,7 +225,7 @@ S genDeclSingle(S func, C del){
 }
 
 L searchName(S *names, S s){
-    DOI(varNum, if(!strcmp(names[i],s))R i) R -1;
+    DOI(varNum, if(sEQ(names[i],s))R i) R -1;
 }
 
 B isDuplicated(S *names, S s){

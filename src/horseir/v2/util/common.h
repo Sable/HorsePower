@@ -77,7 +77,8 @@ void indexWithHorseArray(V z, V y, HA x); // z=y[x]
 void freeHorseArray(HA x);
 
 /* dot.c */
-//void dotProg(Prog *root);
+void dotProg();
+void dotProgMermaid();
 
 /* options.c */
 typedef enum OptionMode{

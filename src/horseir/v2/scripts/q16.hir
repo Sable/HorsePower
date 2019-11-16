@@ -2,15 +2,15 @@ module default{
   import Builtin.*;
   def main() : table{
     t0:? = @load_table(`supplier:sym);
-    t1:i32 = check_cast(@column_value(t0,`s_suppkey:sym), i32);
+    t1:i64 = check_cast(@column_value(t0,`s_suppkey:sym), i64);
     t7:sym = check_cast(@column_value(t0,`s_comment:sym), sym);
     t8:? = @like(t7,`"%Customer%Complaints%":sym);
     t9:? = @compress(t8,t1);
     t16:? = @load_table(`part:sym);
     t20:sym = check_cast(@column_value(t16,`p_brand:sym), sym);
     t21:sym = check_cast(@column_value(t16,`p_type:sym), sym);
-    t22:i32 = check_cast(@column_value(t16,`p_size:sym), i32);
-    t26:? = (49,14,23,45,19,3,36,9):i32;
+    t22:i64 = check_cast(@column_value(t16,`p_size:sym), i64);
+    t26:? = (49,14,23,45,19,3,36,9):i64;
     t27:? = @member(t22,t26);
     t28:? = @neq(t20,`"Brand#45":sym);
     t29:? = @like(t21,`"MEDIUM POLISHED%":sym);
@@ -18,8 +18,8 @@ module default{
     t31:? = @and(t27,t28);
     t32:? = @and(t31,t30);
     t42:? = @load_table(`partsupp:sym);
-    t43:? = check_cast(@column_value(t42,`ps_partkey:sym), enum<i32>);
-    t44:? = check_cast(@column_value(t42,`ps_suppkey:sym), enum<i32>);
+    t43:? = check_cast(@column_value(t42,`ps_partkey:sym), enum<i64>);
+    t44:? = check_cast(@column_value(t42,`ps_suppkey:sym), enum<i64>);
     t48:? = @values(t43);
     t49:? = @index(t32,t48);
     t50:? = @compress(t49,t48);

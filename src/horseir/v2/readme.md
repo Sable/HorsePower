@@ -36,6 +36,26 @@ Trivial folders
 - libs  : an experiment to create a big library for built-in functions with all types of parameters
 ```
 
+## Temporary Folder
+
+Overview
+
+```
+    tmp/
+        udf/
+```
+
+***Note***: New sub-folders can be added freely.
+
+### User-defined Functions
+
+Workspace `tmp/udf` is created for testing generated C code from HorseIR programs.
+
+Run compiler to fetch C code
+
+    ./horse -c cpu -f scripts/udf/q6_proc.hir
+
+
 
 ## Naming Convensions
 
@@ -70,6 +90,7 @@ Classifications
 - `node`   : a macro gets node's construct fields directly
 - `chain`  : a macro for chain nodes
 - `opt`    : for optimization strategies
+- `debug`  : an indicator for debugging information
 
 Function scopes
 
@@ -82,6 +103,28 @@ Function scopes
 - `c`: integers for counting
 - `i`, `j`, `k`, `m`, `n`: iterating variables
 - `i2`, `j2`, `k2`, `m2`, `n2`: associated iterating variables for length
+
+
+## I/O Operations
+
+### Input
+
+Data is read from disk/ramdisk using a system variable `HORSE_BASE` which
+stores the path of the HorsePower project.
+
+
+### Output
+
+- stdout: for actual meaningful output, such as emitted code
+    + P: standard output
+- stderr: for trivial debugging information
+    + WP: warning print (non-stop)
+    + EP: error print (stop)
+    + STOP: stop after print (stop)
+- file output:
+    + FP: file print
+- string print:
+    + SP: string print with a specific format
 
 
 ## Experimental Repository

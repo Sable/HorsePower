@@ -10,8 +10,9 @@ usage() {
         " 3) $0 compile q/t/f <id>      ## compile code without any optimizations" "" \
         " 4) $0 opt     q/t/f <id>      ## compile code with optimizations" "" \
         " 5) $0 stats load/dump         ## load/dump statistical information" "" \
-        " 6) $0 print <item> q/t/f <id> ## print item (pretty/dot/symboltable/typeshape)" "" \
-        " 7) $0 cloc                    ## show the number of lines of code" ""
+        " 6) $0 print <item> q/t/f <id> ## print item (pretty/dot/mermaid/symboltable/typeshape)" "" \
+        " 7) $0 cloc                    ## show the number of lines of code" "" \
+        " 8) $0 utility <cmd>           ## udf:q6, (pretty/dot/mermaid/symboltable/typeshape)" ""
 
     echo "Example: run=1 sf=1 thread=1 ./run.sh interp q 6"
     echo "         opt=fa ./run.sh opt q 6      ## automatic fusion for q6"
@@ -41,7 +42,6 @@ runCompiler() {
     elif [ $cmd = "f" ]; then
         (set -x && ./horse -c cpu -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu -f ./scripts/q${tid}.hir --tpch=${tid})
     else
         usage
@@ -56,7 +56,6 @@ runOptimizer() {
     elif [ $cmd = "f" ]; then
         (set -x && ./horse -c cpu ${opts} -f ./tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -c cpu ${opts} -f ./scripts/q${tid}.hir --tpch=${tid})
     else
         usage
@@ -85,6 +84,11 @@ runPrinter() {
     else
         usage
     fi
+}
+
+runUtility() {
+    cmd=$1
+    (set -x && ./horse -u -f scripts/udf/q6_proc.hir --print ${cmd})
 }
 
 
@@ -125,6 +129,8 @@ elif [ $# -eq 2 ]; then
     mod=$1
     if [ $mod = "stats" ]; then
         runStats $2
+    elif [ $mod = "utility" ]; then
+        runUtility $2
     else
         usage
     fi
