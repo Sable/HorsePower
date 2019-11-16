@@ -955,11 +955,11 @@ static L getTableIdFromTableName(S tableName){
     L d = lookupSimpleHash(hashMeta, hashKey);
     I tableId = -1;
     if(d){
-        tableId = ((MetaData *)d)->tableMeta.tableId;
+        tableId = ((MetaData *)d)->meta.tableMeta.tableId;
     }
     else {
         MetaData *newMeta = NEW(MetaData);
-        newMeta->tableMeta.tableId = tableId = shapeId++;
+        newMeta->meta.tableMeta.tableId = tableId = shapeId++;
         addToSimpleHash(hashMeta, hashKey, (L)newMeta);
     }
     return tableId;
@@ -977,7 +977,7 @@ static InfoNode *specialLoadTable(InfoNode *x){
 
 static InfoNode* setEnumKey(InfoNode *x, L key){
     MetaData *newMeta = NEW(MetaData);
-    newMeta->enumMeta.keyId = key;
+    newMeta->meta.enumMeta.keyId = key;
     addToSimpleHash(hashMeta, (L)x, (L)newMeta);
     return x;
 }
@@ -1090,13 +1090,13 @@ static B isCellTypeSimple(InfoNode *x){
 static I getEnumKeyIdFromMeta(InfoNode *x){
     L d = lookupSimpleHash(hashMeta, (L)x);
     if(d){
-        return ((MetaData*)d)->enumMeta.keyId;
+        return ((MetaData*)d)->meta.enumMeta.keyId;
     }
     else {
         MetaData *newMeta = NEW(MetaData);
-        newMeta->enumMeta.keyId = shapeId++;
+        newMeta->meta.enumMeta.keyId = shapeId++;
         addToSimpleHash(hashMeta, (L)x, (L)newMeta);
-        return newMeta->enumMeta.keyId;
+        return newMeta->meta.enumMeta.keyId;
     }
 }
 

@@ -41,9 +41,9 @@ typedef struct ChainBasicBlock{
     Chain *entry, *last;
 }ChainBlock;
 
-typedef struct CallGraph{
-    /* pending */
-}CallGraph;
+// typedef struct CallGraph{
+//     /* pending */
+// }CallGraph;
 
 //void printChainList();
 //void printChainInfo(Chain *chain, char opt);
