@@ -12,8 +12,8 @@ database queries with low response time.
 HorsePower has the following parts:
 
 - [HorseIR](horseir): An array-based IR for handling and optimizing queries
-- [HorseSQL](sql2ir): An SQL to HorseIR translator
-- [HorseSystem](system):  A system for executing HorseIR programs
+- [HorseSQL](sql2ir): A plan to HorseIR translator
+- [HorseSystem](system):  A system for processing HorseIR programs
 - [HorseRuntime](runtime): A runtime system for In-Memory Database Systems (IMDB)
 
 

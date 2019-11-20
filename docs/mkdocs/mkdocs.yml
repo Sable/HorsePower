@@ -55,12 +55,12 @@ nav:
     - Examples     : 'horseir/examples.md'
 - HorseSQL :
     - Overview     : 'sql2ir/index.md'
+    - HyPer        : 'sql2ir/hyper.md'
+    - MonetDB      : 'sql2ir/monetdb.md'
     - TPC-H        : 'sql2ir/tpch.md'
 - HorseSystem : 'system/index.md'
 - HorseRuntime: 'runtime/index.md'
 - Research:
-    - HyPer        : 'research/hyper.md'
-    - MonetDB      : 'research/monetdb.md'
     - PL           : 'research/pl.md'
     - MMDB         : 'research/mmdb.md'
     - SQL          : 'research/sql.md'
