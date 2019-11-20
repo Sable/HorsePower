@@ -5,11 +5,11 @@
 ```
     @take(3:i32, (1,2,3,4,5,6):i32)
 (1,2,3):i32
-    @take(-3:i32, (4,5,6):i32)
+    @take(-3:i32, (1,2,3,4,5,6):i32)
 (4,5,6):i32
 ```
 
-Function `take` returns the leading `n` items from a value `v`.
+Function `take` returns the leading `n` items (when n is positive) or the tailing `n` times (when n is negative) from a value `v`.
 If `n` is greater than the length of `v`, the extra slots are filled with the
 default values depending on their current types.
 
@@ -30,11 +30,14 @@ _  , _   -> domain error
 ```
     @drop(3:i32, (1,2,3,4,5,6):i32)
 (4,5,6):i32
-    @drop(-3:i32, (4,5,6):i32)
+    @drop(-3:i32, (1,2,3,4,5,6):i32)
 (1,2,3):i32
 ```
 
-Function `drop` drops the tailing `n` from a value `v` and returns the remaining values.
+Function `drop` drops
+the leading `n` (when n is positive) or
+the tailing `n` (when n is negative) from
+a value `v` and returns the remaining values.
 If `n` is greater or equal to the length of `v`, an empty value is returned.
 
 ### Type Rules

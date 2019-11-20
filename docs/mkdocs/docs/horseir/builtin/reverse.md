@@ -2,7 +2,7 @@
 
 ### Description
 
-Reverse a list
+Reverse a vector
 
 ### Type Rules
 
@@ -32,6 +32,10 @@ _       -> domain error
     @reverse((4,9,16):i32)
 (16,9,4):i32
 ```
+
+### See Also
+
+- [@flip](flip.md): a reversing function for lists
 
 ### Note
 

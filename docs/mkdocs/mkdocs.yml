@@ -44,8 +44,6 @@ markdown_extensions:
 copyright:
     '&copy; 2017-2019, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
 
-#<a id="audrey_page" href="https://www.cs.mcgill.ca/~yfeng21/" target="_blank">Yulan Feng</a>
-
 nav:
 - Home    : 'index.md'
 - Overview: 'overview.md'

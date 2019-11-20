@@ -61,6 +61,8 @@ Function `randk` takes two integers `randk(n,x)`, where `n` is the number of
 random numbers and `x` is as an range.  It returns a vector with `n` random
 numbers within 0 (inclusive) and x (exclusive).
 
+Implementation: [Reservoir sampling](https://en.wikipedia.org/wiki/Reservoir_sampling)
+
 **Type rules**
 
 ```

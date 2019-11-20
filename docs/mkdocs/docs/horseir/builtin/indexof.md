@@ -6,10 +6,10 @@
 @index_of(x, y)
 ```
 
-find each item from y in x:
+find each item from x in y:
 
 1. return index, if <blue>found</blue>
-1. return the length of x, if <red>not found</red>
+1. return the length of y, if <red>not found</red>
 
 *Note: Indexing starts from 0*
 
@@ -33,11 +33,11 @@ Table with details (See [type alias](../../../horseir/#types))
 
 ### Shape Rules
 
-[Shape right rules](../../../horseir/#shape-right)
+[Shape left rules](../../../horseir/#shape-left)
 
 ### Examples
 
 ```no-highlight
-    @index_of((4,9,16):i32, (3,4):i32)
+    @index_of((3,4):i32, (4,9,16):i32)
 (3,0):i32
 ```
