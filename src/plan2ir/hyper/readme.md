@@ -1,3 +1,41 @@
+# A Plan-to-HorseIR Translator for HyPer's Plans
+
+## Folder Structure
+
+Python scripts (i.e. `*.py`) consist of a plan-to-HorseIR translator which
+reads a plan and generates a valid HorseIR program.
+The plan is stored in a JSON object obtained from HyPer's online interface
+(http://hyper-db.de/interface.html#).
+
+### Core Folders
+
+pre-process
+
+    - fetches JSON objects from online HyPer
+
+input-json
+
+    - contains JSON
+
+output-hir
+
+    - translates JSON objects to HorseIR code (in format .hir)
+
+post-process
+
+    - analyze and optimize generated HorseIR code
+
+### Auxiliary Folders
+
+fig
+
+    - contains screenshots for TPC-H queries from HyPer's website
+
+tmp
+
+    - has all temporary folders and files, such as log data and temp scripts
+
+
 ## List of Queries
 
 | ID | Status |1st|2nd|Auto| Joins                                    | Special
