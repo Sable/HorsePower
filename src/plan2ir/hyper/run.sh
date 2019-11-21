@@ -4,7 +4,7 @@ usage(){
     printf '%s\n' \
         "Usage: $0 <cmd>" "" \
         "  1) $0 <tpch | aida> <id>          ## gen code from tpch or aida queries" "" \
-        "  2) $0 batch tpch <all | partial>  ## gen code from tpch or aida queries" "" \
+        "  2) $0 batch tpch <all | partial>  ## all or partial queries, save to output-hir/gen" "" \
         "  3) $0 profile horseir             ## profile HorseIR code under gen/" "" \
         "  4) $0 see diff                    ## diff gen-v1/q$.hir gen/q$.hir" "" \
         "  5) $0 see pass                    ## see if TPC-H queries pass" "" \
@@ -16,6 +16,8 @@ usage(){
 inputdata="input-json"
 outputdata="output-hir"
 postfolder="post-process"
+genfolder="gen-latest"
+gentemp="gen"
 
 RED='\033[0;31m'
 GN='\033[0;32m'
@@ -26,13 +28,13 @@ function gen_tpch_plan(){
     #python genIR.py "$src/q$1.json" | tee gen/q$1.hir
     python genIR.py "$src/q$1.json"
     #python genIR.py "unopt/q$1.json"
-    exit ${PIPESTATUS[0]}
+    return ${PIPESTATUS[0]}
 }
 
 function gen_aida_plan(){
     src="/home/sable/hanfeng.c/Desktop/hobby/aida/tpch/hyper/plans"
     python genIR.py "$src/q$1.json"
-    exit ${PIPESTATUS[0]}
+    return ${PIPESTATUS[0]}
 }
 
 function gen_tpch_plan_batch(){
@@ -46,7 +48,7 @@ function gen_tpch_plan_batch(){
     for id in ${ids[@]}
     do
         echo "processing query $id"
-        gen_tpch_plan $id > ${outputdata}/gen/q${id}.hir
+        gen_tpch_plan $id > ${outputdata}/${gentemp}/q${id}.hir
         if test ${pipestatus[0]} -eq 0 ; then
             echo -e "query $id: ${GN}ok${NO}"
         else
@@ -58,7 +60,7 @@ function gen_tpch_plan_batch(){
 function see_diff(){
     for id in {1..22}
     do
-        diff ${outputdata}/gen-v1/q$id.hir ${outputdata}/gen/q$id.hir
+        diff ${outputdata}/gen-v1/q$id.hir ${outputdata}/${genfolder}/q$id.hir
     done
 }
 
@@ -85,7 +87,7 @@ function see_size(){
     total=0
     for id in {1..22}
     do
-        size=$(cat ${outputdata}/gen/q$id.hir | wc -l)
+        size=$(cat ${outputdata}/${genfolder}/q$id.hir | wc -l)
         echo "q$id $size"
         total=$(($total + $size))
     done
@@ -99,7 +101,7 @@ if [ "$#" -eq 2 ]; then
     elif [ $cmd = "aida" ]; then
         (set -x && gen_aida_plan $qid)
     elif [ $cmd = "profile" ] && [ $2 = "horseir" ]; then
-        grep -REin "program slicing|time" ${outputdata}/gen/*.hir | python ${postfolder}/profile_horseir.py
+        grep -REin "program slicing|time" ${outputdata}/${genfolder}/*.hir | python ${postfolder}/profile_horseir.py
     elif [ $cmd = "see" ] && [ $2 = "diff" ]; then
         see_diff
     elif [ $cmd = "see" ] && [ $2 = "pass" ]; then
