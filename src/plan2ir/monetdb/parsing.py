@@ -67,6 +67,8 @@ def nextToken(line):
             return nextOp(line, ch)
         elif isDigit(ch):
             return nextNumber(line, size)
+        elif ch == '&':
+            return ch,1
         else:
             wrong("unknown ch: %c" % ch)
     else:

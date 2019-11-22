@@ -1,9 +1,0 @@
-% .plan # table_name
-% rel # name
-% clob # type
-% 475 # length
-project (
-| project (
-| | table(sys.table_bs) [ "table_bs"."sptprice" NOT NULL, "table_bs"."strike" NOT NULL, "table_bs"."rate" NOT NULL, "table_bs"."volatility" NOT NULL, "table_bs"."time" NOT NULL, "table_bs"."optiontype" NOT NULL ] COUNT
-| ) [ "table_bs"."sptprice" NOT NULL, "table_bs"."optiontype" NOT NULL, double["table_bs"."sptprice" NOT NULL] as "L6"."L6", double["table_bs"."strike" NOT NULL] as "L7"."L7", double["table_bs"."rate" NOT NULL] as "L10"."L10", double["table_bs"."volatility" NOT NULL] as "L11"."L11", double["table_bs"."time" NOT NULL] as "L12"."L12", sys.compute_bs_scalar("L6"."L6", "L7"."L7", "L10"."L10", "L11"."L11", "L12"."L12", "table_bs"."optiontype" NOT NULL) as "L4"."optionprice" ]
-) [ "table_bs"."sptprice" NOT NULL, "table_bs"."optiontype" NOT NULL, "L4"."optionprice" ]

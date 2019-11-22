@@ -513,7 +513,10 @@ def getAs(v, env):
     return v['value']['id']
 
 def getLiteralChar(v, env):
-    return ("'%s'" % v['value'])
+    return ("'%s':char" % v['value'])
+
+def getLiteralBool(v, env):
+    return ("%d:bool" % (1 if v['value'] == 'true' else 0))
 
 def getValuesV(v, env):
     if 'type' in v:
@@ -542,6 +545,8 @@ def getValuesV(v, env):
             return getNameVar(v, env) 
         elif t == 'char':
             return getLiteralChar(v, env)
+        elif t == 'boolean':
+            return getLiteralBool(v, env)
         elif t == 'clob':
             return getItemClob(v, env)
         elif t == 'filter':
@@ -754,6 +759,7 @@ def initDatabaseUDF():
 def registerUDF():
     global udf_list
     udf_list.append('compute_bs_scalar')
+    udf_list.append('q6_cond_proc')
 
 def getEnvId(x, env2):
     if isName(x):

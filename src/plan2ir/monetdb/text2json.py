@@ -30,6 +30,7 @@ def scanMain():
     elif isKeyword('top')     : return scanTop     ()
     elif isGroupby()          : return scanGroupby ()
     elif isLeftOuterJoin()    : return scanLeftOuterJoin()
+    elif isWordRef()          : return scanRef()
     else: wrong("not supported yet: %s" % curToken())
 
 def scanTokens(text):
@@ -136,16 +137,38 @@ def scanSelect():
     }
 
 def scanTable():
-    consume('(')
-    name = fetchIdName() #0
-    consume(')')
-    columns = scanTableColumns()
-    consume("COUNT")
-    return {
-        'operator': 'table',
-        'table'   : name,
-        'columns' : columns
-    }
+    def scanTableNormal():
+        consume('(')
+        name = fetchIdName() #0
+        consume(')')
+        columns = scanTableColumns()
+        consume("COUNT")
+        return {
+            'operator': 'table',
+            'table'   : name,
+            'columns' : columns,
+            'isudf'   : 'false'
+        }
+    def scanTableUDF():
+        udfname = fetchIdName()
+        parameters = scanUDFParameters()
+        if tryToken(','):
+            consume('project')
+            columns = scanProject()
+        else:
+            columns = ''
+        return {
+            'operator': 'table',
+            'table'   : udfname,
+            'columns' : columns,
+            'isudf'   : 'true'
+        }
+    # start computing scanTable
+    cur = curToken()
+    if cur == '(':
+        return scanTableNormal()
+    else:
+        return scanTableUDF()
 
 def scanGroupby():
     consume('(')
@@ -198,6 +221,26 @@ def scanTop():
         'limit'   : limit
     }
 
+def isWordRef():
+    cur = curToken()
+    return cur == "&" or cur == "REF"
+
+def scanRef():
+    def discardNumber():
+        fetchToken()
+    if tryToken("&"):
+        consume("REF")
+        discardNumber()
+    elif tryToken("REF"):
+        discardNumber()
+        consume("(")
+        discardNumber()
+        consume(")")
+    else:
+        wrong("Unknown toke")
+    return scanMain()
+
+
 """
 helper functions
 """
@@ -227,6 +270,19 @@ def scanTableColumns():
         else:
             columns.append(item)
         tryToken(',')
+    return columns
+
+def scanUDFParameters():
+    columns = []
+    consume('(')
+    while True:
+        columns.append(scanItem())
+        if tryToken(','):
+            continue
+        elif tryToken(')'):
+            break
+        else:
+            wrong('unknown token %s' % curToken())
     return columns
 
 def scanSelectExprs():
