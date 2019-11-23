@@ -20,8 +20,8 @@ O profileSimpleHash(sHashTable *st){
             if(minv>x) minv=x; \
             if(maxv<x) maxv=x; c++;})
     WP("Profile simple hash\n");
-    WP(indent "size: %g %% (%lld/%lld)\n", percent(c,st->size),c,st->size);
-    WP(indent "range: [%lld,%lld]\n",minv,maxv);
+    WP(indent4 "size: %g %% (%lld/%lld)\n", percent(c,st->size),c,st->size);
+    WP(indent4 "range: [%lld,%lld]\n",minv,maxv);
 }
 
 #define ROTL64(x,n) ((x>>n)|(x<<(64-n)))

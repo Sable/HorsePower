@@ -23,9 +23,9 @@ static char *qOpt[99];
 #define usage_n(x) dispLine(x, INDENT, "-f, --file <filename>", "Specify a query file")
 
 static void dispLine(I level, I left, const char *shortMsg, const char *longMsg){
-    I indents[] = { 2, 4, 6, 8 };
-    if(level < 0 || level >  3) EP("lead must be between [0, 3]\n");
-    I leads = indents[level];
+    I indentLevel[] = { 2, 4, 6, 8 };
+    if(level < 0 || level >  3) EP("lead must be between [0, 3]");
+    I leads = indentLevel[level];
     DOI(leads, WP(" ")); WP("%s", shortMsg);
     DOI(left-strlen(shortMsg)-leads, WP(" "));
     WP("%s\n", longMsg);
@@ -140,7 +140,7 @@ static const char *strMode(OptionMode mode){
         case      HelperM: R "Helper";
         case  ExperimentM: R "Experiment";
         case     UtilityM: R "Utility";
-        default: EP("Unknown mode: %d\n", mode);
+        default: EP("Unknown mode: %d", mode);
     }
 }
 
@@ -174,7 +174,7 @@ static I validateOptimization(){
     if(numOpts > 0){
         DOI(numOpts, \
             if(OPT_NA == (qOpts[i]=obtainOptCode(qOpt[i]))) \
-                EP("Unknown optimizaiton: %s\n", qOpt[i]))
+                EP("Unknown optimizaiton: %s", qOpt[i]))
     }
     R 0;
 }

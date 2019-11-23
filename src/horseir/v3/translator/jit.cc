@@ -19,7 +19,7 @@
 #include "llvm/ExecutionEngine/Orc/LambdaResolver.h"
 #include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
 
-#include "jit.h"
+#include "llvmjit.h"
 
 using namespace llvm;
 using namespace llvm::orc;
@@ -36,29 +36,27 @@ static IRBuilder<> Builder(theContext);
 static StructType *TyValue;
 static StructType *TyValueAnon;
 static PointerType *TyValuePtr;
+static StructType *TyTimeVal, *TyTimeZone;
 
 //extern List *compiledMethodList;
 
-#define TyI8  Type::getInt8Ty(theContext)
-#define TyI32 Type::getInt32Ty(theContext)
-#define TyI64 Type::getInt64Ty(theContext)
-#define TyF32 Type::getDoubleTy(theContext)
-#define TyF64 Type::getDoubleTy(theContext)
-
-#define TyI8p  Type::getInt8PtrTy(theContext)
-#define TyI32p Type::getInt32PtrTy(theContext)
-#define TyI64p Type::getInt64PtrTy(theContext)
-#define TyF32p Type::getDoublePtrTy(theContext)
-#define TyF64p Type::getDoublePtrTy(theContext)
-
-#define ConstantI32(x) ConstantInt::get(TyI32,x)
-#define ConstantI64(x) ConstantInt::get(TyI64,x)
-#define ConstantF32(x) ConstantFP::get(TyF32,x)
-#define ConstantF64(x) ConstantFP::get(TyF64,x)
-
+#define FuncEntryStr "horse_entry"
 #define genPrintf(...) llvm_printf(BB, __VA_ARGS__, NULL)
 
-#define FuncEntryStr "horse_entry"
+#include "jit.h"  // macros and functions
+
+#define H_LLVM true  // debugging flag
+
+#define setAlign(x)         x->setAlignment(4)
+#define newAlloca(typ)      Builder.CreateAlloca(typ,nullptr)
+#define newStore(val,x)     Builder.CreateStore(val,x)
+#define newLoad(typ,x)      Builder.CreateLoad(typ,x)
+#define newGEP(typ,x,pos)   Builder.CreateStructGEP(typ,x,pos)
+#define newCast(x,typ)      Builder.CreateBitCast(x,typ)
+
+#define llvm_genValuePtr(x,t) llvm_genValueNodePtr(x,H_##t)
+#define llvm_msg(...) if(H_LLVM) WP("LLVM:" __VA_ARGS__)
+
 
 /* ------------------ Declarations above ------------------------- */
 
@@ -87,69 +85,16 @@ static void initGlobalType(){
     items.push_back(TyValueAnon);
     TyValue = StructType::create(theContext, items, "struct.NodeValue");
     TyValuePtr = TyValue->getPointerTo();
-}
-
-static Function* demo_createFunc(){
-    std::vector<Type *> paramTy({TyI32, TyI32});
-    FunctionType *funcTy = FunctionType::get(TyI32, paramTy, false);
-    std::string funcName = "demo";
-    std::vector<std::string> funcArgs({"x", "y"});
-    Function *func = Function::Create(funcTy,
-                                      Function::ExternalLinkage,
-                                      funcName,
-                                      theModule.get());
-    int idx = 0;
-    for (auto &arg : func->args()){
-        arg.setName(funcArgs[idx++]);
-    }
-    return func;
-}
-
-#define isDemoNaive false
-static void demo_createBody(Function *func){
-    if(isDemoNaive){
-        // follow: "Getting Started with LLVM Core Libraries" p119
-        Function::arg_iterator args = func->arg_begin();
-        Value* arg1 = args++;  // arg1.setName("a");
-        Value* arg2 = args++;
-        BasicBlock *BB = BasicBlock::Create(theContext, "entry", func);
-        Builder.SetInsertPoint(BB); // insert content into BB
-        // init two variables
-        AllocaInst* localA = Builder.CreateAlloca(TyI32, nullptr, "a");
-        localA->setAlignment(4);
-        AllocaInst* localB = Builder.CreateAlloca(TyI32, nullptr, "b");
-        localB->setAlignment(4);
-        // save to local vars
-        StoreInst* instA = Builder.CreateStore(arg1, localA);
-        instA->setAlignment(4);
-        StoreInst* instB = Builder.CreateStore(arg2, localB);
-        instB->setAlignment(4);
-        // load from local vars
-        LoadInst* valA = Builder.CreateLoad(TyI32, localA);
-        valA->setAlignment(4);
-        LoadInst* valB = Builder.CreateLoad(TyI32, localB);
-        valB->setAlignment(4);
-        // operation: add
-        Value* res = Builder.CreateAdd(valA, valB);
-        Builder.CreateRet(res);
-    }
-    else {
-        // simplified version (remove intermediate variables)
-        BasicBlock *BB = BasicBlock::Create(theContext, "entry", func);
-        Builder.SetInsertPoint(BB); // insert content into BB
-        Function::arg_iterator args = func->arg_begin();
-        Value *arg1 = args++;
-        Value *arg2 = args++;
-        Value *res = Builder.CreateAdd(arg1, arg2, "rtn");
-        Builder.CreateRet(res);
-    }
+    // timeval
+    TyTimeVal  = StructType::create(theContext, {TyI64, TyI64}, "struct.timeval");
+    TyTimeZone = StructType::create(theContext, {TyI32, TyI32}, "struct.timezone");
 }
 
 /*
  * source:
  *   https://stackoverflow.com/a/46337835/4111149
  */
-void llvm_printf(BasicBlock *bb, const char *format, ...){
+static void llvm_printf(BasicBlock *bb, const char *format, ...){
     Function *funcPrint = theModule->getFunction("printf");
     if(!funcPrint){ // first time
         FunctionType *funcTy = FunctionType::get(TyI32, true);
@@ -185,41 +130,158 @@ static void setParamName(Function *func, std::vector<std::string> funcArgs){
     }
 }
 
-static void genMethodEntry(){
-    std::vector<Type *> params({TyValue, TyValuePtr});
-    // step 1: create function head
-    FunctionType *funcTy = FunctionType::get(TyF64, params, false);
-    std::string funcName = FuncEntryStr;
-    Function *func = Function::Create(funcTy,
+// x->i32
+static Value *llvm_genValueNodePtr(Value *x, I typ){
+    AllocaInst *a_n = newAlloca(TyValuePtr);
+    setAlign(a_n);
+    StoreInst *s_n = newStore(x, a_n);
+    setAlign(s_n);
+    LoadInst *l_n = newLoad(TyValuePtr, a_n);
+    setAlign(l_n);
+    Value *ptr_n  = newGEP(TyValue, l_n, 3);
+    Value *rtn = NULL;
+    switch(typ){
+        caseI rtn = newCast(ptr_n, TyI32p); break;
+        caseQ caseZ
+        caseL rtn = newCast(ptr_n, TyI64p); break;
+        caseF rtn = newCast(ptr_n, TyF32p); break;
+        caseE rtn = newCast(ptr_n, TyF64p); break;
+        default: EP("Need to support: %s\n", getTypeName(typ));
+    }
+    return rtn;
+}
+
+//-- gen-based functions
+
+static Function *llvm_genMethodHead(
+        std::string funcName,
+        Type * rtnType){
+    llvm_msg("1. Creating function: %s\n", funcName.c_str());
+    FunctionType *funcTy = FunctionType::get(rtnType, false);
+    Function *func = Function::Create(
+            funcTy,
             Function::ExternalLinkage,
             funcName,
             theModule.get());
-    setParamName(func, {"xy", "y"});
-    // step 2: build function body
+    return func;
+}
+
+static Function *llvm_genMethodHead(
+        std::string funcName,
+        Type * rtnType,
+        std::vector<Type *> paramTypes,
+        std::vector<std::string> paramNames = std::vector<std::string>(),
+        GlobalValue::LinkageTypes linkType = GlobalValue::ExternalLinkage){
+    llvm_msg("2. Creating function: %s\n", funcName.c_str());
+    FunctionType *funcTy = FunctionType::get(rtnType, paramTypes, false);
+    Function *func = Function::Create(
+            funcTy, linkType, funcName, theModule.get());
+    if(!paramNames.empty())
+        setParamName(func, paramNames);
+    return func;
+}
+
+
+static void llvm_genCall_gettimeofday(std::vector<Value *> params){
+    Function *func = theModule->getFunction("gettimeofday");
+    if(!func){
+        FunctionType *funcTy = FunctionType::get(
+                TyI32,
+                {TyTimeVal->getPointerTo(), TyTimeZone->getPointerTo()},
+                false);
+        func = Function::Create(funcTy,
+                GlobalValue::ExternalLinkage,
+                "gettimeofday",
+                theModule.get());
+        func->setCallingConv(CallingConv::C);
+        AttributeList funcAttr;
+        func->setAttributes(funcAttr);
+    }
+    CallInst *call = Builder.CreateCall(func, params);
+}
+
+static CallInst *llvm_genCall_calcinterval(std::vector<Value *> params){
+    Function *func = theModule->getFunction("calcInterval");
+    if(!func){
+        llvm_msg("Not found: calcInterval\n");
+        FunctionType *funcTy = FunctionType::get(
+                TyF64,
+                {TyI64,TyI64,TyI64,TyI64},
+                false);
+        func = Function::Create(funcTy,
+                GlobalValue::ExternalLinkage,
+                "calcInterval",
+                theModule.get());
+        func->setCallingConv(CallingConv::C);
+        AttributeList funcAttr;
+        func->setAttributes(funcAttr);
+    }
+    return Builder.CreateCall(func, params);
+}
+
+static void genMethodEntry(){
+    llvm_msg("step 1: create function head\n");
+    Function *func = llvm_genMethodHead(FuncEntryStr, TyF64);
+    // std::vector<Type *> params({TyValue, TyValuePtr});
+    llvm_msg("step 2: build function body\n");
     BasicBlock *BB = BasicBlock::Create(theContext, "entry", func);
     Builder.SetInsertPoint(BB);
-    AllocaInst *new_elapse = Builder.CreateAlloca(TyF64, nullptr, "elapsed");
-    new_elapse->setAlignment(4);
-    StoreInst *instElapse = Builder.CreateStore(ConstantF64(3.14), new_elapse);
-    instElapse->setAlignment(4);
-    LoadInst *valElapse = Builder.CreateLoad(TyF64, new_elapse);
-    genPrintf("The elapsed time (ms): %g\n", valElapse);
+    AllocaInst *a_elapse = newAlloca(TyF64);
+    setAlign(a_elapse);
+    AllocaInst *a_tv1 = newAlloca(TyTimeVal);
+    AllocaInst *a_tv2 = newAlloca(TyTimeVal);
+    llvm_genCall_gettimeofday({a_tv1, ConstantPointerNull::get(TyTimeZone->getPointerTo())});
+    llvm_msg("(( running code ))\n");
+    llvm_genCall_gettimeofday({a_tv2, ConstantPointerNull::get(TyTimeZone->getPointerTo())});
+    // invoke params
+    llvm_msg("(( casting ))\n");
+    Value *v_c1_arg0 = newGEP(TyTimeVal, a_tv1, 0);
+    Value *v_c1_arg1 = newGEP(TyTimeVal, a_tv1, 1);
+    Value *v_c2_arg0 = newGEP(TyTimeVal, a_tv2, 0);
+    Value *v_c2_arg1 = newGEP(TyTimeVal, a_tv2, 1);
+    //ArrayType *TyArrayI64 = ArrayType::get(TyI64, 2);
+    //PointerType *TyArrayI64p = TyArrayI64->getPointerTo();
+    //Value *v_c1 = newCast(a_tv1, TyArrayI64p);
+    //Value *v_c1_arg0 = newGEP(TyArrayI64, a_tv1, 0);
+    //Value *v_c1_arg1 = newGEP(TyArrayI64, a_tv1, 1);
+    //Value *v_c2 = newCast(a_tv2, TyArrayI64p);
+    //Value *v_c2_arg0 = newGEP(TyArrayI64, a_tv2, 0);
+    //Value *v_c2_arg1 = newGEP(TyArrayI64, a_tv2, 1);
+    llvm_msg("(( cast tv2 ))\n");
+    std::vector<Value *> vecArgs;
+    vecArgs.push_back(newLoad(TyI64, v_c1_arg0));
+    vecArgs.push_back(newLoad(TyI64, v_c1_arg1));
+    vecArgs.push_back(newLoad(TyI64, v_c2_arg0));
+    vecArgs.push_back(newLoad(TyI64, v_c2_arg1));
+    llvm_msg("(( invoking ))\n");
+    CallInst *rtn = llvm_genCall_calcinterval(vecArgs);
+    StoreInst *s_elapse = newStore(rtn, a_elapse);
+    setAlign(s_elapse);
+    LoadInst   *l_elapse = newLoad(TyF64, a_elapse);
+    setAlign(l_elapse);
+    genPrintf("The elapsed time (ms): %g\n", l_elapse);
     genPrintf("Output:\n");
     // -- testing NodeValue
-    Function::arg_iterator args = func->arg_begin();
-    Value *arg2 = args+1;
-    AllocaInst *localA = Builder.CreateAlloca(TyValuePtr, nullptr);
-    localA->setAlignment(4);
-    StoreInst *instA = Builder.CreateStore(arg2, localA);
-    instA->setAlignment(4);
-    LoadInst *valA = Builder.CreateLoad(TyValuePtr, localA);
-    valA->setAlignment(4);
-    Value *ptrA = Builder.CreateStructGEP(TyValue, valA, 3);
-    Value *castA = Builder.CreateBitCast(ptrA, TyI64p);
-    Builder.CreateStore(ConstantI64(99), castA);
-    Builder.CreateRet(valElapse);
+    //Function::arg_iterator args = func->arg_begin();
+    //Value *arg2 = args+1;
+    //Value *castA = llvm_genValuePtr(arg2, I);
+    //Builder.CreateStore(ConstantI64(99), castA);
+    Builder.CreateRet(l_elapse);
     // step 3: check function
     verifyFunction(*func);
+}
+
+static void genMethodExternal(){
+    Function *func = llvm_genMethodHead("calcInterval",
+            TyF64,
+            {TyI64,TyI64,TyI64,TyI64},
+            std::vector<std::string>(),
+            GlobalValue::InternalLinkage);
+    BasicBlock *BB = BasicBlock::Create(theContext, "entry", func);
+    Builder.SetInsertPoint(BB);
+    Function::arg_iterator args = func->arg_begin();
+    Value *arg0 = args;
+    Builder.CreateRet(Builder.CreateSIToFP(arg0, TyF64));
 }
 
 static void genMethodHead(Node *n){
@@ -269,7 +331,7 @@ static void runCode(){
 
 static void init(){
     //depth = 0;
-    initModule("ExampleModule");
+    initModule("HorseModule");
     initTopDecl();
     initTarget();
     initGlobalType();
@@ -278,10 +340,9 @@ static void init(){
 int HorseCompilerJITNaive(){
     init();
     tic();
-    //demo();
     //compileCode(compiledMethodList->next);
+    genMethodExternal();
     genMethodEntry();
-    //demo_createFunc();
     time_toc("Part 1: code gen (ms): %g\n", elapsed);
     runCode();
     return 0;

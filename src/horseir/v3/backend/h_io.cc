@@ -56,7 +56,7 @@ V readCSV(S fileName, L numCols, L *types, Q *symList){
     V x = allocTable(numCols);
     DOI(numCols, {V key=getTableKeys(x); vQ(key,i)=symList[i]; \
         V val=getTableVals(x); initValue(getTableCol(val,i), types[i], numRow);})    
-    if(H_DEBUG) P("** Done with initialization **\n");
+    if(H_DEBUG) WP("** Done with initialization **\n");
 #ifndef USE_MMAP
     rewind(fp);
 #endif

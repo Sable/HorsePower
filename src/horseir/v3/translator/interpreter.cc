@@ -65,32 +65,32 @@ static V executeMon(MonadicFunc f, V *p){
     V z = NEW(V0);
     I status = (*f)(z,p[0]);
     if(status==0) return z;
-    else {P("[Monadic]"); printErrMsg(status); return 0;}
+    else {WP("[Monadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeDya(DyadicFunc f, V *p){
     V z = NEW(V0);
     I status = (*f)(z, p[0], p[1]);
     if(status==0) return z;
-    else {P("[Dyadic]"); printErrMsg(status); return 0;}
+    else {WP("[Dyadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeAny(AnyadicFunc f, V *p, L n){
     V z = NEW(V0);
     I status = (*f)(z, n, p);
     if(status==0) return z;
-    else {P("[Anyadic]"); printErrMsg(status); return 0;}
+    else {WP("[Anyadic]"); printErrMsg(status); return 0;}
 }
 
 static V executeIndexA(V *p){
     V z = NEW(V0);
     I status = pfnIndexA(z, p[0], p[1], p[2]);
     if(status==0) return z;
-    else {P("[IndexA]"); printErrMsg(status); return 0;}
+    else {WP("[IndexA]"); printErrMsg(status); return 0;}
 }
 
 static V executeTriple(EachTriple f, V *p){
-    if(H_DEBUG) P("executeTriple\n");
+    if(H_DEBUG) WP("executeTriple\n");
     V z = NEW(V0);
     I status = (*f)(z, p[0], p[1], p[2]);
     if(status==0) return z;
@@ -98,7 +98,7 @@ static V executeTriple(EachTriple f, V *p){
 }
 
 static V executeJoinIndex(JoinOperation f, V *p){
-    if(H_DEBUG) P("executeJoinIndex\n");
+    if(H_DEBUG) WP("executeJoinIndex\n");
     V z = NEW(V0);
     I status = (*f)(z, p[1], p[2], p[0]);
     if(status==0) return z;
@@ -106,26 +106,26 @@ static V executeJoinIndex(JoinOperation f, V *p){
 }
 
 static V executeEachDya(EachDyadic f, V *p){
-    if(H_DEBUG) P("executeEachDya\n");
+    if(H_DEBUG) WP("executeEachDya\n");
     V z = NEW(V0);
     S funcName = getSymbolStr(vq(p[0]));
     FuncUnit fu;
     getFuncIndexByName(funcName, &fu);
     if(fu.kind == 1){ // unary
-        EP("[EachDya] (%s) not supported.\n", funcName);
+        EP("[EachDya] (%s) not supported.", funcName);
     }
     else if(fu.kind == 2){ // binary
         I status = (*f)(z, p[1], p[2], dyaFunc[fu.b]);
         if(status==0) return z;
-        else {P("[EachDyadic]"); printErrMsg(status);}
+        else {WP("[EachDyadic]"); printErrMsg(status);}
     }
     else {
-        EP("dyadic op expected for each_left/right, not %s\n", funcName);
+        EP("dyadic op expected for each_left/right, not %s", funcName);
     } R 0;
 }
 
 static V executeEachMon(EachMonadic f, V *p){
-    if(H_DEBUG) P("executeEachMon\n");
+    if(H_DEBUG) WP("executeEachMon\n");
     V z = NEW(V0);
     S funcName = getSymbolStr(vq(p[0]));
     FuncUnit fu;
@@ -136,10 +136,10 @@ static V executeEachMon(EachMonadic f, V *p){
         else {WP("[EachMonadic]"); printErrMsg(status);}
     }
     else if(fu.kind == 2){ // binary
-        EP("Not supported: %s\n", funcName);
+        EP("Not supported: %s", funcName);
     }
     else {
-        EP("Monadic op expected for each, not %s\n", funcName);
+        EP("Monadic op expected for each, not %s", funcName);
     } R 0;
 }
 
@@ -169,7 +169,7 @@ V executeOther(TypeOther x, V *params, I numParams){
 
 static B H_LINE;
 static O showLine(Node *n){
-    P(">> running line %d: ", n->lineno);
+    WP(">> running line %d: ", n->lineno);
     printNode(n);
 }
 
@@ -218,7 +218,7 @@ static O saveToStackSub(SymbolNameList *list){
         //P(">> save i = %lld\n", i);
         stackPtr += size;
     }
-    else EP("Stack overflow\n");
+    else EP("Stack overflow");
 }
 
 static O saveToStack(Node *method){
@@ -289,7 +289,7 @@ static V invokeBuiltin(char *funcName, VList *list){
             case 3: return executeOther(fu.t, params, numArg);
         }
     }
-    else EP("valence error: %d expected, but %d found\n", valence, numArg);
+    else EP("valence error: %d expected, but %d found", valence, numArg);
     // TODO: free params
     return 0;
 }
@@ -392,7 +392,7 @@ static O checkRtns(List *vars, VList *list){
     if(numVars == numRtns){
         assignVars(vars, list->next);
     }
-    else EP("%d expects, but %d returned\n", numVars, numRtns);
+    else EP("%d expects, but %d returned", numVars, numRtns);
 }
 
 static O runAssignStmt(Node *n){
@@ -445,7 +445,7 @@ static S getFuncNameStr(Node *funcName){
     switch(sn->kind){
         case builtinS: return sn->name; 
         case  methodS: return sn->name;
-        default: EP("Add more support for %d\n", sn->kind);
+        default: EP("Add more support for %d", sn->kind);
     }
 }
 
@@ -491,7 +491,7 @@ static O checkReturnType(List *nlist, VList *plist){
     if(nlist){
         checkReturnType(nlist->next, plist->next);
         if(!checkReturnTypeSub(nlist->val, plist->v))
-            EP("Return type is not expected\n");
+            EP("Return type is not expected");
     }
 }
 
@@ -517,7 +517,7 @@ static O runIf(Node *n, I *isR){
             runNode(elseBlock, isR);
         }
     }
-    else EP("If-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+    else EP("If-condition must be a single bool: size = %lld, type = %s", xn, getTypeName(xp));
 }
 
 static O runWhile(Node *n, I *isR){
@@ -533,7 +533,7 @@ static O runWhile(Node *n, I *isR){
             else runWhile(n, isR);
         }
     }
-    else EP("While-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+    else EP("While-condition must be a single bool: size = %lld, type = %s", xn, getTypeName(xp));
 }
 
 static O runRepeat(Node *n, I *isR){
@@ -550,7 +550,7 @@ static O runRepeat(Node *n, I *isR){
             else if(isCtn) { *isR = 0; }
         }
     }
-    else EP("Repeat-condition must be a single bool: size = %lld, type = %s\n", xn, getTypeName(xp));
+    else EP("Repeat-condition must be a single bool: size = %lld, type = %s", xn, getTypeName(xp));
 }
 
 static O runBreak(I *isR){
@@ -582,7 +582,7 @@ static O runNode(Node *n, I *isR){
         case    breakK: runBreak     (isR);    break;
         case continueK: runContinue  (isR);    break;
         case  varDeclK: runVarDecl   (n,isR);  break;
-        default: EP("Kind not supported yet: %s\n", getNodeTypeStr(n));
+        default: EP("Kind not supported yet: %s", getNodeTypeStr(n));
     }
 }
 
@@ -597,7 +597,7 @@ static O runList(List *list, I *isR){
 }
 
 static O runMethod(Node *method, VList *param){
-    if(H_LINE) P("method name %s\n", method->val.method.fname);
+    if(H_LINE) WP("method name %s\n", method->val.method.fname);
     Node *prevNode = currentMethod;
     if(prevNode != NULL)
         saveToStack(prevNode);
@@ -610,7 +610,7 @@ static O runMethod(Node *method, VList *param){
     if(rtnTypes){
         // output - if it has returns
         if(method == entryMain){
-            P("Output: \n");
+            WP("Output: \n");
             printVList(paramList->next);
         }
     }
@@ -628,7 +628,7 @@ static O init(){
 }
 
 static O resultReport(){
-    P(">> stack pointer current: %lld, peak = %lld, max = %lld\n", stackPtr, stackPeak, (L)STACK_SIZE);
+    WP(">> stack pointer current: %lld, peak = %lld, max = %lld\n", stackPtr, stackPeak, (L)STACK_SIZE);
 }
 
 /* entry */

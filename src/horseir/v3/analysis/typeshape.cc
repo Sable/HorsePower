@@ -36,7 +36,7 @@ static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
     InfoNode *newNode = NULL;
     void* funcRtn = getTypeRules(funcName, &valence);  /* entry */
     if(!funcRtn) {
-        EP("Error type rules found in *%s*\n", funcName);
+        EP("Error type rules found in *%s*", funcName);
     }
     if(numArg == valence){
         if(valence == 2){ // binary
@@ -55,18 +55,18 @@ static InfoNode *propagateBuiltin(char *funcName, InfoNodeList *list){
             NilFunc func = (NilFunc)funcRtn;
             newNode = func();
         }
-        else EP("Valence must >= 0\n");
+        else EP("Valence must >= 0");
     }
     else if(valence == -1){ // match anything
         AllFunc func = (AllFunc)funcRtn;
         newNode = func(list);
     }
-    else EP("Builtin function valence mismatch (%s): %d vs. %d\n", funcName, numArg, valence);
+    else EP("Builtin function valence mismatch (%s): %d vs. %d", funcName, numArg, valence);
     // return
     if(newNode) return newNode;
     else {
         DOIr(numArg, printInfoNode(getNode(list,i)))
-        EP("NULL type rules found for function : %s\n",funcName);
+        EP("NULL type rules found for function : %s",funcName);
     }
 }
 
@@ -102,7 +102,7 @@ static InfoNodeList *propagateMethod(Node *n, InfoNodeList *inputList){
             return meta->returnTypes;
         }
     }
-    else EP("Method valence mismatch: %d vs. %d\n", numArg, valence);
+    else EP("Method valence mismatch: %d vs. %d", numArg, valence);
 }
 
 InfoNodeList *propagateType(Node *func, InfoNodeList *list){
@@ -206,7 +206,7 @@ InfoNode* getInfoFromNode(Node *n){
         switch(x->kind){
             case globalS: t = x->val.global; break;
             case localS : t = x->val.local ; break;
-            default: EP("Kind not supported:%d\n", x->kind);
+            default: EP("Kind not supported:%d", x->kind);
         }
         return getInfoFromNode(t->val.param.typ);
     }
@@ -241,7 +241,7 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
         // TODO: Is a shape info necessary?
         printInfoNode(x);
         printInfoNode(y);
-        EP("Right hand side type or shape unknown\n");
+        EP("Right hand side type or shape unknown");
     }
     if(isW(x)) {
         copyInfoNode(x, y);
@@ -414,16 +414,16 @@ static void scanAssignStmt(Node *n){
         if(numVar == numExpr){
             // <---- type copied here if type compatible  ....
             if(typelistCompatible(numVar, vars, currentInList));
-            else EP("Type error in assignment\n");
+            else EP("Type error in assignment");
         }
-        else EP("Assignment need %d, but %d returned\n", numVar, numExpr);
+        else EP("Assignment need %d, but %d returned", numVar, numExpr);
     }
     else {
         //printInfoNode(currentInList->next->in); getchar();
         if(numVar == 1 && typelistCompatible(1, vars, currentInList));
         else {
             printNode(n);
-            EP("Type error in assignment\n");
+            EP("Type error in assignment");
         }
     }
     //printInfoNode(currentInList->next->in);
@@ -439,7 +439,8 @@ static void scanGlobal(Node *n){
     InfoNode *rhs = currentInList->next?currentInList->next->in:NULL;
     if(numExpr == 1 && infoCompatible(lhs, rhs));
     else {
-        printNode(n); EP("Type error in assignment\n");
+        printNode(n);
+        EP("Type error in assignment");
     }
     cleanInfoList(currentInList);
 }
@@ -475,7 +476,7 @@ static void scanName(Node *n){
     switch(x->kind){
         case globalS: {Node *t=x->val.global; scanType(t->val.global.typ); } break;
         case localS : {Node *t=x->val.local;  scanType(t->val.param.typ);  } break;
-        default: EP("Kind not supported: %d\n", x->kind);
+        default: EP("Kind not supported: %d", x->kind);
     }
 }
 
@@ -515,7 +516,7 @@ static void scanReturnStmt(Node *n){
     if(numExpr == numRtns){
         if(numRtns > 0){
             if(typeInfoNodeListCompatible(meta->returnTypes, currentInList->next));
-            else EP("Return type mismatch in method: %s\n", currentMethod->val.method.fname);
+            else EP("Return type mismatch in method: %s", currentMethod->val.method.fname);
         }
     }
     else EP("Method expects %d returns, but gets %d", numRtns, numExpr);

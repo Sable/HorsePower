@@ -274,7 +274,7 @@ ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, int size){
                   sn->size = size;
               else if(isSNScan(sn))
                   sn->sizeScan = size;
-              else EP("unknow kind = %d\n", kind); break;
+              else EP("unknow kind = %d", kind); break;
               //if(isId) sn->sizeId = size<0?(shapeId++):size;
               //else sn->size = size; break;
         default: sn->size = -2; break;
@@ -692,7 +692,7 @@ static ShapeNode *decideShapeElementwiseV(ShapeNode *x, ShapeNode *y){
         if(x->size == 1) rtnShape = y;
         else if(isSNConst(y)){
             if(x->size == y->size || y->size == 1) rtnShape = x;
-            else EP("length of both sides should obey the elemetwise rule\n");
+            else EP("length of both sides should obey the elemetwise rule");
         }
         else rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
@@ -706,7 +706,7 @@ static ShapeNode *decideShapeElementwiseV(ShapeNode *x, ShapeNode *y){
         else if(isSNConst(y) && y->size == 1) rtnShape = x;
         else rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else EP("unknown kind = %d\n",x->kind);
+    else EP("unknown kind = %d",x->kind);
     return rtnShape;
 }
 
@@ -739,7 +739,7 @@ static ShapeNode *decideShapeAppend(InfoNode *x, InfoNode *y){
     else if(isShapeU(inShape(x)) || isShapeU(inShape(y))){
         rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else EP("unknown shape case for append\n");
+    else EP("unknown shape case for append");
     return rtnShape;
 }
 
@@ -765,7 +765,7 @@ static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
     else {
         printShapeNode(x); P("\n");
         printShapeNode(y); P("\n");
-        EP("unknown ShapeNode for compress");
+        EP("Unknown ShapeNode for compress");
     }
 }
 
@@ -777,7 +777,7 @@ static ShapeNode *decideShapeCompress(InfoNode *x, InfoNode *y){
     else if(isShapeU(inShape(x)) || isShapeU(inShape(y))){
         rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else EP("unknown InfoNode for compress\n");
+    else EP("Unknown InfoNode for compress");
     return rtnShape;
 }
 

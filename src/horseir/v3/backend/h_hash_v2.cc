@@ -6,7 +6,7 @@
 
 TBucket createHashWithV2(L n, V *x, L *hashLen){
     if(n >= 1) R create_hash_multiply_v2(x[0]);
-    else EP("number of columns invalid: %lld\n", n);
+    else EP("Number of columns invalid: %lld", n);
 }
 
 // same as insert_index_v1
@@ -29,7 +29,7 @@ static L insert_index_v2(HN t, L td){
         other[t->h_num] = td;
         t->h_num++;
     }
-    else EP("not enough slots: %lld\n", t->h_num);
+    else EP("Not enough slots: %lld", t->h_num);
     //P("number of slots: %lld\n", t->h_num); getchar();
     R td;
 }
@@ -46,7 +46,7 @@ static L insert_hash_v2(HB ht, L htMask, void *src, L srcI, L typ){
             if(x->h_hash==hashValue){ \
             switch(typ){\
                 caseL if(x->h_l==toL(src,srcI)) R insert_index_v2(x,srcI); break; \
-                default: EP("unexpected type: %s\n", getTypeName(typ)); \
+                default: EP("Unexpected type: %s", getTypeName(typ)); \
             }}})
         if(t->cur + 1 < t->size){
             HN x=node+(t->cur);
@@ -58,7 +58,7 @@ static L insert_hash_v2(HB ht, L htMask, void *src, L srcI, L typ){
             x->h_other = srcI;
             t->cur++;
         }
-        else EP("size not enough, need to grow: %lld / %lld\n", t->cur, t->size);
+        else EP("Size not enough, need to grow: %lld / %lld", t->cur, t->size);
     }
     else { // empty bucket
         const L init_size = 16;
@@ -115,7 +115,7 @@ static L insert_hash_int_v2(HB ht, L htMask, LL *src, L srcI){
             t->size    = PRE_SIZE+MORE_SIZE;
             t->cur++;
         }
-        else EP("size not enough, need to grow: %lld / %lld\n", t->cur, t->size);
+        else EP("Size not enough, need to grow: %lld / %lld", t->cur, t->size);
         P("size: t->cur = %lld\n", t->cur);
     }
     else if(t->cur<PRE_SIZE){ // empty bucket
@@ -130,7 +130,7 @@ static L insert_hash_int_v2(HB ht, L htMask, LL *src, L srcI){
         t->size    = -1;
         t->cur++;
     }
-    else EP("unexpected t->cur = %lld\n", t->cur);
+    else EP("Unexpected t->cur = %lld", t->cur);
     R srcI;
 }
 
@@ -139,12 +139,12 @@ TBucket create_hash_multiply_v2(V x){
     L  *prefix     = HASH_AL(L , setT);
     HB *hashBucket = HASH_AL(HB, setT);
     L  *hashSize   = HASH_AL(L , setT);
-    if(H_DEBUG) P("v2 //Step 1: scan for basic info\n");
+    if(H_DEBUG) WP("v2 //Step 1: scan for basic info\n");
 tic();
     DOI(xn, count[vLL(x,i)&setN]++)
     DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
 toc();
-    if(H_DEBUG) P("v2 //Step 2: create partitions (setT=%lld)\n",(L)setT);
+    if(H_DEBUG) WP("v2 //Step 2: create partitions (setT=%lld)\n",(L)setT);
 tic();
     DOI(setT, { \
         L hashLen=count[i]==0?0:getHashTableSize(count[i]); \
@@ -152,7 +152,7 @@ tic();
         hashSize[i]=hashLen;})
 toc();
     //test_hashSize(hashSize);
-    if(H_DEBUG) P("v2 //Step 3: insert items (%lld)\n",xn);
+    if(H_DEBUG) WP("v2 //Step 3: insert items (%lld)\n",xn);
 tic();
      //DOI(xn, {L id=vL(x,i)&setN; \
          insertHashMany_v2(hashBucket[id],hashSize[id]-1,xg,i,NULL,-1,H_L);})
@@ -259,7 +259,10 @@ static I lib_join_radix_hash_v2(V z0, V z1, V x, V y){
         P("Total elements write = %lld\n", c); // expected for Q5 3rd join: 46008
         R 0;
     }
-    else {EP("type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
+    else {
+        EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));
+        R 1;
+    }
 }
 
 #define runHashJoin(fn) {L hashCur=getHashHeap();I e=fn;setHashHeap(hashCur); R e;}

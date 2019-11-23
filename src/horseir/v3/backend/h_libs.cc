@@ -27,7 +27,7 @@ static void writeToFileForDebug(V x, const char* file_name){
     if(xp==H_L){
         writeToFileFromPtr(sL(x),xn,file_name);
     }
-    else EP("H_L is expected\n");
+    else EP("H_L is expected");
 }
 
 #include "h_hash_common.h"
@@ -91,7 +91,7 @@ static UI getHashValueComplete(void *val, L valI, L typ){
         caseS R hash_S(toS(val,valI));
         caseG { V x=(V)val; UI c=0;
             DOI(vn(x), {V y=vV(x,i); DOJ(vn(y),c+=getHashValueComplete(isList(y)?(void *)y:sG(y),j,vp(y)))}) R c; }
-        default: EP("type not supported: %lld\n", typ);
+        default: EP("type not supported: %lld", typ);
     }
 }
 
@@ -714,7 +714,7 @@ static CN *lib_qsort_node(V val, L size, FUNC_QCMP(cmp)){
     switch(vp(val)){
         caseL DOI(size, {nodes[i].i64=vL(val,i); nodes[i].p=i;})
               qsort(nodes, size, sizeof(CN), cmp_L); break;
-        default: EP("xxxx\n");
+        default: EP("Support more types: %s", getTypeName(vp(val)));
     }
     //DOI(size, lib_node_assign(nodes+i, val, i))
     //qsort(nodes, size, sizeof(CN), cmp_test);
@@ -1212,8 +1212,8 @@ static B seeOrder(Pos_i *pos, L n){
 }
 
 void lib_radixsort_int(L *rtn, V val, L len, B *isUp, B isRtnIndex){
-    if(H_DEBUG) P("... lib_radixsort_int\n");
-    if(vp(val) != H_I) EP("require H_I\n");
+    if(H_DEBUG) WP("... lib_radixsort_int");
+    if(vp(val) != H_I) EP("require H_I");
     B f0 = isUp?*isUp:1;
     Pos_i *pos = (Pos_i*)malloc(sizeof(Pos_i)*len);
     DOP(len, {pos[i].x=vI(val,i); pos[i].i=i;})
@@ -1273,8 +1273,8 @@ static void lib_radixsort_core_long(Pos *val, I len){
 }
 
 void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
-    if(H_DEBUG) P("... lib_radixsort_long\n");
-    if(vp(val) != H_L) EP("require H_L\n");
+    if(H_DEBUG) WP("... lib_radixsort_long\n");
+    if(vp(val) != H_L) EP("require H_L");
     B f0 = isUp?*isUp:1;
     Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
     DOP(len, {pos[i].x=vL(val,i); pos[i].i=i;})
@@ -1418,7 +1418,7 @@ static L binary_search(V x, L p0, V y, V d, I op){
     }
     if(sta == end) R sta;
     else if(end < 0) R end;
-    else EP("binary search result different:(%lld, %lld)\n",sta,end);
+    else EP("binary search result different:(%lld, %lld)",sta,end);
 }
 
 /* ------ Hash Related ------ */
@@ -1508,7 +1508,7 @@ I lib_join_index_linear(V z0, V z1, V x, V y, B isEq){
         caseI DOI(vn(y), {DOJ(vn(x), if(vI(y,i) op vI(x,j)){size++;break;})}) break; \
         caseL DOI(vn(y), {DOJ(vn(x), if(vL(y,i) op vL(x,j)){size++;break;})}) break; \
         caseE DOI(vn(y), {DOJ(vn(x), if(vE(y,i) op vE(x,j)){size++;break;})}) break; \
-        default: EP("type not supported: %s\n",getTypeName(xp)); \
+        default: EP("type not supported: %s",getTypeName(xp)); \
     }
 #define join_linear_save(op) \
     switch(xp){ \
@@ -1757,7 +1757,7 @@ I lib_join_dummy(V z0, V z1, V x, V y){
             caseI DOI(vn(x), DOJ(vn(y), if(vI(x,i)==vI(y,j)){vL(z0,c)=i; vL(z1,c)=j; c++;}))
         }
     }
-    else EP("type not supported: %s, %s\n",getTypeName(vp(x)),getTypeName(vp(y)));
+    else EP("type not supported: %s, %s",getTypeName(vp(x)),getTypeName(vp(y)));
     R 0;
 }
 
@@ -1776,7 +1776,7 @@ I lib_join_dummy2(V x, V y){
     }
     else {
         getInfoVar(x); getInfoVar(y);
-        EP("dummy2 only supports: list(I,I) join list(I,I)\n");
+        EP("dummy2 only supports: list(I,I) join list(I,I)");
     }
     R 0;
 }
@@ -1801,7 +1801,7 @@ I lib_join_dummy3(V x, V y){
     }
     else {
         getInfoVar(x); getInfoVar(y);
-        EP("dummy3 only supports: list(E,I) join list(E,I)\n");
+        EP("dummy3 only supports: list(E,I) join list(E,I)");
     }
     R 0;
 }
@@ -1867,7 +1867,7 @@ void profileListR(V x){
             P("# Nested list (depth > 1) found\n");
         P("data <- c("); DOI(xn, {if(i>0)P(",");P("%lld",vn(vV(x,i)));}) P(")\n");
     }
-    else EP("Type list expected\n");
+    else EP("Type list expected");
 }
 
 // special case for q20
@@ -1921,7 +1921,7 @@ void lib_groupby_dummy(V x){
         }
         P("total result = %lld\n", cnt); getchar(); // Q20: 543210
     }
-    else EP("condition not satisfied\n");
+    else EP("condition not satisfied");
 }
 
 L getInteger1(V x){
@@ -1932,10 +1932,10 @@ L getInteger1(V x){
             caseH R xh;
             caseI R xi;
             caseL R xl;
-            default: EP("Not an integer type: %s\n", getTypeName(xp));
+            default: EP("Not an integer type: %s", getTypeName(xp));
         }
     }
-    else EP("V must be a singleton\n");
+    else EP("V must be a singleton");
 }
 
 #define InitSeed 16807

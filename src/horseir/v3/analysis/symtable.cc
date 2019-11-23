@@ -147,7 +147,8 @@ SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind){
     //if(kind != builtinS)
     //  P("put string: %s ==> %d ==> %lld\n", name,i,(long long)(st->table[i]));
     for(SymbolName *s = st->table[i]; s; s = s->next){
-        if(sEQ(s->name, name)) EP("Name existed: %s\n",name);
+        if(sEQ(s->name, name))
+            EP("Name existed: %s",name);
     }
     SymbolName *s = (SymbolName*)malloc(sizeof(SymbolName));
     s->name  = name;
@@ -242,9 +243,9 @@ static SymbolTable *getDecls(char *moduleName, char **subNames, int size){
             }
             return st;
         }
-        else EP("size must >=0: %d\n",size);
+        else EP("Size must >=0: %d",size);
     }
-    else EP("module %s not found\n",moduleName);
+    else EP("Module %s not found",moduleName);
 }
 
 static void scanModuleDecl(Node *n, SymbolTable *st){
@@ -317,7 +318,7 @@ static void scanName(Node *n, SymbolTable *st){
     if(sn){
         //printSymbolName(sn); getchar();
     }
-    else EP("Name %s needs to be declared before used\n", strName(n));
+    else EP("Name %s needs to be declared before used", strName(n));
 }
 
 static void scanFunc(Node *n, SymbolTable *st){
@@ -424,7 +425,8 @@ static void scanParams(Node *n, SymbolTable *st){
 }
 
 static void scanId(Node *n, SymbolTable *st){
-    printNode(n); EP("Nothing for ID\n");
+    printNode(n);
+    EP("Nothing for ID");
 }
 
 static void scanExprStmt(Node *n, SymbolTable *st){

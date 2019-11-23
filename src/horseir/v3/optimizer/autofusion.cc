@@ -82,7 +82,7 @@ static void genCodeAutoListSingleLen(gNode *rt);
 /* ---------- Above declarations ----------  */
 
  // copy from optimizer/pattern.c
-static void genIndent(){ DOI(depth, glueCode("    ")); }
+static void genIndent(){ DOI(depth, glueCode(indent4)); }
 
 static B isGroupReduction(S funcName){
     DOI(NUM_R, if(sEQ(funcName, ReductionNames[i])) R true) R false;
@@ -449,10 +449,10 @@ static void genCodeAuto(gNode *rt, B isRT){
         glueCode(genDeclSingle(temp, '{')); glueLine();
         varNum = 0;
         totalInputs(getNodeParams(n), rt, 0, varNames);
-        DOI(varNum, glueAny(indent "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
+        DOI(varNum, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
         //P("%s\n", code); getchar();
         //printAllNames(); getchar();
-        glueAny(indent);
+        glueAny(indent4);
         if(isKindR(rt)){
             switch(getReductionKind(rt->funcName)){
                 case sumR: 
@@ -464,9 +464,9 @@ static void genCodeAuto(gNode *rt, B isRT){
                 default: TODO("handle reduction op: %s", rt->funcName); break;
             }
             glueLine();
-            glueAny(indent "initV(z, H_%c, 1);\n", z0c);
+            glueAny(indent4 "initV(z, H_%c, 1);\n", z0c);
             SP(last, "v%c(z,0) = c;", z0c);
-            glueAny(indent "DOP(vn(z), ");
+            glueAny(indent4 "DOP(vn(z), ");
         }
         else if(isKindE(rt) || isKindD(rt) || isKindB(rt)){
             glueAny("DOP(vn(z), v%c(z,i)=", z0c);
@@ -522,14 +522,14 @@ static void genCodeAuto(gNode *rt, B isRT){
         glueAny(")\n");
         // remaining
         if(isKindR(rt)){
-            glueAny(indent "%s\n", last);
+            glueAny(indent4 "%s\n", last);
         }
         else if(isKindE(rt) || isKindD(rt) || isKindB(rt)){
             //P("code = %s\n", code); getchar();
             // do nothing
         }
         else TODO("Add impl. for kind %c", rt->kind);
-        glueAny(indent "R 0;\n}");
+        glueAny(indent4 "R 0;\n}");
         extra->funcFunc = strdup(code);
     }
     addToSimpleHash(hashOpt, (L)(rt->node), (L)extra); // insert to hash
@@ -835,7 +835,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
     numLast = 0;
     fetchFusionLastNode(rt);
     // dump local vars
-    DOI(varNum, glueAny(indent "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
+    DOI(varNum, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
     // set meta information
     ChainExtra *extra = addNodeToChainExtra(cur, OptG);
     // fetch var infor for codegen
@@ -846,8 +846,8 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
     Node *r0 = findIteratorNode(rt);
     I r0x = getNameIndex(r0);
     if(sEQ(rt->funcName,"len")){
-        glueAny(indent "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
-        glueAny(indent "DOP(vn(z), vL(z,i)=");
+        glueAny(indent4 "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
+        glueAny(indent4 "DOP(vn(z), vL(z,i)=");
         genCodeAutoListSingleLen(rt);
         glueAny(") R 0;\n}");
     }
@@ -960,7 +960,7 @@ B sameLastNodes(gNodeList *a, gNodeList *b){
 // }
 
 static O genLocalVars(S *names, I n){
-    DOI(n, glueAny(indent "V x%lld=x[%lld]; // %s\n",i,i,names[i]))
+    DOI(n, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,names[i]))
 }
 
 /*
@@ -982,8 +982,8 @@ static O genCodeListSingle(fListNode *f){
     I r0x = getNameIndex(r0);
     // set meta information
     if(sEQ(g->funcName, "len")){
-        glueAny(indent "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
-        glueAny(indent "DOP(vn(z), vL(z,i)=");
+        glueAny(indent4 "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
+        glueAny(indent4 "DOP(vn(z), vL(z,i)=");
         genCodeAutoListSingleLen(g);
         glueAny(") R 0;\n}");
     }
@@ -1022,7 +1022,7 @@ static O genMultipleInitVars(fListNode **fList, I num){
        Node *z0 = f->nodeRtn;  \
        S z0s = getNameStr(z0); \
        C z0c = getTypeCodeByName(z0); \
-       glueAny(indent "initV(z%lld, H_%c, vn(x%d)); // %s\n",i,z0c,r0x,z0s); })
+       glueAny(indent4 "initV(z%lld, H_%c, vn(x%d)); // %s\n",i,z0c,r0x,z0s); })
 }
 
 static O genMultipleBodyOuter(fListNode **fList, I num, I r0x){

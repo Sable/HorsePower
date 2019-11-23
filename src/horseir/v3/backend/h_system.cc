@@ -39,7 +39,7 @@ void swap2(V z){
         memcpy(vg(z), tt, sizeof(V0)*2);
         //printV(vV(z,0)); printV(vV(z,1)); getchar();
     }
-    else EP("z is not a list or vn(z) !=2: %d %d\n", isList(z),2==vn(z));
+    else EP("z is not a list or vn(z) !=2: %d %d", isList(z), 2==vn(z));
 }
 
 L registerTable(S tableName, V tablePtr){
@@ -232,7 +232,7 @@ I promoteValueWithIndex(V z, V x, L typMax, V ind){
                     caseE DOP(size, xCopy(vX(z,i),vE(x,WithIndex),0)) break;
                 }
             } break;
-            default: EP("PromoteValue error: %s\n", getTypeName(vp(z)));
+            default: EP("PromoteValue error: %s", getTypeName(vp(z)));
         }
         R 0;
     }
@@ -422,8 +422,8 @@ I matchPair(B *t, V x, V y){
 static void check_pcre2_jit(){
     L has_jit = 0;
     pcre2_config(PCRE2_CONFIG_JIT, &has_jit);
-    if(has_jit == 1) P("JIT is available!\n");
-    else EP("JIT is not enabled: %lld\n", (L)has_jit);
+    if(has_jit == 1) WP("JIT is available!\n");
+    else EP("JIT is not enabled: %lld", (L)has_jit);
 }
 
 /* pat = pattern */
@@ -548,8 +548,8 @@ static B compareTupleItem(V x, L ax, V y, L ay){
             caseX R xEqual(vX(x,ax),vX(y,ay));
             /* logic here is buggy: need to check if they are the same Lists */
             //caseG DOI(vn(x), if(!compareTuple(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
-            caseG EP("Need to compare the whole cell\n");
-            default: EP("type not supported: %s\n", getTypeName(vp(x)));
+            caseG EP("Need to compare the whole cell");
+            default: EP("Type not supported: %s", getTypeName(vp(x)));
         }
     }
     else R 0;
@@ -585,7 +585,7 @@ static B isSameValueItem(V x, L a, L b){
         caseC R vC(x,a) == vC(x,b); 
         caseQ R vQ(x,a) == vQ(x,b); 
         caseS R !strcmp(vS(x,a), vS(x,b));
-        default: EP("isSameValueItem: support more types.\n");
+        default: EP("Support more types: %s",getTypeName(xp));
     }
     R 0;
 }
@@ -669,7 +669,7 @@ B isOrdered(V x){
 }
 
 B isOrderWithIndex(V x, V ind){
-    if(!isLong(ind)) EP("index must be i64\n");
+    if(!isLong(ind)) EP("Index must be i64");
     if(isInt(x)){
         DOIa(vn(x), if(vI(x,vL(ind,i))<vI(x,vL(ind,i-1))){\
             P("vI(x,%lld) = %d\n", vL(ind,i),vI(x,vL(ind,i))); \
@@ -711,7 +711,7 @@ I searchOrdered(V z, V x, V y){
         initV(z,H_L,lenZ);
         DOP(lenZ, {L k=binarySearch_L(sL(x),0,vn(x),vL(y,i)); vL(z,i)=k<0?vn(x):k;})
     }
-    else EP("type not supported: %s\n", getTypeName(xp));
+    else EP("Type not supported: %s", getTypeName(xp));
     R 0;
 }
 
@@ -723,7 +723,7 @@ I listFlat2Normal(V z, V x){
         DOI(lenZ, {V t=vV(z,i); L k=vL(x,i); L kSize=getTypeSize(typ2,k)-f0; initV(t,typ2,k);\
                 memcpy(vg(t),cur,kSize); if(f0)vg(t)[kSize]=0; cur+=kSize;})
     }
-    else EP("Not supported type: %s\n", getTypeName(typ2));
+    else EP("Not supported type: %s", getTypeName(typ2));
     R 0;
 }
 
@@ -778,7 +778,7 @@ B compareOpWithIndex(V x, V y, L k0, L k1, I op){
         caseL R COMP(op,vL(x,k0),vL(y,k1));
         caseF R COMP(op,vF(x,k0),vF(y,k1));
         caseE R COMP(op,vE(x,k0),vE(y,k1));
-        default: EP("type not supported: %s\n", getTypeName(vp(x)));
+        default: EP("Type not supported: %s", getTypeName(vp(x)));
     }
     R 0;
 }
@@ -855,7 +855,7 @@ L getListSize1(V x){
     if(isList(x) && vn(x)>0){
         R vn(vV(x,0));
     }
-    else EP("List size rank error\n");
+    else EP("List size rank error");
 }
 
 F logBaseF(F b, F x){
@@ -975,7 +975,7 @@ I inferPi(I t){
 /* Error messages */
 
 #define errCase(label, msg)\
-    case label: EP("Error: " msg ".\n"); break
+    case label: EP("Error: " msg "."); break
 
 void printErrMsg(I eid){
     switch(eid){

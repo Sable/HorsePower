@@ -50,7 +50,7 @@ static void printStrList(StrList *src){
 }
 
 static void printDotMermaid(L x, L y){
-    P(Indent4);
+    P(indent4);
     P("N%lld",x);
     P(" --> ");
     P("N%lld",y);
@@ -58,7 +58,7 @@ static void printDotMermaid(L x, L y){
 }
 
 static void printDotNormal(L x, L y){
-    P(Indent4);
+    P(indent4);
     P("N%lld",x); //printDotNode(method[x].node, false);
     P(" -> ");
     P("N%lld",y); //printDotNode(method[y].node, false);
@@ -78,17 +78,17 @@ static void dotBuildCall(I graphId, Node *use, S funcName){
     L nodeId = use->lineno;
     switch(dotKind){
         case NormalDot:
-            SP(tempStr, Indent2 "N%lld -> start%d", nodeId, graphId);
+            SP(tempStr, indent2 "N%lld -> start%d", nodeId, graphId);
             break;
         case MermaidDot:
             {
                 S s = tempStr;
-                s += SP(s, Indent4 "func%d[\"%s\"] -.-> node%lld((\"N%lld\"))\n",
+                s += SP(s, indent4 "func%d[\"%s\"] -.-> node%lld((\"N%lld\"))\n",
                         curId, curFuncName, nodeId, nodeId);
-                s += SP(s, Indent4 "node%lld --> func%d[\"%s\"]",
+                s += SP(s, indent4 "node%lld --> func%d[\"%s\"]",
                         nodeId, graphId, funcName);
                 // optional: round the item to highlight
-                P(Indent4 "N%lld((N%lld))\n", nodeId, nodeId);
+                P(indent4 "N%lld((N%lld))\n", nodeId, nodeId);
             }
             break;
     }
@@ -180,15 +180,15 @@ static void dotChain(ChainList *list){
 }
 
 static void printDotHeadNormal(S fn, I graphId){
-    P(Indent2 "subgraph cluster%d {\n", graphId);
-    P(Indent4 "label=\"%s\"\n", fn);
+    P(indent2 "subgraph cluster%d {\n", graphId);
+    P(indent4 "label=\"%s\"\n", fn);
     if(sNEQ(fn, "main")){
-        P(Indent4 "start%d\n", graphId);
+        P(indent4 "start%d\n", graphId);
     }
 }
 
 static void printDotHeadMermaid(S fn){
-    P(Indent2 "subgraph %s\n", fn);
+    P(indent2 "subgraph %s\n", fn);
 }
 
 static void printSubgraphHead(S fn, I graphId){
@@ -205,10 +205,10 @@ static void printSubgraphHead(S fn, I graphId){
 static void printSubgraphTail(){
     switch(dotKind){
         case NormalDot:
-            P(Indent2 "}\n");
+            P(indent2 "}\n");
             break;
         case MermaidDot:
-            P(Indent2 "end\n");
+            P(indent2 "end\n");
             break;
         default:
             EP("Unknown dot kind: %d\n", dotKind);

@@ -52,7 +52,7 @@ void useNaiveSystem(){
     gHeap = (G)malloc(INIT_HEAP_SIZE);
     gHeapCur = 0;
     if(H_DEBUG)
-        P("-> [Info heap] Successfully initialized\n");
+        WP("-> [Info heap] Successfully initialized\n");
 }
 
 G getHeapMem(I typ, L len){
@@ -93,7 +93,7 @@ G allocMem(G heap, L *cur, L top, I typ, L len){
         g = heap + (*cur);
         *cur = (*cur) + size;
     }
-    else EP("Heap full!! when requesting %lld\n",size);
+    else EP("Heap full!! when requesting %lld",size);
     R g;
 }
 
@@ -103,7 +103,7 @@ static G allocMemSize(L size){
         g = gHeap + gHeapCur;
         gHeapCur += size;
     }
-    else EP("Heap full!! when requesting %lld\n",size);
+    else EP("Heap full!! when requesting %lld",size);
     R g;
 }
 
@@ -133,7 +133,7 @@ L getTypeSize(I typ, L len){
         case H_A  : r = sizeof(V0);    break;
         case H_K  : r = sizeof(V0);    break;
         case H_V  : r = sizeof(V0);    break;
-        default: EP("type not supported: %s\n", getTypeName(typ));
+        default: EP("type not supported: %s", getTypeName(typ));
     }
     return r * len + k;
 }
@@ -259,7 +259,7 @@ void updateBlock(BN rt){
 
 BN addBlock(BN rt, L n){
     if(H_DEBUG)
-        printf("n = %lld, size = %lld\n",n, rt->size);
+        WP("n = %lld, size = %lld\n",n, rt->size);
     if(n <= bn(rt)){
         if(bx(rt) == NULL && by(rt) == NULL){
             if((n<<1) <= bn(rt) && bn(rt)>256){
@@ -391,7 +391,7 @@ L updateRefCount(G x){
 void printHeapInfo(){
     #ifdef USE_NAIVE
     // if(H_DEBUG)
-        P("-> [Info heap] Init. %lld, used %lld (%lf%%)\n", \
+        WP("-> [Info heap] Init. %lld, used %lld (%lf%%)\n", \
             INIT_HEAP_SIZE, \
             gHeapCur, \
             gHeapCur*100.0/INIT_HEAP_SIZE);
@@ -418,7 +418,7 @@ void initHashHeap(){
     hHeapCur = 0;
     memset(hHeap, 0, INIT_HASH_SIZE);
     if(H_DEBUG)
-        P("-> [Info hash heap] Successfully initialized\n");
+        WP("-> [Info hash heap] Successfully initialized\n");
 }
 
 G allocHashMem(L size){
@@ -431,7 +431,7 @@ G allocHashMem(L size){
         R g;
     }
     else {
-        EP("Hash heap full!! (%lld+%lld)\n",hHeapCur,size);
+        EP("Hash heap full!! (%lld+%lld)",hHeapCur,size);
     }
 }
 
@@ -444,14 +444,15 @@ void setHashHeap(L x){
         if(x<hHeapCur){ 
             memset(hHeap+x, 0, hHeapCur-x);
         }
-        if(H_DEBUG) P("[HashHeap] Setting pointer from %lld to %lld\n",hHeapCur,x);
+        if(H_DEBUG)
+            WP("[HashHeap] Setting pointer from %lld to %lld\n",hHeapCur,x);
         hHeapCur=x;
     }
-    else EP("unexpected hash heap size: %lld [0,%lld)\n",x,INIT_HASH_SIZE);
+    else EP("unexpected hash heap size: %lld [0,%lld)",x,INIT_HASH_SIZE);
 }
 
 void printHashInfo(){
-    P("-> [Info hash heap] usage = %.2lf%% (%lld/%lld)\n", \
+    WP("-> [Info hash heap] usage = %.2lf%% (%lld/%lld)\n", \
         hHeapCur*100.0/INIT_HASH_SIZE,hHeapCur,INIT_HASH_SIZE);
 }
 

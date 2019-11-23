@@ -38,8 +38,4 @@ O loadConst(Node *n, V x, L k, I t);
 #define glueCodeLine(x)  do{glueIndent(); resetCode(); ptr+=SP(ptr, "%s\n",x); }while(0)
 #define glueAnyLine(...) do{glueIndent(); glueAny(__VA_ARGS__);glueLine();}while(0)
 
-#define indent "    "
-#define indent2 indent indent
-
-
 #endif

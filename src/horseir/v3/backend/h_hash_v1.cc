@@ -6,7 +6,7 @@
 
 TBucket createHashWithV1(L n, V *x, L *hashLen){
     if(n >= 1) R create_hash_multiply_v1(x[0]);
-    else EP("number of columns invalid: %lld\n", n);
+    else EP("Number of columns invalid: %lld", n);
 }
 
 // same as insert_index_v2
@@ -29,7 +29,7 @@ static L insert_index_v1(HN t, L td){
         other[t->h_num] = td;
         t->h_num++;
     }
-    else EP("not enough slots: %lld\n", t->h_num);
+    else EP("Not enough slots: %lld", t->h_num);
     //P("number of slots: %lld\n", t->h_num); getchar();
     R td;
 }
@@ -52,7 +52,7 @@ static L insert_hash_int_v1(HB ht, L htMask, LL *src, L srcI, LL id){
             x->h_other = srcI;
             t->cur++;
         }
-        else EP("size not enough, need to grow: %lld / %lld\n", t->cur, t->size);
+        else EP("Size not enough, need to grow: %lld / %lld", t->cur, t->size);
     }
     else {
         #define INIT_BUCKET_SIZE 8
@@ -73,12 +73,12 @@ TBucket create_hash_multiply_v1(V x){
     L  *prefix     = HASH_AL(L , setT);
     HB *hashBucket = HASH_AL(HB, setT);
     L  *hashSize   = HASH_AL(L , setT);
-    if(H_DEBUG) P("v1: //Step 1: scan for basic info\n");
+    if(H_DEBUG) WP("v1: //Step 1: scan for basic info\n");
 tic();
     DOI(xn, count[vLL(x,i)&setN]++)
     DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
 toc();
-    if(H_DEBUG) P("v1: //Step 2: create partitions (setT=%lld)\n",(L)setT);
+    if(H_DEBUG) WP("v1: //Step 2: create partitions (setT=%lld)\n",(L)setT);
 tic();
     DOI(setT, { \
         L hashLen=count[i]==0?0:getHashTableSize(count[i]); \
@@ -86,7 +86,7 @@ tic();
         hashSize[i]=hashLen;})
 toc();
     //test_hashSize(hashSize);
-    if(H_DEBUG) P("v1 //Step 3: insert items (%lld)\n",xn);
+    if(H_DEBUG) WP("v1 //Step 3: insert items (%lld)\n",xn);
 tic();
      //DOI(xn, {L id=vL(x,i)&setN; \
          insertHashMany_v2(hashBucket[id],hashSize[id]-1,xg,i,NULL,-1,H_L);})
@@ -144,7 +144,10 @@ static L lib_join_radix_hash_v1(V z0, V z1, V x, V y){
     //TIME_END();
     //TIME_SHOW("> Radix hash, final:"); PP("total c = %lld\n",c);
     }
-    else {EP("type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
+    else {
+        EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));
+        R 1;
+    }
 }
 
 static HN find_hash_value_multiple_v1(HB hashT, V *src, L hashLen, L n, LL *args){

@@ -24,9 +24,9 @@ static L insert_index_v3(HN t, L td){
         other[t->h_num] = td;
         t->h_num++;
     }
-    else EP("not enough slots: %lld\n", t->h_num); // 64 not enough in q7 -> 1024
+    else EP("Not enough slots: %lld", t->h_num); // 64 not enough in q7 -> 1024
     // q14 output too many below
-    //if(H_DEBUG) P("number of slots: %lld\n", t->h_num); //getchar();
+    //if(H_DEBUG) WP("number of slots: %lld\n", t->h_num); //getchar();
     R td;
 }
 
@@ -55,7 +55,8 @@ static L insert_hash_int_v3_I(HC *ht, L htMask, LL *src, L srcI, LL id){
             t->c_total++;
         }
         else {
-            if(H_DEBUG) P("...... need a new cell: %lld\n",t->c_total);
+            if(H_DEBUG)
+                WP("...... need a new cell: %lld\n",t->c_total);
             HC t0 = createHashCell(1);
             HN x = t0->c_node;
             STORE_INFO_I(x);
@@ -100,7 +101,8 @@ static L insert_hash_int_v3_E(HC *ht, L htMask, E *src, L srcI, LL id){
             t->c_total++;
         }
         else {
-            if(H_DEBUG) P("...... need a new cell: %lld\n",t->c_total);
+            if(H_DEBUG)
+                WP("...... need a new cell: %lld\n",t->c_total);
             HC t0 = createHashCell(1);
             HN x = t0->c_node;
             STORE_INFO_E(x);
@@ -125,12 +127,12 @@ TB create_hash_multiply_v3(V x){
     L  *prefix     = HASH_AL(L , setT);
     L  *hashMask   = HASH_AL(L , setT);
     HC**hashCell   = HASH_AL(HC*,setT);
-    if(H_DEBUG) P("v3: //Step 1: scan for basic info\n");
+    if(H_DEBUG) WP("v3: //Step 1: scan for basic info\n");
 tic();
     DOI(xn, count[vLL(x,i)&setN]++)
     DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
 toc();
-    if(H_DEBUG) P("v3: //Step 2: create partitions (setT=%lld)\n",(L)setT);
+    if(H_DEBUG) WP("v3: //Step 2: create partitions (setT=%lld)\n",(L)setT);
 tic();
     DOI(setT, { \
         L hashLen=count[i]==0?0:getHashTableSize(count[i]); \
@@ -138,7 +140,7 @@ tic();
         hashMask[i]=hashLen-1;})
 toc();
     //test_hashSize(hashSize);
-    if(H_DEBUG) P("v3 //Step 3: insert items (%lld)\n",xn);
+    if(H_DEBUG) WP("v3 //Step 3: insert items (%lld)\n",xn);
     //P("xn = %lld, setT = %lld\n",xn,setT); getchar();
 tic();
     switch(xp){
@@ -148,7 +150,7 @@ caseI
 caseE
     DOI(xn, {LL id=vLL(x,i)&setN; \
         insert_hash_int_v3_E(hashCell[id],hashMask[id],sE(x),i,id);}) break;
-default: EP("type not supported: %s\n", getTypeName(xp));
+default: EP("Type not supported: %s", getTypeName(xp));
     }
 toc();
     TB tb;
@@ -254,7 +256,7 @@ static I lib_join_radix_hash_v3(V z0, V z1, V x, V y){
         P("Total elements write = %lld\n", c); // expected for Q5 3rd join: 46008
         R 0;
     }
-    else {EP("type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
+    else {EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
 }
 
 
@@ -283,7 +285,7 @@ static L profile_hash_join_group(HC *ht, L size, L groupId){
     L subTotal = 0;
     DOI(size, subTotal+=profile_hash_join_cell(ht[i]))
     //EP("[%3lld] %lld\n", groupId,subTotal);
-    P("--- Group Id: %lld ---\n",groupId);
+    WP("--- Group Id: %lld ---\n",groupId);
     DOI(size, P("[%lld] %lld\n",groupId,profile_hash_join_cell(ht[i])))
     //DOI(size, {L t=profile_hash_join_cell(ht[i]); \
             if(t>1)EP("[%3lld] i=%lld, t=%lld\n", groupId,i,t);} )
@@ -298,7 +300,7 @@ static L profile_total_buckets(L *hashMask){
 void profile_hash_join_v3(HC **ht, L *hashMask){
     L total_cell=0, total_bucket=profile_total_buckets(hashMask);
     DOI(setT, total_cell+=profile_hash_join_group(ht[i],hashMask[i],i))
-    P("percent: %.2lf%% (%lld/%lld)\n", \
+    WP("percent: %.2lf%% (%lld/%lld)\n", \
             percent(total_cell,total_bucket), total_cell, total_bucket);
 }
 
@@ -353,27 +355,27 @@ static L insert_hash_int_v3_G(HC *ht, L htMask, LL *src, L srcI, LL id, V xlist)
 
 TB create_hash_multiply_v3_list(V x){
     if(!isList(x))
-        EP("domain error: must be a list, but found: %s\n",getTypeName(xp));
+        EP("Domain error: must be a list, but found: %s\n",getTypeName(xp));
     L numRow = vn(x)>0?vn(vV(x,0)):0;
     L  *count      = HASH_AL(L , setT);
     L  *prefix     = HASH_AL(L , setT);
     L  *hashMask   = HASH_AL(L , setT);
     HC**hashCell   = HASH_AL(HC*,setT);
     I  *hashTemp   = HASH_AL(I , numRow);  // hash value I -> L?
-    if(H_DEBUG) P("v3-list: //Step 1: scan for basic info\n");
+    if(H_DEBUG) WP("v3-list: //Step 1: scan for basic info\n");
 tic();
     DOP(numRow, hashTemp[i]=hash_list(x,i))
     DOI(numRow, count[hashTemp[i]&setN]++)
     DOIa(setT, prefix[i]=prefix[i-1]+count[i-1])
 toc();
-    if(H_DEBUG) P("v3-list: //Step 2: create partitions (setT=%lld)\n",(L)setT);
+    if(H_DEBUG) WP("v3-list: //Step 2: create partitions (setT=%lld)\n",(L)setT);
 tic();
     DOI(setT, { \
         L hashLen=count[i]==0?0:getHashTableSize(count[i]); \
         hashCell[i]=(hashLen>0)?HASH_AL(HC,hashLen):NULL; \
         hashMask[i]=hashLen-1;})
 toc();
-    if(H_DEBUG) P("v3-list //Step 3: insert items (%lld)\n",numRow);
+    if(H_DEBUG) WP("v3-list //Step 3: insert items (%lld)\n",numRow);
 tic();
     DOI(numRow, {LL id=hashTemp[i]&setN; \
         insert_hash_int_v3_G(hashCell[id],hashMask[id],hashTemp,i,id,x);})

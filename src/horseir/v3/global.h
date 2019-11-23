@@ -87,8 +87,8 @@ void   time_clear();
 /* constants */
 #define uscore "_"  // underscore
 #define comma  ','
-#define Indent2 "  "
-#define Indent4 "    "
+#define indent2 "  "
+#define indent4 "    "
 #define CODE_MAX_SIZE 10240
 
 #include "frontend/tree.h"
