@@ -72,41 +72,42 @@
 
 /* declarations below */
 
-O optElementwise();
-O optPattern();
-O optAuto();
-O optSReduction(Prog *root);
+O  optElementwise();
+O  optPattern    ();
+O  optAuto       ();
+O  optSReduction (Prog *root);
 
-const char *obtainMaxValue(C c);
-const char *obtainMinValue(C c);
+CS obtainMaxValue(C c);
+CS obtainMinValue(C c);
+C  obtainNodeTypeAlias(Node *n);
 
-S getNameStr       (Node *n);
-C getTypeCodeByName(Node *n); 
-const char *getFuncNameC   (S fn);
-const char *getFuncNameAuto(S fn);
+S  getNameStr       (Node *n);
+C  getTypeCodeByName(Node *n); 
+CS getFuncNameC     (S fn);
+CS getFuncNameAuto  (S fn);
 
-Node* getNodeItemIndex(Node *n, I pos);
-List* getNodeParams   (Node *n);
-Node* getNodeFunc     (Node *n);
-List* getParamsIndex  (List *list, I pos);
 
-Node* getNodeFirstParam(Node *n);
-Node* getSingleFunc    (Node *funcs);
-Node* getEachFuncNode  (Node *n);
+B  isElementwise(S funcName);
+I  findDefByName(Chain *p, S name);
 
-B isElementwise(S funcName);
-I findDefByName(Chain *p, S name);
+S  genDeclSingle (S func, C del);
+B  isDuplicated  (S *names, S s);
+L  searchName    (S *names, S s);
+O  genCodeConst  (Node *n);
+O  genCodeNode   (Node *n);
+O  genCodeList   (List *list);
+O  genCodeName   (Node *n, I id);
+S  genInvcSingle (S targ, S func, S *names, I num);
 
-Node* getStmtCall(Node *stmt);
+Node *getNodeItemIndex(Node *n, I pos);
+List *getNodeParams   (Node *n);
+Node *getNodeFunc     (Node *n);
+List *getParamsIndex  (List *list, I pos);
 
-S genDeclSingle (S func, C del);
-B isDuplicated  (S *names, S s);
-L searchName    (S *names, S s);
-O genCodeConst  (Node *n);
-O genCodeNode   (Node *n);
-O genCodeList   (List *list);
-O genCodeName   (Node *n, I id);
-S genInvcSingle (S targ, S func, S *names, I num);
+Node *getNodeFirstParam(Node *n);
+Node *getSingleFunc    (Node *funcs);
+Node *getEachFuncNode  (Node *n);
+Node *getStmtCall(Node *stmt);
 
 SymbolName *getNodeSymbolName(Node *n);
 

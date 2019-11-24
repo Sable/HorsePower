@@ -10,7 +10,7 @@ L TEST_RUNS      = 1;
 extern B isReadBin;
 
 static O setDataPath(S path, const char *folder, S tableName, const char *format){
-    const S base = getenv("HORSE_BASE");
+    CS base = getenv("HORSE_BASE");
     if(base){
         SP(path, "%s/data/%s/db%lld/%s.%s", base, folder, CSV_FILE_SCALE, tableName, format);
     }
@@ -20,7 +20,7 @@ static O setDataPath(S path, const char *folder, S tableName, const char *format
     }
 }
 
-static L initDBTable(L n, const C* PRE_DEFINED[], L* SYM_LIST_LINE){
+static L initDBTable(L n, CS PRE_DEFINED[], L* SYM_LIST_LINE){
     DOI(n, insertSym(createSymbol((S)PRE_DEFINED[i])));
     // printAllSymol();
     DOI(n, SYM_LIST_LINE[i]= getSymbol((S)PRE_DEFINED[i]));

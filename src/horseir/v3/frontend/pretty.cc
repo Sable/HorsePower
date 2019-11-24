@@ -353,31 +353,31 @@ static void prettyNodeBuff(char *b, Node *n){
 
 const char *getNodeTypeStr(Node *n){
     switch(n->kind){
-        CaseLine(idK);
-        CaseLine(varK);
-        CaseLine(varDeclK);
-        CaseLine(globalK);
-        CaseLine(typeK);
-        CaseLine(nameK);
-        CaseLine(funcK);
-        CaseLine(argExprK);
-        CaseLine(paramExprK);
-        CaseLine(blockK);
-        CaseLine(stmtK);
-        CaseLine(castK);
-        CaseLine(importK);
-        CaseLine(methodK);
-        CaseLine(moduleK);
-        CaseLine(ifK);
-        CaseLine(whileK);
-        CaseLine(repeatK);
-        CaseLine(returnK);
-        CaseLine(breakK);
-        CaseLine(continueK);
-        CaseLine(callK);
-        CaseLine(vectorK);
-        CaseLine(constK);
-        CaseLine(exprstmtK);
+        CASE_STR(idK);
+        CASE_STR(varK);
+        CASE_STR(varDeclK);
+        CASE_STR(globalK);
+        CASE_STR(typeK);
+        CASE_STR(nameK);
+        CASE_STR(funcK);
+        CASE_STR(argExprK);
+        CASE_STR(paramExprK);
+        CASE_STR(blockK);
+        CASE_STR(stmtK);
+        CASE_STR(castK);
+        CASE_STR(importK);
+        CASE_STR(methodK);
+        CASE_STR(moduleK);
+        CASE_STR(ifK);
+        CASE_STR(whileK);
+        CASE_STR(repeatK);
+        CASE_STR(returnK);
+        CASE_STR(breakK);
+        CASE_STR(continueK);
+        CASE_STR(callK);
+        CASE_STR(vectorK);
+        CASE_STR(constK);
+        CASE_STR(exprstmtK);
         default: EP("unknown node: %d\n", n->kind);
     }
     R NULL;

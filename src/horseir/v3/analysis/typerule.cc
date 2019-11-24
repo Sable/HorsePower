@@ -1,6 +1,6 @@
 #include "../global.h"
 
-const char *FunctionUnaryStr[] = { /* unary 58 */
+CS FunctionUnaryStr[] = { /* unary 58 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" ,
     "not", "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",
     "asin",  "atan", "cosh", "sinh", "tanh", "acosh", "asinh", "atanh", "date",
@@ -11,7 +11,7 @@ const char *FunctionUnaryStr[] = { /* unary 58 */
     "meta", "load_table", "fetch", "print"
 };
 
-const char *FunctionBinaryStr[] = { /* binary 32 */
+CS FunctionBinaryStr[] = { /* binary 32 */
     "lt" ,  "gt", "leq" , "geq"  , "eq", "neq" , "plus", "minus" , "mul",
     "div", "power", "logb", "mod", "and", "or", "nand", "nor" , "xor",
     "append", "like", "compress", "randk", "index_of", "take",
@@ -19,30 +19,26 @@ const char *FunctionBinaryStr[] = { /* binary 32 */
     "sub_string"
 };
 
-const char *FunctionOtherStr[] = { /* special 13  */
+CS FunctionOtherStr[] = { /* special 13  */
     "each", "each_item", "each_left", "each_right", "enum", "dict", "table",
     "ktable", "index_a", "list", "join_index", "datetime_add",
     "datetime_sub"
 };
 
 
-int  UnarySize = sizeof( FunctionUnaryStr)/sizeof(char*);
-int BinarySize = sizeof(FunctionBinaryStr)/sizeof(char*);
-int  OtherSize = sizeof( FunctionOtherStr)/sizeof(char*);
+I  UnarySize = sizeof( FunctionUnaryStr)/sizeof(CS);
+I BinarySize = sizeof(FunctionBinaryStr)/sizeof(CS);
+I  OtherSize = sizeof( FunctionOtherStr)/sizeof(CS);
 
-static int shapeId = 0;
-static int scanId  = 100; /* starting from 100, must > 0 bcz of simple hash */
+static I shapeId = 0;
+static I scanId  = 100; /* starting from 100, must > 0 bcz of simple hash */
 extern sHashTable *hashScan, *hashMeta; /* declared in typeshape.c */
 
 typedef bool (*TypeCond)(InfoNode *);
 static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 
-#define CASE(k, x)      case k: return x;
-#define CASE_VOID(k, x) case k: return (void *)x;
-#define DEFAULT(x) default: EP("NOT found: %s",x)
-
-// rules
 #define commonTrig commonArith1
+#define copyShapeNode(x, y) *(x)=*(y)
 
 /* monadic */
 #define ruleAbs         commonArith1
@@ -169,24 +165,24 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define isTT(n) isT(n,tableT)||isT(n,ktableT)
 #define sameT(x,y) (inType(x)==inType(y))
 
-bool isIntIN     (InfoNode *n) {return isIT(n);}
-bool isFloatIN   (InfoNode *n) {return isFT(n);}
-bool isBoolIN    (InfoNode *n) {return isBT(n);}
-bool isClexIN    (InfoNode *n) {return isXT(n);}
-bool isCharIN    (InfoNode *n) {return isCT(n);}
-bool isRealIN    (InfoNode *n) {return isIT(n)||isFT(n)||isBT(n);}
-bool isNumericIN (InfoNode *n) {return isRealIN(n)||isClexIN(n);}
-bool isStringIN  (InfoNode *n) {return isST(n);} // TODO: split sym and str
-bool isDateIN    (InfoNode *n) {return isDT(n);}
-bool isTimeIN    (InfoNode *n) {return isTM(n);}
-bool isDtIN      (InfoNode *n) {return isDT(n)||isTM(n);}
-bool isBasicIN   (InfoNode *n) {return 
-  isRealIN(n)||isCharIN(n)||isStringIN(n)||isDateIN(n)||isTimeIN(n);}
-bool isDictIN    (InfoNode *n) {return isNT(n);}
-bool isFuncIN    (InfoNode *n) {return isT(n,funcT);}
-bool isTableIN   (InfoNode *n) {return isTT(n);}
-bool isReal32IN  (InfoNode *n) {return is32(n);}
-bool isReal64IN  (InfoNode *n) {return is64(n);}
+B isIntIN     (InfoNode *n) {R isIT(n);}
+B isFloatIN   (InfoNode *n) {R isFT(n);}
+B isBoolIN    (InfoNode *n) {R isBT(n);}
+B isClexIN    (InfoNode *n) {R isXT(n);}
+B isCharIN    (InfoNode *n) {R isCT(n);}
+B isRealIN    (InfoNode *n) {R isIT(n)||isFT(n)||isBT(n);}
+B isNumericIN (InfoNode *n) {R isRealIN(n)||isClexIN(n);}
+B isStringIN  (InfoNode *n) {R isST(n);} // TODO: split sym and str
+B isDateIN    (InfoNode *n) {R isDT(n);}
+B isTimeIN    (InfoNode *n) {R isTM(n);}
+B isDtIN      (InfoNode *n) {R isDT(n)||isTM(n);}
+B isBasicIN   (InfoNode *n) {R isRealIN(n)||isCharIN(n)||isStringIN(n)||
+                               isDateIN(n)||isTimeIN(n);}
+B isDictIN    (InfoNode *n) {R isNT(n);}
+B isFuncIN    (InfoNode *n) {R isT(n,funcT);}
+B isTableIN   (InfoNode *n) {R isTT(n);}
+B isReal32IN  (InfoNode *n) {R is32(n);}
+B isReal64IN  (InfoNode *n) {R is64(n);}
 
 static InfoNode *newInfoNode(HorseType type, ShapeNode *shape){
     InfoNode *in = NEW(InfoNode);
@@ -208,28 +204,24 @@ static InfoNode *newInfoNodeAll(
 }
 
 // x,y have diff types, but compatible
-static bool compatibleT(InfoNode *x, InfoNode *y){
+static B compatibleT(InfoNode *x, InfoNode *y){
     switch(inType(x)){
-        case  i16T: return isT(y,boolT);
-        case  i32T: return isT(y,boolT)||isT(y,i16T);
-        case  i64T: return isT(y,boolT)||isT(y,i16T)||isT(y,i32T);
-        case  f32T: return isIntIN(y);
-        case  f64T: return isIntIN(y)||isT(y,f32T);
+        CASE(i16T, isT(y,boolT));
+        CASE(i32T, isT(y,boolT)||isT(y,i16T));
+        CASE(i64T, isT(y,boolT)||isT(y,i16T)||isT(y,i32T));
+        CASE(f32T, isIntIN(y));
+        CASE(f64T, isIntIN(y)||isT(y,f32T));
         default: break;
     }
     return false;
 }
 
-bool checkType(InfoNode *x, InfoNode *y){
-    if(sameT(x,y)) return true;
-    if(compatibleT(x,y)) return true;
-    return false;
+B checkType(InfoNode *x, InfoNode *y){
+    R (sameT(x,y) || compatibleT(x,y));
 }
 
-#define copyShapeNode(x, y) *(x)=*(y)
-
 // maybe not used any more
-bool checkShape(InfoNode *x, InfoNode *y){
+B checkShape(InfoNode *x, InfoNode *y){
     ShapeNode *sx = x->shape;
     ShapeNode *sy = y->shape;
     if(sx){
@@ -240,13 +232,13 @@ bool checkShape(InfoNode *x, InfoNode *y){
         else {
             switch(sx->kind){
                 case constSP:
-                    if(sx->size != sy->size) { TODO("update size\n"); }
+                    if(sx->size != sy->size) { TODO("update size"); }
                     break;
                 case symbolSP:
-                    if(sx->sizeId != sy->sizeId) { TODO("fix size\n"); }
+                    if(sx->sizeId != sy->sizeId) { TODO("fix size"); }
                     break;
                 case scanSP:
-                    if(sx->sizeScan != sy->sizeScan) { TODO("error size\n"); }
+                    if(sx->sizeScan != sy->sizeScan) { TODO("error size"); }
                     break;
             }
         }
@@ -258,7 +250,7 @@ bool checkShape(InfoNode *x, InfoNode *y){
     }
 }
 
-ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, int size){
+ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, I size){
     ShapeNode *sn = NEW(ShapeNode);
     sn->type = type;
     sn->kind = kind;
@@ -284,7 +276,7 @@ ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, int size){
 
 ShapeNode *newShapeNodeScan(ShapeNode *x){
     /* map(x, size) */
-    int curId = lookupSimpleHash(hashScan, (L)x);
+    I curId = lookupSimpleHash(hashScan, (L)x);
     if(!curId){ // not found
         addToSimpleHash(hashScan, (L)x, curId=scanId++);
     }
@@ -920,14 +912,14 @@ RelationNode *newRelationNode(S foreign, S primary, S key){
     return r;
 }
 
-void addRelation(S f, S p, S k){
+static O addRelation(S f, S p, S k){
     if(relationSize < relationSizeMax)
         tableRelation[relationSize++] = newRelationNode(f, p, k);
     else
         EP("There are more than %d relations (need to increase)", relationSizeMax);
 }
 
-static void initTableRelations(){
+static O initTableRelations(){
     RelationNode **tableRelation = NEW2(RelationNode, relationSizeMax);
     addRelation((S)"lineitem", (S)"order", (S)"orderkey");
 }
@@ -1170,7 +1162,7 @@ static InfoNode *propIndex(InfoNode *x, InfoNode *y){
 }
 
 /* copy from typeshape.c, TODO: combine later */
-static InfoNode *getNode(InfoNodeList *rt, int k){
+static InfoNode *getNode(InfoNodeList *rt, I k){
     while(rt->next && k>=0){ rt=rt->next; k--; }
     return rt->in;
 }
@@ -1190,7 +1182,7 @@ static InfoNode *commonDtChange(InfoNodeList *in_list){
     return newInfoNode(rtnType, inShape(x));
 }
 
-static InfoNode *propEachDya(InfoNodeList *in_list, int side){
+static InfoNode *propEachDya(InfoNodeList *in_list, I side){
     InfoNode *fn = getNode(in_list, 2);
     InfoNode *x  = getNode(in_list, 1);
     InfoNode *y  = getNode(in_list, 0);
@@ -1335,56 +1327,56 @@ static InfoNode *propJoinIndex(InfoNodeList *in_list){
 
 // check function strings and numbers
 
-void checkFuncNumber(){
+O checkFuncNumber(){
     if(UnarySize != totalU || BinarySize != totalB || OtherSize != totalO)
         EP("FunctionStr and FunctionType should have the same # of elem.");
 }
 
-static int findNameFromSet(char *funcName, const char *set[], int size){
+static I findNameFromSet(char *funcName, CS set[], I size){
     DOI(size, if(sEQ(funcName, set[i])) return i)
     return -1;
 }
 
-static bool searchUnary(char *funcName, FuncUnit *x){
-    int k = findNameFromSet(funcName, FunctionUnaryStr, UnarySize);
+static B searchUnary(char *funcName, FuncUnit *x){
+    I k = findNameFromSet(funcName, FunctionUnaryStr, UnarySize);
     if(k>=0){ x->kind = 1; x->u = (TypeUnary)k; return true; }
     return false;
 }
 
-static bool searchBinary(char *funcName, FuncUnit *x){
-    int k = findNameFromSet(funcName, FunctionBinaryStr, BinarySize);
+static B searchBinary(char *funcName, FuncUnit *x){
+    I k = findNameFromSet(funcName, FunctionBinaryStr, BinarySize);
     if(k>=0){ x->kind = 2; x->b = (TypeBinary)k; return true; }
     return false;
 }
 
-static bool searchOther(char *funcName, FuncUnit *x){
-    int k = findNameFromSet(funcName, FunctionOtherStr, OtherSize);
+static B searchOther(char *funcName, FuncUnit *x){
+    I k = findNameFromSet(funcName, FunctionOtherStr, OtherSize);
     if(k>=0){ x->kind = 3; x->t = (TypeOther)k; return true; }
     return false;
 }
 
-const S obtainTypeUnary(TypeUnary t){
+CS obtainTypeUnary(TypeUnary t){
     if(t>=0 && t<UnarySize)
         return strdup(FunctionUnaryStr[t]);
     else
         EP("TypeUnary must be in range [0, %d)", UnarySize);
 }
 
-const S obtainTypeBinary(TypeBinary t){
+CS obtainTypeBinary(TypeBinary t){
     if(t>=0 && t<BinarySize)
         return strdup(FunctionBinaryStr[t]);
     else
         EP("TypeBinary must be in range [0, %d)", BinarySize);
 }
 
-const S obtainTypeOther(TypeOther t){
+CS obtainTypeOther(TypeOther t){
     if(t>=0 && t<OtherSize)
         return strdup(FunctionOtherStr[t]);
     else
         EP("TypeOther must be in range [0, %d)", OtherSize);
 }
 
-void getFuncIndexByName(char *name, FuncUnit *x){
+O getFuncIndexByName(S name, FuncUnit *x){
     if(!searchUnary(name,x) && !searchBinary(name,x) && !searchOther(name,x)){
         if(sEQ(name, "le"))
             WP("Do you mean 'leq' instead of 'le'?\n");
@@ -1392,11 +1384,11 @@ void getFuncIndexByName(char *name, FuncUnit *x){
             WP("Do you mean 'geq' instead of 'ge'?\n");
         else if(sEQ(name, "sub"))
             WP("Do you mean 'minus' instead of 'sub'?\n");
-        EP("Function name not found in built-in: %s\n", name);
+        EP("Function name not found in built-in: %s", name);
     }
 }
 
-int getValenceOther(TypeOther x){
+static I getValenceOther(TypeOther x){
     switch(x){
         CASE(     eachF, 2);
         CASE( eachItemF, 3);
@@ -1411,131 +1403,131 @@ int getValenceOther(TypeOther x){
         CASE(     listF, -1); //any
         CASE(    dtaddF, 3);
         CASE(    dtsubF, 3);
-        DEFAULT(obtainTypeOther(x));
+        default: EP("TypeOther NOT defined: %s", obtainTypeOther(x));
     }
 }
 
-static void *getUnaryRules(TypeUnary x){
+static O *getUnaryRules(TypeUnary x){
     switch(x){ /* monadic */
-        CASE_VOID(      absF, ruleAbs)
-        CASE_VOID(      negF, ruleNeg)
-        CASE_VOID(     ceilF, ruleCeil)
-        CASE_VOID(    floorF, ruleFloor)
-        CASE_VOID(    roundF, ruleRound)
-        CASE_VOID(     conjF, ruleConj)
-        CASE_VOID(    recipF, ruleRecip)
-        CASE_VOID(   signumF, ruleSignum)
-        CASE_VOID(       piF, rulePi)
-        CASE_VOID(      notF, ruleNot)
-        CASE_VOID(      logF, ruleLog)
-        CASE_VOID(     log2F, ruleLog2)
-        CASE_VOID(    log10F, ruleLog10)
-        CASE_VOID(      expF, ruleExp)
-        CASE_VOID(      cosF, ruleCos)
-        CASE_VOID(      sinF, ruleSin)
-        CASE_VOID(      tanF, ruleTan)
-        CASE_VOID(     acosF, ruleAcos)
-        CASE_VOID(     asinF, ruleAsin)
-        CASE_VOID(     atanF, ruleAtan)
-        CASE_VOID(     coshF, ruleCosh)
-        CASE_VOID(     sinhF, ruleSinh)
-        CASE_VOID(     tanhF, ruleTanh)
-        CASE_VOID(    acoshF, ruleAcosh)
-        CASE_VOID(    asinhF, ruleAsinh)
-        CASE_VOID(    atanhF, ruleAtanh)
-        CASE_VOID(     dateF, ruleDate)
-        CASE_VOID(     yearF, ruleYear)
-        CASE_VOID(    monthF, ruleMonth)
-        CASE_VOID(     timeF, ruleTime)
-        CASE_VOID(     hourF, ruleHour)
-        CASE_VOID(   minuteF, ruleMinute)
-        CASE_VOID(   secondF, ruleSecond)
-        CASE_VOID(     millF, ruleMill)
-        CASE_VOID(   uniqueF, ruleUnique)
-        CASE_VOID(      strF, ruleStr)
-        CASE_VOID(      lenF, ruleLen)
-        CASE_VOID(    rangeF, ruleRange)
-        CASE_VOID(     factF, ruleFact)
-        CASE_VOID(     randF, ruleRand)
-        CASE_VOID(     seedF, ruleSeed)
-        CASE_VOID(     flipF, ruleFlip)
-        CASE_VOID(  reverseF, ruleReverse)
-        CASE_VOID(    whereF, ruleWhere)
-        CASE_VOID(    groupF, ruleGroup)
-        CASE_VOID(      sumF, ruleSum)
-        CASE_VOID(      avgF, ruleAvg)
-        CASE_VOID(      minF, ruleMin)
-        CASE_VOID(      maxF, ruleMax)
-        CASE_VOID(     razeF, ruleRaze)
-        CASE_VOID(   tolistF, ruleTolist)
-        CASE_VOID(     keysF, ruleKeys)
-        CASE_VOID(   valuesF, ruleValues)
-        CASE_VOID(     metaF, ruleMeta)
-        CASE_VOID(loadTableF, ruleLoadTable)
-        CASE_VOID(    fetchF, ruleFetch)
-        CASE_VOID(  printF, rulePrint)
-        DEFAULT(obtainTypeUnary(x));
+        CASE_VOID(      absF, ruleAbs);
+        CASE_VOID(      negF, ruleNeg);
+        CASE_VOID(     ceilF, ruleCeil);
+        CASE_VOID(    floorF, ruleFloor);
+        CASE_VOID(    roundF, ruleRound);
+        CASE_VOID(     conjF, ruleConj);
+        CASE_VOID(    recipF, ruleRecip);
+        CASE_VOID(   signumF, ruleSignum);
+        CASE_VOID(       piF, rulePi);
+        CASE_VOID(      notF, ruleNot);
+        CASE_VOID(      logF, ruleLog);
+        CASE_VOID(     log2F, ruleLog2);
+        CASE_VOID(    log10F, ruleLog10);
+        CASE_VOID(      expF, ruleExp);
+        CASE_VOID(      cosF, ruleCos);
+        CASE_VOID(      sinF, ruleSin);
+        CASE_VOID(      tanF, ruleTan);
+        CASE_VOID(     acosF, ruleAcos);
+        CASE_VOID(     asinF, ruleAsin);
+        CASE_VOID(     atanF, ruleAtan);
+        CASE_VOID(     coshF, ruleCosh);
+        CASE_VOID(     sinhF, ruleSinh);
+        CASE_VOID(     tanhF, ruleTanh);
+        CASE_VOID(    acoshF, ruleAcosh);
+        CASE_VOID(    asinhF, ruleAsinh);
+        CASE_VOID(    atanhF, ruleAtanh);
+        CASE_VOID(     dateF, ruleDate);
+        CASE_VOID(     yearF, ruleYear);
+        CASE_VOID(    monthF, ruleMonth);
+        CASE_VOID(     timeF, ruleTime);
+        CASE_VOID(     hourF, ruleHour);
+        CASE_VOID(   minuteF, ruleMinute);
+        CASE_VOID(   secondF, ruleSecond);
+        CASE_VOID(     millF, ruleMill);
+        CASE_VOID(   uniqueF, ruleUnique);
+        CASE_VOID(      strF, ruleStr);
+        CASE_VOID(      lenF, ruleLen);
+        CASE_VOID(    rangeF, ruleRange);
+        CASE_VOID(     factF, ruleFact);
+        CASE_VOID(     randF, ruleRand);
+        CASE_VOID(     seedF, ruleSeed);
+        CASE_VOID(     flipF, ruleFlip);
+        CASE_VOID(  reverseF, ruleReverse);
+        CASE_VOID(    whereF, ruleWhere);
+        CASE_VOID(    groupF, ruleGroup);
+        CASE_VOID(      sumF, ruleSum);
+        CASE_VOID(      avgF, ruleAvg);
+        CASE_VOID(      minF, ruleMin);
+        CASE_VOID(      maxF, ruleMax);
+        CASE_VOID(     razeF, ruleRaze);
+        CASE_VOID(   tolistF, ruleTolist);
+        CASE_VOID(     keysF, ruleKeys);
+        CASE_VOID(   valuesF, ruleValues);
+        CASE_VOID(     metaF, ruleMeta);
+        CASE_VOID(loadTableF, ruleLoadTable);
+        CASE_VOID(    fetchF, ruleFetch);
+        CASE_VOID(  printF, rulePrint);
+        default: EP("TypeUnary NOT defined: %s", obtainTypeUnary(x));
     }
 }
 
-static void *getBinaryRules(TypeBinary x){
+static O *getBinaryRules(TypeBinary x){
     switch(x){ /* dyadic */
-        CASE_VOID(      ltF, ruleLt)
-        CASE_VOID(      gtF, ruleGt)
-        CASE_VOID(     leqF, ruleLeq)
-        CASE_VOID(     geqF, ruleGeq)
-        CASE_VOID(      eqF, ruleEq)
-        CASE_VOID(     neqF, ruleNeq)
-        CASE_VOID(    plusF, rulePlus)
-        CASE_VOID(   minusF, ruleMinus)
-        CASE_VOID(     mulF, ruleMul)
-        CASE_VOID(     divF, ruleDiv)
-        CASE_VOID(   powerF, rulePower)
-        CASE_VOID(    logbF, ruleLogBase)
-        CASE_VOID(     modF, ruleMod)
-        CASE_VOID(     andF, ruleAnd)
-        CASE_VOID(      orF, ruleOr)
-        CASE_VOID(    nandF, ruleNand)
-        CASE_VOID(     norF, ruleNor)
-        CASE_VOID(     xorF, ruleXor)
-        CASE_VOID(  appendF, ruleAppend)
-        CASE_VOID(    likeF, ruleLike)
-        CASE_VOID(compressF, ruleCompress)
-        CASE_VOID(   randkF, ruleRandk)
-        CASE_VOID( indexofF, ruleIndexof)
-        CASE_VOID(    takeF, ruleTake)
-        CASE_VOID(    dropF, ruleDrop)
-        CASE_VOID(   orderF, ruleOrder)
-        CASE_VOID(  memberF, ruleMember)
-        CASE_VOID(  vectorF, ruleVector)
-        CASE_VOID(   matchF, ruleMatch)
-        CASE_VOID(   indexF, ruleIndex)
-        CASE_VOID(columnValueF, ruleColumnValue)
-        CASE_VOID(  subStringF, ruleSubString)
-        DEFAULT(obtainTypeBinary(x));
+        CASE_VOID(      ltF, ruleLt);
+        CASE_VOID(      gtF, ruleGt);
+        CASE_VOID(     leqF, ruleLeq);
+        CASE_VOID(     geqF, ruleGeq);
+        CASE_VOID(      eqF, ruleEq);
+        CASE_VOID(     neqF, ruleNeq);
+        CASE_VOID(    plusF, rulePlus);
+        CASE_VOID(   minusF, ruleMinus);
+        CASE_VOID(     mulF, ruleMul);
+        CASE_VOID(     divF, ruleDiv);
+        CASE_VOID(   powerF, rulePower);
+        CASE_VOID(    logbF, ruleLogBase);
+        CASE_VOID(     modF, ruleMod);
+        CASE_VOID(     andF, ruleAnd);
+        CASE_VOID(      orF, ruleOr);
+        CASE_VOID(    nandF, ruleNand);
+        CASE_VOID(     norF, ruleNor);
+        CASE_VOID(     xorF, ruleXor);
+        CASE_VOID(  appendF, ruleAppend);
+        CASE_VOID(    likeF, ruleLike);
+        CASE_VOID(compressF, ruleCompress);
+        CASE_VOID(   randkF, ruleRandk);
+        CASE_VOID( indexofF, ruleIndexof);
+        CASE_VOID(    takeF, ruleTake);
+        CASE_VOID(    dropF, ruleDrop);
+        CASE_VOID(   orderF, ruleOrder);
+        CASE_VOID(  memberF, ruleMember);
+        CASE_VOID(  vectorF, ruleVector);
+        CASE_VOID(   matchF, ruleMatch);
+        CASE_VOID(   indexF, ruleIndex);
+        CASE_VOID(columnValueF, ruleColumnValue);
+        CASE_VOID(  subStringF, ruleSubString);
+        default: EP("TypeBinary NOT defined: %s", obtainTypeBinary(x));
     }
 }
 
-static void *getOtherRules(TypeOther x){
+static O *getOtherRules(TypeOther x){
     switch(x){ /* special */
-        CASE_VOID(       eachF, ruleEach)
-        CASE_VOID(   eachItemF, ruleEachItem)
-        CASE_VOID(   eachLeftF, ruleEachLeft)
-        CASE_VOID(  eachRightF, ruleEachRight)
-        CASE_VOID(       enumF, ruleEnum)
-        CASE_VOID(       dictF, ruleDict)
-        CASE_VOID(      tableF, ruleTable)
-        CASE_VOID(     ktableF, ruleKtable)
-        CASE_VOID(     indexAF, ruleIndexA)
-        CASE_VOID(  joinIndexF, ruleJoinIndex)
-        CASE_VOID(       listF, ruleList)
-        CASE_VOID(      dtaddF, ruleDtadd)
-        CASE_VOID(      dtsubF, ruleDtsub)
-        DEFAULT(obtainTypeOther(x));
+        CASE_VOID(       eachF, ruleEach);
+        CASE_VOID(   eachItemF, ruleEachItem);
+        CASE_VOID(   eachLeftF, ruleEachLeft);
+        CASE_VOID(  eachRightF, ruleEachRight);
+        CASE_VOID(       enumF, ruleEnum);
+        CASE_VOID(       dictF, ruleDict);
+        CASE_VOID(      tableF, ruleTable);
+        CASE_VOID(     ktableF, ruleKtable);
+        CASE_VOID(     indexAF, ruleIndexA);
+        CASE_VOID(  joinIndexF, ruleJoinIndex);
+        CASE_VOID(       listF, ruleList);
+        CASE_VOID(      dtaddF, ruleDtadd);
+        CASE_VOID(      dtsubF, ruleDtsub);
+        default: EP("Rule NOT found: %s", obtainTypeOther(x));
     }
 }
 
-int getValence(FuncUnit *x){
+I getValence(FuncUnit *x){
     switch(x->kind){
         case 1: return 1;
         case 2: return 2;
@@ -1544,7 +1536,7 @@ int getValence(FuncUnit *x){
     return -1;
 }
 
-void *getTypeRules(char *name, int* num){
+O *getTypeRules(char *name, int* num){
     FuncUnit x;
     getFuncIndexByName(name, &x);
     switch(x.kind){

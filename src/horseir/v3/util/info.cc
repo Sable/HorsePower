@@ -1,41 +1,44 @@
 #include "../global.h"
 
-#define CS(x) case x: return #x
-#define SZ(x) case H_##x: return sizeof(x)
-#define DF(x) default: EP("Type not defined: %d\n",(I)x)
-#define CS2(x, y) case H_##x: return y
+#define CASE_TYPE(t,x) case H_##t: return x
+//#define SZ(x) CASE(x, sizeof(x))
 
 const char *getTypeName(I x){
     switch(x){
-        CS(H_B); CS(H_J); CS(H_H); CS(H_I); CS(H_L); CS(H_F); CS(H_E); CS(H_X);
-        CS(H_C); CS(H_Q); CS(H_S); CS(H_M); CS(H_D); CS(H_Z); CS(H_U); CS(H_W);
-        CS(H_T); CS(H_G); CS(H_N); CS(H_Y); CS(H_A); CS(H_K); CS(H_V); 
-        DF(x);
+        CASE_STR(H_B); CASE_STR(H_J); CASE_STR(H_H); CASE_STR(H_I);
+        CASE_STR(H_L); CASE_STR(H_F); CASE_STR(H_E); CASE_STR(H_X);
+        CASE_STR(H_C); CASE_STR(H_Q); CASE_STR(H_S); CASE_STR(H_M);
+        CASE_STR(H_D); CASE_STR(H_Z); CASE_STR(H_U); CASE_STR(H_W);
+        CASE_STR(H_T); CASE_STR(H_G); CASE_STR(H_N); CASE_STR(H_Y);
+        CASE_STR(H_A); CASE_STR(H_K); CASE_STR(H_V); 
+        default: EP("Type not defined: %d",(I)x);
     }
 }
 
 HorseType getTypeFromV(V x){
     switch(xp){
-        CS2(B, boolT); CS2(J,  i8T); CS2(H,  i16T); CS2(I,  i32T); CS2(L, i64T);
-        CS2(F,  f32T); CS2(E, f64T); CS2(X, clexT); CS2(C, charT); CS2(Q, symT);
-        CS2(S,  strT); CS2(D,dateT); CS2(T, timeT); CS2(Z,   dtT);
-        CS2(U, minuteT); CS2(W, secondT);
-        CS2(G, listT); CS2(N,dictT); CS2(Y, enumT); CS2(A, tableT); CS2(K, ktableT);
-        DF(xp);
+        CASE_TYPE(B,   boolT); CASE_TYPE(J,    i8T); CASE_TYPE(H,    i16T);
+        CASE_TYPE(I,    i32T); CASE_TYPE(L,   i64T); CASE_TYPE(F,    f32T);
+        CASE_TYPE(E,    f64T); CASE_TYPE(X,  clexT); CASE_TYPE(C,   charT);
+        CASE_TYPE(Q,    symT); CASE_TYPE(S,   strT); CASE_TYPE(D,   dateT);
+        CASE_TYPE(T,   timeT); CASE_TYPE(Z,    dtT); CASE_TYPE(U, minuteT);
+        CASE_TYPE(W, secondT); CASE_TYPE(G,  listT); CASE_TYPE(N,   dictT);
+        CASE_TYPE(Y,   enumT); CASE_TYPE(A, tableT); CASE_TYPE(K, ktableT);
+        default: EP("Type not defined: %d",(I)xp);
     }
 }
 
 const char *getExtraKind(GenKind x){
     switch(x){
-        case NativeG: return "Native";
-        case   SkipG: return "Skip";
-        case    OptG: return "Opt";
-        default: EP("Unknown kind: %d\n", x);
+        CASE(NativeG, "Native");
+        CASE(  SkipG, "Skip");
+        CASE(   OptG, "Opt");
+        default: EP("Unknown kind: %d", (I)x);
     }
 }
 
 HorseType getType(Node *x){
-    if(!x) EP("Empty type node found\n");
+    if(!x) EP("Empty type node found");
     if(x->val.type.isWild) R wildT;
     //else if(x->val.type.cell) {
     //    TODO("Cell types not allowed.\n");
@@ -101,7 +104,7 @@ HorseType getType(Node *x){
 
 const char *getKindName(Kind x){
     if(x >= totalK){
-        EP("Kind not defined: %d (total %d)\n", x,totalK);
+        EP("Kind not defined: %d (total %d)", x,totalK);
     }
     // TODO: Fix
 //    switch(x){
@@ -143,17 +146,17 @@ const char *getKindName(Kind x){
 //    } R 0;
 //}
 
-void getInfoVar2(V x, const char *name){
-    P("Variable %s has type %s and len %lld\n", name, getTypeName(xp),xn);
+void getInfoVar2(V x, CS name){
+    WP("Variable %s has type %s and len %lld\n", name, getTypeName(xp),xn);
     if(xp == H_G){
         L v_min = 9999999, v_max = -1;
         DOI(xn, {V t=vV(x,i); \
                 if(vn(t)<v_min)v_min=vn(t); \
                 if(vn(t)>v_max)v_max=vn(t);})
         if(xn < 10){
-            P(" "); DOI(xn, P(" %s", getTypeName(vp(vV(x,i))))) P("\n");
+            WP(" "); DOI(xn, WP(" %s", getTypeName(vp(vV(x,i))))) P("\n");
         }
-        P("  total = %lld, max = %lld, min = %lld\n", xn, v_max, v_min); //getchar();
+        WP("  total = %lld, max = %lld, min = %lld\n", xn, v_max, v_min); //getchar();
     }
 }
 
@@ -196,7 +199,7 @@ static void indexWithHorseArraySub(V z, V y, HA x, L k){
                 caseF vF(z,k+i)=vF(y,x->data[i]); break;
                 caseE vE(z,k+i)=vE(y,x->data[i]); break;
                 caseQ vQ(z,k+i)=vQ(y,x->data[i]); break;
-                default: EP("type not supported: %s\n",getTypeName(vp(y)));
+                default: EP("type not supported: %s",getTypeName(vp(y)));
             }})
         indexWithHorseArraySub(z,y,x->next,k+(x->size));
     }

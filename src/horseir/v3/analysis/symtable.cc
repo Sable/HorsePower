@@ -13,11 +13,11 @@ static SymbolNameList *symList;
 
 static const char* strSymbolKind(SymbolKind x){
     switch(x){
-        CaseLine(moduleS);
-        CaseLine(globalS);
-        CaseLine(methodS);
-        CaseLine(localS);
-        CaseLine(builtinS);
+        CASE_STR(moduleS);
+        CASE_STR(globalS);
+        CASE_STR(methodS);
+        CASE_STR(localS);
+        CASE_STR(builtinS);
         default: EP("Kind not supported: %d", x);
     }
 }

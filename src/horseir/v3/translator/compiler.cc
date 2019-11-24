@@ -45,8 +45,9 @@ sHashTable *hashOpt;
 #define FUNC_MAX_SIZE 10240
 static C head_code[HEAD_MAX_SIZE], *htr;
 static C func_code[FUNC_MAX_SIZE], *ftr;
-static C code[CODE_MAX_SIZE], *ptr;
 static CodeList *codeList;
+
+extern C code[CODE_MAX_SIZE], *ptr;
 
 /* ------ declaration above ------ */
 
@@ -66,31 +67,7 @@ static void storeCode(S s){
     else EP("A line of the code should be less than %d", NUM_CHAR_LINE);
 }
 
-static C obtainTypeAlias(HorseType t){
-    switch(t){
-        case boolT: R 'B';
-        case   i8T: R 'J';
-        case  i16T: R 'H';
-        case  i32T: R 'I';
-        case  i64T: R 'L';
-        case  f32T: R 'F';
-        case  f64T: R 'E';
-        case  strT: R 'S';
-        case  symT: R 'S'; // Q -> S
-        case charT: R 'C';
-        case dateT: R 'I'; // D -> I
-        default: EP("Add more types: %d", t);
-    }
-}
-
-static C obtainNodeTypeAlias(Node *n){
-    InfoNode *in = n->val.type.in;
-    if(!in->subInfo)
-        return obtainTypeAlias(in->type);
-    else EP("Type problem");
-}
-
-static const char *obtainTypeShort(HorseType t){
+static CS obtainTypeShort(HorseType t){
     switch(t){
         case boolT: R "Bool";
         case   i8T: R "I8";
@@ -103,7 +80,7 @@ static const char *obtainTypeShort(HorseType t){
         case  symT: R "Symbol";
         case charT: R "Char";
         case dateT: R "Date";
-        default: EP("Add more types: %d", t);
+        default: TODO("Support type: %d", t);
     }
     return NULL;
 }
@@ -113,7 +90,7 @@ static S obtainLiteralFunc(Node *n, B isScalar){
     if(!in->subInfo){
         C tmp[99];
         SP(tmp, isScalar?"Literal%s":"LiteralVector%s", obtainTypeShort(in->type));
-        return strdup(tmp);
+        R strdup(tmp);
     }
     else EP("Type problem");
 }
@@ -132,16 +109,16 @@ static B isNodeMethod(Node *n){
         if(instanceOf(expr, callK)){
             Node *func = nodeCallFunc(expr); // nameK
             SymbolKind sk = nodeNameKind(func);
-            return sk == methodS;
+            R sk == methodS;
         }
     }
-    return false;
+    R false;
 }
 
 /* ------ helper functions above ------ */
 
 static void genIndent(){
-    DOI(depth, glueCode("    "));
+    DOI(depth, glueCode(indent4));
 }
 
 static void glueMethodHead(S part1, const char *part2){
@@ -673,7 +650,7 @@ static void dumpCode(){
     dispStats();
     //saveToFile("out/gen.h", head_code, func_code, code);
     printBanner("Generated Code Below");
-    P("%s\n%s\n%s\n", head_code, func_code, code);
+    WP("%s\n%s\n%s\n", head_code, func_code, code);
 }
 
 static void init(){

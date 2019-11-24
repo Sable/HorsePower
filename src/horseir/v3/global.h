@@ -45,38 +45,33 @@ extern "C" {
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-/* declaration */
-void  *newM(int n);
-void   error(const char* s);
-void   my_tic();
-double my_toc(bool isPrint);
-void   time_clear();
-
 #define NEW(typ)    (typ* )newM(sizeof(typ))
 #define NEW2(typ,n) (typ**)newM(sizeof(typ*)*(n))
 #define NEWL(typ,n) (typ* )newM(sizeof(typ)*(n))
-#define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))
-#define CaseLine(x) case x: R #x
 
-#define P printf
-#define R return
+#define P  printf
+#define R  return
 #define SP sprintf
 #define FP fprintf
-#define PN(x)     P("%s\n",x)
-#define newLine() P("\n")
-#define WP(...)   do{FP(stderr,__VA_ARGS__);}while(0)  // warning
+#define sEQ(x,y)  (!strcmp(x,y))   // string equal
+#define sNEQ(x,y) (0!=strcmp(x,y)) // string not equal
+
+/* debugging */
+#define printBanner(s) WP("/*==== " s " ====*/\n")
 #define FLine()   FP(stderr, "\n")
 #define INFO(s)   FP(stderr, s "(%s:%d:%s):\n\t", __FILE__, __LINE__, __func__)
 #define FT(s,...) FP(stdout,s,__VA_ARGS__)
 #define FS(x)     FT("%s",x)
-#define sEQ(x,y)  (!strcmp(x,y))   // string equal
-#define sNEQ(x,y) (0!=strcmp(x,y)) // string not equal
-
-/* For debugging */
-#define printBanner(s) WP("/*==== " s " ====*/\n")
+#define WP(...)   do{FP(stderr,__VA_ARGS__);}while(0)  // warning
 #define EP(...)   do{INFO("[ERROR]");  FP(stderr,__VA_ARGS__); FLine(); exit(1);}while(0)  // error
 #define TODO(...) do{INFO("[TODO]");   FP(stderr,__VA_ARGS__); FLine(); exit(2);}while(0)  // todo
 #define STOP(...) do{P("%-15s>> ",__FUNCTION__); P(__VA_ARGS__); getchar();}while(0)
+
+/* structs */
+#define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))
+#define CASE(t,x)      case t: R x
+#define CASE_STR(x)    case x: R #x
+#define CASE_VOID(t,x) case t: R (void *)x
 
 /* time functions */
 #define tic() my_tic()
@@ -100,10 +95,17 @@ void   time_clear();
 #include "translator/common.h"
 #include  "optimizer/common.h"
 
-void initGlobal();
-void initBackend();
-void initStats();
-void initTablesByQid(I id);
+/* declaration */
+O *newM(I n);
+O  error(CS s);
+O  my_tic();
+E  my_toc(B isPrint);
+O  time_clear();
+
+O initGlobal();
+O initBackend();
+O initStats();
+O initTablesByQid(I id);
 
 #ifdef	__cplusplus
 }

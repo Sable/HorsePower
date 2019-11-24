@@ -1,14 +1,14 @@
 #include "../global.h"
 
 #define AllOptSize 2
+#define hashOptSize (1<<12)  // 4K
+
 static const OC ListOfAllOpt[AllOptSize] = {OPT_FA, OPT_FP};
 
 extern Prog *root;
 extern sHashTable *hashOpt;
 
 I qid, phTotal;
-
-#define hashOptSize (1<<12)  // 4K
 
 /* ---------- Above declarations ----------  */
 
@@ -21,9 +21,9 @@ static void printBannerLocal(const char *msg){
 static void optimizerMain(OC opt){
     printBannerLocal(obtainOptStr(opt));
     switch(opt){
-        case OPT_FE: optElementwise();    break; // compiledMethodList
-        case OPT_FP: optPattern();        break; // compiledMethodList
-        case OPT_FA: optAuto();           break; // compiledMethodList
+        case OPT_FE: optElementwise(); break; // compiledMethodList
+        case OPT_FP: optPattern();     break; // compiledMethodList
+        case OPT_FA: optAuto();        break; // compiledMethodList
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }
@@ -40,7 +40,7 @@ static void init(){
 }
 
 I HorseCompilerOptimized(){
-    printBanner("Start Optimizr");
+    printBanner("Compiling with Optimizations");
     init();
     if(isOptimizeAll()){
         DOI(AllOptSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts

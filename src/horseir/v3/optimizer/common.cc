@@ -3,7 +3,7 @@
 extern bool *ElementwiseUnaryMap;
 extern bool *ElementwiseBinaryMap;
 
-const char *obtainMaxValue(C c){
+CS obtainMaxValue(C c){
     switch(c){
         case 'E': return "MAX_DBL";
         case 'I': return "MAX_INT";
@@ -11,7 +11,7 @@ const char *obtainMaxValue(C c){
     }
 }
 
-const char *obtainMinValue(C c){
+CS obtainMinValue(C c){
     switch(c){
         case 'E': return "MIN_DBL";
         case 'I': return "MIN_INT";
@@ -95,12 +95,12 @@ Node *getNodeItemIndex(Node *n, I pos){
             return p0->val;
         else {
             printNode(n);
-            P("\n looking for pos %d, but find: ", reversedPos);
+            WP("\n looking for pos %d, but find: ", reversedPos);
             if(p0) printNode(p0->val);
             //printNode(params->val);
             //printNode(params->next->val);
             //printNode(params->next->next->val);
-            P("total parameters: %d, pos: %d\n", totalList(params), pos);
+            WP("total parameters: %d, pos: %d\n", totalList(params), pos);
             EP("only variable allowed (no func/literal)");
         }
     }
@@ -128,22 +128,32 @@ S getNameStr(Node *n){
     }
 }
 
+static C obtainTypeAlias(HorseType t){
+    switch(t){
+        case   boolT: R 'B';
+        case     i8T: R 'J';
+        case    i16T: R 'H';
+        case    i32T: R 'I';
+        case    i64T: R 'L';
+        case    f32T: R 'F';
+        case    f64T: R 'E';
+        case    strT: R 'S';
+        case    symT: R 'S'; // Q -> S
+        case   charT: R 'C';
+        case   dateT: R 'I'; // D -> I
+        case  monthT: R 'M';
+        case   timeT: R 'T';
+        case     dtT: R 'Z';
+        case minuteT: R 'U';
+        case secondT: R 'W';
+        default: EP("Add more types: %d", t);
+    }
+}
+
 #define isBasicType(x) (!(x)->subInfo && !(x)->next)
 static C obtainTypeCodeByIn(InfoNode *in){
     if(isBasicType(in)){
-        switch(in->type){
-            case  boolT: return 'B';
-            case   i32T: return 'I';
-            case   i64T: return 'L';
-            case   f32T: return 'F';
-            case   f64T: return 'E';
-            case monthT: return 'M';
-            case  charT: return 'C';
-            case   symT: return 'Q';
-            case   strT: return 'S';
-            case  dateT: return 'D';
-            default: TODO("add type: %d\n", in->type);
-        }
+        R obtainTypeAlias(in->type);
     }
     else if(isListT(in)){
         // TODO: condition appplied with single cell type
@@ -163,7 +173,11 @@ C getTypeCodeByName(Node *n){
     }
 }
 
-static const char *obtainFuncElem(S fn){
+C obtainNodeTypeAlias(Node *n){
+    R obtainTypeCodeByIn(n->val.type.in);
+}
+
+static CS obtainFuncElem(S fn){
     // elementwise
     if(sEQ(fn, "plus"))  R "PLUS" ;
     if(sEQ(fn, "minus")) R "MINUS";
@@ -181,8 +195,8 @@ static const char *obtainFuncElem(S fn){
     R NULL;
 }
 
-static const char *obtainFuncAuto(S fn){
-    const char *x = obtainFuncElem(fn);
+static CS obtainFuncAuto(S fn){
+    CS x = obtainFuncElem(fn);
     if(x) R x;
     if(sEQ(fn, "index"))  R "INDEX";
     if(sEQ(fn, "like"))   R "LIKE";
@@ -191,14 +205,14 @@ static const char *obtainFuncAuto(S fn){
     R NULL;
 }
 
-const char *getFuncNameC(S fn){
-    const char *macro = obtainFuncElem(fn);
+CS getFuncNameC(S fn){
+    CS macro = obtainFuncElem(fn);
     if(macro) return macro;
     else TODO("Add impl. for %s", fn);
 }
 
-const char *getFuncNameAuto(S fn){
-    const char *macro = obtainFuncAuto(fn);
+CS getFuncNameAuto(S fn){
+    CS macro = obtainFuncAuto(fn);
     if(macro) return macro;
     else TODO("Add impl. for %s\n", fn);
 }
@@ -280,6 +294,6 @@ S genInvcSingle(S targ, S func, S *names, I num){
     ptr += SP(ptr, "%s(%s, (V[]){",func,targ);
     DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
     SP(ptr, "})");
-    return strdup(temp);
+    R strdup(temp);
 }
 

@@ -185,23 +185,23 @@ static HorseType getVectorType(Node *x){
 // boolT =?= H_B ...
 static const char* getTypeStr2(HorseType t){
     switch(t){
-        CaseLine(boolT);
-        CaseLine(i8T);
-        CaseLine(i16T);
-        CaseLine(i32T);
-        CaseLine(i64T);
-        CaseLine(f32T);
-        CaseLine(f64T);
-        CaseLine(clexT);
-        CaseLine(charT);
-        CaseLine(symT);
-        CaseLine(strT);
-        CaseLine(dateT);
-        CaseLine(monthT);
-        CaseLine(minuteT);
-        CaseLine(secondT);
-        CaseLine(timeT);
-        CaseLine(dtT);
+        CASE_STR(boolT);
+        CASE_STR(i8T);
+        CASE_STR(i16T);
+        CASE_STR(i32T);
+        CASE_STR(i64T);
+        CASE_STR(f32T);
+        CASE_STR(f64T);
+        CASE_STR(clexT);
+        CASE_STR(charT);
+        CASE_STR(symT);
+        CASE_STR(strT);
+        CASE_STR(dateT);
+        CASE_STR(monthT);
+        CASE_STR(minuteT);
+        CASE_STR(secondT);
+        CASE_STR(timeT);
+        CASE_STR(dtT);
         default: TODO("Add more type: %d\n",t);
     }
 }
@@ -209,19 +209,19 @@ static const char* getTypeStr2(HorseType t){
 static const char* getConstTypeStr(Node *x){
     ConstValue *p = x->val.nodeC;
     switch(p->type){
-        CaseLine(intC);
-        CaseLine(floatC);
-        CaseLine(longC);
-        CaseLine(clexC);
-        CaseLine(charC);
-        CaseLine(strC);
-        CaseLine(symC);
-        CaseLine(dateC);
-        CaseLine(monthC);
-        CaseLine(minuteC);
-        CaseLine(secondC);
-        CaseLine(timeC);
-        CaseLine(dtC);
+        CASE_STR(intC);
+        CASE_STR(floatC);
+        CASE_STR(longC);
+        CASE_STR(clexC);
+        CASE_STR(charC);
+        CASE_STR(strC);
+        CASE_STR(symC);
+        CASE_STR(dateC);
+        CASE_STR(monthC);
+        CASE_STR(minuteC);
+        CASE_STR(secondC);
+        CASE_STR(timeC);
+        CASE_STR(dtC);
         default: TODO("Add more type: %d\n",p->type);
     }
 }

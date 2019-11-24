@@ -41,8 +41,8 @@ I pfnList(V z, L n, V x[]){
  * indexing: x[y]
  */
 I pfnIndex(V z, V x, V y){
-    //if(H_DEBUG) P("-> Entering index\n");
-    // P("info x y: (%lld, %lld) (%lld, %lld)\n",vp(x),vn(x),vp(y),vn(y));
+    //if(H_DEBUG) WP("-> Entering index\n");
+    // WP("info x y: (%lld, %lld) (%lld, %lld)\n",vp(x),vn(x),vp(y),vn(y));
     if(isTypeGroupInt(vp(y))){
         I typZ = vp(x); L lenZ = vn(y), lenX = vn(x);
         V tempY = allocNode();
@@ -218,7 +218,7 @@ I pfnValues(V z, V x){
 
 I pfnFetch(V z, V x){
     if(isEnum(x)){
-        //t = (V)getEnumVal(x); P("fetch: vn(t) = %lld\n", vn(t)); getchar();
+        //t = (V)getEnumVal(x); WP("fetch: vn(t) = %lld\n", vn(t)); getchar();
         R copyV(z, (V)getEnumVal(x));
     }
     else R E_DOMAIN;
@@ -232,8 +232,8 @@ I pfnFetch(V z, V x){
 //        I typZ = vp(targ);
 //        L lenZ = vn(x);
 //        //initV(z, typZ, lenZ);
-//        // P("1."); DOI(20, P(" %lld",vY(x,i)))           P("\n");
-//        // P("2."); DOI(20, P(" %lld",vL(targ, vY(x,i)))) P("\n"); getchar();
+//        // WP("1."); DOI(20, WP(" %lld",vY(x,i)))           WP("\n");
+//        // WP("2."); DOI(20, WP(" %lld",vL(targ, vY(x,i)))) WP("\n"); getchar();
 //        switch(typZ){
 //            caseB DOP(lenZ, vB(z,i)=vB(targ,vY(x,i))) break;
 //            caseJ DOP(lenZ, vJ(z,i)=vJ(targ,vY(x,i))) break;
@@ -298,7 +298,7 @@ static I fetchColumnValue(V z, V x, V y, B f){
             //P("lenZ = %lld\n", lenZ);
             DOI(lenZ, { \
                L colIndex = findColFromTable(x, vQ(y,i)); \
-               P("colIndex = %lld, %s\n", (L)colIndex,getSymbolStr(vQ(y,i))); \
+               WP("colIndex = %lld, %s\n", (L)colIndex,getSymbolStr(vQ(y,i))); \
                if(colIndex < 0) R E_COL_NOT_FOUND; \
                CHECKE(copyColumnValue(vV(z,i), getTableCol(getTableVals(x), colIndex));)})
             R 0 ;
@@ -308,7 +308,7 @@ static I fetchColumnValue(V z, V x, V y, B f){
 }
 
 I pfnColumnValue(V z, V x, V y){
-    //if(H_DEBUG) P("-> Entering column_value\n");
+    //if(H_DEBUG) WP("-> Entering column_value\n");
     R fetchColumnValue(z,x,y,1);
 }
 
@@ -739,10 +739,10 @@ I pfnWhere(V z, V x){
             memset(parZ  , 0, sizeof(L)*H_CORE);
             memset(offset, 0, sizeof(L)*H_CORE);
             CHECKE(getNumOfNonZero(x,parZ));
-            // P("parZ:"); DOI(H_CORE, P(" %lld", parZ[i])); P("\n");
+            // WP("parZ:"); DOI(H_CORE, WP(" %lld", parZ[i])); WP("\n");
             DOI(H_CORE, lenZ += parZ[i])
             DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
-            // P("offset:"); DOI(H_CORE, P(" %lld", offset[i])); P("\n");
+            // WP("offset:"); DOI(H_CORE, WP(" %lld", offset[i])); WP("\n");
             initV(z,typZ,lenZ);
             DOT(lenX, if(vB(x,i))vL(z,offset[tid]++)=i)
         }
@@ -764,9 +764,9 @@ I pfnWhere(V z, V x){
 I pfnSum(V z, V x){
     //P("type is %s\n", getTypeName(xp));getchar();
     //if(xn<200){
-    //    P("Input x size: %lld\n", xn); printV2(x, 20); getchar();
+    //    WP("Input x size: %lld\n", xn); printV2(x, 20); getchar();
     //}
-    //L numZero = 0; DOI(xn, if(vL(x,i)==0) numZero++) P("num = %lld\n", numZero); getchar();
+    //L numZero = 0; DOI(xn, if(vL(x,i)==0) numZero++) WP("num = %lld\n", numZero); getchar();
     if(isTypeGroupReal(vp(x))){
         I typZ = isFloat(x)?H_F:isDouble(x)?H_E:H_L; /* keeps H_L, see q1 */
         initV(z,typZ,1);
@@ -1008,15 +1008,15 @@ I pfnGroupBasic(V z, V x){
     initV(y,H_B,lenZ);
 if(H_DEBUG) tic();
     if(isOrdered(x)){
-        if(H_DEBUG) P("Ordered data found in pfnGroup\n");
+        if(H_DEBUG) WP("Ordered data found in pfnGroup\n");
         order_list = NULL;
     }
     else if(isIntegers(x)){;} // skip
     else {
-        if(H_DEBUG) P("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
+        if(H_DEBUG) WP("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
         // TODO: need to go back to check again (for q3)
         //if(isList(x) && xn==1 && vp(vV(x,0))==H_I){
-        //    P("debugging create_hash_multiply\n");
+        //    WP("debugging create_hash_multiply\n");
         //    create_hash_multiply(vV(x,0));
         //    getchar();
         //}
@@ -1027,7 +1027,7 @@ if(H_DEBUG) tic();
         //P("sort done\n");
     }
 if(H_DEBUG) time_toc("1.(elapsed time %g ms)\n\n", elapsed);
-    // P("t = \n");
+    // WP("t = \n");
     // printV(t);
 
 if(H_DEBUG) tic();
@@ -1514,7 +1514,7 @@ I pfnCompress(V z, V x, V y){
             CHECKE(copyV(z,y));
         }
         if(H_DEBUG)
-            P("compress ratio:%.2lf %% (%lld/%lld)\n", vn(z)*100.0/vn(x), vn(z), vn(x));
+            WP("compress ratio:%.2lf %% (%lld/%lld)\n", vn(z)*100.0/vn(x), vn(z), vn(x));
         R 0;
     }
     else R E_DOMAIN;
@@ -1525,7 +1525,7 @@ I pfnCompress(V z, V x, V y){
 I pfnIndexOf(V z, V x, V y){
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         if(isOrdered(x)){
-            if(H_DEBUG) P("Ordered data found in index_of\n");
+            if(H_DEBUG) WP("Ordered data found in index_of\n");
             R searchOrdered(z,x,y);
         }
         else {
@@ -1680,8 +1680,8 @@ I pfnLike(V z, V x, V y){
             /* jit facilities */
             I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
             //case 1
-            // if(jit_status == 0) P("jit pattern initialized successfully\n");
-            // else P("jit pattern initialized failed %lld\n", jit_status);
+            // if(jit_status == 0) WP("jit pattern initialized successfully\n");
+            // else WP("jit pattern initialized failed %lld\n", jit_status);
             // pcre2_match_context *mcontext = pcre2_match_context_create(NULL);
             // pcre2_jit_stack *jit_stack = pcre2_jit_stack_create(32*1024, 1024*1024, NULL);
             // pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
@@ -1749,7 +1749,7 @@ I pfnLike(V z, V x, V y){
                       {getLikeFromString(&t,vS(x,i),vS(y,i)); \
                        vB(z,i)=t;})                                                  break;
             }
-            DOI(10, P("%d ",vB(z,i))) P("\n");
+            DOI(10, WP("%d ",vB(z,i))) WP("\n");
             R 0;
         }
         else R E_LENGTH;
@@ -1775,7 +1775,7 @@ I pfnOrderBy(V z, V x, V y){
             R lib_order_basic(z,vV(x,0),y);
             //I res = lib_order_basic(z,vV(x,0),y);
             //V t = vV(x,0);
-            //DOI(20, P("z[%2lld], %lld, v = %d\n",i,vL(z,i),vI(t,vL(z,i)))) getchar();
+            //DOI(20, WP("z[%2lld], %lld, v = %d\n",i,vL(z,i),vI(t,vL(z,i)))) getchar();
             //if(isOrderWithIndex(t,z)) WP("special list (size 1): value ordered\n");
             //else EP("sorry, not in order\n");
             //R res;
@@ -1786,21 +1786,21 @@ I pfnOrderBy(V z, V x, V y){
             initV(z,H_L,lenZ);
             //printHeapInfo(); getchar();
             //P("lenZ = %lld, sL(z) = %lld, sB(y) = %lld\n", lenZ,(L)sL(z),(L)sB(y)); 
-            //DOI(lenZ, vL(z,i) = i); P("done\n"); getchar();
-            // P("lenZ = %lld, item = %lld\n",lenZ,vn(x));
-            // P("before\n");
-            // DOI(10, P("%s, %s, %lld\n", \
+            //DOI(lenZ, vL(z,i) = i); WP("done\n"); getchar();
+            // WP("lenZ = %lld, item = %lld\n",lenZ,vn(x));
+            // WP("before\n");
+            // DOI(10, WP("%s, %s, %lld\n", \
             //     getSymbolStr(vQ(vV(x,0),i)), getSymbolStr(vQ(vV(x,1),i)),vL(vV(x,2),i)))
             // lib_list_order_by(sL(z), lenZ, x, sB(y), lib_quicksort_cmp);
             lib_order_by_list(sL(z), x, sB(y), lenZ, 0, lib_quicksort_cmp_item);
-            // P("after\n");
-            // DOI(lenZ, if(!strcmp(getSymbolStr(vQ(vV(x,0),vL(z,i))), "Brand#54") && \
+            // WP("after\n");
+            // DOI(lenZ, if(sEQ(getSymbolStr(vQ(vV(x,0),vL(z,i))), "Brand#54") && \
             //     !strcmp(getSymbolStr(vQ(vV(x,1),vL(z,i))), "STANDARD BRUSHED COPPER")) \
-            //     P("[%5lld] %s, %s, %lld\n", i, \
+            //     WP("[%5lld] %s, %s, %lld\n", i, \
             //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
             // getchar();
-            // P("----\n");
-            // DOI(20, P("[%3lld] %s, %s, %lld\n", i, \
+            // WP("----\n");
+            // DOI(20, WP("[%3lld] %s, %s, %lld\n", i, \
             //     getSymbolStr(vQ(vV(x,0),vL(z,i))), getSymbolStr(vQ(vV(x,1),vL(z,i))), vL(vV(x,2),vL(z,i))))
             // getchar();
         }
@@ -1890,10 +1890,10 @@ I pfnEachRight(V z, V x, V y, FUNC2(foo)){
         L lenZ = vn(t);
         initV(z,H_G,lenZ);
 #ifdef PROFILE
-        P(">> pfnEachRight: size(z) = %lld\n", (L)lenZ);
+        WP(">> pfnEachRight: size(z) = %lld\n", (L)lenZ);
         L minVal = 999999, maxVal = -1;
         DOI(lenZ, {V tt=vV(y,i); if(minVal>vn(tt)) minVal=vn(tt); if(maxVal<vn(tt)) maxVal=vn(tt);})
-        P(">> lenZ = %lld, minVal = %lld, maxVal = %lld\n", (L)lenZ, (L)minVal, (L)maxVal);
+        WP(">> lenZ = %lld, minVal = %lld, maxVal = %lld\n", (L)lenZ, (L)minVal, (L)maxVal);
 #endif
         DOI(lenZ, CHECKE((*foo)(vV(z,i),x,vV(t,i))))  // seg fault after DOI -> DOP
     }
@@ -1917,7 +1917,7 @@ I pfnOuter(V z, V x, V y, FUNC2(foo)){
         V tempY = allocNode();
         CHECKE(promoteValue(tempX, x, typMax));
         CHECKE(promoteValue(tempY, y, typMax));
-        P("total size = %lld\n", (L)(lenX * lenY));
+        WP("total size = %lld\n", (L)(lenX * lenY));
         initV(z,H_G,lenX);
         DOI(lenX, initV(vV(z,i),typCell,lenY))
         switch(typCell){
@@ -1952,16 +1952,16 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
     // TODO: a bug found in joinIndexHash (check q8)
     //P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
     //if(isOrdered(x)){
-    //    P("2.0 ordered left\n");
+    //    WP("2.0 ordered left\n");
     //    R joinIndexHash(z,x,y,'l');
     //}
     //else if(isOrdered(y)){
-    //    P("2.1 ordered right\n");
+    //    WP("2.1 ordered right\n");
     //    R joinIndexHash(z,x,y,'r');
     //}
     //else {
         if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-            P("2.2 general\n");
+            WP("2.2 general\n");
             L lenX    = vn(x), lenY = vn(y);
             I typMax  = MAX(vp(x),vp(y));
             V tempX = allocNode();
@@ -1969,7 +1969,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,H_G,lenZ);
-            P("2.3 op = %lld\n",(L)op);
+            WP("2.3 op = %lld\n",(L)op);
             //if(isList(y) && vn(vV(y,0))==148370){
             //    WP("setting to debug\n");
             //    op = 99; //debug
@@ -1995,12 +1995,12 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
             // }
             else if(99 == op) {
                 // dummy
-                P("dummy dummy dummy\n");
+                WP("dummy dummy dummy\n");
                 lib_join_dummy(vV(z,0), vV(z,1), x, y);
             }
             else { // brutal force
                 L c = 0;
-                P("3,x=%lld, y=%lld (brutal force)\n",lenX,lenY);
+                WP("3,x=%lld, y=%lld (brutal force)\n",lenX,lenY);
                 switch(typCell){
                     caseB {
                         switch(typMax){
@@ -2017,7 +2017,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
                     } break;
                     default: R E_DOMAIN;
                 }
-                P("4, c = %lld\n",c); getchar();
+                WP("4, c = %lld\n",c); getchar();
                 DOI(lenZ, initV(vV(z,i),H_L,c))
                     // assign value
                 c = 0;
@@ -2086,8 +2086,8 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
 }
 
 static L getFirstEqual(V f){
-    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "eq"))R i)
-    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "neq"))R i)
+    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "eq"))R i)
+    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "neq"))R i)
     R 0;
 }
 
@@ -2099,7 +2099,7 @@ static I pfnJoinIndexMultiple(V z, V x, V y, V f){
         CHECKE(joinOneColumn(z0,x0,y0,f0));
         //P("fx = %lld\n", fx); printV(f); getchar();
         //V k0 = vV(z0,0), k1 = vV(z0,1);
-        //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;P("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) P("not found\n"); getchar();
+        //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;P("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
         //printV(x0); printV(y0); printV(z0); getchar();
         initV(z,H_G,2);
         CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
@@ -2308,7 +2308,7 @@ I pfnMember(V z, V y, V x){ /* return left shape */
             (isTypeGroupString(vp(x)) || isComplex(x) || isTypeGroupDTime(vp(x)))){
         initV(z,H_B,vn(y));
         if(false && xn <= NUM_JOIN_LINEAR){ // slower than hash
-            if(H_DEBUG) P("small input for member vn(y)=%lld, vn(x)=%lld\n",vn(y),vn(x));
+            if(H_DEBUG) WP("small input for member vn(y)=%lld, vn(x)=%lld\n",vn(y),vn(x));
             switch(vp(x)){
                 caseQ DOJ(vn(y), {B f=0;DOI(vn(x), if(vQ(y,j)==vQ(x,i)){f=1;break;})vB(z,j)=f;}) break;
                 default: EP("Add more type support for special case: %s", getTypeName(vp(x)));
@@ -2433,10 +2433,10 @@ I pfnAddFKey(V x, V xKey, V y, V yKey){
         CHECKE(fetchColumnValue(xCol, tableX, xKey, 0));
         CHECKE(fetchColumnValue(yCol, tableY, yKey, 0));
         if(vn(xKey) > 1){
-            P(" keys: \n");
+            WP(" keys: \n");
             printV(xKey);
             printV(yKey);
-            P(" values: \n");
+            WP(" values: \n");
             printV(xCol);
             printV(yCol);
             getchar();
@@ -2446,16 +2446,16 @@ I pfnAddFKey(V x, V xKey, V y, V yKey){
         //P("2222\n"); getchar();
         CHECKE(setFKey(tableY, yKey, fKey));
         if(isOne(xKey)){
-            P("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
+            WP("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
                     getSymbolStr(vq(x)), getSymbolStr(vq(xKey)),\
                     getSymbolStr(vq(y)), getSymbolStr(vq(yKey)));
         }
         else if(vn(xKey)>1) {
-            P("Added fkeys successfully: %s.", getSymbolStr(vq(x)));
+            WP("Added fkeys successfully: %s.", getSymbolStr(vq(x)));
             printValue(xKey);
-            P(" (key) -> %s.", getSymbolStr(vq(y)));
+            WP(" (key) -> %s.", getSymbolStr(vq(y)));
             printValue(yKey);
-            P(" (fkey)\n");
+            WP(" (fkey)\n");
             getchar();
         }
         //else R E_NOT_IMPL;
@@ -2589,7 +2589,7 @@ I pfnSubString(V z, V x, V y){
 //     if(isInteger(x)){
 //         L lenX = -1;
 //         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-//         // P("lenX 1 = %lld\n", lenX);
+//         // WP("lenX 1 = %lld\n", lenX);
 //         L *temp  = (L*)malloc(sizeof(L)*lenX);
 //         L *count = (L*)malloc(sizeof(L)*lenX);
 //         L *maps  = (L*)malloc(sizeof(L)*lenX);
@@ -2602,7 +2602,7 @@ I pfnSubString(V z, V x, V y){
 //         initV(z, H_N, 2);
 //         V keys = getDictKeys(z);
 //         V vals = getDictVals(z);
-//         // P("size of keys: %lld\n", cnt);
+//         // WP("size of keys: %lld\n", cnt);
 //         initV(keys, H_L, cnt); cnt = 0;
 //         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
 //         initV(vals, H_G, cnt);
@@ -2621,7 +2621,7 @@ I pfnSubString(V z, V x, V y){
 //         L lenX = -1;
 //         // lenX = vn(x);
 //         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-//         // P("lenX 2 = %lld\n", lenX);
+//         // WP("lenX 2 = %lld\n", lenX);
 //         L *temp  = (L*)malloc(sizeof(L)*lenX);
 //         L *maps  = (L*)malloc(sizeof(L)*lenX);
 //         memset(temp , 0, sizeof(L)*lenX);
@@ -2632,7 +2632,7 @@ I pfnSubString(V z, V x, V y){
 //         initV(z, H_N, 2);
 //         V keys = getDictKeys(z);
 //         V vals = getDictVals(z);
-//         // P("size of keys: %lld\n", cnt);
+//         // WP("size of keys: %lld\n", cnt);
 //         initV(keys, H_L, cnt); cnt = 0;
 //         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
 //         initV(vals, H_E, cnt);
@@ -2665,7 +2665,7 @@ I pfnGroupTrie(V z, V x){
     DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); charMap[t]++; })
 // toc();
     L lenZ = 0; DOI(MAP_SIZE, if(charMap[i]!=0)charId[i]=lenZ++)
-// P("val of lenZ: %lld\n", lenZ);
+// WP("val of lenZ: %lld\n", lenZ);
     initV(vals, H_G, lenZ);
     L c=0; DOI(MAP_SIZE, if(charMap[i]!=0){ initV(vV(vals,c++),H_L,charMap[i]); })
     L *count = NEWL(L,lenZ);
@@ -2684,7 +2684,7 @@ I pfnPrint(V z, V x){
     //WP("Add pfnPrint\n");
     // printVBasic(x);
     //if(vn(x) > 30){
-    //    P("size(x) = %lld\n", vn(x));
+    //    WP("size(x) = %lld\n", vn(x));
     //}
     //else printV2(x, 20);
     //getchar();
@@ -2761,7 +2761,7 @@ I pfnRandK(V z, V x, V y){
             //    DOI(x0, {if(f) break; \
             //        DOJ3(i+1, x0, \
             //            if(vL(z,i)==vL(z,j)){ \
-            //        P("vL(z,%lld) = %lld, vL(z,%lld) = %lld\n",i,vL(z,i),j,vL(z,j)); f=1; break;}) })
+            //        WP("vL(z,%lld) = %lld, vL(z,%lld) = %lld\n",i,vL(z,i),j,vL(z,j)); f=1; break;}) })
             //    if(f) EP("Duplicated numbers found!");
             //    else WP("Pass\n");
             //}

@@ -74,7 +74,7 @@ static void envInitDot(){
 }
 
 static void envVersion(){
-    P("HorseIR version: 0.2.1\n");
+    P("HorseIR version: 0.3.0\n");
 }
 
 static void utlPrinter(char *qItem, char *file){

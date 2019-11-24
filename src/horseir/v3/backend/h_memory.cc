@@ -86,9 +86,9 @@ G allocMem(G heap, L *cur, L top, I typ, L len){
     G g = NULL;
     if((*cur)+size < top){
         if(H_DEBUG){
-            // P("-> [Info heap] Allocated %3lld for info (", size);
+            // WP("-> [Info heap] Allocated %3lld for info (", size);
             // printType(typ);
-            // P(", %2lld)\n",len);
+            // WP(", %2lld)\n",len);
         }
         g = heap + (*cur);
         *cur = (*cur) + size;
@@ -353,22 +353,22 @@ L testMemory(){
     printRoot(root);
     BN work_c = addBlock(root, 80); //add(C, 80)
     printRoot(root);
-    P("> end (A, 70)\n");
+    WP("> end (A, 70)\n");
     releaseBlock(work_a);            //end A
     printRoot(root);
     BN work_d = addBlock(root, 60); //add(D, 80)
     printRoot(root);
-    P("> end (B, 35)\n");
+    WP("> end (B, 35)\n");
     releaseBlock(work_b);            //end B
     printRoot(root);
-    P("> end (D, 80)\n");
+    WP("> end (D, 80)\n");
     releaseBlock(work_d);            //end D
     printRoot(root);
-    P("> end (C, 80)\n");
+    WP("> end (C, 80)\n");
     releaseBlock(work_c);            //end C
     printRoot(root);
     freeBlock(root);
-    P("numBlocks = %lld, total mem = %lld out of %lld (%g%%)\n", \
+    WP("numBlocks = %lld, total mem = %lld out of %lld (%g%%)\n", \
         numBlocks, \
         numBlocks*sizeof(BN0), \
         INIT_HEAP_SIZE, \
@@ -395,18 +395,18 @@ void printHeapInfo(){
             INIT_HEAP_SIZE, \
             gHeapCur, \
             gHeapCur*100.0/INIT_HEAP_SIZE);
-        // P("gHeap = 0x%016x, gHeapCur = %lld\n",gHeap,gHeapCur);
+        // WP("gHeap = 0x%016x, gHeapCur = %lld\n",gHeap,gHeapCur);
     #endif
 
     #ifdef USE_BUDDY
-        P("-> [Buddy heap] Init. %lld, used %lld/%lld, extra %lld (%g%%)\n", \
+        WP("-> [Buddy heap] Init. %lld, used %lld/%lld, extra %lld (%g%%)\n", \
             INIT_HEAP_SIZE, \
             gRoot->size,    \
             gRoot->level,   \
             numBlocks*sizeof(BN0), \
             numBlocks*sizeof(BN0)*100.0/INIT_HEAP_SIZE \
             );
-        P("-> [Buddy heap] "); printRoot(gRoot);
+        WP("-> [Buddy heap] "); printRoot(gRoot);
     #endif
 }
 

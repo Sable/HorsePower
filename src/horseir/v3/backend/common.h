@@ -19,6 +19,7 @@ typedef struct { F real,imag; } X;
 typedef struct { Q source; G ek,ev; } Y0, *Y;  //key,value: V // Q source
 typedef struct ListY { G y,cn;  struct ListY *next; } ListY; // cn: column name 
 typedef struct { L row, col; ListY *fkey; } A0,*A;
+typedef const char *CS;  // constant string
 
 /* unsigned types */
 typedef uint64_t UL;

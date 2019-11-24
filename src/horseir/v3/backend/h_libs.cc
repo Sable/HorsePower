@@ -20,7 +20,7 @@ static void writeToFileFromPtr(L *x, L n, const char* fn){
     FP(fp, "%lld\n",n);
     DOI(n, FP(fp,"%lld\n",x[i]))
     fclose(fp);
-    P("file %s is saved\n", fn);
+    WP("file %s is saved\n", fn);
 }
 
 static void writeToFileForDebug(V x, const char* file_name){
@@ -171,7 +171,7 @@ static I insert_hash(HN ht, L htMask, void* src, L srcI, I typ, B isU){
             caseE if(toE(src,td)==toE(src,srcI)) R isU?td:insert_index(t,srcI); break;
             caseX if(xEqual(toX(src,td),toX(src,srcI)))
                      R isU?td:insert_index(t,srcI); break;
-            caseS if(!strcmp(toS(src,td),toS(src,srcI)))
+            caseS if(sEQ(toS(src,td),toS(src,srcI)))
                      R isU?td:insert_index(t,srcI); break;
             caseG if(compareTuple((V)src,td,(V)src,srcI))
                      R isU?td:insert_index(t,srcI); break;
@@ -197,7 +197,7 @@ static L find_hash(HN ht, L htMask, void* src, void* val, L valI, L typ){
             caseF if(toF(src,td)==toF(val,valI)) R td; break;
             caseE if(toE(src,td)==toE(val,valI)) R td; break;
             caseX if(xEqual(toX(src,td),toX(val,valI)))  R td; break;
-            caseS if(!strcmp(toS(src,td),toS(val,valI))) R td; break;
+            caseS if(sEQ(toS(src,td),toS(val,valI))) R td; break;
             caseG if(compareTuple((V)src,td,(V)val,valI))R td; break;
             default: R -1;
         }
@@ -226,7 +226,7 @@ static L find_hash_many(HN ht, L htMask, void* src, void* val, L valI, L typ, HI
             caseF if(toF(src,td)==toF(val,valI)) {*other=hT(t);R td;} break;
             caseE if(toE(src,td)==toE(val,valI)) {*other=hT(t);R td;} break;
             caseX if(xEqual(toX(src,td),toX(val,valI)))  {*other=hT(t);R td;} break;
-            caseS if(!strcmp(toS(src,td),toS(val,valI))) {*other=hT(t);R td;} break;
+            caseS if(sEQ(toS(src,td),toS(val,valI))) {*other=hT(t);R td;} break;
             caseG if(compareTuple((V)src,td,(V)val,valI)){*other=hT(t);R td;} break;
             default: R -1;
         }
@@ -267,7 +267,7 @@ L profileHash(HN ht, L htSize){
         DOI(htSize, {HN t=hN(hV(ht,i)); \
             while(t){HI p=hT(t); L k=0; \
               while(p){k++; p=p->inext;} c+=k+1; c2+=k; c3+=k>0; t=hN(t);}})
-        P("> total = %lld, print (%lld / %lld) = %.1lf\n", c,c2,c3,1.0*c2/c3);
+        WP("> total = %lld, print (%lld / %lld) = %.1lf\n", c,c2,c3,1.0*c2/c3);
     }
     WP("\n"); R 0;
 }
@@ -389,7 +389,7 @@ void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
         DOI3(low, high, DOJ3(low, high, if(str[rtn[i]] > str[rtn[j]]) { L t=rtn[i]; rtn[i]=rtn[j]; rtn[j]=t; } ))
     }
     else {
-        if(H_DEBUG) P("entering large char sort: len = %lld\n", len);
+        if(H_DEBUG) WP("entering large char sort: len = %lld\n", len);
         L cnt[256]={0}, step[256]={0}, cursor=0;
         L *temp = (L*)malloc(sizeof(L)*len);
         DOI3(low, high, cnt[str[rtn[i]]]++);
@@ -427,7 +427,7 @@ void lib_quicksort_other(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
     if(low < high){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
-        //if(leftSame) { P("low = %lld, high = %lld\n",low,high); getchar(); }
+        //if(leftSame) { WP("low = %lld, high = %lld\n",low,high); getchar(); }
         //P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
 //#pragma omp parallel sections
         {
@@ -456,7 +456,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
     B f = isUp?*isUp:1;
     // switch(vp(t)){
     //     caseH if(f==0 && vH(t,a)==1992){
-    //         P("1992: a = %d, b = %d\n",vH(t,a),vH(t,b)); getchar();} break;
+    //         WP("1992: a = %d, b = %d\n",vH(t,a),vH(t,b)); getchar();} break;
     // }
     #define SORT_CMP(q) case##q if(v##q(t,a)!=v##q(t,b)) R v##q(t,a)<v##q(t,b)?cmp_switch(f); break
     switch(vp(t)){ \
@@ -476,7 +476,7 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
         SORT_CMP(U); \
         SORT_CMP(W); \
         SORT_CMP(T); \
-        default: P("No impl. for type %lld\n",(L)vp(t)); exit(99); break; \
+        default: EP("No impl. for type %s\n",getTypeName(vp(t))); \
         /* Pending: caseC */
     } 
     // R (a>b?1:a<b?-1:0);
@@ -587,7 +587,7 @@ static void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(c
                 // free(buff);
             } // else no need to sort
             else if(lib_mergesort_decide(val,rtn[low],rtn[high-1],isUp,cmp)>0){
-                P("2. low = %lld, high = %lld\n", (L)low, (L)high); // in q16, no case found
+                WP("2. low = %lld, high = %lld\n", (L)low, (L)high); // in q16, no case found
             }
         }
     }
@@ -909,7 +909,7 @@ static B lib_member_fast1(void* src, void* val, L valI, L typ){
         LIB_MEMBER_F1F(X, xEqual);
         LIB_MEMBER_F1(C);
         LIB_MEMBER_F1F(S, !strcmp);
-        default: { P("Not impl. for type %lld\n", typ); exit(99); }
+        default: { EP("Not impl. for type: %s\n", getTypeName(typ)); }
     }
     R 0;
 }
@@ -919,10 +919,11 @@ static B lib_member_fast1(void* src, void* val, L valI, L typ){
 #define LIB_MEMBER_F2F(p,foo) case##p R foo(to##p(val,valI),to##p(src,0)) || foo(to##p(val,valI),to##p(src,1))
 
 static B lib_member_fast2(void* src, void* val, L valI, L typ){
-    // P("match %lld (%s), %lld (%s), %lld (%s) == %d\n", toL(val,valI), getSymbolStr(toL(val,valI))\
-    //                                                  , toL(src,0),    getSymbolStr(toL(src,0)) \
-    //                                                  , toL(src,1),    getSymbolStr(toL(src,1))\
-    //                                                  , toL(val,valI)==toL(src,0) || toL(val,valI)==toL(src,1));
+    // WP("match %lld (%s), %lld (%s), %lld (%s) == %d\n", \
+    //       toL(val,valI), getSymbolStr(toL(val,valI))\
+    //     , toL(src,0),    getSymbolStr(toL(src,0)) \
+    //     , toL(src,1),    getSymbolStr(toL(src,1))\
+    //     , toL(val,valI)==toL(src,0) || toL(val,valI)==toL(src,1));
     // getchar();
     switch(typ){
         LIB_MEMBER_F2(B);
@@ -935,7 +936,7 @@ static B lib_member_fast2(void* src, void* val, L valI, L typ){
         LIB_MEMBER_F2F(X, xEqual);
         LIB_MEMBER_F2(C);
         LIB_MEMBER_F2F(S, !strcmp);
-        default: { P("Not impl. for type %lld\n", typ); exit(99); }
+        default: { EP("Not impl. for type %s", getTypeName(typ)); }
     }
     R 0;
 }
@@ -1400,8 +1401,8 @@ I lib_group_by_flat(V z, V x){
 }
 
 static L getFirstEqual(V f){
-    DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "eq"))R i)
-    //DOI(vn(f), if(!strcmp(getSymbolStr(vQ(f,i)), "neq"))R i)
+    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "eq"))R i)
+    //DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "neq"))R i)
     R 0;
 }
 
@@ -1903,7 +1904,7 @@ B checkOrderCase1(V z, V x, V f){
 // check the number of keys after groupby
 void lib_groupby_dummy(V x){
     if(xp == H_G && xn == 2 && vp(vV(x,0)) == H_I && vp(vV(x,1)) == H_I){
-        P("begin group dummy\n");
+        WP("begin group dummy\n");
         V x0 = vV(x,0);
         V x1 = vV(x,1);
         B *flag = NEWL(B, vn(x0));
@@ -1919,7 +1920,7 @@ void lib_groupby_dummy(V x){
                 }
             }
         }
-        P("total result = %lld\n", cnt); getchar(); // Q20: 543210
+        WP("total result = %lld\n", cnt); getchar(); // Q20: 543210
     }
     else EP("condition not satisfied");
 }
@@ -1939,7 +1940,7 @@ L getInteger1(V x){
 }
 
 #define InitSeed 16807
-#define MaxSeed 2147483647
+#define MaxSeed  2147483647
 L HorseSeed = InitSeed;
 
 L genRand(L x){

@@ -60,7 +60,7 @@ typedef struct {
 #define isListS(n) (listT==getSubType(n))
 #define isEnumT(n) (enumT==inType(n))
 
-#define isS(n, t) (t == n->type)
+#define isS(n,t) (t == n->type)
 #define isShapeU(n) isS(n, unknownH)
 #define isShapeV(n) isS(n,  vectorH)
 #define isShapeL(n) isS(n,    listH)
@@ -91,13 +91,13 @@ O  checkFuncNumber();
 B  checkType(InfoNode *x, InfoNode *y);
 B  checkShape(InfoNode *x, InfoNode *y);
 I  getValence(FuncUnit *x);
-O  getFuncIndexByName(char *name, FuncUnit *x);
+O  getFuncIndexByName(S name, FuncUnit *x);
 O *getTypeRules(char *name, int* num);
 
-ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, int size);
+ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, I size);
 
-const S obtainTypeUnary (TypeUnary  t);
-const S obtainTypeBinary(TypeBinary t);
-const S obtainTypeOther (TypeOther  t);
+CS obtainTypeUnary (TypeUnary  t);
+CS obtainTypeBinary(TypeBinary t);
+CS obtainTypeOther (TypeOther  t);
 
 #endif

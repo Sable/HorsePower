@@ -220,13 +220,13 @@ L printSymTick(L x, S strBuff){
 }
 
 void printAllSymol(){
-    P("total size = %lld\n", symCur+1);
-    DOI(symCur+1, P("[%2lld] %s\n",i,symTable[i]->data.str));
+    WP("total size = %lld\n", symCur+1);
+    DOI(symCur+1, WP("[%2lld] %s\n",i,symTable[i]->data.str));
 }
 
 void printSymInfo(){
     if(H_DEBUG)
-        P("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
+        WP("-> [Info symbol] Init. %lld, used %lld (%lf%%)\n",\
             symSize, symCur+1, (symCur+1)*100.0/symSize);
 }
 

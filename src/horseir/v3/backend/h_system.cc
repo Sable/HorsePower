@@ -49,7 +49,7 @@ L registerTable(S tableName, V tablePtr){
 }
 
 V findTableByName(L sid){
-    DOI(listTableCur, if(listTable[i].sid == sid){R listTable[i].table;})
+    DOI(listTableCur, if(listTable[i].sid == sid) R listTable[i].table)
     R NULL;
 }
 
@@ -144,8 +144,8 @@ I initListCopy(V z, V x, L len){
 I findColFromTable(V x, L cId){
     V key = getTableKeys(x);
     // if(H_DEBUG) {
-    //     P("cId = %lld, col size = %lld\n", cId,tableCol(x));
-    //     DOI(tableCol(x), P("col[%lld] = %lld\n",i,vQ(key,i)));
+    //     WP("cId = %lld, col size = %lld\n", cId,tableCol(x));
+    //     DOI(tableCol(x), WP("col[%lld] = %lld\n",i,vQ(key,i)));
     //     getchar();
     // }
     DOI(tableCol(x), if(cId == vQ(key,i))R i)
@@ -405,7 +405,7 @@ I matchPair(B *t, V x, V y){
                 caseE DOI(vn(x), if(vE(x,i)!=vE(y,i))R 0) break;
                 caseX DOI(vn(x), if(!xEqual(vX(x,i),vX(y,i)))R 0)   break;
                 caseQ DOI(vn(x), if(vQ(x,i)!=vQ(y,i))R 0)           break;
-                caseS DOI(vn(x), if(0!=strcmp(vS(x,i),vS(y,i)))R 0) break;
+                caseS DOI(vn(x), if(sNEQ(vS(x,i),vS(y,i)))R 0) break;
                 default: R E_NOT_IMPL;
             }
             *t=1; R 0;
@@ -487,9 +487,9 @@ I getColumnValue(V z, V x){
 
 I getDatetimeOp(Q id){
     S str = getSymbolStr(id);
-    if(!strcmp(str, "year")) R 0;
-    else if(!strcmp(str, "month")) R 1;
-    else if(!strcmp(str, "day")) R 2;
+    if(sEQ(str, "year")) R 0;
+    else if(sEQ(str, "month")) R 1;
+    else if(sEQ(str, "day")) R 2;
     else R -1;
 }
 
@@ -512,7 +512,7 @@ D calcDate(D x, L v, I dop, I op){
 
 void printFloat(E x){
     S s = (S)&x;
-    DOI(8, {P("%d ",s[i]);}) P("\n");
+    DOI(8, WP("%d ",s[i])) WP("\n");
 }
 
 //L calcInterval(struct timeval t0, struct timeval t1){
@@ -544,7 +544,7 @@ static B compareTupleItem(V x, L ax, V y, L ay){
             caseL R vL(x,ax)==vL(y,ay);
             caseF R vF(x,ax)==vF(y,ay);
             caseE R vE(x,ax)==vE(y,ay);
-            caseS R !strcmp(vS(x,ax),vS(y,ay));
+            caseS R sEQ(vS(x,ax),vS(y,ay));
             caseX R xEqual(vX(x,ax),vX(y,ay));
             /* logic here is buggy: need to check if they are the same Lists */
             //caseG DOI(vn(x), if(!compareTuple(vV(x,i),ax,vV(y,i),ay))R 0) R 1;
@@ -584,7 +584,7 @@ static B isSameValueItem(V x, L a, L b){
         caseF R vF(x,a) == vF(x,b); 
         caseC R vC(x,a) == vC(x,b); 
         caseQ R vQ(x,a) == vQ(x,b); 
-        caseS R !strcmp(vS(x,a), vS(x,b));
+        caseS R sEQ(vS(x,a), vS(x,b));
         default: EP("Support more types: %s",getTypeName(xp));
     }
     R 0;
@@ -598,7 +598,7 @@ static I joinIndexHashValue(V z0, V z1, V x, V y){
     V0 t0; V t = &t0; L c;
     CHECKE(pfnIndexOf(t, x, y));
     c = 0; DOI(vn(t), {L pos=vL(t,i);L j=pos;while(j<vn(x)&&isSameValueItem(x,pos,j++))c++;})
-    P("[joinIndex] c = %lld\n",(L)c);
+    WP("[joinIndex] c = %lld\n",(L)c);
     initV(z0,H_L,c);
     initV(z1,H_L,c);
     c = 0; DOI(vn(t), {L pos=vL(t,i);L j=pos;while(j<vn(x)&&isSameValueItem(x,pos,j)){vL(z0,c)=j++;vL(z1,c)=i;c++;}})
@@ -606,8 +606,8 @@ static I joinIndexHashValue(V z0, V z1, V x, V y){
 }
 
 I joinIndexHash(V z, V x, V y, C op){
-    P("len: x = %lld, y = %lld\n",(L)vn(x),(L)vn(y));
-    P("typ: x = %lld, y = %lld\n",(L)vp(x),(L)vp(y));
+    WP("len: x = %lld, y = %lld\n",(L)vn(x),(L)vn(y));
+    WP("typ: x = %lld, y = %lld\n",(L)vp(x),(L)vp(y));
     if(op == 'l'){ // left
         initV(z, H_G, 2);
         R joinIndexHashValue(vV(z,0),vV(z,1),x,y);
@@ -672,8 +672,8 @@ B isOrderWithIndex(V x, V ind){
     if(!isLong(ind)) EP("Index must be i64");
     if(isInt(x)){
         DOIa(vn(x), if(vI(x,vL(ind,i))<vI(x,vL(ind,i-1))){\
-            P("vI(x,%lld) = %d\n", vL(ind,i),vI(x,vL(ind,i))); \
-            P("vI(x,%lld) = %d\n", vL(ind,i-1),vI(x,vL(ind,i-1))); \
+            WP("vI(x,%lld) = %d\n", vL(ind,i),vI(x,vL(ind,i))); \
+            WP("vI(x,%lld) = %d\n", vL(ind,i-1),vI(x,vL(ind,i-1))); \
                 R 0;})
     }
     else if(isLong(x)){
@@ -742,20 +742,20 @@ I listFlatEachLen(V z, V x){
 //    L lenZ = vn(y);
 //    initV(z,H_L,lenZ);
 //    E optTime[10]; struct timeval tv0, tv1; 
-//    P("Input size: %lld, vp(x) = %lld, vp(y) = %lld\n", lenZ, vp(x), vp(y));
+//    WP("Input size: %lld, vp(x) = %lld, vp(y) = %lld\n", lenZ, vp(x), vp(y));
 //    DOJ(10, {gettimeofday(&tv0, NULL); DOP(lenZ, {L k=binarySearch(sL(x),0,vn(x),vL(y,i)); vL(z,i)=k<0?vn(x):k;}) gettimeofday(&tv1, NULL); optTime[j] = calcInterval(tv0, tv1)/1000.0; })
-//    E total = 0; DOI(10, total += optTime[i]) P("[searchOrdered] Createing index time (avg): %g ms\n", total/10); getchar();
+//    E total = 0; DOI(10, total += optTime[i]) WP("[searchOrdered] Createing index time (avg): %g ms\n", total/10); getchar();
 //    R 0;
 //}
 
 // same as pfnCompare
 static I getOpFromName(S x){
-    if(!strcmp(x, "lt")) R 0;
-    else if(!strcmp(x, "leq")) R 1;
-    else if(!strcmp(x, "gt"))  R 2;
-    else if(!strcmp(x, "geq")) R 3;
-    else if(!strcmp(x, "eq"))  R 4;
-    else if(!strcmp(x, "neq")) R 5;
+    if(sEQ(x, "lt")) R 0;
+    else if(sEQ(x, "leq")) R 1;
+    else if(sEQ(x, "gt"))  R 2;
+    else if(sEQ(x, "geq")) R 3;
+    else if(sEQ(x, "eq"))  R 4;
+    else if(sEQ(x, "neq")) R 5;
     else R -1;
 }
 
@@ -794,11 +794,11 @@ static I compareOneColumn(V z0, V z1, V x, V y, V ind0, V ind1, I op){
     L size = vn(ind0);
     V t = allocNode(); initV(t, H_B, size);
     if(vp(x) == vp(y)){
-        //DOI(20, P("x[%lld] = %g, y[%lld] = %g\n",\
+        //DOI(20, WP("x[%lld] = %g, y[%lld] = %g\n",\
                     vL(ind0,i),vE(x,vL(ind0,i)),\
                     vL(ind1,i),vE(y,vL(ind1,i))))
         DOP(size, vB(t,i)=compareOp(x,y,i,ind0,ind1,op))
-        //DOI(20, P("resut[%lld] = %d\n",i,vB(t,i)))
+        //DOI(20, WP("resut[%lld] = %d\n",i,vB(t,i)))
     }
     else {
         V tempX  = allocNode(), tempY = allocNode();
@@ -817,7 +817,7 @@ static I compareOneColumn(V z0, V z1, V x, V y, V ind0, V ind1, I op){
 I joinOtherColumns(V z, V x, V y, V ind, L fx, V f){
     V ind0 = vV(ind,0), ind1 = vV(ind,1);
     //DOI(vn(x), \
-       if(i!=fx){I k=(compareOneColumn(vV(z,0),vV(z,1),vV(x,i),vV(y,i),ind0,ind1,getOpFromSymbol(vQ(f,i)))); if(k!=0) P("k=%d, i=%lld\n",k,i);}) getchar();
+       if(i!=fx){I k=(compareOneColumn(vV(z,0),vV(z,1),vV(x,i),vV(y,i),ind0,ind1,getOpFromSymbol(vQ(f,i)))); if(k!=0) WP("k=%d, i=%lld\n",k,i);}) getchar();
     DOI(vn(x), \
        if(i!=fx){CHECKE(compareOneColumn(vV(z,0),vV(z,1),vV(x,i),vV(y,i),ind0,ind1,getOpFromSymbol(vQ(f,i))));\
        ind0=vV(z,0); ind1=vV(z,1);}) R 0;

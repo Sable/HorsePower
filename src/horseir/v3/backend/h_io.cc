@@ -26,7 +26,7 @@ const L OUTPUT_SIZE = 100;
 //  R status;
 // }
 
-void* openMMapFile(S s){
+static O *openMMapFile(S s){
     L fd;
     void* data;
     struct stat sbuf;
@@ -104,11 +104,10 @@ L loadCSV(void *fp, B isLoading, V table, L numCols, L *types){
         rowID++;
     }
     if(errCode != 0){
-        fprintf(stderr, "readCSV error at line %lld\n", rowID);
-        exit(ERROR_CODE);
+        EP("readCSV error at line %lld", rowID);
     }
     if(!isLoading){
-        FT(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
+        WP(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
     }
     else {
         tableRow(table) = rowSize;
@@ -137,7 +136,7 @@ L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
     R numCols;
 }
 
-FILE* openFile(S s){
+FILE *openFile(S s){
     FILE* fp = fopen(s, "r");
     if(NULL == fp){
         fprintf(stderr, "%s\n", strerror(errno));
@@ -286,7 +285,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
                 printSymTick(xQ(k), buff): \
                 printSymbol(xQ(k), buff);   break;
         caseS {S t=xS(k); c=strlen(t); \
-               if(BUFF_SIZE<=c) { P("Buff exceeds\n"); exit(10); }\
+               if(BUFF_SIZE<=c) { EP("Buff exceeds"); }\
                strcpy(buff,t); }            break;
         caseC c=SP(buff, "%c", xC(k));      break;
         /* date time */
@@ -313,7 +312,7 @@ L getBasicItemStr(V x, L k, S buff, B hasTick){
         caseG c=SP(buff, "%lldL", k);                      break;
         caseY c=getBasicItemStr(\
                    (V)getEnumKey(x),vY(x,k),buff,0);    break;
-        default: P("--> unexpected type %s <--\n", getTypeName(xp));  break;
+        default: EP("Unexpected type : %s", getTypeName(xp));  break;
     }
     R c;
 }
@@ -329,11 +328,11 @@ L printBasicItem(V x, L k){
     }
 }
 
-L printInfo(V x){
+I printInfo(V x){
     FS("{["); printType2(xp); FT("*%lld*",xn); FS("]}"); R 0;
 }
 
-L printBasicValue(V x, L k, B hasTag){
+I printBasicValue(V x, L k, B hasTag){
     if(0>k){
         if(xn==1) printBasicItem(x,0);
         else {
@@ -358,7 +357,7 @@ L getStringItemStr(V x, L k){
     R FT("'%s'",xS(k));
 }
 
-L printStrItem(V x, L k){
+I printStrItem(V x, L k){
     getStringItemStr(x,0);
     FS("(");
     if(k<0) { DOI(xn, {if(i>0)FS(","); getStringItemStr(x,i);}) }
@@ -390,7 +389,7 @@ O printListItem(V x, L k){
     else printListNormalItem(x, k);
 }
 
-L printDictItem(V x, L k){
+I printDictItem(V x, L k){
     FS("{");
     V key = getDictKeys(x), val = getDictVals(x);
     if(k<0) { DOI(dictNum(x), {if(i>0)FS(",\n"); printValueItem(key,i); FS(" -> "); printValueItem(val,i);})}
@@ -399,7 +398,7 @@ L printDictItem(V x, L k){
     FS("}"); R 0;
 }
 
-L printEnumItem(V x, L k){
+I printEnumItem(V x, L k){
     FS("<");
     if(getEnumName(x)<0) FS("<Enum>");
     else FS(getSymbolStr(getEnumName(x)));
@@ -420,7 +419,7 @@ L printEnumItem(V x, L k){
     FS(">"); R 0;
 }
 
-L printValueItem(V x, L k){
+I printValueItem(V x, L k){
     if(H_DEBUG) printInfo(x);
     if(isTypeGroupBasic(xp)){
         printBasicValue(x, k, true);
@@ -438,15 +437,15 @@ L printValueItem(V x, L k){
     R 0;
 }
 
-L printV(V x){
+I printV(V x){
     printValue(x); FS("\n"); R 0;
 }
 
-L printV2(V x, L n){
+I printV2(V x, L n){
     printV3(x, 0, n, true); R 0;
 }
 
-L printV3(V x, L k0, L k1, B isR){
+I printV3(V x, L k0, L k1, B isR){
     switch(xp){
         caseA printTablePretty(x, k1); break;
         caseK printTablePretty(x, k1); break;
@@ -460,19 +459,19 @@ L printV3(V x, L k0, L k1, B isR){
     if(isR) FS("\n"); R 0;
 }
 
-L printTable(V x){
+I printTable(V x){
     printTablePretty(x,-1);
     R 0;
 }
 
-L printKTable(V x){
+I printKTable(V x){
     printTablePretty(x,-1);
     R 0;
 }
 
 /* pretty print */
 
-L printTablePretty(V x, L rowLimit){
+I printTablePretty(V x, L rowLimit){
     C buff[BUFF_SIZE];
     if(isTable(x)){
         P("\nTable: row = %lld, col = %lld\n", tableRow(x),tableCol(x));
@@ -536,7 +535,7 @@ L printTablePretty(V x, L rowLimit){
         free(colWidthVal);
     }
     else{
-        P("<Not a table/ktable> - From printTablePretty\n");
+        EP("Not a table/ktable");
     }
     R 0;
 }
@@ -559,7 +558,7 @@ L getColWidth(V x, L k, L rowLimit){
     R maxSize>TABLE_CELL_MAX?TABLE_CELL_MAX:maxSize;
 }
 
-L getStrPretty(S str, L maxSize){
+I getStrPretty(S str, L maxSize){
     L len = strlen(str);
     L maxLen = TABLE_CELL_MAX - TABLE_CELL_DOT;
     if(len <= maxLen){

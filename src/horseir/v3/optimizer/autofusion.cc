@@ -227,7 +227,7 @@ static gNode* findFusionUp(Chain *chain, B isRT){
                                 rt->pnode[cnt] = rtn?(gNode*)rtn:NULL;
                                 //if(rtn){
                                 //    gNode *t = (gNode*)rtn;
-                                //    P(".....\n"); printNode(t->node); getchar();
+                                //    WP(".....\n"); printNode(t->node); getchar();
                                 //}
                             }
                             else rt->pnode[cnt] = findFusionUp(next, false);
@@ -239,7 +239,7 @@ static gNode* findFusionUp(Chain *chain, B isRT){
                 param = param->next;
                 cnt++;
             }
-            //P("----add\n"); printChain(chain); P("\n");
+            //P("----add\n"); printChain(chain); WP("\n");
             addToSimpleHash(hashgNode, (L)chain, (L)(rt));
             R rt;
         }
@@ -375,7 +375,7 @@ static void totalInputs(List *list, gNode *rt, I dep, S *names){
                 //P("rt->node: "); printNode(rt->node); getchar();
                 if(isLeafNode(p))
                     names[varNum++] = nodeName2(p);
-                //else P("skip .... %s\n", nodeName2(p));
+                //else WP("skip .... %s\n", nodeName2(p));
             }
         }
     }
@@ -385,8 +385,8 @@ static void totalInputs(List *list, gNode *rt, I dep, S *names){
 
 static void printgNode(gNode *rt, I dep){
     if(rt){
-        DOI(dep, P("  ")) // print indentations
-        P("[%d]",dep); printNode(rt->node); P("\n");
+        DOI(dep, WP("  ")) // print indentations
+        WP("[%d]",dep); printNode(rt->node); WP("\n");
         DOI(rt->pnum, printgNode(rt->pnode[i], dep+1))
     }
 }
@@ -400,8 +400,8 @@ static void printgNodeList(){
 }
 
 static void printAllNames(){
-    P("All local names (total %d):\n", varNum);
-    DOI(varNum, P("- %s\n", varNames[i]))
+    WP("All local names (total %d):\n", varNum);
+    DOI(varNum, WP("- %s\n", varNames[i]))
 }
 
 static void genCodeBody(Node *p, gNode *g){
