@@ -1,10 +1,10 @@
 #!/bin/bash
 
 usage() {
-    printf '%s\n' \
-        "Usage: $0 <command> " "" \
-        " 1) $0 view        ## view the test information" "" \
-        " 2) $0 next <case> ## generate a new test file in <case: pass/fail>" "" 
+    printf '%s\n\n' \
+        "Usage: $0 <command> " \
+        "  1) $0 view          ## view the test information" \
+        "  2) $0 next <case>   ## generate a new test file in <case: pass/fail>"
 }
 
 if [ $# -eq 1 ]; then
@@ -12,6 +12,7 @@ if [ $# -eq 1 ]; then
     if [ ${cmd} = "view" ]; then
         echo "folder: pass"
         (set +x && cd pass && ls *.hir | wc -l | xargs python ../gen-docs.py)
+        echo ""
         echo "folder: fail"
         (set +x && cd fail && ls *.hir | wc -l | xargs python ../gen-docs.py)
     else

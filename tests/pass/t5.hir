@@ -8,5 +8,8 @@ module default {
     import bar.z; /* bar: single */
 
     import baz.{a,b,c}; /* baz: multiple */
+
+    def main(){
+    }
 }
 

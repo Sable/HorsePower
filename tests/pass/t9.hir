@@ -15,6 +15,9 @@ module default{
   def bar(a:f32, b:str, c:i32) : i32 {
       //x = 2:i32; // need to be declared before use
   }
+
+  def main(){
+  }
 }
 
 // module default{ // a duplicated module name

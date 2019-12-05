@@ -4,3 +4,8 @@
  * this is a very simple comment
  */
 
+module default {
+    def main(){
+    }
+}
+

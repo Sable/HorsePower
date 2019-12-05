@@ -3,7 +3,7 @@
 module default {
     def main() {
         x0:i32 = (0,1):str; // mismatched type
-        x1:i32 = 0;         // int
+        x1:i32 = 0;         // <-- 0:i32
     }
 }
 

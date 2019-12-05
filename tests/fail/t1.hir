@@ -2,7 +2,7 @@
 
 module datetime {
     def date(){
-        x0:m = 2019-00:m; // wrong month
+        x0:month = 2019-00:month; // wrong month
     }
 }
 

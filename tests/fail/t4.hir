@@ -1,7 +1,7 @@
 // 4 : name table 1 - name not found
 module default{
 
-  def foo(x:i32, y:f64) : i32 {
+  def main(x:i32, y:f64) : i32 {
       k0 = 1:i32;
   }
 

@@ -14,5 +14,5 @@ module var_decl{
     }
 }
 
-// similar to t/t27.hir
+// similar to pass/t27.hir
 

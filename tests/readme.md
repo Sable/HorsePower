@@ -1,15 +1,24 @@
 
-Description
+## Overview
 
-    Folder contains a list of test examples
+Description: folder contains a list of test examples
 
     pass/*.hir   ## pass cases
     fail/*.hir   ## fail cases
-    run.sh       ## running script
+    run.sh       ## main script
+
+    tpch         ## tpch queries
+    udf          ## udf functions
+    aquery       ## aquery examples
+
+
+
+## Unit Test Section
 
 View code description (1st line)
 
-    cat t/t0.hir | head -1
+    cat pass/t0.hir | head -1
+
 
 Generate docs from test cases
 
@@ -23,8 +32,14 @@ Generate docs from test cases
 
      ./run.sh view
 
-Note
+## Legacy
 
-    cp -r ../v1/data/func tests
+Moving from v1 to v2
+
+    cp -r src/horseir/v1/data/func src/horseir/v2/tests
+
+Moving from v2 to v3
+
+    mv src/horseir/v2/tests tests
 
 

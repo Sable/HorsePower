@@ -2,7 +2,7 @@
 
 module udchain {
     //global NEW:i32 = 1:i32;
-    def chain() {
+    def main() {
         x0:i32 = (20,30,40):i32;
         y0:i32 = @add(x0, x0);
         z0:i32 = @mul(x0, y0);

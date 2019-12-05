@@ -9,5 +9,8 @@ module default{
         t0:i32 = @plus(1:i32, -1:i32); // easy right?
         t1:i32 = @plus(t0, t0); /* how about this? */
     }
+
+    def main(){
+    }
 }
 

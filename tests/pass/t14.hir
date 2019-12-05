@@ -4,6 +4,8 @@ module A{
     import B.*;
     def fooA(){
     }
+    def main(){
+    }
 }
 
 module B{

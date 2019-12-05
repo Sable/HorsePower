@@ -2,10 +2,15 @@
 
 module default {
     def test() : i32{
+        /*
         L0> t0:i32 = @add(1:i32, 2:f32);
             goto L1;
         L1>
             t1:bool = @gt(t0, 1:i32);
             if (t1) goto L0;
+        */
+    }
+
+    def main() {
     }
 }
