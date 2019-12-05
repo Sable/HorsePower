@@ -182,6 +182,7 @@ static void printRepeatBuff(char *b, Node *n){
 static void printExprStmtBuff(char *b, Node *n){
     resetBuff(b);
     prettyNodeBuff(b, n->val.exprStmt.expr);
+    echo(b, ";");
     printLine(b);
 }
 

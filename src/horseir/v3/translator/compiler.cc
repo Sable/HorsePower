@@ -99,7 +99,7 @@ static void addStrConst(S s){
     L size = strlen(s) + 2 + 1;
     L preSize = ptr - code;
     if(size + preSize > CODE_MAX_SIZE)
-        EP("size is more than expected: %lld vs. %d", size + preSize, CODE_MAX_SIZE);
+        EP("Size is more than expected: %lld vs. %d", size + preSize, CODE_MAX_SIZE);
     SP(ptr, "\"%s\"", s);
 }
 

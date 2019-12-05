@@ -25,9 +25,17 @@ endif()
 
 message(STATUS "Debugging flags: ${HORSE_CLANG} ; ${HORSE_MODE}")
 
+find_package(OpenMP REQUIRED)
+
 set(CMAKE_CXX_COMPILER ${HORSE_CLANG})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${HORSE_MODE}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+if (HORSE_OMP_FLAG)
+    # sable-tigger
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${HORSE_OMP_FLAG}")
+else()
+    # sable-intel
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPROFILE")
 if (NOT LLVM_ENABLE_RTTI)
@@ -71,6 +79,11 @@ target_link_libraries(${EXE_NAME} $ENV{HORSE_BASE}/libs/lib/libpcre2-8.a)
 target_link_libraries(${EXE_NAME} ${llvm_libs})
 
 target_include_directories(${EXE_NAME} PUBLIC $ENV{HORSE_BASE}/libs/include)
+
+# sable-tigger
+if (HORSE_OMP_HEADER)
+    target_include_directories(${EXE_NAME} PUBLIC /usr/lib/gcc/x86_64-linux-gnu/8/include)
+endif()
 
 message(STATUS "Executable path: ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}")
 

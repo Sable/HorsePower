@@ -236,8 +236,8 @@ static void weedVector(Node *x){
     while(p){
         if(!weedConst(p->val, t)){
             printNode(x);
-            EP("Literal type or range error: (expect %s, find %s)", \
-                    getTypeStr2(t),getConstTypeStr(p->val));
+            EP("Literal type or range error");
+            // getTypeStr2(t), getConstTypeStr(p->val)
         }
         p = p->next;
     }
