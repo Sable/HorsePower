@@ -1,7 +1,7 @@
 #include "../global.h"
 
-extern bool *ElementwiseUnaryMap;
-extern bool *ElementwiseBinaryMap;
+extern B *ElementwiseUnaryMap;
+extern B *ElementwiseBinaryMap;
 
 CS obtainMaxValue(C c){
     switch(c){

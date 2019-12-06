@@ -82,7 +82,7 @@ void dotProgMermaid();
 
 /* options.c */
 typedef enum OptionMode{
-    UnknownM, InterpNaiveM, CompilerM, VersionM, HelperM, ExperimentM, UtilityM
+    UnknownM, InterpNaiveM, CompilerM, VersionM, HelperM, UtilityM
 }OptionMode;
 
 typedef enum {

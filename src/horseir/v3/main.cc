@@ -2,9 +2,9 @@
 
 Prog *root;
 Node *entryMain;
-int yyparse(); /* see y.tab.c */
+I yyparse(); /* see y.tab.c */
 extern FILE *yyin;
-extern int yylineno;
+extern I yylineno;
 
 static void runInterpreterCore(){
     tic();
@@ -30,33 +30,35 @@ static void runCompilerJITCore(){
     time_toc("LLVM JIT time (ms): %g\n", elapsed);
 }
 
-static void parseInput(char *file_path){
+static void parseInput(S file_path){
     yylineno = 1;
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s", file_path);
     }
     WP("parsing ....\n");
     tic();
-    int ret = yyparse();
+    I ret = yyparse();
     fclose(yyin);
-    if(ret == 0) WP("Successfully parsed: %s!\n",file_path);
-    else { EP("Parsing failed: %s",file_path);}
+    if(ret == 0)
+        WP("Successfully parsed: %s!\n",file_path);
+    else
+        EP("Parsing failed: %s",file_path);
     time_toc("Parsing time (ms): %g\n", elapsed);
 }
 
-static void envInit(char *file){
+static void envInit(S file){
     parseInput(file);
     initGlobal();
     weedProg(root);  // weed types/main
 }
 
-static void envInterpreter(char *file){
+static void envInterpreter(S file){
     envInit(file);
     buildSymbolTable(root);
     runInterpreterCore();
 }
 
-static void envCompiler(char *file){
+static void envCompiler(S file){
     envInit(file);
     buildSymbolTable(root);
     propagateTypeShape(root, false);
@@ -77,7 +79,7 @@ static void envVersion(){
     P("HorseIR version: 0.3.0\n");
 }
 
-static void utlPrinter(char *qItem, char *file){
+static void utlPrinter(S qItem, S file){
     envInit(file);
     if(sEQ(qItem, "pretty")){
         printProg(root);
@@ -100,28 +102,30 @@ static void utlPrinter(char *qItem, char *file){
     else EP("Unknown item for printer: %s", qItem);
 }
 
-static void utlStats(char *qStats){
-    if(sEQ(qStats, "dump")) dumpStats();
-    else if(sEQ(qStats, "load")) loadStats();
-    else EP("Unknown cmd for stats printer: %s", qStats);
+static void utlStats(S qStats){
+    if(sEQ(qStats, "dump"))
+        dumpStats();
+    else if(sEQ(qStats, "load"))
+        loadStats();
+    else
+        EP("Unknown cmd for stats printer: %s", qStats);
 }
 
 static void envUtility(OptionUtility opt){
     switch(opt){
-        case   StatsU: utlStats   (qCmd); break;
-        case PrinterU: utlPrinter (qCmd, qPath); break;
+        case   StatsU: utlStats(qCmd); break;
+        case PrinterU: utlPrinter(qCmd, qPath); break;
         default: EP("Utility function unknown");
     }
 }
 
-int main(int argc, char *argv[]){
-    int r = getLongOption(argc, argv);
+I main(I argc, S argv[]){
+    I r = getLongOption(argc, argv);
     if(r) BAD_TRY();
     else {
         switch(optMode){
             case InterpNaiveM: envInterpreter(qPath);break;
             case    CompilerM: envCompiler(qPath);   break;
-            case  ExperimentM: TODO("experiment");   break;
             case     VersionM: envVersion();         break;
             case     UtilityM: envUtility(optUtl);   break;
             case      HelperM: GOOD_TRY();           break;
@@ -129,6 +133,6 @@ int main(int argc, char *argv[]){
             default: EP("Option mode not supported: %d", optMode);
         }
     }
-    return 0;
+    R 0;
 }
 

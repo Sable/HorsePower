@@ -9,10 +9,12 @@ static void initTablesAll();
 
 /* helper functions */
 
-void *newM(int n){
+void *newM(I n){
     void *x = malloc(n);
     memset(x, 0, n);
-    if(!x){ error("Memory allocation fails"); }
+    if(!x){
+        error("Memory allocation fails");
+    }
     return x;
 }
 
@@ -58,7 +60,7 @@ static void initTablesAll(){
 #ifndef my_tic
 
 #define TIMEVAL_N 10
-static int timeSlotId = 0;
+static I timeSlotId = 0;
 struct timeval tv0a[TIMEVAL_N], tv0b[TIMEVAL_N];
 
 static void time_check(){
@@ -73,7 +75,7 @@ static L calcIntervalPrecise(struct timeval t0, struct timeval t1){
 }
 
 // return: ms (Linux/MacOS)
-static double calcInterval(struct timeval t0, struct timeval t1){
+static E calcInterval(struct timeval t0, struct timeval t1){
     return calcIntervalPrecise(t0, t1) / 1000.0;
 }
 
@@ -82,10 +84,10 @@ void my_tic(){
     gettimeofday(&tv0a[timeSlotId++], NULL);
 }
 
-double my_toc(bool isPrint){
+E my_toc(B isPrint){
     timeSlotId--; time_check(); 
     gettimeofday(&tv0b[timeSlotId], NULL);
-    double elapsed = calcInterval(tv0a[timeSlotId], tv0b[timeSlotId]);
+    E elapsed = calcInterval(tv0a[timeSlotId], tv0b[timeSlotId]);
     if(isPrint)
         P("[%d] The elapsed time (ms): %g\n\n", timeSlotId, elapsed);
     return elapsed;
@@ -113,13 +115,13 @@ const TypeBinary GroupElementwiseB[] = {
     powerF, modF, andF, orF, nandF, norF, xorF
 };
 
-bool *ElementwiseUnaryMap;
-bool *ElementwiseBinaryMap;
+B *ElementwiseUnaryMap;
+B *ElementwiseBinaryMap;
 
 // TODO: need to free two maps?
 static void initElementwiseFuncMap(){
-    ElementwiseUnaryMap  = NEWL(bool, totalU);
-    ElementwiseBinaryMap = NEWL(bool, totalB);
+    ElementwiseUnaryMap  = NEWL(B, totalU);
+    ElementwiseBinaryMap = NEWL(B, totalB);
     DOI(sizeof(GroupElementwiseU)/sizeof(TypeUnary), ElementwiseUnaryMap[GroupElementwiseU[i]]=true)
     DOI(sizeof(GroupElementwiseB)/sizeof(TypeBinary), ElementwiseBinaryMap[GroupElementwiseB[i]]=true)
 }

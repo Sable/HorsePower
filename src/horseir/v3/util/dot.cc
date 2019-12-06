@@ -7,12 +7,12 @@
  *   - improve lines for function calls (optional)
  */
 
-typedef struct _stringlist{
+typedef struct HorseStringList{
     S msg;
-    struct _stringlist *next;
+    struct HorseStringList *next;
 }StrList;
 
-typedef enum DotKind {
+typedef enum HorseDotKind {
     NormalDot, MermaidDot
 }DotKind;
 
@@ -133,9 +133,8 @@ static I findMethodId(List *list, S name, I id){
         I k = findMethodId(list->next, name, id+1);
         if(k >= 0) R k;
         else {
-            if(sEQ(nodeMethodName(list->val), name)){
+            if(sEQ(nodeMethodName(list->val), name))
                 R id;
-            }
         }
     }
     R -1;
@@ -153,9 +152,8 @@ static void dotScanFunc(Node *n){
             I graphId = findMethodIdByName(\
                        compiledMethodList->next, \
                        nodeName2(func));
-            if(graphId >= 0){
+            if(graphId >= 0)
                 dotBuildCall(graphId, n, nodeName2(func));
-            }
             else
                 EP("Function not found: %s", nodeName2(func));
         }
@@ -237,8 +235,7 @@ static void setDotKind(DotKind k){
     switch(k){
         case NormalDot: break;
         case MermaidDot:break;
-        default:
-            EP("Unknown dot kind: %d\n", k);
+        default: EP("Unknown dot kind: %d\n", k);
     }
     dotKind = k;
 }
@@ -260,7 +257,7 @@ static void printDotTail(){
 static void printDotCallgraph(){
     switch(dotKind){
         case NormalDot:
-            printStrList(extraList); // TODO: clean extraList
+            printStrList(extraList);
             break;
         case MermaidDot:
             printSubgraphHead((S)"callgraph", -1);
@@ -269,8 +266,23 @@ static void printDotCallgraph(){
     }
 }
 
+static void cleanStrList(StrList *list){
+    StrList *t = list;
+    while(t){
+        StrList *p = t;
+        t = t->next;
+        if(p->msg)
+            free(p->msg);
+        free(p);
+    }
+}
+
 static void init(){
     extraList = newList(0);
+}
+
+static void cleanup(){
+    cleanStrList(extraList);
 }
 
 static void runDot(){
@@ -279,6 +291,7 @@ static void runDot(){
     dotMethodList(compiledMethodList->next, 0);
     printDotCallgraph();
     printDotTail();
+    cleanup();
 }
 
 void dotProg(){

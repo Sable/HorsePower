@@ -24,7 +24,8 @@ static char *qOpt[99];
 
 static void dispLine(I level, I left, const char *shortMsg, const char *longMsg){
     I indentLevel[] = { 2, 4, 6, 8 };
-    if(level < 0 || level >  3) EP("lead must be between [0, 3]");
+    if(level < 0 || level >  3)
+        EP("lead must be between [0, 3]");
     I leads = indentLevel[level];
     DOI(leads, WP(" ")); WP("%s", shortMsg);
     DOI(left-strlen(shortMsg)-leads, WP(" "));
@@ -138,7 +139,6 @@ static const char *strMode(OptionMode mode){
         case    CompilerM: R "Compiler";
         case     VersionM: R "Version";
         case      HelperM: R "Helper";
-        case  ExperimentM: R "Experiment";
         case     UtilityM: R "Utility";
         default: EP("Unknown mode: %d", mode);
     }
@@ -221,7 +221,6 @@ static I validateOptions(){
         case     UtilityM: return validateUtility();
         case     VersionM: break;
         case      HelperM: break;
-        case  ExperimentM: break;
         case     UnknownM: break;
         default: TODO("Add support for validating %s", strMode(optMode));
     }
@@ -271,7 +270,7 @@ static void init(){
 I getLongOption(I argc, C *argv[]){
     I c, option_index  = 0;
     init();
-    while((c=getopt_long(argc, argv,"hvtur:c:f:o:x:", long_options, &option_index)) != -1){
+    while((c=getopt_long(argc, argv,"hvtur:c:f:o:", long_options, &option_index)) != -1){
         if(numOpts >= 99)
             EP("Buffer overflow: %d >= 99", numOpts);
         switch(c){
@@ -282,7 +281,6 @@ I getLongOption(I argc, C *argv[]){
             case 'u': optMode = setMode(optMode,     UtilityM); break;
             case 'v': optMode = setMode(optMode,     VersionM); break;
             case 'h': optMode = setMode(optMode,      HelperM); break;
-            case 'x': optMode = setMode(optMode,  ExperimentM); break;
             case 'r': qRun    = atoi(optarg);   break;
             case 'f': qPath   = strdup(optarg); break;
             case 'o': qOpt[numOpts++] = strdup(optarg); break;
