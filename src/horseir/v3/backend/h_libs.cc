@@ -91,7 +91,7 @@ static UI getHashValueComplete(void *val, L valI, L typ){
         caseS R hash_S(toS(val,valI));
         caseG { V x=(V)val; UI c=0;
             DOI(vn(x), {V y=vV(x,i); DOJ(vn(y),c+=getHashValueComplete(isList(y)?(void *)y:sG(y),j,vp(y)))}) R c; }
-        default: EP("type not supported: %lld", typ);
+        default: EP("Type not supported: %lld", typ);
     }
 }
 
@@ -1419,7 +1419,7 @@ static L binary_search(V x, L p0, V y, V d, I op){
     }
     if(sta == end) R sta;
     else if(end < 0) R end;
-    else EP("binary search result different:(%lld, %lld)",sta,end);
+    else EP("Binary search result different:(%lld, %lld)",sta,end);
 }
 
 /* ------ Hash Related ------ */
@@ -1490,7 +1490,7 @@ static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
 
 // THash createHashWithV2(L n, V *x, L *hashLen){
 //     if(n >= 1) R createHashMultiple(x[0], hashLen);
-//     else EP("number of columns invalid: %lld\n", n);
+//     else EP("Number of columns invalid: %lld\n", n);
 // }
 
 // HN findValueFromHash2(HN *hashT, V *src, L *hashSize, L n, ...){
@@ -1509,7 +1509,7 @@ I lib_join_index_linear(V z0, V z1, V x, V y, B isEq){
         caseI DOI(vn(y), {DOJ(vn(x), if(vI(y,i) op vI(x,j)){size++;break;})}) break; \
         caseL DOI(vn(y), {DOJ(vn(x), if(vL(y,i) op vL(x,j)){size++;break;})}) break; \
         caseE DOI(vn(y), {DOJ(vn(x), if(vE(y,i) op vE(x,j)){size++;break;})}) break; \
-        default: EP("type not supported: %s",getTypeName(xp)); \
+        default: EP("Type not supported: %s",getTypeName(xp)); \
     }
 #define join_linear_save(op) \
     switch(xp){ \
@@ -1758,7 +1758,7 @@ I lib_join_dummy(V z0, V z1, V x, V y){
             caseI DOI(vn(x), DOJ(vn(y), if(vI(x,i)==vI(y,j)){vL(z0,c)=i; vL(z1,c)=j; c++;}))
         }
     }
-    else EP("type not supported: %s, %s",getTypeName(vp(x)),getTypeName(vp(y)));
+    else EP("Type not supported: %s, %s",getTypeName(vp(x)),getTypeName(vp(y)));
     R 0;
 }
 
@@ -1773,11 +1773,11 @@ I lib_join_dummy2(V x, V y){
         DOI(vn(x0), {L c=0;\
             DOJ(vn(y0), if(vI(x0,i)==vI(y0,j) && vI(x1,i)==vI(y1,j)){c++;tot++;})\
             if(c>0)P("[%lld] vI(x0,%lld)=%d, vI(x1,%lld)=%d\n",c,i,vI(x0,i),i,vI(x1,i));})
-        P("dummy2: total = %lld\n",tot); getchar();
+        WP("Dummy2: total = %lld\n",tot); getchar();
     }
     else {
         getInfoVar(x); getInfoVar(y);
-        EP("dummy2 only supports: list(I,I) join list(I,I)");
+        EP("Dummy2 only supports: list(I,I) join list(I,I)");
     }
     R 0;
 }
@@ -1798,11 +1798,11 @@ I lib_join_dummy3(V x, V y){
         DOI(vn(x0), {L c=0;\
             DOJ(vn(y0), if(vE(x0,i)<vE(y0,j) && vI(x1,i)==vI(y1,j)){c++;tot++;})\
         })
-        P("dummy3: total = %lld\n",tot); getchar();
+        WP("Dummy3: total = %lld\n",tot); getchar();
     }
     else {
         getInfoVar(x); getInfoVar(y);
-        EP("dummy3 only supports: list(E,I) join list(E,I)");
+        EP("Dummy3 only supports: list(E,I) join list(E,I)");
     }
     R 0;
 }
@@ -1922,7 +1922,7 @@ void lib_groupby_dummy(V x){
         }
         WP("total result = %lld\n", cnt); getchar(); // Q20: 543210
     }
-    else EP("condition not satisfied");
+    else EP("Condition not satisfied");
 }
 
 L getInteger1(V x){

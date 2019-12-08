@@ -341,11 +341,11 @@ void initTablesByQid(I id){
             case 20: initQ20(); break;
             case 21: initQ21(); break;
             case 22: initQ22(); break;
-            default: EP("Add more tpch queries: %d",id);
+            default: TODO("Add more tpch queries: %d",id);
         }
     }
     else if(id==99){ // init all tables
-        // EP("loading all tables\n");
+        // EP("Loading all tables\n");
         initTablesAll();
         addFKey("part"    , "p_partkey"  , "partsupp", "ps_partkey" );
         addFKey("supplier", "s_suppkey"  , "partsupp", "ps_suppkey" );
@@ -355,7 +355,7 @@ void initTablesByQid(I id){
         addFKey("nation"  , "n_nationkey", "supplier", "s_nationkey");
         addFKey("nation"  , "n_nationkey", "customer", "c_nationkey");
     }
-    else EP("qid must be [1,22] or 99 (all)");
+    else EP("Query id must be [1,22] or 99 (all)");
     time_toc(">>> Loading data (ms): %g ms\n", elapsed);
 }
 

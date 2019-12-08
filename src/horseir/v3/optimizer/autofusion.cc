@@ -589,7 +589,7 @@ static void genCodeAutoListLen(gNodeList *list, L id){
             if(name)
                 glueAny("vn(x%lld)", searchName(varNames, name));
             else
-                EP("name is NULL");
+                EP("Name is NULL");
             skipAllListNode(rt);
         }
         else EP("Support multiple vars");
@@ -793,7 +793,7 @@ static void genCodeAutoListSingleLen(gNode *rt){
             if(name)
                 glueAny("vn(vV(x%lld,i))", searchName(varNames, name));
             else
-                EP("name is NULL");
+                EP("Name is NULL");
             skipAllListNode(rt);
         }
         else TODO("Support multiple vars");

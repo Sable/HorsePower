@@ -56,7 +56,7 @@ static HN createHashSingle(V x, L *hashLen){
 
 HN createHashWithV(L n, V *x){
     if(n >= 1) R createHashSingle(x[0]);
-    else EP("number of columns invalid: %lld", n);
+    else EP("Number of columns invalid: %lld", n);
 }
 
 // naive version

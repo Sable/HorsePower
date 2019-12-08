@@ -379,7 +379,7 @@ const char *getNodeTypeStr(Node *n){
         CASE_STR(vectorK);
         CASE_STR(constK);
         CASE_STR(exprstmtK);
-        default: EP("unknown node: %d\n", n->kind);
+        default: EP("Unknown node: %d\n", n->kind);
     }
     R NULL;
 }

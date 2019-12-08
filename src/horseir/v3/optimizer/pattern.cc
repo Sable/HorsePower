@@ -61,7 +61,7 @@ static PatternTree *createFP1(){
 
 static PatternTree *createFP2(I op){
     if(op!=1&&op!=2){
-        EP("pattern 2 must have an option 1 or 2");
+        EP("Pattern 2 must have an option 1 or 2");
     }
     if(debugPattern)
         P("// Pattern FP2\n");
@@ -203,7 +203,7 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
     else if(op == 7){
         glueAnyLine("DOP(vn(y), vL(z,i)=vn(vV(y,i))) R 0;");
     }
-    else EP("Add support: op = %d", op);
+    else TODO("Add support: op = %d", op);
     depth--;
     glueAnyLine("}");
     S invc = phNameFP2(z0s, tmp, x0s, y1s);

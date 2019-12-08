@@ -136,7 +136,7 @@ const char *obtainBuiltinName(S func){
         case 1: R   monFnName[x.u];
         case 2: R   dyaFnName[x.b];
         case 3: R otherFnName[x.t];
-        default: EP("kind not found: %d\n", x.kind);
+        default: EP("Kind not found: %d\n", x.kind);
     }
 }
 

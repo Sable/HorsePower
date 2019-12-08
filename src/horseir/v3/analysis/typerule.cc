@@ -266,7 +266,7 @@ ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, I size){
                   sn->size = size;
               else if(isSNScan(sn))
                   sn->sizeScan = size;
-              else EP("unknow kind = %d", kind); break;
+              else EP("Unknow kind = %d", kind); break;
               //if(isId) sn->sizeId = size<0?(shapeId++):size;
               //else sn->size = size; break;
         default: sn->size = -2; break;
@@ -684,7 +684,7 @@ static ShapeNode *decideShapeElementwiseV(ShapeNode *x, ShapeNode *y){
         if(x->size == 1) rtnShape = y;
         else if(isSNConst(y)){
             if(x->size == y->size || y->size == 1) rtnShape = x;
-            else EP("length of both sides should obey the elemetwise rule");
+            else EP("Length of both sides should obey the elemetwise rule");
         }
         else rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
@@ -698,7 +698,7 @@ static ShapeNode *decideShapeElementwiseV(ShapeNode *x, ShapeNode *y){
         else if(isSNConst(y) && y->size == 1) rtnShape = x;
         else rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else EP("unknown kind = %d",x->kind);
+    else EP("Unknown kind = %d",x->kind);
     return rtnShape;
 }
 
@@ -710,7 +710,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y){
     else if(isShapeU(inShape(x)) || isShapeU(inShape(y))){
         rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else error("unknown shape case for elementwise");
+    else error("Unknown shape case for elementwise");
     return rtnShape;
 }
 
@@ -731,7 +731,7 @@ static ShapeNode *decideShapeAppend(InfoNode *x, InfoNode *y){
     else if(isShapeU(inShape(x)) || isShapeU(inShape(y))){
         rtnShape = newShapeNode(unknownH, SN_ID, -1);
     }
-    else EP("unknown shape case for append");
+    else EP("Unknown shape case for append");
     return rtnShape;
 }
 
@@ -740,19 +740,19 @@ static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
         if(x->sizeId == y->sizeId)
             return newShapeNodeScan(x);
         else
-            EP("scan shape sizes must be the same: %d vs %d", x->sizeId, y->sizeId);
+            EP("Scan shape sizes must be the same: %d vs %d", x->sizeId, y->sizeId);
     }
     else if(isSNConst(x) && isSNConst(y)){
         if(x->size == y->size)
             return newShapeNode(vectorH, SN_ID, -1);
         else
-            EP("shape size not equal for comrpess: %d vs %d", x->size, y->size);
+            EP("Shape size not equal for comrpess: %d vs %d", x->size, y->size);
     }
     else if(isSNScan(x) && isSNScan(y)){
         if(x->sizeScan == y->sizeScan)
             return newShapeNodeScan(x);
         else
-            EP("scan shape sizes must be the same: %d vs %d", x->sizeScan, y->sizeScan);
+            EP("Scan shape sizes must be the same: %d vs %d", x->sizeScan, y->sizeScan);
     }
     else {
         printShapeNode(x); P("\n");

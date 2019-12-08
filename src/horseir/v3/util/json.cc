@@ -73,7 +73,7 @@ static void printJSONPairCore(JSON *x, int dep){
         case 3: P("[");
                 DOI(x->size, {if(i>0)P(",");printJSONCore(x->child_list[i], dep);})
                 P("]");  break;
-        default: EP("Add impl. %d\n", x->kind);
+        default: TODO("Add impl. %d\n", x->kind);
     }
 }
 

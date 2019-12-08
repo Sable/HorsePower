@@ -31,7 +31,7 @@ void printShapeNode(ShapeNode *sn){
             case  vectorH: P("shape(vector,"); break;
             case    listH: P("shape(list,"); break;
             case   tableH: P("shape(table,"); break;
-            default: EP("shape type not supported yet: %d\n",sn->type); break;
+            default: EP("Shape type not supported yet: %d\n",sn->type); break;
         }
         switch(sn->type){
             case unknownH: P("%d)",sn->size); break;
@@ -40,7 +40,7 @@ void printShapeNode(ShapeNode *sn){
             case   tableH: if(isSNConst(sn)) P("%d",sn->size);
                            else if(isSNId(sn)) P("id:%d",sn->sizeId);
                            else if(isSNScan(sn)) P("scan:%d",sn->sizeScan);
-                           else EP("kind not supported: %d\n", sn->kind);
+                           else EP("Kind not supported: %d\n", sn->kind);
                            P(")"); break;
             default: break;
             //case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);

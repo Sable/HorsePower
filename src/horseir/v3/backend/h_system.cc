@@ -39,7 +39,7 @@ void swap2(V z){
         memcpy(vg(z), tt, sizeof(V0)*2);
         //printV(vV(z,0)); printV(vV(z,1)); getchar();
     }
-    else EP("z is not a list or vn(z) !=2: %d %d", isList(z), 2==vn(z));
+    else EP("Var z is not a list or vn(z) !=2: %d %d", isList(z), 2==vn(z));
 }
 
 L registerTable(S tableName, V tablePtr){

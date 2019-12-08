@@ -439,7 +439,7 @@ static void scanConst(Node *n){
         case   longC: SP(temp, "%lld", v->valL); break;
         case   clexC: SP(temp, v->valX[1]>=0?"%g+%g":"%g%g", \
                               v->valX[0], v->valX[1]); break;
-        default: EP("Add more constant types: %d", v->type);
+        default: TODO("Add more constant types: %d", v->type);
     }
     if(temp[0]) glueCode(temp);
 }
@@ -509,7 +509,7 @@ static void scanFunc(Node *n){
         glueCode(", ");
         scanFuncName(first);
     }
-    else EP("Add impl.");
+    else TODO("Add impl.");
 }
 
 static B checkSimpleHash(Node *n){
@@ -550,7 +550,7 @@ static void scanNode(Node *n){
         case  continueK: scanContinue  (n); break;
         case     blockK: scanBlock     (n); break;
         case      funcK: scanFunc      (n); break;
-        default: EP("Add more node types: %s", getNodeTypeStr(n));
+        default: TODO("Add more node types: %s", getNodeTypeStr(n));
     }
     genStatement(n, false);
 }

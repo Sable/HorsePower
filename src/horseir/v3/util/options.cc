@@ -25,7 +25,7 @@ static char *qOpt[99];
 static void dispLine(I level, I left, const char *shortMsg, const char *longMsg){
     I indentLevel[] = { 2, 4, 6, 8 };
     if(level < 0 || level >  3)
-        EP("lead must be between [0, 3]");
+        EP("The given level must be between [0, 3]");
     I leads = indentLevel[level];
     DOI(leads, WP(" ")); WP("%s", shortMsg);
     DOI(left-strlen(shortMsg)-leads, WP(" "));

@@ -231,7 +231,7 @@ static void copyInfoNode(InfoNode *x, InfoNode* y){
         x->subInfo = y->subInfo;
         x->next    = y->next;
     }
-    else EP("x or y is NULL");
+    else EP("At least one is NULL: x(%d) and y(%d)", NULL!=x, NULL!=y);
 }
 
 // true : exactly same

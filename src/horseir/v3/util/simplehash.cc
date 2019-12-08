@@ -53,7 +53,7 @@ O addToSimpleHash(sHashTable *st, L key, L val){
             n->next = st->table[t];
             st->table[t] = n;
         }
-        else EP("duplicated key found");
+        else EP("Duplicated key found");
     }
 }
 

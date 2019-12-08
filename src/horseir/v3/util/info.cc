@@ -199,7 +199,7 @@ static void indexWithHorseArraySub(V z, V y, HA x, L k){
                 caseF vF(z,k+i)=vF(y,x->data[i]); break;
                 caseE vE(z,k+i)=vE(y,x->data[i]); break;
                 caseQ vQ(z,k+i)=vQ(y,x->data[i]); break;
-                default: EP("type not supported: %s",getTypeName(vp(y)));
+                default: EP("Type not supported: %s",getTypeName(vp(y)));
             }})
         indexWithHorseArraySub(z,y,x->next,k+(x->size));
     }

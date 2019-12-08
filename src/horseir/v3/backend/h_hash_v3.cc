@@ -289,7 +289,7 @@ static L profile_hash_join_group(HC *ht, L size, L groupId){
     DOI(size, P("[%lld] %lld\n",groupId,profile_hash_join_cell(ht[i])))
     //DOI(size, {L t=profile_hash_join_cell(ht[i]); \
             if(t>1)EP("[%3lld] i=%lld, t=%lld\n", groupId,i,t);} )
-    //EP("no len(cell) > 1 found\n");
+    //EP("No len(cell) > 2 found\n");
     R subTotal;
 }
 
@@ -448,7 +448,7 @@ I lib_join_index_basic_v3(V z0, V z1, V x, V y, B isEq){
     }
     V x0 = sV(x); V y0 = sV(y);
     //V x1 = vV(x,1), y1 = vV(y,1); // debug
-    //if(vp(x0) != H_I) EP("current x0 must be H_I\n");
+    //if(vp(x0) != H_I) EP("Current x0 must be H_I\n");
     //TB th1 = create_hash_multiply_v3(x0);
     TB th1 = create_hash_multiply_v3_list(x);
     HC **hash1     = th1.hashCell;

@@ -289,7 +289,7 @@ static I fetchColumnValue(V z, V x, V y, B f){
         if(isOne(y)){
             Q colId = vq(y);
             L colIndex = findColFromTable(x,colId);
-            if(colIndex < 0) { EP("1. col not found"); R E_COL_NOT_FOUND; }
+            if(colIndex < 0) { EP("1. Col not found"); R E_COL_NOT_FOUND; }
             else R copyColumnValue(z, getTableCol(getTableVals(x),colIndex));
         }
         else {
@@ -794,7 +794,7 @@ I pfnAvg(V z, V x){
         caseL ve(z) = vl(t)*1.0/vn(x); break;
         caseF vf(z) = vf(t)    /vn(x); break;
         caseE ve(z) = ve(t)    /vn(x); break;
-        default: EP("type not supported: %s", getTypeName(vp(t)));
+        default: EP("Type not supported: %s", getTypeName(vp(t)));
     }
     R 0;
 }
@@ -1090,7 +1090,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,0),vL(tempY,i))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,0),vF(tempY,i),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,0),vE(tempY,i),compareFloat)) break;
-                    default: EP("1. type not defined: %s", getTypeName(typMax));
+                    default: EP("1. Type not defined: %s", getTypeName(typMax));
                 }
             }
             else if(isOne(y)) {
@@ -1102,7 +1102,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,0))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,0),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,0),compareFloat)) break;
-                    default: EP("2. type not defined: %s", getTypeName(typMax));
+                    default: EP("2. Type not defined: %s", getTypeName(typMax));
                 }
             }
             else {
@@ -1114,7 +1114,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseL DOP(lenZ, vB(z,i)=COMP(op,vL(tempX,i),vL(tempY,i))) break;
                     caseF DOP(lenZ, vB(z,i)=COMPFN(op,vF(tempX,i),vF(tempY,i),compareFloat)) break;
                     caseE DOP(lenZ, vB(z,i)=COMPFN(op,vE(tempX,i),vE(tempY,i),compareFloat)) break;
-                    default: EP("3. type not defined: %s", getTypeName(typMax));
+                    default: EP("3. Type not defined: %s", getTypeName(typMax));
                 }
             }
         }
@@ -1131,7 +1131,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,0),vU(y,i))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,0),vV(y,i))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,0),vT(y,i))) break;
-                    default: EP("4. type not defined: %s", getTypeName(vp(x)));
+                    default: EP("4. Type not defined: %s", getTypeName(vp(x)));
                 }
             }
             else if(isOne(y)) {
@@ -1145,7 +1145,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,0))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,0))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,0))) break;
-                    default: EP("5. type not defined: %s", getTypeName(vp(x)));
+                    default: EP("5. Type not defined: %s", getTypeName(vp(x)));
                 }
             }
             else {
@@ -1159,7 +1159,7 @@ I pfnCompare(V z, V x, V y, I op){
                     caseU DOP(lenZ, vB(z,i)=COMP(op,vU(x,i),vU(y,i))) break;
                     caseV DOP(lenZ, vB(z,i)=COMP(op,vV(x,i),vV(y,i))) break;
                     caseT DOP(lenZ, vB(z,i)=COMP(op,vT(x,i),vT(y,i))) break;
-                    default: EP("6. type not defined: %s", getTypeName(vp(x)));
+                    default: EP("6. Type not defined: %s", getTypeName(vp(x)));
                 }
             }
         }
@@ -1694,7 +1694,7 @@ I pfnLike(V z, V x, V y){
                 //DOI(vn(x), temp[i]=strlen(vS(x,i))) // 50ms
                 //P("size temp[2] = %lld\n", temp[2]);
                 //DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);})
-                //EP("need to comment out the following code\n");
+                //EP("Need to comment out the following code\n");
                 L n = xn;
                 {
                     pcre2_match_context *mcontext = pcre2_match_context_create(NULL); \
@@ -1728,7 +1728,7 @@ I pfnLike(V z, V x, V y){
         }
         else if(isChar(x) || isEqualLength(x,y)){  // y:string
             if(isSymbol(y)){
-                EP("pending ... for like (..., symbol)");
+                EP("Pending ... for like (..., symbol)");
             }
             switch(vp(x)){
                 caseC DOI(vn(y), \
@@ -1777,7 +1777,7 @@ I pfnOrderBy(V z, V x, V y){
             //V t = vV(x,0);
             //DOI(20, WP("z[%2lld], %lld, v = %d\n",i,vL(z,i),vI(t,vL(z,i)))) getchar();
             //if(isOrderWithIndex(t,z)) WP("special list (size 1): value ordered\n");
-            //else EP("sorry, not in order\n");
+            //else EP("Sorry, not in order\n");
             //R res;
         }
         else {
@@ -1989,7 +1989,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
             //         caseI
             //         caseL R lib_join_compare_int(vV(z,0),vV(z,1),tempX,tempY);
             //         caseF
-            //         caseE EP("pending...\n");
+            //         caseE EP("Pending...\n");
             //         default: R E_NOT_IMPL;
             //     }
             // }
@@ -2012,7 +2012,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
                             caseF DOI(lenX, DOJ(lenY, if(OuterOp(op,vF(tempX,i),vF(tempY,j)))c++)); break;
                             caseE DOI(lenX, DOJ(lenY, if(OuterOp(op,vE(tempX,i),vE(tempY,j)))c++)); break;
                             caseC DOI(lenX, DOJ(lenY, if(OuterOp(op,vC(tempX,i),vC(tempY,j)))c++)); break;
-                            default: EP("Add more types for %s, %s\n", getTypeName(vp(x)), getTypeName(vp(y)));
+                            default: TODO("Add more types for %s, %s\n", getTypeName(vp(x)), getTypeName(vp(y)));
                         }
                     } break;
                     default: R E_DOMAIN;
@@ -2064,7 +2064,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
                     caseB {
                         switch(typ){
                             caseQ DOI(lenX, DOJ(lenY, if(OuterOp(op, vQ(x,i),vQ(x,j)))c++)); break;
-                            default: EP("Add more types for %s, %s", getTypeName(vp(x)), getTypeName(vp(y)));
+                            default: TODO("Add more types for %s, %s", getTypeName(vp(x)), getTypeName(vp(y)));
                         }
                     } break;
                     default: R E_DOMAIN;
@@ -2311,7 +2311,7 @@ I pfnMember(V z, V y, V x){ /* return left shape */
             if(H_DEBUG) WP("small input for member vn(y)=%lld, vn(x)=%lld\n",vn(y),vn(x));
             switch(vp(x)){
                 caseQ DOJ(vn(y), {B f=0;DOI(vn(x), if(vQ(y,j)==vQ(x,i)){f=1;break;})vB(z,j)=f;}) break;
-                default: EP("Add more type support for special case: %s", getTypeName(vp(x)));
+                default: TODO("Add more type support for special case: %s", getTypeName(vp(x)));
             }
         }
         else {

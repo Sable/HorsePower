@@ -7,7 +7,7 @@ CS obtainMaxValue(C c){
     switch(c){
         case 'E': return "MAX_DBL";
         case 'I': return "MAX_INT";
-        default: EP("Add impl.");
+        default: TODO("Add impl.");
     }
 }
 
@@ -15,7 +15,7 @@ CS obtainMinValue(C c){
     switch(c){
         case 'E': return "MIN_DBL";
         case 'I': return "MIN_INT";
-        default: EP("Add impl.");
+        default: TODO("Add impl.");
     }
 }
 
@@ -84,7 +84,7 @@ Node *getNodeItemIndex(Node *n, I pos){
         List *vars = n->val.assignStmt.vars;
         Node *targ = NULL;
         if(1 == totalList(vars)) targ = vars->val;
-        else EP("only one targ expected");
+        else EP("Only one targ expected");
         if(pos == 0) return targ;
         Node *func = getNodeFunc(n);
         if(!func) return NULL;
@@ -95,13 +95,13 @@ Node *getNodeItemIndex(Node *n, I pos){
             return p0->val;
         else {
             printNode(n);
-            WP("\n looking for pos %d, but find: ", reversedPos);
+            WP("\n Looking for pos %d, but find: ", reversedPos);
             if(p0) printNode(p0->val);
             //printNode(params->val);
             //printNode(params->next->val);
             //printNode(params->next->next->val);
-            WP("total parameters: %d, pos: %d\n", totalList(params), pos);
-            EP("only variable allowed (no func/literal)");
+            WP("Total parameters: %d, pos: %d\n", totalList(params), pos);
+            EP("Only variable allowed (no func/literal)");
         }
     }
     return NULL;
@@ -146,7 +146,7 @@ static C obtainTypeAlias(HorseType t){
         case     dtT: R 'Z';
         case minuteT: R 'U';
         case secondT: R 'W';
-        default: EP("Add more types: %d", t);
+        default: TODO("Add more types: %d", t);
     }
 }
 
@@ -159,7 +159,7 @@ static C obtainTypeCodeByIn(InfoNode *in){
         // TODO: condition appplied with single cell type
         return obtainTypeCodeByIn(in->subInfo);
     }
-    else TODO("Only basic type supported: %d\n", in->type);
+    else TODO("Only basic type supported: %d", in->type);
 }
 
 C getTypeCodeByName(Node *n){
@@ -263,7 +263,7 @@ O genCodeConst(Node *n){
         case   longC: glueAny("%lld", v->valL); break;
         case   clexC: glueAny(v->valX[1]>=0?"%g+%g":"%g%g", \
                               v->valX[0], v->valX[1]); break;
-        default: EP("Add more constant types: %d\n", v->type);
+        default: TODO("Add more constant types: %d", v->type);
     }
 }
 

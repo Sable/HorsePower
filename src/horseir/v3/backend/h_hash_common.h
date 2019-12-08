@@ -44,7 +44,9 @@ static UL hash_murmur3_i32(I a){ // default: return 64-bit
 
 static UL hash_murmur3_i64(L a){
     I a_low = a&0xFFFFFFFF;
-    if(a_low != a){ EP("need to hash a_high as well: %d, %lld\n",a_low,a); }
+    if(a_low != a){
+        EP("Need to hash a_high as well: %d, %lld\n",a_low,a);
+    }
     R hash_murmur3_i32(a_low);
 }
 
@@ -103,7 +105,7 @@ static UI hash_list(V x, L k){
         caseL h+=hash_L(vL(x0,k)); break; \
         caseF h+=hash_F(vF(x0,k)); break; \
         caseE h+=hash_E(vE(x0,k)); break; \
-        default: EP("type not supported: %s\n", getTypeName(vp(x0))); \
+        default: EP("Type not supported: %s\n", getTypeName(vp(x0))); \
         }})
     R h;
 }
@@ -119,13 +121,13 @@ static B isAllMatchBasic(L n, V p, L k0, V q, L k1){
         DOIa(n, {V x=p+i; V y=q+i; \
                 switch(xp){ \
                 caseI P("vI(x,%lld)=%d, vI(y,%lld)=%d\n",k0,vI(x,k0),k1,vI(y,k1)); getchar(); break; \
-                default: EP("type not suported: %s\n", getTypeName(xp));}})
+                default: EP("Type not suported: %s\n", getTypeName(xp));}})
     }
     DOIa(n, {V x=p+i; V y=q+i; \
             switch(xp){ \
             caseI if(vI(x,k0)!=vI(y,k1)) R 0; break; \
             caseE if(vE(x,k0)!=vE(y,k1)) R 0; break; \
-            default: EP("type not suported: %s\n", getTypeName(xp));}})
+            default: EP("Type not suported: %s\n", getTypeName(xp));}})
     R 1;
 }
 static B isAllMatchList(V x, V y, L kx, L ky){
@@ -135,7 +137,7 @@ static B isAllMatchList(V x, V y, L kx, L ky){
         caseL if(vL(x0,kx)!=vL(y0,ky)) R false; break; \
         caseF if(vF(x0,kx)!=vF(y0,ky)) R false; break; \
         caseE if(vE(x0,kx)!=vE(y0,ky)) R false; break; \
-        default: EP("type not supported: %s\n", getTypeName(vp(x0)));\
+        default: EP("Type not supported: %s\n", getTypeName(vp(x0)));\
         }})
     R true;
 }

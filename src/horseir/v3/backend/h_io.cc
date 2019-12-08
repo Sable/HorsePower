@@ -104,7 +104,7 @@ L loadCSV(void *fp, B isLoading, V table, L numCols, L *types){
         rowID++;
     }
     if(errCode != 0){
-        EP("readCSV error at line %lld", rowID);
+        EP("Error at line %lld", rowID);
     }
     if(!isLoading){
         WP(">> CSV info: %lld rows and %lld cols\n", rowSize, numCols);
@@ -585,7 +585,7 @@ O printFormat(V x, I op){
         case 0: printCSV(x); break;
         case 1: printXML(x); break;
         //case 2: printJSON(x);break; // TODO
-        default: EP("format not supported: %d", op);
+        default: EP("Format not supported: %d", op);
     }
 }
 
@@ -683,7 +683,7 @@ void serializeV(V x, FILE *fp){
         caseX serializeBasic(x, fp); break;
         caseA serializeA    (x, fp); break;
         caseG serializeG    (x, fp); break;
-        default: EP("type not supported: %s", getTypeName(xp));
+        default: EP("Type not supported: %s", getTypeName(xp));
     }
 }
 
@@ -694,7 +694,7 @@ void serializeV(V x, FILE *fp){
 
 static void readDataBySize(void *ptr, L t_size, L size, FILE *fp){
     if(size != fread(ptr, t_size, size, fp)){
-        EP("fread error");
+        EP("Fread error");
     }
 }
 
@@ -763,7 +763,7 @@ void readSerializeV(V x, FILE *fp){
         caseX readSerializeBasic(x, fp); break; 
         caseA readSerializeA    (x, fp); break; 
         caseG readSerializeG    (x, fp); break; 
-        default: EP("[readSerializeV] not support type: %s", getTypeName(xp));
+        default: EP("Type not supported: %s", getTypeName(xp));
     }
 }
 

@@ -120,7 +120,7 @@ static V executeEachDya(EachDyadic f, V *p){
         else {WP("[EachDyadic]"); printErrMsg(status);}
     }
     else {
-        EP("dyadic op expected for each_left/right, not %s", funcName);
+        EP("Dyadic op expected for each_left/right, not %s", funcName);
     } R 0;
 }
 
@@ -289,7 +289,7 @@ static V invokeBuiltin(char *funcName, VList *list){
             case 3: return executeOther(fu.t, params, numArg);
         }
     }
-    else EP("valence error: %d expected, but %d found", valence, numArg);
+    else EP("Valence error: %d expected, but %d found", valence, numArg);
     // TODO: free params
     return 0;
 }
@@ -445,7 +445,7 @@ static S getFuncNameStr(Node *funcName){
     switch(sn->kind){
         case builtinS: return sn->name; 
         case  methodS: return sn->name;
-        default: EP("Add more support for %d", sn->kind);
+        default: TODO("Add more support for %d", sn->kind);
     }
 }
 

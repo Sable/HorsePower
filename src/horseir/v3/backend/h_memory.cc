@@ -133,7 +133,7 @@ L getTypeSize(I typ, L len){
         case H_A  : r = sizeof(V0);    break;
         case H_K  : r = sizeof(V0);    break;
         case H_V  : r = sizeof(V0);    break;
-        default: EP("type not supported: %s", getTypeName(typ));
+        default: EP("Type not supported: %s", getTypeName(typ));
     }
     return r * len + k;
 }
@@ -448,7 +448,7 @@ void setHashHeap(L x){
             WP("[HashHeap] Setting pointer from %lld to %lld\n",hHeapCur,x);
         hHeapCur=x;
     }
-    else EP("unexpected hash heap size: %lld [0,%lld)",x,INIT_HASH_SIZE);
+    else EP("Unexpected hash heap size: %lld [0,%lld)",x,INIT_HASH_SIZE);
 }
 
 void printHashInfo(){

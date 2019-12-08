@@ -146,7 +146,7 @@ static Value *llvm_genValueNodePtr(Value *x, I typ){
         caseL rtn = newCast(ptr_n, TyI64p); break;
         caseF rtn = newCast(ptr_n, TyF32p); break;
         caseE rtn = newCast(ptr_n, TyF64p); break;
-        default: EP("Need to support: %s\n", getTypeName(typ));
+        default: EP("Need to support: %s", getTypeName(typ));
     }
     return rtn;
 }

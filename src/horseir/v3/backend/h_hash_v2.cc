@@ -317,7 +317,10 @@ I exp_join_q5_v2_c1_sub(V z0, V z1, V x, V f, V y){
         P("Total elements write = %lld\n", c); // expected for Q5 3rd join: 46008
         R 0;
     }
-    else {EP("type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
+    else {
+        EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));
+        R 1;
+    }
 }
 
 I exp_join_q5_v2_c1(V z, V *x){
