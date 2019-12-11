@@ -106,7 +106,7 @@ static UI getHashValue(void *val, L valI, L typ){
 
 static I createHash(HN *hashT, L htSize){
     *hashT = (HN) allocHashMem(sizeof(HN0) * htSize);
-    //P("mem size: %lld (%lld * %lld)\n", sizeof(HN0)*htSize,sizeof(HN0),htSize);
+    //WP("mem size: %lld (%lld * %lld)\n", sizeof(HN0)*htSize,sizeof(HN0),htSize);
     //memset(*hashT, 0, sizeof(HN0)*htSize); // cleared (1) begin, and (2) exit
     R 0;
 }
@@ -286,7 +286,7 @@ static L profileInt(V x){
 /* functions exposed as libraries */
 
 // #define lib_index_template(typ) \
-//     P("......"); getchar(); \
+//     WP("......"); getchar(); \
 //     HN hashT; \
 //     L hashLen = getHashTableSize(sLen); \
 //     CHECKE(createHash(&hashT,hashLen)); \
@@ -294,13 +294,13 @@ static L profileInt(V x){
 //     struct timeval tv0, tv1; E optTime[10];\
 //     DOJ(10, {gettimeofday(&tv0, NULL); DOP(vLen, {L t=findHash(hashT,hashLen,src,-1,val,i,typ);targ[i]=t<0?sLen:t;}) \
 //     gettimeofday(&tv1, NULL); optTime[j] = calcInterval(tv0, tv1)/1000.0;}) \
-//     E total = 0; DOI(10, total += optTime[i]) P("Createing index time (avg): %g ms\n", total/10);
+//     E total = 0; DOI(10, total += optTime[i]) WP("Createing index time (avg): %g ms\n", total/10);
 
 #define lib_index_template(typ) \
     HN hashT; \
     L hashLen  = getHashTableSize(sLen); \
     L hashMask = hashLen - 1; \
-    L hashCur = getHashHeap(); if(H_DEBUG)P("size1 = %lld, %lld\n",hashLen,hashCur); \
+    L hashCur = getHashHeap(); if(H_DEBUG)WP("size1 = %lld, %lld\n",hashLen,hashCur); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
     DOI(vLen, {L t=find_hash(hashT,hashMask,src,val,i,typ);targ[i]=t<0?sLen:t;}) \
@@ -373,7 +373,7 @@ I lib_index_of_G(L* targ, V src, L sLen, V val, L vLen){
 }
 
 void lib_quicksort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    //P("low = %lld, high = %lld, type = %s\n", low,high,getTypeName(vp(val)));
+    //WP("low = %lld, high = %lld, type = %s\n", low,high,getTypeName(vp(val)));
     switch(vp(val)){
         caseC lib_quicksort_char(rtn, val, low , high, isUp, cmp); break;
         caseI lib_radixsort_int (rtn, val, high, isUp, true); break;
@@ -395,7 +395,7 @@ void lib_quicksort_char(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
         DOI3(low, high, cnt[str[rtn[i]]]++);
         DOI(256, {if(cnt[i]!=0) step[i] = cursor; cursor += cnt[i]; })
         if(H_DEBUG){
-            DOI(256, if(step[i]!=0)P("step[%lld] = %lld\n",(L)i,(L)step[i]))
+            DOI(256, if(step[i]!=0)WP("step[%lld] = %lld\n",(L)i,(L)step[i]))
         }
         DOI3(low, high, temp[step[str[rtn[i]]]++]=rtn[i])
         memcpy(rtn+low, temp, sizeof(L)*len);
@@ -428,7 +428,7 @@ void lib_quicksort_other(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
         B leftSame=true;
         L pos = lib_partition(rtn, val, low, high, isUp, cmp, &leftSame);
         //if(leftSame) { WP("low = %lld, high = %lld\n",low,high); getchar(); }
-        //P("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
+        //WP("low = %lld, high = %lld, %lld, %lld\n",low,high,leftSame,pos);
 //#pragma omp parallel sections
         {
 //#pragma omp section
@@ -488,11 +488,11 @@ L lib_quicksort_cmp_item(V t, L a, L b, B *isUp){
 }
 
 static void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    //P("Entering merge sort: (%lld, %lld)\n",low,high);
+    //WP("Entering merge sort: (%lld, %lld)\n",low,high);
     // #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
     #define SWAP_I(a,b) { rtn[a]^=rtn[b]; rtn[b]^=rtn[a]; rtn[a]^=rtn[b]; }
-    // P("type of val: %lld\n", vp(val));
-    // P("before:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    // WP("type of val: %lld\n", vp(val));
+    // WP("before:"); DOI3(low, high, WP(" %lld",vL(val,rtn[i]))); WP("\n");
     if(low < high - 1){
         if(low + 1 == high - 1){
             if((*cmp)(val,rtn[low],rtn[high-1],isUp)>0){
@@ -508,31 +508,31 @@ static void lib_mergesort(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
                 // L *buff = (L*)malloc(sizeof(L)*len);
                 for(L i=0;i<len;i++){
                     if(curLeft == mid){
-                        // P("trace 1\n");
+                        // WP("trace 1\n");
                         LARGE_BUFF[i]=rtn[curRight++];
                     }
                     else if(curRight == high){
-                        // P("trace 2\n");
+                        // WP("trace 2\n");
                         LARGE_BUFF[i]=rtn[curLeft++];
                     }
                     else if((*cmp)(val,rtn[curLeft],rtn[curRight],isUp)>0){
-                        // P("trace 3\n");
+                        // WP("trace 3\n");
                         LARGE_BUFF[i]=rtn[curRight++];
                     }
                     else {
-                        // P("trace 4\n");
+                        // WP("trace 4\n");
                         LARGE_BUFF[i]=rtn[curLeft++];
                     }
                 }
                 memcpy(rtn+low,LARGE_BUFF,sizeof(L)*len);
-                // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
+                // WP("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
                 // free(buff);
             } // else no need to sort
         }
     }
-    // P("after:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    // WP("after:"); DOI3(low, high, WP(" %lld",vL(val,rtn[i]))); WP("\n");
     // getchar();
-    // P("exit.\n");
+    // WP("exit.\n");
 }
 
 // the same as lib_quicksort_list
@@ -542,11 +542,11 @@ static L lib_mergesort_decide(V val, L a, L b, B *isUp, FUNC_CMP(cmp)){
 }
 
 static void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp)){
-    // P("Entering merge sort: (%lld, %lld)\n",low,high);
+    // WP("Entering merge sort: (%lld, %lld)\n",low,high);
     // #define SWAP_I(a,b) { L temp=rtn[a]; rtn[a]=rtn[b]; rtn[b]=temp; }
     #define SWAP_I(a,b) { rtn[a]^=rtn[b]; rtn[b]^=rtn[a]; rtn[a]^=rtn[b]; }
-    // P("type of val: %lld\n", vp(val));
-    // P("before:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    // WP("type of val: %lld\n", vp(val));
+    // WP("before:"); DOI3(low, high, WP(" %lld",vL(val,rtn[i]))); WP("\n");
     if(low < high - 1){
         if(low + 1 == high - 1){
             // if((*cmp)(val,rtn[low],rtn[high-1],isUp)>0){
@@ -560,30 +560,30 @@ static void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(c
             lib_mergesort_list(rtn, val, mid, high, isUp, cmp);
             // if((*cmp)(val,rtn[mid-1],rtn[mid],isUp)>0){ // need to sort
             if(lib_mergesort_decide(val,rtn[mid-1],rtn[mid],isUp,cmp)>0){
-                // P("1. low = %lld, high = %lld\n", low, high); // check
+                // WP("1. low = %lld, high = %lld\n", low, high); // check
                 L curLeft=low, curRight=mid;
                 // L *buff = (L*)malloc(sizeof(L)*len);
                 for(L i=0;i<len;i++){
                     if(curLeft == mid){
-                        // P("trace 1\n");
+                        // WP("trace 1\n");
                         LARGE_BUFF[i]=rtn[curRight++];
                     }
                     else if(curRight == high){
-                        // P("trace 2\n");
+                        // WP("trace 2\n");
                         LARGE_BUFF[i]=rtn[curLeft++];
                     }
                     // else if((*cmp)(val,rtn[curLeft],rtn[curRight],isUp)>0){
                     else if(lib_mergesort_decide(val,rtn[curLeft],rtn[curRight],isUp,cmp)>0){
-                        // P("trace 3\n");
+                        // WP("trace 3\n");
                         LARGE_BUFF[i]=rtn[curRight++];
                     }
                     else {
-                        // P("trace 4\n");
+                        // WP("trace 4\n");
                         LARGE_BUFF[i]=rtn[curLeft++];
                     }
                 }
                 memcpy(rtn+low,LARGE_BUFF,sizeof(L)*len);
-                // P("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
+                // WP("merged: %lld + %lld = %lld\n", mid-low, high-mid, len);
                 // free(buff);
             } // else no need to sort
             else if(lib_mergesort_decide(val,rtn[low],rtn[high-1],isUp,cmp)>0){
@@ -591,9 +591,9 @@ static void lib_mergesort_list(L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(c
             }
         }
     }
-    // P("after:"); DOI3(low, high, P(" %lld",vL(val,rtn[i]))); P("\n");
+    // WP("after:"); DOI3(low, high, WP(" %lld",vL(val,rtn[i]))); WP("\n");
     // getchar();
-    // P("exit.\n");
+    // WP("exit.\n");
 }
 
 /*
@@ -606,10 +606,10 @@ static B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cm
     #define DOIm(m, n, x) {for(L i=m+1,i2=n;i<i2;i++)x;}
     DOIm(low, high, {L t=(*cmp)(val,targ[i-1],targ[i],isUp); \
         rtn=rtn==0?t:rtn==-1?(t==1?-2:rtn):(t==-1?-2:rtn); \
-        if(rtn==-2) { /*P("i=%lld, %lld, %lld\n",i,vL(val,i-1),vL(val,i));*/ R 0;} })
+        if(rtn==-2) { /*WP("i=%lld, %lld, %lld\n",i,vL(val,i-1),vL(val,i));*/ R 0;} })
     B isOrder= rtn==(*isUp?-1:1);
     if(isOrder && !(*isUp)){ // reverse order
-        //P("low = %lld, high = %lld\n", low,high); getchar();
+        //WP("low = %lld, high = %lld\n", low,high); getchar();
         DOI3(low, (low+high)/2, \
             {L temp=targ[i]; L pos=high-(i-low)-1; targ[i]=targ[pos]; targ[pos] = temp;})
     }
@@ -617,9 +617,9 @@ static B lib_order_by_sorted(L *targ, V val, B *isUp, L low, L high, FUNC_CMP(cm
 }
 
 void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
-    //P("1.----%lld\n",tLen);
+    //WP("1.----%lld\n",tLen);
     DOI(tLen, targ[i]=i);
-    //P("2.----\n"); getchar();
+    //WP("2.----\n"); getchar();
     //#if defined(OPT_Q16) || defined(SORT_MERGE)
     //    /* quick sort */
     //    // lib_quicksort_other(targ, val, 0, tLen, isUp, lib_quicksort_cmp);
@@ -628,9 +628,9 @@ void lib_order_by_list(L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp)){
     //    lib_mergesort_list(targ, val, 0, tLen, isUp, cmp);
     //    free(LARGE_BUFF);
     //#else
-        //P("before: "); DOI(tLen, P(" %lld",targ[i])) P("\n");
+        //WP("before: "); DOI(tLen, WP(" %lld",targ[i])) WP("\n");
         lib_quicksort_list(targ, val, isUp, 0, tLen, colId, cmp);
-        //P("after : "); DOI(tLen, P(" %lld",targ[i])) P("\n");
+        //WP("after : "); DOI(tLen, WP(" %lld",targ[i])) WP("\n");
     //#endif
 }
 
@@ -657,17 +657,17 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
     }
     // gettimeofday(&tv1, NULL);
     // if(colId == 0)
-    // P("1. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
+    // WP("1. Result (elapsed time %g ms)\n\n", calcInterval(tv0,tv1)/1000.0);
     // gettimeofday(&tv0, NULL);
     {
-        // P("len: %lld - %lld = %lld\n", high, low, high-low); getchar();
+        // WP("len: %lld - %lld = %lld\n", high, low, high-low); getchar();
         L pos = low;
         do{
             // find next
             L start = pos, end = high;
             L hend = start + 5, hpos = -1; // heuristic end/pos
             if(hend>high) hend=high;
-            // P("type of curV: %lld\n", vp(curV));
+            // WP("type of curV: %lld\n", vp(curV));
             DOI3(start+1, hend, { if(0!=(*cmp)(curV,targ[i-1],targ[i],curB)){ hpos=i; break; } })
             if(hpos >= 0){
                 lib_quicksort_list(targ, val, isUp, start, hpos, colId+1, cmp);
@@ -688,7 +688,7 @@ void lib_quicksort_list(L *targ, V val, B *isUp, L low, L high, L colId, FUNC_CM
                     else break;
                 }while(start < end);
                 // if(end < high)
-                //     P("pivot char: %c | %c\n", vC(curV, targ[pivot]), vC(curV, targ[end]));
+                //     WP("pivot char: %c | %c\n", vC(curV, targ[pivot]), vC(curV, targ[end]));
                 lib_quicksort_list(targ, val, isUp, pivot, end, colId+1, cmp);
                 pos = end;
             }
@@ -729,10 +729,10 @@ void lib_order_vector(L *targ, V val, L vLen, B *isUp){
 
 void lib_order_by_vector(L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp)){
     if(!isIntegers(val)) DOP(tLen, targ[i]=i)
-    // P("tLen = %lld\n", tLen);
+    // WP("tLen = %lld\n", tLen);
     lib_quicksort(targ, val, 0, tLen, isUp, cmp);
     //lib_order_vector(targ, val, tLen, isUp); // experimental
-    // P("done.\n");
+    // WP("done.\n");
 }
 
 L lib_bs_find_same(V val, L* index, L iLen, L (*cmp)(V,L,L,B*), B opt, L* seg){
@@ -757,8 +757,8 @@ L lib_get_group_by_q1(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L  lenZ = lib_bs_find_same(val, index, iLen, cmp, false, NULL);
     L* segZ = (L*)malloc(sizeof(L) * lenZ);
     lib_bs_find_same(val, index, iLen, cmp, true, segZ);
-    // P("Result:\n");
-    // DOI(lenZ, P("segZ[%lld] = %lld\n", i,segZ[i]))
+    // WP("Result:\n");
+    // DOI(lenZ, WP("segZ[%lld] = %lld\n", i,segZ[i]))
     /* dict */
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
@@ -776,11 +776,11 @@ L lib_get_group_by_q1(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
 static I lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L k, c, cz; V d,t;
     /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
+    // WP("step 1\n");
     L lenZ=iLen>0?1:0;
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
+    // WP("step 2\n");
     // initV(z, H_N, lenZ);
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
@@ -797,14 +797,14 @@ static I lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)
                else c++;)
     if(c>0) initV(d,H_L,c);
     /* 3. fill indices into each cell */
-    // P("step 3\n");
+    // WP("step 3\n");
     k=0, c=0;
     d=vV(zVal,k++);
     if(iLen>0) vL(d,c++)=index[0];
     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
                   d=vV(zVal,k++); vL(d,0)=index[i]; c=1; } \
                else vL(d,c++)=index[i])
-    // P("exit\n");
+    // WP("exit\n");
     R 0;
 }
 
@@ -815,11 +815,11 @@ static I lib_get_group_by_other(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)
 static I lib_get_group_by_order(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
     L k, c, cz; V d,t;
     /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
+    // WP("step 1\n");
     L lenZ=iLen>0?1:0;
     DOIa(iLen, if(0!=(*cmp)(val,i-1,i,NULL))lenZ++)
     /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
+    // WP("step 2\n");
     // initV(z, H_N, lenZ);
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
@@ -836,14 +836,14 @@ static I lib_get_group_by_order(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)
                else c++;)
     if(c>0) initV(d,H_L,c);
     /* 3. fill indices into each cell */
-    // P("step 3\n");
+    // WP("step 3\n");
     k=0, c=0;
     d=vV(zVal,k++);
     if(iLen>0) vL(d,c++)=0;
     DOIa(iLen, if(0!=(*cmp)(val,i-1,i,NULL)){ \
                   d=vV(zVal,k++); vL(d,0)=i; c=1; } \
                else vL(d,c++)=i)
-    // P("exit\n");
+    // WP("exit\n");
     R 0;
 }
 
@@ -862,11 +862,11 @@ I lib_get_group_by(V z, V val, L *index, L iLen, L (*cmp)(V,L,L,B*)){
 // L lib_get_group_by(V z, V val, L* index, L iLen, L (*cmp)(V,L,L,B*)){
 //     L k, c, cz; V d,t;
 //     /* 1. get the total number of cells: lenZ */
-//     P("step 1\n");
+//     WP("step 1\n");
 //     L lenZ=iLen>0?1:0;
 //     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL))lenZ++)
 //     /* 2. allocate list and get the info of each cell */
-//     P("step 2\n");
+//     WP("step 2\n");
 //     // initV(z, H_N, lenZ);
 //     initV(z, H_N, 2);
 //     V zKey = getDictKeys(z);
@@ -883,14 +883,14 @@ I lib_get_group_by(V z, V val, L *index, L iLen, L (*cmp)(V,L,L,B*)){
 //                else c++;)
 //     if(c>0) initV(d,H_L,c);
 //     /* 3. fill indices into each cell */
-//     P("step 3\n");
+//     WP("step 3\n");
 //     k=0, c=0;
 //     d=vV(zVal,k++);
 //     if(iLen>0) vL(d,c++)=index[0];
 //     DOIa(iLen, if(0!=(*cmp)(val,index[i-1],index[i],NULL)){ \
 //                   d=vV(zVal,k++); vL(d,0)=index[i]; c=1; } \
 //                else vL(d,c++)=index[i])
-//     P("exit\n");
+//     WP("exit\n");
 //     R 0;
 // }
 
@@ -947,14 +947,14 @@ static B lib_member_fast2(void* src, void* val, L valI, L typ){
     else if(sLen == 2) { DOP(vLen, targ[i]=lib_member_fast2(src,val,i,typ)) }\
     else { DOP(vLen, targ[i]=lib_member_fast1(src,val,i,typ)) } \
     setHashHeap(hashCur);
-    // { L k=0; DOI(vLen, k+=targ[i]) P("total sum = %lld\n", k); }
+    // { L k=0; DOI(vLen, k+=targ[i]) WP("total sum = %lld\n", k); }
 
 #define lib_member_template_normal(typ)\
     HN hashT; \
     L hashLen  = getHashTableSize(sLen); \
     L hashMask = hashLen - 1; \
     L hashCur = getHashHeap(); \
-    /*P("size2 = %lld\n",hashLen);*/ \
+    /*WP("size2 = %lld\n",hashLen);*/ \
     tic(); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
@@ -1052,7 +1052,7 @@ void get_current_path(){
     int bytes = MIN(readlink(szTmp, pBuf, len), len - 1);
     if(bytes >= 0)
         pBuf[bytes] = '\0';
-    P("current path: %s\n", pBuf);
+    WP("current path: %s\n", pBuf);
 }
 
 #define U8  uint8_t
@@ -1123,7 +1123,7 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //    //FILE *fp = fopen("problem1_data.txt", "w");
 //    //FP(fp, "%lld\n", n);
 //    //DOI(n, FP(fp, "%lld ", val[i])) FP(fp, "\n"); fclose(fp);
-//    //P("done.\n"); getchar();
+//    //WP("done.\n"); getchar();
 //    U32 out; L size = n * 2;
 //    struct timeval tv0, tv1;
 //    gettimeofday(&tv0, NULL);
@@ -1133,8 +1133,8 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //    HT nodes  = (HT)malloc(sizeof(HT0)*n);
 //    memset(table, 0, sizeof(HT)*size);
 //    gettimeofday(&tv1, NULL);
-//    P("0. Exe. time (ms): %g\n", calcInterval(tv0, tv1));
-//    //DOI(n, {MurmurHash3(val+i, 1, 16807, &out); if(out%size==9348)P("%lld ", val[i]); table[out%size]++;})
+//    WP("0. Exe. time (ms): %g\n", calcInterval(tv0, tv1));
+//    //DOI(n, {MurmurHash3(val+i, 1, 16807, &out); if(out%size==9348)WP("%lld ", val[i]); table[out%size]++;})
 //    gettimeofday(&tv0, NULL);
 //    DOI(n, {out = hash_djb2_n(val+i, sizeof(L));
 //            HT node = nodes+i; node->next = NULL; node->index = i; \
@@ -1149,28 +1149,28 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //    //        else {lastp[x]->next = node; lastp[x] = node;} \
 //    //        });
 //    gettimeofday(&tv1, NULL);
-//    P("1. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
-//    P("out = %u\n", out);
+//    WP("1. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
+//    WP("out = %u\n", out);
 //    gettimeofday(&tv0, NULL);
 //    for(L i=0; i<size;i++){
 //        if(table[i]){
-//            HT t = table[i]; L tot = 0; while(t){ tot++; /*P("%lld ", val[t->index]);*/ t=t->next;} //P("\n");
+//            HT t = table[i]; L tot = 0; while(t){ tot++; /*WP("%lld ", val[t->index]);*/ t=t->next;} //WP("\n");
 //            B *visited = (B*)malloc(sizeof(B)*tot); memset(visited, 0, sizeof(B)*tot);
 //            t = table[i];
 //            DOJ(tot, {if(!visited[j]){ visited[j]=true; HT p = t->next; L cnt = 0; \
 //                L k = j+1; while(p){ if(val[t->index]==val[p->index]){visited[k]=true; cnt++;} p = p->next; k++; } \
-//                /*P("val = %lld, cnt = %lld\n",val[t->index],cnt);*/ } t=t->next;} )
+//                /*WP("val = %lld, cnt = %lld\n",val[t->index],cnt);*/ } t=t->next;} )
 //            free(visited);
 //        }
 //    } 
 //    gettimeofday(&tv1, NULL);
-//    P("2. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
+//    WP("2. Exe. time (ms): %g\n", calcInterval(tv0, tv1)); getchar();
 //    /*L tot = 0, maxv = 0;
 //    DOI(size, if(table[i]>table[maxv])maxv=i)
 //    L minv = maxv;
 //    DOI(size, if(table[i]>0 && table[i]<table[minv])minv=i)
 //    DOI(size, tot += table[i]>0)
-//    P(">0: %lld, %lld (%lld), %lld (%lld)\n",tot,maxv,table[maxv],minv,table[minv]);
+//    WP(">0: %lld, %lld (%lld), %lld (%lld)\n",tot,maxv,table[maxv],minv,table[minv]);
 //    */
 //    free(lastp);
 //    free(table);
@@ -1209,7 +1209,7 @@ static void lib_radixsort_core_int(Pos_i *val, I len){
 }
 
 static B seeOrder(Pos_i *pos, L n){
-    DOIa(n, if(pos[i].x < pos[i-1].x){P("stop at pos[%lld].x=%d\n",i,pos[i].x);R 0;}) R 1;
+    DOIa(n, if(pos[i].x < pos[i-1].x){WP("stop at pos[%lld].x=%d\n",i,pos[i].x);R 0;}) R 1;
 }
 
 void lib_radixsort_int(L *rtn, V val, L len, B *isUp, B isRtnIndex){
@@ -1221,7 +1221,7 @@ void lib_radixsort_int(L *rtn, V val, L len, B *isUp, B isRtnIndex){
 tic();
     lib_radixsort_core_int(pos, len);
 toc(); getchar();
-    //P("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, P("%lld: %lld\n",i,pos[i].i)) getchar();
+    //WP("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, WP("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)
         else DOP(len, rtn[i]=pos[len-i-1].i)
@@ -1230,9 +1230,9 @@ toc(); getchar();
         if(f0) DOP(len, rtn[i]=pos[i].x)
         else DOP(len, rtn[i]=pos[len-i-1].x)
     }
-    //P("result: "); DOI(len, P("%d ",pos[i].x)) P("\n"); getchar();
-    //if(seeOrder(pos,len)) P(" result ordered\n");
-    //else P(" result ordered not\n");
+    //WP("result: "); DOI(len, WP("%d ",pos[i].x)) WP("\n"); getchar();
+    //if(seeOrder(pos,len)) WP(" result ordered\n");
+    //else WP(" result ordered not\n");
     free(pos);
 }
 
@@ -1280,7 +1280,7 @@ void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
     Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
     DOP(len, {pos[i].x=vL(val,i); pos[i].i=i;})
     lib_radixsort_core_long(pos, len);
-    //P("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, P("%lld: %lld\n",i,pos[i].i)) getchar();
+    //WP("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, WP("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)
         else DOP(len, rtn[i]=pos[len-i-1].i)
@@ -1299,18 +1299,18 @@ I lib_group_by_normal_int(V z, V x){
     L k, c, cz; V d,t;
     L start=xn>0?1:0;
     /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
+    // WP("step 1\n");
     L lenZ=start;
     DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
     /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
+    // WP("step 2\n");
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
     V zVal = getDictVals(z);
     initV(zKey, H_L, lenZ);
     initV(zVal, H_G, lenZ);
     /* 3. fill indices into each cell */
-    // P("step 3\n");
+    // WP("step 3\n");
     k=cz=0, c=start;
     d=vV(zVal,k++);
     if(start) vL(zKey,cz++)=pos[0].i;
@@ -1336,18 +1336,18 @@ I lib_group_by_normal_long(V z, V x){
     L k, c, cz; V d,t;
     L start=xn>0?1:0;
     /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
+    // WP("step 1\n");
     L lenZ=start;
     DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
     /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
+    // WP("step 2\n");
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
     V zVal = getDictVals(z);
     initV(zKey, H_L, lenZ);
     initV(zVal, H_G, lenZ);
     /* 3. fill indices into each cell */
-    // P("step 3\n");
+    // WP("step 3\n");
     k=cz=0, c=start;
     d=vV(zVal,k++);
     if(start) vL(zKey,cz++)=pos[0].i;
@@ -1373,11 +1373,11 @@ I lib_group_by_flat(V z, V x){
     L k, c, cz; V d,t;
     L start=xn>0?1:0;
     /* 1. get the total number of cells: lenZ */
-    // P("step 1\n");
+    // WP("step 1\n");
     L lenZ=start;
     DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
     /* 2. allocate list and get the info of each cell */
-    // P("step 2\n");
+    // WP("step 2\n");
     initV(z, H_N, 2);
     V zKey = getDictKeys(z);
     V zVal = getDictVals(z);
@@ -1389,7 +1389,7 @@ I lib_group_by_flat(V z, V x){
     DOP(xn,vL(g2,i)=pos[i].i)
     vg2(zVal) = g2;
     /* 3. fill indices into each cell */
-    // P("step 3\n");
+    // WP("step 3\n");
     k=0, c=start;
     if(start) vL(zKey,k)=pos[0].i;
     DOIa(xn, if(pos[i-1].x!=pos[i].x){vL(zVal,k++)=c; vL(zKey,k)=pos[i].i; c=1;} \
@@ -1446,7 +1446,7 @@ static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
         L hashKey = hash_L(args[0]) & hashMask;
         HN t = hV(hashT, hashKey);
         V src0 = src[0];
-        //P(" n = 1, begin\n");
+        //WP(" n = 1, begin\n");
         L debug_local_num = 0;
         if(hN(t)) debug_hash_need_search1++;
         debug_hash_count1++;
@@ -1460,14 +1460,14 @@ static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
         //debug_hash_total1 += debug_local_num;
         if(debug_hash_max1 < debug_local_num)
             debug_hash_max1 = debug_local_num;
-        //P(" n = 1, done\n");
+        //WP(" n = 1, done\n");
     }
     else {
         L val = args[0];
         L hashMask = hashLen - 1;
         L hashKey = hash_L(args[0]) & hashMask;
         HN t = hV(hashT, hashKey);
-        //P("1: n = %lld\n",n);
+        //WP("1: n = %lld\n",n);
         L debug_local_num = 0;
         if(hN(t)) debug_hash_need_search2++;
         debug_hash_count2++;
@@ -1481,7 +1481,7 @@ static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
         //debug_hash_total2 += debug_local_num;
         if(debug_hash_max2 < debug_local_num)
             debug_hash_max2 = debug_local_num;
-        //P("2: done\n");
+        //WP("2: done\n");
     }
     R 0;
 }
@@ -1495,8 +1495,8 @@ static HN findValueFromHashCore(HN hashT, V *src, L hashLen, L n, L *args){
 
 // HN findValueFromHash2(HN *hashT, V *src, L *hashSize, L n, ...){
 //     readArgs();
-//     //P("Input with %lld:\n",n);
-//     //DOI(n, P("args[%lld] = %lld\n",i,args[i]))
+//     //WP("Input with %lld:\n",n);
+//     //DOI(n, WP("args[%lld] = %lld\n",i,args[i]))
 //     L hashSetId  = args[0] & setN;
 //     R findValueFromHashCore(hashT[hashSetId],src,hashSize[hashSetId],n,args);
 // }
@@ -1532,15 +1532,15 @@ I lib_join_index_linear(V z0, V z1, V x, V y, B isEq){
     size=0;
     join_linear_main(join_linear_save);
     //time_toc();
-    //P("size = %lld\n", size);
-    //DOI(size>10?10:size, P(" %lld",vL(z1,i))) P("\n"); getchar();
+    //WP("size = %lld\n", size);
+    //DOI(size>10?10:size, WP(" %lld",vL(z1,i))) WP("\n"); getchar();
     R 0;
 }
 
 I lib_join_index_compare(V z0, V z1, V x, V y, I op){
     // x and y have the same type
     V0 tt; V d=&tt; L n=0; I op_f=(0==op||1==op?0:1); // lt/leq:0 (desc); gt/geq:1 (asc)
-    //P("op = %d, op_f = %d\n",op,op_f);
+    //WP("op = %d, op_f = %d\n",op,op_f);
     pfnOrderBy(d, y, initLiteralBool(op_f));
     //printV(x); printV(y); printV(d); getchar();
     // 1. fetch length
@@ -1586,7 +1586,7 @@ tic();
 time_toc("Step 2: Hash probe %g ms, %.1lf MB/s\n", elapsed, 1.0*vLen/elapsed/1000);
 tic();
     /* debug: print result in 0/1 */
-    //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
+    //DOI(vLen, WP("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
     L parZ[H_CORE], offset[H_CORE]; 
     memset(parZ  , 0, sizeof(L)*H_CORE);
     memset(offset, 0, sizeof(L)*H_CORE);
@@ -1594,13 +1594,13 @@ tic();
          if(compareOpRow(x,y,tempK[i],i,f)){parZ[tid]++;none=false;} \
          HI t0=tempH[i]; while(t0){if(compareOpRow(x,y,tempK[i],i,f)){parZ[tid]++; none=false;} t0=t0->inext;} \
          if(none)tempK[i]=-1;})
-    //DOI(H_CORE, P("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
+    //DOI(H_CORE, WP("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
     DOI(H_CORE, c+=parZ[i])
-    //DOI(H_CORE, P("%lld ",parZ[i])) P(" => total %lld\n",c); // show segment info
+    //DOI(H_CORE, WP("%lld ",parZ[i])) WP(" => total %lld\n",c); // show segment info
     DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
     initV(z0, H_L, c);
     initV(z1, H_L, c);
-    //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) P("tot = %lld\n",tot); getchar();
+    //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) WP("tot = %lld\n",tot); getchar();
     DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; \
          if(compareOpRow(x,y,tempK[i],i,f)){vL(z0,p)=tempK[i];vL(z1,p)=i;} \
          HI t0=tempH[i]; while(t0){p++; if(compareOpRow(x,y,tempK[i],i,f)){vL(z0,p)=t0->ival;vL(z1,p)=i;}t0=t0->inext;} \
@@ -1610,7 +1610,7 @@ time_toc("Step 3: hash finish %g ms\n", elapsed);
     profileHash(hashT, hashLen);
     free(tempK);
     free(tempH);
-    DOI(20, P("**")) P("\n");
+    DOI(20, WP("**")) WP("\n");
     R 0;
 }
 
@@ -1650,8 +1650,8 @@ I lib_join_index_basic(V z0, V z1, V x, V y, B isEq){
     //WP("Profiling x: "); profileInt(x);
     //WP("Profiling y: "); profileInt(y);
     WP("xLen = %lld, yLen = %lld\n", sLen,vLen);
-    //DOI(vn(x), if(vL(x,i)<74){P("stop at x: %lld\n",vL(x,i)); getchar();})
-    //DOI(vn(y), if(vL(y,i)==1){P("see y == 1 at y[%lld]\n",i); break;}) getchar();
+    //DOI(vn(x), if(vL(x,i)<74){WP("stop at x: %lld\n",vL(x,i)); getchar();})
+    //DOI(vn(y), if(vL(y,i)==1){WP("see y == 1 at y[%lld]\n",i); break;}) getchar();
     HN hashT; E elapsed;
     L hashLen  = getHashTableSize(sLen);
 tic();
@@ -1674,7 +1674,7 @@ tic();
 time_toc("Step 2: Hash probe %g ms, %.1lf K/ms (%s)\n", elapsed, 1.0*vLen/elapsed/1000, getTypeName(typ));
 tic();
     /* debug: print result in 0/1 */
-    //DOI(vLen, P("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
+    //DOI(vLen, WP("tempK[%lld] = %lld\n",i,tempK[i])); getchar();
     L parZ[H_CORE], offset[H_CORE]; 
     memset(parZ, 0, sizeof(L)*H_CORE);
     memset(offset, 0, sizeof(L)*H_CORE);
@@ -1685,15 +1685,15 @@ tic();
         DOT(vLen, if(tempK[i]>=0){L cc=1; HI t0=tempH[i]; while(t0){cc++;t0=t0->inext;} parZ[tid]+=sLen-cc;}\
                   else{parZ[tid]+=sLen;})
     }
-    //DOI(H_CORE, P("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
+    //DOI(H_CORE, WP("parZ[%lld] = %lld\n",i,parZ[i])); getchar();
     DOI(H_CORE, c+=parZ[i])
-    //DOI(H_CORE, P("%lld ",parZ[i])) P(" => total %lld\n",c); // show segment info
+    //DOI(H_CORE, WP("%lld ",parZ[i])) WP(" => total %lld\n",c); // show segment info
     DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
     initV(z0, H_L, c);
     initV(z1, H_L, c);
     //c = 0; L tt=0;
     if(isEq){
-        //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) P("tot = %lld\n",tot); getchar();
+        //L tot=0; DOI(vLen, if(tempK[i]>=0){HI t0=tempH[i]; while(t0){t0=t0->inext;tot++;}}) WP("tot = %lld\n",tot); getchar();
         DOT(vLen, if(tempK[i]>=0){L p=offset[tid]; \
                      vL(z0,p)=tempK[i];vL(z1,p)=i; \
                      HI t0=tempH[i]; while(t0){p++;vL(z0,p)=t0->ival;vL(z1,p)=i;t0=t0->inext;} offset[tid]=p+1; })
@@ -1715,19 +1715,19 @@ tic();
 time_toc("Step 3: Hash finish\n");
     //TIME_SHOW("Step 3: hash finish");
     //WP("size = %lld, z0 = %lld, z1 = %lld\n",c,vn(z0),vn(z1));
-    //P("size = %lld, tt = %lld\n",c,tt);
+    //WP("size = %lld, tt = %lld\n",c,tt);
     // parallel - error (race condition)
     //DOP(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0);\
                if(k>=0){vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}},\
         reduction(+:c))
     // serial
     //DOI(vLen, {HI t0;L k=find_hash_many(hashT,hashMask,src,val,i,typ,&t0);\
-               if(k>=0){P("i=%lld, k=%lld\n",i,k);vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}})
+               if(k>=0){WP("i=%lld, k=%lld\n",i,k);vL(z0,c)=k;vL(z1,c)=i;c++;while(t0){vL(z0,c)=t0->ival;vL(z1,c)=i;c++;t0=t0->inext;}}})
     // free hashT
     profileHash(hashT, hashLen);
     free(tempK);
     free(tempH);
-    DOI(20, P("--")) P("\n");
+    DOI(20, WP("--")) WP("\n");
     R 0;
 }
 
@@ -1742,15 +1742,15 @@ I lib_join_dummy(V z0, V z1, V x, V y){
     printBanner("join dummy dummy dummy");
     if(vp(x) == vp(y) && vp(x) == H_LL){
         L c=0;
-        P("Input x and y:\n"); getInfoVar(x); getInfoVar(y); 
+        WP("Input x and y:\n"); getInfoVar(x); getInfoVar(y); 
         switch(vp(x)){
             caseI DOI(vn(x), DOJ(vn(y), if(vI(x,i)==vI(y,j))c++;)) break;
             //caseI DOJ(vn(y), DOI(vn(x), if(vI(x,i)==vI(y,j))                  \
-                     {P("x[%lld]==%lld, y[%lld]=%lld\n",i,vI(x,i),j,vI(y,j)); \
+                     {WP("x[%lld]==%lld, y[%lld]=%lld\n",i,vI(x,i),j,vI(y,j)); \
                       getchar();c++;})) break;
             caseL DOI(vn(x), DOJ(vn(y), if(vL(x,i)==vL(y,j))c++)) break;
         }
-        P("Total # of items after join: %lld\n",c); getchar();
+        WP("Total # of items after join: %lld\n",c); getchar();
         initV(z0, H_L, c);
         initV(z1, H_L, c);
         c = 0;
@@ -1772,7 +1772,7 @@ I lib_join_dummy2(V x, V y){
         L tot = 0;
         DOI(vn(x0), {L c=0;\
             DOJ(vn(y0), if(vI(x0,i)==vI(y0,j) && vI(x1,i)==vI(y1,j)){c++;tot++;})\
-            if(c>0)P("[%lld] vI(x0,%lld)=%d, vI(x1,%lld)=%d\n",c,i,vI(x0,i),i,vI(x1,i));})
+            if(c>0)WP("[%lld] vI(x0,%lld)=%d, vI(x1,%lld)=%d\n",c,i,vI(x0,i),i,vI(x1,i));})
         WP("Dummy2: total = %lld\n",tot); getchar();
     }
     else {
@@ -1793,7 +1793,7 @@ I lib_join_dummy3(V x, V y){
         L tot = 0;
         // DOI(vn(x0), { \
             DOJ(vn(y0), if(vI(x1,i)==vI(y1,j) && vI(x1,i)==122187){ \
-                P("vE(x0,%lld)=%g, vE(y0,%lld)=%g\n",i,vE(x0,i),j,vE(y0,j)); })\
+                WP("vE(x0,%lld)=%g, vE(y0,%lld)=%g\n",i,vE(x0,i),j,vE(y0,j)); })\
         })
         DOI(vn(x0), {L c=0;\
             DOJ(vn(y0), if(vE(x0,i)<vE(y0,j) && vI(x1,i)==vI(y1,j)){c++;tot++;})\
@@ -1815,14 +1815,14 @@ void profileHashTable(THash th){
     L  *hs = th.hashSize;
     L  num = th.numTable;
     L  cnt = 0;
-    DOI(num, if(hs[i]>0){cnt++;P("hash[%3lld]: ",i);profileHashTableSingle(ht[i],hs[i]);})
-    P("Summary: total %lld tables out of %lld used (%.2lf %%)\n",cnt,num,percent(cnt,num));
+    DOI(num, if(hs[i]>0){cnt++;WP("hash[%3lld]: ",i);profileHashTableSingle(ht[i],hs[i]);})
+    WP("Summary: total %lld tables out of %lld used (%.2lf %%)\n",cnt,num,percent(cnt,num));
 }
 #endif
 
 #ifdef DO_HASH_V1
 static void profileHashBucketSingle(HB x, L size){
-    P("slots used %.2lf %% (%lld/%lld)\n",percent(x->cur,x->size),x->cur,x->size);
+    WP("slots used %.2lf %% (%lld/%lld)\n",percent(x->cur,x->size),x->cur,x->size);
 }
 
 static L countDupLinkSize(HN x){
@@ -1842,9 +1842,9 @@ static void profileHashBucketDup(TBucket tb){
     DOI(num, \
        DOJ(hs[i], \
           {HB t0=(ht[i]+j); DOK(t0->cur, {L size=countDupLinkSize(t0->node+k); if(max_dup_size<size) max_dup_size=size;})}))
-    P("max dup size: %lld\n", max_dup_size);
+    WP("max dup size: %lld\n", max_dup_size);
     if(max_dup_size == 1){
-        P("  ** data used in key are completely distinct **\n");
+        WP("  ** data used in key are completely distinct **\n");
     }
 }
 
@@ -1853,10 +1853,10 @@ void profileHashBucket(TBucket tb){
     L  *hs = tb.hashSize;
     L  num = tb.numBucket;
     L  cnt = 0;
-    //DOI(num, if(hs[i]>0){cnt++;P("hash[%3lld]: ",i);profileHashBucketSingle(ht[i]);})
-    P("profiling bucket\n");
+    //DOI(num, if(hs[i]>0){cnt++;WP("hash[%3lld]: ",i);profileHashBucketSingle(ht[i]);})
+    WP("profiling bucket\n");
     profileHashBucketDup(tb);
-    P("Summary: total %lld tables out of %lld used (%.2lf %%)\n",cnt,num,percent(cnt,num));
+    WP("Summary: total %lld tables out of %lld used (%.2lf %%)\n",cnt,num,percent(cnt,num));
 }
 #endif
 
@@ -1865,8 +1865,8 @@ static B profileIsNested(V x){ DOI(xn, if(isList(vV(x,i)))R 1) R 0; }
 void profileListR(V x){
     if(isList(x)){
         if(profileIsNested(x))
-            P("# Nested list (depth > 1) found\n");
-        P("data <- c("); DOI(xn, {if(i>0)P(",");P("%lld",vn(vV(x,i)));}) P(")\n");
+            WP("# Nested list (depth > 1) found\n");
+        WP("data <- c("); DOI(xn, {if(i>0)WP(",");WP("%lld",vn(vV(x,i)));}) WP(")\n");
     }
     else EP("Type list expected");
 }
@@ -1874,7 +1874,7 @@ void profileListR(V x){
 // special case for q20
 B checkOrderCase1(V z, V x, V f){
     if(2==xn && isInt(vV(x,0)) && isInt(vV(x,1)) && vB(f,0)==vB(f,1)){
-        if(H_DEBUG) P("order case 1\n"); // getchar();
+        if(H_DEBUG) WP("order case 1\n"); // getchar();
         V x0  = vV(x,0);
         V x1  = vV(x,1);
         //getInfoVar(x0); getInfoVar(x1); getchar();
@@ -1894,7 +1894,7 @@ B checkOrderCase1(V z, V x, V f){
         initV(z, H_L, size);
         lib_radixsort_long(sL(z), t, size, &f0, true); // return index
     toc();
-        //DOI(100, P("[%lld] %lld: %d, %d\n",i,temp[vL(z,i)],vI(x0,vL(z,i)),vI(x1,vL(z,i))))
+        //DOI(100, WP("[%lld] %lld: %d, %d\n",i,temp[vL(z,i)],vI(x0,vL(z,i)),vI(x1,vL(z,i))))
         free(vg(t));
         R true;
     }

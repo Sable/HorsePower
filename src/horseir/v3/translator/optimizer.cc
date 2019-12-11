@@ -23,7 +23,7 @@ static void optimizerMain(OC opt){
     switch(opt){
         case OPT_FE: optElementwise(); break; // compiledMethodList
         case OPT_FP: optPattern();     break; // compiledMethodList
-        case OPT_FA: optAuto();        break; // compiledMethodList
+        case OPT_FA: optAutoFusion();  break; // compiledMethodList
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }

@@ -74,7 +74,7 @@
 
 O  optElementwise();
 O  optPattern    ();
-O  optAuto       ();
+O  optAutoFusion ();
 O  optSReduction (Prog *root);
 
 CS obtainMaxValue(C c);

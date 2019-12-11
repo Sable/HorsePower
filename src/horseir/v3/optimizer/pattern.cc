@@ -41,8 +41,8 @@ static void deletePatternTree(PatternTree *ptree){
 
 static void printPatternTreeCore(PatternTree *ptree, I dep){
     if(ptree){
-        DOI(dep*2+2, P(" "))
-        P("(%s, %s, %d)\n", \
+        DOI(dep*2+2, WP(" "))
+        WP("(%s, %s, %d)\n", \
                 ptree->func1?ptree->func1:"NULL", \
                 ptree->func2?ptree->func2:"NULL", ptree->num);
         DOI(ptree->num, printPatternTreeCore(ptree->child[i], dep+1))
@@ -55,7 +55,7 @@ static void printPatternTree(PatternTree *ptree){
 
 static PatternTree *createFP1(){
     if(debugPattern)
-        P("// Pattern FP0\n");
+        WP("// Pattern FP0\n");
     return NULL;
 }
 
@@ -64,7 +64,7 @@ static PatternTree *createFP2(I op){
         EP("Pattern 2 must have an option 1 or 2");
     }
     if(debugPattern)
-        P("// Pattern FP2\n");
+        WP("// Pattern FP2\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", op==1?"sum":op==2?"avg":NULL, 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
@@ -73,7 +73,7 @@ static PatternTree *createFP2(I op){
 
 static PatternTree *createFP3(){
     if(debugPattern)
-        P("// Pattern FP3\n");
+        WP("// Pattern FP3\n");
     PatternTree *rt = initPatternTree("index_a", NULL, 2);
     rt->child[0] = initPatternTree("vector", NULL, 1);
     rt->child[0]->child[0] = initPatternTree("len", NULL, 0);
@@ -85,7 +85,7 @@ static PatternTree *createFP3(){
 
 static PatternTree *createFP4(){
     if(debugPattern)
-        P("// Pattern FP4\n");
+        WP("// Pattern FP4\n");
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", "len", 1);
     rt->child[0]->child[0] = initPatternTree("each", "unique", 1);
@@ -96,7 +96,7 @@ static PatternTree *createFP4(){
 static PatternTree *createFP5(I op){
 #define getFP5op(op,a,b,c) op==0?a:op==1?b:c
     if(debugPattern)
-        P("// Pattern FP%d\n", getFP5op(op,5,6,7));
+        WP("// Pattern FP%d\n", getFP5op(op,5,6,7));
     PatternTree *rt = initPatternTree("raze", NULL, 1);
     rt->child[0] = initPatternTree("each", getFP5op(op,"min","max","len"), 1);
     rt->child[0]->child[0] = initPatternTree("each_right", "index", 0);
@@ -183,7 +183,7 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
     Node *z0 = getParamFromChain(chain_z, 0); S z0s = getNameStr(z0);
     C x0c = getTypeCodeByName(x0);
     C z0c = getTypeCodeByName(z0);
-    //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
+    //WP("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
     SP(tmp, "q%d_peephole_fp%d_%d", qid, op, phTotal++);
     glueCode(genDecl2(tmp, '{'));
     glueLine();
@@ -235,7 +235,7 @@ static void genPattern3_C(PatternTree *ptree){
     Node *y0 = getParamFromChain(chain_y0, 2); S y0s = getNameStr(y0);
     Node *y1 = getParamFromChain(chain_y1, 1); S y1s = getNameStr(y1);
     Node *z0 = getParamFromChain(chain_z , 0); S z0s = getNameStr(z0);
-    //P("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
+    //WP("x0 = %s, x1 = %s, y0 = %s, y1 = %s, z = %s\n", x0,x1,y0,y1,z);
     SP(tmp, "q%d_peephole_fp3_%d", qid, phTotal++);
     glueCode(genDecl2(tmp,'{')); glueLine();
     depth++;
@@ -265,7 +265,7 @@ static void genPattern4_C(PatternTree *ptree){
     Node *x0 = getParamFromChain(chain_x, 2); S x0s = getNameStr(x0);
     Node *y0 = getParamFromChain(chain_x, 3); S y0s = getNameStr(y0);
     Node *z0 = getParamFromChain(chain_z, 0); S z0s = getNameStr(z0);
-    //P("x = %s, y = %s, z = %s\n", x,y,z);
+    //WP("x = %s, y = %s, z = %s\n", x,y,z);
     SP(tmp, "q%d_peephole_fp4_%d", qid, phTotal++);
     glueCode(genDecl3(tmp,'{')); glueLine();
     //glueAnyLine("L %s(V z, V x, V y){", tmp);
@@ -302,7 +302,7 @@ static void genPattern7_C(PatternTree *ptree){
 }
 
 static void genPattern_C(PatternTree *ptree, I pid){
-    //P("gen pattern pid = %d\n", pid);
+    //WP("gen pattern pid = %d\n", pid);
     switch(pid){
         case 1: genPattern1_C(ptree); break;
         case 2: genPattern2_C(ptree); break; // q3
@@ -358,13 +358,13 @@ static B matchChain2(Chain *chain, S func1, S func2){
         SymbolName *sn = func->val.name.sn;
         if(sn->kind != builtinS) return false;
         S funcName = func->val.name.id2;
-        //P("Input: %s, %s\n", funcName, func1);
+        //WP("Input: %s, %s\n", funcName, func1);
         if(sEQ(funcName, func1) || sEQ(func1, "?")) {
             // match func2
             if(func2){
                 List *params = rhs->val.call.param->val.listS;
                 S firstP = getFirstParam(params);
-                //P("--> matched?: %s, %s | %s, %s\n", funcName, func1, firstP, func2);
+                //WP("--> matched?: %s, %s | %s, %s\n", funcName, func1, firstP, func2);
                 return firstP?sEQ(func2, firstP):false;
             }
             else return true;
@@ -376,19 +376,19 @@ static B matchChain2(Chain *chain, S func1, S func2){
 static B matchPattern(Chain *chain, PatternTree* ptree){
     if(matchChain2(chain, ptree->func1, ptree->func2)){
         I numOfDefs = ptree->num==0?0:chain->defSize;
-        //P("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
+        //WP("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
         if(numOfDefs == ptree->num){
-            //P("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
+            //WP("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
             //prettyPatternTree(ptree->child[0]);
-            //printChain(chain->chain_defs[0]); P("\n");
+            //printChain(chain->chain_defs[0]); WP("\n");
             DOI(numOfDefs, \
                     if(!matchPattern(chain->chain_defs[i], ptree->child[i]))R false)
-            //P("return true\n"); getchar();
+            //WP("return true\n"); getchar();
             ptree->chain = chain; /* setup */
             return true;
         }
     }
-    //P("func not matched: %s\n", ptree->func1);
+    //WP("func not matched: %s\n", ptree->func1);
     return false;
 }
 
@@ -398,10 +398,10 @@ static void findCase1(ChainList *list, PatternTree* ptree, I pid){
     if(list){
         findCase1(list->next, ptree, pid);
         // check chains visited or not
-        // P("[%d] ",isChainVisited(list->chain)); printChain(list->chain); P("\n");
+        // WP("[%d] ",isChainVisited(list->chain)); printChain(list->chain); WP("\n");
         if(!isChainVisited(list->chain)){
             if(matchPattern(list->chain, ptree)){
-                //P("Pattern %d found\n", pid); getchar();
+                //WP("Pattern %d found\n", pid); getchar();
                 cleanCode(); ptr = code;
                 genPattern(ptree, pid);
             }
@@ -559,7 +559,7 @@ static B isValidPatternIndex(Chain *x, Node *n){
 
 static B allUsesValidIndex(Chain *chain, Node *n){
     //printNode(chainNode(chain));
-    //DOI(chain->useSize, P("use[%lld] = %d\n",i,isValidPatternIndex(chain->chain_uses[i],n)));
+    //DOI(chain->useSize, WP("use[%lld] = %d\n",i,isValidPatternIndex(chain->chain_uses[i],n)));
     //getchar();
     DOI(chain->useSize, if(!isValidPatternIndex(chain->chain_uses[i],n))R 0) R 1;
 }
@@ -591,7 +591,7 @@ static S genLocals(S funcName, Chain *chain, Node *n){
 
 static void genPatternIndex(Chain *chain, Node *n){
     cleanCode(); ptr = code;
-    //DOI(chain->useSize, {printChain(chain->chain_uses[i]); P("\n");}) getchar();
+    //DOI(chain->useSize, {printChain(chain->chain_uses[i]); WP("\n");}) getchar();
     //TODO("Impl. code gen for the pattern 'index'");  // example input: q1
     C temp[199];
     // step 0: function head
@@ -717,7 +717,7 @@ static void init(){
     ptr     = code;
     initPatterns();
     if(debugPattern){
-        DOI(numPattern, {P("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
+        DOI(numPattern, {WP("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
     }
 }
 

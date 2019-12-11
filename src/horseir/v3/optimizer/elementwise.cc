@@ -19,11 +19,11 @@ static Node *currentMethod;
 /* ------ declaration above ------ */
 
 static void printChainUses(Chain *p){
-    DOI(chainUseSize(p), {P(" --> "); printChain(chainUse(p,i)); P("\n"); })
+    DOI(chainUseSize(p), {WP(" --> "); printChain(chainUse(p,i)); WP("\n"); })
 }
 
 static void printChainDefs(Chain *p){
-    DOI(chainDefSize(p), {P(" <-- "); printChain(chainDef(p,i)); P("\n"); })
+    DOI(chainDefSize(p), {WP(" <-- "); printChain(chainDef(p,i)); WP("\n"); })
 }
 
 static B isMatchedDef(Chain *p, char *name){
@@ -92,7 +92,7 @@ static gNode *findFusionUp(Chain *chain){
         //printChainUses(chain); getchar();
         // -- useful debugging
         //printBanner("Gotcha");
-        //printChain(chain); P("\n");
+        //printChain(chain); WP("\n");
         gNode *rt = initgNode(chainNode(chain));
         B isOK = true;
         I cnt = 0;
@@ -102,7 +102,7 @@ static gNode *findFusionUp(Chain *chain){
                 SymbolKind sk = nodeNameKind(p);
                 if(sk == localS){
                     I c = findDefByName(chain, nodeName2(p));
-                    //P("c4 = %d, s = %s\n", c, nodeName2(p)); getchar();
+                    //WP("c4 = %d, s = %s\n", c, nodeName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         rt->pnode[cnt] = findFusionUp(chain->chain_defs[c]);
@@ -138,7 +138,7 @@ static Chain *findFusionDown(Chain *chain){
             if(instanceOf(p, varK)){
                 if(p->val.param.sn->kind == localS){
                     I c = findUseByName(chain, nodeVarName(p));
-                    //P("c1 = %d, s = %s\n", c, nodeVarName(p)); getchar();
+                    //WP("c1 = %d, s = %s\n", c, nodeVarName(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         Chain *foundChain = findFusionDown(chain->chain_uses[c]);
@@ -150,7 +150,7 @@ static Chain *findFusionDown(Chain *chain){
             else if(instanceOf(p, nameK)){
                 if(nodeNameKind(p) == localS){
                     I c = findUseByName(chain, nodeName2(p));
-                    //P("c2 = %d, s = %s\n", c, nodeName2(p)); getchar();
+                    //WP("c2 = %d, s = %s\n", c, nodeName2(p)); getchar();
                     if(c < 0) isOK = false;
                     else {
                         Chain *foundChain = findFusionDown(chain->chain_uses[c]);
@@ -161,7 +161,7 @@ static Chain *findFusionDown(Chain *chain){
             }
             else isOK = false;
             //printChain(chain);
-            //P("isOK = %d\n", isOK); getchar();
+            //WP("isOK = %d\n", isOK); getchar();
             if(!isOK) return chain;
             vars = vars->next;
         }
@@ -202,8 +202,8 @@ static void genCodeElem(gNode *rt, B isRT){
         /* TODO: shape maybe not vn(x0) */
         glueAny(indent4 "initV(z, H_%c, vn(x0));\n", z0c); 
         glueAny(indent4 "DOP(vn(z), v%c(z,i)=",z0c);
-        //DOI(varNum, P(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
-        //P(indent "DOP(vn(z), v%c(z,i)=",z0c);
+        //DOI(varNum, WP(indent "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        //WP(indent "DOP(vn(z), v%c(z,i)=",z0c);
         // setup invocation for final fusion
         extra->funcDecl = genDeclSingle(temp, ';');
         extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
@@ -235,7 +235,7 @@ static void findFusionSub(Chain *chain){
         // if num of chains > 1, likely fusion
         gNode *rt = findFusionUp(bottom);
         if(rt && isOK2Fuse(rt)){
-            P("bottom chain found:\n");
+            WP("bottom chain found:\n");
             //printChain(bottom); getchar();
             cleanCode(); ptr = code;
             genCodeElem(rt,true);
@@ -244,13 +244,13 @@ static void findFusionSub(Chain *chain){
     else {
         chain->isVisited = true;
         //WP("bottom chain not found at: \n\t");
-        //printChain(chain); P("\n");
+        //printChain(chain); WP("\n");
     }
 }
 
 static void findFusion(Chain *chain){
     Node *n = chainNode(chain);
-    //printChain(chain); P("\n");
+    //printChain(chain); WP("\n");
     if(instanceOf(n, stmtK)){
         findFusionSub(chain);
     }

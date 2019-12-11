@@ -14,9 +14,8 @@ extern "C" {
 
 /* methods */
 
-void initMemory     ();
-void useNaiveSystem ();
-void useBuddySystem ();
+void initMemoryBasic();
+void initMemoryInterp();
 
 L getTypeSize       (I typ, L len);
 G allocMem          (G heap, L *cur, L top, I typ, L len);

@@ -9,6 +9,7 @@
  */
 const L INIT_HEAP_SIZE = 53687091200LL; //64MB, 64*1024*1024
 const L INIT_HASH_SIZE = 1073741824; //1GB, 536870912;  //512MB
+const L INIT_COMPILE_SIZE = 33554432; // 32MB
 
 typedef struct buddy_node { /* size 48 */
     L size, level; G value;
@@ -34,22 +35,34 @@ L  numBlocks = 0;
 
 G  hHeap = NULL; L hHeapCur;  // hash heap
 
+static void useBuddySystem(L size);
+static void useNaiveSystem(L size);
+static void initMemory(L size);
+
 /* methods */
 
+void initMemoryBasic(){
+    initMemory(INIT_COMPILE_SIZE);
+}
+
+void initMemoryInterp(){
+    initMemory(INIT_HEAP_SIZE);
+}
+
 //void initMain(){
-void initMemory(){
+static void initMemory(L size){
     #ifdef USE_NAIVE
-        useNaiveSystem();
+        useNaiveSystem(size);
     #endif
 
     #ifdef USE_BUDDY
-        useBuddySystem();
+        useBuddySystem(size);
     #endif
     initHashHeap();
 }
 
-void useNaiveSystem(){
-    gHeap = (G)malloc(INIT_HEAP_SIZE);
+static void useNaiveSystem(L size){
+    gHeap = (G)malloc(size);
     gHeapCur = 0;
     if(H_DEBUG)
         WP("-> [Info heap] Successfully initialized\n");
@@ -245,8 +258,8 @@ BN newBlock(L n, BN p, G ptr){
     R x;
 }
 
-void useBuddySystem(){
-    gRoot = newBlock(INIT_HEAP_SIZE, NULL, allocHeap(INIT_HEAP_SIZE));
+static void useBuddySystem(L size){
+    gRoot = newBlock(size, NULL, allocHeap(size));
 }
 
 void updateBlock(BN rt){

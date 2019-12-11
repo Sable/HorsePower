@@ -239,7 +239,7 @@ static gNode* findFusionUp(Chain *chain, B isRT){
                 param = param->next;
                 cnt++;
             }
-            //P("----add\n"); printChain(chain); WP("\n");
+            //WP("----add\n"); printChain(chain); WP("\n");
             addToSimpleHash(hashgNode, (L)chain, (L)(rt));
             R rt;
         }
@@ -258,7 +258,7 @@ static gNode *findFusionEach(Chain *chain, B isRT){
                 setVisited(chain, true);
                 S funcEach = nodeName2(func); // 1st param
                 C kind = getFuncKind(funcEach);
-                //P("func: %s, %c\n", funcEach, kind); getchar();
+                //WP("func: %s, %c\n", funcEach, kind); getchar();
                 if(isRT && (kind != 'R' && kind != 'M')) R NULL;
                 gNode *rt = initgNode(n, kind, funcEach);
                 B flag[5]; DOI(5, flag[i]=0)
@@ -371,8 +371,8 @@ static void totalInputs(List *list, gNode *rt, I dep, S *names){
         else {
             Node *p = list->val;
             if(instanceOf(p,nameK) && !isDuplicated(names, nodeName2(p))){
-                //P("p: "); printNode(p);
-                //P("rt->node: "); printNode(rt->node); getchar();
+                //WP("p: "); printNode(p);
+                //WP("rt->node: "); printNode(rt->node); getchar();
                 if(isLeafNode(p))
                     names[varNum++] = nodeName2(p);
                 //else WP("skip .... %s\n", nodeName2(p));
@@ -425,7 +425,7 @@ static void genCodeParamReversed(List *list, gNode *rt, I dep){
     if(list){
         genCodeParamReversed(list->next, rt, dep+1);
         if(list->next) glueChar(comma);
-        //P("dep = %d\n", dep);
+        //WP("dep = %d\n", dep);
         gNode *t = rt->pnode[dep];
         if(t) genCodeAuto(t, false);
         else genCodeBody(list->val, t);
@@ -450,7 +450,7 @@ static void genCodeAuto(gNode *rt, B isRT){
         varNum = 0;
         totalInputs(getNodeParams(n), rt, 0, varNames);
         DOI(varNum, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
-        //P("%s\n", code); getchar();
+        //WP("%s\n", code); getchar();
         //printAllNames(); getchar();
         glueAny(indent4);
         if(isKindR(rt)){
@@ -485,7 +485,7 @@ static void genCodeAuto(gNode *rt, B isRT){
         Node *p1 = params->next->val;
         if(!code_cond){ // TODO: only one scan allowed currently
             genCodeScanCond(p1, rt->pnode[1]); // 1st param
-            //P("cond: %s\n", code_cond); getchar();
+            //WP("cond: %s\n", code_cond); getchar();
         }
         genCodeBody(p0, rt->pnode[0]); // 2nd param
     }
@@ -525,7 +525,7 @@ static void genCodeAuto(gNode *rt, B isRT){
             glueAny(indent4 "%s\n", last);
         }
         else if(isKindE(rt) || isKindD(rt) || isKindB(rt)){
-            //P("code = %s\n", code); getchar();
+            //WP("code = %s\n", code); getchar();
             // do nothing
         }
         else TODO("Add impl. for kind %c", rt->kind);
@@ -548,8 +548,8 @@ static void genCodeAutoListParam1(List *list, gNode *rt, L id){
     I total = rt->pnum;
     Node **rtn = NEW2(Node, total);
     loadParamsVec(rtn, list);
-    //P("params:\n");
-    //DOI(total, {P("%lld\n",i); printNode(rtn[i]);}) getchar();
+    //WP("params:\n");
+    //DOI(total, {WP("%lld\n",i); printNode(rtn[i]);}) getchar();
     // important: reversed in rt->pnode
     DOIa(total, {gNode *t=rt->pnode[total-i-1]; \
             if(i>1) glueChar(comma); \
@@ -782,7 +782,7 @@ static I getNameIndex(Node *n){
 }
 
 static void genCodeAutoListSingleLen(gNode *rt){
-    //P("numLast = %d\n", numLast);
+    //WP("numLast = %d\n", numLast);
     //DOI(numLast, printNode(tempLastNodes[i]))
     if(numLast > 0){
         List *vars = nodeStmtVars(tempLastNodes[0]);
@@ -869,7 +869,7 @@ static void findFusion(Chain *chain){
     if(call){
         if(getCallKind(call)){
 //printChain(chain);
-//P("\nrt: %d, isOK2Fuse(rt): %d\n", rt != 0, rt?isOK2Fuse(rt):0); getchar();
+//WP("\nrt: %d, isOK2Fuse(rt): %d\n", rt != 0, rt?isOK2Fuse(rt):0); getchar();
 // TODO: need top to bottom to check if fusion is allowed
             gNode *rt = findFusionUp(chain, true);
             if(rt && isOK2Fuse(rt)){
@@ -1128,7 +1128,7 @@ static void init(){
     depth     = 0;
 }
 
-void optAuto(){
+void optAutoFusion(){
     init();
     scanMethodList(compiledMethodList->next);
 }

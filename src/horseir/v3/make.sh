@@ -6,7 +6,8 @@ usage(){
         "  1) $0 debug     ## clang debugging mode " \
         "  2) $0 release   ## clang release mode" \
         "  3) $0 clean     ## remove the temp folder: build/" \
-        "Example: $0 debug "
+        "Example:" \
+        "  *) $0 debug"
     exit 0
 }
 

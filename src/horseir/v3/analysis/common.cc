@@ -1,11 +1,16 @@
 #include "../global.h"
 
+/*
+ * TODO:
+ * - Type shape node can be printed using JSON objects
+ */
+
 static void printTypeNode(InfoNode *x);
 
 static void printTypeNodeNext(InfoNode *x){
     if(x){
         printTypeNodeNext(x->next);
-        P(","); printTypeNode(x);
+        WP(","); printTypeNode(x);
     }
 }
 
@@ -13,50 +18,48 @@ static void printTypeNodeSub(InfoNode *x){
     printTypeNode(x);
     printTypeNodeNext(x->next);
     //while(x->next){ // sequential
-    //    P(","); printTypeNode(x->next); x = x->next;
+    //    WP(","); printTypeNode(x->next); x = x->next;
     //}
 }
 
 static void printTypeNode(InfoNode *x){
     printType(x->type);
     if(x->subInfo){
-        P("<"); printTypeNodeSub(x->subInfo); P(">");
+        WP("<"); printTypeNodeSub(x->subInfo); WP(">");
     }
 }
 
 void printShapeNode(ShapeNode *sn){
     if(sn){
         switch(sn->type){
-            case unknownH: P("shape(?,"); break;
-            case  vectorH: P("shape(vector,"); break;
-            case    listH: P("shape(list,"); break;
-            case   tableH: P("shape(table,"); break;
+            case unknownH: WP("shape(?,"); break;
+            case  vectorH: WP("shape(vector,"); break;
+            case    listH: WP("shape(list,"); break;
+            case   tableH: WP("shape(table,"); break;
             default: EP("Shape type not supported yet: %d\n",sn->type); break;
         }
         switch(sn->type){
-            case unknownH: P("%d)",sn->size); break;
+            case unknownH: WP("%d)",sn->size); break;
             case  vectorH:
             case    listH:
-            case   tableH: if(isSNConst(sn)) P("%d",sn->size);
-                           else if(isSNId(sn)) P("id:%d",sn->sizeId);
-                           else if(isSNScan(sn)) P("scan:%d",sn->sizeScan);
+            case   tableH: if(isSNConst(sn)) WP("%d",sn->size);
+                           else if(isSNId(sn)) WP("id:%d",sn->sizeId);
+                           else if(isSNScan(sn)) WP("scan:%d",sn->sizeScan);
                            else EP("Kind not supported: %d\n", sn->kind);
-                           P(")"); break;
+                           WP(")"); break;
             default: break;
-            //case   tableH: if(sn->isId) P("id:%d)",sn->sizeId);
-            //               else P("%d)",sn->size); break;
+            //case   tableH: if(sn->isId) WP("id:%d)",sn->sizeId);
+            //               else WP("%d)",sn->size); break;
         }
     }
 }
 
-/* InfoNode */
-
 void printInfoNode(InfoNode *x){
-    P("\t{type: ");
+    WP("\t{type: ");
     printTypeNode(x);
-    P("; shape: ");
+    WP("; shape: ");
     printShapeNode(x->shape);
-    P("}\n");
+    WP("}\n");
 }
 
 static InfoNode *getSubInfo(InfoNode *x){

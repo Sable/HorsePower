@@ -211,18 +211,18 @@ static O saveToStackSub(SymbolNameList *list){
         V *x = (V*)(runStack + stackPtr);
         L i = 0;
         while(list){
-            //P("added: %s\n", list->symName->name);
+            //WP("added: %s\n", list->symName->name);
             x[i++] = list->symName->value;
             list=list->next;
         }
-        //P(">> save i = %lld\n", i);
+        //WP(">> save i = %lld\n", i);
         stackPtr += size;
     }
     else EP("Stack overflow");
 }
 
 static O saveToStack(Node *method){
-    //P("save to stack\n");
+    //WP("save to stack\n");
     saveToStackSub(method->val.method.meta->paramVars);
     saveToStackSub(method->val.method.meta->localVars);
     if(stackPtr > stackPeak)
@@ -235,15 +235,15 @@ static O loadFromStackSub(SymbolNameList *list){
     V *x = (V*)(runStack + stackPtr);
     L i = 0;
     while(list){
-        //P("loaded: %s\n", list->symName->name);
+        //WP("loaded: %s\n", list->symName->name);
         list->symName->value = x[i++];
         list=list->next;
     }
-    //P(">> load i = %lld\n", i); getchar();
+    //WP(">> load i = %lld\n", i); getchar();
 }
 
 static O loadFromStack(Node *method){ // localVars first, then paramVars
-    //P("load from stack\n"); getchar();
+    //WP("load from stack\n"); getchar();
     loadFromStackSub(method->val.method.meta->localVars);
     loadFromStackSub(method->val.method.meta->paramVars);
 }
@@ -252,8 +252,8 @@ static O loadParams(Node *method, VList *param){
     SymbolNameList *list = method->val.method.meta->paramVars;
     param = param->next;
     while(list){
-        //P("name = %s\n", list->symName->name);
-        //P("value = \n"); printV(param->v);
+        //WP("name = %s\n", list->symName->name);
+        //WP("value = \n"); printV(param->v);
         list->symName->value = param->v;
         list = list->next;
         param = param->next;
@@ -312,7 +312,7 @@ static O invokeFunction(Node *func, VList *param){
               addParam(rtnList, rtn);
              } break;
         case  methodS: {
-                //P("stackPtr = %lld\n", stackPtr);
+                //WP("stackPtr = %lld\n", stackPtr);
                 //printV(param->next->v); getchar();
                 runMethod(sn->val.method, param);
                 //rtnList->next = paramList->next; // save link (dangerous)
@@ -331,7 +331,7 @@ static O runCall(Node *n){
     cleanVList(paramList);
     if(param) runNode(param, NULL); 
     //if(n->lineno == 66){
-    //    P("size = %d\n", totalVList(paramList)); getchar();
+    //    WP("size = %d\n", totalVList(paramList)); getchar();
     //    V p0 = paramList->next->v;
     //    V p1 = paramList->next->next->v;
     //    getInfoVar(p0);
@@ -544,7 +544,7 @@ static O runRepeat(Node *n, I *isR){
         L t = getInteger1(x);
         while(t--) {
             runNode(n->val.repeatStmt.bodyBlock, isR);
-            //P("t = %lld, isR = %d\n", t, *isR); getchar();
+            //WP("t = %lld, isR = %d\n", t, *isR); getchar();
             if(isRtn) break;
             else if(isBrk) { *isR = 0; break; }
             else if(isCtn) { *isR = 0; }
@@ -606,7 +606,7 @@ static O runMethod(Node *method, VList *param){
     currentMethod = method;
     List *rtnTypes = method->val.method.typ;
     I isR=0; runNode(method->val.method.block, &isR);
-    //P("return code: %d\n", isR);
+    //WP("return code: %d\n", isR);
     if(rtnTypes){
         // output - if it has returns
         if(method == entryMain){

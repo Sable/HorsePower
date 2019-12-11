@@ -24,18 +24,19 @@ void error(const char *s){
 }
 
 void initBackend(){
-    initMemory();    // h_memory.c
+    switch(optMode){ // h_memory.c
+        case InterpNaiveM: initMemoryInterp(); break;
+        case    CompilerM:
+        case     UtilityM: initMemoryBasic();  break;
+        default: break;
+    }
     initSym();       // h_symbol.c
     initSys();       // h_system.c
 }
 
 void initGlobal(){
     initElementwiseFuncMap();
-    switch(optMode){
-        case InterpNaiveM:
-        case    CompilerM: initBackend(); break;
-        default: break;
-    }
+    initBackend();
     if(optMode == InterpNaiveM && qIsTpch)
         initTablesByQid(qTpchId);
 }

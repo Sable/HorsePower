@@ -182,7 +182,7 @@ static InfoNode *getInfoVector(Node *n){
     ShapeNode *sn = newShapeNode(vectorH, SN_CONST, num);
     sn->consts = n;  // <-- pass constant values
     in->shape  = sn;
-    //P("consts = %lld", (L)(in->consts));
+    //WP("consts = %lld", (L)(in->consts));
     //printNode(n); printInfoNode(in); getchar();
     return in;
 }
@@ -269,7 +269,7 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
             return partNext; //  partSub && partNext
         }
         else {
-            P("------------\n");
+            WP("------------\n");
             printInfoNode(x);
             printInfoNode(y);
             EP("Shape incompatible: upon two types");
@@ -382,15 +382,15 @@ static void scanMethod(Node *n){
     while(c<3){
         cleanInfoList(rtns);
         deepCopyInfoNodeList(rtns, meta->returnTypes);
-        //printInfoNode(rtns->next->in); getchar(); P("after copy ...\n");
+        //printInfoNode(rtns->next->in); getchar(); WP("after copy ...\n");
         scanNode(n->val.method.block);
-        //P("-----\n");
+        //WP("-----\n");
         //printInfoNode(rtns->next->in);
         //printInfoNode(meta->returnTypes->in);
         if(c == 1 && meta->isCalled) c = 2;
         else break;
     } // loop body executed 1 or 2 times
-    if(H_SHOW) P("Method scanned round(s): %d\n", c); //getchar();
+    if(H_SHOW) WP("Method scanned round(s): %d\n", c); //getchar();
     meta->isCompiling = false;
     meta->isCalled    = false;
     currentMethod = prevNode;

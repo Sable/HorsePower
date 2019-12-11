@@ -227,7 +227,7 @@ static void genLocalVar(SymbolName *sn, I k){
     else if(k % NUM_VAR_ROW == 0){
         glueLine(); genIndent();
     }
-    //P("V %s = incV(); \n", sn->name);
+    //WP("V %s = incV(); \n", sn->name);
     glueAny("V %s = incV(); ", sn->name);
 }
 
@@ -237,8 +237,9 @@ static void genLocalVars(Node *block){
     DOI(SymbolTableSize, { SymbolName *sn = st->table[i];
             while(sn){genLocalVar(sn, k++); sn=sn->next;}} )
     glueLine();
-    glueIndent(); glueAny("V tempV[10]; // temporary return vars"); glueLine();
-    //P("total decl vars = %d\n", k); getchar();
+    //if(false) // TODO: check if no udf
+    glueAnyLine("V tempV[10]; // temporary return vars");
+    //WP("total decl vars = %d\n", k); getchar();
 }
 
 static void genProfileStmt(B f, I c, const char *macro){
@@ -496,7 +497,7 @@ static void scanBlock(Node *n){
     depth++;
     genLocalVars(n);
     scanList(n->val.listS);
-    //P("last stmt %s\n", getNodeTypeStr(n->val.listS->val));
+    //WP("last stmt %s\n", getNodeTypeStr(n->val.listS->val));
     //Node *lastStmt = n->val.listS?n->val.listS->val:NULL;
     //if(lastStmt && !instanceOf(lastStmt, returnK))
     //    glueCodeLine(VAR_END);
@@ -516,7 +517,7 @@ static B checkSimpleHash(Node *n){
     L x = lookupSimpleHash(hashOpt,(L)n);
     if(x){
         ChainExtra *extra = (ChainExtra*)x;
-        //P("kind = %s\n", getExtraKind(extra->kind)); getchar();
+        //WP("kind = %s\n", getExtraKind(extra->kind)); getchar();
         switch(extra->kind){
             case NativeG: R 0;
             case   SkipG: R 1;
@@ -650,7 +651,7 @@ static void dumpCode(){
     dispStats();
     //saveToFile("out/gen.h", head_code, func_code, code);
     printBanner("Generated Code Below");
-    WP("%s\n%s\n%s\n", head_code, func_code, code);
+    P("%s\n%s\n%s\n", head_code, func_code, code);
 }
 
 static void init(){

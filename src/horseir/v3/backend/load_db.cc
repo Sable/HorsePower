@@ -172,23 +172,23 @@ static L (*tpchDB[8])() = { \
     readTableSupplier,readTablePartsupp };
 
 static L readTpchTables(){
-    // P("reading table region\n");
+    // WP("reading table region\n");
     // readTableRegion();
-    // P("reading table nation\n");
+    // WP("reading table nation\n");
     // readTableNation();
-    // P("reading table customer\n");
+    // WP("reading table customer\n");
     // readTableCustomer();
-    // P("reading table orders\n");
+    // WP("reading table orders\n");
     // readTableOrders();
-    // P("reading table lineitem\n");
+    // WP("reading table lineitem\n");
     // readTableLineitem();
-    // P("reading table part\n");
+    // WP("reading table part\n");
     // readTablePart();
-    // P("reading table supplier\n");   
+    // WP("reading table supplier\n");   
     // readTableSupplier();
-    // P("reading table partsupp\n");
+    // WP("reading table partsupp\n");
     // readTablePartsupp();
-    DOI(0, if(i==4){P("Loading table %s\n",tpchName[i]); (*tpchDB[i])();})
+    DOI(0, if(i==4){WP("Loading table %s\n",tpchName[i]); (*tpchDB[i])();})
     // simulateQ6();
     R 0;
 }
@@ -196,9 +196,9 @@ static L readTpchTables(){
 L metaTable(V x, S tableName){
     V keyV = getTableKeys(x);
     V valV = getTableVals(x);
-    P("Table: %s\n", tableName);
+    WP("Table: %s\n", tableName);
     DOI(vn(keyV), \
-        {P("[%2lld] %-15s %s\n",i,\
+        {WP("[%2lld] %-15s %s\n",i,\
         getSymbolStr(vQ(keyV,i)),\
         getTypeName(vp(vV(valV,i))));})
     R 0;
@@ -221,7 +221,7 @@ L initTableFromBin(S tableName){
 
 static L readTableBlackScholes(){
     C CSV_LINE[128]; SP(CSV_LINE, "/home/sable/hanfeng.c/github/benchmark-udf/data/in_1M.tbl");
-    P("File: %s\n", CSV_LINE);
+    WP("File: %s\n", CSV_LINE);
     L TYPE_LINE[]  = {H_FLT, H_FLT, H_FLT, H_FLT, H_FLT, H_FLT,
                       H_C  , H_FLT, H_FLT};
     const L NUM_COL_LINE = 9;
@@ -242,9 +242,9 @@ static L readTableBlackScholes(){
 
 L initTableByName(S tableName){
     if(!findTableByName(getSymbol(tableName))){
-        P("Loading table %s\n",tableName);
+        WP("Loading table %s\n",tableName);
         if(isReadBin){
-            P(">> Reading from bin\n");
+            WP(">> Reading from bin\n");
             initTableFromBin(tableName);
         }
         else{
@@ -270,7 +270,7 @@ L initTableByName(S tableName){
         }
     }
     else {
-        P("Table %s has been loaded\n",tableName);
+        WP("Table %s has been loaded\n",tableName);
     }
     R 0;
 }

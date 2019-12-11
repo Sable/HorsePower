@@ -62,7 +62,7 @@ V readCSV(S fileName, L numCols, L *types, Q *symList){
 #endif
     WP("loading data\n");
     loadCSV(fp, true, x, numCols, types);
-    //if(H_DEBUG) {printTablePretty(x,20); P("\n");} // input preview
+    //if(H_DEBUG) {printTablePretty(x,20); WP("\n");} // input preview
 #ifndef USE_MMAP
     fclose(fp);
 #endif
@@ -121,7 +121,7 @@ L getField(S line, C sp, V x, L rowID, L *types, L *errCode){
     S lineT = trim(line);
     L cnt = 0, numCols = 0, strLen = strlen(lineT);
     V val = getTableVals(x);
-    //P("line[%lld] = %s", rowID,lineT); printType2(xp); P("\n");
+    //WP("line[%lld] = %s", rowID,lineT); printType2(xp); WP("\n");
     DOI(strLen, {\
         if(sp==lineT[i]){\
             tmp[cnt]=0; trimSelf(tmp); \
@@ -162,7 +162,7 @@ void loadItem(V x, L k, L typ, S s){
         caseQ xQ(k) = getSymbol(s); break;
         caseS {S t=allocStrMem(strlen(s)); strcpy(t,s); xS(k)=t;} break;
         caseD {I a,b,c; sscanf(s,"%d-%d-%d",&a,&b,&c); xD(k) = a*10000+b*100+c;} break;
-        default: P("Loaditem type exception.\n"); break;
+        default: WP("Loaditem type exception.\n"); break;
     }
 }
 
@@ -371,7 +371,7 @@ static L printListFlatItem(V x, L k){
     if(k<0) {
         DOI(xn, {if(i>0)FS(","); \
             V g2=vg2(x); L a1=a0+vL(x,i); \
-            P("("); printV3(g2,a0,a1,false); P(")"); a0=a1;})
+            FS("("); printV3(g2,a0,a1,false); FS(")"); a0=a1;})
     }
     else { EP("Pending flat list print"); }
     FS("):list"); R 0;
@@ -474,13 +474,13 @@ I printKTable(V x){
 I printTablePretty(V x, L rowLimit){
     C buff[BUFF_SIZE];
     if(isTable(x)){
-        P("\nTable: row = %lld, col = %lld\n", tableRow(x),tableCol(x));
+        WP("\nTable: row = %lld, col = %lld\n", tableRow(x),tableCol(x));
         L totSize = 0;
         L *colWidth = (L*)malloc(sizeof(L) * tableCol(x));
         L rows=tableRow(x), rowPrint = rowLimit<0?rows:rowLimit>rows?rows:rowLimit;
         DOI(tableCol(x), colWidth[i]=getColWidth(x,i,rowPrint))
         DOI(tableCol(x), totSize+=colWidth[i]); totSize += tableCol(x);
-        // DOI(vn(x), P("[%lld] %lld\n",i,colWidth[i]))
+        // DOI(vn(x), WP("[%lld] %lld\n",i,colWidth[i]))
         /* print head */
         DOI(tableCol(x), {if(i>0) FS(" "); V key=getTableKeys(x); \
             printSymbol(vQ(key,i),buff); getStrPretty(buff,colWidth[i]); FT("%s",buff);})
@@ -488,7 +488,7 @@ I printTablePretty(V x, L rowLimit){
         DOI(totSize-1, FS("-"));
         FS("\n");
         // test the type of each column
-        // DOI(tableCol(x), {V val = getTableCol(getTableVals(x),i); P("type[%lld] = %lld\n",i,vp(val));})
+        // DOI(tableCol(x), {V val = getTableCol(getTableVals(x),i); WP("type[%lld] = %lld\n",i,vp(val));})
         /* print body */
         DOI(rowPrint,  { \
             DOJ(tableCol(x), {if(j>0) FS(" "); V val = getTableCol(getTableVals(x),j); \
@@ -499,7 +499,7 @@ I printTablePretty(V x, L rowLimit){
         free(colWidth);
     }
     else if(isKTable(x)){
-        P("\n KTable: row = %lld, col = %lld\n", tableRow(x),tableCol(x));
+        WP("\n KTable: row = %lld, col = %lld\n", tableRow(x),tableCol(x));
         V key = getKTableKey(x);
         V val = getKTableVal(x);
         L *colWidthKey = (L*)malloc(sizeof(L) * tableCol(key));
@@ -603,7 +603,7 @@ V readMatrix(S fileName){
         if(0 == lineNo){
             sscanf(line_special, "%lld %lld", &numRows, &numCols);
             initList(x, numRows);
-            P("Loading %s: %lld, %lld\n", fileName, numRows, numCols);
+            WP("Loading %s: %lld, %lld\n", fileName, numRows, numCols);
         }
         else {
             S ptr = line_special;
@@ -641,7 +641,7 @@ static void serializeQ(V x,FILE *fp){
 }
 
 static void serializeS(V x,FILE *fp){
-    //DOI(xn, P(" %lld",strlen(vS(x,i)))); P("\n");
+    //DOI(xn, WP(" %lld",strlen(vS(x,i)))); WP("\n");
     DOI(xn, serializeInt(strlen(vS(x,i)), fp));
     DOI(xn, serializeStr(vS(x,i), strlen(vS(x,i)), fp));
 }

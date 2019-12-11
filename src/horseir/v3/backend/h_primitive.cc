@@ -226,7 +226,7 @@ I pfnFetch(V z, V x){
 
 // removed by adding a new field in Y (i.e. ev)
 //I pfnFetch(V z, V x){
-//    //P("typ = %lld\n", xp);
+//    //WP("typ = %lld\n", xp);
 //    if(isEnum(x)){
 //        V targ = (V)getEnumKey(x);
 //        I typZ = vp(targ);
@@ -270,7 +270,7 @@ static V fetchFKeyByName(V x, V m){
                 B f = 1;
                 DOI(vn(m), if(vQ(m,i)!=vQ(col,i)){f=0;break;})
                 if(f) {
-                    //P(" matched!\n"); printV(m); getchar();
+                    //WP(" matched!\n"); printV(m); getchar();
                     R (V)(y->y);
                 }
             }
@@ -295,7 +295,7 @@ static I fetchColumnValue(V z, V x, V y, B f){
         else {
             L lenZ = vn(y);
             initV(z, H_G, lenZ);
-            //P("lenZ = %lld\n", lenZ);
+            //WP("lenZ = %lld\n", lenZ);
             DOI(lenZ, { \
                L colIndex = findColFromTable(x, vQ(y,i)); \
                WP("colIndex = %lld, %s\n", (L)colIndex,getSymbolStr(vQ(y,i))); \
@@ -654,7 +654,7 @@ I pfnSqrt(V z, V x){
 }
 
 I pfnLen(V z, V x){
-    //P("len: x = %lld\n", xn);
+    //WP("len: x = %lld\n", xn);
     //printV2(x, 20);
     initV(z,H_L,1);
     vl(z)= isTable(x)?tableRow(x):vn(x);
@@ -762,7 +762,7 @@ I pfnWhere(V z, V x){
 }
 
 I pfnSum(V z, V x){
-    //P("type is %s\n", getTypeName(xp));getchar();
+    //WP("type is %s\n", getTypeName(xp));getchar();
     //if(xn<200){
     //    WP("Input x size: %lld\n", xn); printV2(x, 20); getchar();
     //}
@@ -1024,7 +1024,7 @@ if(H_DEBUG) tic();
         DOP(lenZ,vB(y,i)=1)
         CHECKE(pfnOrderBy(t,x,y));
         order_list = sL(t);
-        //P("sort done\n");
+        //WP("sort done\n");
     }
 if(H_DEBUG) time_toc("1.(elapsed time %g ms)\n\n", elapsed);
     // WP("t = \n");
@@ -1052,7 +1052,7 @@ if(H_DEBUG) tic();
 if(H_DEBUG) time_toc("2.(elapsed time %g ms)\n\n", elapsed);
  //getchar();
     //L tid = getSymbol((S)"148561");
-    //DOI(vn(x), if(vQ(x,i)==tid)P("%lld\n",i))
+    //DOI(vn(x), if(vQ(x,i)==tid)WP("%lld\n",i))
     R 0;
 }
 
@@ -1477,7 +1477,7 @@ I pfnMod(V z, V x, V y){
 }
 
 I pfnCompress(V z, V x, V y){
-    //P("typ: x = %lld, y = %lld\n", vp(x),vp(y));
+    //WP("typ: x = %lld, y = %lld\n", vp(x),vp(y));
     if(isBool(x)){
         if(!isEqualLength(x,y)) R E_LENGTH;
         L lenX = vn(x);
@@ -1671,12 +1671,12 @@ I pfnLike(V z, V x, V y){
     //if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
     if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
         B t;
-        //P("Entering pfnLike: x(%s, %lld), y(%s, %lld)\n",getTypeName(vp(x)),vn(x),getTypeName(vp(y)),vn(y)); getchar();
+        //WP("Entering pfnLike: x(%s, %lld), y(%s, %lld)\n",getTypeName(vp(x)),vn(x),getTypeName(vp(y)),vn(y)); getchar();
         if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
             S  strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
             pcre2_code *re = getLikePatten(strY);
-            //P("input size: %lld\n", vn(x));
+            //WP("input size: %lld\n", vn(x));
             /* jit facilities */
             I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
             //case 1
@@ -1692,7 +1692,7 @@ I pfnLike(V z, V x, V y){
                 //L *temp = (L*)malloc(sizeof(L)*xn);
                 //debug_tic;
                 //DOI(vn(x), temp[i]=strlen(vS(x,i))) // 50ms
-                //P("size temp[2] = %lld\n", temp[2]);
+                //WP("size temp[2] = %lld\n", temp[2]);
                 //DOLIKE(vn(x), {vB(z,i)=LIKEMATCH(vS(x,i),strlen(vS(x,i)),re,match);})
                 //EP("Need to comment out the following code\n");
                 L n = xn;
@@ -1718,7 +1718,7 @@ I pfnLike(V z, V x, V y){
             }
             }
             //L jit_size = pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, NULL);
-            //P("pfnLike time (ms): %g ms , jit size = %lld\n", calcInterval(tv0, tv1), jit_size); //getchar();
+            //WP("pfnLike time (ms): %g ms , jit size = %lld\n", calcInterval(tv0, tv1), jit_size); //getchar();
             pcre2_code_free(re);
             pcre2_match_data_free(match);
             //case 1
@@ -1785,7 +1785,7 @@ I pfnOrderBy(V z, V x, V y){
             //printHeapInfo(); getchar();
             initV(z,H_L,lenZ);
             //printHeapInfo(); getchar();
-            //P("lenZ = %lld, sL(z) = %lld, sB(y) = %lld\n", lenZ,(L)sL(z),(L)sB(y)); 
+            //WP("lenZ = %lld, sL(z) = %lld, sB(y) = %lld\n", lenZ,(L)sL(z),(L)sB(y)); 
             //DOI(lenZ, vL(z,i) = i); WP("done\n"); getchar();
             // WP("lenZ = %lld, item = %lld\n",lenZ,vn(x));
             // WP("before\n");
@@ -1816,7 +1816,7 @@ I pfnOrderBy(V z, V x, V y){
 }
 
 I pfnEach(V z, V x, FUNC1(foo)){
-    //P("type x: %s\n", getTypeName(xp));
+    //WP("type x: %s\n", getTypeName(xp));
     if(isList(x)){
         V t = NULL;
         if(isListFlat(x)) {
@@ -1943,14 +1943,14 @@ I pfnOuter(V z, V x, V y, FUNC2(foo)){
 
 static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
     /* pfnEq (0), pfnLt (1) */
-    //P("typ: x = %lld, y = %lld\n", vp(x), vp(y));
+    //WP("typ: x = %lld, y = %lld\n", vp(x), vp(y));
     I typCell = -1; L lenZ = 2;
     I op = getOpFromSymbol(vq(f));
     if(op<0) R E_DOMAIN;
     else { typCell=H_B; }
     B isEq= 4==op;
     // TODO: a bug found in joinIndexHash (check q8)
-    //P("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
+    //WP("1,order_x = %d, order_y = %d\n",isOrdered(x),isOrdered(y));
     //if(isOrdered(x)){
     //    WP("2.0 ordered left\n");
     //    R joinIndexHash(z,x,y,'l');
@@ -2097,9 +2097,9 @@ static I pfnJoinIndexMultiple(V z, V x, V y, V f){
         L fx = getFirstEqual(f); L f0=vQ(f,fx);
         V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
         CHECKE(joinOneColumn(z0,x0,y0,f0));
-        //P("fx = %lld\n", fx); printV(f); getchar();
+        //WP("fx = %lld\n", fx); printV(f); getchar();
         //V k0 = vV(z0,0), k1 = vV(z0,1);
-        //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;P("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
+        //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;WP("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
         //printV(x0); printV(y0); printV(z0); getchar();
         initV(z,H_G,2);
         CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
@@ -2125,9 +2125,9 @@ I pfnJoinIndex(V z, V x, V y, V f){
     if(vn(f)==1){
         if(vn(x) > vn(y)){
             CHECKE(pfnJoinIndexSingle(z,y,x,f));
-            //P("before:\n"); printV(vV(z,0)); printV(vV(z,1));
+            //WP("before:\n"); printV(vV(z,0)); printV(vV(z,1));
             swap2(z);
-            //P("after:\n"); printV(vV(z,0)); printV(vV(z,1));
+            //WP("after:\n"); printV(vV(z,0)); printV(vV(z,1));
             //getchar();
             R 0;
         }
@@ -2285,7 +2285,7 @@ I pfnKTable(V z, V x, V y){
 
 #define MEMBER(t,z,x,y) case##t CHECKE(lib_member_##t(sB(z),s##t(x),vn(x),s##t(y),vn(y))); break
 I pfnMember(V z, V y, V x){ /* return left shape */
-    //P("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
+    //WP("vp(x) = %d, vp(y) = %d\n", vp(x),vp(y));
     //printV(x); printV(y); getchar();
     if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
         V tempX = allocNode();
@@ -2441,9 +2441,9 @@ I pfnAddFKey(V x, V xKey, V y, V yKey){
             printV(yCol);
             getchar();
         }
-        //P("1111\n"); getchar();
+        //WP("1111\n"); getchar();
         CHECKE(pfnEnum(fKey, xCol, yCol));
-        //P("2222\n"); getchar();
+        //WP("2222\n"); getchar();
         CHECKE(setFKey(tableY, yKey, fKey));
         if(isOne(xKey)){
             WP("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \

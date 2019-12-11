@@ -259,7 +259,7 @@ ShapeNode *newShapeNode(ShapeType type, ShapeKind kind, I size){
         case  vectorH: 
         case    listH:
         case   tableH:
-              //P("kind = %d, size = %d\n", kind, size); getchar();
+              //WP("kind = %d, size = %d\n", kind, size); getchar();
               if(isSNId(sn))
                   sn->sizeId = size<0?shapeId++:size;
               else if(isSNConst(sn))
@@ -664,7 +664,7 @@ static InfoNode *commonPower(InfoNode *x, InfoNode *y){
 
 static InfoNode *propMember(InfoNode *x, InfoNode *y){
     HorseType rtnType;
-    //P("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
+    //WP("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
     if(sameT(x,y) && isBasicIN(x)){
         rtnType = boolT;
     }
@@ -755,8 +755,8 @@ static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
             EP("Scan shape sizes must be the same: %d vs %d", x->sizeScan, y->sizeScan);
     }
     else {
-        printShapeNode(x); P("\n");
-        printShapeNode(y); P("\n");
+        printShapeNode(x); WP("\n");
+        printShapeNode(y); WP("\n");
         EP("Unknown ShapeNode for compress");
     }
 }
@@ -989,7 +989,7 @@ static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
 
 // improve it later
 // static InfoNode *specialColumnValue(InfoNode *x, InfoNode *y){
-//     //P("type: column value\n"); printType(x->type); P(" "); printType(y->type); P("\n"); getchar();
+//     //WP("type: column value\n"); printType(x->type); WP(" "); printType(y->type); WP("\n"); getchar();
 //     Type rtnType;  B isForeignKey = false; L primaryKeyId = -1;
 //     if(isTableIN(x) && isString1IN(y)){
 //         S   tableName = tableInfo[x->shape->sizeId];
@@ -1104,7 +1104,7 @@ static InfoNode *propKeyValues(InfoNode *x, bool f){
     else if(isEnumT(x)){ /* TODO: need to pass info to keys */
         if(f) { // pass key
             I rtnId = getEnumKeyIdFromMeta(x);
-            //P("return ID: %d\n", rtnId); getchar();
+            //WP("return ID: %d\n", rtnId); getchar();
             if(isCellTypeSimple(x))
                 return newInfoNode(inType(inCell(x)),
                                     newShapeNode(vectorH, SN_ID, rtnId));
@@ -1292,8 +1292,8 @@ static InfoNode *propIndexA(InfoNodeList *in_list){
     InfoNode *v = getNode(in_list, 2);
     InfoNode *x = getNode(in_list, 1);
     InfoNode *y = getNode(in_list, 0);
-    //P("type: v(%s), x(%s), y(%s)\n",getpTypeName(v->type),getpTypeName(x->type),getpTypeName(y->type));
-    //P("shape: %d, %d\n", x->shape->type, y->shape->type); getchar();
+    //WP("type: v(%s), x(%s), y(%s)\n",getpTypeName(v->type),getpTypeName(x->type),getpTypeName(y->type));
+    //WP("shape: %d, %d\n", x->shape->type, y->shape->type); getchar();
     if(sameT(v,y) && isIntIN(x) && sameH(inShape(x),inShape(y))){
         return v;
     }

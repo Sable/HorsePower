@@ -18,7 +18,7 @@ static void runCompilerCore(){
         HorseCompilerNaive();     // compiler.c
     else
         HorseCompilerOptimized(); // optimizer.c
-    time_toc("Compile time (ms): %g\n", elapsed);
+    time_toc("Compiling time (ms): %g\n", elapsed);
 }
 
 static void runCompilerJITCore(){
@@ -35,7 +35,6 @@ static void parseInput(S file_path){
     if(!(yyin=fopen(file_path, "r"))){
         EP("File not found: %s", file_path);
     }
-    WP("parsing ....\n");
     tic();
     I ret = yyparse();
     fclose(yyin);
@@ -47,8 +46,8 @@ static void parseInput(S file_path){
 }
 
 static void envInit(S file){
-    parseInput(file);
     initGlobal();
+    parseInput(file);
     weedProg(root);  // weed types/main
 }
 

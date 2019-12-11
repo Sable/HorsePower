@@ -71,7 +71,7 @@ static void cleanSymbolNameList(SymbolNameList *list){
 }
 
 static void addSymbolNameList(SymbolNameList *list, SymbolName *sn){
-    //P("added %s\n", sn->name);
+    //WP("added %s\n", sn->name);
     SymbolNameList *x = NEW(SymbolNameList);
     x->symName = sn;
     x->next = list->next;
@@ -102,7 +102,7 @@ char *strName(Node *n){
 }
 
 void printSymbolName(SymbolName *sn){
-    P("symbol: %s, kind: %s\n", sn->name, strSymbolKind(sn->kind));
+    WP("symbol: %s, kind: %s\n", sn->name, strSymbolKind(sn->kind));
     switch(sn->kind){
         case  moduleS: printNode(sn->val.module); break;
         case  methodS: printNode(sn->val.method); break;
@@ -111,7 +111,7 @@ void printSymbolName(SymbolName *sn){
         case builtinS: break;
         default: EP("Not supported: %d", sn->kind);
     }
-    P("\n");
+    WP("\n");
 }
 
 void printSymbolNameList(SymbolNameList *list){
@@ -145,7 +145,7 @@ static int simpleHash(char *str){
 SymbolName *putSymbolName(SymbolTable *st, char *name, SymbolKind kind){
     int i = simpleHash(name);
     //if(kind != builtinS)
-    //  P("put string: %s ==> %d ==> %lld\n", name,i,(long long)(st->table[i]));
+    //  wP("put string: %s ==> %d ==> %lld\n", name,i,(long long)(st->table[i]));
     for(SymbolName *s = st->table[i]; s; s = s->next){
         if(sEQ(s->name, name))
             EP("Name existed: %s",name);
@@ -284,7 +284,7 @@ static void scanDeclarationList(List *list, SymbolTable *st){
 // 2nd pass: scan
 
 static void scanVar(Node *n, SymbolTable *st){
-    //P("var = %s\n", n->val.param.id);
+    //WP("var = %s\n", n->val.param.id);
     SymbolName *s = putSymbolName(st, n->val.param.id, localS);
     Node *typ = n->val.param.typ;
     s->val.local = n;
@@ -369,7 +369,7 @@ static void scanReturnStmt(Node *n, SymbolTable *st){
 
 //static void printSymList(){
 //    SymbolNameList *p = symList->next;
-//    while(p){P("- %s\n", p->symName->name); p=p->next;}
+//    while(p){WP("- %s\n", p->symName->name); p=p->next;}
 //}
 
 static void setReturnShape(InfoNodeList *list){

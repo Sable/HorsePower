@@ -54,10 +54,10 @@ static void printChainDefNames(Chain *c){
     if(n){
         while(n->next){
             n = n->next;
-            P("name = %s\n", n->name);
+            WP("name = %s\n", n->name);
         }
     }
-    P("---list---done----\n");
+    WP("---list---done----\n");
 }
 
 static void addToFlowList(FlowList *list, ChainList *flow){
@@ -77,7 +77,7 @@ static void cleanFlowList(FlowList *list){
 
 
 static void addToFlow(ChainList *flow, Chain *c){
-    //printChain(c); P("--added--\n"); getchar();
+    //printChain(c); WP("--added--\n"); getchar();
     ChainList *p = NEW(ChainList);
     p->chain = c;
     p->next = flow->next;
@@ -90,7 +90,7 @@ static void removeKillSet(ChainList *flow, char *s){
     while(flow && flow->next){
         Chain *x = flow->next->chain;
         if(isInNameList(x->defs,s)){
-            //isFound = true; P("found s = %s\n", s); printFlow(src); getchar();
+            //isFound = true; WP("found s = %s\n", s); printFlow(src); getchar();
             ChainList *t = flow->next;
             flow->next = flow->next->next; 
             free(t); // clean flow->next ?
@@ -98,7 +98,7 @@ static void removeKillSet(ChainList *flow, char *s){
         else flow = flow->next;
     }
     //if(isFound){
-        //P("----> after <-----\n"); printFlow(src); getchar();
+        //WP("----> after <-----\n"); printFlow(src); getchar();
     //}
 }
 
@@ -139,7 +139,7 @@ static void cleanFlow(ChainList *p){
 static bool isChainInList(ChainList *list, Chain *chain){
     if(list){
         bool t = isChainInList(list->next, chain);
-        //P("%lld vs %lld\n", (L)list->chain->cur, (L)chain->cur);
+        //WP("%lld vs %lld\n", (L)list->chain->cur, (L)chain->cur);
         return t?true:sameChain(list->chain, chain);  // check Node cur
     }
     return false;
@@ -179,7 +179,7 @@ static ChainList *mergeFlow(ChainList *left, ChainList *right){
 static bool sameFlowBody(ChainList *left, ChainList *right){
     if(left){
         bool t = sameFlowBody(left->next, right);
-        //if(t) P("t = true\n"); else P("t = false\n");
+        //if(t) WP("t = true\n"); else WP("t = false\n");
         return t?isChainInList(right, left->chain):false;
     }
     return true;
@@ -194,12 +194,12 @@ static int countChainList(ChainList *list){
 static bool sameFlow(ChainList *left, ChainList *right){
     int  leftSize = countChainList(left);
     int rightSize = countChainList(right);
-    //P("leftSize = %d, rightSize = %d\n", leftSize, rightSize);
+    //WP("leftSize = %d, rightSize = %d\n", leftSize, rightSize);
     //printFlow(left); printFlow(right); getchar();
     if(left && right) {
         if(leftSize == rightSize){
             bool t = sameFlowBody(left->next, right->next);
-            //P("t = %d\n", t); getchar();
+            //WP("t = %d\n", t); getchar();
             return t;
         }
         else return false;
@@ -281,36 +281,36 @@ static void addToDUChain(Chain *defChain, Chain *useChain){
 
 void printChainInfo(Chain *p){
     printNode(p->cur);
-    P("  defSize = %d, maxDSize = %d\n",p->defSize,p->maxDSize);
-    P("  useSize = %d, maxUSize = %d\n",p->useSize,p->maxUSize);
-    P("  %s visited\n", p->isVisited?"Is":"Not");
+    WP("  defSize = %d, maxDSize = %d\n",p->defSize,p->maxDSize);
+    WP("  useSize = %d, maxUSize = %d\n",p->useSize,p->maxUSize);
+    WP("  %s visited\n", p->isVisited?"Is":"Not");
 }
 
 void printChainExtra(ChainExtra *x){
-    P("Function Decl:\n");
-    P("%s\n\n", x->funcDecl);
-    P("Function Invc:\n");
-    P("%s\n\n", x->funcInvc);
-    P("Function Body:\n");
-    P("%s\n\n", x->funcFunc);
+    WP("Function Decl:\n");
+    WP("%s\n\n", x->funcDecl);
+    WP("Function Invc:\n");
+    WP("%s\n\n", x->funcInvc);
+    WP("Function Body:\n");
+    WP("%s\n\n", x->funcFunc);
 }
 
 static void printChainUses(Chain *p){
-    DOI(p->useSize, {P(" --> "); printChain(p->chain_uses[i]); P("\n"); })
+    DOI(p->useSize, {WP(" --> "); printChain(p->chain_uses[i]); WP("\n"); })
 }
 
 static void printChainDefs(Chain *p){
-    DOI(p->defSize, {P(" <-- "); printChain(p->chain_defs[i]); P("\n"); })
+    DOI(p->defSize, {WP(" <-- "); printChain(p->chain_defs[i]); WP("\n"); })
 }
 
 static int printFlowBody(ChainList *list){
     if(list){
         int lineno = printFlowBody(list->next);
         Chain *p = list->chain;
-        P("[%3d] %d, %lld: ", lineno, p->isVisited, (L)list->chain->cur);
-        printChain(p);     P("\n");
+        WP("[%3d] %d, %lld: ", lineno, p->isVisited, (L)list->chain->cur);
+        printChain(p);     WP("\n");
         printChainUses(p);
-        printChainDefs(p); P("\n");
+        printChainDefs(p); WP("\n");
         return lineno + 1;
     }
     return 0;
@@ -337,13 +337,13 @@ static void scanAssignStmt(Node *n, ChainList *flow){
 
 static void scanVar(Node *n, ChainList *flow){
     char *name = n->val.param.id;
-    //P("var = %s\n", name);
+    //WP("var = %s\n", name);
     // udchain: add defs
-    //P("1. addDefNameToChain\n");
+    //WP("1. addDefNameToChain\n");
     addDefNameToChain(currentChain, name);
-    //P("2. removeKillSet\n");
+    //WP("2. removeKillSet\n");
     removeKillSet(flow, name);
-    //P("3. addToFlow\n");
+    //WP("3. addToFlow\n");
     addToFlow(flow, currentChain);
 }
 
@@ -352,7 +352,7 @@ static void findInFlowBody(ChainList *flow, char *s){
         findInFlowBody(flow->next, s);
         Chain *x = flow->chain;
         if(isInNameList(x->defs,s)){  // TODO: can improve with symbol tables
-            //P(">> found!!! (%s)\n", s); printChain(x); P("\n");
+            //WP(">> found!!! (%s)\n", s); printChain(x); WP("\n");
             addToUDChain(currentChain, x); // use-def chain
             addToDUChain(x, currentChain); // def-use chain
         }
@@ -368,10 +368,10 @@ static void findInFlow(ChainList *flow, char *s){
 //     // kill all defs before
 //     while(flow->next){
 //         Chain *x = flow->next->chain;
-//         //P("looking for %s\n", s);
+//         //WP("looking for %s\n", s);
 //         //printChainDefNames(x);
 //         if(isInNameList(x->defs,s)){  // TODO: can improve with symbol tables
-//             //P(">> found!!!\n"); printChain(x); P("\n");
+//             //WP(">> found!!!\n"); printChain(x); WP("\n");
 //             addToUDChain(currentChain, x); // use-def chain
 //             addToDUChain(x, currentChain); // def-use chain
 //         }
@@ -386,10 +386,10 @@ static void scanName(Node *n, ChainList *flow){
         addDefNameToChain(currentChain, name);
         removeKillSet(flow, name);
         addToFlow(flow, currentChain);
-        //P("flow next = %lld\n", (L)flow->next); printFlow(flow); getchar();
+        //WP("flow next = %lld\n", (L)flow->next); printFlow(flow); getchar();
     }
     else { // udchain: add uses
-        //P("checking use: %s, currentChain: %lld\n", name, (L)currentChain); getchar();
+        //WP("checking use: %s, currentChain: %lld\n", name, (L)currentChain); getchar();
         if(currentChain){
             char *useName = name;
             addUseNameToChain(currentChain, useName);
@@ -481,7 +481,7 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
     FlowList *prev_exit  = flow_list_exit->next;
     flow_list_input->next = NULL;
     flow_list_exit->next  = NULL;
-    //P("Starting while/repeat...");
+    //WP("Starting while/repeat...");
     while(true){
         if(mergedFlow){
             addToFlowList(flow_list_input, entryFlow);
@@ -496,7 +496,7 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
             cleanFlowList(flow_list_exit);
         }
         mergedFlow = copyFlow(flow);
-        //P("Mergedflow: \n"); printFlow(mergedFlow); getchar();
+        //WP("Mergedflow: \n"); printFlow(mergedFlow); getchar();
         if(isWhile){
             scanNode(n->val.whileStmt.condExpr , flow);
             scanNode(n->val.whileStmt.bodyBlock, flow);
@@ -506,12 +506,12 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
             scanNode(n->val.repeatStmt.bodyBlock, flow);
         }
         addToFlowList(flow_list_input, flow);
-        //P("Iteration: \n"); printFlow(flow); getchar();
+        //WP("Iteration: \n"); printFlow(flow); getchar();
         cnt++;
     }
     newFlow = mergeFlowList(flow_list_exit);
     setFlow(flow, newFlow);
-    P("Scan while/repeat with %d loops to a fixed point\n", cnt); //getchar();
+    WP("Scan while/repeat with %d loops to a fixed point\n", cnt); //getchar();
     cleanFlowList(flow_list_input);
     cleanFlowList(flow_list_exit);
     flow_list_input->next = prev_input;
