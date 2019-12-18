@@ -430,9 +430,18 @@ void printNodeLine(Node *n){
     P("[Line %3d]: ",n->lineno); printNode(n);
 }
 
-void printNodeStr(Node *n){
+static void printNodeStrCore(Node *n){
     buff[0]=0; setNewLine(false);
     prettyNodeBuff(buff, n);
+}
+
+const char *obtainNodeStr(Node *n){
+    printNodeStrCore(n);
+    R buff[0]==0?NULL:strdup(buff);
+}
+
+void printNodeStr(Node *n){
+    printNodeStrCore(n);
     P("%s", buff);
 }
 

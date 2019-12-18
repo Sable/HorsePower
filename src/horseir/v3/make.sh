@@ -6,6 +6,7 @@ usage(){
         "  1) $0 debug     ## clang debugging mode " \
         "  2) $0 release   ## clang release mode" \
         "  3) $0 clean     ## remove the temp folder: build/" \
+        "  4) $0 lib       ## create a static library" \
         "Example:" \
         "  *) $0 debug"
     exit 0
@@ -20,7 +21,8 @@ setup_tigger(){
     cc_path=/usr/bin/clang++-6.0
     cc_omp_header=/usr/lib/gcc/x86_64-linux-gnu/8/include
     cc_omp_flag="-fopenmp=libiomp5"
-    extra_cmd="-DHORSE_CLANG=${cc_path}  -DHORSE_OMP_HEADER=${cc_omp_header} -DHORSE_OMP_FLAG=${cc_omp_flag}"
+    extra_cmd="-DHORSE_CLANG=${cc_path} -DHORSE_OMP_HEADER=${cc_omp_header} -DHORSE_OMP_FLAG=${cc_omp_flag}"
+    echo "extra_cmd = ${extra_cmd}"
 }
 
 machine=`hostname` 
@@ -42,6 +44,8 @@ if [ "$#" -eq 1 ]; then
         (mkdir -p build && cd build && cmake .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16)
     elif [ $mode = "clean" ]; then
         (set -x && rm -rf build)
+    elif [ $mode = "lib" ]; then
+        (mkdir -p build-lib && cd build-lib && cmake -D BUILD_STATIC_LIBS=ON .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16 && mv libcore.a ..)
     else
         usage
     fi

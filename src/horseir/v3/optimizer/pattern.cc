@@ -13,6 +13,7 @@ static Node *currentMethod;
 static PatternTree *allPattern[99];
 static I numPattern, depth;
 static B isACC;
+static I optPatternKind;
 
 extern List *compiledMethodList;
 extern sHashTable *hashOpt;
@@ -668,10 +669,23 @@ static void findCase3(ChainList *list){
  * Cases: compress(2) and index(3) have very similar code
  */
 static void analyzeChain(ChainList *list){
-    DOI(numPattern, findCase1(list, allPattern[i], i+1));
-    //findCase1(list, allPattern[6], 7); // test with a specifc pattern
-    findCase2(list); // compress
-    findCase3(list); // index
+    if(optPatternKind == 0){
+        //STOP("opt all");
+        DOI(numPattern, findCase1(list, allPattern[i], i+1));
+        //findCase1(list, allPattern[6], 7); // test with a specifc pattern
+        findCase2(list); // compress
+        findCase3(list); // index
+    }
+    else if(optPatternKind == 1){
+        //STOP("opt p1");
+        DOI(numPattern, findCase1(list, allPattern[i], i+1));
+        findCase3(list); // index
+    }
+    else if(optPatternKind == 2){
+        //STOP("opt p2");
+        findCase2(list); // compress
+    }
+    
 }
 
 static void compileMethod(Node *n){
@@ -696,14 +710,14 @@ static void initPatterns(){
     PatternTree *fp4 = createFP4();
     PatternTree *fp5 = createFP5(0); // min
     PatternTree *fp6 = createFP5(1); // max
-    PatternTree *fp7 = createFP5(2); // len
+    //PatternTree *fp7 = createFP5(2); // len
     insertPattern(fp1);
     insertPattern(fp2);
     insertPattern(fp3);
     insertPattern(fp4);
     insertPattern(fp5);
     insertPattern(fp6);
-    insertPattern(fp7);
+    //insertPattern(fp7);
 }
 
 static void cleanPatterns(){
@@ -721,9 +735,10 @@ static void init(){
     }
 }
 
-void optPattern(){
+void optPattern(I kind){
     printBanner("Fusion with Patterns");
     init();
+    optPatternKind = kind;
     scanMethodList(compiledMethodList->next);
     cleanPatterns();
 }

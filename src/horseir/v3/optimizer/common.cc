@@ -138,9 +138,9 @@ static C obtainTypeAlias(HorseType t){
         case    f32T: R 'F';
         case    f64T: R 'E';
         case    strT: R 'S';
-        case    symT: R 'S'; // Q -> S
+        case    symT: R 'Q';
         case   charT: R 'C';
-        case   dateT: R 'I'; // D -> I
+        case   dateT: R 'D'; // D -> I why?
         case  monthT: R 'M';
         case   timeT: R 'T';
         case     dtT: R 'Z';
@@ -246,12 +246,26 @@ B isDuplicated(S *names, S s){
     return searchName(names, s) >= 0;
 }
 
+L constIdNum;
+S constId[99];
+
+static void genCodeConstSymbol(S str){
+    L id = -1;
+    DOI(constIdNum, if(sEQ(constId[i], str)){id=i;break;})
+    if(id < 0){
+        glueAny("%s", str);
+    }
+    else {
+        glueAny("id%lld",id);
+    }
+}
+
 // copy from: compiler.c/scanConst
 O genCodeConst(Node *n){
     ConstValue *v = n->val.nodeC;
     switch(v->type){
         case    symC:
-        case    strC: glueAny("%s",v->valS); break;
+        case    strC: glueAny("%s", v->valS); break;
         case   dateC:
         case  monthC:
         case   timeC:
@@ -267,14 +281,37 @@ O genCodeConst(Node *n){
     }
 }
 
+Node *getSingleSymbol(Node *x){
+    if(instanceOf(x, vectorK) && x->val.vec.one){
+        Node *c = x->val.vec.val->val;
+        ConstValue *v = c->val.nodeC;
+        if(v->type == symC){
+            R c;
+        }
+    }
+    R NULL;
+}
+
 static O genCodeVector(Node *n){
-    genCodeList(n->val.vec.val);
+    Node *c = getSingleSymbol(n);
+    if(c){
+        ConstValue *v = c->val.nodeC;
+        genCodeConstSymbol(v->valS);
+    }
+    else {
+        genCodeList(n->val.vec.val);
+    }
 }
 
 O genCodeName(Node *n, I id){
     C typeCode = getTypeCodeByName(n);
     //P("looking for "); printNode(n); getchar();
     glueAny("v%c(x%d,i)", typeCode, id);
+}
+
+O genCodeIndex(Node *n, I id){
+    C typeCode = getTypeCodeByName(n);
+    glueAny("v%c(x%d", typeCode, id);
 }
 
 O genCodeNode(Node *n){

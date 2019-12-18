@@ -1874,7 +1874,8 @@ void profileListR(V x){
 // special case for q20
 B checkOrderCase1(V z, V x, V f){
     if(2==xn && isInt(vV(x,0)) && isInt(vV(x,1)) && vB(f,0)==vB(f,1)){
-        if(H_DEBUG) WP("order case 1\n"); // getchar();
+        if(H_DEBUG)
+            STOP("order case 1");
         V x0  = vV(x,0);
         V x1  = vV(x,1);
         //getInfoVar(x0); getInfoVar(x1); getchar();
@@ -1936,7 +1937,7 @@ L getInteger1(V x){
             default: EP("Not an integer type: %s", getTypeName(xp));
         }
     }
-    else EP("V must be a singleton");
+    else EP("Value node must be a singleton");
 }
 
 #define InitSeed 16807

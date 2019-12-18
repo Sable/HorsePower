@@ -14,6 +14,9 @@ int   numOpts;
 bool  qIsTpch;
 int   qTpchId;
 char *qCmd;
+bool isOptPatternAll;
+bool isOptPattern1;
+bool isOptPattern2;
 
 static int longFlag; // set by '--verbose'
 static char *qOpt[99];
@@ -155,6 +158,8 @@ static TC getTargetCode(S target){
 static OC obtainOptCode(S opt){
     if(sEQ(opt, "fe")) R OPT_FE;
     else if(sEQ(opt, "fp")) R OPT_FP;
+    else if(sEQ(opt, "fp1")) R OPT_FP1;
+    else if(sEQ(opt, "fp2")) R OPT_FP2;
     else if(sEQ(opt, "fa")) R OPT_FA;
     else if(sEQ(opt, "all")) R OPT_ALL;
     else R OPT_NA;

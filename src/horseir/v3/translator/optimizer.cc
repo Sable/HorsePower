@@ -21,9 +21,11 @@ static void printBannerLocal(const char *msg){
 static void optimizerMain(OC opt){
     printBannerLocal(obtainOptStr(opt));
     switch(opt){
-        case OPT_FE: optElementwise(); break; // compiledMethodList
-        case OPT_FP: optPattern();     break; // compiledMethodList
-        case OPT_FA: optAutoFusion();  break; // compiledMethodList
+        case OPT_FE : optElementwise(); break; // compiledMethodList
+        case OPT_FP : optPattern(0);    break; // compiledMethodList
+        case OPT_FP1: optPattern(1);    break; // compiledMethodList
+        case OPT_FP2: optPattern(2);    break; // compiledMethodList
+        case OPT_FA : optAutoFusion();  break; // compiledMethodList
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }

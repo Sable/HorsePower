@@ -73,7 +73,7 @@
 /* declarations below */
 
 O  optElementwise();
-O  optPattern    ();
+O  optPattern    (I kind);
 O  optAutoFusion ();
 O  optSReduction (Prog *root);
 
@@ -97,6 +97,7 @@ O  genCodeConst  (Node *n);
 O  genCodeNode   (Node *n);
 O  genCodeList   (List *list);
 O  genCodeName   (Node *n, I id);
+O  genCodeIndex  (Node *n, I id);
 S  genInvcSingle (S targ, S func, S *names, I num);
 
 Node *getNodeItemIndex(Node *n, I pos);
@@ -110,5 +111,7 @@ Node *getEachFuncNode  (Node *n);
 Node *getStmtCall(Node *stmt);
 
 SymbolName *getNodeSymbolName(Node *n);
+
+Node *getSingleSymbol(Node *x);
 
 #endif

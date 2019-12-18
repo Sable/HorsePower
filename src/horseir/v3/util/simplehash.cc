@@ -1,15 +1,13 @@
 #include "../global.h"
 
-#define Node sHashNode
-
-static Node *initHashNode(L key, L val){
-    Node *n = NEW(Node);
+static sHashNode *initHashNode(L key, L val){
+    sHashNode *n = NEW(sHashNode);
     n->key = key;
     n->val = val;
     return n;
 }
 
-static L countSimpleNode(Node *n){
+static L countSimpleNode(sHashNode *n){
     L c=0; while(n){c++; n=n->next;} R c;
 }
 
@@ -37,7 +35,7 @@ static L getHashValue(L val, L size){
     return (val < 0 ? -val : val)%size;
 }
 
-static Node* findSimpleHash(Node *n, L key){
+static sHashNode *findSimpleHash(sHashNode *n, L key){
     while(n && n->key != key) n = n->next; R n;
 }
 
@@ -47,32 +45,39 @@ O addToSimpleHash(sHashTable *st, L key, L val){
         st->table[t] = initHashNode(key, val);
     }
     else {
-        Node *p = findSimpleHash(st->table[t], key);
+        sHashNode *p = findSimpleHash(st->table[t], key);
         if(p == NULL){
-            Node *n = initHashNode(key, val);
+            sHashNode *n = initHashNode(key, val);
             n->next = st->table[t];
             st->table[t] = n;
         }
-        else EP("Duplicated key found");
+        else {
+            EP("Duplicated key found with values: %lld vs. %lld",(L)(p->val),val);
+        }
     }
 }
 
 L lookupSimpleHash(sHashTable *st, L key){
     L t = getHashValue(key, st->size);
-    Node *p = findSimpleHash(st->table[t], key);
+    sHashNode *p = findSimpleHash(st->table[t], key);
     R p==NULL?0:p->val;
 }
 
 sHashTable* initSimpleHash(L size){
     sHashTable *st = NEW(sHashTable);
-    st->table = NEW2(Node, size);
+    st->table = NEW2(sHashNode, size);
     st->size  = size;
     R st;
 }
 
-/*
- * // free functions needed
- * static void freeHash(Node **table, L size);
-*/
+void freeSimpleHash(sHashTable *st){
+    DOI(st->size, { \
+            sHashNode *t=st->table[i]; \
+            if(t){ \
+                while(t){ sHashNode *p=t; t=t->next; free(p); } \
+                st->table[i]=NULL; }} )
+    free(st);
+    // STOP("The simple hash table has been freed!\n");
+}
 
 
