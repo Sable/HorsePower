@@ -1,0 +1,40 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`orders:sym);
+    t6:date = check_cast(@column_value(t0,`o_orderdate:sym), date);
+    t7:sym = check_cast(@column_value(t0,`o_orderpriority:sym), sym);
+    t11:? = @geq(t6,1993-07-01:date);
+    t12:? = @lt(t6,1993-10-01:date);
+    t13:? = @and(t11,t12);
+    t23:? = @load_table(`lineitem:sym);
+    t24:enum<i32> = check_cast(@column_value(t23,`l_orderkey:sym), enum<i32>);
+    t36:date = check_cast(@column_value(t23,`l_commitdate:sym), date);
+    t37:date = check_cast(@column_value(t23,`l_receiptdate:sym), date);
+    t41:? = @lt(t36,t37);
+    t58:? = @values(t24);
+    t59:? = @keys(t24);
+    t60:? = @compress(t41,t58);
+    t61:? = @len(t59);
+    t62:? = @vector(t61,0:bool);
+    t63:? = @index_a(t62,t60,1:bool);
+    t64:? = @and(t13,t63);
+    t70:? = @compress(t64,t7);
+    t74:? = @list(t70);
+    t75:? = @group(t74);
+    t76:? = @keys(t75);
+    t77:? = @values(t75);
+    t78:? = @index(t70,t76);
+    t79:? = @each_right(@index,t70,t77);
+    t80:? = @each(@len,t79);
+    t81:? = @raze(t80);
+    t82:? = @list(t78);
+    t83:? = @order(t82,1:bool);
+    t84:? = @index(t78,t83);
+    t85:? = @index(t81,t83);
+    t86:? = (`o_orderpriority,`order_count):sym;
+    t87:? = @list(t84,t85);
+    t88:? = @table(t86,t87);
+    return t88;
+  }
+}

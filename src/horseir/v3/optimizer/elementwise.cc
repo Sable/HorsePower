@@ -175,15 +175,64 @@ static B isOK2Fuse(gNode *rt){
     DOI(rt->pnum, if(rt->pnode[i])R 1) R 0;
 }
 
+extern L constIdNum;
+extern S constId[99];
+
+static const char *obtainConstSymbolId(Node *p){
+    ConstValue *v = p->val.nodeC;
+    if(v->type == symC){
+        L id = -1;
+        DOI(constIdNum, if(sEQ(constId[i],v->valS)){id=i;break;})
+        if(id < 0){
+            id = constIdNum++;
+            constId[id] = v->valS;
+        }
+        C temp[99];
+        SP(temp, "id%lld", id);
+        R strdup(temp);
+    }
+    R NULL;
+}
+
+
 // TODO: remove duplicated items (only distinct values wanted)
 static void totalInputs(gNode *rt, S *names){
     List *params = getNodeParams(rt->node);
     DOI(rt->pnum, {I k=i2-i-1; gNode *t=rt->pnode[k]; \
             if(t) totalInputs(t,names); \
             else {Node *p = getParamsIndex(params,k)->val; \
-                if(instanceOf(p,nameK)){ \
-                  if(!isDuplicated(names,nodeName2(p))) \
-                    names[varNum++]=nodeName2(p);}} })
+                if(instanceOf(p,nameK) && !isDuplicated(names,nodeName2(p))){ \
+                    names[varNum++]=nodeName2(p); } \
+                else{
+                    Node *c = getSingleSymbol(p);
+                    if(c){ // single const symbol
+                        S idStr = (S)obtainConstSymbolId(c); \
+                        if(idStr){
+                            names[varNum++] = idStr;
+                        }
+                    } } } })
+    //update sequence in names:
+    //    name1,id,name2 --> name1,name2,id
+    S temp[99]; L tt = 0, k = 0;
+    DOI(varNum, if(!strncmp(names[i],"id",2))temp[tt++]=names[i])
+    DOI(varNum, if(strncmp(names[i],"id",2))names[k++]=names[i])
+    DOI(tt, names[k++]=temp[i])
+}
+
+// input string format: id%d
+// output the integer part
+static L getConstSymbolIdInt(S id){
+    R (L)atoi(id+2);
+}
+
+static O genLocalVars(S *names, I num){
+    DOI(num, if(!strncmp(names[i], "id", 2)){\
+        glueAny(indent4 "Q %s=getSymbol(\"%s\");\n",\
+                names[i],\
+                constId[getConstSymbolIdInt(names[i])]); \
+        }\
+        else { \
+        glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,names[i]);})
 }
 
 static void genCodeElem(gNode *rt, B isRT){
@@ -198,7 +247,8 @@ static void genCodeElem(gNode *rt, B isRT){
         glueCode(genDeclSingle(temp, '{')); glueLine();
         varNum = 0;
         totalInputs(rt, varNames);
-        DOI(varNum, glueAny(indent4 "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        //DOI(varNum, glueAny(indent4 "V x%lld = x[%lld]; // %s\n",i,i,varNames[i]))
+        genLocalVars(varNames, varNum);
         /* TODO: shape maybe not vn(x0) */
         glueAny(indent4 "initV(z, H_%c, vn(x0));\n", z0c); 
         glueAny(indent4 "DOP(vn(z), v%c(z,i)=",z0c);

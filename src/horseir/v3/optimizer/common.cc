@@ -1,4 +1,5 @@
 #include "../global.h"
+#include <ctype.h>  // tolower
 
 extern B *ElementwiseUnaryMap;
 extern B *ElementwiseBinaryMap;
@@ -166,10 +167,29 @@ C getTypeCodeByName(Node *n){
     SymbolName *sn = getNodeSymbolName(n);
     switch(sn->kind){
         case localS: {
-                Node * typ = sn->val.local->val.param.typ;
+                Node *typ = sn->val.local->val.param.typ;
                 return obtainTypeCodeByIn(typ->val.type.in);
              }
-        default: TODO("add impl.");
+        default: TODO("Add impl.");
+    }
+}
+
+static B isScalarByIn(InfoNode *in){
+    ShapeNode *sn = in->shape;
+    switch(sn->kind){
+        case constSP: R sn->size == 1;
+        default: R false;
+    }
+}
+
+B isScalarShapeByName(Node *n){
+    SymbolName *sn = getNodeSymbolName(n);
+    switch(sn->kind){
+        case localS: {
+                Node *typ = sn->val.local->val.param.typ;
+                return isScalarByIn(typ->val.type.in);
+             }
+        default: TODO("Add impl.");
     }
 }
 
@@ -306,7 +326,12 @@ static O genCodeVector(Node *n){
 O genCodeName(Node *n, I id){
     C typeCode = getTypeCodeByName(n);
     //P("looking for "); printNode(n); getchar();
-    glueAny("v%c(x%d,i)", typeCode, id);
+    if(isScalarShapeByName(n)){
+        glueAny("v%c(x%d)", tolower(typeCode), id);
+    }
+    else {
+        glueAny("v%c(x%d,i)", typeCode, id);
+    }
 }
 
 O genCodeIndex(Node *n, I id){
@@ -329,7 +354,8 @@ O genCodeList(List *list){
 S genInvcSingle(S targ, S func, S *names, I num){
     C temp[199]; S ptr = temp;
     ptr += SP(ptr, "%s(%s, (V[]){",func,targ);
-    DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
+    DOI(num, if(strncmp(names[i],"id",2)) \
+             ptr+=SP(ptr,(i>0?",%s":"%s"),names[i]))
     SP(ptr, "})");
     R strdup(temp);
 }

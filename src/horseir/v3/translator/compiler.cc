@@ -293,7 +293,7 @@ static void genEntry(){
         glueCodeLine("E elapsed = calc_toc();");
         glueCodeLine("P(\"The elapsed time (ms): %g\\n\", elapsed);");
         glueCodeLine("P(\"Output:\\n\");");
-        glueAnyLine("DOI(%d, printV(rtns[i]))", numRtns);
+        glueAnyLine("DOI(%d, printV2(rtns[i],20))", numRtns); // or printV(rtns[i])
     }
     glueCodeLine("return elapsed;");
     depth--;
@@ -416,7 +416,9 @@ static void scanVector(Node *n){
         glueCode(")");
     }
     else if(c > 1){
-        resetCode(); SP(ptr, "(%d, (%c []){", c, obtainNodeTypeAlias(typeNode));
+        C k = obtainNodeTypeAlias(typeNode);
+        resetCode();
+        SP(ptr, "(%d, (%c []){", c, 'Q'==k?'S':'D'==k?'I':k);
         genList(n->val.vec.val, comma);
         glueCode("})");
     }

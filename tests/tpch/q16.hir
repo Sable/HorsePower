@@ -1,0 +1,62 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`supplier:sym);
+    t1:i32 = check_cast(@column_value(t0,`s_suppkey:sym), i32);
+    t7:sym = check_cast(@column_value(t0,`s_comment:sym), sym);
+    t8:? = @like(t7,`"%Customer%Complaints%":sym);
+    t9:? = @compress(t8,t1);
+    t16:? = @load_table(`part:sym);
+    t20:sym = check_cast(@column_value(t16,`p_brand:sym), sym);
+    t21:sym = check_cast(@column_value(t16,`p_type:sym), sym);
+    t22:i32 = check_cast(@column_value(t16,`p_size:sym), i32);
+    t26:? = (49,14,23,45,19,3,36,9):i32;
+    t27:? = @member(t22,t26);
+    t28:? = @neq(t20,`"Brand#45":sym);
+    t29:? = @like(t21,`"MEDIUM POLISHED%":sym);
+    t30:? = @not(t29);
+    t31:? = @and(t27,t28);
+    t32:? = @and(t31,t30);
+    t42:? = @load_table(`partsupp:sym);
+    t43:? = check_cast(@column_value(t42,`ps_partkey:sym), enum<i32>);
+    t44:? = check_cast(@column_value(t42,`ps_suppkey:sym), enum<i32>);
+    t48:? = @values(t43);
+    t49:? = @index(t32,t48);
+    t50:? = @compress(t49,t48);
+    t51:? = @where(t49);
+    t55:? = @index(t20,t50);
+    t56:? = @index(t21,t50);
+    t57:? = @index(t22,t50);
+    t63:? = @fetch(t44);
+    t64:? = @index(t63,t51);
+    t68:? = @member(t64,t9);
+    t69:? = @not(t68);
+    t73:? = @compress(t69,t55);
+    t74:? = @compress(t69,t56);
+    t75:? = @compress(t69,t57);
+    t80:? = @compress(t69,t64);
+    t84:? = @list(t73,t74,t75);
+    t85:? = @group(t84);
+    t86:? = @keys(t85);
+    t87:? = @values(t85);
+    t88:? = @index(t73,t86);
+    t89:? = @index(t74,t86);
+    t90:? = @index(t75,t86);
+    t91:? = @each_right(@index,t80,t87);
+    t92:? = @each(@unique,t91);
+    t93:? = @each(@len,t92);
+    t94:? = @raze(t93);
+    t95:? = @list(t94,t88,t89,t90);
+    t96:? = @order(t95,(0,1,1,1):bool);
+    t97:? = @index(t88,t96);
+    t98:? = @index(t89,t96);
+    t99:? = @index(t90,t96);
+    t100:? = @index(t94,t96);
+    t101:? = (`p_brand,`p_type,`p_size,`supplier_cnt):sym;
+    t102:? = @list(t97,t98,t99,t100);
+    t103:? = @table(t101,t102);
+    return t103;
+  }
+}
+// Program slicing (before 110, after 60)
+// Elapsed time: 6.03 ms

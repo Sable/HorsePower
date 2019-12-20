@@ -457,6 +457,12 @@ static void totalInputs(List *list, gNode *rt, I dep, S *names){
                     }
                 }
             }
+            //update sequence in names:
+            //    name1,id,name2 --> name1,name2,id
+            S temp[99]; L tt = 0, k = 0;
+            DOI(varNum, if(!strncmp(names[i],"id",2))temp[tt++]=names[i])
+            DOI(varNum, if(strncmp(names[i],"id",2))names[k++]=names[i])
+            DOI(tt, names[k++]=temp[i])
         }
     }
 }

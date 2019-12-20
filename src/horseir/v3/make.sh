@@ -25,6 +25,17 @@ setup_tigger(){
     echo "extra_cmd = ${extra_cmd}"
 }
 
+prepare_lib(){
+    mkdir -p build-lib && cd build-lib
+    src_files="../backend/*.cc ../util/*.cc ../global.cc ../frontend/pretty.cc"
+    src_include_dirs="${HORSE_BASE}/libs/include/"
+    src_include_libs="${HORSE_BASE}/libs/lib/libpcre2-8.a"
+    cc_flags="-fopenmp -lm -lstdc++ -march=native"
+    lib_name=libcore.a
+    (set -x && g++-8 ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ..)
+}
+
+
 machine=`hostname` 
 if [ $machine = "sableintel" ]; then
     setup_intel
@@ -45,7 +56,8 @@ if [ "$#" -eq 1 ]; then
     elif [ $mode = "clean" ]; then
         (set -x && rm -rf build)
     elif [ $mode = "lib" ]; then
-        (mkdir -p build-lib && cd build-lib && cmake -D BUILD_STATIC_LIBS=ON .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16 && mv libcore.a ..)
+        # (mkdir -p build-lib && cd build-lib && cmake -D BUILD_STATIC_LIBS=ON .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16 && mv libcore.a ..)
+        prepare_lib
     else
         usage
     fi

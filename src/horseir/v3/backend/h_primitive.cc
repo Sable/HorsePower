@@ -2465,10 +2465,10 @@ I pfnAddFKey(V x, V xKey, V y, V yKey){
 }
 
 I pfnSubString(V z, V x, V y){
-    if(isString(x) && isLong(y)){
+    if(isString(x) && isIntegers(y)){
         if(2==vn(y)){
-            L start = vL(y,0); // starting position
-            L seg   = vL(y,1); // length of segment
+            L start = getIntValue(y,0); // starting position
+            L seg   = getIntValue(y,1); // length of segment
             initV(z,H_S,vn(x));
             // warning: must NOT DOI -> DOP, because of race condition in allocStrMem
             DOI(vn(x), vS(z,i)=allocStrMem(seg))

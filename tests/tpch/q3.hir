@@ -1,0 +1,85 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    a0:? = @load_table(`customer:sym);
+    a1:? = @load_table(`orders:sym);
+    a2:? = @load_table(`lineitem:sym);
+    // customer
+    c00:? = check_cast(@column_value(a0,`c_mktsegment:sym   ), sym );
+    c01:? = check_cast(@column_value(a0,`c_custkey:sym      ), i64 );
+    // orders
+    c10:? = check_cast(@column_value(a1,`o_orderdate:sym    ), d   );
+    c11:? = check_cast(@column_value(a1,`o_shippriority:sym ), i64 );
+    c12:? = check_cast(@column_value(a1,`o_custkey:sym      ), enum); //i64
+    c13:? = check_cast(@column_value(a1,`o_orderkey:sym     ), i64 );
+    // lineitem
+    c20:? = check_cast(@column_value(a2,`l_orderkey:sym     ), enum);
+    c21:? = check_cast(@column_value(a2,`l_extendedprice:sym), f64 );
+    c22:? = check_cast(@column_value(a2,`l_discount:sym     ), f64 );
+    c23:? = check_cast(@column_value(a2,`l_shipdate:sym     ), d   );
+    // custkey: c_ (key) and o_ (fkey)
+    t0_0:? = @eq(c00, `"BUILDING":sym); // k_mask
+    t0_1:? = @lt(c10, 1995-03-15:date);    // f_mask
+    t0_2:? = @values(c12);
+    t0_3:? = @compress(t0_1, t0_2);
+    t0_4:? = @index(t0_0, t0_3);
+    t0_5:? = @compress(t0_4, t0_3);  // key
+    t0_6:? = @where(t0_1);
+    t0_7:? = @compress(t0_4, t0_6);  // value
+    t0_8:? = @index(c13, t0_7);  // o_orderkey
+    t0_9:? = @index(c10, t0_7);  // o_orderdate
+    t0_10:? = @index(c11, t0_7); // o_shippriority
+    // group left
+    t1_0:? = @list(t0_8, t0_9, t0_10);
+    t1_1:? = @group(t1_0);
+    t1_2:? = @keys(t1_1);
+    t1_3:? = @values(t1_1);
+    t1_4:? = @index(t0_8, t1_2);  // o_orderkey
+    t1_5:? = @each(@len, t1_3);
+    t1_6:? = @raze(t1_5);
+    t1_8:? = @index(t0_9, t1_2);  // o_orderdate
+    t1_9:? = @index(t0_10,t1_2);  // o_shippriority
+    // scan right
+    t9_0:? = @gt(c23, 1995-03-15:date);
+    //t9_1:? = @compress(t9_0, c20);
+    //t9_2:? = @fetch(t9_1); // l_orderkey
+    t9_1:? = @fetch(c20);
+    t9_2:? = @compress(t9_0, t9_1); // l_orderkey
+    t9_3:? = @compress(t9_0, c21);  // l_extendedprice
+    t9_4:? = @compress(t9_0, c22);  // l_discount
+    t9_5:? = @group(t9_2);
+    t9_6:? = @keys(t9_5);
+    t9_7:? = @values(t9_5);
+    t9_8:? = @index(t9_2, t9_6); // l_orderkey
+    t9_9:? = @minus(1:i64, t9_4);
+    t9_10:? = @mul(t9_9, t9_3);  // revenue
+    // size(t9_7) : 829958
+    // size(t9_10): 3241776
+    t9_11:? = @each_right(@index, t9_10, t9_7);
+    t9_12:? = @each(@sum, t9_11);
+    t9_13:? = @raze(t9_12);
+    // join
+    t2_0:? = @join_index(@eq, t1_4, t9_8);
+    t2_1:? = @index(t2_0, 0:i64);
+    t2_2:? = @index(t2_0, 1:i64);
+    t2_3:? = @index(t9_13, t2_2);
+    t2_4:? = @index(t1_6, t2_1);  // size for each pair (many 1s)
+    t2_5:? = @mul(t2_3, t2_4);    // revenue
+    t2_9:? = @index(t1_4, t2_1);  // o_orderkey
+    t2_10:? = @index(t1_8, t2_1); // o_orderdate
+    t2_11:? = @index(t1_9, t2_1); // o_shippriority
+    // order by
+    t4_0:? = @list(t2_5, t2_10);
+    t4_1:? = @order(t4_0, (0, 1):bool);
+    t4_2:? = @index(t2_9 , t4_1);
+    t4_3:? = @index(t2_5 , t4_1);
+    t4_4:? = @index(t2_10, t4_1);
+    t4_5:? = @index(t2_11, t4_1);
+    // return debug
+    w0:? = (`l_orderkey,`revenue,`o_orderdate,`o_shippriority):sym;
+    w1:? = @list(t4_2, t4_3, t4_4, t4_5);
+    w2:? = @table(w0, w1);
+    return w2;
+  }
+}
+

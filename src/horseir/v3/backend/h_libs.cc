@@ -1328,6 +1328,43 @@ I lib_group_by_normal_int(V z, V x){
     R 0;
 }
 
+// I lib_group_by_normal_long(V z, V x){
+//     P("hello \n"); getchar();
+//     Pos_i *pos = (Pos_i*)malloc(sizeof(Pos_i)*xn);
+//     DOP(xn, {pos[i].x=vL(x,i)&0xffffffffL; pos[i].i=i;})
+//     lib_radixsort_core_int(pos, xn);
+//     L k, c, cz; V d,t;
+//     L start=xn>0?1:0;
+//     /* 1. get the total number of cells: lenZ */
+//     // WP("step 1\n");
+//     L lenZ=start;
+//     DOIa(xn, if(pos[i-1].x!=pos[i].x)lenZ++)
+//     /* 2. allocate list and get the info of each cell */
+//     // WP("step 2\n");
+//     initV(z, H_N, 2);
+//     V zKey = getDictKeys(z);
+//     V zVal = getDictVals(z);
+//     initV(zKey, H_L, lenZ);
+//     initV(zVal, H_G, lenZ);
+//     /* 3. fill indices into each cell */
+//     // WP("step 3\n");
+//     k=cz=0, c=start;
+//     d=vV(zVal,k++);
+//     if(start) vL(zKey,cz++)=pos[0].i;
+//     DOIa(xn, if(pos[i-1].x!=pos[i].x){ \
+//                vL(zKey,cz++)=pos[i].i; initV(d,H_L,c); d=vV(zVal,k++); c=1;} \
+//              else c++)
+//     if(c>0) initV(d,H_L,c);
+//     k=0, c=0;
+//     d=vV(zVal,k++);
+//     if(start) vL(d,c++)=pos[0].i;
+//     DOIa(xn, if(pos[i-1].x!=pos[i].x){\
+//                d=vV(zVal,k++); vL(d,0)=pos[i].i; c=1;} \
+//              else vL(d,c++)=pos[i].i)
+//     free(pos);
+//     R 0;
+// }
+
 
 I lib_group_by_normal_long(V z, V x){
     Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);

@@ -664,7 +664,7 @@ static InfoNode *commonPower(InfoNode *x, InfoNode *y){
 
 static InfoNode *propMember(InfoNode *x, InfoNode *y){
     HorseType rtnType;
-    //WP("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
+    // WP("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
     if(sameT(x,y) && isBasicIN(x)){
         rtnType = boolT;
     }

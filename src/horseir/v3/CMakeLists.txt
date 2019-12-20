@@ -9,7 +9,7 @@ option(BUILD_STATIC_LIBS "Build the static library" OFF)
 
 # message(STATUS "Static lib ${BUILD_STATIC_LIBS}")
 
-find_package(LLVM 6.0.1 REQUIRED CONFIG)
+find_package(LLVM 6.0 REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
@@ -30,7 +30,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${HORSE_MODE}")
 if (HORSE_OMP_FLAG)
     # sable-tigger
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${HORSE_OMP_FLAG}")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 else()
     # sable-intel
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -68,14 +67,12 @@ if(BUILD_STATIC_LIBS STREQUAL "ON")
     set(LIB_NAME core)
     message(STATUS "Building the static library: ${LIB_NAME}")
     message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-    set(LIB_FILES ${SRC_FRONTEND}
-                  ${SRC_BACKEND}
-                  ${SRC_ANALYSIS}
-                  ${SRC_OPTIMIZER}
-                  ${SRC_TRANSLATOR}
+    # ../backend/*.c ../util/*.c ../global.c ../frontend/pretty.c
+    set(LIB_FILES ${SRC_BACKEND}
                   ${SRC_UTIL}
-                  global.cc)
-    ADD_LIBRARY(${LIB_NAME} STATIC ${LIB_FILES} ${BISON_HorseBison_OUTPUTS} ${FLEX_HorseFlex_OUTPUTS})
+                  ${CMAKE_SOURCE_DIR}/global.cc
+                  ${CMAKE_SOURCE_DIR}/frontend/pretty.cc)
+    # ADD_LIBRARY(${LIB_NAME} STATIC ${LIB_FILES} ${BISON_HorseBison_OUTPUTS} ${FLEX_HorseFlex_OUTPUTS})
     target_link_libraries(${LIB_NAME} m)
     target_link_libraries(${LIB_NAME} stdc++)
     target_link_libraries(${LIB_NAME} $ENV{HORSE_BASE}/libs/lib/libpcre2-8.a)

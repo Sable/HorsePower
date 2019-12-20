@@ -55,6 +55,7 @@ I promoteValueWithIndex  (V z, V x, L typMax, V ind);
 B checkZero              (V x);
 B checkMatch             (V x);
 L getSingleIntValue      (V x);
+L getIntValue            (V x, L k);
 L calcFact               (L n);
 I getNumOfNonZero        (V x, L *z);
 I appendList             (V z, V x, V y);

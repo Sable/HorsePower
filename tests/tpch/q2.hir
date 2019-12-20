@@ -1,0 +1,154 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+      a0:? = @load_table(`part:sym);
+      a1:? = @load_table(`supplier:sym);
+      a2:? = @load_table(`partsupp:sym);
+      a3:? = @load_table(`nation:sym);
+      a4:? = @load_table(`region:sym);
+      // part
+      c00:? = check_cast(@column_value(a0, `p_partkey:sym     ), i64);
+      c01:? = check_cast(@column_value(a0, `p_size:sym        ), i64);
+      c02:? = check_cast(@column_value(a0, `p_type:sym        ), str);
+      c03:? = check_cast(@column_value(a0, `p_mfgr:sym        ), i64);
+      // supplier
+      c10:? = check_cast(@column_value(a1, `s_acctbal:sym     ), i64);
+      c11:? = check_cast(@column_value(a1, `s_name:sym        ), sym);
+      c12:? = check_cast(@column_value(a1, `s_address:sym     ), str);
+      c13:? = check_cast(@column_value(a1, `s_phone:sym       ), str);
+      c14:? = check_cast(@column_value(a1, `s_comment:sym     ), str);
+      c15:? = check_cast(@column_value(a1, `s_nationkey:sym   ), enum); //i64
+      c16:? = check_cast(@column_value(a1, `s_suppkey:sym     ), i64);
+      // partsupp
+      c20:? = check_cast(@column_value(a2, `ps_partkey:sym    ), enum); //i64
+      c21:? = check_cast(@column_value(a2, `ps_suppkey:sym    ), enum); //i64
+      c22:? = check_cast(@column_value(a2, `ps_supplycost:sym ), f64);
+      // nation
+      c30:? = check_cast(@column_value(a3, `n_name:sym        ), sym);
+      c31:? = check_cast(@column_value(a3, `n_nationkey:sym   ), i64);
+      c32:? = check_cast(@column_value(a3, `n_regionkey:sym   ), enum); //i64
+      // region
+      c40:? = check_cast(@column_value(a4, `r_regionkey:sym   ), i64);
+      c41:? = check_cast(@column_value(a4, `r_name:sym        ), sym);
+      // 1. regionkey: region and nation (keyed)
+      k_mask:? = @eq(c41, `"EUROPE":sym);
+      t0_0:? = @values(c32);
+      t0_1:? = @index(k_mask, t0_0);
+      t0_2:? = @compress(t0_1, c31); // n_nationkey
+      t0_3:? = @compress(t0_1, c30); // n_name
+      // 2. nationkey: n_nationkey and s_nationkey
+      t1_0:? = @fetch(c15);
+      t1_1:? = @join_index(@eq, t0_2, t1_0);
+      t1_2:? = @index(t1_1, 1:i64);
+      t1_3:? = @index(c16, t1_2);    // s_suppkey
+      t1_4:? = @index(c10, t1_2);    // s_acctbal
+      t1_5:? = @index(c11, t1_2);
+      t1_6:? = @index(c12, t1_2);
+      t1_7:? = @index(c13, t1_2);
+      t1_8:? = @index(c14, t1_2);
+      t1_9:? = @index(t1_1, 0:i64);
+      t1_10:? = @index(t0_3, t1_9);
+      // 3. suppkey: s_suppkey and ps_suppkey => 158960
+      t2_0:? = @fetch(c21);
+      t2_1:? = @join_index(@eq, t1_3, t2_0);
+      t2_2:? = @index(t2_1, 1:i64);
+      t2_3:? = @index(t2_0, t2_2 );  // ps_suppkey
+      t2_4:? = @index(c22 , t2_2 );  // ps_supplycost
+      t2_5:? = @fetch(c20);
+      t2_6:? = @index(t2_5, t2_2 );  // ps_partkey
+      t2_7:? = @index(t2_1, 0:i64);
+      t2_8:? = @index(t1_4 , t2_7);
+      t2_9:? = @index(t1_5, t2_7);
+      t2_10:? = @index(t1_6, t2_7);
+      t2_11:? = @index(t1_7, t2_7);
+      t2_12:? = @index(t1_8, t2_7);
+      t2_13:? = @index(t1_10, t2_7);
+      // 4. partkey: ps_partkey and p_partkey
+      t3_0:? = @join_index(@eq, t2_6, c00);
+      t3_1:? = @index(t3_0, 0:i64);
+      t3_2:? = @index(t3_0, 1:i64);
+      t3_3:? = @index(c00 , t3_2 );
+      t3_4:? = @index(t2_4, t3_1 );  // ps_supplycost
+      // aggregate
+      t4_0:? = @group(t3_3);
+      t4_1:? = @keys(t4_0);
+      t4_2:? = @values(t4_0);
+      t4_3:? = @each_right(@index,t3_4,t4_2);
+      t4_4:? = @each(@min,t4_3);
+      t4_5:? = @raze(t4_4);
+      // value
+      t5_0:? = @index(t3_3, t4_1);
+      t5_1:? = @raze(t4_4);
+      //t5_2:? = `i_partkey`i_supplycost:sym;
+      //t5_3:? = @list(t5_0, t5_1);
+      //table_x:? = @table(t5_2, t5_3);
+      // scan
+      t6_0:? = @eq(c01, 15:i64);
+      t6_1:? = @like(c02, "%BRASS":str);
+      t6_2:? = @and(t6_0, t6_1);
+      // partkey: ps_partkey and p_partkey
+      t7_0:? = @compress(t6_2, c00);
+      t7_1:? = @join_index(@eq, t2_6, t7_0);
+      t7_2:? = @index(t7_1, 0:i64);
+      t7_3:? = @index(t7_1, 1:i64);
+      t7_4:? = @index(t2_4, t7_2); // ps_supplycost
+      t7_5:? = @index(t7_0, t7_3); // p_partkey
+      t7_6:? = @compress(t6_2, c03);
+      t7_7:? = @index(t7_6, t7_3); // p_partkey
+      t7_8:? = @index(t2_8, t7_2);
+      t7_9:? = @index(t2_9, t7_2);
+      t7_10:? = @index(t2_10, t7_2);
+      t7_11:? = @index(t2_11, t7_2);
+      t7_12:? = @index(t2_12, t7_2);
+      t7_13:? = @index(t2_13, t7_2);
+      // partkey+supplycost
+      //t8_0:? = @list(t7_5,t7_4);
+      //t8_1:? = @list(t5_0,t5_1);
+      //t8_2:? = @join_index(@eq, t8_0, t8_1);
+      //t8_3:? = @index(t7_5, 0:i64);
+      //t8_4:? = @index(t7_4, 0:i64);
+      //t8_5:? = @index(t5_0, 1:i64);
+      //t8_6:? = @index(t5_1, 1:i64);
+      t8_0:? = @join_index(@eq, t7_5, t5_0);
+      t8_1:? = @index(t8_0, 0:i64);
+      t8_2:? = @index(t8_0, 1:i64);
+      t8_3:? = @index(t7_4, t8_1); // ps_supplycost
+      t8_4:? = @index(t5_1, t8_2); //  i_supplycost
+      t8_5:? = @eq(t8_3, t8_4);
+      t8_6:? = @index(t7_5, t8_1); // p_partkey
+      t8_7:? = @index(t5_0, t8_2); // i_partkey
+      t8_8:? = @index(t7_7, t8_1); // p_mfgr
+      t8_9:? = @index(t7_8, t8_1);
+      t8_10:? = @index(t7_9, t8_1);
+      t8_11:? = @index(t7_10, t8_1);
+      t8_12:? = @index(t7_11, t8_1);
+      t8_13:? = @index(t7_12, t8_1);
+      t8_14:? = @index(t7_13, t8_1);
+      // value
+      t9_0:? = @compress(t8_5, t8_6);  // p_partkey
+      t9_1:? = @compress(t8_5, t8_8);  // p_mfgr
+      t9_2:? = @compress(t8_5, t8_9);  // s_acctbal
+      t9_3:? = @compress(t8_5, t8_10); // s_name
+      t9_4:? = @compress(t8_5, t8_11); // s_address
+      t9_5:? = @compress(t8_5, t8_12); // s_phone
+      t9_6:? = @compress(t8_5, t8_13); // s_comment
+      t9_7:? = @compress(t8_5, t8_14); // n_name
+      // sort
+      t10_0:? = @list(t9_2,t9_7,t9_3,t9_0);
+      t10_1:? = @order(t10_0, (0,1,1,1):bool);
+      t10_2:? = @index(t9_2, t10_1);
+      t10_3:? = @index(t9_3, t10_1);
+      t10_4:? = @index(t9_7, t10_1);
+      t10_5:? = @index(t9_0, t10_1);
+      t10_6:? = @index(t9_1, t10_1);
+      t10_7:? = @index(t9_4, t10_1);
+      t10_8:? = @index(t9_5, t10_1);
+      t10_9:? = @index(t9_6, t10_1);
+      // return debug
+      w0:? = (`s_acctbal,`s_name,`n_name,`p_partkey,`p_mfgr,`s_address,`s_phone,`s_comment):sym;
+      w1:? = @list(t10_2, t10_3, t10_4, t10_5, t10_6, t10_7, t10_8, t10_9);
+      w2:? = @table(w0, w1);
+      return w2;
+  }
+}
+

@@ -28,7 +28,7 @@ void initBackend(){
         case InterpNaiveM: initMemoryInterp(); break;
         case    CompilerM:
         case     UtilityM: initMemoryBasic();  break;
-        default: break;
+        default: initMemoryInterp(); break;
     }
     initSym();       // h_symbol.c
     initSys();       // h_system.c

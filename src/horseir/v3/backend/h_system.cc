@@ -264,6 +264,23 @@ L getSingleIntValue(V x){
     R (1==xn)?(H_B==xp?xb:H_H==xp?xh:H_I==xp?xi:H_L==xp?xl:-1):-1;
 }
 
+// x(k)
+L getIntValue(V x, L k){
+    if(k < 0 || k >= xn) {
+        EP("size out of [0, %lld)", xn);
+    }
+    switch(xp){
+        caseB R vB(x,k);
+        caseJ R vJ(x,k);
+        caseH R vH(x,k);
+        caseI R vI(x,k);
+        caseL R vL(x,k);
+        default: EP("Not a type: %s", getTypeName(xp));
+    }
+    R 0;
+}
+
+
 L calcFact(L n){
     if(n>=0){
         L z=1; DOI(n, z*=(i+1)) R z;
