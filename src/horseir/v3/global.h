@@ -65,7 +65,7 @@ extern "C" {
 #define WP(...)   do{FP(stderr,__VA_ARGS__);}while(0)  // warning
 #define EP(...)   do{INFO("[ERROR]");  FP(stderr,__VA_ARGS__); FLine(); exit(1);}while(0)  // error
 #define TODO(...) do{INFO("[TODO]");   FP(stderr,__VA_ARGS__); FLine(); exit(2);}while(0)  // todo
-#define STOP(...) do{P("%-15s>> ",__FUNCTION__); P(__VA_ARGS__); getchar();}while(0)
+#define STOP(...) do{WP("%-15s>> ",__FUNCTION__); WP(__VA_ARGS__); getchar();}while(0)
 
 /* structs */
 #define instanceOf(x,t) (x!=NULL&&(x->kind)==(t))

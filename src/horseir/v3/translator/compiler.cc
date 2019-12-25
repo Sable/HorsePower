@@ -519,7 +519,7 @@ static B checkSimpleHash(Node *n){
     L x = lookupSimpleHash(hashOpt,(L)n);
     if(x){
         ChainExtra *extra = (ChainExtra*)x;
-        //WP("kind = %s\n", getExtraKind(extra->kind)); getchar();
+        // printNode(n); WP("kind = %s, %lld\n", getExtraKind(extra->kind), (L)n); getchar();
         switch(extra->kind){
             case NativeG: R 0;
             case   SkipG: R 1;

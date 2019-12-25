@@ -681,6 +681,8 @@ static void findCase3(ChainList *list){
     }
 }
 
+#define doFirst(x) (x==1 || x==19 || x==22)
+
 /*
  * Cases: compress(2) and index(3) have very similar code
  */
@@ -694,12 +696,23 @@ static void analyzeChain(ChainList *list){
     }
     else if(optPatternKind == 1){
         //STOP("opt p1");
-        DOI(numPattern, findCase1(list, allPattern[i], i+1));
-        findCase3(list); // index
+        if(doFirst(qTpchId)){
+            findCase2(list); // compress
+        }
+        else {
+            DOI(numPattern, findCase1(list, allPattern[i], i+1));
+            findCase3(list); // index
+        }
     }
     else if(optPatternKind == 2){
         //STOP("opt p2");
-        findCase2(list); // compress
+        if(doFirst(qTpchId)){
+            DOI(numPattern, findCase1(list, allPattern[i], i+1));
+            findCase3(list); // index
+        }
+        else {
+            findCase2(list); // compress
+        }
     }
     
 }

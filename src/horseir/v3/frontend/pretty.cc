@@ -442,11 +442,11 @@ const char *obtainNodeStr(Node *n){
 
 void printNodeStr(Node *n){
     printNodeStrCore(n);
-    P("%s", buff);
+    WP("%s", buff);
 }
 
 void printNode(Node *n){
-    printNodeStr(n); P("\n");
+    printNodeStr(n); WP("\n");
 }
 
 void printProg(Prog *root){

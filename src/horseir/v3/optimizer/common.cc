@@ -3,6 +3,7 @@
 
 extern B *ElementwiseUnaryMap;
 extern B *ElementwiseBinaryMap;
+extern C localIter;
 
 CS obtainMaxValue(C c){
     switch(c){
@@ -182,6 +183,14 @@ static B isScalarByIn(InfoNode *in){
     }
 }
 
+static B isVectorByIn(InfoNode *in){
+    ShapeNode *sn = in->shape;
+    switch(sn->kind){
+        case constSP: R sn->size > 0;
+        default: R false;
+    }
+}
+
 B isScalarShapeByName(Node *n){
     SymbolName *sn = getNodeSymbolName(n);
     switch(sn->kind){
@@ -220,7 +229,7 @@ static CS obtainFuncAuto(S fn){
     if(x) R x;
     if(sEQ(fn, "index"))  R "INDEX";
     if(sEQ(fn, "like"))   R "LIKE";
-    if(sEQ(fn, "member")) R "MEMBER";
+    if(sEQ(fn, "member")) R "MEMBER_CONST";
     if(sEQ(fn, "len"))    R "vn";
     R NULL;
 }
@@ -231,10 +240,26 @@ CS getFuncNameC(S fn){
     else TODO("Add impl. for %s", fn);
 }
 
-CS getFuncNameAuto(S fn){
-    CS macro = obtainFuncAuto(fn);
-    if(macro) return macro;
-    else TODO("Add impl. for %s\n", fn);
+// CS getFuncNameAuto(S fn){
+//     CS macro = obtainFuncAuto(fn);
+//     if(macro) return macro;
+//     else TODO("Add impl. for %s\n", fn);
+// }
+
+CS getFuncNameAuto(Node *n){
+    Node *fn = getNodeFunc(n);
+    if(sEQ(nodeName2(fn), "member")){
+        Node *p1 = getParamsIndex(getNodeParams(n),0)->val;
+        C code = getTypeCodeByName(p1);
+        switch(code){
+            case 'Q': R "MEMBER_CONST_Q";
+            case 'S': R "MEMBER_CONST";
+            default: TODO("Support const member: %c", code);
+        }
+    }
+    else {
+        R obtainFuncAuto(nodeName2(fn));
+    }
 }
 
 B isElementwise(S funcName){
@@ -276,6 +301,8 @@ static void genCodeConstSymbol(S str){
         glueAny("%s", str);
     }
     else {
+        //DOI(constIdNum, WP("constId[%lld] = %s\n", i, constId[i]))
+        //WP("id = %lld\n", id);
         glueAny("id%lld",id);
     }
 }
@@ -330,7 +357,7 @@ O genCodeName(Node *n, I id){
         glueAny("v%c(x%d)", tolower(typeCode), id);
     }
     else {
-        glueAny("v%c(x%d,i)", typeCode, id);
+        glueAny("v%c(x%d,%c)", typeCode, id, localIter);
     }
 }
 
@@ -347,6 +374,23 @@ O genCodeNode(Node *n){
     }
 }
 
+B isNodeConst(Node *n){
+    if(n->kind == vectorK || n->kind == constK){
+        R true;
+    }
+    else {
+        SymbolName *sn = getNodeSymbolName(n);
+        switch(sn->kind){
+            case localS: {
+                             Node *typ = sn->val.local->val.param.typ;
+                             return isVectorByIn(typ->val.type.in);
+                         }
+            default: TODO("Add impl.");
+        }
+    }
+}
+
+
 O genCodeList(List *list){
     if(list){ genCodeList(list->next); genCodeNode(list->val); }
 }
@@ -359,4 +403,5 @@ S genInvcSingle(S targ, S func, S *names, I num){
     SP(ptr, "})");
     R strdup(temp);
 }
+
 

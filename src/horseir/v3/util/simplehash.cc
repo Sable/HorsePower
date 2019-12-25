@@ -52,7 +52,8 @@ O addToSimpleHash(sHashTable *st, L key, L val){
             st->table[t] = n;
         }
         else {
-            EP("Duplicated key found with values: %lld vs. %lld",(L)(p->val),val);
+            // WP("Duplicated key found with values: %lld vs. %lld",(L)(p->val),val);
+            p->val = val; // update anyway
         }
     }
 }

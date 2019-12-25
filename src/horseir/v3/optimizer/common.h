@@ -84,21 +84,22 @@ C  obtainNodeTypeAlias(Node *n);
 S  getNameStr       (Node *n);
 C  getTypeCodeByName(Node *n); 
 CS getFuncNameC     (S fn);
-CS getFuncNameAuto  (S fn);
+CS getFuncNameAuto  (Node *n);
 
 
 B  isElementwise(S funcName);
 I  findDefByName(Chain *p, S name);
 
-S  genDeclSingle (S func, C del);
-B  isDuplicated  (S *names, S s);
-L  searchName    (S *names, S s);
-O  genCodeConst  (Node *n);
-O  genCodeNode   (Node *n);
-O  genCodeList   (List *list);
-O  genCodeName   (Node *n, I id);
-O  genCodeIndex  (Node *n, I id);
-S  genInvcSingle (S targ, S func, S *names, I num);
+S  genDeclSingle  (S func, C del);
+B  isDuplicated   (S *names, S s);
+L  searchName     (S *names, S s);
+O  genCodeConst   (Node *n);
+O  genCodeNode    (Node *n);
+O  genCodeList    (List *list);
+O  genCodeName    (Node *n, I id);
+O  genCodeIndex   (Node *n, I id);
+S  genInvcSingle  (S targ, S func, S *names, I num);
+B  isNodeConst    (Node *n);
 
 Node *getNodeItemIndex(Node *n, I pos);
 List *getNodeParams   (Node *n);

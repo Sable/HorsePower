@@ -63,8 +63,11 @@ static sHashTable *hashgNode;
 static gNodeList *glist;
 
 static fListNode* fList[100];
-static I fListNum;
+static I fListNum, curNum;
 static I depth;
+static B fuseFlag[100];
+static B hasCompress, findCompress;
+C localIter;
 
 #define OPT_DEBUG false
 
@@ -85,6 +88,7 @@ static void genCodeAuto             (gNode *rt, B isRT);
 static void genCodeAutoList         (gNodeList *list, I size);
 static void genCodeAutoListNode     (gNode *rt, L id);
 static void genCodeAutoListSingleLen(gNode *rt);
+static void fixCodeAutoListSingleLen(fListNode *f, C iter);
 
 static void genLocalVars(S *names, I n);
 
@@ -92,17 +96,33 @@ static void genLocalVars(S *names, I n);
 
  // copy from optimizer/pattern.c
 static void genIndent(){ DOI(depth, glueCode(indent4)); }
+static B nextCond(Node *x, Node *next);
 
 static void debugCode(S msg){
     WP("Output code (%s):\n %s\n", msg,code);
     getchar();
 }
 
+static void debugFusionNode(L id){
+    Node *tmp = fList[id]->nodeOpt;
+    L x = lookupSimpleHash(hashOpt, (L)tmp);
+    ChainExtra *extra = (ChainExtra*)x;
+    WP("visible: %s, %lld, x = %lld\n", getExtraKind(extra->kind), (L)tmp, x);
+    printNode(tmp); getchar();
+}
+
 static void addToSimpleHashUnsafe(sHashTable *st, L key, L val){
     if(!lookupSimpleHash(st, key)){
         addToSimpleHash(st, key, val);
     }
-    // ignore the latest update
+    else {
+        // ignore the latest update
+        // WP("ignore: key = %lld, val = %lld\n", key, val);
+    }
+}
+
+static void addToSimpleHashForce(sHashTable *st, L key, L val){
+    addToSimpleHash(st, key, val);
 }
 
 static void freegNodeList(gNodeList *g){
@@ -167,6 +187,14 @@ static gNode *initgNode(Node *node, C kind, S funcName){
     if(x->pnum >= 5)
         EP("Not enough space");
     return x;
+}
+
+static S getCallFuncName(Node *n){
+    if(instanceOf(n, stmtK)){
+        Node *call = getStmtCall(n);
+        R call?nodeName2(nodeCallFunc(call)):NULL;
+    }
+    R NULL;
 }
 
 static gNode *findFusionIndex(Chain *chain);
@@ -261,6 +289,8 @@ static gNode* findFusionUp(Chain *chain, B isRT){
                 case 'B': flag[0] = 1; break; // 2nd param
                 case 'R': flag[0] = 1; break; // 1st param
             }
+            // if(kind == 'S')
+            //     findCompress = true;
             I c = 0, cnt = 0;
             while(param){
                 if(flag[cnt]){
@@ -268,7 +298,8 @@ static gNode* findFusionUp(Chain *chain, B isRT){
                         case -1: rt->pnode[cnt] = NULL; break;
                         case  0: {
                             Chain *next = chain->chain_defs[c];
-                            if(isChainVisited(next)){
+                            if(nextCond(chainNode(chain), chainNode(next)));
+                            else if(isChainVisited(next)){
                                 L rtn = lookupSimpleHash(hashgNode, (L)next);
                                 rt->pnode[cnt] = rtn?(gNode*)rtn:NULL;
                                 //if(rtn){
@@ -470,6 +501,7 @@ static void totalInputs(List *list, gNode *rt, I dep, S *names){
 /* ------ copy ends ----- */
 
 static L printgNodeCore(gNode *pt, gNode *rt, I dep, sHashTable *flag){
+    L c = 0;
     if(rt){
         if(pt){
             WP(indent4 "\"%s\" -> \"%s\"\n", \
@@ -477,15 +509,24 @@ static L printgNodeCore(gNode *pt, gNode *rt, I dep, sHashTable *flag){
                     obtainNodeStr(rt->node));
             // WP(" (%d)\n",rt->numUse);
         }
-        L c = 0;
         if(!lookupSimpleHash(flag,(L)rt)){
+            if(pt) c++;
             DOI(rt->pnum, c+=printgNodeCore(rt, rt->pnode[i], dep+1, flag))
             addToSimpleHash(flag, (L)rt, 1);
         }
-        R c;
+    }
+    R c;
+}
+
+static L loadParamsVec(Node **rtn, List *list){
+    if(list){
+        L k = loadParamsVec(rtn, list->next);
+        rtn[k] = list->val;
+        R k + 1;
     }
     R 0;
 }
+
 
 /*
  * Input : a fuisble section
@@ -496,7 +537,7 @@ static L printgNodeCore(gNode *pt, gNode *rt, I dep, sHashTable *flag){
 static L printgNode(gNode *rt){
     sHashTable *flag = initSimpleHash(1<<10);
     WP("digraph G {\n");
-    L c = printgNodeCore(NULL, rt, 0, flag);
+    L c = printgNodeCore(NULL, rt, 0, flag) + (NULL != rt);
     WP("}\n");
     freeSimpleHash(flag);
     R c;
@@ -525,15 +566,15 @@ static void countUsegNode(gNode *rt){
 static I trimgNode(gNode *rt){
     if(rt){
         Chain *chain = rt->gChain;
-        printNode(rt->node);
+        // printNode(rt->node);
         if(chain->useSize != rt->numUse){
             if(OPT_DEBUG)
-                P("-- useSize = %d vs. numUse = %d\n", chain->useSize, rt->numUse);
+                WP("-- useSize = %d vs. numUse = %d\n", chain->useSize, rt->numUse);
             R 1;
         }
         else {
             if(OPT_DEBUG)
-                P("++ useSize = %d vs. numUse = %d\n", chain->useSize, rt->numUse);
+                WP("++ useSize = %d vs. numUse = %d\n", chain->useSize, rt->numUse);
             DOI(rt->pnum, if(trimgNode(rt->pnode[i])){rt->pnode[i]=NULL;})
             R 0;
         }
@@ -567,9 +608,74 @@ static void trimgNodeFromTop(gNode *rt){
     }
 }
 
+static I countValidStmts(gNode *rt){
+    I c = 0;
+    if(rt && isKindE(rt)){
+        c++;
+        DOI(rt->pnum, c+=countValidStmts(rt->pnode[i]))
+    }
+    R c;
+}
+
+// pnode stores gNode in the reversed order
+// if(rt->pnode[0]) { WP("0\n"); printNode(rt->pnode[0]->node); }
+// if(rt->pnode[1]) { WP("1\n"); printNode(rt->pnode[1]->node); } // take
+static B gNodeHeuristic1(gNode *rt){
+    Node *n = rt->node;
+    S fn = getCallFuncName(n);
+    if(sEQ(fn, "compress") && !(rt->pnode[0])){
+        I numStmts = countValidStmts(rt->pnode[1]);
+        R (numStmts > 5); // q19: 6
+    }
+    R false;
+}
+
+static void updategNodeWithOnlyE(gNode *rt){
+    if(rt){
+        DOI(rt->pnum, {gNode *next=rt->pnode[i];
+                if(next){
+                  if(!isKindE(next)) rt->pnode[i]=NULL;
+                  else updategNodeWithOnlyE(next); }
+                })
+    }
+}
+
+static B gNodeHeuristic2(gNode *rt){
+    if(isKindE(rt)){
+        I numStmts = countValidStmts(rt);
+        //WP("numStmts = %d\n", numStmts);
+        if(numStmts > 10){
+            updategNodeWithOnlyE(rt);
+            R true;
+        }
+    }
+    R false;
+}
+
+static gNode *analyzegNode(gNode *rt){
+    if(!rt) R NULL;
+    if(gNodeHeuristic1(rt)){
+        R rt->pnode[1]; // return boolean side
+    }
+    if(gNodeHeuristic2(rt)){
+        //printgNode(rt); getchar();
+        R rt;
+    }
+    R rt;
+}
+
+
+static void printNameArray(S *names, I n){
+    WP("Local names (total %d):\n", n);
+    DOI(n, WP("- %s\n", names[i]))
+}
+
 static void printAllNames(){
-    WP("All local names (total %d):\n", varNum);
-    DOI(varNum, WP("- %s\n", varNames[i]))
+    printNameArray(varNames, varNum);
+}
+
+static L searchNameArray(S *names, I n, S s){
+    DOI(n, if(sEQ(names[i],s))R i) R -1;
 }
 
 static void genCodeBody(Node *p, gNode *g){
@@ -609,6 +715,58 @@ static void genCodeParamReversed(List *list, gNode *rt, I dep){
     }
 }
 
+static void genCodeParamMemberReversed(List *list, gNode *rt, I dep){
+    Node *p0 = list->next->val; // 1st param
+    Node *p1 = list->val;       // 2nd param
+    genCodeBody(p0, NULL);
+    glueChar(comma);
+    glueAny("x%lld", searchName(varNames,nodeName2(p1)));
+}
+
+
+static void fixCodeParamReversed(List *list, gNode *rt, L id){
+    B isTryOK = false;
+    I total = rt->pnum;
+    Node **rtn = NEW2(Node, total);
+    loadParamsVec(rtn, list);
+    // WP("params: %d, %d\n", total,rt->pnum);
+    // DOI(total, {WP("%lld\n",i); printNode(rtn[i]);}) getchar();
+    // important: reversed in rt->pnode
+    // printgNode(rt);
+    gNode *t=rt->pnode[0]; // index for the 2nd parameter
+    // WP("t is NULL: %d\n", t==NULL);
+    if(t) {
+        Node *next = t->node;
+        printNode(next);
+        if(sEQ(getCallFuncName(next), "compress")){
+            isTryOK = true;
+            Node *z0 = getNodeItemIndex(rt->node, 1);//pfnIndex(t79, t51, t56)
+            C z0c = getTypeCodeByName(z0);
+            S z0s = nodeName2(z0);
+            L zid = searchName(varNames, z0s);
+            Node *k0 = getNodeItemIndex(next,2); // pfnCompress(t56, t27, t55))
+            C k0c = getTypeCodeByName(k0);
+            S k0s = nodeName2(k0);
+            L kid = searchName(varNames, k0s);
+            glueAny("v%c(x%lld,vL(x%lld,%c));", z0c,zid,kid,localIter);
+        }
+        else if(sEQ(getCallFuncName(next), "where")){
+            isTryOK = true;
+            Node *z0 = getNodeItemIndex(rt->node,1); // t57:? = @where(t27);
+            C z0c = getTypeCodeByName(z0);
+            S z0s = nodeName2(z0);
+            // WP("name2 = %s\n", z0s); getchar();
+            L zid = searchName(varNames, z0s);
+            glueAny("v%c(x%lld,%c);", z0c,zid,localIter);
+        }
+    }
+    // WP("isTryOK = %d\n", isTryOK); getchar();
+    if(!isTryOK){
+        genCodeParamReversed(list, rt, id);
+    }
+    // TODO: free rtn
+}
+
 static void genCodeAuto(gNode *rt, B isRT){
     //if(rt->isMarked){
     //    //debugCode((S)"LINE 452");
@@ -635,7 +793,8 @@ static void genCodeAuto(gNode *rt, B isRT){
         //printAllNames(); getchar();
         if(isKindR(rt)){
             glueAny(indent4);
-            switch(getReductionKind(rt->funcName)){
+            ReductionKind rkind = getReductionKind(rt->funcName);
+            switch(rkind){
                 case sumR: 
                 case avgR: glueAny("%c c = 0;", z0c); break;
                 case minR: glueAny("%c c = %s_MAX;", z0c,getMinMax(z0c)); break;
@@ -644,27 +803,32 @@ static void genCodeAuto(gNode *rt, B isRT){
                 case anyR: glueAny("%c c = 0;", z0c); break;
                 default: TODO("handle reduction op: %s", rt->funcName); break;
             }
-            glueLine();
+            glueAny(" L tot=0;\n");
             glueAny(indent4 "initV(z, H_%c, 1);\n", z0c);
-            SP(last, "v%c(z,0) = c;", z0c);
-            glueAny(indent4 "DOP(vn(z), ");
+            switch(rkind){
+                case avgR: SP(last, "v%c(z,0) = c/tot;",z0c); break;
+                default: SP(last, "v%c(z,0) = c;", z0c); break;
+            }
+            glueAny(indent4 "DOP(vn(x0), ");
         }
         else if(isKindE(rt)){
             glueAny(indent4 "initV(z, H_%c, vn(x0));\n", z0c);
-            glueAny(indent4 "DOP(vn(z), v%c(z,i)=", z0c);
+            glueAny(indent4 "DOP(vn(x0), v%c(z,i)=", z0c);
         }
         else if(isKindS(rt)){
-            debugCode((S)"LINE 492");
+            //debugCode((S)"LINE 492");
             //TODO("Add scan");
         }
         else {
+            WP("%s\n", obtainNodeStr(rt->node));
             TODO("Add support for kind: %c", rt->kind);
         }
         extra->funcDecl = genDeclSingle(temp, ';');
         extra->funcInvc = genInvcSingle(z0s, temp, varNames, varNum);
-        resetCode(); oldPtr = ptr;
+        resetCode(); oldPtr = ptr; hasCompress = false;
     }
     if(isKindS(rt)){
+        hasCompress = true;
         //printNode(n);
         List *param = getNodeParams(n);
         I total = totalVar(param);
@@ -694,12 +858,27 @@ static void genCodeAuto(gNode *rt, B isRT){
         Node *p0 = getNodeParams(n)->val;
         genCodeBody(p0, rt->pnode[0]);
     }
-    else if(isKindE(rt) || isKindX(rt) || isKindB(rt)){
-        Node *fn = getNodeFunc(n);
-        glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
-        List *params = getNodeParams(n);
+    else if(isKindE(rt)){
+        //Node *fn = getNodeFunc(n);
+        //glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
+        glueAny("%s(", getFuncNameAuto(n));
         genCodeParamReversed(getNodeParams(n), rt, 0);
         glueChar(')');
+    }
+    else if(isKindB(rt)){
+        Node *fn = getNodeFunc(n);
+        //glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
+        glueAny("%s(", getFuncNameAuto(n));
+        if(sEQ(nodeName2(fn),"member")) {
+            genCodeParamMemberReversed(getNodeParams(n), rt, 0);
+        }
+        else 
+            genCodeParamReversed(getNodeParams(n), rt, 0);
+        glueChar(')');
+    }
+    else if(isKindX(rt)){
+        Node *fn = getNodeFunc(n);
+        fixCodeParamReversed(getNodeParams(n), rt, 0);
     }
     else {
         TODO("Add impl. for kind: %c", rt->kind);
@@ -724,7 +903,8 @@ static void genCodeAuto(gNode *rt, B isRT){
             if(code_cond){
                 S code_body = strdup(oldPtr);
                 const char *rop = obtainReductionOp(getReductionKind(rt->funcName));
-                SP(oldPtr, "if(%s){\\\n\t%s;}, reduction(%s:c)", code_cond, code_body, rop);
+                ReductionKind rkind = getReductionKind(rt->funcName);
+                SP(oldPtr, "if(%s){\\\n\t%s;%s}, reduction(%s:c)", code_cond, code_body, hasCompress&&rkind==avgR?"tot++;":"", rop);
                 free(code_cond);
                 free(code_body);
                 code_cond = NULL;
@@ -744,8 +924,7 @@ static void genCodeAuto(gNode *rt, B isRT){
             glueAny(indent4 "R 0;\n}");
         }
         else if(isKindE(rt)){
-            glueLine();
-            glueAny(indent4 "R 0;\n}");
+            glueAny(") R 0;\n}");
             //debugCode((S)"kind E");
         }
         else {
@@ -754,15 +933,6 @@ static void genCodeAuto(gNode *rt, B isRT){
         extra->funcFunc = strdup(code);
     }
     addToSimpleHashUnsafe(hashOpt, (L)(rt->node), (L)extra); // insert to hash
-}
-
-static L loadParamsVec(Node **rtn, List *list){
-    if(list){
-        L k = loadParamsVec(rtn, list->next);
-        rtn[k] = list->val;
-        R k + 1;
-    }
-    R 0;
 }
 
 static void genCodeAutoListParam1(List *list, gNode *rt, L id){
@@ -779,10 +949,32 @@ static void genCodeAutoListParam1(List *list, gNode *rt, L id){
     // TODO: free rtn
 }
 
+static void fixCodeAutoListParam1(List *list, gNode *rt, L id){
+    I total = rt->pnum;
+    Node **rtn = NEW2(Node, total);
+    loadParamsVec(rtn, list);
+    // WP("params: %d, %d\n", total,rt->pnum);
+    // DOI(total, {WP("%lld\n",i); printNode(rtn[i]);}) getchar();
+    // important: reversed in rt->pnode
+        localIter = 'k';
+        gNode *t=rt->pnode[2]; // index for the first parameter
+        if(t) genCodeAutoListNode(t, id);
+        else genCodeBody(rtn[1], t);
+        localIter = 'i';
+    // TODO: free rtn
+}
+
+
 static ChainExtra* addNodeToChainExtra(Node *n, GenKind kind){
     ChainExtra *extra = NEW(ChainExtra);
     extra->kind = kind;
-    addToSimpleHashUnsafe(hashOpt, (L)(n), (L)extra); // insert to hash
+    if(kind == OptG){
+        // printNode(n); WP("extra = %lld\n", (L)extra); getchar();
+        addToSimpleHashForce(hashOpt, (L)n, (L)extra);
+    }
+    else {
+        addToSimpleHashUnsafe(hashOpt, (L)(n), (L)extra); // insert to hash
+    }
     return extra;
 }
 
@@ -847,6 +1039,39 @@ static void genCodeAutoListBody(Node *p, gNode *g, L id){
     }
 }
 
+Node *getNodeVar1(Node *n){
+    List *vars = nodeStmtVars(n);
+    I total = totalList(vars);
+    if(total == 1){
+        R vars->val;
+    }
+    else {
+        EP("Expect single var assignment");
+    }
+}
+
+static B findElementExpr(Node *p1){
+    B isFound = false;
+    localIter = 'k';
+    DOI(fListNum, if(!fList[i]->isList){
+            S var1 = nodeVarName(getNodeVar1(fList[i]->gnode->node));
+            // WP("p1 = %s, var1 = %s\n", obtainNodeStr(p1), var1);
+            if(sEQ(obtainNodeStr(p1), var1)){
+                isFound = true;
+                genCodeAuto(fList[i]->gnode, false);
+                fuseFlag[i] = true; curNum++;
+            }})
+    localIter = 'i';
+    // if(isFound){
+    //     WP("found:\n%s\n", code);
+    // }
+    // else {
+    //     WP("not found\n");
+    // }
+    // getchar();
+    R isFound;
+}
+
 static void genCodeAutoListNode(gNode *rt, L id){
     Node *n = rt->node;
     addToChainExtra(rt, SkipG);
@@ -857,17 +1082,31 @@ static void genCodeAutoListNode(gNode *rt, L id){
             case minR: glueAny("if(c%lld>",id); break;
             case maxR: glueAny("if(c%lld<",id); break;
             case allR:
-            case anyR: TODO("Add"); break;
+            case anyR: TODO("Future support."); break;
             default: TODO("Unknown reduction: %s", rt->funcName);
         }
-        debugCode((S)"LINE 654");
+        // debugCode((S)"LINE 654");
         genCodeAutoListBody(getNodeParams(n)->val, rt->pnode[0], id);
     }
-    else if(isKindE(rt) || isKindX(rt) || isKindB(rt)){
-        Node *fn = getEachFuncNode(n);
-        glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
+    else if(isKindE(rt) || isKindB(rt)){
+        //Node *fn = getEachFuncNode(n);
+        //glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
+        glueAny("%s(", getFuncNameAuto(n));
         genCodeAutoListParam1(getNodeParams(n), rt, id); // skip 1st one
         glueChar(')');
+    }
+    else if(isKindX(rt)){
+        Node *fn = getEachFuncNode(n);
+        // WP("kind %s (index)\n", getFuncNameAuto(nodeName2(fn)));
+        // printNode(n); getchar();
+        //Node *p1 = getNodeParams(n)->next->val; // 1st parameter
+        //if(!findElementExpr(p1)){
+        //    glueAny("%s(", getFuncNameAuto(nodeName2(fn)));
+        //    genCodeAutoListParam1(getNodeParams(n), rt, id); // skip 1st one
+        //    glueChar(')');
+        //}
+        fixCodeAutoListParam1(getNodeParams(n), rt, id); // skip 1st one
+        //WP("code = %s\n", code); getchar();
     }
     else TODO("Add support kind: %c", rt->kind);
 }
@@ -900,12 +1139,21 @@ static O genCodeListReduction(fListNode *f){
         case maxR: glueAny("%c c%d=%s_MIN;", z0c,fid,getMinMax(z0c)); break;
         case allR: glueAny("%c c%d=1;", z0c,fid); break;
         case anyR: glueAny("%c c%d=0;", z0c,fid); break;
-        case lenR: break; // skip for len
+        case lenR: glueAny("E c%d=0;",fid); break; // dummy: skip for len
         default: TODO("handle reduction op: %s, fid: %d", g->funcName,fid); break;
     }
     if(k != lenR) // skip lenR
         glueChar(' ');
 }
+
+static const char *genCodeListParallelReduction(fListNode **fList, I num){
+    C temp[199];  S ptr = (S)temp;
+    ptr += SP(ptr, "reduction(+:");
+    DOI(num, {I fid=fList[i]->fuseId;ptr+=SP(ptr,i>0?",c%d":"c%d",fid);})
+    // WP("temp = %s\n", temp); getchar();
+    R strdup(temp);
+}
+
 
 static O genCodeListBody(fListNode *f){
     gNode *g = f->gnode;
@@ -920,18 +1168,19 @@ static O genCodeListBody(fListNode *f){
 static O genCodeListBodyLen(fListNode *f, C iter){
     gNode *g = f->gnode;
     I fid = f->fuseId;
+    I zid = fid - 1;
     Node *z0 = f->nodeRtn;
     C z0c = getTypeCodeByName(z0);
     glueIndent();
     ReductionKind k = getReductionKind(g->funcName);
     switch(k){
-        case lenR: glueAny("v%c(z%d,%c)=",z0c,fid,iter);
-                   genCodeAutoListSingleLen(g); break;
+        case lenR: glueAny("v%c(z%d,%c)=",z0c,zid,iter);
+                   fixCodeAutoListSingleLen(f, iter); break;
         case sumR:
         case maxR: 
-        case minR: glueAny("v%c(z%d,%c)=c%d", z0c,fid,iter,fid); break;
-        case avgR: glueAny("v%c(z%d,%c)=c%d/vn(.)", z0c,fid,iter,fid); break;
-        default: TODO("impl.");
+        case minR: glueAny("v%c(z%d,%c)=c%d", z0c,zid,iter,fid); break;
+        case avgR: glueAny("v%c(z%d,%c)=c%d/vn(t)", z0c,zid,iter,fid); break;
+        default: TODO("Future support.");
     }
     glueAny("; \\\n");
 }
@@ -974,7 +1223,7 @@ static void clearFusion(){
     cleanCode();
     ptr = code;
     varNum = 0; 
-    constIdNum = 0;
+    //constIdNum = 0;
 }
 
 static L numLast;
@@ -988,7 +1237,6 @@ static B checkStmtByKind(Node *n, C x){
     }
     R false;
 }
-
 
 static Node *getNodeDef(Chain *chain, Node *n){
     I c = 0;
@@ -1044,6 +1292,13 @@ static I getNameIndex(Node *n){
     else EP("Unknown name");
 }
 
+static I fixNameIndex(fListNode *f){
+    Node *n = f->nodeIter;
+    S name = instanceOf(n, nameK)?nodeName2(n):instanceOf(n,varK)?nodeVarName(n):NULL;
+    if(name) R searchNameArray(f->varNames, f->varNum, name);
+    else EP("Unknown name");
+}
+
 static void genCodeAutoListSingleLen(gNode *rt){
     //WP("numLast = %d\n", numLast);
     //DOI(numLast, printNode(tempLastNodes[i]))
@@ -1053,15 +1308,92 @@ static void genCodeAutoListSingleLen(gNode *rt){
         if(total == 1){
             Node *p = vars->val;
             S name = instanceOf(p, nameK)? nodeName2(p): instanceOf(p, varK)? nodeVarName(p):NULL;
-            if(name)
+            if(name){
+                printAllNames();
+                STOP("name = %s\n", name);
                 glueAny("vn(vV(x%lld,i))", searchName(varNames, name));
-            else
+            }
+            else{
                 EP("Name is NULL");
+            }
             skipAllListNode(rt);
         }
         else TODO("Support multiple vars");
     }
-    else EP("The numLast > 0, but %lld found", numLast);
+    else {
+        WP("--Error-Below--\n");
+        WP("numLast = %d\n", rt->numLast);
+        printgNode(rt);
+        EP("The numLast > 0, but %lld found", numLast);
+    }
+}
+
+static void fixCodeAutoListSingleLen(fListNode *f, C iter){
+    gNode *rt = f->gnode;
+    numLast = 0;
+    fetchFusionLastNode(rt);
+    if(numLast > 0){
+        List *vars = nodeStmtVars(tempLastNodes[0]);
+        I total = totalList(vars);
+        if(total == 1){
+            Node *p = vars->val;
+            S name = instanceOf(p, nameK)? nodeName2(p): instanceOf(p, varK)? nodeVarName(p):NULL;
+            if(name){
+                printNameArray(f->varNames, f->varNum);
+                glueAny("vn(vV(x%lld,%c))", \
+                        searchNameArray(f->varNames, f->varNum, name), iter);
+                // glueAny("vn(t)");
+            }
+            else{
+                EP("Name is NULL");
+            }
+            skipAllListNode(rt);
+        }
+        else TODO("Support multiple vars");
+    }
+    else {
+        WP("--Error-Below--\n");
+        WP("numLast = %d\n", rt->numLast);
+        printgNode(rt);
+        EP("The numLast > 0, but %lld found", numLast);
+    }
+}
+
+static B isMemberConst(Node *n){
+    List *param = getNodeParams(n);
+    while(param){
+        Node *p = param->val;
+        if(isNodeConst(p) && 'Q' == getTypeCodeByName(p)){
+            R 1;
+        }
+        param = param->next;
+    }
+    R 0;
+}
+
+static B nextCond(Node *x, Node *next){
+    S name1 = getCallFuncName(x);
+    S name2 = getCallFuncName(next);
+    if(!name1 || !name2) R false;
+    // if(sEQ(name1, "and") && sEQ(name2, "member")){ // q19
+    //     printNode(next);
+    //     WP("result: %d\n", isMemberConst(next)); getchar();
+    // }
+    R (sEQ(name1,"plus"    ) && sEQ(name2,"compress")) || 
+      //(sEQ(name1,"and"     ) && sEQ(name2,"member"  ) &&
+      //                                    qTpchId!=22) ||
+      (sEQ(name1,"and"     ) && sEQ(name2,"member"  ) &&
+            (qTpchId!=22 && !isMemberConst(next)))     ||
+      (sEQ(name1,"where"   ) && sEQ(name2,"lt"      )) ||
+      (sEQ(name1,"member"  ) && sEQ(name2,"compress")) || 
+      (sEQ(name1,"compress") && sEQ(name2,"index"))    || 
+      (sEQ(name1,"compress") && sEQ(name2,"like"))     || 
+      (sEQ(name1,"compress") && sEQ(name2,"compress")) || 
+      (sEQ(name1,"compress") && sEQ(name2,"or"))       || 
+      (sEQ(name1,"not"     ) && sEQ(name2,"like")     &&
+                                          qTpchId!=14) || 
+      (sEQ(name1,"not"     ) && sEQ(name2,"member"));
+      //(findCompress && sEQ(name2,"compress"));
 }
 
 static void copyLocalVarsToListNode(fListNode *f){
@@ -1112,6 +1444,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
     if(sEQ(rt->funcName,"len")){
         glueAny(indent4 "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
         glueAny(indent4 "DOP(vn(z), vL(z,i)=");
+        WP("1\n");
         genCodeAutoListSingleLen(rt);
         glueAny(") R 0;\n}");
     }
@@ -1131,6 +1464,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
 static void findFusion(Chain *chain){
     Node *call = getStmtCall(chainNode(chain));
     if(call){
+        findCompress = false;
         C kind = getCallKind(call);
         if(kind){
             // if(OPT_DEBUG && kind == 'R'){
@@ -1141,6 +1475,7 @@ static void findFusion(Chain *chain){
             gNode *rt = findFusionUp(chain, true);
 			// 2nd pass, trim rt
 			trimgNodeFromTop(rt); 
+            rt = analyzegNode(rt);
             if(rt && isOK2Fuse(rt)){
 				//WP("Fusion auto found:\n");
 				//printgNode(rt); getchar();
@@ -1169,7 +1504,7 @@ static void findFusion(Chain *chain){
 static void analyzeChainBottomUp(ChainList *list){
     while(list){
         Chain *chain = list->chain;
-        //printChain(chain); P("%d", isChainVisited(chain)); getchar();
+        //printChain(chain); WP("%d", isChainVisited(chain)); getchar();
         if(!isChainVisited(chain) && instanceOf(chainNode(chain), stmtK)){
             findFusion(chain);
         }
@@ -1270,12 +1605,270 @@ static O saveToLocalVars(fListNode **fList, I num){
 
 static ChainExtra* setSingleNodeVisible(fListNode **fList, I num){
     DOIa(num, addNodeToChainExtra(fList[i]->nodeOpt, SkipG))
+    // WP("visible\n"); printNode(fList[0]->nodeOpt); getchar();
     return addNodeToChainExtra(fList[0]->nodeOpt, OptG);
 }
+
+static B checkNodeHasLikeOrElem(gNode *rt){
+    if(rt){
+        DOI(rt->pnum, {
+                gNode *x=rt->pnode[i];
+                if(x){ if(checkNodeHasLikeOrElem(x)||isKindE(x)||isKindB(x))R 1; }
+                });
+    }
+    R 0;
+}
+
+static B checkNodeHasLike(gNode *rt){
+    if(rt){
+        DOI(rt->pnum, {
+                gNode *x=rt->pnode[i];
+                if(x){ if(checkNodeHasLike(x)||isKindB(x)) R 1; }
+                })
+    }
+    R 0;
+}
+
+// at least one parameter is constant
+static B isParamConst1(Node *n){
+    List *list = getNodeParams(n);
+    while(list){
+        if(instanceOf(list->val, constK))
+            R 1;
+        list = list->next;
+    }
+    R 0;
+}
+
+static B checkNodeSimpleMember(gNode *rt){
+    if(rt){
+        DOI(rt->pnum, {
+                gNode *x=rt->pnode[i];
+                if(x){ if(checkNodeSimpleMember(x)) R 1;
+                    S namex = getCallFuncName(x->node);
+                    if(namex && sEQ(namex, "member")) R 1; }
+                })
+    }
+    R 0;
+}
+// if(namex && sEQ(namex, "member") && isParamConst1(x->node)) R 1; }
+
+
+static B isSpecialLike(fListNode *f){
+    // need: like + elementwise + reduction
+    gNode *rt = f->gnode;
+    R isKindR(rt) && checkNodeHasLike(rt) && checkNodeHasLikeOrElem(rt);
+}
+
+static B isSpecialIndex(fListNode *f){
+    gNode *rt = f->gnode;
+    R isKindX(rt) && isKindS(rt->pnode[0]); // last param in rt
+}
+
+static S specialString;
+static L specialStringId;
+
+static S findSpecialString(Node *n){
+    List *list = getNodeParams(n);
+    while(list){
+        Node *c = getSingleSymbol(list->val);
+        if(c){ // get constant string
+            R c->val.nodeC->valS;
+        }
+        list = list->next;
+    }
+    R 0;
+}
+
+static void getSpecialLikeString(gNode *rt){
+    if(specialString) R;
+    if(rt){
+        if(isKindB(rt)){
+            specialString = findSpecialString(rt->node);
+        }
+        else {
+            DOI(rt->pnum, getSpecialLikeString(rt->pnode[i]))
+        }
+    }
+}
+
+static L findSpecialStringId(Node *n){
+    List *list = getNodeParams(n);
+    while(list){
+        Node *c = getSingleSymbol(list->val);
+        if(!c){ // get non-constant string
+            R searchName(varNames, nodeName2(list->val));
+        }
+        list = list->next;
+    }
+    R -1;
+}
+
+static void getSpecialStringId(gNode *rt){
+    if(specialStringId >= 0) R;
+    if(rt){
+        if(isKindB(rt)){
+            specialStringId = findSpecialStringId(rt->node);
+        }
+        else {
+            DOI(rt->pnum, getSpecialStringId(rt->pnode[i]))
+        }
+    }
+}
+
+static void genCodeExprSpecialLike(gNode *rt);
+
+static void genCodeParamLikeReversed(List *list, gNode *rt, I dep){
+    if(list){
+        genCodeParamLikeReversed(list->next, rt, dep+1);
+        if(list->next) glueChar(comma);
+        gNode *t = rt->pnode[dep];
+        if(t) genCodeExprSpecialLike(t);
+        else {
+            Node *p = list->val;
+            if(instanceOf(p, nameK))
+                genCodeName(p, searchName(varNames, nodeName2(p)));
+            else
+                genCodeNode(p);
+        }
+    }
+}
+
+static void genCodeExprSpecialLike(gNode *rt){
+    if(rt){
+        Node *n = rt->node;
+        if(isKindE(rt)){
+            glueAny("%s(", getFuncNameAuto(n));
+            genCodeParamLikeReversed(getNodeParams(n), rt, 0);
+            glueChar(')');
+        }
+        else if(isKindB(rt)){
+            glueChar('t');
+        }
+        else if(isKindR(rt)){
+            glueAny("r[tid]+=");
+            genCodeExprSpecialLike(rt->pnode[0]);
+        }
+        else {
+            printNode(n);
+            TODO("Should not go here.");
+        }
+        if(!isKindR(rt)){
+            ChainExtra *extra = NEW(ChainExtra);
+            extra->kind = SkipG;
+            addToSimpleHashUnsafe(hashOpt, (L)(rt->node), (L)extra); // insert to hash
+        }
+    }
+}
+
+static void genCodeBodySpecialLike1(fListNode *f){
+    gNode *rt = f->gnode;
+    depth++;
+    glueAnyLine("pcre2_code *re = getLikePatten(\"%s\");", specialString);
+    glueAnyLine("pcre2_match_data *match = pcre2_match_data_create_from_pattern(re, NULL);");
+    glueAnyLine("if(re==NULL) R 99;");
+    glueAnyLine("I jit_status = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);");
+    glueAnyLine("initV(z, H_E, 1);");
+    glueAnyLine("E r[H_CORE]; DOI(H_CORE, r[i]=0)");
+    glueAnyLine("DOLIKE(vn(x0), {");
+    depth++;
+    specialStringId = -1;
+    getSpecialStringId(rt);
+    glueAnyLine("B t = LIKEMATCH(getSymbolStr(vQ(x%lld,i)),getSymbolSize(vQ(x%lld,i)),re,match);",specialStringId,specialStringId);
+    genIndent(); genCodeExprSpecialLike(rt); glueAny(";})\n");
+    depth--;
+    glueAnyLine("E r0=0; DOI(H_CORE, r0+=r[i]) ve(z)=r0;");
+    glueAnyLine("pcre2_code_free(re);");
+    glueAnyLine("pcre2_match_data_free(match);");
+    glueAnyLine("R 0;");
+    depth--;
+}
+
+static void genCodeBodySpecialLike2(fListNode *f){
+    gNode *rt = f->gnode;
+    genCodeAuto(rt, true);
+}
+
+
+static void genCodeBodySpecialLike(fListNode *f){
+    specialString = NULL;
+    getSpecialLikeString(f->gnode);
+    if(specialString){
+        genCodeBodySpecialLike1(f);
+    }
+    else {
+        EP("String expected!");
+    }
+}
+
+static void genCodeSpecialLike(fListNode *f){
+    B isSimpleMember = checkNodeSimpleMember(f->gnode);
+    // WP("isSimpleMember = %d\n", isSimpleMember); getchar();
+    if(isSimpleMember){
+        genCodeBodySpecialLike2(f);
+    }
+    else {
+        C temp[199];
+        SP(temp, "q%d_autofusion_%d",qid,f->fuseId);
+        glueCode(genDeclSingle(temp, '{')); glueLine();
+        genLocalVars(varNames, varNum);
+        genCodeBodySpecialLike(f);
+        glueAny("}\n");
+        S z0s = getNameStr(f->nodeRtn);
+        ChainExtra *extra = addNodeToChainExtra(f->nodeOpt, OptG);
+        extra->funcFunc = strdup(code);
+        extra->funcDecl = genDeclSingle(temp, ';');
+        extra->funcInvc = genInvcSingle(z0s, temp, f->varNames, f->varNum);
+    }
+    // debugCode((S)"Show like");
+}
+
+static void genCodeBodySpecialIndex(fListNode *f){
+    Node *z0 = f->nodeRtn;
+    S z0s = getNameStr(z0);
+    C z0c = getTypeCodeByName(z0);
+    gNode *rt = f->gnode;
+    gNode *next = rt->pnode[0];
+    I x0 = getNameIndex(getNodeParams(next->node)->val); // boolean
+    I x1 = getNameIndex(getNodeItemIndex(rt->node, 1));
+    depth++;
+    glueAnyLine("L lenZ = 0, parZ[H_CORE], offset[H_CORE];");
+    glueAnyLine("DOI(H_CORE, parZ[i]=offset[i]=0)");
+    glueAnyLine("CHECKE(getNumOfNonZero(x%d,parZ));",x0);
+    glueAnyLine("DOI(H_CORE, lenZ += parZ[i])");
+    glueAnyLine("DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])");
+    glueAnyLine("initV(z, H_%c, lenZ);",z0c);
+    glueAnyLine("DOT(vn(x%d), if(vB(x%d,i)){L c=offset[tid]++;\\",x0,x0);
+    depth++;
+    glueAnyLine("v%c(z,c) = v%c(x%d,i);})",z0c,z0c,x1);
+    depth--;
+    glueAnyLine("R 0;");
+    depth--;
+    glueAnyLine("}");
+}
+
+static void genCodeSpecialIndex(fListNode *f){
+    C temp[199];
+    SP(temp, "q%d_autofusion_%d",qid,f->fuseId);
+    glueCode(genDeclSingle(temp, '{')); glueLine();
+    genLocalVars(varNames, varNum);
+    genCodeBodySpecialIndex(f);
+    S z0s = getNameStr(f->nodeRtn);
+    ChainExtra *extra = addNodeToChainExtra(f->nodeOpt, OptG);
+    extra->funcFunc = strdup(code);
+    extra->funcDecl = genDeclSingle(temp, ';');
+    extra->funcInvc = genInvcSingle(z0s, temp, f->varNames, f->varNum);
+    //debugCode((S)"Show index code");
+}
+
 
 static O genMultipleInitVars(fListNode **fList, I num){
     Node *r0 = fList[0]->nodeIter;
     I r0x = getNameIndex(r0);
+    DOI(num, { fListNode *f = fList[i];
+       Node *z0 = f->nodeRtn;
+       S z0s = getNameStr(z0);
+       glueAny(indent4 "V z%lld=z[%lld]; // %s\n",i,i,z0s); })
     DOI(num, { fListNode *f = fList[i]; \
        Node *z0 = f->nodeRtn;  \
        S z0s = getNameStr(z0); \
@@ -1307,15 +1900,18 @@ static O genMultipleBodyInner(fListNode **fList, I num, I r0x){
     glueIndent(); DOI(num, genCodeListReduction(fList[i])) glueAny("\\\n");
     glueAnyLine("DOP(vn(t), {L k=vL(t,i);\\");
     depth++;
-    P("3\n");
+    //WP("3\n");
     DOI(num, genCodeListBody(fList[i]))   // skip len
     depth--;
-    glueAnyLine("}) \\");
-    P("4\n");
+    glueAnyLine("}, %s)) \\", genCodeListParallelReduction(fList,num));
+    //WP("4\n");
     DOI(num, genCodeListBodyLen(fList[i], 'j')) // do len
     depth--;
-    glueAnyLine(")");
+    glueAnyLine("})");
     depth--;
+    glueAnyLine("R 0;");
+    depth--;
+    glueAnyLine("}");
 }
 
 static O genMultipleBody(fListNode **fList, I num){
@@ -1329,7 +1925,7 @@ static O genMultipleBody(fListNode **fList, I num){
     genMultipleBodyInner(fList, num, r0x);
     //glueAnyLine("}");
     depth--;
-    getchar();
+    //STOP("check 1.");
 }
 
 static gNode *findFusionIndex(Chain *chain){
@@ -1346,14 +1942,14 @@ static gNode *findFusionIndex(Chain *chain){
                 Node *p = chainNode(next);
                 Node *call = getStmtCall(p);
                 S funcName = nodeName2(nodeCallFunc(call));
-                STOP("funcName = %s\n", funcName);
+                // STOP("funcName = %s\n", funcName);
                 rt->pnode[0] = initgNode(p, 'S', funcName);
                 rt->pnode[0]->gChain = next;
                 if(sEQ(funcName, "compress"))
                     rt->pnode[1] = NULL;
                 setVisited(chain, true);
                 setVisited(next, true);
-                printgNode(rt); getchar();
+                //printgNode(rt); getchar();
                 R rt;
             }
         }
@@ -1361,15 +1957,54 @@ static gNode *findFusionIndex(Chain *chain){
     R NULL;
 }
 
-
-
 static void printFusibleSections(fListNode **fList, I fListNum){
     L c = 0;
-    DOI(fListNum, { S iter=(S)obtainNodeStr(fList[i]->nodeIter); \
-            WP("Fusible section: #%lld (iter: %s)\n",i,iter?iter:"NULL"); \
-            L c0=printgNode(fList[i]->gnode); WP("\n (%lld)\n",c0); c+=c0; })
+    DOI(fListNum, {
+            S iter=(S)obtainNodeStr(fList[i]->nodeIter);
+            WP("Fusible section: #%lld (iter: %s, List: %d, Id: %d)\n",\
+                    i,iter?iter:"NULL", fList[i]->isList, fList[i]->fuseId);
+            L c0=printgNode(fList[i]->gnode) + fList[i]->isList;
+            WP("\n-- size: %lld\n",c0); c+=c0; })
     WP("total statements fused: %lld\n", c);
-    getchar();
+    // getchar();
+}
+
+static L countFusedStmtsCore(gNode *pt, gNode *rt, I dep, sHashTable *flag){
+    L c = 0;
+    if(rt){
+        if(!lookupSimpleHash(flag,(L)rt)){
+            if(pt) c++;
+            DOI(rt->pnum, c+=countFusedStmtsCore(rt, rt->pnode[i], dep+1, flag))
+            addToSimpleHash(flag, (L)rt, 1);
+        }
+    }
+    R c;
+}
+
+static L countFusedStmts(fListNode *f){
+    gNode *rt = f->gnode;
+    sHashTable *flag = initSimpleHash(1<<10);
+    L c = countFusedStmtsCore(NULL, rt, 0, flag)+ (NULL != rt) + f->isList;
+    freeSimpleHash(flag);
+    R c;
+}
+
+static S genDeclMultiple(S func, C del){
+    C temp[199]; 
+    SP(temp, "static I %s(V *z, V *x)%c", func, del);
+    return strdup(temp);
+}
+
+static S genInvcMultiple(S func, fListNode **fList, I num){
+    C temp[199]; S ptr = temp;
+    saveToLocalVars(fList, num);
+    ptr += SP(ptr, "%s((V []){", func);
+    DOI(num, ptr+=SP(ptr,(i>0?",%s":"%s"),getNameStr(fList[i]->nodeRtn)))
+    ptr += SP(ptr, "}, (V []){");
+    DOI(varNum, if(strncmp(varNames[i],"id",2)) \
+             ptr+=SP(ptr,(i>0?",%s":"%s"),varNames[i]))
+    SP(ptr, "})");
+    R strdup(temp);
 }
 
 static void genCodeListSingle(fListNode **fList){
@@ -1381,16 +2016,16 @@ static void genCodeListSingle(fListNode **fList){
     // generate local vars
     genLocalVars(f->varNames, f->varNum);
     Node *z0 = f->nodeRtn;
-    Node *r0 = f->nodeIter;
+    //Node *r0 = f->nodeIter;
     gNode *g = f->gnode;
     S z0s = getNameStr(z0);
     C z0c = getTypeCodeByName(z0);
-    I r0x = getNameIndex(r0);
+    I r0x = fixNameIndex(f);
     // set meta information
     if(sEQ(g->funcName, "len")){
         glueAny(indent4 "initV(z, H_%c, vn(x%d));\n",z0c,r0x);
         glueAny(indent4 "DOP(vn(z), vL(z,i)=");
-        genCodeAutoListSingleLen(g);
+        fixCodeAutoListSingleLen(f, 'i');
         glueAny(") R 0;\n}");
     }
     else { // generate non-len list fusion
@@ -1403,44 +2038,49 @@ static void genCodeListSingle(fListNode **fList){
     //STOP("code = %s", code);
 }
 
-static void genCodeListMultiple(fListNode **fList, I num){
+static void genCodeListMultiple(fListNode **myList, I num){
     WP("- Fusing %d fusible sections for lists\n", num);
-    fListNode *f = fList[0];
+    fListNode *f = myList[0];
     // generate function signature
     C temp[199];
     SP(temp, "q%d_autofusionlist_%d",qid,f->fuseId);
-    glueCode(genDeclSingle(temp, '{')); glueLine();
+    glueCode(genDeclMultiple(temp, '{')); glueLine();
     // generate local vars
-    saveToLocalVars    (fList, num); // save to varNames
+    saveToLocalVars    (myList, num); // save to varNames
     genLocalVars       (varNames, varNum);
-    genMultipleInitVars(fList, num);
-    genMultipleBody    (fList, num);
-    //ChainExtra *extra = setSingleNodeVisible(fList, num);
-    // extra->funcFunc = ...
-    // extra->funcDecl = ...
-    // extra->funcinvc = ...
-    //STOP("code = %s",code);
-    //TODO("impl. soon");
+    genMultipleInitVars(myList, num);
+    genMultipleBody    (myList, num);
+    ChainExtra *extra = setSingleNodeVisible(myList, num);
+    extra->funcFunc = strdup(code);
+    extra->funcDecl = genDeclMultiple(temp, ';');
+    extra->funcInvc = genInvcMultiple(temp, myList, num);
+    // WP("code = %s\n",code); getchar();
 }
 
 // done
 static void genCodeVectorSingle(fListNode **fList){
     fListNode *f = fList[0];
-    gNode *rt = f->gnode;
-    totalInputs(getNodeParams(rt->node), rt, 0, varNames); // load all vars
-    saveToLocalVars(fList, 1); // save to varNames
-    genCodeAuto(rt, true);
-    //debugCode((S)">> Gen code for vector: single");
-}
-
-Node *getNodeVar1(Node *n){
-    List *vars = nodeStmtVars(n);
-    I total = totalList(vars);
-    if(total == 1){
-        R vars->val;
+    if(isSpecialLike(f)){
+        // WP("special like found!!!\n");
+        gNode *rt = f->gnode;
+        totalInputs(getNodeParams(rt->node), rt, 0, varNames); // load all vars
+        saveToLocalVars(fList, 1);
+        genCodeSpecialLike(f);
+    }
+    else if(isSpecialIndex(f)){
+        WP("special index found!!!\n");
+        gNode *rt = f->gnode;
+        totalInputs(getNodeParams(rt->node), rt, 0, varNames); // load all vars
+        saveToLocalVars(fList, 1);
+        genCodeSpecialIndex(f);
     }
     else {
-        EP("Expect single var assignment");
+        //printgNode(f->gnode);
+        gNode *rt = f->gnode;
+        totalInputs(getNodeParams(rt->node), rt, 0, varNames); // load all vars
+        saveToLocalVars(fList, 1); // save to varNames
+        genCodeAuto(rt, true);
+        //debugCode((S)">> Gen code for vector: single");
     }
 }
 
@@ -1451,7 +2091,7 @@ static void genCodeVectorMultipleBody(fListNode **fList, I num){
         gNode *nt = rt->pnode[0];
         Node *next = nt->node;
         if(checkStmtByKind(next, 'S')){
-            P("search string: %s\n", nodeVarName(getNodeVar1(f->nodeIter)));
+            WP("search string: %s\n", nodeVarName(getNodeVar1(f->nodeIter)));
             L id = searchName(varNames, nodeVarName(getNodeVar1(f->nodeIter)));
             glueAny(indent4 "L parZ[H_CORE], offset[H_CORE], total = 0;\n");
             glueAny(indent4 "DOI(H_CORE, parZ[i]=offset[i]=0)\n");
@@ -1472,24 +2112,34 @@ static void genCodeVectorMultipleBody(fListNode **fList, I num){
 }
 
 
-static void genCodeVectorMultiple(fListNode **fList, I num){
+static void genCodeVectorMultiple(fListNode **myList, I num){
     WP("- Fusing %d fusible sections for vectors\n", num);
-    printFusibleSections(fList, num);
-    fListNode *f = fList[0];
+    printFusibleSections(myList, num);
+    fListNode *f = myList[0];
     // generate function signature
     C temp[199];
     SP(temp, "q%d_autofusion_%d",qid,f->fuseId);
-    glueCode(genDeclSingle(temp, '{')); glueLine();
-    saveToLocalVars    (fList, num); // save to varNames
+    glueCode(genDeclMultiple(temp, '{')); glueLine();
+    saveToLocalVars    (myList, num); // save to varNames
     genLocalVars       (varNames, varNum);
     genReturnVars      (num);
-    genCodeVectorMultipleBody(fList, num);
+    genCodeVectorMultipleBody(myList, num);
     glueAny("}\n");
-    debugCode((S)">> Gen code for vector: multiple");
-    STOP("check point");
+    ChainExtra *extra = setSingleNodeVisible(myList, num);
+    extra->funcFunc = strdup(code);
+    extra->funcDecl = genDeclMultiple(temp, ';');
+    extra->funcInvc = genInvcMultiple(temp, myList, num);
+    // Node *tmp = myList[0]->nodeOpt;
+    // L x2 = lookupSimpleHash(hashOpt, (L)tmp);
+    // WP("1. visible: %s, %lld, x = %lld, x2 = %lld\n", getExtraKind(extra->kind), (L)tmp, (L)extra, x2);
+    // printNode(tmp); getchar();
+    // debugFusionNode(2);
+    //WP("1 visible: %s, %lld\n", getExtraKind(extra->kind), (L)(myList[0]->nodeOpt));
+    //printNode(myList[0]->nodeOpt); getchar();
+    // debugCode((S)">> Gen code for vector: multiple");
 }
 
-static void genFusionCodeMain(fListNode **fList, I num, B isList){
+static L genFusionCodeMain(fListNode **fList, I num, B isList){
     clearFusion();
     if(isList){
         if(num == 1)
@@ -1503,35 +2153,46 @@ static void genFusionCodeMain(fListNode **fList, I num, B isList){
         else
             genCodeVectorMultiple(fList, num);
     }
+    L c = 0;
+    if(isList && num == 1);
+    else {
+        DOI(num, c+=countFusedStmts(fList[i]))
+        P(" // - #: %lld\n", c);
+    }
+    R c;
 }
+
 
 static void genFusionCode(){
     WP("# of fusible sections: %d\n", fListNum);
     printFusibleSections(fList, fListNum);
+    L total = 0;
     if(fListNum == 1){
-        genFusionCodeMain(fList, 1, fList[0]->isList);
+        total = genFusionCodeMain(fList, 1, fList[0]->isList);
     }
     else if(fListNum > 1){
-        B *flag = NEWL(B, fListNum);
+        memset(fuseFlag, 0, sizeof(B)*fListNum);
         fListNode **temp = NEW2(fListNode, fListNum);
-        I curNum = 0;
+        curNum = 0;
         while(curNum < fListNum){
-            DOI(fListNum, if(!flag[i]){ flag[i]=true; \
+            // WP("cur = %d, fListNum =%d\n", curNum, fListNum);
+            DOI(fListNum, if(!fuseFlag[i]){ fuseFlag[i]=true; \
                 I curT=0; temp[curT++]=fList[i]; \
                 B isList = fList[i]->isList; \
                 DOJ3(i+1, fListNum, { \
-                if(!flag[j] && \
+                if(!fuseFlag[j] && \
                     isList == fList[j]->isList && \
                     fList[i]->nodeIter != NULL && \
                     fList[i]->nodeIter == fList[j]->nodeIter){ \
-                STOP("%lld, %lld, %s\n", i,j,obtainNodeStr(fList[i]->nodeIter)); \
-                flag[j]=true; temp[curT++]=fList[j];}}) \
-                genFusionCodeMain(temp, curT, isList); \
+                WP("%lld, %lld, %s\n", i,j,obtainNodeStr(fList[i]->nodeIter)); \
+                fuseFlag[j]=true; temp[curT++]=fList[j];}}) \
+                total+=genFusionCodeMain(temp, curT, isList); \
                 curNum += curT; })
+            //debugFusionNode(2);
         }
-        free(flag);
         free(temp);
     }
+    P("// Total # of fused stmts: %lld\n", total);
     // else do nothing
 }
 // if(fList[i]->nodeIter && fList[j]->nodeIter){ \
@@ -1562,6 +2223,7 @@ static void init(){
     hashgNode = initSimpleHash(1<<10);
     fListNum  = 0;
     depth     = 0;
+    localIter = 'i';
 }
 
 static void clean(){
