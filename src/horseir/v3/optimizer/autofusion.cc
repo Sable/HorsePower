@@ -1223,7 +1223,6 @@ static void clearFusion(){
     cleanCode();
     ptr = code;
     varNum = 0; 
-    //constIdNum = 0;
 }
 
 static L numLast;

@@ -13,6 +13,7 @@ extern sHashTable *hashOpt;
 extern I varNum;
 extern S varNames[99];
 extern C code[CODE_MAX_SIZE], *ptr;
+extern C localIter;
 
 static Node *currentMethod;
 
@@ -329,6 +330,7 @@ static void scanMethodList(List *list){
 
 static void init(){
     currentMethod = NULL;
+    localIter = 'i';
 }
 
 // entry: fuse elementwise
