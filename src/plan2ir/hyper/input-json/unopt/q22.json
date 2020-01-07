@@ -1,0 +1,832 @@
+{
+  "header": [
+    "cntrycode", 
+    "v", 
+    "numcust", 
+    "v42", 
+    "totacctbal", 
+    "v41"
+  ], 
+  "plan": {
+    "operator": "sort", 
+    "input": {
+      "operator": "groupby", 
+      "input": {
+        "operator": "map", 
+        "input": {
+          "operator": "select", 
+          "input": {
+            "operator": "select", 
+            "input": {
+              "right": {
+                "operator": "select", 
+                "input": {
+                  "operator": "select", 
+                  "input": {
+                    "tupleFlags": [
+                      "v38", 
+                      [
+                        "BigInt"
+                      ]
+                    ], 
+                    "from": "orders", 
+                    "operatorId": 15, 
+                    "restrictions": [], 
+                    "tid": [
+                      "v36", 
+                      [
+                        "BigInt"
+                      ]
+                    ], 
+                    "values": [
+                      {
+                        "iu": [
+                          "o_orderkey", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "o_orderkey"
+                      }, 
+                      {
+                        "iu": [
+                          "o_custkey", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "o_custkey"
+                      }, 
+                      {
+                        "iu": [
+                          "o_orderstatus", 
+                          [
+                            "Char1"
+                          ]
+                        ], 
+                        "name": "o_orderstatus"
+                      }, 
+                      {
+                        "iu": [
+                          "o_totalprice", 
+                          [
+                            "Numeric", 
+                            12, 
+                            2
+                          ]
+                        ], 
+                        "name": "o_totalprice"
+                      }, 
+                      {
+                        "iu": [
+                          "o_orderdate", 
+                          [
+                            "Date"
+                          ]
+                        ], 
+                        "name": "o_orderdate"
+                      }, 
+                      {
+                        "iu": [
+                          "o_orderpriority", 
+                          [
+                            "Char", 
+                            15
+                          ]
+                        ], 
+                        "name": "o_orderpriority"
+                      }, 
+                      {
+                        "iu": [
+                          "o_clerk", 
+                          [
+                            "Char", 
+                            15
+                          ]
+                        ], 
+                        "name": "o_clerk"
+                      }, 
+                      {
+                        "iu": [
+                          "o_shippriority", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "o_shippriority"
+                      }, 
+                      {
+                        "iu": [
+                          "o_comment", 
+                          [
+                            "Varchar", 
+                            79
+                          ]
+                        ], 
+                        "name": "o_comment"
+                      }
+                    ], 
+                    "operator": "tablescan", 
+                    "tableOid": [
+                      "v37", 
+                      [
+                        "RegClass"
+                      ]
+                    ], 
+                    "segment": 22
+                  }, 
+                  "operatorId": 14, 
+                  "condition": {
+                    "right": {
+                      "iu": "c_custkey", 
+                      "expression": "iuref"
+                    }, 
+                    "expression": "comparison", 
+                    "mode": "=", 
+                    "left": {
+                      "iu": "o_custkey", 
+                      "expression": "iuref"
+                    }
+                  }
+                }, 
+                "operatorId": 13, 
+                "condition": {
+                  "expression": "const", 
+                  "value": {
+                    "type": [
+                      "Bool"
+                    ], 
+                    "value": true
+                  }
+                }
+              }, 
+              "operatorId": 6, 
+              "marker": [
+                "v39", 
+                [
+                  "Bool"
+                ]
+              ], 
+              "operator": "leftmarkjoin", 
+              "condition": {
+                "expression": "const", 
+                "value": {
+                  "type": [
+                    "Bool"
+                  ], 
+                  "value": true
+                }
+              }, 
+              "left": {
+                "operator": "join", 
+                "right": {
+                  "operator": "select", 
+                  "input": {
+                    "operator": "groupby", 
+                    "input": {
+                      "operator": "select", 
+                      "input": {
+                        "tupleFlags": [
+                          "v7", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "from": "customer", 
+                        "operatorId": 12, 
+                        "restrictions": [], 
+                        "tid": [
+                          "v5", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "values": [
+                          {
+                            "iu": [
+                              "c_custkey2", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "c_custkey"
+                          }, 
+                          {
+                            "iu": [
+                              "c_name2", 
+                              [
+                                "Varchar", 
+                                25
+                              ]
+                            ], 
+                            "name": "c_name"
+                          }, 
+                          {
+                            "iu": [
+                              "c_address2", 
+                              [
+                                "Varchar", 
+                                40
+                              ]
+                            ], 
+                            "name": "c_address"
+                          }, 
+                          {
+                            "iu": [
+                              "c_nationkey2", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "c_nationkey"
+                          }, 
+                          {
+                            "iu": [
+                              "c_phone2", 
+                              [
+                                "Char", 
+                                15
+                              ]
+                            ], 
+                            "name": "c_phone"
+                          }, 
+                          {
+                            "iu": [
+                              "c_acctbal2", 
+                              [
+                                "Numeric", 
+                                12, 
+                                2
+                              ]
+                            ], 
+                            "name": "c_acctbal"
+                          }, 
+                          {
+                            "iu": [
+                              "c_mktsegment2", 
+                              [
+                                "Char", 
+                                10
+                              ]
+                            ], 
+                            "name": "c_mktsegment"
+                          }, 
+                          {
+                            "iu": [
+                              "c_comment2", 
+                              [
+                                "Varchar", 
+                                117
+                              ]
+                            ], 
+                            "name": "c_comment"
+                          }
+                        ], 
+                        "operator": "tablescan", 
+                        "tableOid": [
+                          "v6", 
+                          [
+                            "RegClass"
+                          ]
+                        ], 
+                        "segment": 21
+                      }, 
+                      "operatorId": 11, 
+                      "condition": {
+                        "expression": "and", 
+                        "arguments": [
+                          {
+                            "right": {
+                              "expression": "const", 
+                              "value": {
+                                "type": [
+                                  "Numeric", 
+                                  3, 
+                                  2
+                                ], 
+                                "value": 0
+                              }
+                            }, 
+                            "expression": "comparison", 
+                            "mode": ">", 
+                            "left": {
+                              "iu": "c_acctbal2", 
+                              "expression": "iuref"
+                            }
+                          }, 
+                          {
+                            "set": [
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "13"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "31"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "23"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "29"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "30"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "18"
+                                }
+                              }, 
+                              {
+                                "expression": "const", 
+                                "value": {
+                                  "type": [
+                                    "Varchar"
+                                  ], 
+                                  "value": "17"
+                                }
+                              }
+                            ], 
+                            "expression": "quantor", 
+                            "mode": "=some", 
+                            "value": {
+                              "expression": "substring", 
+                              "arguments": [
+                                {
+                                  "iu": "c_phone2", 
+                                  "expression": "iuref"
+                                }, 
+                                {
+                                  "expression": "const", 
+                                  "value": {
+                                    "type": [
+                                      "Integer"
+                                    ], 
+                                    "value": 1
+                                  }
+                                }, 
+                                {
+                                  "expression": "const", 
+                                  "value": {
+                                    "type": [
+                                      "Integer"
+                                    ], 
+                                    "value": 2
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }, 
+                    "aggregates": [
+                      {
+                        "source": 0, 
+                        "operation": "sum", 
+                        "iu": [
+                          "v8", 
+                          [
+                            "Numeric", 
+                            12, 
+                            2, 
+                            "nullable"
+                          ]
+                        ]
+                      }, 
+                      {
+                        "source": 0, 
+                        "operation": "count", 
+                        "iu": [
+                          "v9", 
+                          [
+                            "BigInt"
+                          ]
+                        ]
+                      }, 
+                      {
+                        "source": 0, 
+                        "operation": "avg", 
+                        "iu": [
+                          "v10", 
+                          [
+                            "Numeric", 
+                            14, 
+                            4, 
+                            "nullable"
+                          ]
+                        ]
+                      }
+                    ], 
+                    "values": [
+                      {
+                        "value": {
+                          "iu": "c_acctbal2", 
+                          "expression": "iuref"
+                        }
+                      }
+                    ], 
+                    "operatorId": 10
+                  }, 
+                  "operatorId": 9, 
+                  "condition": {
+                    "expression": "const", 
+                    "value": {
+                      "type": [
+                        "Bool"
+                      ], 
+                      "value": true
+                    }
+                  }
+                }, 
+                "operatorId": 7, 
+                "condition": {
+                  "expression": "const", 
+                  "value": {
+                    "type": [
+                      "Bool"
+                    ], 
+                    "value": true
+                  }
+                }, 
+                "left": {
+                  "tupleFlags": [
+                    "v4", 
+                    [
+                      "BigInt"
+                    ]
+                  ], 
+                  "from": "customer", 
+                  "operatorId": 8, 
+                  "restrictions": [], 
+                  "tid": [
+                    "v2", 
+                    [
+                      "BigInt"
+                    ]
+                  ], 
+                  "values": [
+                    {
+                      "iu": [
+                        "c_custkey", 
+                        [
+                          "Integer"
+                        ]
+                      ], 
+                      "name": "c_custkey"
+                    }, 
+                    {
+                      "iu": [
+                        "c_name", 
+                        [
+                          "Varchar", 
+                          25
+                        ]
+                      ], 
+                      "name": "c_name"
+                    }, 
+                    {
+                      "iu": [
+                        "c_address", 
+                        [
+                          "Varchar", 
+                          40
+                        ]
+                      ], 
+                      "name": "c_address"
+                    }, 
+                    {
+                      "iu": [
+                        "c_nationkey", 
+                        [
+                          "Integer"
+                        ]
+                      ], 
+                      "name": "c_nationkey"
+                    }, 
+                    {
+                      "iu": [
+                        "c_phone", 
+                        [
+                          "Char", 
+                          15
+                        ]
+                      ], 
+                      "name": "c_phone"
+                    }, 
+                    {
+                      "iu": [
+                        "c_acctbal", 
+                        [
+                          "Numeric", 
+                          12, 
+                          2
+                        ]
+                      ], 
+                      "name": "c_acctbal"
+                    }, 
+                    {
+                      "iu": [
+                        "c_mktsegment", 
+                        [
+                          "Char", 
+                          10
+                        ]
+                      ], 
+                      "name": "c_mktsegment"
+                    }, 
+                    {
+                      "iu": [
+                        "c_comment", 
+                        [
+                          "Varchar", 
+                          117
+                        ]
+                      ], 
+                      "name": "c_comment"
+                    }
+                  ], 
+                  "operator": "tablescan", 
+                  "tableOid": [
+                    "v3", 
+                    [
+                      "RegClass"
+                    ]
+                  ], 
+                  "segment": 21
+                }
+              }
+            }, 
+            "operatorId": 5, 
+            "condition": {
+              "expression": "and", 
+              "arguments": [
+                {
+                  "set": [
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "13"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "31"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "23"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "29"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "30"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "18"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "17"
+                      }
+                    }
+                  ], 
+                  "expression": "quantor", 
+                  "mode": "=some", 
+                  "value": {
+                    "expression": "substring", 
+                    "arguments": [
+                      {
+                        "iu": "c_phone", 
+                        "expression": "iuref"
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 1
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 2
+                        }
+                      }
+                    ]
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "v10", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": ">", 
+                  "left": {
+                    "iu": "c_acctbal", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "input": {
+                    "iu": "v39", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "not"
+                }
+              ]
+            }
+          }, 
+          "operatorId": 4, 
+          "condition": {
+            "expression": "const", 
+            "value": {
+              "type": [
+                "Bool"
+              ], 
+              "value": true
+            }
+          }
+        }, 
+        "values": [
+          {
+            "iu": [
+              "v40", 
+              [
+                "Varchar"
+              ]
+            ], 
+            "value": {
+              "expression": "substring", 
+              "arguments": [
+                {
+                  "iu": "c_phone", 
+                  "expression": "iuref"
+                }, 
+                {
+                  "expression": "const", 
+                  "value": {
+                    "type": [
+                      "Integer"
+                    ], 
+                    "value": 1
+                  }
+                }, 
+                {
+                  "expression": "const", 
+                  "value": {
+                    "type": [
+                      "Integer"
+                    ], 
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          }
+        ], 
+        "operatorId": 3
+      }, 
+      "aggregates": [
+        {
+          "source": 0, 
+          "operation": "keep", 
+          "iu": [
+            "v", 
+            [
+              "Varchar"
+            ]
+          ]
+        }, 
+        {
+          "source": 1, 
+          "operation": "sum", 
+          "iu": [
+            "v41", 
+            [
+              "Numeric", 
+              12, 
+              2
+            ]
+          ]
+        }, 
+        {
+          "source": 4294967295, 
+          "operation": "count", 
+          "iu": [
+            "v42", 
+            [
+              "BigInt"
+            ]
+          ]
+        }
+      ], 
+      "values": [
+        {
+          "value": {
+            "iu": "v40", 
+            "expression": "iuref"
+          }
+        }, 
+        {
+          "value": {
+            "iu": "c_acctbal", 
+            "expression": "iuref"
+          }
+        }
+      ], 
+      "operatorId": 2
+    }, 
+    "criterion": [
+      {
+        "nullFirst": false, 
+        "descending": false, 
+        "value": {
+          "iu": [
+            "v", 
+            [
+              "Varchar"
+            ]
+          ], 
+          "expression": "iuref"
+        }
+      }
+    ], 
+    "operatorId": 1
+  }
+}

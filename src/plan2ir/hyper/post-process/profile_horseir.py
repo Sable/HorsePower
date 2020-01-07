@@ -21,7 +21,10 @@ def main():
             sys.stderr.write('Error')
             exit(1)
         # print content
-    printInfo(info_line, info_time)
+    if len(sys.argv) == 2 and sys.argv[1] == "latex":
+        printInfoFormatLatex(info_line, info_time)
+    else:
+        printInfo(info_line, info_time)
     pass
 
 def printInfo(info_line, info_time):
@@ -38,6 +41,19 @@ def printInfo(info_line, info_time):
     print '-'*len(string_head)
     print 'Average time (ms): %.2lf' % getAverageTime(info_time)
     print 'Line number (total, average): %d, %d' % getLineInfo(info_line)
+
+def printInfoFormatLatex(info_line, info_time):
+    print '\\begin{table}[htbp]'
+    print '\\begin{tabular}{|c|c|c|c|c|}'
+    print '\\hline'
+    print 'qid & time (ms) & before & after & change \\\\ \\hline \\hline'
+    for x in range(22):
+        qid = 'q%d' % (x+1)
+        num = info_line[qid]
+        ttt = info_time[qid]
+        print '%-3s & %9.2lf & %6d & %5d & %5.lf\\%% \\\\ \\hline' % (qid, ttt, num[0], num[1], compute(num[0],num[1]))
+    print '\\end{tabular}'
+    print '\\end{table}'
 
 def getQueryId(x):
     return x.split('/')[-1].split('.')[0]

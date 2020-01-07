@@ -46,7 +46,23 @@ tmp
     - has all temporary folders and files, such as log data and temp scripts
 
 
+## Execution Plans (Visualized)
+
+Screenshots of query plans from the HyPer's web (see dir: `fig/`)
+
+| Figures (A)          | Figures (B)            | Figures (C)            | Figures (D)            | Figures (E)            |
+| :------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: |
+| [q1.png](fig/q1.png) | [q6.png](fig/q6.png)   | [q11.png](fig/q11.png) | [q16.png](fig/q16.png) | [q21.png](fig/q21.png) |
+| [q2.png](fig/q2.png) | [q7.png](fig/q7.png)   | [q12.png](fig/q12.png) | [q17.png](fig/q17.png) | [q22.png](fig/q22.png) |
+| [q3.png](fig/q3.png) | [q8.png](fig/q8.png)   | [q13.png](fig/q13.png) | [q18.png](fig/q18.png) | |
+| [q4.png](fig/q4.png) | [q9.png](fig/q9.png)   | [q14.png](fig/q14.png) | [q19.png](fig/q19.png) | |
+| [q5.png](fig/q5.png) | [q10.png](fig/q10.png) | [q15.png](fig/q15.png) | [q20.png](fig/q20.png) | |
+
+
 ## List of Queries
+
+Note: P means "pass"; Y means "yes, automatic"
+
 
 | ID | Status |1st|2nd|Auto| Joins                                    | Special
 |----|--------|:-:|:-:|:--:|------------------------------------------|-------------------------
@@ -73,13 +89,6 @@ tmp
 | 21 | Pass*  |   | P | Y  | 4 joins, 1 leftsemijoin, 1 leftantijoin  |
 | 22 | Pass   | P |   | Y  | 1 join,  1 leftantijoin                  | bnl
 
-Command lines
-
-    # fetch information: line numbers and execution time
-    grep -REin "program slicing|time" gen | python profile_horseir.py
-
-    # show the details of execution plans
-    python profile.py opt
 
 Note (Oct 10)
 
@@ -185,17 +194,41 @@ Todo list
 - program debugging
 - performance tuning
 
-## Figures
 
-Screenshots of query plans from the HyPer's web (see dir: `fig/`)
+## Steps to Setup
 
-| Figures (A)          | Figures (B)            | Figures (C)            | Figures (D)            | Figures (E)            |
-| :------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: |
-| [q1.png](fig/q1.png) | [q6.png](fig/q6.png)   | [q11.png](fig/q11.png) | [q16.png](fig/q16.png) | [q21.png](fig/q21.png) |
-| [q2.png](fig/q2.png) | [q7.png](fig/q7.png)   | [q12.png](fig/q12.png) | [q17.png](fig/q17.png) | [q22.png](fig/q22.png) |
-| [q3.png](fig/q3.png) | [q8.png](fig/q8.png)   | [q13.png](fig/q13.png) | [q18.png](fig/q18.png) | |
-| [q4.png](fig/q4.png) | [q9.png](fig/q9.png)   | [q14.png](fig/q14.png) | [q19.png](fig/q19.png) | |
-| [q5.png](fig/q5.png) | [q10.png](fig/q10.png) | [q15.png](fig/q15.png) | [q20.png](fig/q20.png) | |
+1 Download SQL queries from `http://hyper-db.de` directly (optional)
+
+    (cd pre-process/online-query && ./download.sh)
+
+2 Manually fetch plans in JSON and save to `input-json/raw`
+
+    - Unoptimized Plan
+    - Unnesting
+    - Predicate Pushdown
+    - Operator Reordering
+    - Physical Operator Mapping
+    - Optimized Plan
+
+3 Extract plans (opt/unopt/opt-order) and save to `input-json/opt-order`
+
+    (cd input-json && ./convert_raw_to_opt.sh opt-order)
+
+4 Translate optimized plans to HorseIR and save to `output-hir/gen`
+
+    ./run.sh batch tpch all
+
+5 Profile generated HorseIR programs
+
+    ./run.sh profile horseir
+
+6 Profile input optimized plans (optional)
+
+    ./run.sh profile plan opt
+
+See more options by typing
+
+    ./run.sh
 
 
 ## Misc

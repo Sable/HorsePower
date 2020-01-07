@@ -1,0 +1,829 @@
+{
+  "plan": {
+    "operator": "groupby", 
+    "operatorId": 1, 
+    "cardinality": 1, 
+    "input": {
+      "operator": "join", 
+      "operatorId": 2, 
+      "cardinality": 269118, 
+      "method": "hash", 
+      "singleMatch": true, 
+      "left": {
+        "operator": "tablescan", 
+        "operatorId": 3, 
+        "cardinality": 200000, 
+        "segment": 18, 
+        "from": "part", 
+        "values": [
+          {
+            "name": "p_partkey", 
+            "iu": [
+              "p_partkey", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "p_name", 
+            "iu": [
+              "p_name", 
+              [
+                "Varchar", 
+                55
+              ]
+            ]
+          }, 
+          {
+            "name": "p_mfgr", 
+            "iu": [
+              "p_mfgr", 
+              [
+                "Char", 
+                25
+              ]
+            ]
+          }, 
+          {
+            "name": "p_brand", 
+            "iu": [
+              "p_brand", 
+              [
+                "Char", 
+                10
+              ]
+            ]
+          }, 
+          {
+            "name": "p_type", 
+            "iu": [
+              "p_type", 
+              [
+                "Varchar", 
+                25
+              ]
+            ]
+          }, 
+          {
+            "name": "p_size", 
+            "iu": [
+              "p_size", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "p_container", 
+            "iu": [
+              "p_container", 
+              [
+                "Char", 
+                10
+              ]
+            ]
+          }, 
+          {
+            "name": "p_retailprice", 
+            "iu": [
+              "p_retailprice", 
+              [
+                "Numeric", 
+                12, 
+                2
+              ]
+            ]
+          }, 
+          {
+            "name": "p_comment", 
+            "iu": [
+              "p_comment", 
+              [
+                "Varchar", 
+                23
+              ]
+            ]
+          }
+        ], 
+        "tid": [
+          "v", 
+          [
+            "BigInt"
+          ]
+        ], 
+        "tableOid": [
+          "v2", 
+          [
+            "RegClass"
+          ]
+        ], 
+        "tupleFlags": [
+          "v3", 
+          [
+            "BigInt"
+          ]
+        ], 
+        "restrictions": []
+      }, 
+      "right": {
+        "operator": "tablescan", 
+        "operatorId": 4, 
+        "cardinality": 529392, 
+        "segment": 23, 
+        "from": "lineitem", 
+        "values": [
+          {
+            "name": "l_orderkey", 
+            "iu": [
+              "l_orderkey", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_partkey", 
+            "iu": [
+              "l_partkey", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_suppkey", 
+            "iu": [
+              "l_suppkey", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_linenumber", 
+            "iu": [
+              "l_linenumber", 
+              [
+                "Integer"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_quantity", 
+            "iu": [
+              "l_quantity", 
+              [
+                "Numeric", 
+                12, 
+                2
+              ]
+            ]
+          }, 
+          {
+            "name": "l_extendedprice", 
+            "iu": [
+              "l_extendedprice", 
+              [
+                "Numeric", 
+                12, 
+                2
+              ]
+            ]
+          }, 
+          {
+            "name": "l_discount", 
+            "iu": [
+              "l_discount", 
+              [
+                "Numeric", 
+                12, 
+                2
+              ]
+            ]
+          }, 
+          {
+            "name": "l_tax", 
+            "iu": [
+              "l_tax", 
+              [
+                "Numeric", 
+                12, 
+                2
+              ]
+            ]
+          }, 
+          {
+            "name": "l_returnflag", 
+            "iu": [
+              "l_returnflag", 
+              [
+                "Char1"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_linestatus", 
+            "iu": [
+              "l_linestatus", 
+              [
+                "Char1"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_shipdate", 
+            "iu": [
+              "l_shipdate", 
+              [
+                "Date"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_commitdate", 
+            "iu": [
+              "l_commitdate", 
+              [
+                "Date"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_receiptdate", 
+            "iu": [
+              "l_receiptdate", 
+              [
+                "Date"
+              ]
+            ]
+          }, 
+          {
+            "name": "l_shipinstruct", 
+            "iu": [
+              "l_shipinstruct", 
+              [
+                "Char", 
+                25
+              ]
+            ]
+          }, 
+          {
+            "name": "l_shipmode", 
+            "iu": [
+              "l_shipmode", 
+              [
+                "Char", 
+                10
+              ]
+            ]
+          }, 
+          {
+            "name": "l_comment", 
+            "iu": [
+              "l_comment", 
+              [
+                "Varchar", 
+                44
+              ]
+            ]
+          }
+        ], 
+        "tid": [
+          "v4", 
+          [
+            "BigInt"
+          ]
+        ], 
+        "tableOid": [
+          "v5", 
+          [
+            "RegClass"
+          ]
+        ], 
+        "tupleFlags": [
+          "v6", 
+          [
+            "BigInt"
+          ]
+        ], 
+        "restrictions": [
+          {
+            "attribute": 13, 
+            "mode": "=", 
+            "value": {
+              "expression": "const", 
+              "value": {
+                "type": [
+                  "Char", 
+                  25
+                ], 
+                "value": "DELIVER IN PERSON"
+              }
+            }
+          }
+        ], 
+        "residuals": [
+          {
+            "expression": "quantor", 
+            "mode": "=some", 
+            "value": {
+              "expression": "iuref", 
+              "iu": "l_shipmode"
+            }, 
+            "set": [
+              {
+                "expression": "const", 
+                "value": {
+                  "type": [
+                    "Varchar"
+                  ], 
+                  "value": "AIR"
+                }
+              }, 
+              {
+                "expression": "const", 
+                "value": {
+                  "type": [
+                    "Varchar"
+                  ], 
+                  "value": "AIR REG"
+                }
+              }
+            ]
+          }
+        ]
+      }, 
+      "condition": {
+        "expression": "and", 
+        "arguments": [
+          {
+            "expression": "or", 
+            "arguments": [
+              {
+                "expression": "and", 
+                "arguments": [
+                  {
+                    "expression": "between", 
+                    "arguments": [
+                      {
+                        "expression": "iuref", 
+                        "iu": "p_size"
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 1
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 5
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "p_brand"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Char", 
+                          10
+                        ], 
+                        "value": "Brand#12"
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "quantor", 
+                    "mode": "=some", 
+                    "value": {
+                      "expression": "iuref", 
+                      "iu": "p_container"
+                    }, 
+                    "set": [
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "SM CASE"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "SM BOX"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "SM PACK"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "SM PKG"
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": ">=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 100
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "<=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 1100
+                      }
+                    }
+                  }
+                ]
+              }, 
+              {
+                "expression": "and", 
+                "arguments": [
+                  {
+                    "expression": "between", 
+                    "arguments": [
+                      {
+                        "expression": "iuref", 
+                        "iu": "p_size"
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 1
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 10
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "p_brand"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Char", 
+                          10
+                        ], 
+                        "value": "Brand#23"
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "quantor", 
+                    "mode": "=some", 
+                    "value": {
+                      "expression": "iuref", 
+                      "iu": "p_container"
+                    }, 
+                    "set": [
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "MED BAG"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "MED BOX"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "MED PKG"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "MED PACK"
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": ">=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 1000
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "<=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 2000
+                      }
+                    }
+                  }
+                ]
+              }, 
+              {
+                "expression": "and", 
+                "arguments": [
+                  {
+                    "expression": "between", 
+                    "arguments": [
+                      {
+                        "expression": "iuref", 
+                        "iu": "p_size"
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 1
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Integer"
+                          ], 
+                          "value": 15
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "p_brand"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Char", 
+                          10
+                        ], 
+                        "value": "Brand#34"
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "quantor", 
+                    "mode": "=some", 
+                    "value": {
+                      "expression": "iuref", 
+                      "iu": "p_container"
+                    }, 
+                    "set": [
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "LG CASE"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "LG BOX"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "LG PACK"
+                        }
+                      }, 
+                      {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Varchar"
+                          ], 
+                          "value": "LG PKG"
+                        }
+                      }
+                    ]
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": ">=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 2000
+                      }
+                    }
+                  }, 
+                  {
+                    "expression": "comparison", 
+                    "mode": "<=", 
+                    "left": {
+                      "expression": "iuref", 
+                      "iu": "l_quantity"
+                    }, 
+                    "right": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Numeric", 
+                          12, 
+                          2
+                        ], 
+                        "value": 3000
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }, 
+          {
+            "expression": "comparison", 
+            "mode": "=", 
+            "left": {
+              "expression": "iuref", 
+              "iu": "p_partkey"
+            }, 
+            "right": {
+              "expression": "iuref", 
+              "iu": "l_partkey"
+            }
+          }
+        ]
+      }
+    }, 
+    "values": [
+      {
+        "value": {
+          "expression": "mul", 
+          "left": {
+            "expression": "iuref", 
+            "iu": "l_extendedprice"
+          }, 
+          "right": {
+            "expression": "sub", 
+            "left": {
+              "expression": "const", 
+              "value": {
+                "type": [
+                  "Integer"
+                ], 
+                "value": 1
+              }
+            }, 
+            "right": {
+              "expression": "iuref", 
+              "iu": "l_discount"
+            }
+          }
+        }
+      }
+    ], 
+    "aggregates": [
+      {
+        "source": 0, 
+        "operation": "sum", 
+        "iu": [
+          "v7", 
+          [
+            "Numeric", 
+            14, 
+            4, 
+            "nullable"
+          ]
+        ]
+      }
+    ]
+  }, 
+  "header": [
+    "revenue", 
+    "v7"
+  ]
+}

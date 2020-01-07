@@ -17,7 +17,7 @@ def trim(text):
 
 def main():
     if len(sys.argv) != 2:
-        print "Usage: python gen_opt.py <file>"
+        print "Usage: python %s <file>" % sys.argv[0]
         sys.exit(1)
     name = sys.argv[1]
     plan = json.loads(readLines(name, ''), object_pairs_hook=OrderedDict)['optimizersteps']

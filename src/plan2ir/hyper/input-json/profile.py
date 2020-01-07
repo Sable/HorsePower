@@ -1,9 +1,10 @@
 import json, sys
+sys.path.append("..")
 from codegen import *
 
 """
 Usage:
-    python profile.py opt
+    python profile.py /path/to/opt
 
 Improve:
     - check details rather than only constructs
@@ -12,7 +13,7 @@ Improve:
 
 def main():
     if len(sys.argv) != 2:
-        print "Usage: python profile.py opt"
+        print "Usage: python profile.py /path/to/opt"
         exit(1)
     data = []
     #data.append(processMain(19))
