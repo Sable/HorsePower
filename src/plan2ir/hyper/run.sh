@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 usage(){
-    printf '%s\n' \
-        "Usage: $0 <cmd>" "" \
-        "  1) $0 <tpch | aida> <id>          ## gen code from tpch or aida queries" "" \
-        "  2) $0 batch tpch <all | partial>  ## all or partial queries, save to output-hir/gen" "" \
-        "  3) $0 profile horseir             ## profile HorseIR code under gen/" "" \
-        "  4) $0 see diff                    ## diff gen-v1/q$.hir gen/q$.hir" "" \
-        "  5) $0 see pass                    ## see if TPC-H queries pass" "" \
-        "  6) $0 see size                    ## see the length info of files in gen/" "" \
-        "Example: $0 tpch 6  ## query 6"
+    printf '%s\n\n' \
+        "Usage: $0 <cmd>" \
+        "  1) $0 <tpch | aida> <id>          ## gen code from tpch or aida queries" \
+        "  2) $0 batch tpch <all | partial>  ## all or partial queries, save to output-hir/gen" \
+        "  3) $0 profile horseir             ## profile HorseIR code under gen/" \
+        "  4) $0 see diff                    ## diff gen-v1/q$.hir gen/q$.hir" \
+        "  5) $0 see pass                    ## see if TPC-H queries pass" \
+        "  6) $0 see size                    ## see the length info of files in gen/" \
+        "Example:" \
+        "  *) $0 tpch 6  ## query 6"
     exit 1
 }
 

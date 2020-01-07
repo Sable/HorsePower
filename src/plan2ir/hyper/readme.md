@@ -1,6 +1,6 @@
 # A Plan-to-HorseIR Translator for HyPer's Plans
 
-## Folder Structure
+## Structure
 
 Python scripts (i.e. `*.py`) consist of a plan-to-HorseIR translator which
 reads a plan and generates a valid HorseIR program.
@@ -189,66 +189,58 @@ Todo list
 
 Screenshots of query plans from the HyPer's web (see dir: `fig/`)
 
-| Figures (A)          | Figures (B)            | Figures (C)            | Figures (D)            |
-| :------------------: | :--------------------: | :--------------------: | :--------------------: |
-| [q1.png](fig/q1.png) | q7.png                 | q13.png                | [q19.png](fig/q19.png) |
-| [q2.png](fig/q2.png) | q8.png                 | q14.png                | q20.png                |
-| q3.png               | q9.png                 | q15.png                | q21.png                |
-| [q4.png](fig/q4.png) | q10.png                | q16.png                | q22.png                |
-| q5.png               | q11.png                | [q17.png](fig/q17.png) | |
-| [q6.png](fig/q6.png) | [q12.png](fig/q12.png) | q18.png                | |
-
-## Folders
-
-Description of folders
-
-    - raw/ Execution plans downloaded from hyper online
-    - opt/ Optimized plans extracted from raw
-    - fig/ Hyper's optimized execution plans in figures
-
-    - gen/ Execution plans generated in HorseIR (Optimized)
+| Figures (A)          | Figures (B)            | Figures (C)            | Figures (D)            | Figures (E)            |
+| :------------------: | :--------------------: | :--------------------: | :--------------------: | :--------------------: |
+| [q1.png](fig/q1.png) | [q6.png](fig/q6.png)   | [q11.png](fig/q11.png) | [q16.png](fig/q16.png) | [q21.png](fig/q21.png) |
+| [q2.png](fig/q2.png) | [q7.png](fig/q7.png)   | [q12.png](fig/q12.png) | [q17.png](fig/q17.png) | [q22.png](fig/q22.png) |
+| [q3.png](fig/q3.png) | [q8.png](fig/q8.png)   | [q13.png](fig/q13.png) | [q18.png](fig/q18.png) | |
+| [q4.png](fig/q4.png) | [q9.png](fig/q9.png)   | [q14.png](fig/q14.png) | [q19.png](fig/q19.png) | |
+| [q5.png](fig/q5.png) | [q10.png](fig/q10.png) | [q15.png](fig/q15.png) | [q20.png](fig/q20.png) | |
 
 
-## Issues Remaining
+## Misc
 
-1. Handle date types in HyPer
-2. Handle the enum type
-3. Idea: optimization for @raze (a static analysis for removing unnecessary raze operations logically)
+**An idea**
 
-What is early probe?
+- Consider an optimization for @raze (a static analysis for removing unnecessary raze operations logically)
+
+
+**What is early probe?**
 
 - Currently, we treat it as a normal table scan.
 
+**Sorted queries based on the size of files**
 
- 16K q8   N   I
- 14K q2   N   I
- 13K q21  N   .
- 13K q9   N   I
- 12K q7   N   I <-- Incomplete
- 11K q5   N   Y
- 11K q19  Y   F <-- Fail, join condition and + or
- 10K q20  N   .
-9.7K q11  N   Y
-9.6K q18  N   Y
-9.2K q22  Y   Y
-9.0K q17  N   .
-8.4K q10  N   Y
-7.2K q16  Y   Y
-6.9K q12  Y   Y
-6.5K q3   N   Y
-6.3K q15  N   Y
-5.8K q14  Y   Y
-4.9K q1   Y   Y
-4.4K q4   Y   Y
-4.3K q13  Y   Y
-2.9K q6   Y   Y
+     16K q8   N   I
+     14K q2   N   I
+     13K q21  N   .
+     13K q9   N   I
+     12K q7   N   I <-- Incomplete
+     11K q5   N   Y
+     11K q19  Y   F <-- Fail, join condition and + or
+     10K q20  N   .
+    9.7K q11  N   Y
+    9.6K q18  N   Y
+    9.2K q22  Y   Y
+    9.0K q17  N   .
+    8.4K q10  N   Y
+    7.2K q16  Y   Y
+    6.9K q12  Y   Y
+    6.5K q3   N   Y
+    6.3K q15  N   Y
+    5.8K q14  Y   Y
+    4.9K q1   Y   Y
+    4.4K q4   Y   Y
+    4.3K q13  Y   Y
+    2.9K q6   Y   Y
 
 
-How block nested loop (bnl) join works?
+**How block nested loop (bnl) join works?**
 
-- https://mariadb.com/kb/en/library/block-based-join-algorithms/#how-block-nested-loop-join-works
+- [See an online article](https://mariadb.com/kb/en/library/block-based-join-algorithms/#how-block-nested-loop-join-works)
 
-Bugs on HyPer web: visual issues
+**Bugs on HyPer web: visual issues**
 
 - q18, operatorId 7 for 'select', condition should be 'v10 > 30000'
+
 
