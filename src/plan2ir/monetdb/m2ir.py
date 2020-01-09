@@ -1,9 +1,8 @@
 import json, sys, time
-
-sys.path.append("../hyper")
-from codelib import *
-
 import text2json, json2ir, jsonPrinter
+
+# sys.path.append("../hyper")
+from util import *
 
 """
 Entry/Main
@@ -11,19 +10,27 @@ Entry/Main
 def main():
     numArgs = len(sys.argv)
     if numArgs == 1:
-        genPlan(readFromStdin())
+        if not sys.stdin.isatty():
+            genPlan(readFromStdin())
+        else:
+            usage()
     elif numArgs == 2:
-        genPlan(open(sys.argv[1],'r').readlines())
+        plan = open(sys.argv[1],'r').readlines()
+        genPlan(plan)
     elif numArgs == 3:
         op   = sys.argv[1]
         plan = open(sys.argv[2],'r').readlines()
         genPlanWithOp(op, plan)
     else:
-        print "Usage:"
-        print "\t(1) cat <file> | python %s" % sys.argv[0]
-        print "\t(2) python %s <file>" % sys.argv[0]
-        print "\t(3) python %s show/dot/dump <file>" % sys.argv[0]
-        sys.exit(1)
+        usage()
+
+def usage():
+    programName = sys.argv[0]
+    print "Usage:"
+    print "\t(1) cat <file> | python %s" % programName
+    print "\t(2) python %s <file>" % programName
+    print "\t(3) python %s show/dot/dump <file>" % programName
+    sys.exit(1)
 
 def genPlan(plan):
     json2ir.compile(text2json.scanPlan(plan))
@@ -41,4 +48,5 @@ def genPlanWithOp(op, plan):
 if __name__ == '__main__':
     start = time.time()
     main()
-    info('Elapsed time: %.2lf ms' % (1000*(time.time() - start)))
+    info('Elapsed time: %.2lf ms' % (1000.0*(time.time() - start)))
+

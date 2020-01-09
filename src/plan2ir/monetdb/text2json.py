@@ -1,7 +1,5 @@
 import json, sys, time, copy
 
-sys.path.append("../hyper")
-
 from parsing  import *
 from datetime import date, timedelta
 from util     import *
@@ -18,6 +16,7 @@ def scanPlan(plan):
     #print tokens
     #printJSON(scanMain())
     #print json.dumps(scanMain())
+    #stop()
     return scanMain()
 
 def scanMain():
@@ -31,7 +30,9 @@ def scanMain():
     elif isGroupby()          : return scanGroupby ()
     elif isLeftOuterJoin()    : return scanLeftOuterJoin()
     elif isWordRef()          : return scanRef()
-    else: wrong("not supported yet: %s" % curToken())
+    else:
+        printPrevTokens(3)
+        wrong("Not supported yet: %s" % curToken())
 
 def scanTokens(text):
     tokens = []
@@ -47,6 +48,11 @@ def printCur():
     global gPtr, gTokens
     print gTokens[gPtr:]
 
+def printPrevTokens(num=1):
+    global gPtr, gTokens, gSize
+    size = 0 if num < 0 or gPtr < num else num
+    for x in range(size):
+        print '[-%d] %s' % (x+1,gTokens[gSize-x-1])
 
 def setGlobalTokens(tokens):
     global gPtr, gTokens, gSize
@@ -100,6 +106,9 @@ def isLastToken():
     global gPtr, gSize
     return True if gPtr >= gSize else False
 
+def probToken(s): # safe probe
+    return ((not isLastToken()) and (curToken()==s))
+
 """
 scan functions
 """
@@ -109,20 +118,27 @@ def scanProject():
     content = scanMain()
     consume(')')
     exprs = scanProjectExprs()
-    if (not isLastToken()) and curToken() == '[':
-        # add an additional field 'order'
-        return {
-            'operator'  : 'project',
-            'input'     : content,
-            'output'    : exprs,
-            'order'     : scanProjectExprs()
-        }
-    else:
-        return {
-            'operator'  : 'project',
-            'input'     : content,
-            'output'    : exprs
-        }
+    return {
+        'operator'  : 'project',
+        'input'     : content,
+        'output'    : exprs
+    }
+    #if (not isLastToken()) and curToken() == '[':
+    #    order_expr = scanProjectExprs()
+    #    consume("COUNT")
+    #    # add an additional field 'order'
+    #    return {
+    #        'operator'  : 'project',
+    #        'input'     : content,
+    #        'output'    : exprs,
+    #        'order'     : order_expr
+    #    }
+    #else:
+    #    return {
+    #        'operator'  : 'project',
+    #        'input'     : content,
+    #        'output'    : exprs
+    #    }
 
 def scanSelect():
     consume('(')
@@ -147,7 +163,7 @@ def scanTable():
             'operator': 'table',
             'table'   : name,
             'columns' : columns,
-            'isudf'   : 'false'
+            'isudf'   : False
         }
     def scanTableUDF():
         udfname = fetchIdName()
@@ -155,13 +171,19 @@ def scanTable():
         if tryToken(','):
             consume('project')
             columns = scanProject()
+            if probToken('['):
+                exprs = scanProjectExprs()
+                consume("COUNT")
+            else:
+                exprs = ''
         else:
             columns = ''
         return {
             'operator': 'table',
             'table'   : udfname,
             'columns' : columns,
-            'isudf'   : 'true'
+            'isudf'   : True,
+            'output'  : exprs
         }
     # start computing scanTable
     cur = curToken()
@@ -318,7 +340,7 @@ def scanSelectStmt():
     numStmt = len(stmt)
     if not numStmt in [1, 2, 3, 4, 5]:
         print len(stmt), stmt
-        todo("add support")
+        todo("Add support")
     return stmt
     #if tryToken("date"):
 

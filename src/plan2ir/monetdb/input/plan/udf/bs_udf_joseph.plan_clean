@@ -1,0 +1,68 @@
+project (
+  join (
+    table sys.myudf_bs(
+       double["blackscholes"."sptprice" NOT NULL],
+       double["blackscholes"."strike" NOT NULL],
+       double["blackscholes"."rate" NOT NULL],
+       double["blackscholes"."divq" NOT NULL],
+       double["blackscholes"."volatility" NOT NULL],
+       double["blackscholes"."time" NOT NULL],
+       "blackscholes"."optiontype" NOT NULL,
+       double["blackscholes"."divs" NOT NULL],
+       double["blackscholes"."dgrefval" NOT NULL]),
+    project (
+       table(sys.blackscholes) [
+         "blackscholes"."sptprice" NOT NULL,
+         "blackscholes"."strike" NOT NULL,
+         "blackscholes"."rate" NOT NULL,
+         "blackscholes"."divq" NOT NULL,
+         "blackscholes"."volatility" NOT NULL,
+         "blackscholes"."time" NOT NULL,
+         "blackscholes"."optiontype" NOT NULL,
+         "blackscholes"."divs" NOT NULL,
+         "blackscholes"."dgrefval" NOT NULL
+       ] COUNT
+    ) [
+        "blackscholes"."sptprice" NOT NULL,
+        "blackscholes"."strike" NOT NULL,
+        "blackscholes"."rate" NOT NULL,
+        "blackscholes"."divq" NOT NULL,
+        "blackscholes"."volatility" NOT NULL,
+        "blackscholes"."time" NOT NULL,
+        "blackscholes"."optiontype" NOT NULL,
+        "blackscholes"."divs" NOT NULL,
+        "blackscholes"."dgrefval" NOT NULL
+    ] [
+        "bu"."sptprice",
+        "bu"."strike",
+        "bu"."rate",
+        "bu"."divq",
+        "bu"."volatility",
+        "bu"."time",
+        "bu"."optiontype",
+        "bu"."divs",
+        "bu"."dgrefval",
+        "bu"."optionprice"
+    ] COUNT ,
+    table(sys.myoptions) [
+        "myoptions"."sptprice" as "mo"."sptprice",
+        "myoptions"."optionprice" as "mo"."optionprice"
+    ] COUNT
+    ) [
+        "bu"."sptprice" = double(53,6)["mo"."sptprice"],
+        "bu"."optionprice" > double(53,6)["mo"."optionprice"]
+    ]  -- join conditions (above)
+) [
+    "bu"."sptprice",
+    "bu"."strike",
+    "bu"."rate",
+    "bu"."divq",
+    "bu"."volatility",
+    "bu"."time",
+    "bu"."optiontype",
+    "bu"."divs",
+    "bu"."dgrefval",
+    "bu"."optionprice",
+    "mo"."sptprice",
+    "mo"."optionprice"
+]

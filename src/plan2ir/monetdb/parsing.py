@@ -1,6 +1,6 @@
 import sys
-sys.path.append("../hyper")
-from codelib import *
+
+from util import *
 
 def isLetter(x):
     return (x >= 'a' and x <='z') or (x>='A' and x<='Z')
