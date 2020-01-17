@@ -7,8 +7,8 @@ Intel
 | Name          | CPU (GFlops)                | Inst.(Up to)| Threads     | RAM      | GPU                                   | Cores   |
 | :-------------| :-------------------------: | :---------: | :-----------| :------- | :------------------------------------:| :-----: |
 | sable-tigger  | i7-8700K  @ 3.70GHz (320GF) | AVX2        | 12 (1x12)   | 32  GB   | [GeForce GTX 1080 Ti (c6.1)][gtx1080] | 3584    |
+| sable-beaver  | i7-9400F  @ 2.90GHz (306GF) | AVX2        | 6  (1x6)    | 32  GB   | (Two cards, see below)                | ...     |
 | sable-intel   | E7-4850   @ 2.00GHz (240GF) | SSE4.2      | 80 (4x20)   | 128 GB   | N/A                                   | N/A     |
-| sable-beaver  | i7-4770   @ 3.40GHz (177GF) | AVX2        | 4  (1x4)    | 16  GB   | (Two cards, see below)                | ...     |
 | sable-cheetah | i7-3930K  @ 3.20GHz (135GF) | AVX         | 12 (1x12)   | 16  GB   | [GeForce GT 720 (c3.5)][gt720]        | 192     |
 | sable-lynx    | i7-3820   @ 3.60GHz (105GF) | AVX         | 8  (1x8)    | 8   GB   | [GeForce GTX 560 Ti (c2.1)][gtx560]   | 384     |
 | sable-deer    | i7-3820   @ 3.60GHz (105GF) | AVX         | 8  (1x8)    | 16  GB   | [GeForce GTX 560 Ti (c2.1)][gtx560]   | 384     |
@@ -16,6 +16,11 @@ Intel
 | chf-pc        | i7-3610QM @ 2.30GHz (87 GF) | AVX         | 8  (1x8)    | 8   GB   | [GeForce GT 630M (c2.1)][gt630]       | 96      |
 | chf-mac       | i5-5257U  @ 2.70GHz (70 GF) | AVX2        | 4  (1x4)    | 8   GB   | [Intel Iris Graphics 6100][iris]      | Void    |
 | sable-venus   | i5-660    @ 3.33GHz (25 GF) | SSE4.2      | 4  (1x4)    | 12  GB   | [GeForce 8400 GS][gs8400]             | Void    |
+
+<!--
+old machine
+| sable-beaver  | i7-4770   @ 3.40GHz (177GF) | AVX2        | 4  (1x4)    | 16  GB   | (Two cards, see below)                | ...     |
+-->
 
 AMD
 

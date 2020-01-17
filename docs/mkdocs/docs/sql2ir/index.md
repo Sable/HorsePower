@@ -34,7 +34,7 @@ as an intermediate layer before generating HorseIR code.
 ## Internal Links
 
 - [HyPer's plan-to-HorseIR translator](hyper.md): For standard SQL queries.
-- [MonetDB's plan-to-HorseIR translator](hyper.md): For standard queries and UDFs.
+- [MonetDB's plan-to-HorseIR translator](monetdb.md): For standard queries and UDFs.
 - [TPC-H Queries](tpch.md): List of 22 standard queries.
 
 

@@ -42,7 +42,7 @@ markdown_extensions:
         permalink: True
 
 copyright:
-    '&copy; 2017-2019, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
+    '&copy; 2017-2020, McGill Sable Research Group <br> Email: <a>hanfeng.chen@mail.mcgill.ca</a> (<a id="chf_page" href="http://www.sable.mcgill.ca/~hanfeng.c/" target="_blank">Hanfeng Chen</a>)'
 
 nav:
 - Home    : 'index.md'
