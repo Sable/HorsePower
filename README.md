@@ -10,7 +10,7 @@ fine-grained parallelism.
 
 ## Project Overview
 
-<p align="center"><img src="docs/figures/horse-flow2.png" width="90%"/></p>
+<p align="center"><img src="docs/figures/horse-flow2.png"/></p>
 <p align="center">Figure 1. The workflow of the HorsePower framework.</p>
 
 In summer 2017, we started this project from scratch.  The workflow of the
