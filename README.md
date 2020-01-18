@@ -8,83 +8,42 @@ array programming offers a promising option for performance speedup with
 fine-grained parallelism.
 
 
-## Quick Entries
-
-- Design:
-    [Grammar](src/HorseIR/frontend/grammar/HorseIR.g4)
-    | [IR design](docs/mkdocs/docs/horseir/)
-    | [IR Type](docs/horsetype)
-    | [TPC-H](docs/tpch)
-    | [TPC-H examples](src/horseir/v2/tests/)
-    | [Reference](http://www.sable.mcgill.ca/~hanfeng.c/horse/docs/horseir/)
-
-- Implementation: 
-    [Details](docs/implementation)
-    | [Project libraries](libs/)
-
-- Paper:
-    [Related](docs/study)
-
-
 ## Project Overview
 
-In the summer 2017, we started this project from scratch.  We planned to build
-the framework in the first three months (12 weeks). Thus, we could have another
-month to improve it and draft several technical reports.
+<p align="center"><img src="docs/figures/horse-flow2.png" /></p>
+<p align="center">Figure 1. The workflow of the HorsePower framework.</p>
 
-<p align="center"><img src="docs/figures/horse-flow.png" /></p>
-<p align="center">Figure 1. The workflow of the Horse framework.</p>
-
-Figure 1 describes the workflow of the Horse framework.  A candidate for the
-source language is our *Horse* language which is an extension of standard SQL.
-The Horse language is designed for data analytics with extended SQL features
-and array programming.  Also, we provide a front end for parsing and
-transforming source code to HorseIR.  After the optimization phases, several
-back ends are supported, i.e. LLVM, C/C++ and interpreter.  A couple of
-optimizations take place before bitcode is generated.  On the other hand, the
-interpreter is able to output result on the fly, so that it could save the
-compilation time.  That means it may be faster than compiled code.
-
-
-<!--
-Figure 2 introduces the design of three levels of IRs.  The workflow dependence
-of IRs consists of an acyclic graph.  The workflow is described as follows.
-
-1. Source code is converted to medium-level IR (MIR, 3-address code);
-2. MIR has two options, either to Low-level IR (LIR) or to High-level IR (HIR);
-3. HIR is designed for optimizations with high-level perspectives;
-4. LIR is close to target code which usually is relatively low-level;
-5. In each level, IR code is optimized with different optimizations.
-
-<p align="center"><img src="docs/figures/horse-ir.png" /></p>
-<p align="center">Figure 2. The design of 3 IRs.</p>
-
--->
+In summer 2017, we started this project from scratch.  The workflow of the
+HorsePower framework can be found in Figure 1.
+A candidate of the source language is our *HorseIR* language which is an
+extension of standard SQL.  The Horse language is designed for data analytics
+with extended SQL features.
+At the current stage, we adopt execution plans from standard database SQL queries
+and MATLAB code.
+We provide a front end for parsing and transforming source code to HorseIR.
+After the optimization phases, multiple back-ends are supported.
+Static analyses and code optimizations are performed before the target code is generated.
+On the other hand, we provide an interpreter which allows running programs directly.
 
 In HorsePower, we focus on the following parts.
 
-    - High-level source language design
-    - Fine-grained primitives and highly tuned library
+    - Design and implementation of array-based intermediate representation (IR)
     - Static analysis for an array-based IR (i.e. HorseIR)
-    - Query optimizations with heuristics
-    - Query optimizations with data-flow analyses
+    - Query optimizations with compiler optimizations
+    - Fine-grained primitive functions and highly tuned libraries
 
-### Settings
 
-- Platform       : Cross-platform
-- Tools          : C/C++, Flex & Bison
-- Parallelism    : OpenMP/Pthread/CUDA/OpenCL
-- Conventions    : [docs/conventions](docs/conventions)
-- GitHub Issue   : [Issues](https://github.com/Sable/HorsePower/issues)
+## Installation
 
-### Configurations
+Download the repository
 
-- gcc 8.1.0 or higher
-- uuid-dev library
+    git clone git@github.com:Sable/HorsePower.git
 
-#### Install Libraries
+Setup the environment variable `HORSE_BASE`
 
-Installation with the following command line  **about 13 mins**
+    cd HorsePower && export HORSE_BASE=$PWD
+
+Installation with the following command line  (About 13 mins)
 
     (cd libs && sh deploy_linux.sh)
 
@@ -95,16 +54,67 @@ After installation, new folders created as follows.
     - libs/antlr4
     - libs/pcre2
 
-#### Build and Run
+### Build and Run
 
 There are multiple versions developing under `src/horseir/`.
 For each version, you can find a running script `run.sh` which builds an
 executable and runs it with proper parameters.
+You are recommended to use the latest version as this project is still under
+active development.
 
-The usage of the script can be found by typing
+To learn how to run, type
 
-    (cd src/horseir/v2 && ./run.sh)      # show usage
+    (cd src/horseir/v3 && ./run.sh)      # show usage
 
+
+### Notes
+
+A brief summary of this project.
+
+| Name                     | Notes                                  |
+| :----------------------: | :------------------------------------: |
+| Platform                 | Cross-platform                         |
+| Tools                    | C/C++, Flex & Bison                    |
+| Parallelism              | OpenMP/Pthread/CUDA/OpenCL             |
+| Conventions              | [docs/conventions](docs/conventions)   |
+
+Note, it is recommended to use gcc 8.1.0 or higher and additional library
+`uuid-dev` may be required during the installation.
+
+
+## Quick Entries
+
+IR design
+
+- [Official IR design notes](docs/mkdocs/docs/horseir/)
+- [IR grammar in a yacc file (v3)](src/horseir/v3/frontend/h.y)
+- [IR types and rules](docs/horsetype): see also [specific type rules](http://www.sable.mcgill.ca/~hanfeng.c/horse/docs/horseir/functions/)
+- [IR online reference](http://www.sable.mcgill.ca/~hanfeng.c/horse/docs/horseir/)
+
+Database TPC-H
+
+- [TPC-H](docs/tpch)
+- [TPC-H examples](tests)
+
+Implementation
+
+- [Details](docs/implementation)
+- [Project libraries](libs/)
+
+
+## Publications
+
+- Hanfeng Chen, Joseph Vinish D’silva, Hongji Chen, Bettina Kemme, and
+  Laurie Hendren, [HorseIR: Bringing Array Programming Languages together with
+  Database Query Processing](https://dl.acm.org/citation.cfm?id=3276951),
+  Proceedings of the 14th Symposium on Dynamic Languages,
+  ([DLS '18](https://conf.researchr.org/track/dls-2018/dls-2018)),
+  pp. 37-49, November 2018.
+    + [BibTeX record on dblp](https://dblp.uni-trier.de/rec/bibtex/conf/dls/ChenDCKH18)
+    + [DLS18 artifact](https://github.com/Sable/dls18-analysis)
+
+
+<!--
 ### External Links
 
 Software
@@ -129,4 +139,4 @@ SQL front-end
 - [H2 database](http://www.h2database.com/html/grammar.html) | H2: an in-memory db written in Java
 - [hyrise/sql-parser](https://github.com/hyrise/sql-parser)
 
-
+-->
