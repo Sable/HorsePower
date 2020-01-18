@@ -51,8 +51,10 @@ After installation, new folders created as follows.
 
     - libs/include
     - libs/lib
-    - libs/antlr4
     - libs/pcre2
+
+Note, it is recommended to use gcc 8.1.0 or higher and additional library
+`uuid-dev` may be required during the installation.
 
 ### Build and Run
 
@@ -67,19 +69,14 @@ To learn how to run, type
     (cd src/horseir/v3 && ./run.sh)      # show usage
 
 
-### Notes
-
-A brief summary of this project.
+### A Brief Summary
 
 | Name                     | Notes                                  |
-| :----------------------: | :------------------------------------: |
+| :----------------------- | :------------------------------------- |
 | Platform                 | Cross-platform                         |
 | Tools                    | C/C++, Flex & Bison                    |
 | Parallelism              | OpenMP/Pthread/CUDA/OpenCL             |
 | Conventions              | [docs/conventions](docs/conventions)   |
-
-Note, it is recommended to use gcc 8.1.0 or higher and additional library
-`uuid-dev` may be required during the installation.
 
 
 ## Quick Entries
@@ -111,7 +108,14 @@ Implementation
   ([DLS '18](https://conf.researchr.org/track/dls-2018/dls-2018)),
   pp. 37-49, November 2018.
     + [BibTeX record on dblp](https://dblp.uni-trier.de/rec/bibtex/conf/dls/ChenDCKH18)
-    + [DLS18 artifact](https://github.com/Sable/dls18-analysis)
+    + [DLS18 artifact on GitHub](https://github.com/Sable/dls18-analysis)
+
+
+## Copyright and License
+
+Copyright &copy; 2017-2020, Hanfeng Chen, Laurie Hendren and McGill University.
+
+- PCRE2: [PCRE2 Licence](docs/license/pcre2.txt)
 
 
 <!--
