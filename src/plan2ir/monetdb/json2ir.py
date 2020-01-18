@@ -1,10 +1,8 @@
 import json, sys, time, copy
 
-sys.path.append("../hyper")
-
-from codegen  import *
 from parsing  import *
 from datetime import date, timedelta
+from codegen  import *
 from util     import *
 
 db_tpch      = {}
@@ -37,7 +35,7 @@ def scanMain(d, env):
         if   op == 'project'       : rtn = scanProject      (d, env1)
         elif op == 'groupby'       : rtn = scanGroupby      (d, env1)
         elif op == 'select'        : rtn = scanSelect       (d, env1)
-        elif op == 'table'         : rtn = scanTable        (d, env1)
+        elif op == 'table'         : rtn = scanTable        (d, env1) ; stop(rtn)
         elif op == 'top'           : rtn = scanTop          (d, env1)
         elif op == 'joinidx'       : rtn = scanJoinidx      (d, env2)
         elif op == 'join'          : rtn = scanJoin         (d, env2)
@@ -73,15 +71,31 @@ def scanSelect(d, env):
     return updateEnvWithMask(mask, env)
 
 def scanTable(d, env):
-    table       = getTableName (d['table'])
-    table_alias = genLoadTable (table) # table id
-    table_cols  = getTableCols (d['columns'], table)
-    table_names = getTableTabs (table_cols, table)
-    table_types  = getTableTypes(table_cols, table)
-    table_alias  = getTableAlias(table_alias, table_cols, table_types)
-    #print table_cols, table_alias
-    #stop('scanTable')
-    return encodeEnv(table_names, table_cols, table_alias, table_types)
+    if d['isudf'] : # True or False
+        udf_func  = getTableName(d['table'])
+        udf_input = scanMain(d['columns']['input'], env)
+        udf_table = genUDFInov(udf_func, getEnvAlias(udf_input))
+        udf_table_id = genLoadTable(udf_table)
+        ## TODO: add a new table alias "bu" to udf_table (i.e. t10)
+        udf_table_cols  = getTableCols(d['columns']['output'], udf_table)
+        print '-'*10, udf_table
+        print d['columns']['output']
+        print udf_table_cols
+        stop(udf_table)
+        udf_table_names = getTableTabs(udf_table_cols, udf_table)
+        udf_table_types = getTableTypes(udf_table_cols, udf_table)
+        udf_table_alias = getTableAlias(udf_table_id, udf_table_cols, udf_table_types)
+        return encodeEnv(udf_table_names, udf_table_cols, udf_table_alias, udf_table_types)
+    else:
+        table       = getTableName (d['table'])
+        table_id    = genLoadTable (table) # table id
+        table_cols  = getTableCols (d['columns'], table)
+        table_names = getTableTabs (table_cols, table)
+        table_types = getTableTypes(table_cols, table)
+        table_alias = getTableAlias(table_id, table_cols, table_types)
+        #print table_cols, table_alias
+        #stop('scanTable')
+        return encodeEnv(table_names, table_cols, table_alias, table_types)
 
 def scanTop(d, env):
     todo('top')
@@ -95,9 +109,8 @@ def scanJoinidx(d, env):
 TODO: understand how to interpret conditions for joins
 """
 def scanJoin(d, env2):
-    printEnv(env2[0])
-    printEnv(env2[1])
-    print d
+    printEnv2(env2)
+    #print d
     todo('join')
     pass
 
@@ -321,6 +334,7 @@ def getTableCols(cols, table):
     rtn = []
     for col in cols:
         # maybe: check col's type
+        print col
         if isName(col) and not isProperty(col, 'hashidx'):
             id = getIdName(col['value'], table)
             if id:
@@ -743,7 +757,7 @@ def initDatabase():
 
 def initDatabaseUDF():
     global db_tpch
-    db_tpch['table_bs'] = {
+    table_bs = {
         'sptprice'   : 'f64',
         'strike'     : 'f64',
         'rate'       : 'f64',
@@ -754,12 +768,19 @@ def initDatabaseUDF():
         'divs'       : 'f64',
         'dgrefval'   : 'f64'
     }
+    db_tpch['table_bs'] = table_bs
+    db_tpch['blackscholes'] = table_bs
+    db_tpch['myoptions'] = {
+        'sptprice'   : 'f64',
+        'optionprice': 'f64'
+    }
     pass
 
 def registerUDF():
     global udf_list
     udf_list.append('compute_bs_scalar')
     udf_list.append('q6_cond_proc')
+    udf_list.append('myudf_bs')
 
 def getEnvId(x, env2):
     if isName(x):

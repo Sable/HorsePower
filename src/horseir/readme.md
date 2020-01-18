@@ -3,7 +3,7 @@
 
 Versions
 
-- v3: experimental with an LLVM code gen backend (plan)
+- v3: experimental with an LLVM code gen backend (ongoing)
 - v2: stable HorseIR (**latest version**)
 - v1: naive HorseIR only support SQL queries (i.e. without control flows)
 - v0: experimental HorseIR (syntax is different from subsequent versions)
@@ -18,6 +18,7 @@ Versions
 Features (experimental)
 
 - HorseIR-to-LLVM
+- C code to C++ code with `extern "C"`
 
 ### Version: HorseIR Stable Release (v2)
 

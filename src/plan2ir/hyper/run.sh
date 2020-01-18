@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 
 usage(){
-    printf '%s\n' \
-        "Usage: $0 <cmd>" "" \
-        "  1) $0 <tpch | aida> <id>          ## gen code from tpch or aida queries" "" \
-        "  2) $0 batch tpch <all | partial>  ## all or partial queries, save to output-hir/gen" "" \
-        "  3) $0 profile horseir             ## profile HorseIR code under gen/" "" \
-        "  4) $0 see diff                    ## diff gen-v1/q$.hir gen/q$.hir" "" \
-        "  5) $0 see pass                    ## see if TPC-H queries pass" "" \
-        "  6) $0 see size                    ## see the length info of files in gen/" "" \
-        "Example: $0 tpch 6  ## query 6"
+    printf '%s\n\n' \
+        "Usage: $0 <cmd>" \
+        "  1) $0 tpch <id>                   ## gen code from tpch queries" \
+        "  2) $0 batch tpch <all | partial>  ## all or partial queries, save to output-hir/gen" \
+        "  3) $0 profile horseir             ## profile HorseIR code under gen/" \
+        "  4) $0 profile plan <folder>       ## profile input execution plans <opt/raw/...>" \
+        "  5) $0 see diff                    ## diff gen-v1/q$.hir gen/q$.hir" \
+        "  6) $0 see pass                    ## see if TPC-H queries pass" \
+        "  7) $0 see size                    ## see the length info of files in gen/" \
+        "  8) $0 cloc                        ## report the code size" \
+        "Example:" \
+        "  *) $0 tpch 6                       ## query 6" \
+        "  *) format=latex $0 profile horseir ## output in the latex format"
     exit 1
 }
 
 inputdata="input-json"
 outputdata="output-hir"
 postfolder="post-process"
+prefolder="pre-process"
 genfolder="gen-latest"
 gentemp="gen"
 
@@ -94,14 +99,19 @@ function see_size(){
     echo "Current total lines of code: $total"
 }
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 1 ]; then
+    cmd=$1
+    if [ $cmd = "cloc" ]; then
+        (set -x && cloc *.py ${inputdata}/*.py ${postfolder}/*.py ${prefolder}/convert_raw_to_opt.py ${prefolder}/convert_raw_to_opt.sh)
+    else
+        usage
+    fi
+elif [ "$#" -eq 2 ]; then
     cmd=$1; qid=$2
     if [ $cmd = "tpch" ]; then
         (set -x && gen_tpch_plan $qid)
-    elif [ $cmd = "aida" ]; then
-        (set -x && gen_aida_plan $qid)
     elif [ $cmd = "profile" ] && [ $2 = "horseir" ]; then
-        grep -REin "program slicing|time" ${outputdata}/${genfolder}/*.hir | python ${postfolder}/profile_horseir.py
+        grep -REin "program slicing|time" ${outputdata}/${genfolder}/*.hir | python ${postfolder}/profile_horseir.py ${format}
     elif [ $cmd = "see" ] && [ $2 = "diff" ]; then
         see_diff
     elif [ $cmd = "see" ] && [ $2 = "pass" ]; then
@@ -118,6 +128,8 @@ elif [ $# -eq 3 ]; then
         else 
             usage
         fi
+    elif [ $1 = "profile" ] && [ $2 = "plan" ]; then
+        (set -x && cd ${inputdata} && python profile.py $3)
     else 
         usage
     fi

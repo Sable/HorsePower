@@ -1,0 +1,105 @@
+{
+  "plan": {
+    "operator": "sort", 
+    "operatorId": 1, 
+    "cardinality": 135000, 
+    "criterion": [
+      { "value": { "expression": "iuref", "iu": [ "v", [ "BigInt" ] ] }, "descending": true, "nullFirst": true }, 
+      { "value": { "expression": "iuref", "iu": [ "v2", [ "BigInt" ] ] }, "descending": true, "nullFirst": true }
+    ], 
+    "input": {
+      "operator": "groupby", 
+      "operatorId": 2, 
+      "cardinality": 135000, 
+      "input": {
+        "operator": "groupjoin", 
+        "operatorId": 3, 
+        "cardinality": 150000, 
+        "left": {
+          "operator": "tablescan", 
+          "operatorId": 4, 
+          "cardinality": 150000, 
+          "segment": 21, 
+          "from": "customer", 
+          "values": [
+            { "name": "c_custkey"    , "iu": [ "c_custkey",    [ "Integer" ] ] }, 
+            { "name": "c_name"       , "iu": [ "c_name",       [ "Varchar", 25 ] ] }, 
+            { "name": "c_address"    , "iu": [ "c_address",    [ "Varchar", 40 ] ] }, 
+            { "name": "c_nationkey"  , "iu": [ "c_nationkey",  [ "Integer" ] ] }, 
+            { "name": "c_phone"      , "iu": [ "c_phone",      [ "Char", 15 ] ] }, 
+            { "name": "c_acctbal"    , "iu": [ "c_acctbal",    [ "Numeric", 12, 2 ] ] }, 
+            { "name": "c_mktsegment" , "iu": [ "c_mktsegment", [ "Char", 10 ] ] }, 
+            { "name": "c_comment"    , "iu": [ "c_comment",    [ "Varchar", 117 ] ] }
+          ], 
+          "tid": [ "v3", [ "BigInt" ] ], 
+          "tableOid": [ "v4", [ "RegClass" ] ], 
+          "tupleFlags": [ "v5", [ "BigInt" ] ], 
+          "restrictions": []
+        }, 
+        "right": {
+          "operator": "tablescan", 
+          "operatorId": 5, 
+          "cardinality": 1350000, 
+          "segment": 22, 
+          "from": "orders", 
+          "values": [
+            { "name": "o_orderkey", "iu": [ "o_orderkey", [ "Integer", "nullable" ] ] }, 
+            { "name": "o_custkey", "iu": [ "o_custkey", [ "Integer", "nullable" ] ] }, 
+            { "name": "o_orderstatus", "iu": [ "o_orderstatus", [ "Char1", "nullable" ] ] }, 
+            { "name": "o_totalprice", "iu": [ "o_totalprice", [ "Numeric", 12, 2, "nullable" ] ] }, 
+            { "name": "o_orderdate", "iu": [ "o_orderdate", [ "Date", "nullable" ] ] }, 
+            { "name": "o_orderpriority", "iu": [ "o_orderpriority", [ "Char", 15, "nullable" ] ] }, 
+            { "name": "o_clerk", "iu": [ "o_clerk", [ "Char", 15, "nullable" ] ] }, 
+            { "name": "o_shippriority", "iu": [ "o_shippriority", [ "Integer", "nullable" ] ] }, 
+            { "name": "o_comment", "iu": [ "o_comment", [ "Varchar", 79, "nullable" ] ] }
+          ], 
+          "tid": [ "v6", [ "BigInt", "nullable" ] ], 
+          "tableOid": [ "v7", [ "RegClass", "nullable" ] ], 
+          "tupleFlags": [ "v8", [ "BigInt", "nullable" ] ], 
+          "restrictions": [], 
+          "residuals": [
+            { "expression": "not", "input": {
+                "expression": "like", 
+                "arguments": [
+                  { "expression": "iuref", "iu": "o_comment" }, 
+                  { "expression": "const", "value": { "type": [ "Varchar" ], "value": "%special%requests%" } }, 
+                  { "expression": "const", "value": { "type": [ "Varchar" ], "value": "" } }
+                ]
+              }
+            }
+          ]
+        }, 
+        "leftKey": [ { "expression": "iuref", "iu": "c_custkey" } ], 
+        "rightKey": [ { "expression": "iuref", "iu": "o_custkey" } ], 
+        "compareTypes": [ [ "Integer" ] ], 
+        "leftExpressions": [], 
+        "leftCollates": [ "" ], 
+        "leftAggregates": [
+          { "source": 0, "operation": "keep", "iu": [ "v9", [ "Integer" ] ] }
+        ], 
+        "rightExpressions": [
+          { "expression": "iuref", "iu": "o_orderkey" }
+        ], 
+        "rightCollates": [
+          "", ""
+        ], 
+        "rightAggregates": [
+          { "source": 1, "operation": "count", "iu": [ "v10", [ "BigInt" ] ] }, 
+          { "source": 4294967295, "operation": "count", "iu": [ "v28", [ "BigInt" ] ] }
+        ], 
+        "semantic": "outer"
+      }, 
+      "values": [
+        { "value": { "expression": "iuref", "iu": "v10" } }
+      ], 
+      "aggregates": [
+        { "source": 0,          "operation": "keep", "iu": [ "v2", [ "BigInt" ] ] }, 
+        { "source": 4294967295, "operation": "count", "iu": [ "v", [ "BigInt" ] ] }
+      ]
+    }
+  }, 
+  "header": [
+    "c_count",  "v2", 
+    "custdist", "v"
+  ]
+}

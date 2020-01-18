@@ -1,0 +1,1003 @@
+{
+  "header": [
+    "nation", 
+    "v", 
+    "o_year", 
+    "v2", 
+    "sum_profit", 
+    "v73"
+  ], 
+  "plan": {
+    "operator": "sort", 
+    "input": {
+      "operator": "groupby", 
+      "input": {
+        "operator": "map", 
+        "input": {
+          "operator": "select", 
+          "input": {
+            "operator": "select", 
+            "input": {
+              "operator": "join", 
+              "right": {
+                "tupleFlags": [
+                  "v70", 
+                  [
+                    "BigInt"
+                  ]
+                ], 
+                "from": "nation", 
+                "operatorId": 16, 
+                "restrictions": [], 
+                "tid": [
+                  "v68", 
+                  [
+                    "BigInt"
+                  ]
+                ], 
+                "values": [
+                  {
+                    "iu": [
+                      "n_nationkey", 
+                      [
+                        "Integer"
+                      ]
+                    ], 
+                    "name": "n_nationkey"
+                  }, 
+                  {
+                    "iu": [
+                      "n_name", 
+                      [
+                        "Char", 
+                        25
+                      ]
+                    ], 
+                    "name": "n_name"
+                  }, 
+                  {
+                    "iu": [
+                      "n_regionkey", 
+                      [
+                        "Integer"
+                      ]
+                    ], 
+                    "name": "n_regionkey"
+                  }, 
+                  {
+                    "iu": [
+                      "n_comment", 
+                      [
+                        "Varchar", 
+                        152
+                      ]
+                    ], 
+                    "name": "n_comment"
+                  }
+                ], 
+                "operator": "tablescan", 
+                "tableOid": [
+                  "v69", 
+                  [
+                    "RegClass"
+                  ]
+                ], 
+                "segment": 24
+              }, 
+              "operatorId": 6, 
+              "condition": {
+                "expression": "const", 
+                "value": {
+                  "type": [
+                    "Bool"
+                  ], 
+                  "value": true
+                }
+              }, 
+              "left": {
+                "operator": "join", 
+                "right": {
+                  "tupleFlags": [
+                    "v63", 
+                    [
+                      "BigInt"
+                    ]
+                  ], 
+                  "from": "orders", 
+                  "operatorId": 15, 
+                  "restrictions": [], 
+                  "tid": [
+                    "v61", 
+                    [
+                      "BigInt"
+                    ]
+                  ], 
+                  "values": [
+                    {
+                      "iu": [
+                        "o_orderkey", 
+                        [
+                          "Integer"
+                        ]
+                      ], 
+                      "name": "o_orderkey"
+                    }, 
+                    {
+                      "iu": [
+                        "o_custkey", 
+                        [
+                          "Integer"
+                        ]
+                      ], 
+                      "name": "o_custkey"
+                    }, 
+                    {
+                      "iu": [
+                        "o_orderstatus", 
+                        [
+                          "Char1"
+                        ]
+                      ], 
+                      "name": "o_orderstatus"
+                    }, 
+                    {
+                      "iu": [
+                        "o_totalprice", 
+                        [
+                          "Numeric", 
+                          12, 
+                          2
+                        ]
+                      ], 
+                      "name": "o_totalprice"
+                    }, 
+                    {
+                      "iu": [
+                        "o_orderdate", 
+                        [
+                          "Date"
+                        ]
+                      ], 
+                      "name": "o_orderdate"
+                    }, 
+                    {
+                      "iu": [
+                        "o_orderpriority", 
+                        [
+                          "Char", 
+                          15
+                        ]
+                      ], 
+                      "name": "o_orderpriority"
+                    }, 
+                    {
+                      "iu": [
+                        "o_clerk", 
+                        [
+                          "Char", 
+                          15
+                        ]
+                      ], 
+                      "name": "o_clerk"
+                    }, 
+                    {
+                      "iu": [
+                        "o_shippriority", 
+                        [
+                          "Integer"
+                        ]
+                      ], 
+                      "name": "o_shippriority"
+                    }, 
+                    {
+                      "iu": [
+                        "o_comment", 
+                        [
+                          "Varchar", 
+                          79
+                        ]
+                      ], 
+                      "name": "o_comment"
+                    }
+                  ], 
+                  "operator": "tablescan", 
+                  "tableOid": [
+                    "v62", 
+                    [
+                      "RegClass"
+                    ]
+                  ], 
+                  "segment": 22
+                }, 
+                "operatorId": 7, 
+                "condition": {
+                  "expression": "const", 
+                  "value": {
+                    "type": [
+                      "Bool"
+                    ], 
+                    "value": true
+                  }
+                }, 
+                "left": {
+                  "operator": "join", 
+                  "right": {
+                    "tupleFlags": [
+                      "v51", 
+                      [
+                        "BigInt"
+                      ]
+                    ], 
+                    "from": "partsupp", 
+                    "operatorId": 14, 
+                    "restrictions": [], 
+                    "tid": [
+                      "v49", 
+                      [
+                        "BigInt"
+                      ]
+                    ], 
+                    "values": [
+                      {
+                        "iu": [
+                          "ps_partkey", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "ps_partkey"
+                      }, 
+                      {
+                        "iu": [
+                          "ps_suppkey", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "ps_suppkey"
+                      }, 
+                      {
+                        "iu": [
+                          "ps_availqty", 
+                          [
+                            "Integer"
+                          ]
+                        ], 
+                        "name": "ps_availqty"
+                      }, 
+                      {
+                        "iu": [
+                          "ps_supplycost", 
+                          [
+                            "Numeric", 
+                            12, 
+                            2
+                          ]
+                        ], 
+                        "name": "ps_supplycost"
+                      }, 
+                      {
+                        "iu": [
+                          "ps_comment", 
+                          [
+                            "Varchar", 
+                            199
+                          ]
+                        ], 
+                        "name": "ps_comment"
+                      }
+                    ], 
+                    "operator": "tablescan", 
+                    "tableOid": [
+                      "v50", 
+                      [
+                        "RegClass"
+                      ]
+                    ], 
+                    "segment": 20
+                  }, 
+                  "operatorId": 8, 
+                  "condition": {
+                    "expression": "const", 
+                    "value": {
+                      "type": [
+                        "Bool"
+                      ], 
+                      "value": true
+                    }
+                  }, 
+                  "left": {
+                    "operator": "join", 
+                    "right": {
+                      "tupleFlags": [
+                        "v43", 
+                        [
+                          "BigInt"
+                        ]
+                      ], 
+                      "from": "lineitem", 
+                      "operatorId": 13, 
+                      "restrictions": [], 
+                      "tid": [
+                        "v9", 
+                        [
+                          "BigInt"
+                        ]
+                      ], 
+                      "values": [
+                        {
+                          "iu": [
+                            "l_orderkey", 
+                            [
+                              "Integer"
+                            ]
+                          ], 
+                          "name": "l_orderkey"
+                        }, 
+                        {
+                          "iu": [
+                            "l_partkey", 
+                            [
+                              "Integer"
+                            ]
+                          ], 
+                          "name": "l_partkey"
+                        }, 
+                        {
+                          "iu": [
+                            "l_suppkey", 
+                            [
+                              "Integer"
+                            ]
+                          ], 
+                          "name": "l_suppkey"
+                        }, 
+                        {
+                          "iu": [
+                            "l_linenumber", 
+                            [
+                              "Integer"
+                            ]
+                          ], 
+                          "name": "l_linenumber"
+                        }, 
+                        {
+                          "iu": [
+                            "l_quantity", 
+                            [
+                              "Numeric", 
+                              12, 
+                              2
+                            ]
+                          ], 
+                          "name": "l_quantity"
+                        }, 
+                        {
+                          "iu": [
+                            "l_extendedprice", 
+                            [
+                              "Numeric", 
+                              12, 
+                              2
+                            ]
+                          ], 
+                          "name": "l_extendedprice"
+                        }, 
+                        {
+                          "iu": [
+                            "l_discount", 
+                            [
+                              "Numeric", 
+                              12, 
+                              2
+                            ]
+                          ], 
+                          "name": "l_discount"
+                        }, 
+                        {
+                          "iu": [
+                            "l_tax", 
+                            [
+                              "Numeric", 
+                              12, 
+                              2
+                            ]
+                          ], 
+                          "name": "l_tax"
+                        }, 
+                        {
+                          "iu": [
+                            "l_returnflag", 
+                            [
+                              "Char1"
+                            ]
+                          ], 
+                          "name": "l_returnflag"
+                        }, 
+                        {
+                          "iu": [
+                            "l_linestatus", 
+                            [
+                              "Char1"
+                            ]
+                          ], 
+                          "name": "l_linestatus"
+                        }, 
+                        {
+                          "iu": [
+                            "l_shipdate", 
+                            [
+                              "Date"
+                            ]
+                          ], 
+                          "name": "l_shipdate"
+                        }, 
+                        {
+                          "iu": [
+                            "l_commitdate", 
+                            [
+                              "Date"
+                            ]
+                          ], 
+                          "name": "l_commitdate"
+                        }, 
+                        {
+                          "iu": [
+                            "l_receiptdate", 
+                            [
+                              "Date"
+                            ]
+                          ], 
+                          "name": "l_receiptdate"
+                        }, 
+                        {
+                          "iu": [
+                            "l_shipinstruct", 
+                            [
+                              "Char", 
+                              25
+                            ]
+                          ], 
+                          "name": "l_shipinstruct"
+                        }, 
+                        {
+                          "iu": [
+                            "l_shipmode", 
+                            [
+                              "Char", 
+                              10
+                            ]
+                          ], 
+                          "name": "l_shipmode"
+                        }, 
+                        {
+                          "iu": [
+                            "l_comment", 
+                            [
+                              "Varchar", 
+                              44
+                            ]
+                          ], 
+                          "name": "l_comment"
+                        }
+                      ], 
+                      "operator": "tablescan", 
+                      "tableOid": [
+                        "v10", 
+                        [
+                          "RegClass"
+                        ]
+                      ], 
+                      "segment": 23
+                    }, 
+                    "operatorId": 9, 
+                    "condition": {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Bool"
+                        ], 
+                        "value": true
+                      }
+                    }, 
+                    "left": {
+                      "operator": "join", 
+                      "right": {
+                        "tupleFlags": [
+                          "v8", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "from": "supplier", 
+                        "operatorId": 12, 
+                        "restrictions": [], 
+                        "tid": [
+                          "v6", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "values": [
+                          {
+                            "iu": [
+                              "s_suppkey", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "s_suppkey"
+                          }, 
+                          {
+                            "iu": [
+                              "s_name", 
+                              [
+                                "Char", 
+                                25
+                              ]
+                            ], 
+                            "name": "s_name"
+                          }, 
+                          {
+                            "iu": [
+                              "s_address", 
+                              [
+                                "Varchar", 
+                                40
+                              ]
+                            ], 
+                            "name": "s_address"
+                          }, 
+                          {
+                            "iu": [
+                              "s_nationkey", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "s_nationkey"
+                          }, 
+                          {
+                            "iu": [
+                              "s_phone", 
+                              [
+                                "Char", 
+                                15
+                              ]
+                            ], 
+                            "name": "s_phone"
+                          }, 
+                          {
+                            "iu": [
+                              "s_acctbal", 
+                              [
+                                "Numeric", 
+                                12, 
+                                2
+                              ]
+                            ], 
+                            "name": "s_acctbal"
+                          }, 
+                          {
+                            "iu": [
+                              "s_comment", 
+                              [
+                                "Varchar", 
+                                101
+                              ]
+                            ], 
+                            "name": "s_comment"
+                          }
+                        ], 
+                        "operator": "tablescan", 
+                        "tableOid": [
+                          "v7", 
+                          [
+                            "RegClass"
+                          ]
+                        ], 
+                        "segment": 19
+                      }, 
+                      "operatorId": 10, 
+                      "condition": {
+                        "expression": "const", 
+                        "value": {
+                          "type": [
+                            "Bool"
+                          ], 
+                          "value": true
+                        }
+                      }, 
+                      "left": {
+                        "tupleFlags": [
+                          "v5", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "from": "part", 
+                        "operatorId": 11, 
+                        "restrictions": [], 
+                        "tid": [
+                          "v3", 
+                          [
+                            "BigInt"
+                          ]
+                        ], 
+                        "values": [
+                          {
+                            "iu": [
+                              "p_partkey", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "p_partkey"
+                          }, 
+                          {
+                            "iu": [
+                              "p_name", 
+                              [
+                                "Varchar", 
+                                55
+                              ]
+                            ], 
+                            "name": "p_name"
+                          }, 
+                          {
+                            "iu": [
+                              "p_mfgr", 
+                              [
+                                "Char", 
+                                25
+                              ]
+                            ], 
+                            "name": "p_mfgr"
+                          }, 
+                          {
+                            "iu": [
+                              "p_brand", 
+                              [
+                                "Char", 
+                                10
+                              ]
+                            ], 
+                            "name": "p_brand"
+                          }, 
+                          {
+                            "iu": [
+                              "p_type", 
+                              [
+                                "Varchar", 
+                                25
+                              ]
+                            ], 
+                            "name": "p_type"
+                          }, 
+                          {
+                            "iu": [
+                              "p_size", 
+                              [
+                                "Integer"
+                              ]
+                            ], 
+                            "name": "p_size"
+                          }, 
+                          {
+                            "iu": [
+                              "p_container", 
+                              [
+                                "Char", 
+                                10
+                              ]
+                            ], 
+                            "name": "p_container"
+                          }, 
+                          {
+                            "iu": [
+                              "p_retailprice", 
+                              [
+                                "Numeric", 
+                                12, 
+                                2
+                              ]
+                            ], 
+                            "name": "p_retailprice"
+                          }, 
+                          {
+                            "iu": [
+                              "p_comment", 
+                              [
+                                "Varchar", 
+                                23
+                              ]
+                            ], 
+                            "name": "p_comment"
+                          }
+                        ], 
+                        "operator": "tablescan", 
+                        "tableOid": [
+                          "v4", 
+                          [
+                            "RegClass"
+                          ]
+                        ], 
+                        "segment": 18
+                      }
+                    }
+                  }
+                }
+              }
+            }, 
+            "operatorId": 5, 
+            "condition": {
+              "expression": "and", 
+              "arguments": [
+                {
+                  "right": {
+                    "iu": "l_suppkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "s_suppkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "l_suppkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "ps_suppkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "l_partkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "ps_partkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "l_partkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "p_partkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "l_orderkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "o_orderkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "right": {
+                    "iu": "n_nationkey", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "comparison", 
+                  "mode": "=", 
+                  "left": {
+                    "iu": "s_nationkey", 
+                    "expression": "iuref"
+                  }
+                }, 
+                {
+                  "expression": "like", 
+                  "arguments": [
+                    {
+                      "iu": "p_name", 
+                      "expression": "iuref"
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": "%green%"
+                      }
+                    }, 
+                    {
+                      "expression": "const", 
+                      "value": {
+                        "type": [
+                          "Varchar"
+                        ], 
+                        "value": ""
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }, 
+          "operatorId": 4, 
+          "condition": {
+            "expression": "const", 
+            "value": {
+              "type": [
+                "Bool"
+              ], 
+              "value": true
+            }
+          }
+        }, 
+        "values": [
+          {
+            "iu": [
+              "v71", 
+              [
+                "Integer"
+              ]
+            ], 
+            "value": {
+              "input": {
+                "iu": "o_orderdate", 
+                "expression": "iuref"
+              }, 
+              "expression": "extractyear"
+            }
+          }, 
+          {
+            "iu": [
+              "v72", 
+              [
+                "Numeric", 
+                14, 
+                4
+              ]
+            ], 
+            "value": {
+              "right": {
+                "right": {
+                  "iu": "l_quantity", 
+                  "expression": "iuref"
+                }, 
+                "expression": "mul", 
+                "left": {
+                  "iu": "ps_supplycost", 
+                  "expression": "iuref"
+                }
+              }, 
+              "expression": "sub", 
+              "left": {
+                "right": {
+                  "right": {
+                    "iu": "l_discount", 
+                    "expression": "iuref"
+                  }, 
+                  "expression": "sub", 
+                  "left": {
+                    "expression": "const", 
+                    "value": {
+                      "type": [
+                        "Integer"
+                      ], 
+                      "value": 1
+                    }
+                  }
+                }, 
+                "expression": "mul", 
+                "left": {
+                  "iu": "l_extendedprice", 
+                  "expression": "iuref"
+                }
+              }
+            }
+          }
+        ], 
+        "operatorId": 3
+      }, 
+      "aggregates": [
+        {
+          "source": 0, 
+          "operation": "keep", 
+          "iu": [
+            "v", 
+            [
+              "Char", 
+              25
+            ]
+          ]
+        }, 
+        {
+          "source": 1, 
+          "operation": "keep", 
+          "iu": [
+            "v2", 
+            [
+              "Integer"
+            ]
+          ]
+        }, 
+        {
+          "source": 2, 
+          "operation": "sum", 
+          "iu": [
+            "v73", 
+            [
+              "Numeric", 
+              14, 
+              4
+            ]
+          ]
+        }
+      ], 
+      "values": [
+        {
+          "value": {
+            "iu": "n_name", 
+            "expression": "iuref"
+          }
+        }, 
+        {
+          "value": {
+            "iu": "v71", 
+            "expression": "iuref"
+          }
+        }, 
+        {
+          "value": {
+            "iu": "v72", 
+            "expression": "iuref"
+          }
+        }
+      ], 
+      "operatorId": 2
+    }, 
+    "criterion": [
+      {
+        "nullFirst": false, 
+        "descending": false, 
+        "value": {
+          "iu": [
+            "v", 
+            [
+              "Char", 
+              25
+            ]
+          ], 
+          "expression": "iuref"
+        }
+      }, 
+      {
+        "nullFirst": true, 
+        "descending": true, 
+        "value": {
+          "iu": [
+            "v2", 
+            [
+              "Integer"
+            ]
+          ], 
+          "expression": "iuref"
+        }
+      }
+    ], 
+    "operatorId": 1
+  }
+}

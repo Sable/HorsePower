@@ -4,15 +4,25 @@ Helper functions
 
 import sys, traceback, copy, json
 
+# I/O operations
+def readLines(filename,typ='.json'):
+    return "".join([trim(x) for x in open(filename+typ,'r').readlines()])
+
+def trim(text):
+    return text.strip(' \r\n')
+
+def info(msg=''):
+    sys.stdout.write('// %s\n' % msg)
+
+def debug(msg=''):
+    sys.stderr.write('// %s\n' % msg)
+
 def getEnvTable(env): return env['tables']
 def getEnvName (env): return env['cols_n']
 def getEnvAlias(env): return env['cols_a']
 def getEnvType (env): return env['cols_t']
 def getEnvMask (env): return env['mask']
 def getEnvMaskA(env): return env['mask_a']
-
-def debug(msg=''):
-    sys.stderr.write('// %s\n' % msg)
 
 def printEnv(env):
     print 'Environment node: {mask: "%s"}' % (getEnvMask(env))
@@ -27,6 +37,30 @@ def printEnv(env):
     else:
         for x in range(len(alias)):
             print ' %10s.%-16s : %-5s -> %3s' % (table[x],names[x],types[x],alias[x])
+
+def printEnv2(env2):
+    print ('-'*10), 'env[0]', ('-'*10)
+    printEnv(env2[0])
+    print ('-'*10), 'env[1]', ('-'*10)
+    printEnv(env2[1])
+    print ('-'*28)
+    pass
+
+def getAliasType(n, env):
+    if not n in getEnvAlias(env):
+        # TODO: may improve later
+        return n
+    ind = getEnvAlias(env).index(n)
+    if ind < 0:
+        unexpected('name not found: %s' % n)
+    return getEnvType(env)[ind]
+
+def stringList(x, sep=','):
+    temp  = ''
+    for (i,v) in enumerate(x):
+        if i > 0: temp = temp + sep
+        temp = temp + str(v)
+    return temp
 
 def m2p(x):
     return {
@@ -104,6 +138,12 @@ def printRelation(key_id, fkey_id):
     
 def printJSON(x):
     print json.dumps(x, sort_keys=False, indent=2)
+
+def readFromStdin():
+    lines = []
+    for line in sys.stdin:
+        lines.append(line)
+    return lines
 
 """
 Handle exceptions
