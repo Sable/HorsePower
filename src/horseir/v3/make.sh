@@ -30,7 +30,7 @@ prepare_lib(){
     src_files="../backend/*.cc ../util/*.cc ../global.cc ../frontend/pretty.cc"
     src_include_dirs="${HORSE_BASE}/libs/include/"
     src_include_libs="${HORSE_BASE}/libs/lib/libpcre2-8.a"
-    cc_flags="-fopenmp -lm -lstdc++ -march=native"
+    cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a
     (set -x && g++-8 ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ..)
 }

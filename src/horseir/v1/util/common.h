@@ -50,7 +50,6 @@ void freeHorseArray(HA x);
 /* dot.c */
 void dotProg(Prog *root);
 
-
 #ifdef  __cplusplus
 }
 #endif

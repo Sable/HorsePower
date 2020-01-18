@@ -121,7 +121,7 @@ E compiled_main(){
     PROFILE( 36, t110, pfnGroup(t110, t109));  // <--- expensive
     PROFILE( 37, t111, pfnKeys(t111, t110));
     PROFILE( 38, t112, pfnValues(t112, t110));
-    getInfoVar(t112); getchar();  // t112 (H_G): size = 829958, max = 7, min = 1
+    //getInfoVar(t112); getchar();  // t112 (H_G): size = 829958, max = 7, min = 1
     PROFILE( 39, t115, q3_peephole_1((V []){t115},(V []){t108},t112));
     PROFILE( 40, t118, pfnIndex(t118, t79, t111));
     // LINE 41: join index (147126, 829958)

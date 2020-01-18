@@ -49,6 +49,43 @@ L q6_loopfusion_0(V z, V *x){
     //}
     R 0;
 }
+
+L q6_peephole_main(V *z, V *x){
+    E elapsed=0;
+    V z0 = z[0]; // t43
+    V x0 = x[0]; // t11
+    V x1 = x[1]; // t5
+    V x2 = x[2]; // t7
+    V x3 = x[3]; // t6
+    initV(z0, H_E, 1);
+    E total = 0;
+    L size = vn(x0);
+    D *a0 = sD(x0);
+    E *a1 = sE(x1);
+    E *a2 = sE(x2);
+    E *a3 = sE(x3);
+//#pragma acc parallel loop copyin(a0[size], a1[size], a2[size], a3[size])
+//    for(int i=0; i<0; i++){
+//        I a = 1 + 1;
+//    }// do nothing, just copy data
+#pragma acc data copy(a0[size], a1[size], a2[size], a3[size])
+{
+    tic;
+    // acc parallel loop --> acc kernels
+#pragma acc kernels present(a0[size], a1[size], a2[size], a3[size])
+    for(L i=0; i<size; i++){
+        if(AND(AND(AND(LT(a0[i],19950101),GEQ(a0[i],19940101)),LT(a1[i],24)),AND(GEQ(a2[i],0.05),LEQ(a2[i],0.07))))
+        {
+            total += a3[i] * a2[i];
+        }
+    }
+    toc; // will print time info
+}
+    vE(z0, 0) = total;
+    R 0;
+}
+
+
 /*==== FP: Loop fusion with patterns ====*/
 L q6_peephole_0(V *z, V y, V *x){
     V z0 = z[0]; // t31
@@ -82,10 +119,15 @@ E compiledQ6(){
     PROFILE(  2, t6 , pfnColumnValue(t6, t0, initLiteralSym((S)"l_extendedprice")));
     PROFILE(  3, t7 , pfnColumnValue(t7, t0, initLiteralSym((S)"l_discount")));
     PROFILE(  4, t11, pfnColumnValue(t11, t0, initLiteralSym((S)"l_shipdate")));
-    PROFILE(  5, t25, q6_loopfusion_0(t25,(V []){t11,t5,t7}));
-    PROFILE(  6, t32, q6_peephole_0((V []){t31,t32},t25,(V []){t6,t7}));
-    PROFILE(  7, t42, pfnMul(t42, t31, t32));
-    PROFILE(  8, t43, pfnSum(t43, t42));
+    if(false){
+        PROFILE(  5, t25, q6_loopfusion_0(t25,(V []){t11,t5,t7}));
+        PROFILE(  6, t32, q6_peephole_0((V []){t31,t32},t25,(V []){t6,t7}));
+        PROFILE(  7, t42, pfnMul(t42, t31, t32));
+        PROFILE(  8, t43, pfnSum(t43, t42));
+    }
+    else {
+        PROFILE( 99, t43, q6_peephole_main((V []){t43},(V []){t11,t5,t7,t6}));    
+    }
     PROFILE(  9, t44, copyV(t44, initLiteralSym((S)"revenue")));
     PROFILE( 10, t45, pfnList(t45, 1, (V []){t43}));
     PROFILE( 11, t46, pfnTable(t46, t44, t45));

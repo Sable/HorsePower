@@ -221,9 +221,12 @@ L q6_peephole_main(V *z, V *x){
     //DOI(vn(x0), \
             if(AND(AND(AND(AND(GEQ(vD(x0,i),19940101),GEQ(vE(x2,i),0.05)),LEQ(vE(x2,i),0.07)),LT(vD(x0,i),19950101)),LT(vE(x1,i),24))) \
             {total+=vE(x3,i)*vE(x2,i);}) // soln 4, 73
-    DOI(vn(x0), \
+    //DOI(vn(x0), \
             if(AND(AND(AND(LT(vD(x0,i),19950101),GEQ(vD(x0,i),19940101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))) \
             {total+=vE(x3,i)*vE(x2,i);}) // soln 5, 49 (best)
+    DOP(vn(x0), \
+            if(AND(AND(AND(LT(vD(x0,i),19950101),GEQ(vD(x0,i),19940101)),LT(vE(x1,i),24)),AND(GEQ(vE(x2,i),0.05),LEQ(vE(x2,i),0.07)))) \
+            {total+=vE(x3,i)*vE(x2,i);}, reduction(+:total)) // soln 5, 49 (best)
     vE(z0, 0) = total;
     R 0;
 }
