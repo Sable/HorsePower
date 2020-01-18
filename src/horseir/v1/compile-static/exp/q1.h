@@ -120,11 +120,11 @@ L q1_chf_1(V *z, V y, V *x){
     //profileListR(y); getchar();
     //P("lenZ = %lld\n", lenZ); // 4
     DOJ(lenZ, {V t=vV(y,j); E c0=0; E c1=0; E c2=0; E c3=0; E c4=0; L tot=0;\
-       DOI(vn(t), {L k=vL(t,i);\
+       DOP(vn(t), {L k=vL(t,i);\
            if(vD(x4,k)<=19980902){ tot++;\
            c0+=vE(x0,k); c1+=vE(x1,k); c4+=vE(x2,k);\
            E tt=vE(x1,k)*(1-vE(x2,k)); c2+=tt; c3+=tt*(1+vE(x3,k));}\
-       })\
+       }, reduction(+:c0,c1,c2,c3,c4,tot))\
        vE(z0,j)=c0; vE(z1,j)=c1; vE(z2,j)=c2; vE(z3,j)=c3;\
        vE(z4,j)=c0/tot; vE(z5,j)=c1/tot; vE(z6,j)=c4/tot; vL(z7,j)=vn(t);})
     R 0;

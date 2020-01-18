@@ -44,7 +44,7 @@ function gen_aida_plan(){
 
 function gen_tpch_plan_batch(){
     if [ $1 = "all" ]; then
-        ids = `(seq 1 22)`
+        ids=`(seq 1 22)`
     else
         # ids=( 1 4 6 12 14 16 19 22 )
         # ids=( 2 3 5 7 8 9 10 11 13 15 17 18 20 21 )
@@ -53,8 +53,8 @@ function gen_tpch_plan_batch(){
     for id in ${ids[@]}
     do
         echo "processing query $id"
-        gen_tpch_plan $id > ${outputdata}/${gentemp}/q${id}.hir
-        if test ${pipestatus[0]} -eq 0 ; then
+        gen_tpch_plan $id > ${outputdata}/${gentemp}/q${id}.hir 2> /dev/null
+        if test ${PIPESTATUS[0]} -eq 0 ; then
             echo -e "query $id: ${GN}ok${NO}"
         else
             echo -e "query $id: ${RED}failed${NO}"

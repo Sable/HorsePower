@@ -481,13 +481,19 @@ static I q5_fuse_compress(V *z, V f, V *x){
     V z1 = z[1];
     V x0 = x[0];
     V x1 = x[1];
-    L c=0;
-    DOI(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101)))c++)
-    initV(z0, H_I, c);
-    initV(z1, H_I, c);
-    c=0;
-    DOI(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101))){vI(z0,c)=vI(x0,i); vI(z1,c)=vI(x1,i); c++;})
-    P("writes %lld\n",c);
+    L lenZ = 0, parZ[H_CORE], offset[H_CORE];
+    DOI(H_CORE, parZ[i]=offset[i]=0)
+    DOT(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101)))parZ[tid]++)
+    DOI(H_CORE, lenZ += parZ[i])
+    DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
+    //L c=0;
+    //DOP(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101)))c++, reduction(+:c))
+    initV(z0, H_I, lenZ);
+    initV(z1, H_I, lenZ);
+    //DOI(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101))){vI(z0,c)=vI(x0,i); vI(z1,c)=vI(x1,i); c++;})
+    DOT(vn(f), if(AND(GEQ(vD(f,i),19940101),LT(vD(f,i),19950101))){ \
+            L c=offset[tid]++; vI(z0,c)=vI(x0,i); vI(z1,c)=vI(x1,i);})
+    //P("writes %lld\n",c);
     R 0;
 }
 

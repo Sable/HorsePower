@@ -24,9 +24,9 @@ runInterpreter() {
     cmd=$1; tid=$2; sf=$3; run=$4; th=$5
     #echo $0  # --> ./run.sh
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -t -f ./tests/pass/t${tid}.hir)
+        (set -x && ./horse -t -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -t -f ./tests/fail/t${tid}.hir)
+        (set -x && ./horse -t -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
         (set -x && ./horse -t -f ./scripts/q${tid}.hir --tpch=${tid})
@@ -38,9 +38,9 @@ runInterpreter() {
 runCompiler() {
     cmd=$1; tid=$2
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -c cpu -f ./tests/pass/t${tid}.hir)
+        (set -x && ./horse -c cpu -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -c cpu -f ./tests/fail/t${tid}.hir)
+        (set -x && ./horse -c cpu -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         (set -x && ./horse -c cpu -f ./scripts/q${tid}.hir --tpch=${tid})
     else
@@ -52,9 +52,9 @@ runOptimizer() {
     cmd=$1; tid=$2; opt=$3
     opts="-o $opt"
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -c cpu ${opts} -f ./tests/pass/t${tid}.hir)
+        (set -x && ./horse -c cpu ${opts} -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -c cpu ${opts} -f ./tests/fail/t${tid}.hir)
+        (set -x && ./horse -c cpu ${opts} -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         (set -x && ./horse -c cpu ${opts} -f ./scripts/q${tid}.hir --tpch=${tid})
     else
@@ -76,9 +76,9 @@ runStats() {
 runPrinter() {
     item=$1; cmd=$2; tid=$3;
     if [ $cmd = "t" ]; then
-        (set -x && ./horse -u -f ./tests/pass/t${tid}.hir --print=${item})
+        (set -x && ./horse -u -f ${HORSE_BASE}/tests/pass/t${tid}.hir --print=${item})
     elif [ $cmd = "f" ]; then
-        (set -x && ./horse -u -f ./tests/fail/t${tid}.hir --print=${item})
+        (set -x && ./horse -u -f ${HORSE_BASE}/tests/fail/t${tid}.hir --print=${item})
     elif [ $cmd = "q" ]; then
         (set -x && ./horse -u -f ./scripts/q${tid}.hir --tpch=${tid} --print=${item})
     else
@@ -88,7 +88,7 @@ runPrinter() {
 
 runUtility() {
     cmd=$1
-    (set -x && ./horse -u -f scripts/udf/q6_proc.hir --print ${cmd})
+    (set -x && ./horse -u -f ./scripts/udf/q6_proc.hir --print ${cmd})
 }
 
 

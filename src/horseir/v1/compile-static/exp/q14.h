@@ -38,7 +38,7 @@ L q14_loopfusion_1_new(V z, V *x){
     V x2 = x[2]; // t56
     E t = 0;
     initV(z,H_E,1);
-    DOI(vn(x0), t+=PLUS(MUL(vB(x0,i),MUL(vE(x1,i),MINUS(1,vE(x2,i)))),MUL(NOT(vB(x0,i)),0)))
+    DOP(vn(x0), t+=PLUS(MUL(vB(x0,i),MUL(vE(x1,i),MINUS(1,vE(x2,i)))),MUL(NOT(vB(x0,i)),0)), reduction(+:t))
     ve(z) = t; R 0;
 }
 
@@ -48,7 +48,7 @@ L q14_loopfusion_3_new(V z, V *x){
     V x1 = x[1]; // t56
     E t = 0;
     initV(z,H_E,1);
-    DOI(vn(x0), t+=MUL(vE(x0,i),MINUS(1,vE(x1,i))))
+    DOP(vn(x0), t+=MUL(vE(x0,i),MINUS(1,vE(x1,i))), reduction(+:t))
     ve(z) = t; R 0;
 }
 
