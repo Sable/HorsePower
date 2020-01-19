@@ -64,6 +64,12 @@ Default data path for TPC-H
 
     ${HORSE_BASE}/data/tpch
 
+In order to generate different scale factor datasets, you should run
+
+    cd data/tpch
+    ./run.sh deploy       ## Read instructions and update Makefile
+    ./run.sh gendb 1      ## Generate database and save to data/tpch/db1
+
 With a specific scale factor, for example, 1, its path is
 
     ${HORSE_BASE}/data/tpch/db1
@@ -71,12 +77,6 @@ With a specific scale factor, for example, 1, its path is
 It contains a `tbl` file for each table
 
     ${HORSE_BASE}/data/tpch/db1/*.tbl
-
-In order to generate different scale factor datasets, you should run
-
-    cd data/tpch
-    ./run.sh deploy       ## Read instructions and update Makefile
-    ./run.sh gendb 1      ## Generate database and save to data/tpch/db1
 
 
 ### Build and Run
