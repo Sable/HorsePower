@@ -10,8 +10,13 @@
 extern "C" {
 #endif
 
+typedef enum JsonKind{
+    JSON_VALUE, JSON_VALUES, JSON_JSON, JSON_JSONS
+}JsonKind;
+
 typedef struct horse_json{
-    int kind, size;
+    JsonKind kind;
+    int size;
     char *key;
     union{
         char *field;

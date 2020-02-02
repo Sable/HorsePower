@@ -1,0 +1,6 @@
+tmp/
+build/
+frontend/horse.bison.cc
+frontend/horse.bison.hh
+frontend/horse.flex.cc
+libcore.a

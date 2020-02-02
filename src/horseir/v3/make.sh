@@ -26,13 +26,16 @@ setup_tigger(){
 }
 
 prepare_lib(){
-    mkdir -p build-lib && cd build-lib
-    src_files="../backend/*.cc ../util/*.cc ../global.cc ../frontend/pretty.cc"
+    cc_path=g++-8
+    cur_path=$PWD
+    tmp_path=$PWD/tmp/build-lib
+    mkdir -p ${tmp_path} && cd ${tmp_path}
+    src_files="${cur_path}/backend/*.cc ${cur_path}/util/*.cc ${cur_path}/global.cc ${cur_path}/frontend/pretty.cc"
     src_include_dirs="${HORSE_BASE}/libs/include/"
     src_include_libs="${HORSE_BASE}/libs/lib/libpcre2-8.a"
     cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a
-    (set -x && g++-8 ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ..)
+    (set -x && ${cc_path} ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ${cur_path})
 }
 
 

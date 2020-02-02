@@ -15,7 +15,6 @@
 
 /* declare additional macros */
 #ifdef H_LINUX
-  #define _BSD_SOURCE
 /* check for ANSI extensions: e.g. strdup */
   #ifdef __STDC_ALLOC_LIB__
     #define __STDC_WANT_LIB_EXT2__ 1
