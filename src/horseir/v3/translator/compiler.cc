@@ -327,7 +327,7 @@ static SymbolKind scanFuncName(Node *n){
     return sk;
 }
 
-static Node* getFirstNodeFromList(List *list){
+static Node *getFirstNodeFromList(List *list){
     if(list){
         while(list->next) list=list->next;
         R list->val;

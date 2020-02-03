@@ -968,7 +968,7 @@ static InfoNode *specialLoadTable(InfoNode *x){
     else return NULL;
 }
 
-static InfoNode* setEnumKey(InfoNode *x, L key){
+static InfoNode *setEnumKey(InfoNode *x, L key){
     MetaData *newMeta = NEW(MetaData);
     newMeta->meta.enumMeta.keyId = key;
     addToSimpleHash(hashMeta, (L)x, (L)newMeta);

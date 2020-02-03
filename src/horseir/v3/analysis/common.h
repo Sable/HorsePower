@@ -38,7 +38,7 @@ typedef struct InfoNodeList{
 /* analysis/common.c */
 void       printInfoNode(InfoNode *x);
 HorseType  getSubType(InfoNode *x);
-ShapeNode* getSubShape(InfoNode *x);
+ShapeNode *getSubShape(InfoNode *x);
 
 bool isSameShape(ShapeNode *x, ShapeNode *y);
 void freeInfoNode(InfoNode *in);
@@ -56,6 +56,6 @@ I totalInfoNodeList1(InfoNodeList *list);    // with dummy
 I totalSymbolNameList(SymbolNameList *list); //   no dummy
 
 /* typeshape.c */
-InfoNode*  getInfoFromNode(Node *n);
+InfoNode *getInfoFromNode(Node *n);
 
 #endif

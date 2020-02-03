@@ -31,6 +31,10 @@ Run a query with optimizations
     ## opt1 is for elementwise fusion and pattern-based fusion
     ## opt2 is for automatic fusion and pattern-based fusion
 
+Run C code from user-defined functions
+
+    ./horse -c cpu -f ${HORSE_BASE}/tests/udf/q6_proc.hir
+
 
 ## Folder Structure
 
@@ -50,24 +54,12 @@ Run a query with optimizations
 
 ### Temporary Folders
 
-Structure overview
+Folder name included in `.gitignore`
 
-```
-tmp/
-    udf/
-```
+    tmp/
 
-Note that new sub-folders can be added/removed freely since these folders will
+Note that its sub-folders can be added/removed freely since these folders will
 not be committed.
-
-
-### User-defined Functions
-
-Workspace `tmp/udf` is created for testing generated C code from HorseIR programs.
-
-Run compiler to fetch C code
-
-    ./horse -c cpu -f scripts/udf/q6_proc.hir
 
 
 ## Naming Convensions
@@ -117,6 +109,7 @@ Entry/Exit function
 - `init`   : initialize global variables (static or external fields)
 - `clean`  : deallocate memory if necessary
 
+
 ### Variables
 
 - `x`: could be anything
@@ -146,6 +139,24 @@ Messages with macros
 - Stop-and-see messages
     + `STOP`, prints messages (without a default newline)
     + Effect: stop, enter, and continue
+
+
+### Code Styles
+
+Variable declaration with a pointer (align to variable)
+
+    type *var
+
+Function declaration with a return pointer (align to function name)
+
+    type *func(...)
+
+Function declaration must come with explicit parameter names
+
+    int func(int a); // ok
+    int func(int  ); // fine, but not ok
+
+
 
 
 ## Input/Output Operations

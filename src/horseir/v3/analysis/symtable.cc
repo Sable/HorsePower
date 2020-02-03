@@ -11,7 +11,7 @@ static SymbolNameList *symList;
 
 /* declarations above */
 
-static const char* strSymbolKind(SymbolKind x){
+static const char *strSymbolKind(SymbolKind x){
     switch(x){
         CASE_STR(moduleS);
         CASE_STR(globalS);

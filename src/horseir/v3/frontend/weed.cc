@@ -183,7 +183,7 @@ static HorseType getVectorType(Node *x){
 }
 
 // boolT =?= H_B ...
-static const char* getTypeStr2(HorseType t){
+static const char *getTypeStr2(HorseType t){
     switch(t){
         CASE_STR(boolT);
         CASE_STR(i8T);
@@ -206,7 +206,7 @@ static const char* getTypeStr2(HorseType t){
     }
 }
 
-static const char* getConstTypeStr(Node *x){
+static const char *getConstTypeStr(Node *x){
     ConstValue *p = x->val.nodeC;
     switch(p->type){
         CASE_STR(intC);

@@ -76,6 +76,7 @@ O  optElementwise();
 O  optPattern    (I kind);
 O  optAutoFusion ();
 O  optSReduction (Prog *root);
+O  optInlining();
 
 CS obtainMaxValue(C c);
 CS obtainMinValue(C c);
