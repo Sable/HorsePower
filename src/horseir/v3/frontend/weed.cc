@@ -241,12 +241,14 @@ static void weedVector(Node *x){
         }
         p = p->next;
     }
+    weedNode(x->val.vec.typ);
 }
 
 static void weedVar(Node *x){
     char *name = x->val.param.id;
     if(sEQ(name, uscore))
         EP("Underscore '%s' shouldn't have any type.", uscore);
+    weedNode(x->val.param.typ);
 }
 
 static void weedStmt(Node *stmt){
@@ -288,12 +290,13 @@ static void weedMethod(Node *x){
         if(cntMain == 0){ entryMain = x; cntMain++; }
         else EP("Only one main method expected in modules.");
     }
+    weedList(x->val.method.typ);
     weedNode(x->val.method.block);
 }
 
-static void weedModule(Node *module){
-    //printNodeType(module);
-    weedList(module->val.module.body);
+static void weedModule(Node *x){
+    //printNodeType(x);
+    weedList(x->val.module.body);
 }
 
 static void weedCall(Node *x){
@@ -305,6 +308,7 @@ static void weedCall(Node *x){
 static void weedCast(Node *x){
     //printNodeType(x);
     weedNode(x->val.cast.exp);
+    weedNode(x->val.cast.typ);
 }
 
 static void weedList(List *x){
@@ -330,6 +334,14 @@ static void weedName(Node *x){
 
 static void weedExprStmt(Node *x){
     weedNode(x->val.exprStmt.expr);
+}
+
+static void weedType(Node *x){
+    if(!(x->val.type.isWild) && sEQ(x->val.type.typ, "enum")){
+        List *cell = x->val.type.cell;
+        if(cell && cell->next == NULL);
+        else EP("Type enum needs exactly one sub-type (e.g. enum<i64>)");
+    }
 }
 
 static void weedNode(Node *x){
@@ -358,6 +370,7 @@ static void weedNode(Node *x){
         case  continueK: break;
         case   varDeclK: weedVarDecl(x);   break;
         case  exprstmtK: weedExprStmt(x);  break;
+        case      typeK: weedType(x);      break;
         default: EP("Type unknown: %s", getNodeTypeStr(x));
     }
 }
