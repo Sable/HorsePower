@@ -87,9 +87,9 @@ There are a couple of operators defined in non-leaf nodes.
 - `rightantijoin`: right antijoin
 - `leftsemijoin` : left semijoin
 - `rightsemijoin`: right semijoin
-- `map`          : unclear
-- `magic`        : unclear
-- `earlyprobe`   : unclear
+- `map`          : unknown
+- `magic`        : unknown
+- `earlyprobe`   : unknown
 
 *Note: Extra operators are possible, such as leftouterjoin and leftmarkjoin.
 However, they are only existed in non-optimal plans.*
@@ -107,9 +107,9 @@ A tablescan node scans all loaded columns, applies all conditions or restriction
     "operatorId"  : <order of execution>
     "restrictions": <conditions>
     "cardinality" : <an estimated size>
-    "tid"         : <unclear>
-    "tupleFlags   : <unclear>
-    "tableOid"    : <unclear>
+    "tid"         : <unknown>
+    "tupleFlags   : <unknown>
+    "tableOid"    : <unknown>
 }
 ```
 

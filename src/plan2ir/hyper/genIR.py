@@ -203,7 +203,7 @@ def scanValuesSet(v):
             if isOpSubstring:
                 return genLiteral('(%s):str' % stringList(sets))
             else:
-                return genLiteral('%s:sym' % stringList(sets,''))
+                return genLiteral('(%s):sym' % stringList(sets))
         else:
             return genLiteral('(%s):%s' % (stringList(sets), typ)) #gen literal
         # return genAssignment('(%s):%s' % (stringList(sets), typ)) #gen literal
@@ -219,7 +219,7 @@ def scanValuesQuantor(v, env):
         setValue = scanValuesSet(fetch('set', v))
         isOpSubstring = False #chf
         varValue = scanValuesV(fetch('value', v), env)
-        return genMember(setValue, varValue)
+        return genMember(varValue, setValue)
     else:
         unexpected('New mode %s for quantor' % mode)
 
@@ -259,8 +259,8 @@ def scanValuesSubstring(v, env):
     #t4 = genPlus(t3, t1)
     start  = t1.split(':')[0]; start_type  = t1.split(':')[1]
     length = t2.split(':')[0]; length_type = t2.split(':')[1]
-    if start_type == length_type and start_type == 'i64':
-        t5 = genSubString(t0, '(%s,%s):i64'%(start,length))
+    if start_type == length_type and start_type in ['i32', 'i64']:
+        t5 = genSubString(t0, '(%s,%s):%s'%(start,length,start_type))
     else:
         print t1, t2
         print 'type: %s, %s' % (start_type, length_type)
@@ -410,7 +410,10 @@ def scanHeader(d, env):
         # insertMap(head[x*2+1], genIndex(findAliasByName(head[x*2+1], new_env),final_order))
     # build column names
     for x in range(size):
+        if x > 0:
+            temp = temp + ','
         temp = temp + '`%s' % head[x*2]
+    temp = '(' + temp + ')'
     a0 = genLiteral(temp + ':sym')
     # build column values
     # if size == 1:
@@ -502,8 +505,22 @@ def scanTablescan(d, env):
             mask = genAnd(mask, residuals)
         else:  # q2, earlyprobe -> tablescan
             mask = residuals  # q13
-    newAlias = actionCompress(mask, alias, env) if mask is not None else alias  #??
-    return encodeEnv(table_name, columns, newAlias, types, mask, alias)
+    ## test q3
+    newEnv = encodeEnv(table_name, columns, alias, types, mask, alias)
+    if mask is not None:
+        newAlias = actionCompress(mask, alias, newEnv)
+        newEnv['alias'] = newAlias
+    return newEnv
+    # print '-'*50
+    # if not env:
+    #     print 'env is NULL' * 3
+    #     print columns
+    #     print alias
+    #     print types
+    # newAlias = actionCompress(mask, alias, env) if mask is not None else alias  #??
+    # printAllCode()
+    # raw_input()
+    # return encodeEnv(table_name, columns, newAlias, types, mask, alias)
 
 # Copied from scanRestrictions
 def scanResiduals(d, env):
@@ -1152,7 +1169,7 @@ def joinColumnsHybrid(joinType, cond_list, env2):
         or_list = []
         for c,_ in enumerate(or_left):
             t0 = genCompress(or_left[c],  left_alias)
-            t1 = genMember  (t0, right_alias)
+            t1 = genMember  (right_alias, t0)
             t2 = genAnd     (t1, or_right[c])
             or_list.append(t2)
         tt = genVectorOr(or_list)
@@ -1544,7 +1561,7 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
         # printEnv(k_env)
         # printEnv(v_env)
         # Fail in q14
-        # t0 = genMember (k_alias, v_alias)
+        # t0 = genMember (v_alias, k_alias)
         # t1 = genVector(genLength(k_alias), '0:bool')
         # t2 = genIndexA(t1, genCompress(t0, v_alias), '1:bool')
         # return [t2, t0, 'masking']
@@ -1560,7 +1577,7 @@ def joinWithKeys(joinType, k_alias, k_env, v_alias, v_env):
                 unexpected('mask found')
             if getEnvMask(v_env):
                 for x in k_temp:
-                    v_temp.append(genMember(x, v_alias))
+                    v_temp.append(genMember(v_alias, x))
                 for (i,v) in enumerate(v_temp):
                     vector_or.append(genAnd(v, v_cond[i]))
             else:
@@ -1604,18 +1621,18 @@ def joinWithoutRelation(joinType, left_alias, left_env, right_alias, right_env, 
     left_alias = getEnumValue( left_alias,  left_env)
     right_alias= getEnumValue(right_alias, right_env)
     if joinType == 'right_antijoin':
-        t0 = genMember(left_alias, right_alias)
+        t0 = genMember(right_alias, left_alias)
         p1 = genNot(t0)
         return [None, p1, 'masking']
     elif joinType == 'left_antijoin':
-        t0 = genMember(right_alias, left_alias)
+        t0 = genMember(left_alias, right_alias)
         p0 = genNot(t0)
         return [p0, None, 'masking']
     elif joinType == 'right_semijoin':
-        p1 = genMember(left_alias, right_alias)
+        p1 = genMember(right_alias, left_alias)
         return [None, p1, 'masking']
     elif joinType == 'left_semijoin':
-        p0 = genMember(right_alias, left_alias)
+        p0 = genMember(left_alias, right_alias)
         return [p0, None, 'masking']
     elif joinType == 'equi_join':
         t0 = genJoinIndex('@eq', left_alias, right_alias)
@@ -1938,14 +1955,16 @@ def loadTables(d, table_name, table_alias):
         typ = strType(v['iu'][1])
         col = v['name']
         if isOkAny2Enum(table_name, col):
-            typ = 'enum' # convert to symbol
+            typ = 'enum<i32>' # convert to symbol (default: i32)
         elif isOkStr2Sym(table_name, col, typ):
             typ = 'sym' # convert from char to symbol
         vid = genColumnValue(table_alias, '`'+col+':sym', typ)
         if nam != col:
             mapping_key[nam] = col
         # vid = genLoadTableWithCols(nam, typ, table_alias)
-        cols.append(nam); alias.append(vid); types.append(typ)
+        cols.append(nam)
+        alias.append(vid)
+        types.append(typ)
     return cols,alias,types
 
 """
@@ -2039,7 +2058,7 @@ def stringValue(typ, value, withType=True):
     def date2date(d):
         global standard_date
         current_date = standard_date + timedelta(int(d) - 2451545)
-        return '%d.%02d.%02d'%(current_date.year,current_date.month,current_date.day)
+        return '%d-%02d-%02d'%(current_date.year,current_date.month,current_date.day)
     t = strType(typ)
     if t == 'sym' and isOpSubstring:
         t = 'str' #chf
@@ -2049,7 +2068,7 @@ def stringValue(typ, value, withType=True):
         z = "'%c'" % value
     elif t == 'sym':
         z = '`' + strValue if isSimpleSymbol(strValue) else '`"' + strValue + '"'
-    elif t == 'd':
+    elif t == 'date':
         z = date2date(value)
     elif t == 'f64': # Example: "type": [ "Numeric", 12, 2 ], "value": 2400 }
         digit = int(typ[2])
@@ -2060,9 +2079,14 @@ def stringValue(typ, value, withType=True):
 
 def actionCompress(vid, cols, env):
     alias = []
+    print '+'*50
+    print cols
+    print vid
     for c in cols:
         a = genCompress(vid, getEnumValue(c, env))
+        print 'c = %s, a = %s' % (c,a)
         alias.append(a)
+    print '|'*50
     return alias
 
 
@@ -2237,9 +2261,12 @@ def setProperty(d, env):
     return env
 
 def getEnumValue(x, env):
+    if x == 't62':
+        raw_input('t62')
     if not env:  # empty dict
         return x
-    if getAliasType(x,env) == 'enum':
+    # print 'x = %s, typ = %s' % (x, getAliasType(x,env))
+    if getAliasType(x,env).startswith('enum'):  # type: enum<i32>
         ind = getEnvAlias(env).index(x)
         getEnvType(env)[ind] = '!'  # set type unknown
         getEnvAlias(env)[ind] = z = genFetch(x)

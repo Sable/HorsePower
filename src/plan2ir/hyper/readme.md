@@ -1,11 +1,13 @@
 # A Plan-to-HorseIR Translator for HyPer's Plans
 
+
 ## Structure
 
 Python scripts (i.e. `*.py`) consist of a plan-to-HorseIR translator which
 reads a plan and generates a valid HorseIR program.
 The plan is stored in a JSON object obtained from HyPer's online interface
 (http://hyper-db.de/interface.html#).
+
 
 ### Core Folders
 
@@ -34,6 +36,7 @@ post-process
 
     - analyze and optimize generated HorseIR code
     - "./run.sh profile horseir"
+
 
 ### Auxiliary Folders
 

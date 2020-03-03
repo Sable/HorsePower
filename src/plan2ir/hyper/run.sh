@@ -11,9 +11,11 @@ usage(){
         "  6) $0 see pass                    ## see if TPC-H queries pass" \
         "  7) $0 see size                    ## see the length info of files in gen/" \
         "  8) $0 cloc                        ## report the code size" \
+        "  9) $0 exec <id>                   ## run interpter with SF1 on a TPC-H query" \
         "Example:" \
-        "  *) $0 tpch 6                       ## query 6" \
-        "  *) format=latex $0 profile horseir ## output in the latex format"
+        "  *) $0 tpch 6                        ## query 6" \
+        "  *) format=latex $0 profile horseir  ## output in the latex format" \
+        "  *) testfolder=latest $0 exec 4      ## output-hir/gen-latest"
     exit 1
 }
 
@@ -27,6 +29,8 @@ gentemp="gen"
 RED='\033[0;31m'
 GN='\033[0;32m'
 NO='\033[0m'
+
+exe="${HORSE_BASE}/src/horseir/v3/build/horse"
 
 function gen_tpch_plan(){
     src="${inputdata}/opt-order"
@@ -43,6 +47,8 @@ function gen_aida_plan(){
 }
 
 function gen_tpch_plan_batch(){
+    dest=${outputdata}/${gentemp}
+    mkdir -p ${dest}
     if [ $1 = "all" ]; then
         ids=`(seq 1 22)`
     else
@@ -53,7 +59,7 @@ function gen_tpch_plan_batch(){
     for id in ${ids[@]}
     do
         echo "processing query $id"
-        gen_tpch_plan $id > ${outputdata}/${gentemp}/q${id}.hir 2> /dev/null
+        gen_tpch_plan $id > ${dest}/q${id}.hir 2> /dev/null
         if test ${PIPESTATUS[0]} -eq 0 ; then
             echo -e "query $id: ${GN}ok${NO}"
         else
@@ -65,14 +71,12 @@ function gen_tpch_plan_batch(){
 function see_diff(){
     for id in {1..22}
     do
-        diff ${outputdata}/gen-v1/q$id.hir ${outputdata}/${genfolder}/q$id.hir
+        diff ${outputdata}/gen-latest/q$id.hir ${outputdata}/${genfolder}/q$id.hir
     done
 }
 
 function see_pass(){
-    # case 1: Incompelte tests
-    #ids=(2 5 7 8 9 11 15 17 20 21 22)
-    #ids=(1 6 4 14 12 13 16 17 19 22)
+    ## case 1: Incompelte tests
     #ids=(1 4 6 12 14 16 19 22)
     #for id in ${ids[@]}
 
@@ -99,6 +103,16 @@ function see_size(){
     echo "Current total lines of code: $total"
 }
 
+## Usage:
+##                   ./run.sh exec 4   # gen
+## testfolder=latest ./run.sh exec 4   # gen-latest
+if [ -z ${testfolder} ]; then
+    testfolder=./output-hir/gen
+else
+    testfolder=./output-hir/gen-latest
+fi
+
+
 if [ "$#" -eq 1 ]; then
     cmd=$1
     if [ $cmd = "cloc" ]; then
@@ -118,6 +132,9 @@ elif [ "$#" -eq 2 ]; then
         see_pass
     elif [ $cmd = "see" ] && [ $2 = "size" ]; then
         see_size
+    elif [ $1 = "exec" ]; then
+        export OMP_NUM_THREADS=1
+        (set -x && ${exe} -t -f ${testfolder}/q$2.hir --tpch=$2)
     else
         usage
     fi

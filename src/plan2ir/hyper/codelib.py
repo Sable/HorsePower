@@ -90,11 +90,11 @@ def stringList(x, sep=','):
 def strType(t):
     if len(t) > 0:
         return {
-            'Integer': 'i64' ,
+            'Integer': 'i32' ,
             'BigInt' : 'i64' ,
             'Numeric': 'f64' ,
             'Char1'  : 'char',
-            'Date'   : 'd'   ,
+            'Date'   : 'date',
             'Char'   : 'sym' , # str  -> sym
             'Varchar': 'sym'   # char -> sym
         }.get(t[0], ('<Invalid type %s>' % t[0]))
@@ -129,7 +129,7 @@ def printEnv(env):
 
 def getAliasType(n, env):
     if not n in getEnvAlias(env):
-        # TODO: may improve later
+        todo('alias %s not in %s' % (n, getEnvAlias(env)))
         return n
     ind = getEnvAlias(env).index(n)
     if ind < 0:
@@ -254,7 +254,8 @@ def wrong(msg):
     errorMsg(msg, 'Wrong')
 
 def todo(msg):
-    debug('[TODO]: %s' % msg)
+    debug('[TODO] %s' % msg)
+    # errorMsg(msg, 'TODO')
 
 def stop(msg=''):
     if msg:
