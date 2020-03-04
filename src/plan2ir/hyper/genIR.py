@@ -32,6 +32,7 @@ vec_side_or   = {}
 Entry/Main
 """
 def main():
+    global horseDebug  # defined in codegen.py
     if len(sys.argv) != 2:
         print "Usage: python genIR.py opt/<file>"
         sys.exit(1)
@@ -39,13 +40,11 @@ def main():
     plan = json.loads(readLines(name, ''))
     initRelations()
     scanMain(plan, {})
-    # debug= True
-    debug= False
-    if debug:
+    if horseDebug:
         # printVarNum()
         # selected_columns = traverseUse()
         # print selected_columns
-        # printAllCode([], debug=True)
+        printAllCode([], isDebug=True)
         pass
     else:
         selected_columns = traverseUse()
@@ -506,10 +505,10 @@ def scanTablescan(d, env):
         else:  # q2, earlyprobe -> tablescan
             mask = residuals  # q13
     ## test q3
-    newEnv = encodeEnv(table_name, columns, alias, types, mask, alias)
+    newEnv = encodeEnv(table_name, columns, alias, types, mask, copy.copy(alias))
     if mask is not None:
         newAlias = actionCompress(mask, alias, newEnv)
-        newEnv['alias'] = newAlias
+        setEnvAlias(newEnv, newAlias)
     return newEnv
     # print '-'*50
     # if not env:
@@ -1457,7 +1456,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
     k_mask  = getEnvMask(k_env)
     f_mask  = getEnvMask(f_env)
     if joinType == 'left_semijoin':
-        t0 = genValues   (f_alias)
+        t0 = genValues   (f_alias, 'joinWithEnum:left_semijoin')
         t1 = genKeys     (f_alias)
         if k_mask and f_mask:    
             t2 = genCompress (f_mask, t0)
@@ -1481,14 +1480,14 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
         return [p0, None, 'masking']
     elif joinType == 'right_semijoin':
         if k_mask and f_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:right_semijoin 1')
             t1 = genCompress (f_mask, t0)
             t2 = genIndex    (k_mask, t1)
             t3 = genWhere    (f_mask)
             p1 = genCompress (t2, t3)
             kind = 'indexing'
         elif k_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:right_semijoin 2')
             p1 = genIndex    (k_mask, t0)
             kind = 'masking'
         elif f_mask:
@@ -1502,23 +1501,23 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
         # print k_alias,f_alias
         # raw_input()
         if k_mask and f_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:equal_semijoin 1')
             t1 = genCompress (f_mask, t0)
             t2 = genIndex    (k_mask, t1)
             p0 = genCompress (t2, t1)
             t3 = genWhere    (f_mask)
             p1 = genCompress (t2, t3)
         elif k_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:equal_semijoin 2')
             t1 = genIndex    (k_mask, t0)
             p0 = genCompress (t1, t0)
             p1 = genWhere    (t1)
         elif f_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:equal_semijoin 3')
             p0 = genCompress (f_mask, t0)
             p1 = genWhere    (f_mask)
         else: # no mask
-            p0 = genValues   (f_alias)
+            p0 = genValues   (f_alias, 'joinWithEnum:equal_semijoin 4')
             p1 = None
             # pending('join without masks found. 3')  #9
         return [p0, p1, 'indexing']
@@ -1526,7 +1525,7 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
         if k_mask and f_mask:
             pending('[joinWithEnum]: k_mask and f_mask')
         elif k_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:left_antijoin')
             p0 = genIndexA   (k_mask, t0, '0:bool')
         elif f_mask:
             pending('[joinWithEnum]: f_mask')
@@ -1537,11 +1536,11 @@ def joinWithEnum(joinType, k_alias, k_env, f_alias, f_env):
         if k_mask:
             pending('adding k_mask for %s' % joinType)
         elif f_mask:
-            t0 = genValues   (f_alias)
+            t0 = genValues   (f_alias, 'joinWithEnum:groupjoin 1')
             t1 = genCompress (f_mask, t0)
             t2 = genGroup    (t1)
             t3 = genKeys     (t2)
-            t4 = genValues   (t2)
+            t4 = genValues   (t2, 'joinWithEnum:groupjoin 2')
             return [None, t4, 'indexing']
         else:
             pending('adding neither k_mask nor f_mask for %s' % joinType)
@@ -2079,16 +2078,10 @@ def stringValue(typ, value, withType=True):
 
 def actionCompress(vid, cols, env):
     alias = []
-    print '+'*50
-    print cols
-    print vid
     for c in cols:
         a = genCompress(vid, getEnumValue(c, env))
-        print 'c = %s, a = %s' % (c,a)
         alias.append(a)
-    print '|'*50
     return alias
-
 
 def encodeEnv(table_name, cols_names, cols_alias, cols_types, mask='', mask_alias=[], card=-1):
     return {
@@ -2261,8 +2254,6 @@ def setProperty(d, env):
     return env
 
 def getEnumValue(x, env):
-    if x == 't62':
-        raw_input('t62')
     if not env:  # empty dict
         return x
     # print 'x = %s, typ = %s' % (x, getAliasType(x,env))

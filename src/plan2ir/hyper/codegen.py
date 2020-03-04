@@ -3,13 +3,16 @@ Global variables
 """
 from codelib import *
 
+"""
+Mode: debugging (True) / non-debugging (False)
+"""
+# horseDebug = True
+horseDebug = False
 code_block = []
-
-line_no = 0
-var_num = 0
-
-chain_def = {}
-chain_use = {}
+line_no    = 0
+var_num    = 0
+chain_def  = {}
+chain_use  = {}
 
 mapping_enum  = {} # chf
 
@@ -50,12 +53,14 @@ def genPrint(s):
     # print s
     code_block.append(s)
 
-def genAssignment(expr,cast=''):
+def genAssignment(expr,cast='',comment=''):
+    global horseDebug
     targ = genNamebyNum()
+    msg  = (' // %s' % comment) if horseDebug and comment else ''
     if cast:
-        genPrint('%s:%s = check_cast(%s, %s);' % (targ,cast,expr,cast))
+        genPrint('%s:%s = check_cast(%s, %s);%s' % (targ, cast, expr, cast, msg))
     else:
-        genPrint('%s:? = %s;' % (targ, expr))
+        genPrint('%s:? = %s;%s' % (targ, expr, msg))
     return targ
 
 def genNiladic(description):
@@ -63,8 +68,8 @@ def genNiladic(description):
     insertUse('', targ)
     return targ
 
-def genMonadic(description, value):
-    targ = genAssignment('@%s(%s)'%(description,value))
+def genMonadic(description, value, comment=''):
+    targ = genAssignment('@%s(%s)'%(description,value),comment=comment)
     insertUse(value, targ)
     return targ
 
@@ -129,8 +134,8 @@ def genCheckCast(expr, typ):
 def genLoadTable(x):
     return genMonadic('load_table', '`'+x+':sym')
 
-def genValues(x):
-    return genMonadic('values', x)
+def genValues(x,c=''):
+    return genMonadic('values', x, c)
 
 def genKeys(x):
     return genMonadic('keys', x)

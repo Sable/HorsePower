@@ -109,12 +109,16 @@ def getEnvMask (env): return env['mask']
 def getEnvMaskA(env): return env['mask_a']
 def getEnvCard (env): return env['card']
 
+def setEnvAlias(env, x): env['cols_a']=x
+
 def isEnv2(env): return isinstance(env, list)
 def isDict(x): return isinstance(x, dict)
 def isList(x): return isinstance(x, list)
 
 
 def printEnv(env):
+    if not env:
+        errorMsg('env is NULL')
     print 'Environment node: {name: "%s", mask: "%s", card: "%d"}' % (getEnvTable(env), getEnvMask(env), getEnvCard(env))
     alias = env['cols_a']
     names = env['cols_n']
@@ -129,7 +133,7 @@ def printEnv(env):
 
 def getAliasType(n, env):
     if not n in getEnvAlias(env):
-        todo('alias %s not in %s' % (n, getEnvAlias(env)))
+        # todo('alias %s not in %s' % (n, getEnvAlias(env)))
         return n
     ind = getEnvAlias(env).index(n)
     if ind < 0:
