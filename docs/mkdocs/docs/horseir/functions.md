@@ -175,12 +175,12 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 4  | <script>hgFunc('geq(x,y)             ','x >= y        ');</script>   | (CP;CP)             | B                             | [link](builtin/geq.md)       |&#10004;| Y        |
 | 5  | <script>hgFunc('eq(x,y)              ','x == y        ');</script>   | (CP;CP)             | B                             | [link](builtin/eq.md)        |&#10004;| Y        |
 | 6  | <script>hgFunc('neq(x,y)             ','x != y        ');</script>   | (CP;CP)             | B                             | [link](builtin/neq.md)       |&#10004;| Y        |
-| 7  | <script>hgFunc('plus(x,y)            ','Addition      ');</script>   | Various             | Various                       | [link](builtin/plus.md)      |P       | Y        |
-| 8  | <script>hgFunc('minus(x,y)           ','Subtraction   ');</script>   | Various             | Various                       | [link](builtin/minus.md)     |P       | Y        |
-| 9  | <script>hgFunc('mul(x,y)             ','Multiplication');</script>   | (Real;Real)         | Various                       | [link](builtin/mul.md)       |P       | Y        |
-| 10 | <script>hgFunc('div(x,y)             ','Division      ');</script>   | (Real;Real)         | Various                       | [link](builtin/div.md)       |P       | Y        |
-| 11 | <script>hgFunc('power(x,y)           ','Power x of y  ');</script>   | (Real;Real)         | Various                       | [link](builtin/power.md#power)|P       | Y        |
-| 12 | <script>hgFunc('logb(x,y)            ','log\_x(y)     ');</script>   | (Real;Real)         | Various                       | [link](builtin/log.md#logb)  |P       | Y        |
+| 7  | <script>hgFunc('plus(x,y)            ','Addition      ');</script>   | Various             | Various                       | [link](builtin/plus.md)      |&#10004;| Y        |
+| 8  | <script>hgFunc('minus(x,y)           ','Subtraction   ');</script>   | Various             | Various                       | [link](builtin/minus.md)     |&#10004;| Y        |
+| 9  | <script>hgFunc('mul(x,y)             ','Multiplication');</script>   | (Real;Real)         | Various                       | [link](builtin/mul.md)       |&#10004;| Y        |
+| 10 | <script>hgFunc('div(x,y)             ','Division      ');</script>   | (Real;Real)         | Various                       | [link](builtin/div.md)       |&#10004;| Y        |
+| 11 | <script>hgFunc('power(x,y)           ','Power x of y  ');</script>   | (Real;Real)         | Various                       | [link](builtin/power.md#power)|&#10004;| Y        |
+| 12 | <script>hgFunc('logb(x,y)            ','log\_x(y)     ');</script>   | (Real;Real)         | Various                       | [link](builtin/log.md#logb)  |&#10004;| Y        |
 | 13 | <script>hgFunc('mod(x,y)             ','x mod y       ');</script>   | (Real;Real)         | Various                       | [link](builtin/mod.md)       |&#10004;| Y        |
 | 14 | <script>hgFunc('and(x,y)             ','And           ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#and) |&#10004;| Y        |
 | 15 | <script>hgFunc('or(x,y)              ','Or            ');</script>   | (B;B)               | B                             | [link](builtin/logic.md#or)  |&#10004;| Y        |
@@ -206,8 +206,8 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 7  | <script>hgFunc('seed(x)    ','Random seed            ');</script>     | Int                         | L                    | [link](builtin/random.md#seed)|&#10004;| N        |
 | 8  | <script>hgFunc('flip(x)    ','Convert a dict to a table and vice versa');</script>   | Dict, Table  | Table or Dict        | [link](builtin/flip.md)       |&#10004;| N        |
 | 9  | <script>hgFunc('reverse(x) ','Reverse                ');</script>     | Basic                       | Same as argument     | [link](builtin/reverse.md)    |&#10004;| Y        |
-| 10 | <script>hgFunc('where(x)   ','Find all trues         ');</script>     | B                           | L                    | [link](builtin/where.md)      |&#10004;| P        |
-| 11 | <script>hgFunc('group(x)   ','Group items            ');</script>     | Basic                       | List<i64>            | [link](builtin/group.md)      |&#10004;| P        |
+| 10 | <script>hgFunc('where(x)   ','Find all trues         ');</script>     | B                           | L                    | [link](builtin/where.md)      |&#10004;| Y        |
+| 11 | <script>hgFunc('group(x)   ','Group items            ');</script>     | Basic                       | List<i64>            | [link](builtin/group.md)      |&#10004;| Y        |
 
 
 ### 3.2 Binary
@@ -215,7 +215,7 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | No.| Function                                                                | Type of Arg(s)\*            | Type of Value            | Details                        | Status | Parallel |
 | :-:| :---------------------------------------------------------------------- | :-------------------------- | :----------------------- | :----------------------------: | :----- | :------: |
 | 1  | <script>hgFunc('append(x,y)    ','Append to a list          ');</script>| Various                     | Various                  | [link](builtin/append.md)      |&#10004;| Y        |
-| 2  | <script>hgFunc('like(x,y)      ','Patten x matches y        ');</script>| (String; String)            | B                        | [link](builtin/like.md)        |P       | ?(CHECKE)|
+| 2  | <script>hgFunc('like(x,y)      ','Patten x matches y        ');</script>| (String; String)            | B                        | [link](builtin/like.md)        |&#10004;| Y        |
 | 3  | <script>hgFunc('compress(x,y)  ','Compress on y based on x  ');</script>| (B;Basic)                   | Same as the 2nd argument | [link](builtin/compress.md)    |&#10004;| ?        |
 | 4  | <script>hgFunc('randk(x,k)     ','rand(x) in k times        ');</script>| (Int;Int)                   | L                        | [link](builtin/random.md#randk)|&#10004;| N        |
 | 5  | <script>hgFunc('index\_of(x,y) ','index of y in x           ');</script>| (Basic;Basic)               | L                        | [link](builtin/indexof.md)     |&#10004;| Y        |
@@ -238,8 +238,8 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 
 | No.| Function                                                                    | Type of Arg(s)\*    | Type of Value        | Details                           | Status | Parallel |
 | :-:| :-------------------------------------------------------------------------- | :------------------ | :------------------- | :-------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;|          |
-| 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Any,...)           | List                 | [link](builtin/list.md#list)      |&#10004;|          |
+| 1  | <script>hgFunc('raze(x)              ','Raze a nested list      ');</script>| List, Basic         | Basic                | [link](builtin/list.md#raze)      |&#10004;| N        |
+| 2  | <script>hgFunc('list(...)            ','Return a list (n-cell)  ');</script>| (Any,...)           | List                 | [link](builtin/list.md#list)      |&#10004;| N        |
 | 3  | <script>hgFunc('tolist(x)            ','Vector to list          ');</script>| Basic               | List                 | [link](builtin/list.md#tolist)    |&#10004;| ?(CHECKE)|
 | 4  | <script>hgFunc('each(fn,x)           ','Each on x with func `fn`');</script>| (Func; List)        | List                 | [link](builtin/list.md#each)      |&#10004;| ?(CHECKE)|
 | 5  | <script>hgFunc('each\_item(fn,x,y)   ','Each on both sides      ');</script>| (Func; List; List)  | List                 | [link](builtin/list.md#each_item) |&#10004;| ?(CHECKE)|
@@ -261,20 +261,20 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 4  | <script>hgFunc('ktable        ','ktable(table1, table2)   ');</script>  | (Table;Table)               | KTable           | [link](builtin/advanced.md#ktable)|&#10004;| N        |
 | 5  | <script>hgFunc('keys          ','Return keys              ');</script>  | Table, KTable, Dict         | List             | [link](builtin/dbhelper.md#keys)  |&#10004;| ?(CHECKE)|
 | 6  | <script>hgFunc('values        ','Return value part        ');</script>  | Various                     | Various          | [link](builtin/dbhelper.md#values)|&#10004;| N        |
-| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table            | [link](builtin/dbhelper.md#meta)  |&#10004;|          |
+| 7  | <script>hgFunc('meta          ','Return meta info         ');</script>  | Various                     | Table            | [link](builtin/dbhelper.md#meta)  |&#10004;| N        |
 | 8  | <script>hgFunc('fetch         ','Fetch values             ');</script>  | Y                           | Various          | [link](builtin/dbhelper.md#fetch) |&#10004;| Y        |
 | 9  | <script>hgFunc('column\_value ','                         ');</script>  | Table, KTable               | Various          | [link](builtin/dbhelper.md#column_value)|&#10004;| N  |
 | 10 | <script>hgFunc('load\_table   ','Load a table             ');</script>  | Symbol                      | Table, KTable    | [link](builtin/dbhelper.md#load_table)  |&#10004;| N  |
 | 11 | <script>hgFunc('datetime\_add(x,y,m) ','Date time add     ');</script>  | (Calendar;Int;Sym)          | Calendar         | [link](builtin/date.md#datetime-add) |&#10004;| Y     |
-| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Date time sub     ');</script>  | (Calendar;Int;Sym)          | Calendar         | [link](builtin/date.md#datetime-sub) |        |       |
+| 12 | <script>hgFunc('datetime\_sub(x,y,m) ','Date time sub     ');</script>  | (Calendar;Int;Sym)          | Calendar         | [link](builtin/date.md#datetime-sub) |&#10004;| Y     |
 | 13 | <script>hgFunc('join\_index   ','General join index       ');</script>  | (func;Real;Real)            | List             | [link](builtin/join.md#join_index)   |&#10004;| ?     |
 
 ## 5. Misc
 
 | No.| Function                                                                     | Type of Arg(s)\*     | Type of Value        | Details                            | Status | Parallel |
 | :-:| :--------------------------------------------------------------------------- | :------------------- | :------------------- | :--------------------------------: | :----- | :------: |
-| 1  | <script>hgFunc('index(x,y)       ','List indexing (x[y])        ');</script> | Various              | Various              | [link](builtin/indexing.md#index)  | P      | Y        |
-| 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) | P      | N        |
+| 1  | <script>hgFunc('index(x,y)       ','List indexing (x[y])        ');</script> | Various              | Various              | [link](builtin/indexing.md#index)  |&#10004;| Y        |
+| 2  | <script>hgFunc('index\_a(x,y,m)  ','List indexing assignment    ');</script> | (BasicA;Int;BasicB)  | BasicB               | [link](builtin/indexing.md#indexa) |&#10004;| N        |
 | 3  | <script>hgFunc('load\_csv        ','Load a csv file             ');</script> | String               | Table                | link                               |&#10004;| N        |
 | 4  | <script>hgFunc('print            ','Output                      ');</script> | Any                  | L (exit code)        | link                               |&#10004;| N        |
 | 5  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |

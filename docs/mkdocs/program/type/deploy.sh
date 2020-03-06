@@ -2,8 +2,8 @@
 from=genpdf/*.png
 dest=../../docs/horseir/types/
 
-list=(lt eq plus minus mul mod logic append like compress indexof order member vector)
-#list=(eq)
+#list=(lt eq plus minus mul mod logic append like compress indexof order member vector)
+list=(index)
 
 for func in ${list[@]}
 do

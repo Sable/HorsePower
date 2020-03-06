@@ -54,8 +54,8 @@ _      -> domain error
 **Type Rules**
 
 ```no-highlight
-enum   -> Any
-_      -> domain error
+enum<T> -> T
+_       -> domain error
 ```
 
 ### meta
