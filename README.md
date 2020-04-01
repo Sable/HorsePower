@@ -41,32 +41,29 @@ Download the repository
 
 Setup the environment variable `HORSE_BASE`
 
-    cd HorsePower && export HORSE_BASE=$PWD
+    cd HorsePower && source ./setup_env.sh
 
 Installation with the following command line  (About 13 mins)
 
-    (cd libs && sh deploy_linux.sh)
+    (cd ${HORSE_LIB_FOLDER} && sh deploy_linux.sh)
 
 After installation, new folders created as follows.
 
-    - libs/include
-    - libs/lib
-    - libs/pcre2
+    - include
+    - lib
+    - pcre2
 
 Note, it is recommended to use gcc 8.1.0 or higher and additional library
 `uuid-dev` may be required during the installation.
 
 ### Build and Run
 
-There are multiple versions developing under `src/horseir/`.
-For each version, you can find a running script `run.sh` which builds an
-executable and runs it with proper parameters.
-You are recommended to use the latest version as this project is still under
-active development.
+You are recommended to use the latest version as this project is still
+under active development.
 
 To learn how to run, type
 
-    (cd src/horseir/v3 && ./run.sh)      # show usage
+    (cd ${HORSE_SRC_CODE} && ./run.sh)      # show usage
 
 
 ### A Brief Summary
