@@ -62,7 +62,7 @@ static S code_cond;
 static sHashTable *hashgNode;
 static gNodeList *glist;
 
-static fListNode* fList[100];
+static fListNode *fList[100];
 static I fListNum, curNum;
 static I depth;
 static B fuseFlag[100];
@@ -135,7 +135,7 @@ static B isGroupReduction(S funcName){
     DOI(NUM_R, if(sEQ(funcName, ReductionNames[i])) R true) R false;
 }
 
-Node* getStmtCall(Node *stmt){
+Node *getStmtCall(Node *stmt){
     Node *n = nodeStmtExpr(stmt);
     if(instanceOf(n, callK)) R n;
     else if(instanceOf(n, castK)){
@@ -221,7 +221,7 @@ static void insertgNode(gNodeList *glist, gNode *g){
     glist->next  = x;
 }
 
-static fListNode* initfListNode(I fuseId){
+static fListNode *initfListNode(I fuseId){
     fListNode *x = NEW(fListNode);
     x->fuseId = fuseId;
     R x;
@@ -254,7 +254,7 @@ I checkParamDef(Node *p, Chain *chain, I *c){
 }
 
 // TODO: improve the code quality of optimizer/elementwise.c:findFusionUp
-static gNode* findFusionUp(Chain *chain, B isRT){
+static gNode *findFusionUp(Chain *chain, B isRT){
     if(isChainVisited(chain)) R NULL;
     //else setVisited(chain, true);
     Node *n = chainNode(chain);
@@ -1271,7 +1271,7 @@ static void fetchFusionLastNode(gNode *rt){
     }
 }
 
-static Node* findIteratorNode(gNode *rt){
+static Node *findIteratorNode(gNode *rt){
     if(numLast > 0){
         List *vars = nodeStmtVars(tempLastNodes[0]);
         I total = totalList(vars);
@@ -1401,7 +1401,7 @@ static void copyLocalVarsToListNode(fListNode *f){
     DOI(varNum, f->varNames[i]=strdup(varNames[i]))
 }
 
-static fListNode* collectFusibleSection(Node *cur, gNode *g, B isList){
+static fListNode *collectFusibleSection(Node *cur, gNode *g, B isList){
     fListNode *f = initfListNode(phTotal++);
     // load vars
     loadLocalVars(g);

@@ -12,8 +12,10 @@ usage(){
     exit 0
 }
 
+
 setup_intel(){
-    cc_path=/mnt/local/tools/clang6/bin/clang++
+    # cc_path=/mnt/local/tools/clang6-18/bin/clang++
+    cc_path=/usr/bin/clang++-6.0
     extra_cmd="-DHORSE_CLANG=${cc_path}"
 }
 
@@ -22,17 +24,22 @@ setup_tigger(){
     cc_omp_header=/usr/lib/gcc/x86_64-linux-gnu/8/include
     cc_omp_flag="-fopenmp=libiomp5"
     extra_cmd="-DHORSE_CLANG=${cc_path} -DHORSE_OMP_HEADER=${cc_omp_header} -DHORSE_OMP_FLAG=${cc_omp_flag}"
-    echo "extra_cmd = ${extra_cmd}"
 }
 
+
 prepare_lib(){
-    mkdir -p build-lib && cd build-lib
-    src_files="../backend/*.cc ../util/*.cc ../global.cc ../frontend/pretty.cc"
+    cc_path=g++-8
+    cur_path=$PWD
+    tmp_path=$PWD/tmp/build-lib
+    mkdir -p ${tmp_path} && cd ${tmp_path}
+    src_files="${cur_path}/backend/*.cc ${cur_path}/util/*.cc ${cur_path}/global.cc ${cur_path}/frontend/pretty.cc"
     src_include_dirs="${HORSE_BASE}/libs/include/"
     src_include_libs="${HORSE_BASE}/libs/lib/libpcre2-8.a"
     cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a
-    (set -x && g++-8 ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ..)
+    lib_path="${HORSE_BASE}/libs/lib"
+    (set -x && ${cc_path} ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ${lib_path})
+    echo "Library file generated: ${lib_path}/${lib_name}"
 }
 
 
@@ -50,9 +57,9 @@ fi
 if [ "$#" -eq 1 ]; then
     mode=$1
     if [ $mode = "debug" ]; then
-        (mkdir -p build && cd build && cmake .. ${extra_cmd} -DHORSE_MODE="-g" && make -j16)
+        (mkdir -p build && cd build && set -x && cmake .. ${extra_cmd} -DHORSE_MODE="-g" && make -j16)
     elif [ $mode = "release" ]; then
-        (mkdir -p build && cd build && cmake .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16)
+        (mkdir -p build && cd build && set -x && cmake .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16)
     elif [ $mode = "clean" ]; then
         (set -x && rm -rf build)
     elif [ $mode = "lib" ]; then

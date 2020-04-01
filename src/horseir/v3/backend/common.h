@@ -116,6 +116,7 @@ extern G  H_heap;
 extern E  H_EPSILON;
 extern L  H_CORE;
 extern C  LINE_SEP;
+extern B  LINE_HEADER;
 extern TC H_TARGET;
 
 #ifdef __cplusplus

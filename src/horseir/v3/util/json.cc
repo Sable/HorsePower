@@ -15,7 +15,7 @@ static void cleanJSON(JSON *x){
 
 JSON *newJSON0(const char *key, const char *val){
     JSON *x = NEW(JSON);
-    x->kind  = 0;
+    x->kind  = JSON_VALUE;
     x->size  = 1;
     x->key   = strdup(key);
     x->field = strdup(val);
@@ -24,7 +24,7 @@ JSON *newJSON0(const char *key, const char *val){
 
 JSON *newJSON1(const char *key, int size, const char **val){
     JSON *x = NEW(JSON);
-    x->kind  = 1;
+    x->kind  = JSON_VALUES;
     x->size  = size;
     x->key   = strdup(key);
     x->field_list = NEW(char*);
@@ -34,7 +34,7 @@ JSON *newJSON1(const char *key, int size, const char **val){
 
 JSON *newJSON2(const char *key, JSON *val){
     JSON *x = NEW(JSON);
-    x->kind = 2;
+    x->kind = JSON_JSON;
     x->size = 1;
     x->key  = strdup(key);
     x->child = val;
@@ -43,7 +43,7 @@ JSON *newJSON2(const char *key, JSON *val){
 
 JSON *newJSON3(const char *key, int size, JSON **val){
     JSON *x = NEW(JSON);
-    x->kind = 3;
+    x->kind = JSON_JSONS;
     x->size = size;
     x->key  = strdup(key);
     x->child_list = NEW2(JSON, size);
@@ -61,19 +61,33 @@ static void printIndent(int dep){
     DOI(dep, P("    "))
 }
 
+static const char *obtainJsonStr(JsonKind x){
+    switch(x){
+        case JSON_VALUE : R "Simple value";
+        case JSON_VALUES: R "Multiple values";
+        case JSON_JSON  : R "Simple JSON value";
+        case JSON_JSONS : R "Multiple JSON values";
+        default: EP("Unknown JSON kind: %d", x);
+    }
+}
+
 static void printJSONPairCore(JSON *x, int dep){
     printIndent(dep);
     P("\"%s\":",x->key);
     switch(x->kind){
-        case 0: P("\"%s\"", x->field); break;
-        case 1: P("[");
+        case JSON_VALUE :
+                P("\"%s\"", x->field); break;
+        case JSON_VALUES:
+                P("[");
                 DOI(x->size, {if(i>0)P(",");P("\"%s\"",x->field_list[i]);})
                 P("]"); break;
-        case 2: printJSONCore(x->child, dep); break;
-        case 3: P("[");
+        case JSON_JSON :
+                printJSONCore(x->child, dep); break;
+        case JSON_JSONS:
+                P("[");
                 DOI(x->size, {if(i>0)P(",");printJSONCore(x->child_list[i], dep);})
                 P("]");  break;
-        default: TODO("Add impl. %d\n", x->kind);
+        default: TODO("Add impl. for %s", obtainJsonStr(x->kind));
     }
 }
 

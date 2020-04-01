@@ -42,7 +42,7 @@ List* getNodeParams(Node *n){
     return NULL;
 }
 
-Node* getNodeFunc(Node *n){
+Node *getNodeFunc(Node *n){
     if(instanceOf(n, stmtK)){
         Node *rhs = n->val.assignStmt.expr;
         if(instanceOf(rhs, callK)){
@@ -56,7 +56,7 @@ Node* getNodeFunc(Node *n){
     return NULL;
 }
 
-Node* getNodeFirstParam(Node *n){
+Node *getNodeFirstParam(Node *n){
     List *params = nodeList(n->val.call.param);
     while(params && params->next){
         params = params->next;
@@ -64,14 +64,14 @@ Node* getNodeFirstParam(Node *n){
     R params?params->val:0;
 }
 
-Node* getSingleFunc(Node *funcs){
+Node *getSingleFunc(Node *funcs){
     if(totalList(nodeList(funcs)) == 1){
         return nodeList(funcs)->val;
     }
     else R 0;
 }
 
-Node* getEachFuncNode(Node *n){
+Node *getEachFuncNode(Node *n){
     Node *call = getStmtCall(n);
     return getSingleFunc(getNodeFirstParam(call));
 }

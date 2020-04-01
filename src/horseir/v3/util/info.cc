@@ -38,8 +38,10 @@ const char *getExtraKind(GenKind x){
 }
 
 HorseType getType(Node *x){
-    if(!x) EP("Empty type node found");
-    if(x->val.type.isWild) R wildT;
+    if(!x)
+        EP("Empty type node found");
+    if(x->val.type.isWild)
+        R wildT;
     //else if(x->val.type.cell) {
     //    TODO("Cell types not allowed.\n");
     //}

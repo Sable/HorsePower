@@ -39,34 +39,54 @@ Download the repository
 
     git clone git@github.com:Sable/HorsePower.git
 
-Setup the environment variable `HORSE_BASE`
+Setup [environment variables](docs/readme.md)
 
-    cd HorsePower && export HORSE_BASE=$PWD
+    cd HorsePower && source ./setup_env.sh
+
+### Setup Library
 
 Installation with the following command line  (About 13 mins)
 
-    (cd libs && sh deploy_linux.sh)
+    (cd ${HORSE_LIB_FOLDER} && sh deploy_linux.sh)
 
 After installation, new folders created as follows.
 
-    - libs/include
-    - libs/lib
-    - libs/pcre2
+    - include
+    - lib
+    - pcre2
 
 Note, it is recommended to use gcc 8.1.0 or higher and additional library
 `uuid-dev` may be required during the installation.
 
+### Setup Data
+
+Default data path for TPC-H
+
+    ${HORSE_BASE}/data/tpch
+
+In order to generate different scale factor datasets, you should run
+
+    cd data/tpch
+    ./run.sh deploy       ## Read instructions and update Makefile
+    ./run.sh gendb 1      ## Generate database and save to data/tpch/db1
+
+With a specific scale factor, for example, 1, its path is
+
+    ${HORSE_BASE}/data/tpch/db1
+
+It contains a `tbl` file for each table
+
+    ${HORSE_BASE}/data/tpch/db1/*.tbl
+
+
 ### Build and Run
 
-There are multiple versions developing under `src/horseir/`.
-For each version, you can find a running script `run.sh` which builds an
-executable and runs it with proper parameters.
-You are recommended to use the latest version as this project is still under
-active development.
+You are recommended to use the latest version as this project is still
+under active development.
 
 To learn how to run, type
 
-    (cd src/horseir/v3 && ./run.sh)      # show usage
+    (cd ${HORSE_SRC_CODE} && ./run.sh)      # show usage
 
 
 ### A Brief Summary

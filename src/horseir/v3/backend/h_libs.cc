@@ -15,7 +15,7 @@ const I HASH_M = (I)((1LL << 32)-5);
 
 L *LARGE_BUFF; // used in merge sort
 
-static void writeToFileFromPtr(L *x, L n, const char* fn){
+static void writeToFileFromPtr(L *x, L n, const char *fn){
     FILE *fp = fopen(fn, "w");
     FP(fp, "%lld\n",n);
     DOI(n, FP(fp,"%lld\n",x[i]))
@@ -23,7 +23,7 @@ static void writeToFileFromPtr(L *x, L n, const char* fn){
     WP("file %s is saved\n", fn);
 }
 
-static void writeToFileForDebug(V x, const char* file_name){
+static void writeToFileForDebug(V x, const char *file_name){
     if(xp==H_L){
         writeToFileFromPtr(sL(x),xn,file_name);
     }
@@ -1220,7 +1220,7 @@ void lib_radixsort_int(L *rtn, V val, L len, B *isUp, B isRtnIndex){
     DOP(len, {pos[i].x=vI(val,i); pos[i].i=i;})
 tic();
     lib_radixsort_core_int(pos, len);
-toc(); getchar();
+toc(); //getchar();
     //WP("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, WP("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)

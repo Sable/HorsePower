@@ -39,7 +39,6 @@ static VList *paramList, *rtnList;
 /* ---- above declarations ---- */
 // string arrays in compiler.c
 
-/* pfnRand, pfnSeed */
 MonadicFunc monFunc[MonFuncSize] = {
     pfnAbs, pfnNeg, pfnCeil, pfnFloor, pfnRound, pfnConj, pfnRecip, pfnSignum,
     pfnPi  , pfnNot , pfnLog, pfnLog2, pfnLog10, pfnExp, pfnTrigCos,
@@ -52,7 +51,6 @@ MonadicFunc monFunc[MonFuncSize] = {
     pfnToList, pfnKeys, pfnValues, pfnMeta, pfnLoadTable, pfnFetch, pfnPrint
 };
 
-/* pfnRandk, pfnDrop, pfnTake, pfnDatetimeAdd, pfnDatetimeSub */
 DyadicFunc  dyaFunc[DyaFuncSize] = {
     pfnLt, pfnGt, pfnLeq, pfnGeq, pfnEq, pfnNeq, pfnPlus, pfnMinus, pfnMul,
     pfnDiv, pfnPower, pfnLogBase, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor,
@@ -89,6 +87,7 @@ static V executeIndexA(V *p){
     else {WP("[IndexA]"); printErrMsg(status); return 0;}
 }
 
+/* 3 params: pfnDatetimeAdd, pfnDatetimeSub */
 static V executeTriple(EachTriple f, V *p){
     if(H_DEBUG) WP("executeTriple\n");
     V z = NEW(V0);

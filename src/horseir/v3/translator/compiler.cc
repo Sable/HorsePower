@@ -327,7 +327,7 @@ static SymbolKind scanFuncName(Node *n){
     return sk;
 }
 
-static Node* getFirstNodeFromList(List *list){
+static Node *getFirstNodeFromList(List *list){
     if(list){
         while(list->next) list=list->next;
         R list->val;
@@ -625,7 +625,7 @@ static void compileMethod(Node *n){
 static void dispStatsBuff(L cur, L total, const char *name){
     WP("Profile:\n");
     WP(indent4 ">> Used buffer %s %.2lf%% [%lld/%lld]\n", \
-        name, percent(cur,total), cur, total);
+          name, percent(cur,total), cur, total);
     if(cur >= total)
         EP("Code buffer full!!!");
 }

@@ -15,28 +15,9 @@
 
 ### Type Rules
 
-Basic types
+Table with details (See [type alias](../../../horseir/#types))
 
-```no-highlight
-bool   , Int -> bool   
-i8     , Int -> i8     
-i16    , Int -> i16    
-i32    , Int -> i32    
-i64    , Int -> i64    
-f32    , Int -> f32    
-f64    , Int -> f64    
-complex, Int -> complex
-sym    , Int -> sym    
-str    , Int -> str    
-month  , Int -> month  
-date   , Int -> date   
-dt     , Int -> dt     
-minute , Int -> minute 
-second , Int -> second 
-time   , Int -> time   
-_      , _   -> domain error
-```
-
+![index](../types/index.png)
 
 ### Examples
 
@@ -63,12 +44,13 @@ bool   , Int , bool
 i8     , Int , (bool|i8)
 i16    , Int , (bool|i8|i16)
 i32    , Int , (bool|i8|i16|i32)
-i64    , Int , (bool|i8|i16|i32|64)
-f32    , Int , (bool|i8|i16|i32|64|f32)
-f64    , Int , (bool|i8|i16|i32|64|f32|f64)
-complex, Int , (bool|i8|i16|i32|64|f32|f64|complex)
-sym    , Int , sym    
+i64    , Int , (bool|i8|i16|i32|i64)
+f32    , Int , (bool|i8|i16|i32|i64|f32)
+f64    , Int , (bool|i8|i16|i32|i64|f32|f64)
+complex, Int , (bool|i8|i16|i32|i64|f32|f64|complex)
+char   , Int , char
 str    , Int , str    
+sym    , Int , sym    
 month  , Int , month  
 date   , Int , date   
 dt     , Int , dt     

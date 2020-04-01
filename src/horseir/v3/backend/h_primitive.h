@@ -113,6 +113,7 @@ I pfnExp           (V z, V x);
 I pfnLog           (V z, V x);
 I pfnLog2          (V z, V x);
 I pfnLog10         (V z, V x);
+I pfnSqrt          (V z, V x);
 I pfnLen           (V z, V x);
 I pfnRange         (V z, V x);
 I pfnFact          (V z, V x);

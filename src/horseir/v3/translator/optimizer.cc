@@ -26,6 +26,7 @@ static void optimizerMain(OC opt){
         case OPT_FP1: optPattern(1);    break; // compiledMethodList
         case OPT_FP2: optPattern(2);    break; // compiledMethodList
         case OPT_FA : optAutoFusion();  break; // compiledMethodList
+        case OPT_IL : optInlining();    break; // compiledMethodList
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }
