@@ -20,8 +20,8 @@ module default{
       // lineitem (l1)
       c30:? = check_cast(@column_value(a3, `l_suppkey:sym    ), i64 );
       c31:? = check_cast(@column_value(a3, `l_orderkey:sym   ), enum);
-      c32:? = check_cast(@column_value(a3, `l_receiptdate:sym), d   );
-      c33:? = check_cast(@column_value(a3, `l_commitdate:sym ), d   );
+      c32:? = check_cast(@column_value(a3, `l_receiptdate:sym), date);
+      c33:? = check_cast(@column_value(a3, `l_commitdate:sym ), date);
       // 0. nationkey: n_ and s_
       t0_0:? = @eq(c20, `"SAUDI ARABIA":sym);
       t0_1:? = @values(c01);

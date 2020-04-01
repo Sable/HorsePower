@@ -10,18 +10,18 @@ module default{
       c00:? = check_cast(@column_value(a0, `s_name:sym     ), sym);
       c01:? = check_cast(@column_value(a0, `s_address:sym  ), str);
       c02:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
-      c03:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
+      c03:? = check_cast(@column_value(a0, `s_nationkey:sym), enum<i32>);
       // nation
       c10:? = check_cast(@column_value(a1, `n_name:sym     ), sym);
       c11:? = check_cast(@column_value(a1, `n_nationkey:sym), i64);
       // partsupp
-      c20:? = check_cast(@column_value(a2, `ps_suppkey:sym ), enum);
-      c21:? = check_cast(@column_value(a2, `ps_partkey:sym ), enum);
+      c20:? = check_cast(@column_value(a2, `ps_suppkey:sym ), enum<i32>);
+      c21:? = check_cast(@column_value(a2, `ps_partkey:sym ), enum<i32>);
       c22:? = check_cast(@column_value(a2, `ps_availqty:sym), f64);
       // lineitem
       c30:? = check_cast(@column_value(a3, `l_partkey:sym  ), i64);
       c31:? = check_cast(@column_value(a3, `l_suppkey:sym  ), i64);
-      c32:? = check_cast(@column_value(a3, `l_shipdate:sym ), d  );
+      c32:? = check_cast(@column_value(a3, `l_shipdate:sym ), date);
       c33:? = check_cast(@column_value(a3, `l_quantity:sym ), f64);
       // part
       c40:? = check_cast(@column_value(a4, `p_partkey:sym  ), i64);

@@ -7,18 +7,18 @@ module default{
       a3:? = @load_table(`nation:sym);
       // customer
       c00:? = check_cast(@column_value(a0, `c_custkey:sym  ), i64);
-      c01:? = check_cast(@column_value(a0, `c_nationkey:sym), enum);
+      c01:? = check_cast(@column_value(a0, `c_nationkey:sym), enum<i64>);
       c02:? = check_cast(@column_value(a0, `c_name:sym     ), sym);
       c03:? = check_cast(@column_value(a0, `c_acctbal:sym  ), i64);
       c04:? = check_cast(@column_value(a0, `c_phone:sym    ), str);
       c05:? = check_cast(@column_value(a0, `c_address:sym  ), str);
       c06:? = check_cast(@column_value(a0, `c_comment:sym  ), str);
       // orders
-      c10:? = check_cast(@column_value(a1, `o_custkey:sym  ), enum);
+      c10:? = check_cast(@column_value(a1, `o_custkey:sym  ), enum<i64>);
       c11:? = check_cast(@column_value(a1, `o_orderkey:sym ), i64);
-      c12:? = check_cast(@column_value(a1, `o_orderdate:sym), d  );
+      c12:? = check_cast(@column_value(a1, `o_orderdate:sym), date);
       // lineitem
-      c20:? = check_cast(@column_value(a2, `l_orderkey:sym     ), enum);
+      c20:? = check_cast(@column_value(a2, `l_orderkey:sym     ), enum<i64>);
       c21:? = check_cast(@column_value(a2, `l_returnflag:sym   ), char);
       c22:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
       c23:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);

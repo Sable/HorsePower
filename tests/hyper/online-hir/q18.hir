@@ -9,7 +9,7 @@ module default{
       c01:? = check_cast(@column_value(a0, `c_name:sym     ), sym);
       // orders
       c10:? = check_cast(@column_value(a1, `o_orderkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `o_orderdate:sym ), d  );
+      c11:? = check_cast(@column_value(a1, `o_orderdate:sym ), date);
       c12:? = check_cast(@column_value(a1, `o_totalprice:sym), f64);
       c13:? = check_cast(@column_value(a1, `o_custkey:sym   ), enum);
       // lineitem

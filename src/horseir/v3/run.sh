@@ -51,12 +51,12 @@ runInterpreter() {
     cmd=$1; tid=$2; sf=$3; run=$4; th=$5
     #echo $0  # --> ./run.sh
     if [ $cmd = "t" ]; then
-        (set -x && ${exe} -t -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
+        (set -x && ${exe} -t -f ${HORSE_TEST_PASS}/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ${exe} -t -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
+        (set -x && ${exe} -t -f ${HORSE_TEST_FAIL}/t${tid}.hir)
     elif [ $cmd = "q" ]; then
         echo "Running TPC-H Query: q${tid}, sf$sf, run$run, thread$th"
-        (set -x && ${exe} -t -f ${HORSE_BASE}/tests/tpch/q${tid}.hir --tpch=${tid})
+        (set -x && ${exe} -t -f ${HORSE_HYPER_HIR}/q${tid}.hir --tpch=${tid})
     else
         usage
     fi
@@ -65,11 +65,11 @@ runInterpreter() {
 runCompiler() {
     cmd=$1; tid=$2
     if [ $cmd = "t" ]; then
-        (set -x && ${exe} -c cpu -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
+        (set -x && ${exe} -c cpu -f ${HORSE_TEST_PASS}/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ${exe} -c cpu -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
+        (set -x && ${exe} -c cpu -f ${HORSE_TEST_FAIL}/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        (set -x && ${exe} -c cpu -f ${HORSE_BASE}/tests/tpch/q${tid}.hir --tpch=${tid})
+        (set -x && ${exe} -c cpu -f ${HORSE_HYPER_HIR}/q${tid}.hir --tpch=${tid})
     else
         usage
     fi
@@ -78,11 +78,11 @@ runCompiler() {
 runOptimizer() {
     cmd=$1; tid=$2
     if [ $cmd = "t" ]; then
-        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
+        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_TEST_PASS}/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
+        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_TEST_FAIL}/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_BASE}/tests/tpch/q${tid}.hir --tpch=${tid})
+        (set -x && ${exe} -c cpu ${opts} -f ${HORSE_HYPER_HIR}/q${tid}.hir --tpch=${tid})
     else
         usage
     fi
@@ -92,11 +92,11 @@ runOptimizer() {
 runJIT() {
     cmd=$1; tid=$2; opts=""
     if [ $cmd = "t" ]; then
-        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_BASE}/tests/pass/t${tid}.hir)
+        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_TEST_PASS}/t${tid}.hir)
     elif [ $cmd = "f" ]; then
-        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_BASE}/tests/fail/t${tid}.hir)
+        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_TEST_FAIL}/t${tid}.hir)
     elif [ $cmd = "q" ]; then
-        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_BASE}/tests/tpch/q${tid}.hir --tpch=${tid})
+        (set -x && ${exe} -c llvm ${opts} -f ${HORSE_HYPER_HIR}/q${tid}.hir --tpch=${tid})
     else
         usage
     fi
@@ -116,11 +116,11 @@ runStats() {
 runPrinter() {
     item=$1; cmd=$2; tid=$3;
     if [ $cmd = "t" ]; then
-        (set -x && ${exe} -u -f ${HORSE_BASE}/tests/pass/t${tid}.hir --print=${item})
+        (set -x && ${exe} -u -f ${HORSE_TEST_PASS}/t${tid}.hir --print=${item})
     elif [ $cmd = "f" ]; then
-        (set -x && ${exe} -u -f ${HORSE_BASE}/tests/fail/t${tid}.hir --print=${item})
+        (set -x && ${exe} -u -f ${HORSE_TEST_FAIL}/t${tid}.hir --print=${item})
     elif [ $cmd = "q" ]; then
-        (set -x && ${exe} -u -f ${HORSE_BASE}/tests/tpch/q${tid}.hir --tpch=${tid} --print=${item})
+        (set -x && ${exe} -u -f ${HORSE_HYPER_HIR}/q${tid}.hir --tpch=${tid} --print=${item})
     else
         usage
     fi

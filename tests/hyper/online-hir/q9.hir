@@ -12,22 +12,22 @@ module default{
       c01:? = check_cast(@column_value(a0, `p_name:sym   ), sym);
       // supplier
       c10:? = check_cast(@column_value(a1, `s_suppkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), enum);
+      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), enum<i64>);
       // lineitem
       c20:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
       c21:? = check_cast(@column_value(a2, `l_partkey:sym  ), i64);
-      c22:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum);
+      c22:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum<i64>);
       c23:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
       c24:? = check_cast(@column_value(a2, `l_discount:sym ), f64);
       c25:? = check_cast(@column_value(a2, `l_quantity:sym ), i64);
       //c26:? = check_cast(@column_value(a2, `l_partkey`l_suppkey:sym), list<?>);
       // partsupp
-      c30:? = check_cast(@column_value(a3, `ps_suppkey:sym   ), enum);
-      c31:? = check_cast(@column_value(a3, `ps_partkey:sym   ), enum);
+      c30:? = check_cast(@column_value(a3, `ps_suppkey:sym   ), enum<i64>);
+      c31:? = check_cast(@column_value(a3, `ps_partkey:sym   ), enum<i64>);
       c32:? = check_cast(@column_value(a3, `ps_supplycost:sym), f64);
       // orders
       c40:? = check_cast(@column_value(a4, `o_orderkey:sym   ), i64);
-      c41:? = check_cast(@column_value(a4, `o_orderdate:sym  ), d  );
+      c41:? = check_cast(@column_value(a4, `o_orderdate:sym  ), date);
       // nation
       c50:? = check_cast(@column_value(a5, `n_nationkey:sym  ), i64);
       c51:? = check_cast(@column_value(a5, `n_name:sym       ), sym);

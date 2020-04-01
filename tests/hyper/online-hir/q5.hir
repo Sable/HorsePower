@@ -9,23 +9,23 @@ module default{
       a5:? = @load_table(`region:sym);
       // customer
       c00:? = check_cast(@column_value(a0, `c_custkey:sym  ), i64);
-      c01:? = check_cast(@column_value(a0, `c_nationkey:sym), enum);
+      c01:? = check_cast(@column_value(a0, `c_nationkey:sym), enum<i64>);
       // orders
-      c10:? = check_cast(@column_value(a1, `o_custkey:sym  ), enum);
+      c10:? = check_cast(@column_value(a1, `o_custkey:sym  ), enum<i64>);
       c11:? = check_cast(@column_value(a1, `o_orderkey:sym ), i64);
-      c12:? = check_cast(@column_value(a1, `o_orderdate:sym), d  );
+      c12:? = check_cast(@column_value(a1, `o_orderdate:sym), date);
       // lineitem
-      c20:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum);
+      c20:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum<i64>);
       c21:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
       c22:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
       c23:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);
       // supplier
       c30:? = check_cast(@column_value(a3, `s_suppkey:sym  ), i64);
-      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), enum);
+      c31:? = check_cast(@column_value(a3, `s_nationkey:sym), enum<i64>);
       // nation
       c40:? = check_cast(@column_value(a4, `n_name:sym     ), sym);
       c41:? = check_cast(@column_value(a4, `n_nationkey:sym), i64);
-      c42:? = check_cast(@column_value(a4, `n_regionkey:sym), enum);
+      c42:? = check_cast(@column_value(a4, `n_regionkey:sym), enum<i64>);
       // region
       c50:? = check_cast(@column_value(a5, `r_name:sym     ), sym);
       c51:? = check_cast(@column_value(a5, `r_regionkey:sym), i64);
@@ -96,3 +96,4 @@ module default{
       return w2;
   }
 }
+

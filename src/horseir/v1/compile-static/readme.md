@@ -15,6 +15,7 @@ Frequently used commandlines
     ./refresh_lib.sh && ./make.sh 5 exp && ./run.sh 5
     ./make.sh 5 exp && ./run.sh 5
 
+
 ## Profiling
 
 Compile
@@ -136,4 +137,14 @@ Variants (clang/lld,270ms,slow)
 	  /mnt/sableintel/tools/clang/lib/libomp.so \
 	  -o clang-q6
 
+
+## Notes
+
+TPC-H experiment results on sable-tigger
+
+    ${HORSE_BASE}/src/horseir/v1/compile-static/logs/run-tigger
+
+Data listed on a google sheet (Date: Nov. 27, 2019)
+
+    https://docs.google.com/spreadsheets/d/1mGxLGhyJCau90SI2P1tnj1tkIC-Iad5VCBjEz0J6fG8/edit#gid=0
 

@@ -9,19 +9,19 @@ module default{
       a5:? = @load_table(`nation:sym  ); // n2
       // supplier
       c00:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
-      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
+      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), enum<i64>);
       // lineitem
       c10:? = check_cast(@column_value(a1, `l_suppkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `l_orderkey:sym ), enum);
+      c11:? = check_cast(@column_value(a1, `l_orderkey:sym ), enum<i64>);
       c12:? = check_cast(@column_value(a1, `l_extendedprice:sym), f64);
       c13:? = check_cast(@column_value(a1, `l_discount:sym     ), f64);
-      c14:? = check_cast(@column_value(a1, `l_shipdate:sym     ), d);
+      c14:? = check_cast(@column_value(a1, `l_shipdate:sym     ), date);
       // order
       c20:? = check_cast(@column_value(a2, `o_orderkey:sym ), i64);
-      c21:? = check_cast(@column_value(a2, `o_custkey:sym  ), enum);
+      c21:? = check_cast(@column_value(a2, `o_custkey:sym  ), enum<i64>);
       // customer
       c30:? = check_cast(@column_value(a3, `c_custkey:sym ), i64);
-      c31:? = check_cast(@column_value(a3, `c_nationkey:sym), enum);
+      c31:? = check_cast(@column_value(a3, `c_nationkey:sym), enum<i64>);
       // nation/n1
       c40:? = check_cast(@column_value(a4, `n_nationkey:sym), i64);
       c41:? = check_cast(@column_value(a4, `n_name:sym     ), sym);

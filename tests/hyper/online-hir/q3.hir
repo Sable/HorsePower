@@ -8,27 +8,27 @@ module default{
     c00:? = check_cast(@column_value(a0,`c_mktsegment:sym   ), sym );
     c01:? = check_cast(@column_value(a0,`c_custkey:sym      ), i64 );
     // orders
-    c10:? = check_cast(@column_value(a1,`o_orderdate:sym    ), d   );
+    c10:? = check_cast(@column_value(a1,`o_orderdate:sym    ), date);
     c11:? = check_cast(@column_value(a1,`o_shippriority:sym ), i64 );
-    c12:? = check_cast(@column_value(a1,`o_custkey:sym      ), enum); //i64
+    c12:? = check_cast(@column_value(a1,`o_custkey:sym      ), enum<i64>); //i64
     c13:? = check_cast(@column_value(a1,`o_orderkey:sym     ), i64 );
     // lineitem
-    c20:? = check_cast(@column_value(a2,`l_orderkey:sym     ), enum);
+    c20:? = check_cast(@column_value(a2,`l_orderkey:sym     ), enum<i64>);
     c21:? = check_cast(@column_value(a2,`l_extendedprice:sym), f64 );
     c22:? = check_cast(@column_value(a2,`l_discount:sym     ), f64 );
-    c23:? = check_cast(@column_value(a2,`l_shipdate:sym     ), d   );
+    c23:? = check_cast(@column_value(a2,`l_shipdate:sym     ), date);
     // custkey: c_ (key) and o_ (fkey)
-    t0_0:? = @eq(c00, `"BUILDING":sym); // k_mask
-    t0_1:? = @lt(c10, 1995-03-15:date);    // f_mask
+    t0_0:? = @eq(c00, `"BUILDING":sym);   // k_mask
+    t0_1:? = @lt(c10, 1995-03-15:date);   // f_mask
     t0_2:? = @values(c12);
     t0_3:? = @compress(t0_1, t0_2);
     t0_4:? = @index(t0_0, t0_3);
-    t0_5:? = @compress(t0_4, t0_3);  // key
+    t0_5:? = @compress(t0_4, t0_3);       // key
     t0_6:? = @where(t0_1);
-    t0_7:? = @compress(t0_4, t0_6);  // value
-    t0_8:? = @index(c13, t0_7);  // o_orderkey
-    t0_9:? = @index(c10, t0_7);  // o_orderdate
-    t0_10:? = @index(c11, t0_7); // o_shippriority
+    t0_7:? = @compress(t0_4, t0_6);       // value
+    t0_8:? = @index(c13, t0_7);           // o_orderkey
+    t0_9:? = @index(c10, t0_7);           // o_orderdate
+    t0_10:? = @index(c11, t0_7);          // o_shippriority
     // group left
     t1_0:? = @list(t0_8, t0_9, t0_10);
     t1_1:? = @group(t1_0);
@@ -42,7 +42,7 @@ module default{
     // scan right
     t9_0:? = @gt(c23, 1995-03-15:date);
     //t9_1:? = @compress(t9_0, c20);
-    //t9_2:? = @fetch(t9_1); // l_orderkey
+    //t9_2:? = @fetch(t9_1);        // l_orderkey
     t9_1:? = @fetch(c20);
     t9_2:? = @compress(t9_0, t9_1); // l_orderkey
     t9_3:? = @compress(t9_0, c21);  // l_extendedprice
@@ -50,9 +50,9 @@ module default{
     t9_5:? = @group(t9_2);
     t9_6:? = @keys(t9_5);
     t9_7:? = @values(t9_5);
-    t9_8:? = @index(t9_2, t9_6); // l_orderkey
+    t9_8:? = @index(t9_2, t9_6);    // l_orderkey
     t9_9:? = @minus(1:i64, t9_4);
-    t9_10:? = @mul(t9_9, t9_3);  // revenue
+    t9_10:? = @mul(t9_9, t9_3);     // revenue
     // size(t9_7) : 829958
     // size(t9_10): 3241776
     t9_11:? = @each_right(@index, t9_10, t9_7);
@@ -63,11 +63,11 @@ module default{
     t2_1:? = @index(t2_0, 0:i64);
     t2_2:? = @index(t2_0, 1:i64);
     t2_3:? = @index(t9_13, t2_2);
-    t2_4:? = @index(t1_6, t2_1);  // size for each pair (many 1s)
-    t2_5:? = @mul(t2_3, t2_4);    // revenue
-    t2_9:? = @index(t1_4, t2_1);  // o_orderkey
-    t2_10:? = @index(t1_8, t2_1); // o_orderdate
-    t2_11:? = @index(t1_9, t2_1); // o_shippriority
+    t2_4:? = @index(t1_6, t2_1);    // size for each pair (many 1s)
+    t2_5:? = @mul(t2_3, t2_4);      // revenue
+    t2_9:? = @index(t1_4, t2_1);    // o_orderkey
+    t2_10:? = @index(t1_8, t2_1);   // o_orderdate
+    t2_11:? = @index(t1_9, t2_1);   // o_shippriority
     // order by
     t4_0:? = @list(t2_5, t2_10);
     t4_1:? = @order(t4_0, (0, 1):bool);

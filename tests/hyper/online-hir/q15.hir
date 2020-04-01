@@ -3,7 +3,7 @@ module default{
   def main() : table{
       // Create view: revenue0
       a0:? = @load_table(`lineitem:sym);
-      c0:? = check_cast(@column_value(a0, `l_shipdate:sym     ),   d);
+      c0:? = check_cast(@column_value(a0, `l_shipdate:sym     ), date);
       c1:? = check_cast(@column_value(a0, `l_suppkey:sym      ), i64);
       c2:? = check_cast(@column_value(a0, `l_extendedprice:sym), f64);
       c3:? = check_cast(@column_value(a0, `l_discount:sym     ), f64);

@@ -23,7 +23,7 @@ module default{
       c24:? = check_cast(@column_value(a2, `l_discount:sym     ), f64);
       // orders
       c30:? = check_cast(@column_value(a3, `o_orderkey:sym ), i64);
-      c31:? = check_cast(@column_value(a3, `o_orderdate:sym), d  );
+      c31:? = check_cast(@column_value(a3, `o_orderdate:sym), date);
       c32:? = check_cast(@column_value(a3, `o_custkey:sym  ), enum);
       // customer
       c40:? = check_cast(@column_value(a4, `c_custkey:sym  ), i64);

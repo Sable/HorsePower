@@ -1,0 +1,12 @@
+// 40 : function invocation without return
+module default{
+    def foo(){
+        x0:i32 = 1:i32;
+    }
+
+    def main(){
+        @foo();  // no return
+    }
+}
+
+
