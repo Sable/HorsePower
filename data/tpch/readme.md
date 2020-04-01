@@ -12,7 +12,7 @@ Create an alias to a real data folder (e.g. db1 for SF1)
   a different folder.
 
 
-## Data on sable-tiger
+## Data on sable-tigger
 
 Please follow the same configuration on sable-intel, but you should be aware of
 the possible difference of real data folders and create new aliases.

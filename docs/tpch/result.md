@@ -1,6 +1,10 @@
-## Standard Results for Different Scale Factors
+# Experiment Notes
 
-| ID | SF1                    | SF2                      |
+TPC-H benchmarks contain 22 queries with different scale factors.
+
+## Results under scale factors
+
+| ID | SF1                    | SF8                      |
 |:--:|:----------------------:|:------------------------:|
 | 1  | [4x10](sf1/q1.txt)     |                          |
 | 2  | [460x8](sf1/q2.txt)    |                          |
@@ -25,22 +29,17 @@
 | 21 | [411x2](sf1/q21.txt)   |                          |
 | 22 | [7x3](sf1/q22.txt)     |                          |
 
-Notes
 
-- Query output limit
-    + q2: limit 100
-    + q3: limit 10
-    + q10: limit 20
-    + q18: limit 100
-    + q21: limit 100
+Notes: (query output limit)
 
-Execution plans can be found at:
+- q2: limit 100
+- q3: limit 10
+- q10: limit 20
+- q18: limit 100
+- q21: limit 100
 
-```
-HorsePower/src/HorseIR/plan2ir/hyper/fig/
-```
 
-**Table size**
+Table cardinality
 
 | Table    | SF1       | SF10       |
 |:--------:|:---------:|:----------:|
