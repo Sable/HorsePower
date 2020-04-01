@@ -28,16 +28,29 @@ static void deleteSys(){
     free(listTable);
 }
 
+// Note: Not working swap2
 // TODO: maybe swap by pointers?
-void swap2(V z){
+// void swap2(V z){
+//     if(isList(z) && 2==vn(z)){
+//         V0 tt[2];
+//         tt[0] = *vV(z,1);
+//         tt[1] = *vV(z,0);
+//         P("swap solving: input size\n");
+//         printV(vV(z,0)); printV(vV(z,1)); getchar();
+//         memcpy(vg(z), tt, sizeof(V0)*2);
+//         printV(vV(z,0)); printV(vV(z,1)); getchar();
+//     }
+//     else EP("Var z is not a list or vn(z) !=2: %d %d", isList(z), 2==vn(z));
+// }
+
+// Note: working, but extra memory needed
+O swap2(V z){
     if(isList(z) && 2==vn(z)){
-        V0 tt[2];
-        tt[0] = *vV(z,1);
-        tt[1] = *vV(z,0);
-        //P("swap solving: input size\n");
-        //printV(vV(z,0)); printV(vV(z,1)); getchar();
-        memcpy(vg(z), tt, sizeof(V0)*2);
-        //printV(vV(z,0)); printV(vV(z,1)); getchar();
+        V t0=vV(z,0), t1=vV(z,1);
+        initV(z, H_G, 2);
+        V z0=vV(z,0), z1=vV(z,1);
+        *z0 = *t1;
+        *z1 = *t0;
     }
     else EP("Var z is not a list or vn(z) !=2: %d %d", isList(z), 2==vn(z));
 }
@@ -329,7 +342,6 @@ I checkLength(V x){
     DOI(vn(x), if(vn(vV(x,i))!=n0)R E_LENGTH)
     R 0;
 }
-
 
 /* error code -2 */
 static L decideType(L x, L y){

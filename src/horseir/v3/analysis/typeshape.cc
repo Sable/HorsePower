@@ -1,9 +1,9 @@
 #include "../global.h"
 
-typedef InfoNode* (*NilFunc)();
-typedef InfoNode* (*MonFunc)(InfoNode*);
-typedef InfoNode* (*DyaFunc)(InfoNode*, InfoNode*);
-typedef InfoNode* (*AllFunc)(InfoNodeList*);
+typedef InfoNode *(*NilFunc)();
+typedef InfoNode *(*MonFunc)(InfoNode*);
+typedef InfoNode *(*DyaFunc)(InfoNode*, InfoNode*);
+typedef InfoNode *(*AllFunc)(InfoNodeList*);
 // InfoNodeList has a leading dummy node
 #define isSingleType(n) (!(n)->next && !(n)->subInfo)
 
@@ -196,7 +196,7 @@ static InfoNode *getInfoFunc(Node *n){
     return in;
 }
 
-InfoNode* getInfoFromNode(Node *n){
+InfoNode *getInfoFromNode(Node *n){
     if(instanceOf(n, typeK)){
         return n->val.type.in;
     }
@@ -223,7 +223,7 @@ InfoNode* getInfoFromNode(Node *n){
     return NULL;
 }
 
-static void copyInfoNode(InfoNode *x, InfoNode* y){
+static void copyInfoNode(InfoNode *x, InfoNode *y){
     if(x && y){
         // ?? free old x->shape/subInfo/next
         x->type    = y->type;
@@ -525,6 +525,7 @@ static void scanReturnStmt(Node *n){
 
 static void scanNode(Node *n){
     if(!n) R;
+    // printNode(n); // debug
     switch(n->kind){
         case    moduleK: scanModule      (n); break;
         case    methodK: scanMethod      (n); break;

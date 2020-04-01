@@ -1,15 +1,23 @@
 
+## Note
+
+A data path can be a folder or an alias pointing to a folder.
+
 ## Data on sable-intel
 
-Create an alias to a real data folder (e.g. db1 for SF1)
+For different scale factors, we use different folders
 
-    ln -s /mnt/local/tpch-tbl/db1 .
+    SF1 : db1
+    SF2 : db2
+    SF4 : db2
+    SF8 : db8
 
+Create an alias to a real data folder (e.g. db2 for SF1)
 
-***Note***
+    ln -s /mnt/local/tpch-tbl/db2 .
 
-- The size of database usually is very large so that its data may be stored in
-  a different folder.
+Note, the size of database usually is very large so that its data may be stored
+in a different folder.
 
 
 ## Data on sable-tigger

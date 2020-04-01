@@ -43,6 +43,8 @@ Setup [environment variables](docs/readme.md)
 
     cd HorsePower && source ./setup_env.sh
 
+### Setup Library
+
 Installation with the following command line  (About 13 mins)
 
     (cd ${HORSE_LIB_FOLDER} && sh deploy_linux.sh)
@@ -55,6 +57,27 @@ After installation, new folders created as follows.
 
 Note, it is recommended to use gcc 8.1.0 or higher and additional library
 `uuid-dev` may be required during the installation.
+
+### Setup Data
+
+Default data path for TPC-H
+
+    ${HORSE_BASE}/data/tpch
+
+In order to generate different scale factor datasets, you should run
+
+    cd data/tpch
+    ./run.sh deploy       ## Read instructions and update Makefile
+    ./run.sh gendb 1      ## Generate database and save to data/tpch/db1
+
+With a specific scale factor, for example, 1, its path is
+
+    ${HORSE_BASE}/data/tpch/db1
+
+It contains a `tbl` file for each table
+
+    ${HORSE_BASE}/data/tpch/db1/*.tbl
+
 
 ### Build and Run
 

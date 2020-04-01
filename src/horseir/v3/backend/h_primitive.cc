@@ -337,28 +337,28 @@ I pfnIsValidBranch(V z, V x){
 
 #ifdef H_LINUX
   /* copy from /usr/include/math.h */
-  #define M_PI       3.14159265358979323846  /* pi */
+  #define M_PI  3.14159265358979323846  /* pi */
   #define PI M_PI
 #endif
 
-#define ABS(x) ((x)<0?(-x):x)
-#define NEG(x) -(x)
-#define CEIL(x) ceil(x)
-#define FLOOR(x) floor(x)
-#define ROUND(x) round(x)
+#define ABS(x)     ((x)<0?(-x):x)
+#define NEG(x)     -(x)
+#define CEIL(x)    ceil(x)
+#define FLOOR(x)   floor(x)
+#define ROUND(x)   round(x)
 #define DIVDE(x,t) (x/t)
-#define SIGNUM(x) (0<(x)?1:0>(x)?-1:0)
-#define PIMUL(x) (PI*x)
-#define NOT(x) (!x)
-#define EXP(x) exp(x)
-#define LOGE(x) log(x)
-#define LOG2(x) log2(x)
-#define LOG10(x) log10(x)
+#define SIGNUM(x)  (0<(x)?1:0>(x)?-1:0)
+#define PIMUL(x)   (PI*x)
+#define NOT(x)     (!x)
+#define EXP(x)     exp(x)
+#define LOGE(x)    log(x)
+#define LOG2(x)    log2(x)
+#define LOG10(x)   log10(x)
 #define POWER(x,y) pow(x,y)
-#define LOG(x,y) (log(y)/log(x))
-#define MODI(x,y) ((x)%(y))
-#define MODF(x,y) fmod(x,y)
-#define FACT(n) calcFact(n)
+#define LOG(x,y)   (log(y)/log(x))
+#define MODI(x,y)  ((x)%(y))
+#define MODF(x,y)  fmod(x,y)
+#define FACT(n)    calcFact(n)
 
 /* abs */
 I pfnAbs(V z, V x){
@@ -1943,6 +1943,7 @@ I pfnOuter(V z, V x, V y, FUNC2(foo)){
 
 static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
     /* pfnEq (0), pfnLt (1) */
+    //getInfoVar(x); getInfoVar(y); WP("join index\n"); getchar();
     //WP("typ: x = %lld, y = %lld\n", vp(x), vp(y));
     I typCell = -1; L lenZ = 2;
     I op = getOpFromSymbol(vq(f));

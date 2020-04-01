@@ -7,9 +7,9 @@ extern "C" {
 
 /* determine which hash to implement */
 //#define DO_HASH_V0 "v0"
-#define DO_HASH_V1 "v1"
+//#define DO_HASH_V1 "v1"
 //#define DO_HASH_V2 "v2"
-//#define DO_HASH_V3 "v3"
+#define DO_HASH_V3 "v3"
 
 #define setT_CONSTANT 512 //128 //512 //512, 1024, 2048, 4096
 #define PRE_SIZE 8  // for hash join v2
