@@ -123,10 +123,10 @@ static L insert_hash_int_v3_E(HC *ht, L htMask, E *src, L srcI, LL id){
 }
 
 TB create_hash_multiply_v3(V x){
-    L  *count      = HASH_AL(L , setT);
-    L  *prefix     = HASH_AL(L , setT);
-    L  *hashMask   = HASH_AL(L , setT);
-    HC**hashCell   = HASH_AL(HC*,setT);
+    L  *count    = HASH_AL(L , setT);
+    L  *prefix   = HASH_AL(L , setT);
+    L  *hashMask = HASH_AL(L , setT);
+    HC**hashCell = HASH_AL(HC*,setT);
     if(H_DEBUG) WP("v3: //Step 1: scan for basic info\n");
 tic();
     DOI(xn, count[vLL(x,i)&setN]++)
@@ -144,13 +144,13 @@ toc();
     //P("xn = %lld, setT = %lld\n",xn,setT); getchar();
 tic();
     switch(xp){
-caseI
-    DOI(xn, {LL id=vLL(x,i)&setN; \
-        insert_hash_int_v3_I(hashCell[id],hashMask[id],sLL(x),i,id);}) break;
-caseE
-    DOI(xn, {LL id=vLL(x,i)&setN; \
-        insert_hash_int_v3_E(hashCell[id],hashMask[id],sE(x),i,id);}) break;
-default: EP("Type not supported: %s", getTypeName(xp));
+        caseI
+            DOI(xn, {LL id=vLL(x,i)&setN; \
+                    insert_hash_int_v3_I(hashCell[id],hashMask[id],sLL(x),i,id);}) break;
+        caseE
+            DOI(xn, {LL id=vLL(x,i)&setN; \
+                    insert_hash_int_v3_E(hashCell[id],hashMask[id],sE(x),i,id);}) break;
+        default: EP("Type not supported: %s", getTypeName(xp));
     }
 toc();
     TB tb;

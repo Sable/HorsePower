@@ -525,6 +525,7 @@ static void scanReturnStmt(Node *n){
 
 static void scanNode(Node *n){
     if(!n) R;
+    // printNode(n); // debug
     switch(n->kind){
         case    moduleK: scanModule      (n); break;
         case    methodK: scanMethod      (n); break;

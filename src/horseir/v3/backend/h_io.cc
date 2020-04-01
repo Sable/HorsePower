@@ -8,6 +8,7 @@
 L LINE_MAX_CHAR = 1024;
 C LINE_SEP      = '|';
 L BUFF_SIZE     = 256;
+B LINE_HEADER   = false;  // true: ignore the 1st row
 const L OUTPUT_SIZE = 100;
 
 #define ERROR_CODE 99
@@ -89,10 +90,14 @@ L loadCSV(void *fp, B isLoading, V table, L numCols, L *types){
 #ifdef USE_MMAP
     L lineSize=0;
     S fp_data = (S)fp;
+    if(LINE_HEADER && mgets(line, LINE_MAX_CHAR, fp_data))
+        ;
     while(lineSize=mgets(line, LINE_MAX_CHAR, fp_data)){
         fp_data += lineSize;
         while(*fp_data == '\r' || *fp_data == '\n') fp_data++;
 #else
+    if(LINE_HEADER && fgets(line, LINE_MAX_CHAR, (FILE*)fp))
+        ;
     while(fgets(line, LINE_MAX_CHAR, (FILE*)fp)){
 #endif
         if(STRING_NONEMPTY(line)){

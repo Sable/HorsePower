@@ -7,7 +7,7 @@ see its usage.
 
 Build library `libcore.a` which includes built-in functions with all types of parameters
 
-    ./make.sh lib
+    ./make.sh lib   ## save to ${HORSE_BASE}/libs/lib
 
 Build with CMake
 

@@ -337,10 +337,18 @@ static void weedExprStmt(Node *x){
 }
 
 static void weedType(Node *x){
-    if(!(x->val.type.isWild) && sEQ(x->val.type.typ, "enum")){
-        List *cell = x->val.type.cell;
-        if(cell && cell->next == NULL);
-        else EP("Type enum needs exactly one sub-type (e.g. enum<i64>)");
+    HorseType t = getType(x);   // weed type early
+    if(wildT != t){
+        if(enumT == t){
+            List *cell = x->val.type.cell;
+            if(cell && cell->next == NULL);
+            else EP("Type enum needs exactly one sub-type (e.g. enum<i64>)");
+        }
+        else if(dictT == t){
+            List *cell = x->val.type.cell;
+            if(cell && cell->next && cell->next->next == NULL);
+            else EP("Type dict needs exactly two sub-types (e.g. dict<str,str>)");
+        }
     }
 }
 
@@ -376,9 +384,12 @@ static void weedNode(Node *x){
 }
 
 static void weedMainMethod(){
-    if(cntMain == 1); // fine
-    else if(cntMain == 0) EP("Main method not found");
-    else EP("Only one main method expected, but %d found", cntMain);
+    if(cntMain == 1)
+        ; // fine
+    else if(cntMain == 0)
+        EP("Main method not found");
+    else
+        EP("Only one main method expected, but %d found", cntMain);
 }
 
 static void init(){

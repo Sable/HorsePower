@@ -1220,7 +1220,7 @@ void lib_radixsort_int(L *rtn, V val, L len, B *isUp, B isRtnIndex){
     DOP(len, {pos[i].x=vI(val,i); pos[i].i=i;})
 tic();
     lib_radixsort_core_int(pos, len);
-toc(); getchar();
+toc(); //getchar();
     //WP("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, WP("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)
