@@ -33,11 +33,11 @@ prepare_lib(){
     tmp_path=$PWD/tmp/build-lib
     mkdir -p ${tmp_path} && cd ${tmp_path}
     src_files="${cur_path}/backend/*.cc ${cur_path}/util/*.cc ${cur_path}/global.cc ${cur_path}/frontend/pretty.cc"
-    src_include_dirs="${HORSE_BASE}/libs/include/"
-    src_include_libs="${HORSE_BASE}/libs/lib/libpcre2-8.a"
+    src_include_dirs="${HORSE_LIB_FOLDER}/include/"
+    src_include_libs="${HORSE_LIB_FOLDER}/lib/libpcre2-8.a"
     cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a
-    lib_path="${HORSE_BASE}/libs/lib"
+    lib_path="${HORSE_LIB_FOLDER}/lib"
     (set -x && ${cc_path} ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ${lib_path})
     echo "Library file generated: ${lib_path}/${lib_name}"
 }
