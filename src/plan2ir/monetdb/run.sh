@@ -133,7 +133,7 @@ if [ "$#" -eq 1 ]; then
 elif [ "$#" -eq 2 ]; then
     cmd=$1
     if [ $cmd = "tpch" -o $cmd = "udf" -o $cmd = "aida" ]; then
-        compilePlan `getFilePath $cmd $cc`
+        compilePlan `getFilePath $cmd $2`
     elif [ ${cmd} = "plan" ]; then
         genPlanUDF $2
     elif [ ${cmd} = "see" ]; then

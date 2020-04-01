@@ -15,7 +15,8 @@ usage(){
         "Example:" \
         "  *) $0 tpch 6                        ## query 6" \
         "  *) format=latex $0 profile horseir  ## output in the latex format" \
-        "  *) testfolder=latest $0 exec 4      ## output-hir/gen-latest"
+        "  *) testfolder=latest $0 exec 4      ## output-hir/gen-latest" \
+        "  *) testfolder=latest $0 exec 4      ## ${HORSE_BASE}/tests/tpch"
     exit 1
 }
 
@@ -105,9 +106,12 @@ function see_size(){
 
 ## Usage:
 ##                   ./run.sh exec 4   # gen
+## testfolder=tpch   ./run.sh exec 4   # tpch
 ## testfolder=latest ./run.sh exec 4   # gen-latest
 if [ -z ${testfolder} ]; then
     testfolder=./output-hir/gen
+elif [ ${testfolder} = "tpch" ]; then
+    testfolder=${HORSE_BASE}/tests/tpch
 else
     testfolder=./output-hir/gen-latest
 fi

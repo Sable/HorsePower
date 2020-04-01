@@ -35,7 +35,7 @@ def scanMain(d, env):
         if   op == 'project'       : rtn = scanProject      (d, env1)
         elif op == 'groupby'       : rtn = scanGroupby      (d, env1)
         elif op == 'select'        : rtn = scanSelect       (d, env1)
-        elif op == 'table'         : rtn = scanTable        (d, env1) ; stop(rtn)
+        elif op == 'table'         : rtn = scanTable        (d, env1) #; stop(rtn)
         elif op == 'top'           : rtn = scanTop          (d, env1)
         elif op == 'joinidx'       : rtn = scanJoinidx      (d, env2)
         elif op == 'join'          : rtn = scanJoin         (d, env2)

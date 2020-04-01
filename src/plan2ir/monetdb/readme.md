@@ -111,4 +111,14 @@ Run translator to generate HorseIR code (key)
 
     ./run.sh udf q6_proc
 
+SQL to plan
+
+    cp /mnt/local/tpch_2_17_0/chf/myqueries/6.sql ./input/query
+    // modify q6
+
+    // get its execution plan
+    echo "PLAN `cat input/query/6.sql`" | mclient -i -d tpch1 -f raw
+
+    // get its HorseIR code
+    echo "PLAN `cat input/query/6.sql`" | mclient -i -d tpch1 -f raw | python m2ir.py
 
