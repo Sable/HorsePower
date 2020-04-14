@@ -1,0 +1,64 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`part:sym);
+    t1:i32 = check_cast(@column_value(t0,`p_partkey:sym), i32);
+    t4:sym = check_cast(@column_value(t0,`p_brand:sym), sym);
+    t7:sym = check_cast(@column_value(t0,`p_container:sym), sym);
+    t10:? = @eq(t7,`"MED BOX":sym);
+    t11:? = @eq(t4,`"Brand#23":sym);
+    t12:? = @and(t10,t11);
+    t13:? = @compress(t12,t1);
+    t22:? = @load_table(`lineitem:sym);
+    t24:i32 = check_cast(@column_value(t22,`l_partkey:sym), i32);
+    t27:f64 = check_cast(@column_value(t22,`l_quantity:sym), f64);
+    t28:f64 = check_cast(@column_value(t22,`l_extendedprice:sym), f64);
+    t39:? = @join_index(@eq,t13,t24);
+    t40:? = @index(t39,0:i64);
+    t41:? = @index(t39,1:i64);
+    t42:? = @index(t13,t40);
+    t56:? = @index(t27,t41);
+    t57:? = @index(t28,t41);
+    t68:? = @list(t42);
+    t69:? = @group(t68);
+    t70:? = @keys(t69);
+    t71:? = @values(t69);
+    t72:? = @index(t42,t70);
+    t73:? = @load_table(`lineitem:sym);
+    t75:i32 = check_cast(@column_value(t73,`l_partkey:sym), i32);
+    t78:f64 = check_cast(@column_value(t73,`l_quantity:sym), f64);
+    t90:? = @join_index(@eq,t72,t75);
+    t91:? = @index(t90,0:i64);
+    t92:? = @index(t90,1:i64);
+    t93:? = @group(t91);
+    t94:? = @keys(t93);
+    t95:? = @values(t93);
+    t96:? = @index(t91,t94);
+    t97:? = @each_right(@index,t92,t95);
+    t99:? = @each(@len,t71);
+    t100:? = @raze(t99);
+    t101:? = @index(t100,t96);
+    t103:? = @each_right(@index,t78,t97);
+    t104:? = @each(@sum,t103);
+    t105:? = @raze(t104);
+    t106:? = @mul(t101,t105);
+    t107:? = @each(@len,t103);
+    t108:? = @raze(t107);
+    t109:? = @mul(t101,t108);
+    t110:? = @div(t106,t109);
+    t111:? = @mul(0.2:f64,t110);
+    t112:? = @list(t56,t42);
+    t113:? = @list(t111,t72);
+    t114:? = @join_index(@lt@eq,t112,t113);
+    t115:? = @index(t114,0:i64);
+    t131:? = @index(t57,t115);
+    t147:? = @sum(t131);
+    t148:? = @div(t147,7:f64);
+    t149:? = (`avg_yearly):sym;
+    t150:? = @list(t148);
+    t151:? = @table(t149,t150);
+    return t151;
+  }
+}
+// Program slicing (before 158, after 62)
+// Elapsed time: 2.56 ms

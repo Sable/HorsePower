@@ -1,0 +1,57 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`lineitem:sym);
+    t3:i32 = check_cast(@column_value(t0,`l_suppkey:sym), i32);
+    t6:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
+    t7:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
+    t11:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t17:? = @geq(t11,1996-01-01:date);
+    t18:? = @lt(t11,1996-04-01:date);
+    t19:? = @and(t17,t18);
+    t22:? = @compress(t19,t3);
+    t25:? = @compress(t19,t6);
+    t26:? = @compress(t19,t7);
+    t36:? = @minus(1:i32,t26);
+    t37:? = @mul(t25,t36);
+    t38:? = @list(t22);
+    t39:? = @group(t38);
+    t40:? = @keys(t39);
+    t41:? = @values(t39);
+    t42:? = @index(t22,t40);
+    t43:? = @each_right(@index,t37,t41);
+    t44:? = @each(@sum,t43);
+    t45:? = @raze(t44);
+    t46:? = @max(t45);
+    t47:? = @join_index(@eq,t46,t45);
+    t49:? = @index(t47,1:i64);
+    t54:? = @index(t45,t49);
+    t55:? = @index(t42,t49);
+    t56:? = @load_table(`supplier:sym);
+    t57:i32 = check_cast(@column_value(t56,`s_suppkey:sym), i32);
+    t58:sym = check_cast(@column_value(t56,`s_name:sym), sym);
+    t59:sym = check_cast(@column_value(t56,`s_address:sym), sym);
+    t61:sym = check_cast(@column_value(t56,`s_phone:sym), sym);
+    t64:? = @join_index(@eq,t57,t55);
+    t65:? = @index(t64,0:i64);
+    t66:? = @index(t64,1:i64);
+    t71:? = @index(t54,t66);
+    t73:? = @index(t57,t65);
+    t74:? = @index(t58,t65);
+    t75:? = @index(t59,t65);
+    t78:? = @index(t61,t65);
+    t81:? = @list(t73);
+    t82:? = @order(t81,1:bool);
+    t83:? = @index(t73,t82);
+    t84:? = @index(t74,t82);
+    t85:? = @index(t75,t82);
+    t86:? = @index(t78,t82);
+    t87:? = @index(t71,t82);
+    t88:? = (`s_suppkey,`s_name,`s_address,`s_phone,`total_revenue):sym;
+    t89:? = @list(t83,t84,t85,t86,t87);
+    t90:? = @table(t88,t89);
+    return t90;
+  }
+}
+// Program slicing (before 97, after 55)
+// Elapsed time: 3.42 ms

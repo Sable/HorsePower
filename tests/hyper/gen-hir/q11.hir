@@ -1,0 +1,71 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`nation:sym);
+    t2:sym = check_cast(@column_value(t0,`n_name:sym), sym);
+    t5:? = @eq(t2,`GERMANY:sym);
+    t10:? = @load_table(`supplier:sym);
+    t11:i32 = check_cast(@column_value(t10,`s_suppkey:sym), i32);
+    t14:enum<i32> = check_cast(@column_value(t10,`s_nationkey:sym), enum<i32>);
+    t18:? = @values(t14);
+    t19:? = @index(t5,t18);
+    t21:? = @where(t19);
+    t26:? = @index(t11,t21);
+    t34:? = @load_table(`partsupp:sym);
+    t36:enum<i32> = check_cast(@column_value(t34,`ps_suppkey:sym), enum<i32>);
+    t37:i32 = check_cast(@column_value(t34,`ps_availqty:sym), i32);
+    t38:f64 = check_cast(@column_value(t34,`ps_supplycost:sym), f64);
+    t40:? = @fetch(t36);
+    t41:? = @join_index(@eq,t26,t40);
+    t43:? = @index(t41,1:i64);
+    t59:? = @index(t37,t43);
+    t60:? = @index(t38,t43);
+    t62:? = @mul(t60,t59);
+    t63:? = @sum(t62);
+    t64:? = @mul(t63,0.0001:f64);
+    t65:? = @load_table(`nation:sym);
+    t67:sym = check_cast(@column_value(t65,`n_name:sym), sym);
+    t70:? = @eq(t67,`GERMANY:sym);
+    t75:? = @load_table(`supplier:sym);
+    t76:i32 = check_cast(@column_value(t75,`s_suppkey:sym), i32);
+    t79:enum<i32> = check_cast(@column_value(t75,`s_nationkey:sym), enum<i32>);
+    t83:? = @values(t79);
+    t84:? = @index(t70,t83);
+    t86:? = @where(t84);
+    t91:? = @index(t76,t86);
+    t99:? = @load_table(`partsupp:sym);
+    t100:enum<i32> = check_cast(@column_value(t99,`ps_partkey:sym), enum<i32>);
+    t101:enum<i32> = check_cast(@column_value(t99,`ps_suppkey:sym), enum<i32>);
+    t102:i32 = check_cast(@column_value(t99,`ps_availqty:sym), i32);
+    t103:f64 = check_cast(@column_value(t99,`ps_supplycost:sym), f64);
+    t105:? = @fetch(t101);
+    t106:? = @join_index(@eq,t91,t105);
+    t108:? = @index(t106,1:i64);
+    t121:? = @fetch(t100);
+    t122:? = @index(t121,t108);
+    t124:? = @index(t102,t108);
+    t125:? = @index(t103,t108);
+    t127:? = @mul(t125,t124);
+    t128:? = @list(t122);
+    t129:? = @group(t128);
+    t130:? = @keys(t129);
+    t131:? = @values(t129);
+    t132:? = @index(t122,t130);
+    t133:? = @each_right(@index,t127,t131);
+    t134:? = @each(@sum,t133);
+    t135:? = @raze(t134);
+    t136:? = @lt(t64,t135);
+    t141:? = @compress(t136,t132);
+    t142:? = @compress(t136,t135);
+    t144:? = @list(t142);
+    t145:? = @order(t144,0:bool);
+    t146:? = @index(t141,t145);
+    t147:? = @index(t142,t145);
+    t148:? = (`ps_partkey,`value):sym;
+    t149:? = @list(t146,t147);
+    t150:? = @table(t148,t149);
+    return t150;
+  }
+}
+// Program slicing (before 157, after 69)
+// Elapsed time: 2.81 ms

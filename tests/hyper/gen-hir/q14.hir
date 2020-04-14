@@ -1,0 +1,44 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`lineitem:sym);
+    t2:i32 = check_cast(@column_value(t0,`l_partkey:sym), i32);
+    t6:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
+    t7:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
+    t11:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t17:? = @geq(t11,1995-09-01:date);
+    t18:? = @lt(t11,1995-10-01:date);
+    t19:? = @and(t17,t18);
+    t21:? = @compress(t19,t2);
+    t25:? = @compress(t19,t6);
+    t26:? = @compress(t19,t7);
+    t36:? = @load_table(`part:sym);
+    t37:i32 = check_cast(@column_value(t36,`p_partkey:sym), i32);
+    t41:sym = check_cast(@column_value(t36,`p_type:sym), sym);
+    t46:? = @join_index(@eq,t37,t21);
+    t47:? = @index(t46,0:i64);
+    t48:? = @index(t46,1:i64);
+    t55:? = @index(t25,t48);
+    t56:? = @index(t26,t48);
+    t70:? = @index(t41,t47);
+    t75:? = @like(t70,`"PROMO%":sym);
+    t76:? = @minus(1:i32,t56);
+    t77:? = @mul(t55,t76);
+    t78:? = @mul(t75,t77);
+    t79:? = @not(t75);
+    t80:? = @mul(t79,0:f64);
+    t81:? = @plus(t78,t80);
+    t82:? = @minus(1:i32,t56);
+    t83:? = @mul(t55,t82);
+    t84:? = @sum(t81);
+    t85:? = @sum(t83);
+    t86:? = @mul(100:f64,t84);
+    t87:? = @div(t86,t85);
+    t88:? = (`promo_revenue):sym;
+    t89:? = @list(t87);
+    t90:? = @table(t88,t89);
+    return t90;
+  }
+}
+// Program slicing (before 97, after 42)
+// Elapsed time: 1.95 ms

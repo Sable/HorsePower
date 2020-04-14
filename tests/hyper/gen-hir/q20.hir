@@ -1,0 +1,72 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`nation:sym);
+    t2:sym = check_cast(@column_value(t0,`n_name:sym), sym);
+    t5:? = @eq(t2,`CANADA:sym);
+    t10:? = @load_table(`supplier:sym);
+    t11:i32 = check_cast(@column_value(t10,`s_suppkey:sym), i32);
+    t12:sym = check_cast(@column_value(t10,`s_name:sym), sym);
+    t13:sym = check_cast(@column_value(t10,`s_address:sym), sym);
+    t14:enum<i32> = check_cast(@column_value(t10,`s_nationkey:sym), enum<i32>);
+    t18:? = @values(t14);
+    t19:? = @index(t5,t18);
+    t21:? = @where(t19);
+    t26:? = @index(t11,t21);
+    t27:? = @index(t12,t21);
+    t28:? = @index(t13,t21);
+    t34:? = @load_table(`part:sym);
+    t36:sym = check_cast(@column_value(t34,`p_name:sym), sym);
+    t44:? = @like(t36,`"forest%":sym);
+    t60:? = @load_table(`partsupp:sym);
+    t61:enum<i32> = check_cast(@column_value(t60,`ps_partkey:sym), enum<i32>);
+    t62:enum<i32> = check_cast(@column_value(t60,`ps_suppkey:sym), enum<i32>);
+    t63:i32 = check_cast(@column_value(t60,`ps_availqty:sym), i32);
+    t66:? = @values(t61);
+    t67:? = @index(t44,t66);
+    t68:? = @fetch(t61);
+    t69:? = @compress(t67,t68);
+    t70:? = @fetch(t62);
+    t71:? = @compress(t67,t70);
+    t72:? = @compress(t67,t63);
+    t111:? = @load_table(`lineitem:sym);
+    t113:i32 = check_cast(@column_value(t111,`l_partkey:sym), i32);
+    t114:i32 = check_cast(@column_value(t111,`l_suppkey:sym), i32);
+    t116:f64 = check_cast(@column_value(t111,`l_quantity:sym), f64);
+    t122:date = check_cast(@column_value(t111,`l_shipdate:sym), date);
+    t128:? = @geq(t122,1994-01-01:date);
+    t129:? = @lt(t122,1995-01-01:date);
+    t130:? = @and(t128,t129);
+    t132:? = @compress(t130,t113);
+    t133:? = @compress(t130,t114);
+    t135:? = @compress(t130,t116);
+    t147:? = @list(t133,t132);
+    t148:? = @group(t147);
+    t149:? = @keys(t148);
+    t150:? = @values(t148);
+    t151:? = @each_right(@index,t135,t150);
+    t152:? = @each(@sum,t151);
+    t153:? = @raze(t152);
+    t154:? = @index(t133,t149);
+    t155:? = @index(t132,t149);
+    t156:? = @mul(0.5:f64,t153);
+    t157:? = @list(t72,t69,t71);
+    t158:? = @list(t156,t155,t154);
+    t159:? = @join_index(@gt@eq@eq,t157,t158);
+    t160:? = @index(t159,0:i64);
+    t163:? = @index(t71,t160);
+    t172:? = @member(t26,t163);
+    t179:? = @compress(t172,t27);
+    t180:? = @compress(t172,t28);
+    t185:? = @list(t179);
+    t186:? = @order(t185,1:bool);
+    t187:? = @index(t179,t186);
+    t188:? = @index(t180,t186);
+    t189:? = (`s_name,`s_address):sym;
+    t190:? = @list(t187,t188);
+    t191:? = @table(t189,t190);
+    return t191;
+  }
+}
+// Program slicing (before 198, after 70)
+// Elapsed time: 3.61 ms

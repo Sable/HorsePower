@@ -1,0 +1,29 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`lineitem:sym);
+    t5:f64 = check_cast(@column_value(t0,`l_quantity:sym), f64);
+    t6:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
+    t7:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
+    t11:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t17:? = @geq(t11,1994-01-01:date);
+    t18:? = @lt(t11,1995-01-01:date);
+    t19:? = @and(t17,t18);
+    t20:? = @lt(t5,24:f64);
+    t21:? = @geq(t7,0.05:f64);
+    t22:? = @leq(t7,0.07:f64);
+    t23:? = @and(t21,t22);
+    t24:? = @and(t19,t20);
+    t25:? = @and(t24,t23);
+    t31:? = @compress(t25,t6);
+    t32:? = @compress(t25,t7);
+    t42:? = @mul(t31,t32);
+    t43:? = @sum(t42);
+    t44:? = (`revenue):sym;
+    t45:? = @list(t43);
+    t46:? = @table(t44,t45);
+    return t46;
+  }
+}
+// Program slicing (before 53, after 27)
+// Elapsed time: 1.85 ms

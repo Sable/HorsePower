@@ -1,0 +1,72 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`customer:sym);
+    t7:sym = check_cast(@column_value(t0,`c_mktsegment:sym), sym);
+    t9:? = @eq(t7,`BUILDING:sym);
+    t19:? = @load_table(`orders:sym);
+    t20:i32 = check_cast(@column_value(t19,`o_orderkey:sym), i32);
+    t21:enum<i32> = check_cast(@column_value(t19,`o_custkey:sym), enum<i32>);
+    t24:date = check_cast(@column_value(t19,`o_orderdate:sym), date);
+    t27:i32 = check_cast(@column_value(t19,`o_shippriority:sym), i32);
+    t29:? = @lt(t24,1995-03-15:date);
+    t40:? = @values(t21);
+    t41:? = @compress(t29,t40);
+    t42:? = @index(t9,t41);
+    t44:? = @where(t29);
+    t45:? = @compress(t42,t44);
+    t54:? = @index(t20,t45);
+    t58:? = @index(t24,t45);
+    t61:? = @index(t27,t45);
+    t63:? = @load_table(`lineitem:sym);
+    t64:enum<i32> = check_cast(@column_value(t63,`l_orderkey:sym), enum<i32>);
+    t69:f64 = check_cast(@column_value(t63,`l_extendedprice:sym), f64);
+    t70:f64 = check_cast(@column_value(t63,`l_discount:sym), f64);
+    t74:date = check_cast(@column_value(t63,`l_shipdate:sym), date);
+    t80:? = @gt(t74,1995-03-15:date);
+    t81:? = @fetch(t64);
+    t82:? = @compress(t80,t81);
+    t87:? = @compress(t80,t69);
+    t88:? = @compress(t80,t70);
+    t100:? = @list(t54,t58,t61);
+    t101:? = @group(t100);
+    t102:? = @keys(t101);
+    t103:? = @values(t101);
+    t104:? = @index(t54,t102);
+    t105:? = @index(t58,t102);
+    t106:? = @index(t61,t102);
+    t107:? = @each(@len,t103);
+    t108:? = @raze(t107);
+    t109:? = @minus(1:i32,t88);
+    t110:? = @mul(t87,t109);
+    t111:? = @list(t82);
+    t112:? = @group(t111);
+    t113:? = @keys(t112);
+    t114:? = @values(t112);
+    t115:? = @each_right(@index,t110,t114);
+    t116:? = @each(@sum,t115);
+    t117:? = @raze(t116);
+    t120:? = @index(t82,t113);
+    t121:? = @join_index(@eq,t104,t120);
+    t122:? = @index(t121,0:i64);
+    t123:? = @index(t121,1:i64);
+    t124:? = @index(t108,t122);
+    t125:? = @index(t104,t122);
+    t126:? = @index(t105,t122);
+    t127:? = @index(t106,t122);
+    t129:? = @index(t117,t123);
+    t133:? = @mul(t129,t124);
+    t134:? = @list(t133,t126);
+    t135:? = @order(t134,(0,1):bool);
+    t136:? = @index(t125,t135);
+    t137:? = @index(t133,t135);
+    t138:? = @index(t126,t135);
+    t139:? = @index(t127,t135);
+    t140:? = (`l_orderkey,`revenue,`o_orderdate,`o_shippriority):sym;
+    t141:? = @list(t136,t137,t138,t139);
+    t142:? = @table(t140,t141);
+    return t142;
+  }
+}
+// Program slicing (before 149, after 70)
+// Elapsed time: 3.64 ms

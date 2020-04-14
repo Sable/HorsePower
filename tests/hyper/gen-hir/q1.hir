@@ -1,0 +1,73 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`lineitem:sym);
+    t5:f64 = check_cast(@column_value(t0,`l_quantity:sym), f64);
+    t6:f64 = check_cast(@column_value(t0,`l_extendedprice:sym), f64);
+    t7:f64 = check_cast(@column_value(t0,`l_discount:sym), f64);
+    t8:f64 = check_cast(@column_value(t0,`l_tax:sym), f64);
+    t9:char = check_cast(@column_value(t0,`l_returnflag:sym), char);
+    t10:char = check_cast(@column_value(t0,`l_linestatus:sym), char);
+    t11:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
+    t17:? = @leq(t11,1998-09-02:date);
+    t22:? = @compress(t17,t5);
+    t23:? = @compress(t17,t6);
+    t24:? = @compress(t17,t7);
+    t25:? = @compress(t17,t8);
+    t26:? = @compress(t17,t9);
+    t27:? = @compress(t17,t10);
+    t34:? = @minus(1:i32,t24);
+    t35:? = @mul(t23,t34);
+    t36:? = @plus(1:i32,t25);
+    t37:? = @minus(1:i32,t24);
+    t38:? = @mul(t23,t37);
+    t39:? = @mul(t38,t36);
+    t40:? = @list(t26,t27);
+    t41:? = @group(t40);
+    t42:? = @keys(t41);
+    t43:? = @values(t41);
+    t44:? = @index(t26,t42);
+    t45:? = @index(t27,t42);
+    t46:? = @each_right(@index,t22,t43);
+    t47:? = @each(@sum,t46);
+    t48:? = @raze(t47);
+    t49:? = @each_right(@index,t22,t43);
+    t50:? = @each(@avg,t49);
+    t51:? = @raze(t50);
+    t52:? = @each_right(@index,t23,t43);
+    t53:? = @each(@sum,t52);
+    t54:? = @raze(t53);
+    t55:? = @each_right(@index,t23,t43);
+    t56:? = @each(@avg,t55);
+    t57:? = @raze(t56);
+    t58:? = @each_right(@index,t35,t43);
+    t59:? = @each(@sum,t58);
+    t60:? = @raze(t59);
+    t61:? = @each_right(@index,t39,t43);
+    t62:? = @each(@sum,t61);
+    t63:? = @raze(t62);
+    t67:? = @each_right(@index,t24,t43);
+    t68:? = @each(@avg,t67);
+    t69:? = @raze(t68);
+    t70:? = @each(@len,t43);
+    t71:? = @raze(t70);
+    t72:? = @list(t44,t45);
+    t73:? = @order(t72,(1,1):bool);
+    t74:? = @index(t44,t73);
+    t75:? = @index(t45,t73);
+    t76:? = @index(t48,t73);
+    t77:? = @index(t54,t73);
+    t78:? = @index(t60,t73);
+    t79:? = @index(t63,t73);
+    t80:? = @index(t51,t73);
+    t81:? = @index(t57,t73);
+    t82:? = @index(t69,t73);
+    t83:? = @index(t71,t73);
+    t84:? = (`l_returnflag,`l_linestatus,`sum_qty,`sum_base_price,`sum_disc_price,`sum_charge,`avg_qty,`avg_price,`avg_disc,`count_order):sym;
+    t85:? = @list(t74,t75,t76,t77,t78,t79,t80,t81,t82,t83);
+    t86:? = @table(t84,t85);
+    return t86;
+  }
+}
+// Program slicing (before 93, after 71)
+// Elapsed time: 2.20 ms

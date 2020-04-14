@@ -1,0 +1,52 @@
+module default{
+  import Builtin.*;
+  def main() : table{
+    t0:? = @load_table(`customer:sym);
+    t1:i32 = check_cast(@column_value(t0,`c_custkey:sym), i32);
+    t9:? = @load_table(`orders:sym);
+    t11:enum<i32> = check_cast(@column_value(t9,`o_custkey:sym), enum<i32>);
+    t18:sym = check_cast(@column_value(t9,`o_comment:sym), sym);
+    t19:? = @like(t18,`"%special%requests%":sym);
+    t20:? = @not(t19);
+    t22:? = @compress(t20,t11);
+    t30:? = @fetch(t22);
+    t31:? = @group(t1);
+    t32:? = @keys(t31);
+    t33:? = @values(t31);
+    t34:? = @each(@len,t33);
+    t35:? = @raze(t34);
+    t36:? = @index(t1,t32);
+    t37:? = @group(t30);
+    t38:? = @keys(t37);
+    t39:? = @values(t37);
+    t40:? = @each(@len,t39);
+    t41:? = @raze(t40);
+    t42:? = @index(t30,t38);
+    t43:? = @join_index(@eq,t36,t42);
+    t44:? = @index(t43,0:i64);
+    t45:? = @index(t43,1:i64);
+    t46:? = @index(t35,t44);
+    t47:? = @index(t41,t45);
+    t51:? = @mul(t46,t47);
+    t52:? = @len(t32);
+    t53:? = @vector(t52,0:i64);
+    t54:? = @index_a(t53,t44,t51);
+    t55:? = @list(t54);
+    t56:? = @group(t55);
+    t57:? = @keys(t56);
+    t58:? = @values(t56);
+    t59:? = @index(t54,t57);
+    t60:? = @each(@len,t58);
+    t61:? = @raze(t60);
+    t62:? = @list(t61,t59);
+    t63:? = @order(t62,(0,0):bool);
+    t64:? = @index(t59,t63);
+    t65:? = @index(t61,t63);
+    t66:? = (`c_count,`custdist):sym;
+    t67:? = @list(t64,t65);
+    t68:? = @table(t66,t67);
+    return t68;
+  }
+}
+// Program slicing (before 75, after 50)
+// Elapsed time: 1.72 ms
