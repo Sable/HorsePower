@@ -32,9 +32,9 @@ prepare_lib(){
     cur_path=$PWD
     tmp_path=$PWD/tmp/build-lib
     mkdir -p ${tmp_path} && cd ${tmp_path}
-    lib_path="${HORSE_LIB_FOLDER}/${machine}/lib"
+    lib_path="${HORSE_LIB_FOLDER}/lib"
     src_files="${cur_path}/backend/*.cc ${cur_path}/util/*.cc ${cur_path}/global.cc ${cur_path}/frontend/pretty.cc"
-    src_include_dirs="${HORSE_LIB_FOLDER}/${machine}/include"
+    src_include_dirs="${HORSE_LIB_FOLDER}/include"
     src_include_libs="${lib_path}/libpcre2-8.a"
     cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a

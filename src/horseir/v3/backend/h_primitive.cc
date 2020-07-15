@@ -1670,11 +1670,12 @@ I pfnAppend(V z, V x, V y){
 I pfnLike(V z, V x, V y){
     //if(isTypeGroupString(vp(x)) && (isChar(y) || isString(y))){
     if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
+        tic();
         B t;
         //WP("Entering pfnLike: x(%s, %lld), y(%s, %lld)\n",getTypeName(vp(x)),vn(x),getTypeName(vp(y)),vn(y)); getchar();
         if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
-            S  strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
+            S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
             pcre2_code *re = getLikePatten(strY);
             //WP("input size: %lld\n", vn(x));
             /* jit facilities */
@@ -1724,6 +1725,7 @@ I pfnLike(V z, V x, V y){
             //case 1
             // pcre2_match_context_free(mcontext);
             // pcre2_jit_stack_free(jit_stack);
+            toc();
             R 0;
         }
         else if(isChar(x) || isEqualLength(x,y)){  // y:string
@@ -1755,6 +1757,79 @@ I pfnLike(V z, V x, V y){
         else R E_LENGTH;
     }
     else R E_DOMAIN;
+}
+
+B matchLikeNew(S needleData, L needleSize, S patternData, L patternSize, L i, L j)
+{
+	for (;i < patternSize; ++i)
+	{
+		C pc = patternData[i];
+		if (pc == '\\' || pc == '_' || pc == '[')
+		{
+			EP("Unsupport pattern character %c\n", pc);
+		}
+		else if (pc == '%')
+		{
+			if (i + 1 == patternSize)
+			{
+				return true;
+			}
+
+			while (j < needleSize)
+			{
+				if (needleData[j] == patternData[i + 1])
+				{
+					if (matchLikeNew(needleData, needleSize, patternData, patternSize, i + 2, j + 1))
+					{
+						return true;
+					}
+				}
+				++j;
+			}
+
+			return false;
+		}
+		else if (j >= needleSize)
+		{
+			return false;
+		}
+		else if (needleData[j] == patternData[i])
+		{
+			++j;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return (j == needleSize);
+}
+
+I pfnLike2(V z, V x, V y){
+    if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
+        getInfoVar(x);
+        tic();
+        if(isOne(y)){
+            L lenZ = isChar(x)?1:vn(x);
+            S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
+            L lenY = strlen(strY);
+            initV(z,H_B,lenZ);
+            switch(vp(x)){
+                caseQ DOP(vn(x), vB(z,i)=matchLikeNew(getSymbolStr(vQ(x,i)),getSymbolSize(vQ(x,i)),strY,lenY,0,0)); break;
+                caseS DOP(vn(x), vB(z,i)=matchLikeNew(vS(x,i),strlen(vS(x,i)),strY,lenY,0,0)); break;
+                default: getInfoVar(x); EP("Unknow....\n");
+            }
+            // printV2(x, 20);
+            // printV(y);
+            // printV2(z, 20);
+            // getchar();
+        }
+        else R E_LENGTH;
+        toc();
+    }
+    else R E_DOMAIN;
+    R 0;
 }
 
 static B lib_order_basic(V z, V x, V y){
