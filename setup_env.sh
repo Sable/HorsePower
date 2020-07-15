@@ -1,4 +1,5 @@
 #!/bin/bash
+machine=`hostname`
 export HORSE_BASE=$PWD
 
 # Test-related
@@ -20,8 +21,9 @@ export HORSE_TPCH_DATA_RAW=${HORSE_BASE}/data/tpch
 export HORSE_TPCH_DATA_BIN=${HORSE_BASE}/data/tpch-bin
 
 # Library-related
-export HORSE_LIB_FOLDER=${HORSE_BASE}/libs
-export HORSE_LIB_LIB=${HORSE_BASE}/libs/lib
+export HORSE_LIB_FOLDER=${HORSE_BASE}/libs/${machine}
+export HORSE_LIB_LIB=${HORSE_LIB_FOLDER}/lib
+export HORSE_LIB_INCLUDE=${HORSE_LIB_FOLDER}/include
 
 # Source-related
 export HORSE_SRC_BASE=${HORSE_BASE}/src/horseir

@@ -10,8 +10,8 @@ usage(){
 
 deploy(){
     echo "Deploying the TPC-H tool"
-    (unzip -qq tpc-h-tool.zip && rm -r __MACOSX && cd tpch_2_17_0/dbgen && cp makefile.suite Makefile)
-    echo "Note: please edit the tpch_2_17_0/dbgen/Makefile by updating the following lines (starting from line 103)"
+    tar -xf tpc-h-tool.tar.gz
+    echo "Note: default configurations in tpch_2_17_0/dbgen/Makefile (starting from line 103)"
     echo "      CC      = gcc"
     echo "      DATABASE=ORACLE"
     echo "      MACHINE =LINUX"

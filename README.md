@@ -47,13 +47,12 @@ Setup [environment variables](docs/readme.md)
 
 Installation with the following command line  (About 13 mins)
 
-    (cd ${HORSE_LIB_FOLDER} && sh deploy_linux.sh)
+    (cd ${HORSE_BASE}/libs && sh deploy_linux.sh)
 
 After installation, new folders created as follows.
 
     - include
     - lib
-    - pcre2
 
 Note, it is recommended to use gcc 8.1.0 or higher and additional library
 `uuid-dev` may be required during the installation.
