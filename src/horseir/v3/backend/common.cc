@@ -1,7 +1,7 @@
 #include "../global.h"
 
 TC H_TARGET; /* backend/common.h, define the target platform: cpu,  gpu, or others */
-I join_id;
+I join_id, group_id;
 
 V initLiteralDate(L x){
     V z = allocNode();

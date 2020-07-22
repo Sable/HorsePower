@@ -1034,6 +1034,6 @@ void initSys(){
     //omp_set_num_threads(1);
     setNumberOfCore(); // set H_CORE
     time_clear();
-    join_id = 0;
+    join_id = group_id = 0;
 }
 

@@ -990,14 +990,119 @@ I pfnToList(V z, V x){
 //    else R E_DOMAIN;
 //}
 
-#define isGroupTrie(x) (isList(x)&&vn(x)==2&&isChar(vV(x,0))&&isChar(vV(x,1))&&vn(vV(x,0))==vn(vV(x,1)))
-I pfnGroup(V z, V x){
-    if(isGroupTrie(x))
-        return pfnGroupTrie(z, x);
-    else
-        return pfnGroupBasic(z, x);
+static B isLooseOrderUp(V x){
+    DOIa(xn, if(vI(x,i)<vI(x,i-1))R 0) R 1;
+    // DOIa(xn, if(vI(x,i)<vI(x,i-1)){P("a=%d,b=%d\n",vI(x,i),vI(x,i-1));R 0;}) R 1;
 }
 
+static B isLooseOrderDown(V x){
+    DOIa(xn, if(vI(x,i)>vI(x,i-1))R 0) R 1;
+}
+
+static B isLooseOrder(V x){
+    R isLooseOrderUp(x) || isLooseOrderDown(x);
+}
+
+I pfnGroupSimple(V z, V x){
+    initV(z, H_N, 2);
+    V z0 = getDictKeys(z);
+    V z1 = getDictVals(z);
+    I parZ[H_CORE];
+    DOI(H_CORE, parZ[i]=1)
+tic();
+    DOTb(xn, if(vI(x,i)!=vI(x,i-1))parZ[tid]++)
+    // I tot = 1;
+    // DOIa(xn, if(vI(x,i)!=vI(x,i-1))tot++)
+    L seg=xn/H_CORE;
+    DOIa(H_CORE, {L k=seg*i; if(vI(x,k)==vI(x,k-1))parZ[i]--;})
+    I tot = 0; DOI(H_CORE, tot+=parZ[i])
+time_toc("k0: count segs (ms): %g\n", elapsed);
+    initV(z0, H_L, tot+1); // an extra slot for "xn", updated later
+    initV(z1, H_G, tot);
+    L *offset = sL(z0);
+    vn(z0) = tot; // update
+tic();
+    offset[tot]=xn;
+    I parN[H_CORE]; parN[0]=0;
+    DOIa(H_CORE, parN[i]=parN[i-1]+parZ[i-1]) // parallel offset
+    DOTc(xn, {if(tid==0 || (tid>0 && vI(x,pos)!=vI(x,pos-1)))offset[parN[tid]++]=pos;}, {if(vI(x,i)!=vI(x,i-1))offset[parN[tid]++]=i;})
+    // L c = 1; offset[0] = 0; offset[tot]=xn;
+    // DOIa(xn, if(vI(x,i)!=vI(x,i-1))offset[c++]=i)
+time_toc("k0: compute offsets (ms): %g\n", elapsed);
+    V tt = allocNode();
+    initV(tt, H_L, xn);
+tic();
+    DOP(tot, {V t=vV(z1,i);
+            vp(t)=H_L;
+            vn(t)=offset[i+1]-offset[i];
+            vg(t)=(G)(sL(tt)+offset[i]);
+            DOJ(vn(t), vL(t,j)=j+offset[i])
+            })
+time_toc("k0: write values (ms): %g\n", elapsed);
+    // printV2(z0, 20);
+    // DOI(20, printV(vV(z1,i)))
+    R 0;
+}
+
+#define isGroupTrie(x) (isList(x)&&vn(x)==2&&isChar(vV(x,0))&&isChar(vV(x,1))&&vn(vV(x,0))==vn(vV(x,1)))
+#define isGroupSimpleInt(x) (isInt(x)&&isLooseOrder(x))
+#define isGroupSimpleList(x) (isList(x)&&vn(x)==1&&isLooseOrder(vV(x,0)))
+I pfnGroup(V z, V x){
+    // profile_groupby_data(x);
+    if(isGroupTrie(x)){
+        R pfnGroupTrie(z, x);
+    }
+    else if(isGroupSimpleInt(x)){
+        R pfnGroupSimple(z, x);
+    }
+    else if(isGroupSimpleList(x)){
+        R pfnGroupSimple(z, vV(x,0));
+    }
+    else{
+        R pfnGroupBasic(z, x);
+    }
+}
+
+static void profile_write(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    switch(xp){
+        caseI
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%d\n", vI(x,i))) break;
+        caseQ
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%s\n", getSymbolStr(vQ(x,i)))) break;
+        default:
+            getInfoVar(x);
+            fprintf(fp, "%s is not integer (I)\n", fn);
+    }
+    fclose(fp);
+}
+
+static void profile_groupby_data_single(V x){
+    P("Profiling groupby with a single column: %d\n", group_id);
+    C fn_x[99];
+    sprintf(fn_x, "/tmp/g%d.txt" , group_id);
+    if(x)
+        profile_write(x, fn_x);
+    group_id++;
+}
+
+
+static void profile_groupby_data_multiple(V x){
+    EP("Pending...\n");
+}
+
+static void profile_groupby_data(V x){
+    if(xp == H_G){
+        if (xn == 1)
+            profile_groupby_data_single(vV(x,0));
+        else
+            profile_groupby_data_multiple(x);
+    }
+    else
+        profile_groupby_data_single(x);
+}
 
 I pfnGroupBasic(V z, V x){
     // V0 y0,t0; V y = &y0, t = &t0;
@@ -1006,7 +1111,7 @@ I pfnGroupBasic(V z, V x){
     L lenZ = isList(x)?vn(x):1;
     L *order_list = NULL;
     initV(y,H_B,lenZ);
-if(H_DEBUG) tic();
+    tic();
     if(isOrdered(x)){
         if(H_DEBUG) WP("Ordered data found in pfnGroup\n");
         order_list = NULL;
@@ -1026,11 +1131,11 @@ if(H_DEBUG) tic();
         order_list = sL(t);
         //WP("sort done\n");
     }
-if(H_DEBUG) time_toc("1.(elapsed time %g ms)\n\n", elapsed);
+    time_toc("1.(elapsed time %g ms)\n\n", elapsed);
     // WP("t = \n");
     // printV(t);
 
-if(H_DEBUG) tic();
+    tic();
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
@@ -1049,7 +1154,7 @@ if(H_DEBUG) tic();
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-if(H_DEBUG) time_toc("2.(elapsed time %g ms)\n\n", elapsed);
+    time_toc("2.(elapsed time %g ms)\n\n", elapsed);
  //getchar();
     //L tid = getSymbol((S)"148561");
     //DOI(vn(x), if(vQ(x,i)==tid)WP("%lld\n",i))
@@ -2190,21 +2295,6 @@ static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     R 0;
 }*/
 
-static void profile_join_write(V x, S fn){
-    FILE *fp = fopen(fn, "w");
-    switch(xp){
-        caseI
-            fprintf(fp, "%lld\n", vn(x));
-            DOI(vn(x), fprintf(fp, "%d\n", vI(x,i))) break;
-        caseQ
-            fprintf(fp, "%lld\n", vn(x));
-            DOI(vn(x), fprintf(fp, "%s\n", getSymbolStr(vQ(x,i)))) break;
-        default:
-            getInfoVar(x);
-            fprintf(fp, "%s is not integer (I)\n", fn);
-    }
-    fclose(fp);
-}
 
 static void profile_join_write_one(V x, L i, FILE *fp){
     switch(xp){
@@ -2219,6 +2309,7 @@ static void profile_join_write_one(V x, L i, FILE *fp){
             EP("%s is not supported\n", getTypeName(xp));
     }
 }
+
 
 static void print_type_alias(V x, FILE *fp){
     switch(xp){
@@ -2245,11 +2336,11 @@ static void profile_join_data_single(V x, V y, V f){
     sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
     sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
     if(x)
-        profile_join_write(x, fn_x);
+        profile_write(x, fn_x);
     if(y)
-        profile_join_write(y, fn_y);
+        profile_write(y, fn_y);
     if(f)
-        profile_join_write(f, fn_f);
+        profile_write(f, fn_f);
     join_id++;
 }
 
@@ -2264,7 +2355,7 @@ static void profile_join_data_multiple(V x, V y, V f){
     if(y)
         profile_join_write_multiple(y, fn_y);
     if(f)
-        profile_join_write(f, fn_f);
+        profile_write(f, fn_f);
     join_id++;
 }
 

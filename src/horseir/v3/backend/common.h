@@ -112,6 +112,24 @@ typedef enum TargetCode{
     } \
 }  
 
+#define DOTb(n, x, ...) {L seg=(n)/H_CORE; \
+    _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
+    { \
+        L tid = omp_get_thread_num(); \
+        for(L i=tid*seg+1,i2=(tid!=H_CORE-1?((tid+1)*seg):(n));i<i2;i++) x;\
+    } \
+}
+
+#define DOTc(n, x, y, ...) {L seg=(n)/H_CORE; \
+    _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
+    { \
+        L tid = omp_get_thread_num(); \
+        L pos = tid*seg; \
+        x; \
+        for(L i=pos+1,i2=(tid!=H_CORE-1?(pos+seg):(n));i<i2;i++) y;\
+    } \
+}
+
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
@@ -129,7 +147,7 @@ extern L  H_CORE;
 extern C  LINE_SEP;
 extern B  LINE_HEADER;
 extern TC H_TARGET;
-extern I  join_id; // for debugging
+extern I  join_id, group_id; // for debugging
 
 #ifdef __cplusplus
 }
