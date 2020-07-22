@@ -102,6 +102,16 @@ typedef enum TargetCode{
     } \
 }
 
+#define DOTa(n, x, ...) {L seg=(n)/H_CORE; \
+    _Pragma(STRINGIFY(omp parallel __VA_ARGS__)) \
+    { \
+        L tid = omp_get_thread_num(); \
+        L sid = tid * seg; \
+        L len = (tid!=H_CORE-1)?seg:(n-sid); \
+        x; \
+    } \
+}  
+
 #define STRING_EMPTY(s) ((s)[0]!=0)
 #define STRING_NONEMPTY(s) ((s)[0]!=0)
 
@@ -109,6 +119,7 @@ typedef enum TargetCode{
 
 #define PCRE2_CODE_UNIT_WIDTH 8  // for pcre2.h
 #define H_DEBUG false
+
 
 /* extern */
 
@@ -118,6 +129,7 @@ extern L  H_CORE;
 extern C  LINE_SEP;
 extern B  LINE_HEADER;
 extern TC H_TARGET;
+extern I  join_id; // for debugging
 
 #ifdef __cplusplus
 }
@@ -145,6 +157,7 @@ V initLiteralF64    (E x);
 V initLiteralChar   (C x);
 V initLiteralSymVector (L n, S strs[]);
 V initLiteralBoolVector(L n, B b[]);
+V initLiteralI32Vector (L n, I b[]);
 V initLiteralI64Vector (L n, L b[]);
 V initLiteralStrVector (L n, S b[]);
 

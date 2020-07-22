@@ -1,5 +1,5 @@
-static const LL setT = setT_CONSTANT; // gcc-5 fails to know setT is a constant
-static const LL setN = setT_CONSTANT - 1;
+static const I setT = setT_CONSTANT; // gcc-5 fails to know setT is a constant
+static const I setN = setT_CONSTANT - 1;
 
 //UI hash_i32         (I a);
 //UL hash_murmur3_i32 (I a); // default: return 64-bit
@@ -40,6 +40,13 @@ static UL hash_murmur3_i32(I a){ // default: return 64-bit
     h1 = ROTL32(h1,13);
     h1 = h1*5+0xe6546b64;
     R h1;
+    /** copy from Alex's hash function (slower) **/
+    // a ^= a >> 16;
+    // a *= 0x85ebca6b; // 2246822507
+    // a ^= a >> 13;
+    // a *= 0xc2b2ae35; // 3266489909
+    // a ^= a >> 16;
+    // R a;
 }
 
 static UL hash_murmur3_i64(L a){

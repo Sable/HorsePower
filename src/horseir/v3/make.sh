@@ -38,7 +38,7 @@ prepare_lib(){
     src_include_libs="${lib_path}/libpcre2-8.a"
     cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
     lib_name=libcore.a
-    (set -x && ${cc_path} ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ${lib_path})
+    time (set -x && ${cc_path} ${cc_flags} -c ${src_files} -I${src_include_dirs} && ar rcs ${lib_name} *.o ${src_include_libs} && mv ${lib_name} ${lib_path})
     echo "Library file generated: ${lib_path}/${lib_name}"
 }
 

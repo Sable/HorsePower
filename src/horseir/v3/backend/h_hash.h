@@ -11,7 +11,7 @@ extern "C" {
 //#define DO_HASH_V2 "v2"
 #define DO_HASH_V3 "v3"
 
-#define setT_CONSTANT 512 //128 //512 //512, 1024, 2048, 4096
+#define setT_CONSTANT 256  // 128, 512, 1024, 2048, 4096
 #define PRE_SIZE 8  // for hash join v2
 
 #define hash_B /* empty */
@@ -197,7 +197,7 @@ typedef struct hash_node_v3 { // 8*3+8=32
        HI h_index_other; /* never used */
        struct hash_node_v3 *next;
     };
-}HN0,*HN;
+}HN0,*HN;  // sizeof(HN0) --> 32
 
 // 8+
 typedef struct hash_cell { // 8+3*32+8 = 256 (4 cache lines)

@@ -1759,7 +1759,7 @@ I pfnLike(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-B matchLikeNew(S needleData, L needleSize, S patternData, L patternSize, L i, L j)
+static B matchLikeNew(S needleData, L needleSize, S patternData, L patternSize, L i, L j)
 {
 	for (;i < patternSize; ++i)
 	{
@@ -1809,7 +1809,6 @@ B matchLikeNew(S needleData, L needleSize, S patternData, L patternSize, L i, L 
 I pfnLike2(V z, V x, V y){
     if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
         getInfoVar(x);
-        tic();
         if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
@@ -1820,13 +1819,10 @@ I pfnLike2(V z, V x, V y){
                 caseS DOP(vn(x), vB(z,i)=matchLikeNew(vS(x,i),strlen(vS(x,i)),strY,lenY,0,0)); break;
                 default: getInfoVar(x); EP("Unknow....\n");
             }
-            // printV2(x, 20);
-            // printV(y);
-            // printV2(z, 20);
-            // getchar();
+            // printV2(x, 20); printV(y);
+            // printV2(z, 20); getchar();
         }
         else R E_LENGTH;
-        toc();
     }
     else R E_DOMAIN;
     R 0;
@@ -2037,7 +2033,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
     //}
     //else {
         if(isTypeGroupReal(vp(x)) && isTypeGroupReal(vp(y))){
-            WP("2.2 general\n");
+            // WP("2.2 general\n");
             L lenX    = vn(x), lenY = vn(y);
             I typMax  = MAX(vp(x),vp(y));
             V tempX = allocNode();
@@ -2045,7 +2041,7 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
             CHECKE(promoteValue(tempX, x, typMax));
             CHECKE(promoteValue(tempY, y, typMax));
             initV(z,H_G,lenZ);
-            WP("2.3 op = %lld\n",(L)op);
+            // WP("2.3 op = %lld\n",(L)op);
             //if(isList(y) && vn(vV(y,0))==148370){
             //    WP("setting to debug\n");
             //    op = 99; //debug
@@ -2194,20 +2190,109 @@ static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     R 0;
 }*/
 
+static void profile_join_write(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    switch(xp){
+        caseI
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%d\n", vI(x,i))) break;
+        caseQ
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%s\n", getSymbolStr(vQ(x,i)))) break;
+        default:
+            getInfoVar(x);
+            fprintf(fp, "%s is not integer (I)\n", fn);
+    }
+    fclose(fp);
+}
+
+static void profile_join_write_one(V x, L i, FILE *fp){
+    switch(xp){
+        caseB
+            FP(fp, "%d ", vB(x,i)); break;
+        caseI
+            FP(fp, "%d ", vI(x,i)); break;
+        caseE
+            FP(fp, "%g ", vE(x,i)); break;
+        default:
+            getInfoVar(x);
+            EP("%s is not supported\n", getTypeName(xp));
+    }
+}
+
+static void print_type_alias(V x, FILE *fp){
+    switch(xp){
+        caseI FP(fp, "I "); break;
+        caseE FP(fp, "E "); break;
+        caseQ FP(fp, "Q "); break;
+        default: EP("Unknown type: %s\n", getTypeName(xp));
+    }
+}
+
+static void profile_join_write_multiple(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    L size = vn(x), row = vn(vV(x,0));
+    FP(fp, "%lld %lld\n", size, row);
+    DOI(size, print_type_alias(vV(x,i),fp)) FP(fp, "\n");
+    DOI(row, { DOJ(size, profile_join_write_one(vV(x,j),i,fp)) FP(fp,"\n"); })
+    fclose(fp);
+}
+
+static void profile_join_data_single(V x, V y, V f){
+    P("Profiling join with a single column: %d\n", join_id);
+    C fn_x[99], fn_y[99], fn_f[99];
+    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
+    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
+    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
+    if(x)
+        profile_join_write(x, fn_x);
+    if(y)
+        profile_join_write(y, fn_y);
+    if(f)
+        profile_join_write(f, fn_f);
+    join_id++;
+}
+
+static void profile_join_data_multiple(V x, V y, V f){
+    P("Profiling join with multiple columns: %d\n", join_id);
+    C fn_x[99], fn_y[99], fn_f[99];
+    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
+    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
+    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
+    if(x)
+        profile_join_write_multiple(x, fn_x);
+    if(y)
+        profile_join_write_multiple(y, fn_y);
+    if(f)
+        profile_join_write(f, fn_f);
+    join_id++;
+}
+
+static void profile_join_data(V x, V y, V f){
+    if(xp == H_G) // isList
+        profile_join_data_multiple(x,y,f);
+    else
+        profile_join_data_single(x,y,f);
+}
+
+
 I pfnJoinIndex(V z, V x, V y, V f){
 #ifdef H_CALL
     CALLGRIND_START_INSTRUMENTATION;
 #endif
+    // profile_join_data(x, y, f);
     if(vn(f)==1){
-        if(vn(x) > vn(y)){
-            CHECKE(pfnJoinIndexSingle(z,y,x,f));
-            //WP("before:\n"); printV(vV(z,0)); printV(vV(z,1));
-            swap2(z);
-            //WP("after:\n"); printV(vV(z,0)); printV(vV(z,1));
-            //getchar();
-            R 0;
-        }
-        else R pfnJoinIndexSingle(z,x,y,f);
+        ///// code below is moved to lib_join_index_hash
+        // if(vn(x) > vn(y)){
+        //     CHECKE(pfnJoinIndexSingle(z,y,x,f));
+        //     //WP("before:\n"); printV(vV(z,0)); printV(vV(z,1));
+        //     swap2(z);
+        //     //WP("after:\n"); printV(vV(z,0)); printV(vV(z,1));
+        //     //getchar();
+        //     R 0;
+        // }
+        //else R pfnJoinIndexSingle(z,x,y,f);
+        R pfnJoinIndexSingle(z,x,y,f);
     }
     else if(vn(f)>1){
         /*

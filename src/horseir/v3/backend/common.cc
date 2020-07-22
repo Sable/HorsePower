@@ -1,6 +1,7 @@
 #include "../global.h"
 
 TC H_TARGET; /* backend/common.h, define the target platform: cpu,  gpu, or others */
+I join_id;
 
 V initLiteralDate(L x){
     V z = allocNode();
@@ -64,6 +65,13 @@ V initLiteralBoolVector(L n, B b[]){
     V z = allocNode();
     initV(z,H_B,n);
     DOI(n, vB(z,i)=b[i])
+    R z;
+}
+
+V initLiteralI32Vector(L n, I b[]){
+    V z = allocNode();
+    initV(z,H_I,n);
+    DOI(n, vI(z,i)=b[i])
     R z;
 }
 
