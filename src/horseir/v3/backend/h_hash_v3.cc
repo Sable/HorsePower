@@ -272,7 +272,7 @@ static I lib_join_radix_hash_v3(V z0, V z1, V x, V y){
         DOT(vn(y), if(tempHN[i]) parZ[tid]+=tempHN[i]->h_num)
         DOI(H_CORE, c+=parZ[i])
         DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])
-        // P("c = %lld\n", c);
+        // P("// Total writes = %lld\n", c);
         // DOI(H_CORE, P("offset[%lld] = %lld\n", i, offset[i]))
         // getchar();
         initV(z0, H_L, c);
@@ -308,7 +308,7 @@ static I lib_join_radix_hash_v3(V z0, V z1, V x, V y){
                   DOI(n1, {vL(z0,c)=d1[i]; vL(z1,c)=j; c++;})}})
         }
     time_toc("> Radix hash, write phase (ms): %g\n", elapsed);
-        P("Total elements write = %lld\n", c); // expected for Q5 3rd join: 46008
+        P("// Total elements write = %lld\n", c); // expected for Q5 3rd join: 46008
     // printV2(z0, vn(z0));
     // P("-------------\n");
     // printV2(z1, vn(z1));
@@ -328,7 +328,7 @@ static I lib_join_radix_hash(V z0, V z1, V x, V y){
 static L* r2_createHashTable(V x, L size){
     L *ht = HASH_AL(L, size);
     // parallel memset
-    DOTa(size, memset(ht+sid, -1, sizeof(L)*len))
+    DOTa(size, memset(ht+sid, -1, sizeof(L)*slen))
     // memset(ht, -1, sizeof(L)*size);
     DOI(xn, ht[vI(x,i)]=i)
     R ht;
@@ -374,7 +374,7 @@ static I lib_join_table_hash_r2(V z0, V z1, V x, V y, I minX, I maxX){
     if(vp(x)==H_I && vp(y)==H_I){
         if(minX >= 0){
             tic();
-            L *ht = r2_createHashTable(x, maxX);
+            L *ht = r2_createHashTable(x, maxX+1);
             time_toc("r2: build time (ms): %g\n", elapsed);
             tic();
             r2_probeHashTable(z0, z1, y, ht, minX, maxX);
@@ -404,6 +404,10 @@ static B isStrictOrderDown(V x){
     DOIa(xn, if(vI(x,i)>=vI(x,i-1))R 0) R 1;
 }
 
+static B isStrictOrderEqual(V x){
+    DOIa(xn, if(vI(x,i)==vI(x,i-1))R 0) R 1;
+}
+
 static B isStrictOrder(V x, I *minX, I *maxX){
     if(isStrictOrderUp(x)){
         *minX = vI(x,0);
@@ -422,9 +426,12 @@ static I r2_simple_cmp(const void * a, const void * b) {
     return ( *(I*)a - *(I*)b );
 }
 
-static B isStrictUnique(V x, I *minX, I *maxX){
+B isStrictUnique(V x, I *minX, I *maxX){
     if(isStrictOrder(x,minX,maxX)){
         R 1;
+    }
+    else if(!isStrictOrderEqual(x)){
+        R 0;
     }
     else{
         I *temp = HASH_AL(I, xn);
@@ -434,7 +441,7 @@ static B isStrictUnique(V x, I *minX, I *maxX){
         vn(t) = xn;
         vp(t) = H_I;
         vg(t) = (S)temp;
-        // printV(t);
+        // printV2(t, 20);
         R isStrictOrder(t,minX,maxX);
     }
 }
@@ -675,7 +682,7 @@ I lib_join_index_basic_v3(V z0, V z1, V x, V y, B isEq){
             total += n1;
         }
     }
-    //P("total = %lld\n", total); getchar();
+    P("total = %lld\n", total);
     initV(z0,H_L,total);
     initV(z1,H_L,total);
     copyFromHorseArray(vg(z0),res0);

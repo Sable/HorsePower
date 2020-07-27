@@ -955,13 +955,13 @@ static B lib_member_fast2(void* src, void* val, L valI, L typ){
     L hashMask = hashLen - 1; \
     L hashCur = getHashHeap(); \
     /*WP("size2 = %lld\n",hashLen);*/ \
-    tic(); \
+    if(H_DEBUG) tic(); \
     CHECKE(createHash(&hashT,hashLen)); \
     DOI(sLen, insertHash(hashT,hashMask,src,i,NULL,-1,typ)) \
-    time_toc("build time"); \
-    tic(); \
+    if(H_DEBUG) time_toc("// member: build time\n"); \
+    if(H_DEBUG) tic(); \
     DOP(vLen, targ[i]=(0<=find_hash(hashT,hashMask,src,val,i,typ))) \
-    time_toc("probe time"); \
+    if(H_DEBUG) time_toc("// member: probe time\n"); \
     setHashHeap(hashCur);
     // profileHash(hashT,hashLen);
 
@@ -1185,6 +1185,7 @@ static void lib_radixsort_core_int(Pos_i *val, I len){
     const L base = 8;
     const L size = (1<<base)-1; //255
     const L maxSize = 32;
+    tic();
     L     *tempC = (L    *)malloc(sizeof(L    )<<base);
     Pos_i *tempB = (Pos_i*)malloc(sizeof(Pos_i)*len);
     //WP("maxSize = %d\n", maxSize);
@@ -1200,12 +1201,10 @@ static void lib_radixsort_core_int(Pos_i *val, I len){
             tempB[tempC[k]] = val[i];
         }
         memcpy(val, tempB, sizeof(Pos_i) * len);
-        //for(int i=0; i<len; i++){
-        //    val[i] = B[i];
-        //}
     }
     free(tempB);
     free(tempC);
+    time_toc("-- radix sort %d in (ms): %g\n",len,elapsed);
 }
 
 static B seeOrder(Pos_i *pos, L n){
@@ -1239,22 +1238,24 @@ toc(); //getchar();
 /*
  * https://blog.csdn.net/WINCOL/article/details/4799979
  *    old name -> lib_radixsort_basic
+ * [warning] this code probably produces error results
  */
 static void lib_radixsort_core_long(Pos *val, I len){
-    const L size = 255;
-    I *tempC = (I*)malloc(sizeof(I)<<8);
+    // tic();
+    const L size = 65535; //255;
+    I *tempC = (I*)malloc(sizeof(I)<<16);
     Pos *tempB = (Pos*)malloc(sizeof(Pos)*len);
     I maxSize = 32;
-    const L halfL = 0xffffffff;
     for(I i=0; i<len; i++){
         //int numOfDigits = (int)log10(val[i].x) + 1;
         if(((val[i].x)>>32) > 0){
             maxSize = 64; break;
         }
     }
-    //WP("maxSize = %d\n", maxSize);
-    for(I j=0,j2=maxSize; j<j2; j+=8){
-        memset(tempC, 0, sizeof(I)<<8);
+    // L tt=val[0].x; DOIa(len, if(tt<val[i].x) tt=val[i].x)
+    // WP("maxSize = %d, max = %lld\n", maxSize, tt);
+    for(I j=0,j2=maxSize; j<j2; j+=16){
+        memset(tempC, 0, sizeof(I)<<16);
         DOI(len, tempC[((val[i].x)>>j) & size]++)
         DOIa(size+1, tempC[i] = tempC[i] + tempC[i-1])
         //printf("j = %d\n", j);
@@ -1264,22 +1265,74 @@ static void lib_radixsort_core_long(Pos *val, I len){
             tempC[k]--;
             tempB[tempC[k]] = val[i];
         }
+        // tic();
+        // parallel memcpy (maybe not necessary)
+        // DOTa(len, memcpy(val+sid, tempB+sid, sizeof(Pos)*slen))
         memcpy(val, tempB, sizeof(Pos) * len);
+        // time_toc("// copy size: %lld in %g ms\n", sizeof(Pos)*len, elapsed);
         //for(int i=0; i<len; i++){
         //    val[i] = B[i];
         //}
     }
     free(tempB);
     free(tempC);
+    // time_toc("// radix sort total (ms): %g\n", elapsed);
+}
+
+void mergesort_merge(Pos *a, L size){
+    L mid = size / 2;
+    Pos *temp = (Pos*)malloc(sizeof(Pos)*size);
+    for(L i=0,j=mid,k=0; k<size ;k++){
+        temp[k] = j==size ? a[i++]:
+                  i==mid  ? a[j++]:
+                  a[j].x < a[i].x ? a[j++]:a[i++];
+    }
+    memcpy(a, temp, sizeof(Pos)*size);
+    free(temp);
+}
+
+#define SIZE_THRESHOLD 102400
+// experiment in k4_groupby
+static void mergesort_parallel_omp(Pos *a, L size)
+{
+    // P("size = %lld\n", size);
+    if (size < SIZE_THRESHOLD) {
+        lib_radixsort_core_long(a, size);
+        return;
+    }
+#pragma omp task
+    mergesort_parallel_omp(a, size/2);
+
+#pragma omp task
+    mergesort_parallel_omp(a + size/2, size - size/2);
+
+#pragma omp taskwait
+    mergesort_merge(a, size);
+}
+
+static void lib_radixsort_core_par_long(Pos *pos, L len){
+#pragma omp parallel
+#pragma omp single
+    mergesort_parallel_omp(pos, len);
+}
+
+void lib_radixsort_long_v0(L *rtn_val, L *rtn_pos, V x){
+    if(H_DEBUG) WP("... lib_radixsort_long simple version 0\n");
+    if(xp != H_L) EP("require H_L");
+    Pos *pos = HASH_AL(Pos, xn);
+    DOP(xn, {pos[i].x=vL(x,i); pos[i].i=i;})
+    lib_radixsort_core_long(pos, xn);
+    DOP(xn, {rtn_val[i]=pos[i].i; rtn_pos[i]=pos[i].i;})
 }
 
 void lib_radixsort_long(L *rtn, V val, L len, B *isUp, B isRtnIndex){
-    if(H_DEBUG) WP("... lib_radixsort_long\n");
+    P("... lib_radixsort_long\n");
     if(vp(val) != H_L) EP("require H_L");
     B f0 = isUp?*isUp:1;
     Pos *pos = (Pos*)malloc(sizeof(Pos)*len);
     DOP(len, {pos[i].x=vL(val,i); pos[i].i=i;})
-    lib_radixsort_core_long(pos, len);
+    lib_radixsort_core_par_long(pos, len);
+    // lib_radixsort_core_long(pos, len);
     //WP("f0 = %d, rtn = %d\n", f0,isRtnIndex); DOI(len, WP("%lld: %lld\n",i,pos[i].i)) getchar();
     if(isRtnIndex){ // return index
         if(f0) DOP(len, rtn[i]=pos[i].i)
@@ -1400,6 +1453,18 @@ I lib_group_by_normal_long(V z, V x){
              else vL(d,c++)=pos[i].i)
     free(pos);
     R 0;
+}
+
+// paralell version
+I lib_group_by_normal_par_long(V z, V x){
+    printBanner("Parallel group by for long");
+    Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);
+    DOP(xn, {pos[i].x=vL(x,i); pos[i].i=i;})
+    lib_radixsort_core_par_long(pos, xn);
+    V t = allocNode(); initV(t, H_L, xn);
+    L *loc = HASH_AL(L, xn);
+    DOI(xn, {vL(t,i)=pos[i].x; loc[i]=pos[i].i;})
+    R pfnGroupSimpleLong(z, t, loc);
 }
 
 // TODO: extend from only (H_L == vp(x))

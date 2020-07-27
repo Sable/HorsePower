@@ -46,8 +46,10 @@ I    lib_get_group_by         (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
 I    lib_group_by_flat        (V z, V x);
 I    lib_group_by_normal_int  (V z, V x);
 I    lib_group_by_normal_long (V z, V x);
+I lib_group_by_normal_par_long(V z, V x);
 void lib_radixsort_int        (L *rtn, V val, L len, B *isUp, B isRtnIndex);
 void lib_radixsort_long       (L *rtn, V val, L len, B *isUp, B isRtnIndex);
+void lib_radixsort_long_v0    (L *rtn_val, L *rtn_pos, V x);
 
 I lib_member_B(B* targ, B* src, L sLen, B* val, L vLen);
 I lib_member_H(B* targ, H* src, L sLen, H* val, L vLen);

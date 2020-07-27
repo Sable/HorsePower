@@ -107,7 +107,7 @@ typedef enum TargetCode{
     { \
         L tid = omp_get_thread_num(); \
         L sid = tid * seg; \
-        L len = (tid!=H_CORE-1)?seg:(n-sid); \
+        L slen= (tid!=H_CORE-1)?seg:(n-sid); \
         x; \
     } \
 }  

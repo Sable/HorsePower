@@ -1003,7 +1003,7 @@ static B isLooseOrder(V x){
     R isLooseOrderUp(x) || isLooseOrderDown(x);
 }
 
-I pfnGroupSimple(V z, V x){
+static I pfnGroupSimpleInt(V z, V x){
     initV(z, H_N, 2);
     V z0 = getDictKeys(z);
     V z1 = getDictVals(z);
@@ -1044,23 +1044,108 @@ time_toc("k0: write values (ms): %g\n", elapsed);
     R 0;
 }
 
-#define isGroupTrie(x) (isList(x)&&vn(x)==2&&isChar(vV(x,0))&&isChar(vV(x,1))&&vn(vV(x,0))==vn(vV(x,1)))
-#define isGroupSimpleInt(x) (isInt(x)&&isLooseOrder(x))
-#define isGroupSimpleList(x) (isList(x)&&vn(x)==1&&isLooseOrder(vV(x,0)))
-I pfnGroup(V z, V x){
-    // profile_groupby_data(x);
-    if(isGroupTrie(x)){
-        R pfnGroupTrie(z, x);
+I pfnGroupSimpleLong(V z, V x, L *loc){
+    initV(z, H_N, 2);
+    V z0 = getDictKeys(z);
+    V z1 = getDictVals(z);
+    L parZ[H_CORE];
+    DOI(H_CORE, parZ[i]=1)
+tic();
+    DOTb(xn, if(vL(x,i)!=vL(x,i-1))parZ[tid]++)
+    // I tot = 1;
+    // DOIa(xn, if(vL(x,i)!=vL(x,i-1))tot++)
+    L seg=xn/H_CORE;
+    DOIa(H_CORE, {L k=seg*i; if(vL(x,k)==vL(x,k-1))parZ[i]--;})
+    I tot = 0; DOI(H_CORE, tot+=parZ[i])
+time_toc("k0: count segs (ms): %g\n", elapsed);
+    initV(z0, H_L, tot+1); // an extra slot for "xn", updated later
+    initV(z1, H_G, tot);
+    L *offset = sL(z0);
+    vn(z0) = tot; // update
+tic();
+    offset[tot]=xn;
+    I parN[H_CORE]; parN[0]=0;
+    DOIa(H_CORE, parN[i]=parN[i-1]+parZ[i-1]) // parallel offset
+    DOTc(xn, {if(tid==0 || (tid>0 && vL(x,pos)!=vL(x,pos-1)))offset[parN[tid]++]=pos;}, {if(vL(x,i)!=vL(x,i-1))offset[parN[tid]++]=i;})
+    // L c = 1; offset[0] = 0; offset[tot]=xn;
+    // DOIa(xn, if(vL(x,i)!=vL(x,i-1))offset[c++]=i)
+time_toc("k0: compute offsets (ms): %g\n", elapsed);
+    V tt = allocNode();
+    initV(tt, H_L, xn);
+tic();
+    if(!loc){
+        DOP(tot, {V t=vV(z1,i);
+                vp(t)=H_L;
+                vn(t)=offset[i+1]-offset[i];
+                vg(t)=(G)(sL(tt)+offset[i]);
+                DOJ(vn(t), vL(t,j)=j+offset[i])
+                })
     }
-    else if(isGroupSimpleInt(x)){
-        R pfnGroupSimple(z, x);
+    else {
+        DOP(tot, {V t=vV(z1,i);
+                vp(t)=H_L;
+                vn(t)=offset[i+1]-offset[i];
+                vg(t)=(G)(sL(tt)+offset[i]);
+                DOJ(vn(t), vL(t,j)=loc[j+offset[i]])
+                })
     }
-    else if(isGroupSimpleList(x)){
-        R pfnGroupSimple(z, vV(x,0));
+time_toc("k0: write values (ms): %g\n", elapsed);
+    // printV2(z0, 20);
+    // DOI(20, printV(vV(z1,i)))
+    R 0;
+}
+
+I pfnGroupSimple(V z, V x){
+    switch(xp){
+        caseI R pfnGroupSimpleInt (z,x);
+        caseL R pfnGroupSimpleLong(z,x,NULL);
+        default: EP("Unknown type: %s", getTypeName(xp));
     }
-    else{
-        R pfnGroupBasic(z, x);
+    R 0;
+}
+
+
+static void profile_join_write_one(V x, L i, FILE *fp){
+    switch(xp){
+        caseB
+            FP(fp, "%d ", vB(x,i)); break;
+        caseH
+            FP(fp, "%d ", vH(x,i)); break;
+        caseI
+            FP(fp, "%d ", vI(x,i)); break;
+        caseL
+            FP(fp, "%lld ", vL(x,i)); break;
+        caseE
+            FP(fp, "%g ", vE(x,i)); break;
+        caseD
+            FP(fp, "%d ", vD(x,i)); break;
+        caseQ
+            FP(fp, "%d ", vQ(x,i)); break;
+        default:
+            getInfoVar(x);
+            EP("%s is not supported\n", getTypeName(xp));
     }
+}
+
+
+static void print_type_alias(V x, FILE *fp){
+    switch(xp){
+        caseH FP(fp, "H "); break;
+        caseI FP(fp, "I "); break;
+        caseL FP(fp, "L "); break;
+        caseE FP(fp, "E "); break;
+        caseQ FP(fp, "Q "); break;
+        default: EP("Unknown type: %s\n", getTypeName(xp));
+    }
+}
+
+static void profile_join_write_multiple(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    L size = vn(x), row = vn(vV(x,0));
+    FP(fp, "%lld %lld\n", size, row);
+    DOI(size, print_type_alias(vV(x,i),fp)) FP(fp, "\n");
+    DOI(row, { DOJ(size, profile_join_write_one(vV(x,j),i,fp)) FP(fp,"\n"); })
+    fclose(fp);
 }
 
 static void profile_write(V x, S fn){
@@ -1079,6 +1164,7 @@ static void profile_write(V x, S fn){
     fclose(fp);
 }
 
+
 static void profile_groupby_data_single(V x){
     P("Profiling groupby with a single column: %d\n", group_id);
     C fn_x[99];
@@ -1090,7 +1176,10 @@ static void profile_groupby_data_single(V x){
 
 
 static void profile_groupby_data_multiple(V x){
-    EP("Pending...\n");
+    C fn_x[99];
+    sprintf(fn_x, "/tmp/g%d.txt" , join_id);
+    profile_join_write_multiple(x, fn_x);
+    group_id++;
 }
 
 static void profile_groupby_data(V x){
@@ -1104,6 +1193,102 @@ static void profile_groupby_data(V x){
         profile_groupby_data_single(x);
 }
 
+static H getMaxH(V x){
+    H t=vH(x,0);
+    DOIa(xn, if(t<vH(x,i))t=vH(x,i)) R t;
+}
+
+static Q getMaxQ(V x){
+    Q t=vQ(x,0);
+    DOIa(xn, if(t<vQ(x,i))t=vQ(x,i)) R t;
+}
+
+static I getMaxI(V x){
+    I t=vI(x,0);
+    DOIa(xn, if(t<vI(x,i))t=vI(x,i)) R t;
+}
+
+static I getGreaterBit(L x){
+    L t = 1; I k = 0;
+    while(t <= x) { t<<=1; k++; }
+    R k;
+}
+
+static I pfnGroupMergable0(V z, V x){
+    printBanner("Merge Q and H");
+    V t = allocNode();
+    L row = vn(vV(x,0));
+    initV(t, H_L, row);
+    V x0 = vV(x,0), x1 = vV(x,1);
+    I bit = getGreaterBit(getMaxH(x1));
+    // P("bit = %d\n", bit);
+    DOP(row, vL(t,i)=(((L)vQ(x0,i))<<bit)+vH(x1,i))
+    R pfnGroup(z, t);
+}
+
+static I pfnGroupMergable1(V z, V x){
+    printBanner("Merge Q, Q, and I");
+    V t = allocNode();
+    L row = vn(vV(x,0));
+    initV(t, H_L, row);
+    V x0 = vV(x,0), x1 = vV(x,1), x2 = vV(x,2);
+    I bit1 = getGreaterBit(getMaxI(x2));
+    I bit0 = getGreaterBit(getMaxQ(x1)) + bit1;
+    DOP(row, vL(t,i)=(((L)vQ(x0,i))<<bit0)+(((L)vQ(x1,i))<<bit1)+vI(x2,i))
+    R pfnGroup(z, t);
+}
+
+
+static I pfnGroupMergable2(V z, V x){
+    printBanner("Merge I and I");
+    V t = allocNode();
+    L row = vn(vV(x,0));
+    initV(t, H_L, row);
+    V x0 = vV(x,0), x1 = vV(x,1);
+    I bit = getGreaterBit(getMaxI(x1));
+    // P("bit = %d\n", bit);
+    DOP(row, vL(t,i)=(((L)vI(x0,i))<<bit)+vI(x1,i))
+    R pfnGroup(z, t);
+}
+
+#define isGroupTrie(x) (isList(x)&&vn(x)==2&&isChar(vV(x,0))&&isChar(vV(x,1))&&vn(vV(x,0))==vn(vV(x,1)))
+#define isGroupSimpleInt(x) (isInt(x)&&isLooseOrder(x))
+#define isGroupSimpleList(x) (isList(x)&&vn(x)==1&&isLooseOrder(vV(x,0)))
+#define isGroupMergable0(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_H)
+#define isGroupMergable1(x) (isList(x)&&vn(x)==3&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_Q&&vp(vV(x,2))==H_I)
+#define isGroupMergable2(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_I&&vp(vV(x,1))==H_I)
+I pfnGroup(V z, V x){
+    // profile_groupby_data(x);
+    // tic();
+    if(isGroupTrie(x)){
+        R pfnGroupTrie(z, x);
+    }
+    else if(isGroupSimpleInt(x)){
+        R pfnGroupSimple(z, x);
+    }
+    else if(isGroupSimpleList(x)){
+        R pfnGroupSimple(z, vV(x,0));
+    }
+    else if(isList(x)&&isOne(x)){
+        // single list may suffer performance issue (e.g. q15)
+        R pfnGroupBasic(z, vV(x,0));
+    }
+    else if(isGroupMergable0(x)){ // q9
+        R pfnGroupMergable0(z, x);
+    }
+    else if(isGroupMergable1(x)){ // q16
+        R pfnGroupMergable1(z, x);
+    }
+    else if(isGroupMergable2(x)){ // q20
+        R pfnGroupMergable2(z, x);
+    }
+    else{
+        // time_toc("Group time (ms): %g\n", elapsed);
+        R pfnGroupBasic(z, x);
+    }
+}
+
+
 I pfnGroupBasic(V z, V x){
     // V0 y0,t0; V y = &y0, t = &t0;
     V y = allocNode();
@@ -1111,14 +1296,15 @@ I pfnGroupBasic(V z, V x){
     L lenZ = isList(x)?vn(x):1;
     L *order_list = NULL;
     initV(y,H_B,lenZ);
+    P("-- pfnGroupBasic: input size: %lld, isList %d\n", xn, isList(x));
     tic();
     if(isOrdered(x)){
-        if(H_DEBUG) WP("Ordered data found in pfnGroup\n");
+        if(H_DEBUG) P("Ordered data found in pfnGroup\n");
         order_list = NULL;
     }
     else if(isIntegers(x)){;} // skip
     else {
-        if(H_DEBUG) WP("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
+        if(H_DEBUG) P("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
         // TODO: need to go back to check again (for q3)
         //if(isList(x) && xn==1 && vp(vV(x,0))==H_I){
         //    WP("debugging create_hash_multiply\n");
@@ -1131,7 +1317,7 @@ I pfnGroupBasic(V z, V x){
         order_list = sL(t);
         //WP("sort done\n");
     }
-    time_toc("1.(elapsed time %g ms)\n\n", elapsed);
+    time_toc("1. prepare data (ms): %g\n", elapsed);
     // WP("t = \n");
     // printV(t);
 
@@ -1145,7 +1331,8 @@ I pfnGroupBasic(V z, V x){
     }
     else if(isLong(x)){
         //CHECKE(lib_group_by_flat(z,x));
-        CHECKE(lib_group_by_normal_long(z,x));
+        CHECKE(lib_group_by_normal_par_long(z,x));
+        //CHECKE(lib_group_by_normal_long(z,x));
     }
     else if(isTypeGroupBasic(xp)){
         // V0 t1; V tx=&t1;
@@ -1154,7 +1341,8 @@ I pfnGroupBasic(V z, V x){
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-    time_toc("2.(elapsed time %g ms)\n\n", elapsed);
+    time_toc("2. group data (ms): %g\n", elapsed);
+    P("-- output size: %lld\n", vn(vV(z,0)));
  //getchar();
     //L tid = getSymbol((S)"148561");
     //DOI(vn(x), if(vQ(x,i)==tid)WP("%lld\n",i))
@@ -1912,8 +2100,9 @@ static B matchLikeNew(S needleData, L needleSize, S patternData, L patternSize, 
 }
 
 I pfnLike2(V z, V x, V y){
+    printBanner("New like 2");
     if(isTypeGroupString(vp(x)) && isTypeGroupString(vp(y))){
-        getInfoVar(x);
+        // getInfoVar(x);
         if(isOne(y)){
             L lenZ = isChar(x)?1:vn(x);
             S strY = isChar(y)?sC(y):isString(y)?vs(y):getSymbolStr(vq(y));
@@ -1943,6 +2132,7 @@ static B lib_order_basic(V z, V x, V y){
 }
 
 I pfnOrderBy(V z, V x, V y){
+    // profile_groupby_data(x); // write data
     if(isList(x) && isBool(y) && isEqualLength(x,y)){
         DOI(vn(x), if(!isTypeGroupBasic(vp(vV(x,i))))R E_DOMAIN)
         if(!checkMatch(x)) R E_MATCH;
@@ -1990,6 +2180,39 @@ I pfnOrderBy(V z, V x, V y){
     //    R 0;
     //}
 }
+
+// static B isOrderbyMergable0(V x, V y){
+//     I types[] = {H_L, H_Q, H_Q, H_I};
+//     B orders[]= {0,1,1,1};
+//     DOI(vn(x), if(vp(vV(x,i))!=types[i])R 0)
+//     DOI(vn(y), if(vB(y,i)!=orders[i])R 0)
+//     R 1;
+// }
+// 
+// static I pfnOrderByMergable0(V z, V x, V y){
+//     V newx = allocNode(); initV(newx, H_G, 2);
+//     V newy = allocNode(); initV(newy, H_B, 2);
+//     V t = vV(newx,1); *vV(newx,0)=*vV(x,0);
+//     DOI(2, vB(newy,i)=vB(y,i))
+//     // config done.
+//     V x0=vV(x,0), x1=vV(x,1), x2=vV(x,2), x3=vV(x,3);
+//     L row=vn(x0);
+//     initV(t, H_L, row);
+//     I bit2 = getGreaterBit(getMaxQ(x2));
+//     I bit3 = getGreaterBit(getMaxI(x3));
+//     I bit1 = bit2 + bit3;
+//     DOP(row, vL(t,i)=(((L)vQ(x1,i))<<bit1)+(((L)vQ(x2,i))<<bit2)+vI(x3,i))
+//     R pfnOrderByBasic(z, newx, newy);
+// }
+// 
+// I pfnOrderBy(V z, V x, V y){
+//     if(isOrderbyMergable0(x,y)){
+//         R pfnOrderByMergable0(z, x, y);
+//     }
+//     else {
+//         R pfnOrderByBasic(z, x, y);
+//     }
+// }
 
 I pfnEach(V z, V x, FUNC1(foo)){
     //WP("type x: %s\n", getTypeName(xp));
@@ -2262,27 +2485,49 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
     R 0;
 }
 
-static L getFirstEqual(V f){
-    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "eq"))R i)
+static L getFirstEqual(V x, V f){
+    I minX, maxX;
+    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "eq") && isStrictUnique(vV(x,i),&minX,&maxX))R i)
+    DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "eq" ))R i)
     DOI(vn(f), if(sEQ(getSymbolStr(vQ(f,i)), "neq"))R i)
+    R -1;
+}
+
+static I pfnJoinIndexMultiple_all(V z, V x, V y, V f){
+    R 0;
+}
+
+static I pfnJoinIndexMultiple_one(V z, V x, V y, V f){
+    L size = vn(x);
+    L fx = getFirstEqual(x,f);
+    if(fx < 0) EP("Not found eq in join\n");
+    P("fx = %lld\n",fx); // getchar();
+    L f0 = vQ(f,fx);
+    V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
+    tic();
+    CHECKE(joinOneColumn(z0,x0,y0,f0));
+    time_toc("r5: join one column (ms): %g\n", elapsed);
+    //WP("fx = %lld\n", fx); printV(f); getchar();
+    //V k0 = vV(z0,0), k1 = vV(z0,1);
+    //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;WP("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
+    //printV(x0); printV(y0); printV(z0); getchar();
+    initV(z,H_G,2);
+    tic();
+    CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+    time_toc("r5: join other columns (ms): %g\n", elapsed);
     R 0;
 }
 
 static I pfnJoinIndexMultiple(V z, V x, V y, V f){
     if(vn(x)==vn(y) && vn(x)==vn(f)){
-        L size = vn(x);
-        L fx = getFirstEqual(f); L f0=vQ(f,fx);
-        V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
-        CHECKE(joinOneColumn(z0,x0,y0,f0));
-        //WP("fx = %lld\n", fx); printV(f); getchar();
-        //V k0 = vV(z0,0), k1 = vV(z0,1);
-        //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;WP("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
-        //printV(x0); printV(y0); printV(z0); getchar();
-        initV(z,H_G,2);
-        CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+        if(vn(x)<4){
+            R pfnJoinIndexMultiple_one(z,x,y,f);
+        }
+        else {
+            R pfnJoinIndexMultiple_all(z,x,y,f);
+        }
     }
     else R E_LENGTH;
-    R 0;
 }
 
 /*
@@ -2295,39 +2540,6 @@ static L pfnJoinIndexMultiple(V z, V x, V y, V f){
     R 0;
 }*/
 
-
-static void profile_join_write_one(V x, L i, FILE *fp){
-    switch(xp){
-        caseB
-            FP(fp, "%d ", vB(x,i)); break;
-        caseI
-            FP(fp, "%d ", vI(x,i)); break;
-        caseE
-            FP(fp, "%g ", vE(x,i)); break;
-        default:
-            getInfoVar(x);
-            EP("%s is not supported\n", getTypeName(xp));
-    }
-}
-
-
-static void print_type_alias(V x, FILE *fp){
-    switch(xp){
-        caseI FP(fp, "I "); break;
-        caseE FP(fp, "E "); break;
-        caseQ FP(fp, "Q "); break;
-        default: EP("Unknown type: %s\n", getTypeName(xp));
-    }
-}
-
-static void profile_join_write_multiple(V x, S fn){
-    FILE *fp = fopen(fn, "w");
-    L size = vn(x), row = vn(vV(x,0));
-    FP(fp, "%lld %lld\n", size, row);
-    DOI(size, print_type_alias(vV(x,i),fp)) FP(fp, "\n");
-    DOI(row, { DOJ(size, profile_join_write_one(vV(x,j),i,fp)) FP(fp,"\n"); })
-    fclose(fp);
-}
 
 static void profile_join_data_single(V x, V y, V f){
     P("Profiling join with a single column: %d\n", join_id);
@@ -2383,7 +2595,15 @@ I pfnJoinIndex(V z, V x, V y, V f){
         //     R 0;
         // }
         //else R pfnJoinIndexSingle(z,x,y,f);
-        R pfnJoinIndexSingle(z,x,y,f);
+        if(isList(x) && vn(x)>1){
+            V newf = allocNode();
+            initV(newf, H_Q, vn(x));
+            DOI(vn(x), vQ(newf,i)=vq(f))  // duplicate f vn(x) times
+            R pfnJoinIndexMultiple(z,x,y,newf);
+        }
+        else{
+            R pfnJoinIndexSingle(z,x,y,f);
+        }
     }
     else if(vn(f)>1){
         /*

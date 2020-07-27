@@ -240,6 +240,8 @@ void profileHashTable(THash th);
 void profileHashBucket(TBucket tb);
 #endif
 
+B isStrictUnique(V x, I *minX, I *maxX);
+
 #ifdef	__cplusplus
 }
 #endif

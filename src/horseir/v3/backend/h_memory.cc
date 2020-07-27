@@ -459,7 +459,7 @@ void setHashHeap(L x){
             // WP("[HashHeap] Hash memory is not cleaned before reusing\n");
             // tic();
             G ht = hHeap+x;
-            DOTa(hHeapCur-x, memset(ht+sid, 0, len))
+            DOTa(hHeapCur-x, memset(ht+sid, 0, slen))
             // memset(hHeap+x, 0, hHeapCur-x); // commented for performance
             // time_toc("free memory (ms): %g\n", elapsed);
         }

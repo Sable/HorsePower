@@ -146,6 +146,7 @@ I pfnToList        (V z, V x);
 I pfnGroup         (V z, V x);
 I pfnGroupTrie     (V z, V x);
 I pfnGroupBasic    (V z, V x);
+I pfnGroupSimpleLong(V z, V x, L *loc);
 
 I pfnCompare       (V z, V x, V y, I op);
 I pfnLt            (V z, V x, V y);
