@@ -47,6 +47,7 @@ I    lib_group_by_flat        (V z, V x);
 I    lib_group_by_normal_int  (V z, V x);
 I    lib_group_by_normal_long (V z, V x);
 I lib_group_by_normal_par_long(V z, V x);
+I lib_group_by_normal_par_int (V z, V x);
 void lib_radixsort_int        (L *rtn, V val, L len, B *isUp, B isRtnIndex);
 void lib_radixsort_long       (L *rtn, V val, L len, B *isUp, B isRtnIndex);
 void lib_radixsort_long_v0    (L *rtn_val, L *rtn_pos, V x);

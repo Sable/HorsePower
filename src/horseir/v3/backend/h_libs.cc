@@ -1381,6 +1381,19 @@ I lib_group_by_normal_int(V z, V x){
     R 0;
 }
 
+// paralell version (the impl. should be simplified for int, but currently long)
+I lib_group_by_normal_par_int(V z, V x){
+    printBanner("Parallel group by for int");
+    Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);
+    DOP(xn, {pos[i].x=vI(x,i); pos[i].i=i;})  // <-- vI(x,i)
+    lib_radixsort_core_par_long(pos, xn);
+    V t = allocNode(); initV(t, H_L, xn);
+    L *loc = HASH_AL(L, xn);
+    DOI(xn, {vL(t,i)=pos[i].x; loc[i]=pos[i].i;})
+    R pfnGroupSimpleLong(z, t, loc);
+}
+
+
 // I lib_group_by_normal_long(V z, V x){
 //     P("hello \n"); getchar();
 //     Pos_i *pos = (Pos_i*)malloc(sizeof(Pos_i)*xn);
@@ -1451,6 +1464,14 @@ I lib_group_by_normal_long(V z, V x){
     DOIa(xn, if(pos[i-1].x!=pos[i].x){\
                d=vV(zVal,k++); vL(d,0)=pos[i].i; c=1;} \
              else vL(d,c++)=pos[i].i)
+    // DOI(20, P("pos[%lld] = %lld, %lld\n", i, pos[i].x, pos[i].i))
+    // printV(zKey);
+    // DOI(10, printV(vV(zVal,i)))
+    // L ttt = 0; V z0=zKey, z1=zVal;
+    // DOI(vn(z0), ttt+=vL(z0,i))
+    // P("key total = %lld\n", ttt);
+    // DOI(vn(z1), DOJ(vn(vV(z1,i)), ttt+=vL(vV(z1,i),i)))
+    // P("value total = %lld\n", ttt);
     free(pos);
     R 0;
 }

@@ -1064,7 +1064,7 @@ time_toc("k0: count segs (ms): %g\n", elapsed);
     vn(z0) = tot; // update
 tic();
     offset[tot]=xn;
-    I parN[H_CORE]; parN[0]=0;
+    L parN[H_CORE]; parN[0]=0;
     DOIa(H_CORE, parN[i]=parN[i-1]+parZ[i-1]) // parallel offset
     DOTc(xn, {if(tid==0 || (tid>0 && vL(x,pos)!=vL(x,pos-1)))offset[parN[tid]++]=pos;}, {if(vL(x,i)!=vL(x,i-1))offset[parN[tid]++]=i;})
     // L c = 1; offset[0] = 0; offset[tot]=xn;
@@ -1088,6 +1088,7 @@ tic();
                 vg(t)=(G)(sL(tt)+offset[i]);
                 DOJ(vn(t), vL(t,j)=loc[j+offset[i]])
                 })
+        DOP(tot, vL(z0,i)=loc[offset[i]])  // update key indices
     }
 time_toc("k0: write values (ms): %g\n", elapsed);
     // printV2(z0, 20);
@@ -1327,12 +1328,13 @@ I pfnGroupBasic(V z, V x){
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
     }
     else if(isInt(x)){
-        CHECKE(lib_group_by_normal_int(z,x));
+        CHECKE(lib_group_by_normal_par_int(z,x));
+        // CHECKE(lib_group_by_normal_int(z,x));
     }
     else if(isLong(x)){
         //CHECKE(lib_group_by_flat(z,x));
         CHECKE(lib_group_by_normal_par_long(z,x));
-        //CHECKE(lib_group_by_normal_long(z,x));
+        // CHECKE(lib_group_by_normal_long(z,x));
     }
     else if(isTypeGroupBasic(xp)){
         // V0 t1; V tx=&t1;
@@ -2494,6 +2496,7 @@ static L getFirstEqual(V x, V f){
 }
 
 static I pfnJoinIndexMultiple_all(V z, V x, V y, V f){
+    TODO("support 4-column join");
     R 0;
 }
 
@@ -2520,12 +2523,13 @@ static I pfnJoinIndexMultiple_one(V z, V x, V y, V f){
 
 static I pfnJoinIndexMultiple(V z, V x, V y, V f){
     if(vn(x)==vn(y) && vn(x)==vn(f)){
-        if(vn(x)<4){
-            R pfnJoinIndexMultiple_one(z,x,y,f);
-        }
-        else {
-            R pfnJoinIndexMultiple_all(z,x,y,f);
-        }
+        R pfnJoinIndexMultiple_one(z,x,y,f);
+        // if(vn(x)<4){
+        //     R pfnJoinIndexMultiple_one(z,x,y,f);
+        // }
+        // else {
+        //     R pfnJoinIndexMultiple_all(z,x,y,f);
+        // }
     }
     else R E_LENGTH;
 }
