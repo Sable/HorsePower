@@ -280,5 +280,6 @@ Credit: https://www.w3schools.com/css/css_tooltip.asp
 | 5  | <script>hgFunc('sub_string(x,a,b)','Substring: x[a,b]           ');</script> | (str;Int;Int)        | str                  | [link](builtin/substring.md)       |&#10004;| N        |
 | 6  | <script>hgFunc('any(x)','Return true if any value is true');</script>        | B                    | B                    | [link](builtin/bool.md#any)        |&#10004;| N        |
 | 7  | <script>hgFunc('all(x)','Return true if all values are true');</script>      | B                    | B                    | [link](builtin/bool.md#all)        |&#10004;| N        |
+| 8  | <script>hgFunc('cumsum(x)','Return cumulative results');</script>            | Real                 | L or E               | [link](builtin/cumsum.md)          |&#10004;| N        |
 
 

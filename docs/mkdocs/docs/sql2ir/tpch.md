@@ -9,7 +9,7 @@ Query profile data: [Database Schema](https://github.com/Sable/HorsePower/blob/m
 
 <!-- (<u>Total 22</u>: **Pass** X; <blue>Testing</blue>: X; <red>Working</red>: X) -->
 
-| ID       | Tables\*    | Pred. | Join | Aggr. | Group | Order | Return |
+| ID       | Tables\*    | Pred. | Join | Aggr. | Group | Sort  | Return |
 | :------: | :---------- | :---: | :--: | :---: | :---: | :---: | :----: |
 | [1][q1]  | L           | 1     | 0    | 8     | 2     | 2     | 10     |
 | [2][q2]  | P,S,PS,N,R  | 13    | 8    | 1     | 0     | 4     | 9      |
@@ -25,7 +25,7 @@ Query profile data: [Database Schema](https://github.com/Sable/HorsePower/blob/m
 | [12][q12]| O,L         | 6     | 1    | 2     | 1     | 1     | 3      |
 | [13][q13]| C,O         | 2     | 1(o) | 2     | 2     | 2     | 4      |
 | [14][q14]| L,P         | 3     | 1    | 1     | 0     | 0     | 1      |
-| [15][q15]| S,L         |       | 2    |       |       |       |        |
+| [15][q15]| S,L         | 2     | 2    | 2     | 2     | 1     | 5      |
 | [16][q16]| PS,P,S      | 6     | 2    | 1     | 3     | 4     | 5      |
 | [17][q17]| L,P         | 4     | 3    | 2     | 0     | 0     | 2      |
 | [18][q18]| C,O,L       | 3     | 3    | 1     | 5     | 2     | 7      |

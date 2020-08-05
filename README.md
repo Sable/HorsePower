@@ -39,7 +39,7 @@ Download the repository
 
     git clone git@github.com:Sable/HorsePower.git
 
-Setup [environment variables](docs/readme.md)
+Setup [environment variables](./setup_env.sh)
 
     cd HorsePower && source ./setup_env.sh
 
