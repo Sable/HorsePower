@@ -113,6 +113,14 @@ static Node *getParamFromChain(Chain *chain, I pos){
     return getNodeItemIndex(chainNode(chain), pos);
 }
 
+static B isNodeMarked(Node *n){
+    R 0!=lookupSimpleHash(hashOpt, (L)n);
+}
+
+static B isChainMarked(Chain *chain){
+    R isNodeMarked(chainNode(chain));
+}
+
 static void setAllChainVisitedNonRT(PatternTree *ptree){
     Chain *chain = ptree->chain;
     DOI(ptree->num, setAllChainVisitedNonRT(ptree->child[i]))
@@ -125,9 +133,9 @@ static void setAllChainVisitedNonRT(PatternTree *ptree){
     ptree->chain = NULL;
 }
 
-
 static void setAllChainVisited(PatternTree *ptree, S invc, S decl, S code){
     Chain *chain = ptree->chain;
+    setVisited(chain, true);
     DOI(ptree->num, setAllChainVisitedNonRT(ptree->child[i]))
     ChainExtra *extra = NEW(ChainExtra);
     extra->kind = OptG;
@@ -406,9 +414,9 @@ static void findCase1(ChainList *list, PatternTree* ptree, I pid){
         findCase1(list->next, ptree, pid);
         // check chains visited or not
         // WP("[%d] ",isChainVisited(list->chain)); printChain(list->chain); WP("\n");
-        if(!isChainVisited(list->chain)){
+        if(!isChainVisited(list->chain) && !isChainMarked(list->chain)){
             if(matchPattern(list->chain, ptree)){
-                //WP("Pattern %d found\n", pid); getchar();
+                // WP("Pattern %d found\n", pid); getchar();
                 cleanCode(); ptr = code;
                 genPattern(ptree, pid);
             }
@@ -520,6 +528,7 @@ static void genPatternCompress(Chain *chain, Node *n){
                 extra->funcFunc = strdup(code);
             }
             else extra->kind = SkipG;
+            setVisited(chain->chain_uses[i], true);
             Node *n = chainNode(chain->chain_uses[i]);
             addToSimpleHash(hashOpt, (L)n, (L)extra);})
 }
@@ -538,6 +547,7 @@ static void matchPatternCompress(Chain *chain){
         if(instanceOf(n, stmtK)){
             List *vars = n->val.assignStmt.vars;
             while(vars){
+                // printNode(vars->val);
                 searchAndGenPatternCompress(chain, vars->val);
                 vars = vars->next;
             }
@@ -549,9 +559,11 @@ static void findCase2(ChainList *list){
     if(list){
         findCase2(list->next);
         Chain *chain = list->chain;
-        if(!isChainVisited(chain)){
+        // WP("[%d] [%d]",isChainVisited(chain),isChainMarked(chain)); printChain(chain); WP("\n");
+        //if(!isChainVisited(chain) && !isChainMarked(chain)){
+            // WP("--> [%d] [%d]",isChainVisited(chain),isChainMarked(chain)); printChain(chain); WP("\n");
             matchPatternCompress(chain);
-        }
+        //}
     }
 }
 
@@ -646,6 +658,7 @@ static void genPatternIndex(Chain *chain, Node *n){
                 extra->funcFunc = strdup(code);
             }
             else extra->kind = SkipG;
+            setVisited(chain->chain_uses[i], true);
             Node *n = chainNode(chain->chain_uses[i]);
             addToSimpleHash(hashOpt, (L)n, (L)extra);})
 }
@@ -675,7 +688,7 @@ static void findCase3(ChainList *list){
     if(list){
         findCase3(list->next);
         Chain *chain = list->chain;
-        if(!isChainVisited(chain)){
+        if(!isChainVisited(chain) && !isChainMarked(chain)){
             matchPatternIndex(chain);
         }
     }
@@ -688,7 +701,7 @@ static void findCase3(ChainList *list){
  */
 static void analyzeChain(ChainList *list){
     if(optPatternKind == 0){
-        //STOP("opt all");
+        // STOP("Find all patterns: %d", numPattern);
         DOI(numPattern, findCase1(list, allPattern[i], i+1));
         //findCase1(list, allPattern[6], 7); // test with a specifc pattern
         findCase2(list); // compress
@@ -714,15 +727,43 @@ static void analyzeChain(ChainList *list){
             findCase2(list); // compress
         }
     }
+    else if(optPatternKind == 5){ // dls18
+        DOI(numPattern, findCase1(list, allPattern[i], i+1));
+        findCase2(list); // compress
+    }
+    else {
+        EP("Unknown pattern kind: %d", optPatternKind);
+    }
     
+}
+
+#define NiceSelect(x) ((x)?'x':' ')
+void printChainVisited(ChainList *list){
+    // check chains visited or not
+    if(list){
+        printChainVisited(list->next);
+        WP("[%c] [%c] ",NiceSelect(isChainVisited(list->chain)),NiceSelect(isChainMarked(list->chain)));
+        printChain(list->chain);
+        WP("\n");
+    }
+}
+
+void cleanChainVisited(ChainList *list){
+    if(list){
+        cleanChainVisited(list->next);
+        setVisited(list->chain, false);
+    }
 }
 
 static void compileMethod(Node *n){
     Node *prevMethod = currentMethod;
     currentMethod = n;
     ChainList *chains = n->val.method.meta->chains;
-    //printChainList(chains);
+    // printChainList(chains); getchar();
+    cleanChainVisited(chains->next);
+    // printChainVisited(chains->next); getchar();
     analyzeChain(chains->next);
+    // printChainVisited(chains->next); getchar();
     currentMethod = prevMethod;
 }
 

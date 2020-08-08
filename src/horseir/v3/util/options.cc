@@ -47,10 +47,11 @@ static void usageCompiler(){
     dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler target (cpu/llvm)");
     usage_n(1);
     dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:");
-    dispLine(0, INDENT, "", "> fe  : elementwise fusion");
-    dispLine(0, INDENT, "", "> fp  : fusion with patterns");
-    dispLine(0, INDENT, "", "> fa  : automatic operator fusion");
-    dispLine(0, INDENT, "", "> all : all above optimizations");
+    dispLine(0, INDENT, "", "> fe : elementwise fusion");
+    dispLine(0, INDENT, "", "> fp : fusion with patterns");
+    dispLine(0, INDENT, "", "> fa : automatic operator fusion");
+    dispLine(0, INDENT, "", "> basic: fe + fp");
+    dispLine(0, INDENT, "", "> all  : fa + fp");
 }
 
 static void usagePrinter(){
@@ -161,6 +162,7 @@ static OC obtainOptCode(S opt){
     else if(sEQ(opt, "fp1")) R OPT_FP1;
     else if(sEQ(opt, "fp2")) R OPT_FP2;
     else if(sEQ(opt, "fa")) R OPT_FA;
+    else if(sEQ(opt, "basic")) R OPT_BASIC;
     else if(sEQ(opt, "all")) R OPT_ALL;
     else R OPT_NA;
 }
@@ -170,7 +172,8 @@ const char *obtainOptStr(OC x){
         case OPT_FE : R "Elementwise Fusion";
         case OPT_FP : R "Fusion with Patterns";
         case OPT_FA : R "Automatic Operator Fusion";
-        case OPT_ALL: R "All Optimizations On";
+        case OPT_BASIC: R "Basic Optimizations On";
+        case OPT_ALL  : R "All Optimizations On";
         default: R "Unknown Optimizations";
     }
 }

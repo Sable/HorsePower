@@ -1121,7 +1121,7 @@ static void profile_join_write_one(V x, L i, FILE *fp){
         caseD
             FP(fp, "%d ", vD(x,i)); break;
         caseQ
-            FP(fp, "%d ", vQ(x,i)); break;
+            FP(fp, "%lld ", vQ(x,i)); break;
         default:
             getInfoVar(x);
             EP("%s is not supported\n", getTypeName(xp));
@@ -3256,5 +3256,46 @@ I pfnDrop(V z, V x, V y){
     TODO("Add impl.");
     R 0;
 }
+
+
+#define EXP_CUMSUM(t,q) do{v##t(z,0)=v##q(x,0); DOIa(xn, v##t(z,i)=v##q(x,i)+v##t(z,i-1))}while(0)
+I pfnCumsum(V z, V x){
+    if(isTypeGroupReal(vp(x))){
+        I typZ;
+        switch(vp(x)){
+            caseB caseJ caseH caseI caseL
+                typZ=H_L; break;
+            caseF caseE
+                typZ=H_E; break;
+            default:
+                EP("Unsupported type: %s", getTypeName(vp(x)));
+        }
+        initV(z, typZ, xn);
+        switch(vp(x)){
+            caseB EXP_CUMSUM(L,B); break;
+            caseJ EXP_CUMSUM(L,J); break;
+            caseH EXP_CUMSUM(L,H); break;
+            caseI EXP_CUMSUM(L,I); break;
+            caseL EXP_CUMSUM(L,L); break;
+            caseF EXP_CUMSUM(E,F); break;
+            // caseE EXP_CUMSUM(E,E); break;  // serial code
+            caseE {
+                // P("Parallel cumsum: %lld\n", xn);
+                DOTa(xn, {vE(z,sid)=vE(x,sid); DOI3(sid+1, sid+slen, vE(z,i)=vE(z,i-1)+vE(x,i))})
+                L seg=xn/H_CORE;
+                DOJa(H_CORE, {
+                        L sid=seg*j;
+                        E p=vE(z,sid-1);
+                        L slen=(j!=H_CORE-1)?seg:(xn-sid);
+                        DOP(slen, vE(x,sid+i)+=p)
+                    })
+            }
+            break;
+        }
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
 
 

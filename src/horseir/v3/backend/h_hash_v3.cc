@@ -382,7 +382,7 @@ static I lib_join_table_hash_r2(V z0, V z1, V x, V y, I minX, I maxX){
             R 0;
         }
         else {
-            TODO("r2: minX = %lld, maxX = %lld\n", minX, maxX);
+            TODO("r2: minX = %d, maxX = %d\n", minX, maxX);
         }
     }
     else {EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}

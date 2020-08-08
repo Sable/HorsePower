@@ -211,6 +211,7 @@ I pfnSeed          (V z, V x);
 I pfnRandK         (V z, V x, V y);
 I pfnTake          (V z, V x, V y);
 I pfnDrop          (V z, V x, V y);
+I pfnCumsum        (V z, V x);
 
 /* optimizations */
 

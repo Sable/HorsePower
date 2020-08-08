@@ -122,7 +122,7 @@ InfoNodeList *propagateType(Node *func, InfoNodeList *list){
                 cleanInfoList(currentInList);
                 copyInfoNodeList(currentInList, rtns);
             } break;
-        default: TODO("Support kind: %d\n", sn->kind);
+        default: TODO("Support kind: %d, for name %s\n", sn->kind, funcName);
     }
     return currentInList;
 }

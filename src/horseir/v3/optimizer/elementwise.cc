@@ -3,6 +3,7 @@
 typedef struct codegen_gnode{
     Node *node;
     I pnum; // # of parameter
+    Chain *chain;  // TODO: clean node and chain?
     struct codegen_gnode *pnode[5]; // parameter nodes
 }gNode;
 
@@ -77,9 +78,15 @@ static gNode *initgNode(Node *node){
     return x;
 }
 
+static gNode *initgNodeChain(Chain *chain){
+    gNode *x = initgNode(chainNode(chain));
+    x->chain = chain;
+    R x;
+}
+
 static gNode *findFusionUp(Chain *chain){
     if(isChainVisited(chain)) return NULL;
-    else chain->isVisited = true;
+    else setVisited(chain, true);
     Node *n = chainNode(chain);
     if(instanceOf(n, stmtK)){
         List *vars = nodeStmtVars(n);
@@ -94,7 +101,7 @@ static gNode *findFusionUp(Chain *chain){
         // -- useful debugging
         //printBanner("Gotcha");
         //printChain(chain); WP("\n");
-        gNode *rt = initgNode(chainNode(chain));
+        gNode *rt = initgNodeChain(chain); //initgNode(chainNode(chain));
         B isOK = true;
         I cnt = 0;
         while(param){

@@ -1,6 +1,6 @@
 #include "../global.h"
 
-CS FunctionUnaryStr[] = { /* unary 58 */
+CS FunctionUnaryStr[] = { /* unary 59 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" ,
     "not", "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",
     "asin",  "atan", "cosh", "sinh", "tanh", "acosh", "asinh", "atanh", "date",
@@ -8,7 +8,7 @@ CS FunctionUnaryStr[] = { /* unary 58 */
     "time_second", "time_mill", "unique", "str", "len", "range", "fact",
     "rand", "seed", "flip", "reverse", "where", "group", "sum", "avg",
     "min", "max", "raze", "tolist", "keys", "values",
-    "meta", "load_table", "fetch", "print"
+    "meta", "load_table", "fetch", "print", "cumsum"
 };
 
 CS FunctionBinaryStr[] = { /* binary 32 */
@@ -94,6 +94,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleRaze        propRaze
 #define ruleTolist      propToList
 #define rulePrint       propPrint
+#define ruleCumsum      propCumsum
 
 /* dyadic */ 
 #define ruleLt          commonCompare2
@@ -235,7 +236,7 @@ B checkShape(InfoNode *x, InfoNode *y){
                     if(sx->size != sy->size) { TODO("update size"); }
                     break;
                 case symbolSP:
-                    if(sx->sizeId != sy->sizeId) { TODO("fix size"); }
+                    if(sx->sizeId != sy->sizeId) { TODO("fix size: %d, %d", sx->sizeId, sy->sizeId); }
                     break;
                 case scanSP:
                     if(sx->sizeScan != sy->sizeScan) { TODO("error size"); }
@@ -336,6 +337,15 @@ static InfoNode *reductionSum(InfoNode *x){
     else if(isW(x)) rtnType = wildT;
     else return NULL;
     return newInfoNode(rtnType, newShapeNode(vectorH, SN_CONST, 1));
+}
+
+static InfoNode *propCumsum(InfoNode *x){
+    HorseType rtnType;
+    if(isIntIN(x)||isBoolIN(x)) rtnType = i64T;
+    else if(isFloatIN(x)) rtnType = f64T;
+    else if(isW(x)) rtnType = wildT;
+    else return NULL;
+    return newInfoNode(rtnType, inShape(x));
 }
 
 static InfoNode *specialUnique(InfoNode *x){
@@ -1465,7 +1475,8 @@ static O *getUnaryRules(TypeUnary x){
         CASE_VOID(     metaF, ruleMeta);
         CASE_VOID(loadTableF, ruleLoadTable);
         CASE_VOID(    fetchF, ruleFetch);
-        CASE_VOID(  printF, rulePrint);
+        CASE_VOID(    printF, rulePrint);
+        CASE_VOID(   cumsumF, ruleCumsum);
         default: EP("TypeUnary NOT defined: %s", obtainTypeUnary(x));
     }
 }

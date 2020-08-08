@@ -5,6 +5,7 @@
 #define setTpchPath(path,table)    setDataPath(path,"tpch",table,"tbl")
 #define setTpchBinPath(path,table) setDataPath(path,"tpch-bin",table,"bin")
 #define setBSPath(path,table)      setDataPath(path,"bs",table,"txt")
+#define setMorganPath(path,table)  setDataPath(path,"morgan",table,"txt")
 
 L CSV_FILE_SCALE = 1;
 L TEST_RUNS      = 1;
@@ -15,7 +16,7 @@ static O setCSVFormat(CS kind){
         LINE_SEP = '|';
         LINE_HEADER = false;
     }
-    else if(sEQ(kind, "bs")){
+    else if(sEQ(kind, "bs") || sEQ(kind,"morgan")){
         LINE_SEP = ' ';
         LINE_HEADER = true;
     }
@@ -267,6 +268,21 @@ static L readTableOptions(){
     R 0;
 }
 
+static L readTableMorgan(){
+    C CSV_LINE[128]; setMorganPath(CSV_LINE, (S)"morgan"); 
+    WP("File: %s\n", CSV_LINE);
+    L TYPE_LINE[]  = {H_FLT, H_FLT};
+    const L NUM_COL_LINE = 2;
+    Q SYM_LIST_LINE[NUM_COL_LINE];
+    const C* PRE_DEFINED[] = {
+        "x", "y"
+    };
+    initDBTable(NUM_COL_LINE, PRE_DEFINED, SYM_LIST_LINE);
+    V tableMorgan = readCSV(CSV_LINE, NUM_COL_LINE, TYPE_LINE, SYM_LIST_LINE);
+    registerTable((S)"morgan", tableMorgan);
+    R 0;
+}
+
 
 /* load tables */
 
@@ -298,6 +314,8 @@ L initTableByName(S tableName){
                 readTableBlackScholes();
             else if(sEQ(tableName, "myoptions"))
                 readTableOptions();
+            else if(sEQ(tableName, "morgan"))
+                readTableMorgan();
             else EP("Table %s NOT FOUND\n",tableName);
         }
     }

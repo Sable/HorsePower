@@ -116,4 +116,9 @@ SymbolName *getNodeSymbolName(Node *n);
 
 Node *getSingleSymbol(Node *x);
 
+
+void printChainVisited(ChainList *list);
+void cleanChainVisited(ChainList *list);
+
+
 #endif

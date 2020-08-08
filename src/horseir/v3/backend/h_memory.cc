@@ -8,9 +8,10 @@
  * 8   G = 8589934592LL
  * 50  G = 53687091200LL
  */
-const L INIT_HEAP_SIZE = 17179969184LL; // 64MB, 64*1024*1024
-const L INIT_HASH_SIZE = 1073741824;   //  1GB, 536870912;  //512MB
-const L INIT_COMPILE_SIZE = 33554432;  // 32MB
+// const L INIT_HEAP_SIZE = 17179969184LL; // 16G
+const L INIT_HEAP_SIZE = 53687091200LL; // 50GB, (enough for SF16)
+const L INIT_HASH_SIZE = 1073741824;    //  1GB, 536870912;  //512MB
+const L INIT_COMPILE_SIZE = 33554432;   // 32MB
 
 typedef struct buddy_node { /* size 48 */
     L size, level; G value;
