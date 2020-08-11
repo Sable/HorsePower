@@ -177,6 +177,7 @@ I pfnIndexOf       (V z, V x, V y);
 I pfnAppend        (V z, V x, V y);
 I pfnLike          (V z, V x, V y);
 I pfnLike2         (V z, V x, V y);
+B simpleLike2Q     (Q x, Q y);
 I pfnOrderBy       (V z, V x, V y);
 
 I pfnEach          (V z, V x,      FUNC1(foo));

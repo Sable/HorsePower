@@ -674,7 +674,7 @@ static InfoNode *commonPower(InfoNode *x, InfoNode *y){
 
 static InfoNode *propMember(InfoNode *x, InfoNode *y){
     HorseType rtnType;
-    // WP("type: x(%s), y(%s)\n",getpTypeName(x->type),getpTypeName(y->type));
+    // WP("type: x(%s), y(%s)\n",getTypeName(x->type),getTypeName(y->type));
     if(sameT(x,y) && isBasicIN(x)){
         rtnType = boolT;
     }
@@ -749,8 +749,11 @@ static ShapeNode *decideShapeCompressV(ShapeNode *x, ShapeNode *y){
     if(isSNId(x) && isSNId(y)){
         if(x->sizeId == y->sizeId)
             return newShapeNodeScan(x);
-        else
-            EP("Scan shape sizes must be the same: %d vs %d", x->sizeId, y->sizeId);
+        else{
+            WP("Scan shape sizes must be the same: %d vs %d\n", x->sizeId, y->sizeId);
+            // getchar();
+            return newShapeNode(vectorH, SN_ID, -1); // supposedly should avoid (e.g. q11)
+        }
     }
     else if(isSNConst(x) && isSNConst(y)){
         if(x->size == y->size)
@@ -895,7 +898,8 @@ static InfoNode *propSubString(InfoNode *x, InfoNode *y){
         rtnType = wildT;
     }
     else return NULL;
-    return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
+    return newInfoNode(rtnType, inShape(x));
+    // return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
 }
 
 /* special */
@@ -1152,6 +1156,11 @@ static InfoNode *propIndex(InfoNode *x, InfoNode *y){
         if(isListT(x) && isShapeScalar(inShape(y))){
             ShapeNode *subShape = getSubShape(x);
             ShapeNode *rtnShape = NULL;
+            // if(subShape){
+            //     printShapeNode(subShape); WP("\n");
+            //     printShapeNode(inShape(x)); WP("\n");
+            //     getchar();
+            // }
             if(subShape && isSameShape(inShape(x), subShape)){ // special
                 if(subShape->sizeId < 0){
                     rtnShape = newShapeNode(isListS(x)?listH:vectorH, SN_ID, -1);  //S: subtype
@@ -1160,6 +1169,9 @@ static InfoNode *propIndex(InfoNode *x, InfoNode *y){
                 else {
                     rtnShape = newShapeNode(isListS(x)?listH:vectorH, SN_ID, subShape->sizeId);
                 }
+            }
+            else if(subShape){ // (q13) copy subShape
+                rtnShape = subShape;
             }
             else { // normal
                 rtnShape = newShapeNode(isListS(x)?listH:vectorH, SN_ID, -1);

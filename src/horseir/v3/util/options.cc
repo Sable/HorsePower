@@ -163,6 +163,7 @@ static OC obtainOptCode(S opt){
     else if(sEQ(opt, "fp2")) R OPT_FP2;
     else if(sEQ(opt, "fa")) R OPT_FA;
     else if(sEQ(opt, "basic")) R OPT_BASIC;
+    else if(sEQ(opt, "basicfp")) R OPT_FP_DLS18;
     else if(sEQ(opt, "all")) R OPT_ALL;
     else R OPT_NA;
 }

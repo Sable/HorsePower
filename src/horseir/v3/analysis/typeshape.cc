@@ -239,8 +239,8 @@ static void copyInfoNode(InfoNode *x, InfoNode *y){
 static bool infoCompatible(InfoNode *x, InfoNode *y){
     if(isW(y) || (x->shape && !y->shape)){
         // TODO: Is a shape info necessary?
-        printInfoNode(x);
-        printInfoNode(y);
+        WP("Shape L: "); printInfoNode(x);
+        WP("Shape R: "); printInfoNode(y);
         EP("Right hand side type or shape unknown");
     }
     if(isW(x)) {
@@ -426,8 +426,11 @@ static void scanAssignStmt(Node *n){
             EP("Type error in assignment");
         }
     }
-    //printInfoNode(currentInList->next->in);
-    if(H_SHOW) printInfoVars(vars);
+    if(H_SHOW){
+        printNode(n);
+        //printInfoNode(currentInList->next->in);
+        printInfoVars(vars);
+    }
     cleanInfoList(currentInList);
 }
 

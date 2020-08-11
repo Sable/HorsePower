@@ -211,7 +211,7 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
         glueAnyLine("DOP(vn(y), {%c a=0; V t=vV(y,i); DOJ(vn(t), a+=v%c(x,vL(t,j))) v%c(z,i)=a%s;}) R 0;", x0c, x0c, z0c, op==2?"/vn(t)":"");
     }
     else if(op == 5 || op == 6){ // min or max
-        glueAnyLine("DOP(vn(y), {%c a=%s; V t=vV(y,i); DOJ(vn(t), {%c t0=v%c(x0,vL(t,j)); if(t0%ca)a=t0;}) v%c(z,i)=a;}) R 0;",
+        glueAnyLine("DOP(vn(y), {%c a=%s; V t=vV(y,i); DOJ(vn(t), {%c t0=v%c(x,vL(t,j)); if(t0%ca)a=t0;}) v%c(z,i)=a;}) R 0;",
                      x0c, op==5?obtainMaxValue(x0c):obtainMinValue(x0c),
                      x0c, x0c, op==5?'<':'>', z0c);
     }

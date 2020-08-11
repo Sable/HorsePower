@@ -2124,6 +2124,10 @@ I pfnLike2(V z, V x, V y){
     R 0;
 }
 
+B simpleLike2Q(Q x, Q y){
+    R matchLikeNew(getSymbolStr(x), getSymbolSize(x), getSymbolStr(y), getSymbolSize(y), 0, 0);
+}
+
 static B lib_order_basic(V z, V x, V y){
     if(isTypeGroupBasic(xp) && isBool(y) && 1 == vn(y)){
         initV(z,H_L,xn);

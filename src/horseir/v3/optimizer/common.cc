@@ -228,7 +228,7 @@ static CS obtainFuncAuto(S fn){
     CS x = obtainFuncElem(fn);
     if(x) R x;
     if(sEQ(fn, "index"))  R "INDEX";
-    if(sEQ(fn, "like"))   R "LIKE";
+    if(sEQ(fn, "like"))   R "LIKE2Q";
     if(sEQ(fn, "member")) R "MEMBER_CONST";
     if(sEQ(fn, "len"))    R "vn";
     R NULL;

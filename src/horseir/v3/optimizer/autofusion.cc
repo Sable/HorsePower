@@ -160,6 +160,12 @@ static C getFuncKind(S func){
     else R 0; // group: 'O'
 }
 
+S getCallName(Node *call){
+    Node *func    = nodeCallFunc(call);
+    SymbolKind sk = nodeNameKind(func);
+    R (builtinS == sk)? nodeName2(func): 0;
+}
+
 C getCallKind(Node *call){
     Node *func    = nodeCallFunc(call);
     SymbolKind sk = nodeNameKind(func);
@@ -263,6 +269,7 @@ static gNode *findFusionUp(Chain *chain, B isRT){
         Node *call = getStmtCall(n);
         if(call){
             C kind = getCallKind(call);
+            S funcName = getCallName(call);
             if(kind){
                 if(kind=='R' && !isRT) R NULL;
             }
@@ -308,7 +315,20 @@ static gNode *findFusionUp(Chain *chain, B isRT){
                                 //}
                             }
                             else {
-                                if('E' == kind && 'X' == nextKind(chainNode(next)));
+                                C nextK = nextKind(chainNode(next));
+                                Node *nextCall = getStmtCall(chainNode(next));
+                                S nextFuncName = getCallName(nextCall);
+                                WP("func = %s (%c), nextFuncName = %s (%c)\n", funcName,kind, nextFuncName, nextK); getchar();
+                                if('E' == kind && 'X' == nextK);
+                                else if(isRT && 'S' == kind && 'X' == nextK){
+                                    R NULL;
+                                }
+                                else if(isRT && 'X' == kind && 'S' == nextK){
+                                    R NULL; // avoid index + where
+                                }
+                                else if(isRT && 'S' == kind && kind == nextK && sNEQ(funcName, nextFuncName)){
+                                    R NULL;
+                                }
                                 else{
                                     rt->pnode[cnt] = findFusionUp(next, false);
                                 }

@@ -403,7 +403,7 @@ static void printTypeBuff(char *b, HorseType x){
         case    symT: echo(b, "sym");     break;
         case    strT: echo(b, "str");     break;
         case  monthT: echo(b, "m");       break;
-        case   dateT: echo(b, "d");       break;
+        case   dateT: echo(b, "date");    break;
         case  tableT: echo(b, "table");   break;
         case ktableT: echo(b, "ktable");  break;
         case   listT: echo(b, "list");    break;
@@ -418,16 +418,16 @@ static void printTypeBuff(char *b, HorseType x){
 void printType(HorseType x){
     buff[0]=0;
     printTypeBuff(buff, x);
-    P("%s",buff); // type(%s)
+    WP("%s",buff); // type(%s)
 }
 
 
 void printNodeType(Node *n){
-    P("[Line %3d]: %s\n",n->lineno,getNodeTypeStr(n));
+    WP("[Line %3d]: %s\n",n->lineno,getNodeTypeStr(n));
 }
 
 void printNodeLine(Node *n){
-    P("[Line %3d]: ",n->lineno); printNode(n);
+    WP("[Line %3d]: ",n->lineno); printNode(n);
 }
 
 static void printNodeStrCore(Node *n){

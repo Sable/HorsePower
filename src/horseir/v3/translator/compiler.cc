@@ -11,6 +11,7 @@ static I depth;
 static B needInd;
 static List *lhsVars;
 static Node *currentMethod;
+static B isJoinIndex;
 
 static void scanNode(Node *n);
 static void scanList(List *list);
@@ -335,8 +336,15 @@ static Node *getFirstNodeFromList(List *list){
     else R NULL;
 }
 
+static B checkJoinIndex(Node *n){
+    S methodName = nodeName2(n);
+    SymbolKind sk = nodeNameKind(n);
+    R (builtinS == sk && !strcmp(methodName, "join_index"));
+}
+
 static void scanCall(Node *n){
     SymbolKind sk = scanFuncName(nodeCallFunc(n));
+    isJoinIndex = checkJoinIndex(nodeCallFunc(n));
     glueCode("(");
     if(sk == methodS) {
         //genVarArray(lhsVars, comma);
@@ -365,6 +373,8 @@ static void scanCall(Node *n){
         glueCode(", ");
         genVarStore(lhsVars);
     }
+    if(isJoinIndex)
+        isJoinIndex = false;
 }
 
 static void scanVar(Node *n){
@@ -576,9 +586,49 @@ static void scanListFirst(List *list){
     }
 }
 
+static void genFuncName(Node *n){
+    S moduleName = nodeName1(n);
+    S methodName = nodeName2(n);
+    SymbolKind sk = nodeNameKind(n);
+    switch(sk){
+        case builtinS: glueAny("\"%s\"", methodName); break;
+        default:
+        TODO("Add support for symbol kind: %d", sk); break;
+    }
+}
+
+static void genFuncNameList(List *list){
+    if(list){
+        genFuncNameList(list->next);
+        if(list->next){
+            glueAny("%c ", comma);
+        }
+        genFuncName(list->val);
+    }
+}
+
+static void genStringFromFunc(Node *n){
+    L size = totalList(n->val.listS);
+    glueAny("%c ", comma);
+    if(size == 1){
+        glueAny("LiteralSymbol((S)");
+        Node *first = n->val.listS->val;
+        genFuncName(first);
+        glueAny(")");
+    }
+    else {
+        glueAny("LiteralVectorSymbol(%lld, (S []){",size);
+        genFuncNameList(n->val.listS);
+        glueAny("})");
+    }
+}
+
 static void scanList1(List *list, Node *first){
     scanListFirst(list);
-    scanNode(first); // put the first node last
+    if(isJoinIndex)      // special for join_index
+        genStringFromFunc(first);
+    else
+        scanNode(first); // put the first node last
 }
 
 
