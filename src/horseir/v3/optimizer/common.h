@@ -120,5 +120,7 @@ Node *getSingleSymbol(Node *x);
 void printChainVisited(ChainList *list);
 void cleanChainVisited(ChainList *list);
 
+B isScalarShapeByName(Node *n);
+
 
 #endif

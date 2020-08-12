@@ -159,7 +159,8 @@ static C obtainTypeCodeByIn(InfoNode *in){
     }
     else if(isListT(in)){
         // TODO: condition appplied with single cell type
-        return obtainTypeCodeByIn(in->subInfo);
+        // return obtainTypeCodeByIn(in->subInfo);
+        return 'G';
     }
     else TODO("Only basic type supported: %d", in->type);
 }

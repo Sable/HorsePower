@@ -3,8 +3,8 @@
 /* Pattern: general */
 
 typedef struct PatternTree{
-    I num;                    // number of child nodes
-    S func1, func2;        // functin names
+    I num;                      // number of child nodes
+    S func1, func2;             // functin names
     struct PatternTree **child; // child nodes
     Chain *chain;
 }PatternTree;
@@ -382,13 +382,15 @@ static B matchChain2(Chain *chain, S func1, S func2){
                 //WP("--> matched?: %s, %s | %s, %s\n", funcName, func1, firstP, func2);
                 return firstP?sEQ(func2, firstP):false;
             }
-            else return true;
+            else {
+                return true;
+            }
         }
     }
     return false;
 }
 
-static B matchPattern(Chain *chain, PatternTree* ptree){
+static B matchPattern(Chain *chain, PatternTree *ptree){
     if(matchChain2(chain, ptree->func1, ptree->func2)){
         I numOfDefs = ptree->num==0?0:chain->defSize;
         //WP("numOfDefs = %d, ptree->num = %d\n", numOfDefs, ptree->num);
@@ -396,15 +398,34 @@ static B matchPattern(Chain *chain, PatternTree* ptree){
             //WP("num = %d, ptree func = %s\n", numOfDefs, ptree->func1);
             //prettyPatternTree(ptree->child[0]);
             //printChain(chain->chain_defs[0]); WP("\n");
+            // WP("use size: %d | def size: %d | ", chain->useSize, chain->defSize); printChain(chain); getchar();
             DOI(numOfDefs, \
                     if(!matchPattern(chain->chain_defs[i], ptree->child[i]))R false)
-            //WP("return true\n"); getchar();
             ptree->chain = chain; /* setup */
             return true;
         }
     }
     //WP("func not matched: %s\n", ptree->func1);
     return false;
+}
+
+static I countTotalPTreeNode(PatternTree *ptree,  Chain *chain){
+    I c = (ptree->chain == chain);
+    DOI(ptree->num, c+=countTotalPTreeNode(ptree->child[i],chain))
+    R c;
+}
+
+static B checkPatternUse(PatternTree *ptree, I dep){
+    Chain *chain = ptree->chain;
+    if(dep > 0 && chain->useSize > 1){
+        I total = countTotalPTreeNode(ptree, chain);
+        if(chain->useSize != total){
+            WP("[Unable to fuse] Variable maybe used outside the pattern: use (%d) vs. in pattern (%d)\n", chain->useSize, total);
+            R false;
+        }
+    }
+    DOI(ptree->num, if(!checkPatternUse(ptree->child[i], dep+1))R false)
+    R true;
 }
 
 /* case 1: pattern trees */
@@ -415,8 +436,10 @@ static void findCase1(ChainList *list, PatternTree* ptree, I pid){
         // check chains visited or not
         // WP("[%d] ",isChainVisited(list->chain)); printChain(list->chain); WP("\n");
         if(!isChainVisited(list->chain) && !isChainMarked(list->chain)){
-            if(matchPattern(list->chain, ptree)){
-                // WP("Pattern %d found\n", pid); getchar();
+            if(matchPattern(list->chain, ptree) && checkPatternUse(ptree,0)){
+                // WP("Pattern %d found\n", pid); printChain(list->chain);
+                // WP("result: %d\n", checkPatternUse(ptree,0));
+                // getchar();
                 cleanCode(); ptr = code;
                 genPattern(ptree, pid);
             }
@@ -542,7 +565,7 @@ static void searchAndGenPatternCompress(Chain* chain, Node *n){
 }
 
 static void matchPatternCompress(Chain *chain){
-    if(!isChainMarked(chain) && chain->useSize > 1){
+    if(chain->useSize > 1){
         Node *n = chainNode(chain);
         if(instanceOf(n, stmtK)){
             List *vars = n->val.assignStmt.vars;
@@ -651,7 +674,7 @@ static void genPatternIndex(Chain *chain, Node *n){
     // add to hash tables
     DOI(chain->useSize, {
             ChainExtra *extra = NEW(ChainExtra);
-            if(i==0) {
+            if(i==chain->useSize-1) {
                 extra->kind = OptG; 
                 extra->funcInvc = invc;
                 extra->funcDecl = genDeclIndex(temp, ';');
