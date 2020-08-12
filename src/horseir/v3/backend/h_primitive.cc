@@ -1254,13 +1254,14 @@ static I pfnGroupMergable2(V z, V x){
 
 #define isGroupTrie(x) (isList(x)&&vn(x)==2&&isChar(vV(x,0))&&isChar(vV(x,1))&&vn(vV(x,0))==vn(vV(x,1)))
 #define isGroupSimpleInt(x) (isInt(x)&&isLooseOrder(x))
-#define isGroupSimpleList(x) (isList(x)&&vn(x)==1&&isLooseOrder(vV(x,0)))
+#define isGroupSimpleList(x) (isList(x)&&vn(x)==1&&isGroupSimpleInt(vV(x,0)))
 #define isGroupMergable0(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_H)
 #define isGroupMergable1(x) (isList(x)&&vn(x)==3&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_Q&&vp(vV(x,2))==H_I)
 #define isGroupMergable2(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_I&&vp(vV(x,1))==H_I)
 I pfnGroup(V z, V x){
     // profile_groupby_data(x);
     // tic();
+    // WP("items: %d %d, %d %d\n", isInt(x), isGroupSimpleInt(x), isList(x), isGroupSimpleList(x));
     if(isGroupTrie(x)){
         R pfnGroupTrie(z, x);
     }
@@ -2449,8 +2450,8 @@ static I pfnJoinIndexSingle(V z, V x, V y, V f){ // r: reversed
             L lenX = vn(x), lenY = vn(y);
             initV(z,H_G,lenZ);
             L c = 0;
-            getInfoVar(x);
-            getInfoVar(y);
+            // getInfoVar(x);
+            // getInfoVar(y);
             if(4 == op || 5 == op){
                 switch(typ){
                     caseQ R lib_join_index_basic(vV(z,0),vV(z,1),x,y,isEq);
@@ -2676,8 +2677,8 @@ I pfnTable(V z, V x, V y){
  */
 I pfnEnum(V z, V x, V y){
     if(isTypeGroupBasic(vp(x))){
-        getInfoVar(x);
-        getInfoVar(y);
+        // getInfoVar(x);
+        // getInfoVar(y);
         V eInd = allocNode();
         CHECKE(pfnIndexOf(eInd,x,y));
         L lenZ = vn(eInd);

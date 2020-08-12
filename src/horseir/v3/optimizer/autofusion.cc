@@ -318,9 +318,12 @@ static gNode *findFusionUp(Chain *chain, B isRT){
                                 C nextK = nextKind(chainNode(next));
                                 Node *nextCall = getStmtCall(chainNode(next));
                                 S nextFuncName = getCallName(nextCall);
-                                WP("func = %s (%c), nextFuncName = %s (%c)\n", funcName,kind, nextFuncName, nextK); getchar();
+                                // WP("func = %s (%c), nextFuncName = %s (%c)\n", funcName,kind, nextFuncName, nextK); getchar();
                                 if('E' == kind && 'X' == nextK);
                                 else if(isRT && 'S' == kind && 'X' == nextK){
+                                    R NULL;
+                                }
+                                else if(isRT && 'S' == kind && 'E' == nextK){
                                     R NULL;
                                 }
                                 else if(isRT && 'X' == kind && 'S' == nextK){

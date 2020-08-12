@@ -17,7 +17,7 @@ static const char *monFnName[] = {
 static const char *dyaFnName[] = {
     "pfnLt", "pfnGt", "pfnLeq", "pfnGeq", "pfnEq", "pfnNeq", "pfnPlus",
     "pfnMinus", "pfnMul", "pfnDiv", "pfnPower", "pfnLog2", "pfnMod", "pfnAnd",
-    "pfnOr", "pfnNand", "pfnNor", "pfnXor", "pfnAppend", "pfnLike",
+    "pfnOr", "pfnNand", "pfnNor", "pfnXor", "pfnAppend", "pfnLike2",
     "pfnCompress", "pfnRandK", "pfnIndexOf", "pfnTake", "pfnDrop",
     "pfnOrderBy", "pfnMember", "pfnVector", "pfnMatch", "pfnIndex",
     "pfnColumnValue", "pfnSubString"

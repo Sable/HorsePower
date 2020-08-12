@@ -1481,7 +1481,9 @@ I lib_group_by_normal_par_long(V z, V x){
     printBanner("Parallel group by for long");
     Pos *pos = (Pos*)malloc(sizeof(Pos)*xn);
     DOP(xn, {pos[i].x=vL(x,i); pos[i].i=i;})
+tic();
     lib_radixsort_core_par_long(pos, xn);
+time_toc("k0: radix sort (ms): %g\n", elapsed);
     V t = allocNode(); initV(t, H_L, xn);
     L *loc = HASH_AL(L, xn);
     DOI(xn, {vL(t,i)=pos[i].x; loc[i]=pos[i].i;})
