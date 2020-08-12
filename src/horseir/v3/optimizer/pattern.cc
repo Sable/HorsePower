@@ -443,7 +443,7 @@ static B sameVar(Node *x, Node *y){
 
 
 static B isValidPatternCompress(Chain *x, Node *n){
-    if(instanceOf(chainNode(x), stmtK)){
+    if(!isChainMarked(x) && instanceOf(chainNode(x), stmtK)){
         Node *call = getStmtCall(chainNode(x));
         if(call){
             Node *func = nodeCallFunc(call);
@@ -521,7 +521,7 @@ static void genPatternCompress(Chain *chain, Node *n){
     // add to hash tables
     DOI(chain->useSize, {
             ChainExtra *extra = NEW(ChainExtra);
-            if(i==0) {
+            if(i==chain->useSize-1) { // put the last
                 extra->kind = OptG; 
                 extra->funcInvc = invc;
                 extra->funcDecl = genDeclCompress(temp, ';');
@@ -542,7 +542,7 @@ static void searchAndGenPatternCompress(Chain* chain, Node *n){
 }
 
 static void matchPatternCompress(Chain *chain){
-    if(chain->useSize > 1){
+    if(!isChainMarked(chain) && chain->useSize > 1){
         Node *n = chainNode(chain);
         if(instanceOf(n, stmtK)){
             List *vars = n->val.assignStmt.vars;

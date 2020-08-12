@@ -260,10 +260,11 @@ I checkParamDef(Node *p, Chain *chain, I *c){
 }
 
 // TODO: improve the code quality of optimizer/elementwise.c:findFusionUp
-static gNode *findFusionUp(Chain *chain, B isRT){
+static gNode *findFusionUp(Chain *chain, B isRT, B isRT_R){
     if(isChainVisited(chain)) R NULL;
     //else setVisited(chain, true);
     Node *n = chainNode(chain);
+    B isReduction = isRT_R;
     if(instanceOf(n, stmtK)){
         List *vars = nodeStmtVars(n);
         Node *call = getStmtCall(n);
@@ -276,7 +277,7 @@ static gNode *findFusionUp(Chain *chain, B isRT){
             else R NULL;
             if(isRT){ // root support
                 switch(kind){
-                    case 'R':
+                    case 'R': isReduction = true;
                     case 'S':
                     case 'E': break;
                     case 'X': R findFusionIndex(chain);
@@ -315,10 +316,12 @@ static gNode *findFusionUp(Chain *chain, B isRT){
                                 //}
                             }
                             else {
+                                WP("- current node: "); printNode(chainNode(chain));
+                                WP("> next node:"); printNode(chainNode(next));
                                 C nextK = nextKind(chainNode(next));
                                 Node *nextCall = getStmtCall(chainNode(next));
                                 S nextFuncName = getCallName(nextCall);
-                                // WP("func = %s (%c), nextFuncName = %s (%c)\n", funcName,kind, nextFuncName, nextK); getchar();
+                                // WP("[%d] func = %s (%c), nextFuncName = %s (%c)\n", isRT, funcName,kind, nextFuncName, nextK); getchar();
                                 if('E' == kind && 'X' == nextK);
                                 else if(isRT && 'S' == kind && 'X' == nextK){
                                     R NULL;
@@ -332,8 +335,11 @@ static gNode *findFusionUp(Chain *chain, B isRT){
                                 else if(isRT && 'S' == kind && kind == nextK && sNEQ(funcName, nextFuncName)){
                                     R NULL;
                                 }
+                                else if(!isReduction && 'E' == kind && 'S' == nextK){
+                                    rt->pnode[cnt] = NULL;
+                                }
                                 else{
-                                    rt->pnode[cnt] = findFusionUp(next, false);
+                                    rt->pnode[cnt] = findFusionUp(next, false, isReduction);
                                 }
                             }
                         } break;
@@ -811,8 +817,8 @@ static void genCodeAuto(gNode *rt, B isRT){
         glueCode(genDeclSingle(temp, '{')); glueLine();
         //varNum = 0;
         //totalInputs(getNodeParams(n), rt, 0, varNames);
-        genLocalVars(varNames, varNum);
-        //DOI(varNum, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
+        //genLocalVars(varNames, varNum);
+        DOI(varNum, glueAny(indent4 "V x%lld=x[%lld]; // %s\n",i,i,varNames[i]))
         //printAllNames(); getchar();
         if(isKindR(rt)){
             glueAny(indent4);
@@ -835,6 +841,7 @@ static void genCodeAuto(gNode *rt, B isRT){
             glueAny(indent4 "DOP(vn(x0), ");
         }
         else if(isKindE(rt)){
+            glueAny(indent4 "/* Fusion: kind E */");
             glueAny(indent4 "initV(z, H_%c, vn(x0));\n", z0c);
             glueAny(indent4 "DOP(vn(x0), v%c(z,i)=", z0c);
         }
@@ -1494,7 +1501,7 @@ static void findFusion(Chain *chain){
             //     STOP("kind = %c\n", kind);
             // }
             // 1st pass, find all possible nodes
-            gNode *rt = findFusionUp(chain, true);
+            gNode *rt = findFusionUp(chain, true, false);
 			// 2nd pass, trim rt
 			trimgNodeFromTop(rt); 
             rt = analyzegNode(rt);
@@ -1845,24 +1852,28 @@ static void genCodeSpecialLike(fListNode *f){
     // debugCode((S)"Show like");
 }
 
+// compress + index
 static void genCodeBodySpecialIndex(fListNode *f){
     Node *z0 = f->nodeRtn;
     S z0s = getNameStr(z0);
     C z0c = getTypeCodeByName(z0);
     gNode *rt = f->gnode;
     gNode *next = rt->pnode[0];
-    I x0 = getNameIndex(getNodeParams(next->node)->val); // boolean
+    I x0 = getNameIndex(getNodeParams(next->node)->val);
     I x1 = getNameIndex(getNodeItemIndex(rt->node, 1));
+    I x2 = getNameIndex(getNodeItemIndex(next->node, 1)); // boolean
+    // WP("x0 = %d, x1 = %d, x2 = %d\n",x0,x1,x2);
     depth++;
+    glueAnyLine("/* Fusion: special index */");
     glueAnyLine("L lenZ = 0, parZ[H_CORE], offset[H_CORE];");
     glueAnyLine("DOI(H_CORE, parZ[i]=offset[i]=0)");
-    glueAnyLine("CHECKE(getNumOfNonZero(x%d,parZ));",x0);
+    glueAnyLine("CHECKE(getNumOfNonZero(x%d,parZ));",x2);
     glueAnyLine("DOI(H_CORE, lenZ += parZ[i])");
     glueAnyLine("DOIa(H_CORE, offset[i]=parZ[i-1]+offset[i-1])");
     glueAnyLine("initV(z, H_%c, lenZ);",z0c);
-    glueAnyLine("DOT(vn(x%d), if(vB(x%d,i)){L c=offset[tid]++;\\",x0,x0);
+    glueAnyLine("DOT(vn(x%d), if(vB(x%d,i)){L c=offset[tid]++;\\",x2,x2);
     depth++;
-    glueAnyLine("v%c(z,c) = v%c(x%d,i);})",z0c,z0c,x1);
+    glueAnyLine("v%c(z,c) = v%c(x%d,vL(x%d,i));})",z0c,z0c,x1,x0);
     depth--;
     glueAnyLine("R 0;");
     depth--;
@@ -2090,7 +2101,7 @@ static void genCodeVectorSingle(fListNode **fList){
         genCodeSpecialLike(f);
     }
     else if(isSpecialIndex(f)){
-        WP("special index found!!!\n");
+        // WP("special index found!!!\n");
         gNode *rt = f->gnode;
         totalInputs(getNodeParams(rt->node), rt, 0, varNames); // load all vars
         saveToLocalVars(fList, 1);
