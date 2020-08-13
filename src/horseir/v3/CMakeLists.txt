@@ -80,11 +80,11 @@ add_executable(${EXE_NAME} ${SRC_FILES}
                            ${BISON_HorseBison_OUTPUTS}
                            ${FLEX_HorseFlex_OUTPUTS})
 
-target_include_directories(${EXE_NAME} PUBLIC $ENV{HORSE_BASE}/libs/include)
+target_include_directories(${EXE_NAME} PUBLIC $ENV{HORSE_LIB_INCLUDE})
 
 target_link_libraries(${EXE_NAME} m)
 target_link_libraries(${EXE_NAME} stdc++)
-target_link_libraries(${EXE_NAME} $ENV{HORSE_BASE}/libs/lib/libpcre2-8.a)
+target_link_libraries(${EXE_NAME} $ENV{HORSE_LIB_LIB}/libpcre2-8.a)
 target_link_libraries(${EXE_NAME} ${llvm_libs})
 
 # sable-tigger

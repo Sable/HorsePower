@@ -2,7 +2,7 @@ module default{
   import Builtin.*;
   def main() : table{
     t0:? = @load_table(`lineitem:sym);
-    t1:enum = check_cast(@column_value(t0,`l_orderkey:sym), enum);
+    t1:enum<i32> = check_cast(@column_value(t0,`l_orderkey:sym), enum<i32>);
     t12:date = check_cast(@column_value(t0,`l_shipdate:sym), date);
     t13:date = check_cast(@column_value(t0,`l_commitdate:sym), date);
     t14:date = check_cast(@column_value(t0,`l_receiptdate:sym), date);

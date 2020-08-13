@@ -1,72 +1,80 @@
 module default{
   import Builtin.*;
   def main() : table{
-      a0:? = @load_table(`customer:sym);
-      a1:? = @load_table(`orders:sym);
-      a2:? = @load_table(`lineitem:sym);
-      // customer
-      c00:? = check_cast(@column_value(a0, `c_custkey:sym  ), i64);
-      c01:? = check_cast(@column_value(a0, `c_name:sym     ), sym);
-      // orders
-      c10:? = check_cast(@column_value(a1, `o_orderkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `o_orderdate:sym ), date);
-      c12:? = check_cast(@column_value(a1, `o_totalprice:sym), f64);
-      c13:? = check_cast(@column_value(a1, `o_custkey:sym   ), enum);
-      // lineitem
-      c20:? = check_cast(@column_value(a2, `l_orderkey:sym  ), enum);
-      c21:? = check_cast(@column_value(a2, `l_quantity:sym  ), f64);
-      // 0. group by
-      t0_k:? = @fetch(c20);
-      t0_0:? = @group(t0_k);
-      t0_1:? = @keys(t0_0);
-      t0_2:? = @values(t0_0);
-      t0_3:? = @each_right(@index, c21, t0_2);
-      t0_4:? = @each(@sum, t0_3);
-      t0_5:? = @raze(t0_4);
-      t0_6:? = @gt(t0_5, 300:i64);
-      t0_7:? = @compress(t0_6, t0_1);
-      t0_8:? = @index(t0_k, t0_7);
-      // 1. orderkey: 0_ and o_
-      t1_0:? = @member(c10, t0_8); // @member(t0_8, c10);
-      t1_1:? = @values(c13);
-      // 2. custkey: c_ and 1_
-      // 3. orderkey: 2_ and l_
-      t3_0:? = @values(c20);
-      t3_1:? = @index(t1_0, t3_0);    // mask : l_
-      t3_2:? = @compress(t3_1, t3_0); // index: o_
-      t3_3:? = @index(t1_1, t3_2);    // index: c_
-      t3_4:? = @index(c00, t3_3); // c_custkey
-      t3_5:? = @index(c01, t3_3); // c_name
-      t3_6:? = @index(c10, t3_2); // o_orderkey
-      t3_7:? = @index(c11, t3_2); // o_orderdate
-      t3_8:? = @index(c12, t3_2); // o_totalprice
-      t3_9:? = @compress(t3_1, c21); // l_quantity
-      // 4. group
-      t4_0:? = @list(t3_5, t3_4, t3_6, t3_7, t3_8);
-      t4_1:? = @group(t4_0);
-      t4_2:? = @keys(t4_1);
-      t4_3:? = @values(t4_1);
-      t4_4:? = @each_right(@index, t3_9, t4_3);
-      t4_5:? = @each(@sum, t4_4);
-      t4_6:? = @raze(t4_5);
-      t4_7:? = @index(t3_5, t4_2);
-      t4_8:? = @index(t3_4, t4_2);
-      t4_9:? = @index(t3_6, t4_2);
-      t4_10:? = @index(t3_7, t4_2);
-      t4_11:? = @index(t3_8, t4_2);
-      // 5. order by
-      t5_0:? = @list(t4_11, t4_10);
-      t5_1:? = @order(t5_0, (0,1):bool);
-      t5_2:? = @index(t4_7, t5_1);
-      t5_3:? = @index(t4_8, t5_1);
-      t5_4:? = @index(t4_9, t5_1);
-      t5_5:? = @index(t4_10, t5_1);
-      t5_6:? = @index(t4_11, t5_1);
-      t5_7:? = @index(t4_6, t5_1);
-      // result
-      w0:? = (`c_name,`c_custkey,`o_orderkey,`o_orderdate,`o_totalprice,`sum):sym;
-      w1:? = @list(t5_2,t5_3,t5_4,t5_5,t5_6,t5_7);
-      w2:? = @table(w0,w1);
-      return w2;
+    t0:? = @load_table(`customer:sym);
+    t1:i32 = check_cast(@column_value(t0,`c_custkey:sym), i32);
+    t2:sym = check_cast(@column_value(t0,`c_name:sym), sym);
+    t9:? = @load_table(`lineitem:sym);
+    t10:enum<i32> = check_cast(@column_value(t9,`l_orderkey:sym), enum<i32>);
+    t14:f64 = check_cast(@column_value(t9,`l_quantity:sym), f64);
+    t26:? = @fetch(t10);
+    t27:? = @list(t26);
+    t28:? = @group(t27);
+    t29:? = @keys(t28);
+    t30:? = @values(t28);
+    t31:? = @index(t26,t29);
+    t32:? = @each_right(@index,t14,t30);
+    t33:? = @each(@sum,t32);
+    t34:? = @raze(t33);
+    t35:? = @gt(t34,300:f64);
+    t36:? = @compress(t35,t31);
+    t39:? = @load_table(`orders:sym);
+    t40:i32 = check_cast(@column_value(t39,`o_orderkey:sym), i32);
+    t41:enum<i32> = check_cast(@column_value(t39,`o_custkey:sym), enum<i32>);
+    t43:f64 = check_cast(@column_value(t39,`o_totalprice:sym), f64);
+    t44:date = check_cast(@column_value(t39,`o_orderdate:sym), date);
+    t49:? = @member(t40,t36);
+    t50:? = @compress(t49,t40);
+    t51:? = @fetch(t41);
+    t52:? = @compress(t49,t51);
+    t54:? = @compress(t49,t43);
+    t55:? = @compress(t49,t44);
+    t60:? = @join_index(@eq,t1,t52);
+    t61:? = @index(t60,0:i64);
+    t62:? = @index(t60,1:i64);
+    t63:? = @index(t1,t61);
+    t64:? = @index(t2,t61);
+    t72:? = @index(t50,t62);
+    t75:? = @index(t54,t62);
+    t76:? = @index(t55,t62);
+    t81:? = @load_table(`lineitem:sym);
+    t82:enum<i32> = check_cast(@column_value(t81,`l_orderkey:sym), enum<i32>);
+    t86:f64 = check_cast(@column_value(t81,`l_quantity:sym), f64);
+    t98:? = @fetch(t82);
+    t99:? = @join_index(@eq,t72,t98);
+    t100:? = @index(t99,0:i64);
+    t101:? = @index(t99,1:i64);
+    t102:? = @index(t63,t100);
+    t103:? = @index(t64,t100);
+    t110:? = @index(t72,t100);
+    t113:? = @index(t75,t100);
+    t114:? = @index(t76,t100);
+    t123:? = @index(t86,t101);
+    t135:? = @list(t103,t102,t110,t114,t113);
+    t136:? = @group(t135);
+    t137:? = @keys(t136);
+    t138:? = @values(t136);
+    t139:? = @index(t103,t137);
+    t140:? = @index(t102,t137);
+    t141:? = @index(t110,t137);
+    t142:? = @index(t114,t137);
+    t143:? = @index(t113,t137);
+    t144:? = @each_right(@index,t123,t138);
+    t145:? = @each(@sum,t144);
+    t146:? = @raze(t145);
+    t147:? = @list(t143,t142);
+    t148:? = @order(t147,(0,1):bool);
+    t149:? = @index(t139,t148);
+    t150:? = @index(t140,t148);
+    t151:? = @index(t141,t148);
+    t152:? = @index(t142,t148);
+    t153:? = @index(t143,t148);
+    t154:? = @index(t146,t148);
+    t155:? = (`c_name,`c_custkey,`o_orderkey,`o_orderdate,`o_totalprice,`sum):sym;
+    t156:? = @list(t149,t150,t151,t152,t153,t154);
+    t157:? = @table(t155,t156);
+    return t157;
   }
 }
+// Program slicing (before 164, after 78)
+// Elapsed time: 4.40 ms

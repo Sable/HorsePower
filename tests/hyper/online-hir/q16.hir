@@ -3,7 +3,7 @@ module default{
   def main() : table{
     t0:? = @load_table(`supplier:sym);
     t1:i32 = check_cast(@column_value(t0,`s_suppkey:sym), i32);
-    t7:sym = check_cast(@column_value(t0,`s_comment:sym), sym);
+    t7:str = check_cast(@column_value(t0,`s_comment:sym), str);
     t8:? = @like(t7,`"%Customer%Complaints%":sym);
     t9:? = @compress(t8,t1);
     t16:? = @load_table(`part:sym);

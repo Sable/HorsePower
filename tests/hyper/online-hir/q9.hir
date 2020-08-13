@@ -1,122 +1,95 @@
 module default{
   import Builtin.*;
   def main() : table{
-      a0:? = @load_table(`part:sym    );
-      a1:? = @load_table(`supplier:sym);
-      a2:? = @load_table(`lineitem:sym);
-      a3:? = @load_table(`partsupp:sym);
-      a4:? = @load_table(`orders:sym  );
-      a5:? = @load_table(`nation:sym  );
-      // part
-      c00:? = check_cast(@column_value(a0, `p_partkey:sym), i64);
-      c01:? = check_cast(@column_value(a0, `p_name:sym   ), sym);
-      // supplier
-      c10:? = check_cast(@column_value(a1, `s_suppkey:sym  ), i64);
-      c11:? = check_cast(@column_value(a1, `s_nationkey:sym), enum<i64>);
-      // lineitem
-      c20:? = check_cast(@column_value(a2, `l_suppkey:sym  ), i64);
-      c21:? = check_cast(@column_value(a2, `l_partkey:sym  ), i64);
-      c22:? = check_cast(@column_value(a2, `l_orderkey:sym ), enum<i64>);
-      c23:? = check_cast(@column_value(a2, `l_extendedprice:sym), f64);
-      c24:? = check_cast(@column_value(a2, `l_discount:sym ), f64);
-      c25:? = check_cast(@column_value(a2, `l_quantity:sym ), i64);
-      //c26:? = check_cast(@column_value(a2, `l_partkey`l_suppkey:sym), list<?>);
-      // partsupp
-      c30:? = check_cast(@column_value(a3, `ps_suppkey:sym   ), enum<i64>);
-      c31:? = check_cast(@column_value(a3, `ps_partkey:sym   ), enum<i64>);
-      c32:? = check_cast(@column_value(a3, `ps_supplycost:sym), f64);
-      // orders
-      c40:? = check_cast(@column_value(a4, `o_orderkey:sym   ), i64);
-      c41:? = check_cast(@column_value(a4, `o_orderdate:sym  ), date);
-      // nation
-      c50:? = check_cast(@column_value(a5, `n_nationkey:sym  ), i64);
-      c51:? = check_cast(@column_value(a5, `n_name:sym       ), sym);
-      // 0. partkey: p_ and ps_
-      t0_0:? = @like(c01, "%green%":str);
-      t0_1:? = @values(c31);
-      t0_2:? = @index(t0_0, t0_1);
-      t0_3:? = @compress(t0_2, t0_1);
-      t0_4:? = @index(c00, t0_3);     // p_partkey
-      // 1. nationkey: n_ and s_
-      t1_0:? = @values(c11);
-      t1_1:? = @index(c51, t1_0); // n_name
-      // 2. suppkey: 1_ and 0_
-      t2_0:? = @values(c30);
-      t2_1:? = @compress(t0_2, t2_0);
-      t2_2:? = @fetch(c30);
-      t2_3:? = @fetch(c31);
-      t2_4:? = @compress(t0_2, t2_2); // ps_suppkey
-      t2_5:? = @compress(t0_2, t2_3); // ps_partkey
-      t2_6:? = @index(c10 , t2_1);    // s_suppkey
-      t2_7:? = @index(t1_1, t2_1);    // n_name
-      t2_8:? = @compress(t0_2, c32);  // ps_supplycost
-      // 3.1 suppkey : ps_ and l_
-      // 3.2 partkey : ps_ and l_
-      // 3.3 partkey :  p_ and l_
-      // 3.4 suppkey :  s_ and l_
-      t3_0:? = @list(t2_4,t2_5,t0_4,t2_6);
-      t3_1:? = @list(c20,c21,c21,c20);
-      t3_2:? = @join_index(@eq, t3_0, t3_1);
-      t3_3:? = @index(t3_2, 0:i64);
-      t3_4:? = @index(t3_2, 1:i64);
-      t3_k:? = @fetch(c22);
-      t3_5:? = @index(t3_k, t3_4);  // l_orderkey
-      t3_6:? = @index(c23 , t3_4);  // l_extendedprice
-      t3_7:? = @index(c24 , t3_4);  // l_discount
-      t3_8:? = @index(c25 , t3_4);  // l_quantity
-      t3_9:? = @index(t2_7, t3_3);  // n_name
-      t3_10:? = @index(t2_8, t3_3); // ps_supplycost
-      // 4. orderkey: l_ and o_
-      t4_0:? = @join_index(@eq, t3_5, c40);
-      t4_1:? = @index(t4_0, 0:i64);
-      t4_2:? = @index(t4_0, 1:i64);
-      t4_3:? = @index(c41, t4_2);
-      t4_4:? = @date_year(t4_3);   // o_year
-      t4_5:? = @index(t3_9, t4_1); // n_name
-      t4_6:? = @index(t3_6, t4_1); // l_extendedprice
-      t4_7:? = @index(t3_7, t4_1); // l_discount
-      t4_8:? = @index(t3_8, t4_1); // l_quantity
-      t4_9:? = @index(t3_10,t4_1); // ps_supplycost
-      // group by
-      t5_0:? = @list(t4_5, t4_4);
-      t5_k:? = @group(t5_0);
-      t5_1:? = @keys(t5_k);
-      t5_2:? = @values(t5_k);
-      t5_3:? = @minus(1:f64, t4_7);
-      t5_4:? = @mul(t4_6, t5_3);
-      t5_5:? = @mul(t4_9, t4_8);
-      t5_6:? = @minus(t5_4, t5_5);  // amount
-      t5_7:? = @each_right(@index,t5_6,t5_2);
-      t5_8:? = @each(@sum, t5_7);
-      t5_9:? = @raze(t5_8);         // sum_profit
-      t5_10:? = @index(t4_5, t5_1); // n_name (nation)
-      t5_11:? = @index(t4_4, t5_1); // o_year
-      // order by
-      t6_0:? = @list(t5_10, t5_11);
-      t6_1:? = @order(t6_0, (1,0):bool);
-      t6_2:? = @index(t5_10, t6_1);
-      t6_3:? = @index(t5_11, t6_1);
-      t6_4:? = @index(t5_9 , t6_1);
-      // result
-      w0:? = (`nation,`o_year,`sum_profit):sym;
-      w1:? = @list(t6_2, t6_3, t6_4);
-      w2:? = @table(w0,w1);
-      return w2;
+    t0:? = @load_table(`nation:sym);
+    t2:sym = check_cast(@column_value(t0,`n_name:sym), sym);
+    t5:? = @load_table(`supplier:sym);
+    t6:i32 = check_cast(@column_value(t5,`s_suppkey:sym), i32);
+    t9:enum<i32> = check_cast(@column_value(t5,`s_nationkey:sym), enum<i32>);
+    t13:? = @values(t9);
+    t15:? = @index(t2,t13);
+    t19:? = @load_table(`part:sym);
+    t20:i32 = check_cast(@column_value(t19,`p_partkey:sym), i32);
+    t21:sym = check_cast(@column_value(t19,`p_name:sym), sym);
+    t29:? = @like(t21,`"%green%":sym);
+    t39:? = @load_table(`partsupp:sym);
+    t40:enum<i32> = check_cast(@column_value(t39,`ps_partkey:sym), enum<i32>);
+    t41:enum<i32> = check_cast(@column_value(t39,`ps_suppkey:sym), enum<i32>);
+    t43:f64 = check_cast(@column_value(t39,`ps_supplycost:sym), f64);
+    t45:? = @values(t40);
+    t46:? = @index(t29,t45);
+    t47:? = @compress(t46,t45);
+    t48:? = @where(t46);
+    t49:? = @index(t20,t47);
+    t58:? = @fetch(t40);
+    t59:? = @index(t58,t48);
+    t60:? = @fetch(t41);
+    t61:? = @index(t60,t48);
+    t63:? = @index(t43,t48);
+    t65:? = @join_index(@eq,t6,t61);
+    t66:? = @index(t65,0:i64);
+    t67:? = @index(t65,1:i64);
+    t69:? = @index(t15,t66);
+    t72:? = @index(t6,t66);
+    t80:? = @index(t49,t67);
+    t89:? = @index(t59,t67);
+    t90:? = @index(t61,t67);
+    t92:? = @index(t63,t67);
+    t94:? = @load_table(`lineitem:sym);
+    t95:enum<i32> = check_cast(@column_value(t94,`l_orderkey:sym), enum<i32>);
+    t96:i32 = check_cast(@column_value(t94,`l_partkey:sym), i32);
+    t97:i32 = check_cast(@column_value(t94,`l_suppkey:sym), i32);
+    t99:f64 = check_cast(@column_value(t94,`l_quantity:sym), f64);
+    t100:f64 = check_cast(@column_value(t94,`l_extendedprice:sym), f64);
+    t101:f64 = check_cast(@column_value(t94,`l_discount:sym), f64);
+    t111:? = @list(t90,t89,t80,t72);
+    t112:? = @list(t97,t96,t96,t97);
+    t113:? = @join_index(@eq,t111,t112);
+    t114:? = @index(t113,0:i64);
+    t115:? = @index(t113,1:i64);
+    t117:? = @index(t69,t114);
+    t139:? = @index(t92,t114);
+    t141:? = @fetch(t95);
+    t142:? = @index(t141,t115);
+    t146:? = @index(t99,t115);
+    t147:? = @index(t100,t115);
+    t148:? = @index(t101,t115);
+    t158:? = @load_table(`orders:sym);
+    t159:i32 = check_cast(@column_value(t158,`o_orderkey:sym), i32);
+    t163:date = check_cast(@column_value(t158,`o_orderdate:sym), date);
+    t168:? = @join_index(@eq,t159,t142);
+    t169:? = @index(t168,0:i64);
+    t170:? = @index(t168,1:i64);
+    t172:? = @index(t117,t170);
+    t194:? = @index(t139,t170);
+    t200:? = @index(t146,t170);
+    t201:? = @index(t147,t170);
+    t202:? = @index(t148,t170);
+    t217:? = @index(t163,t169);
+    t222:? = @date_year(t217);
+    t223:? = @mul(t194,t200);
+    t224:? = @minus(1:i32,t202);
+    t225:? = @mul(t201,t224);
+    t226:? = @minus(t225,t223);
+    t227:? = @list(t172,t222);
+    t228:? = @group(t227);
+    t229:? = @keys(t228);
+    t230:? = @values(t228);
+    t231:? = @index(t172,t229);
+    t232:? = @index(t222,t229);
+    t233:? = @each_right(@index,t226,t230);
+    t234:? = @each(@sum,t233);
+    t235:? = @raze(t234);
+    t236:? = @list(t231,t232);
+    t237:? = @order(t236,(1,0):bool);
+    t238:? = @index(t231,t237);
+    t239:? = @index(t232,t237);
+    t240:? = @index(t235,t237);
+    t241:? = (`nation,`o_year,`sum_profit):sym;
+    t242:? = @list(t238,t239,t240);
+    t243:? = @table(t241,t242);
+    return t243;
   }
 }
-// join in steps (depleted)
-// t3_0:? = @join_index(@eq, t2_6, c20);
-// t3_1:? = @index(t3_0, 0:i32);
-// t3_2:? = @index(t3_0, 1:i32);
-// t3_3:? = @index(t2_7, t3_1);  // ps_partkey
-// t3_4:? = @index(t0_4, t3_1);  //  p_partkey
-// t3_5:? = @index(t2_5, t3_1);  //  s_suppkey
-// t3_6:? = @index(c20 , t3_2);  //  l_suppkey
-// t3_7:? = @index(c21 , t3_2);  //  l_partkey
-// t3_8:? = @eq(t3_3, t3_7);
-// t3_9:? = @eq(t3_4, t3_7);
-// t3_10:? = @eq(t3_5, t3_6);
-// t3_11:? = @and(t3_8, t3_9);
-// t3_12:? = @and(t3_11, t3_10);
-// t3_13:? = @compress(t3_12, t3_1);
-// t3_14:? = @compress(t3_12, t3_2);
+// Program slicing (before 250, after 93)
+// Elapsed time: 3.99 ms

@@ -1,125 +1,93 @@
 module default{
   import Builtin.*;
   def main() : table{
-      a0:? = @load_table(`supplier:sym);
-      a1:? = @load_table(`orders:sym);
-      a2:? = @load_table(`nation:sym);
-      a3:? = @load_table(`lineitem:sym); // l1
-      a4:? = @load_table(`lineitem:sym); // l2
-      a5:? = @load_table(`lineitem:sym); // l3
-      // supplier
-      c00:? = check_cast(@column_value(a0, `s_name:sym     ), sym);
-      c01:? = check_cast(@column_value(a0, `s_nationkey:sym), enum);
-      c02:? = check_cast(@column_value(a0, `s_suppkey:sym  ), i64);
-      // orders
-      c10:? = check_cast(@column_value(a1, `o_orderkey:sym   ), i64);
-      c11:? = check_cast(@column_value(a1, `o_orderstatus:sym), char);
-      // nation
-      c20:? = check_cast(@column_value(a2, `n_name:sym     ), sym);
-      c21:? = check_cast(@column_value(a2, `n_nationkey:sym), i64);
-      // lineitem (l1)
-      c30:? = check_cast(@column_value(a3, `l_suppkey:sym    ), i64 );
-      c31:? = check_cast(@column_value(a3, `l_orderkey:sym   ), enum);
-      c32:? = check_cast(@column_value(a3, `l_receiptdate:sym), date);
-      c33:? = check_cast(@column_value(a3, `l_commitdate:sym ), date);
-      // 0. nationkey: n_ and s_
-      t0_0:? = @eq(c20, `"SAUDI ARABIA":sym);
-      t0_1:? = @values(c01);
-      t0_2:? = @index(t0_0, t0_1);  // mask: s_
-      t0_3:? = @compress(t0_2,c02); // s_suppkey
-      t0_4:? = @compress(t0_2,c00); // s_name
-      // 1. suppkey: 0_ and l_
-      t1_0:? = @gt(c32,c33);
-      t1_1:? = @compress(t1_0, c30); // l_suppkey
-      t1_k:? = @fetch(c31);          // t1_5
-      t1_2:? = @compress(t1_0, t1_k);
-      t1_3:? = @join_index(@eq, t0_3, t1_1);
-      t1_4:? = @index(t1_3, 0:i64);
-      t1_5:? = @index(t1_3, 1:i64);
-      t1_6:? = @index(t1_2, t1_5);  // l_orderkey
-      t1_7:? = @index(t1_1 , t1_5); // l_suppkey
-      t1_8:? = @index(t0_4, t1_4);  // s_name
-      // 2. orderkey: 1_ and o_
-      t2_0:? = @eq(c11, 'F':char);
-      t2_1:? = @compress(t2_0, c10); // o_orderkey
-      t2_2:? = @join_index(@eq,t1_6,t2_1);
-      t2_3:? = @index(t2_2, 0:i64);
-      t2_4:? = @index(t2_2, 1:i64);
-      t2_5:? = @index(t1_6, t2_3); // l_orderkey
-      t2_6:? = @index(t1_7, t2_3); // l_suppkey
-      t2_7:? = @index(t1_8, t2_3); // s_name
-      // experiment 1
-      //t3_0:? = @gt(c32,c33);
-      //t3_1:? = @compress(t3_0, c30);  // l_suppkey2
-      //t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
-      //t3_3:? = @list(t2_5, t2_6);
-      //t3_4:? = @list(t3_2, t3_1);
-      //t3_5:? = @join_index(@eq@neq,t3_3, t3_4);
-      //t3_6:? = @index(t3_5, 0:i64);
-      //t3_7:? = @unique(t3_6);
-      //xx:? = @sum(t3_7);
-      //xx:? = @sum(t2_5);
-      // experiment 2
-      //t3_0:? = @gt(c32,c33);
-      //t3_1:? = @compress(t3_0, c30);  // l_suppkey2
-      //t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
-      //t3_3:? = @list(t2_5, t2_6);
-      //t3_4:? = @list(t3_2, t3_1);
-      //t3_5:? = @join_leftanti(@eq@neq,t3_3, t3_4);
-      // Note 1: lineitem2(plan) is lineitem3(query)
-      // Note 2: lineitem3(plan) is lineitem2(query)
-      // Note 3: join_leftanti and join_rightanti
-      // Note 4: join_leftsemi and join_rightsemi
-      // 3 left_antijoin
-      // 3.1 l_orderkey = l_orderkey2
-      // 3.2 l_suppkey <> l_suppkey2
-      t3_0:? = @gt(c32,c33);
-      t3_1:? = @compress(t3_0, c30);  // l_suppkey2
-      t3_2:? = @compress(t3_0, t1_k); // l_orderkey2
-      t3_3:? = @list(t2_5, t2_6);
-      t3_4:? = @list(t3_2, t3_1);
-      t3_5:? = @join_index(@eq@neq,t3_3,t3_4);
-      t3_6:? = @index(t3_5, 0:i64);
-      t3_7:? = @len(t2_5);
-      t3_8:? = @vector(t3_7, 1:bool);
-      @print(t3_8);
-      @print(t3_6);
-      t3_9:? = @index_a(t3_8, t3_6, 0:bool);
-      t3_10:? = @compress(t3_9, t2_5); // l_orderkey
-      t3_11:? = @compress(t3_9, t2_6); // l_suppkey
-      t3_12:? = @compress(t3_9, t2_7); // s_name
-      //x1:? = @order(t3_8, 1:bool);
-      //x2:? = @index(t3_8, x1);
-      //x3:? = @sum(x2); // 6923
-      // 4 left_semijoin
-      // 4.1 l_orderkey = l_orderkey3
-      // 4.2 l_suppkey <> l_suppkey3
-      t4_0:? = @list(t3_10, t3_11);
-      t4_1:? = @list(t1_k, c30);
-      @print(t4_0);
-      @print(t4_1);
-      t4_2:? = @join_index(@eq@neq,t4_0,t4_1);
-      t4_3:? = @index(t4_2, 0:i64);
-      t4_4:? = @unique(t4_3);
-      t4_5:? = @index(t4_3, t4_4);
-      //xx:? = @sum(t4_5);  // 4144
-      t4_6:? = @index(t3_12, t4_5); // s_name
-      // 5. groupby
-      t5_0:? = @group(t4_6);
-      t5_1:? = @keys(t5_0);
-      t5_2:? = @values(t5_0);
-      t5_3:? = @each(@len, t5_2);
-      t5_4:? = @raze(t5_3);
-      t5_5:? = @index(t4_6, t5_1);
-      // 6. order
-      t6_0:? = @list(t5_4, t5_5);
-      t6_1:? = @order(t6_0, (0,1):bool);
-      t6_2:? = @index(t5_5, t6_1);
-      t6_3:? = @index(t5_4, t6_1);
-      // result
-      w0:? = (`s_name,`numwait):sym;
-      w1:? = @list(t6_2, t6_3);
-      w2:? = @table(w0,w1);
-      return w2;
+    t0:? = @load_table(`nation:sym);
+    t2:sym = check_cast(@column_value(t0,`n_name:sym), sym);
+    t5:? = @eq(t2,`"SAUDI ARABIA":sym);
+    t10:? = @load_table(`supplier:sym);
+    t11:i32 = check_cast(@column_value(t10,`s_suppkey:sym), i32);
+    t12:str = check_cast(@column_value(t10,`s_name:sym), str);
+    t14:enum<i32> = check_cast(@column_value(t10,`s_nationkey:sym), enum<i32>);
+    t18:? = @values(t14);
+    t19:? = @index(t5,t18);
+    t21:? = @where(t19);
+    t26:? = @index(t11,t21);
+    t27:? = @index(t12,t21);
+    t34:? = @load_table(`lineitem:sym);
+    t35:enum<i32> = check_cast(@column_value(t34,`l_orderkey:sym), enum<i32>);
+    t37:i32 = check_cast(@column_value(t34,`l_suppkey:sym), i32);
+    t46:date = check_cast(@column_value(t34,`l_commitdate:sym), date);
+    t47:date = check_cast(@column_value(t34,`l_receiptdate:sym), date);
+    t51:? = @gt(t47,t46);
+    t52:? = @fetch(t35);
+    t83:? = @compress(t51, t52);
+    //t52:? = @compress(t51,t35);
+    t54:? = @compress(t51,t37);
+    t68:? = @join_index(@eq,t26,t54);
+    t69:? = @index(t68,0:i64);
+    t70:? = @index(t68,1:i64);
+    t77:? = @index(t27,t69);
+    //t83:? = @fetch(t52);
+    t84:? = @index(t83,t70);
+    t86:? = @index(t54,t70);
+    t100:? = @load_table(`orders:sym);
+    t101:i32 = check_cast(@column_value(t100,`o_orderkey:sym), i32);
+    t103:char = check_cast(@column_value(t100,`o_orderstatus:sym), char);
+    t110:? = @eq(t103,'F':char);
+    t111:? = @compress(t110,t101);
+    t120:? = @join_index(@eq,t111,t84);
+    t122:? = @index(t120,1:i64);
+    t128:? = @index(t77,t122);
+    t134:? = @index(t84,t122);
+    t136:? = @index(t86,t122);
+    t160:? = @load_table(`lineitem:sym);
+    t161:enum<i32> = check_cast(@column_value(t160,`l_orderkey:sym), enum<i32>);
+    t163:i32 = check_cast(@column_value(t160,`l_suppkey:sym), i32);
+    t172:date = check_cast(@column_value(t160,`l_commitdate:sym), date);
+    t173:date = check_cast(@column_value(t160,`l_receiptdate:sym), date);
+    t177:? = @gt(t173,t172);
+    t178:? = @fetch(t161);
+    t194:? = @compress(t177,t178);
+    //t178:? = @compress(t177,t161);
+    t180:? = @compress(t177,t163);
+    //t194:? = @fetch(t178);
+    t195:? = @list(t134,t136);
+    t196:? = @list(t194,t180);
+    t197:? = @join_index(@eq@neq,t195,t196);
+    t198:? = @index(t197,0:i64);
+    t199:? = @len(t134);
+    t200:? = @vector(t199,1:bool);
+    t201:? = @index_a(t200,t198,0:bool);
+    t207:? = @compress(t201,t128);
+    t213:? = @compress(t201,t134);
+    t215:? = @compress(t201,t136);
+    t238:? = @load_table(`lineitem:sym);
+    t239:enum<i32> = check_cast(@column_value(t238,`l_orderkey:sym), enum<i32>);
+    t241:i32 = check_cast(@column_value(t238,`l_suppkey:sym), i32);
+    t255:? = @fetch(t239);
+    t256:? = @list(t215,t213);
+    t257:? = @list(t241,t255);
+    t258:? = @join_index(@neq@eq,t256,t257);
+    t259:? = @index(t258,0:i64);
+    t260:? = @unique(t259);
+    t261:? = @index(t259,t260);
+    t267:? = @index(t207,t261);
+    t298:? = @list(t267);
+    t299:? = @group(t298);
+    t300:? = @keys(t299);
+    t301:? = @values(t299);
+    t302:? = @index(t267,t300);
+    t303:? = @each(@len,t301);
+    t304:? = @raze(t303);
+    t305:? = @list(t304,t302);
+    t306:? = @order(t305,(0,1):bool);
+    t307:? = @index(t302,t306);
+    t308:? = @index(t304,t306);
+    t309:? = (`s_name,`numwait):sym;
+    t310:? = @list(t307,t308);
+    t311:? = @table(t309,t310);
+    return t311;
   }
 }
+// Program slicing (before 318, after 87)
+// Elapsed time: 5.51 ms
