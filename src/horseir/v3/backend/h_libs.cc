@@ -1177,6 +1177,148 @@ static void MurmurHash3(const void *key, int len, U32 seed, void *out) {
 //    free(nodes);
 //}
 
+typedef struct hash_group_node{
+    I numDup, maxCap;
+    L  *index;
+    struct hash_group_node *next;
+}HG0, *HG;
+
+
+static L hashOneItem(V x, L k){
+    U32 rtn;
+    U32 seed = 16807;
+    switch(xp){
+        caseJ MurmurHash3(sJ(x)+k, sizeof(J), seed, &rtn); break;
+        caseI MurmurHash3(sI(x)+k, sizeof(I), seed, &rtn); break;
+        caseL MurmurHash3(sL(x)+k, sizeof(L), seed, &rtn); break;
+        caseF MurmurHash3(sF(x)+k, sizeof(F), seed, &rtn); break;
+        caseE MurmurHash3(sE(x)+k, sizeof(E), seed, &rtn); break;
+        caseQ MurmurHash3(sQ(x)+k, sizeof(Q), seed, &rtn); break;
+        caseS MurmurHash3(vS(x,k), strlen(vS(x,k)), seed, &rtn); break;
+        default:
+            EP("Support type: %d", xp);
+    }
+    R (L)rtn;
+}
+
+static HG newHashGroupNode(L pos){
+    HG t = (HG)malloc(sizeof(HG0));
+    t->numDup = 1;
+    t->maxCap = 16;
+    t->index  = NEWL(L, t->maxCap);
+    t->index[0] = pos;
+    t->next = NULL;
+    R t;
+}
+
+static void printGroupValue(V x, L p){
+    DOI(xn, { V t = vV(x,i);
+            if(i>0) WP(" ,");
+            switch(vp(t)){
+            caseJ WP("%d", (I)vJ(t,p)); break;
+            caseI WP("%d", vI(t,p)); break;
+            caseL WP("%lld", vL(t,p)); break;
+            caseF WP("%f", vF(t,p)); break;
+            caseE WP("%g", vE(t,p)); break;
+            caseS WP("%s", vS(t,p)); break;
+            caseQ WP("%lld", vQ(t,p)); break;
+            }
+            })
+    WP("\n");
+}
+
+static B sameHashGroupValue(V x, L p0, L p1){
+    // compare one row
+    //WP("p0 = %lld, p1 = %lld\n", p0,p1);
+    //printGroupValue(x,p0);
+    //printGroupValue(x,p1);
+    DOI(xn, { V t = vV(x,i);
+          switch(vp(t)){
+            caseJ if(vJ(t,p0)!=vJ(t,p1)) R false; break;
+            caseI if(vI(t,p0)!=vI(t,p1)) R false; break;
+            caseL if(vL(t,p0)!=vL(t,p1)) R false; break;
+            caseQ if(vQ(t,p0)!=vQ(t,p1)) R false; break;
+            caseF if(vF(t,p0)!=vF(t,p1)) R false; break;
+            caseE if(vE(t,p0)!=vE(t,p1)) R false; break;
+            caseS if(sNEQ(vS(t,p0),vS(t,p1))) R false; break;
+          }
+        })
+    R true;
+}
+
+static L insertHashGroup(HG *ht, L id, V x, L pos){
+    if(ht[id]){
+        HG t = ht[id];
+        B found = false;
+        while(t){
+            if(sameHashGroupValue(x, t->index[0], pos)){
+                if(t->numDup < t->maxCap){
+                    t->index[t->numDup++] = pos;
+                }
+                else {
+                    L newSize = t->maxCap * 2;
+                    // WP("increased from %d to %d\n", t->maxCap, newSize);
+                    L *newArray= NEWL(L, newSize);
+                    memcpy(newArray, t->index, sizeof(L)*t->maxCap);
+                    newArray[t->numDup++] = pos;
+                    free(t->index);
+                    t->index  = newArray;
+                    t->maxCap = newSize;
+                }
+                return 0;
+            }
+            t = t->next;
+        }
+        HG newt = newHashGroupNode(pos);
+        newt->next = ht[id];
+        ht[id] = newt;
+    }
+    else {
+        ht[id] = newHashGroupNode(pos);
+    }
+    R 1;
+}
+
+I lib_hash_groupby(V z, V x){
+tic();
+    initV(z, H_N, 2);
+    V z0 = getDictKeys(z), z1 = getDictVals(z);
+    L row = vn(vV(x,0));
+    L hashLen = getHashTableSize(row);
+    L hashMask= hashLen-1;
+    HG *ht = NEWL(HG, hashLen);
+    memset(ht, 0, sizeof(HG)*hashLen);
+    L total = 0;
+    DOJ(row, { L val=0;
+            DOI(xn, val+=(hashOneItem(vV(x,i),j)<<i))
+            L id = val&hashMask;
+            total += insertHashGroup(ht, id, x, j);
+            })
+time_toc("[hash group] 1. build hash table (%lld) in ms: %g\n", row, elapsed);
+    initV(z0, H_L, total);
+    initV(z1, H_G, total);
+    // WP("row = %lld, hashLen = %lld, total = %lld\n", row, hashLen, total);
+    L c = 0;
+tic();
+    DOI(hashLen, {
+            HG t = ht[i];
+            while(t){
+                // assign keys
+                vL(z0,c) = t->index[0];
+                // assign values
+                V item = vV(z1,c);
+                initV(item, H_L, 0);
+                vn(item) = t->numDup;
+                vg(item) = (G)(t->index);
+                c++;
+                t = t->next;
+            }
+            })
+time_toc("[hash group] 2. write data (%lld) in ms: %g\n", total, elapsed);
+    R 0;
+}
+
+
 /* radix sort (experimental) */
 typedef struct Pos{ L x; I i;} Pos;
 typedef struct Pos_i{ I x; L i; }Pos_i;

@@ -140,6 +140,8 @@ L lookupSimpleHash  (sHashTable *st, L key);
 O profileSimpleHash (sHashTable *st);
 O freeSimpleHash    (sHashTable *st);
 
+void probeBooleanVector(V x);
+
 #ifdef  __cplusplus
 }
 #endif

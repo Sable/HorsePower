@@ -395,6 +395,124 @@ static I lib_join_table_hash(V z0, V z1, V x, V y, I minX, I maxX){
     R status;
 }
 
+
+typedef struct r6_dup_node{
+    L maxCap;
+    L *index;
+}r6_D0, *r6_D;
+
+typedef struct r6_table_node{
+    L num;
+    union{
+        L index;
+        struct r6_dup_node *ptr;
+    };
+}r6_T0,*r6_T;
+
+static r6_D r6_newDupNode(){
+    r6_D d = HASH_AL(r6_D0, 1);
+    d->maxCap = 16;
+    d->index = HASH_AL(L, d->maxCap);
+    R d;
+}
+
+static r6_T r6_createHashTable(V x, L size){
+    r6_T ht = HASH_AL(r6_T0, size);
+    // parallel memset
+    DOTa(size, memset(ht+sid, 0, sizeof(r6_T0)*slen))
+    // memset(ht, -1, sizeof(L)*size);
+    DOI(xn, { r6_T t = ht + vI(x,i);
+            if(t->num == 0){
+                t->num = 1;
+                t->index = i;
+            }
+            else if(t->num == 1){
+                r6_D d = r6_newDupNode();
+                d->index[0] = t->index;
+                d->index[1] = i;
+                t->ptr = d;
+                t->num++;
+            }
+            else {
+                r6_D d = t->ptr;
+                if(t->num < d->maxCap){
+                    d->index[t->num++] = i;
+                }
+                else {
+                    L newSize = d->maxCap*2;
+                    L *newIndex = HASH_AL(L, newSize);
+                    memcpy(newIndex, d->index, sizeof(L)*d->maxCap);
+                    d->index  = newIndex;
+                    d->maxCap = newSize;
+                    d->index[t->num++] = i;
+                }
+            }
+        })
+    R ht;
+}
+
+static void r6_probeHashTable(V z0, V z1, V x, r6_T ht, I minX, I maxX){
+    // 1. scan to determine size
+    L count[H_CORE];
+    DOI(H_CORE, count[i]=0)
+    DOT(xn, {I v=vI(x,i);if(v>=minX && v<=maxX){
+            r6_T k = ht + v;
+            if(k->num > 0) {
+                count[tid] += k->num;
+            }}
+        })
+    L lenZ = 0;
+    DOI(H_CORE, lenZ+=count[i])
+    initV(z0, H_L, lenZ);
+    initV(z1, H_L, lenZ);
+    // 2. find all matched indices
+    L offset[H_CORE];
+    offset[0]=0;
+    DOIa(H_CORE, offset[i]=offset[i-1]+count[i-1])
+    DOT(xn, {I v=vI(x,i);if(v>=minX && v<=maxX){
+            r6_T k = ht + v;
+            if(k->num == 1) {
+                vL(z0,offset[tid]) = k->index;
+                vL(z1,offset[tid]) = i;
+                offset[tid]++;
+            }
+            else if(k->num > 1){
+                r6_D d = k->ptr;
+                DOJ(k->num, {
+                    vL(z0,offset[tid]) = d->index[j];
+                    vL(z1,offset[tid]) = i;
+                    offset[tid]++;})
+                }
+            }
+        })
+    P("// r6: result c = %lld\n", lenZ);
+}
+
+static I lib_join_table_hash_r6(V z0, V z1, V x, V y, I minX, I maxX){
+    printBanner("Table-based hash join r6");
+    P("// r6: left(x) = %lld, right(y) = %lld\n", vn(x),vn(y));
+    P("// r6: min = %d, max = %d\n", minX, maxX);
+    if(vp(x)==H_I && vp(y)==H_I){
+        tic();
+        r6_T ht = r6_createHashTable(x, maxX+1);
+        time_toc("r6: build time (ms): %g\n", elapsed);
+        tic();
+        r6_probeHashTable(z0, z1, y, ht, minX, maxX);
+        time_toc("r6: probe + write time (ms): %g\n", elapsed);
+        R 0;
+    }
+    else {EP("Type not supported: %s,%s",getTypeName(vp(x)),getTypeName(vp(y)));R 1;}
+}
+
+static I lib_join_table_hash_dup(V z0, V z1, V x, V y, I minX, I maxX){
+    L hashCur = getHashHeap();
+    I status = lib_join_table_hash_r6(z0,z1,x,y,minX,maxX);
+    setHashHeap(hashCur);
+    R status;
+}
+
+
+
 static B isStrictOrderUp(V x){
     DOIa(xn, if(vI(x,i)<=vI(x,i-1))R 0) R 1;
     // DOIa(xn, if(vI(x,i)<=vI(x,i-1)){P("v1=%d,v0=%d\n",vI(x,i),vI(x,i-1)); getchar(); R 0;}) R 1;
@@ -422,6 +540,14 @@ static B isStrictOrder(V x, I *minX, I *maxX){
     R 0;
 }
 
+static B isLessStrictOrderUp(V x){
+    DOIa(xn, if(vI(x,i)<vI(x,i-1))R 0) R 1;
+}
+
+static B isLessStrictOrderDown(V x){
+    DOIa(xn, if(vI(x,i)>vI(x,i-1))R 0) R 1;
+}
+
 static I r2_simple_cmp(const void * a, const void * b) {
     return ( *(I*)a - *(I*)b );
 }
@@ -434,6 +560,7 @@ B isStrictUnique(V x, I *minX, I *maxX){
         R 0;
     }
     else{
+        WP("sorting while checking unique items");
         I *temp = HASH_AL(I, xn);
         memcpy(temp, sI(x), sizeof(I)*xn);
         qsort(temp, xn, sizeof(I), r2_simple_cmp);
@@ -446,6 +573,30 @@ B isStrictUnique(V x, I *minX, I *maxX){
     }
 }
 
+static B checkValueRange(V x, I *minX, I *maxX){
+    if(isLessStrictOrderUp(x)){
+        *minX = vI(x,0);
+        *maxX = vI(x,xn-1);
+    }
+    else if(isLessStrictOrderDown(x)){
+        *minX = vI(x,xn-1);
+        *maxX = vI(x,0);
+    }
+    else {
+        *minX = *maxX = vI(x,0);
+        DOIa(xn, {
+                if(vI(x,i)<*minX){*minX=vI(x,i);}
+                if(vI(x,i)>*maxX){*maxX=vI(x,i);}
+                })
+    }
+    const L maxSize = 1LL << 24;
+    if(*minX > 0 && *maxX < maxSize){
+        R 1;
+    }
+    else R 0;
+}
+
+
 
 I lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
     //lib_join_dummy(x,y); getchar();
@@ -456,6 +607,13 @@ I lib_join_index_hash(V z0, V z1, V x, V y, B isEq){
         time_toc("r2: pre-probe (ms): %g\n", elapsed);
         if(doTableHash){
             R lib_join_table_hash(z0,z1,x,y,minX,maxX);
+        }
+        tic();
+        B doCheckValue = checkValueRange(x,&minX,&maxX);
+        time_toc("r6: pre-probe (ms): %g\n", elapsed);
+        if(doCheckValue){
+        // if(checkValueRange(x,&minX,&maxX)){
+            R lib_join_table_hash_dup(z0,z1,x,y,minX,maxX);
         }
         else {
             if(vn(x) > vn(y)){

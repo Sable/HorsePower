@@ -1122,6 +1122,8 @@ static void profile_join_write_one(V x, L i, FILE *fp){
             FP(fp, "%d ", vD(x,i)); break;
         caseQ
             FP(fp, "%lld ", vQ(x,i)); break;
+        caseS
+            FP(fp, "\"%s\" ", vS(x,i)); break;
         default:
             getInfoVar(x);
             EP("%s is not supported\n", getTypeName(xp));
@@ -1136,6 +1138,7 @@ static void print_type_alias(V x, FILE *fp){
         caseL FP(fp, "L "); break;
         caseE FP(fp, "E "); break;
         caseQ FP(fp, "Q "); break;
+        caseS FP(fp, "S "); break;
         default: EP("Unknown type: %s\n", getTypeName(xp));
     }
 }
@@ -1258,6 +1261,7 @@ static I pfnGroupMergable2(V z, V x){
 #define isGroupMergable0(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_H)
 #define isGroupMergable1(x) (isList(x)&&vn(x)==3&&vp(vV(x,0))==H_Q&&vp(vV(x,1))==H_Q&&vp(vV(x,2))==H_I)
 #define isGroupMergable2(x) (isList(x)&&vn(x)==2&&vp(vV(x,0))==H_I&&vp(vV(x,1))==H_I)
+#define isGroupLots(x) (isList(x)&&vn(x)==7)
 I pfnGroup(V z, V x){
     // profile_groupby_data(x);
     // tic();
@@ -1284,6 +1288,9 @@ I pfnGroup(V z, V x){
     else if(isGroupMergable2(x)){ // q20
         R pfnGroupMergable2(z, x);
     }
+    else if(isGroupLots(x)){ // q10
+        R lib_hash_groupby(z, x);
+    }
     else{
         // time_toc("Group time (ms): %g\n", elapsed);
         R pfnGroupBasic(z, x);
@@ -1301,12 +1308,12 @@ I pfnGroupBasic(V z, V x){
     P("-- pfnGroupBasic: input size: %lld, isList %d\n", xn, isList(x));
     tic();
     if(isOrdered(x)){
-        if(H_DEBUG) P("Ordered data found in pfnGroup\n");
+        if(H_DEBUG) WP("Ordered data found in pfnGroup\n");
         order_list = NULL;
     }
     else if(isIntegers(x)){;} // skip
     else {
-        if(H_DEBUG) P("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
+        if(H_DEBUG) WP("not ordered, I, nor L. with type: %s\n",getTypeName(xp));
         // TODO: need to go back to check again (for q3)
         //if(isList(x) && xn==1 && vp(vV(x,0))==H_I){
         //    WP("debugging create_hash_multiply\n");
@@ -2500,8 +2507,18 @@ static L getFirstEqual(V x, V f){
     R -1;
 }
 
-static I pfnJoinIndexMultiple_all(V z, V x, V y, V f){
-    TODO("support 4-column join");
+static I pfnJoinIndexMultiple_four(V z, V x, V y, V f){
+    L fx=1;
+    L f0 = vQ(f,fx);
+    V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
+    WP("r5: join index %lld\n", fx);
+tic();
+    CHECKE(joinOneColumn(z0,x0,y0,f0));
+toc();
+    initV(z,H_G,2);
+tic();
+    CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
+toc();
     R 0;
 }
 
@@ -2528,13 +2545,13 @@ static I pfnJoinIndexMultiple_one(V z, V x, V y, V f){
 
 static I pfnJoinIndexMultiple(V z, V x, V y, V f){
     if(vn(x)==vn(y) && vn(x)==vn(f)){
-        R pfnJoinIndexMultiple_one(z,x,y,f);
-        // if(vn(x)<4){
-        //     R pfnJoinIndexMultiple_one(z,x,y,f);
-        // }
-        // else {
-        //     R pfnJoinIndexMultiple_all(z,x,y,f);
-        // }
+        // R pfnJoinIndexMultiple_one(z,x,y,f);
+        if(vn(x)!=4){
+            R pfnJoinIndexMultiple_one(z,x,y,f);
+        }
+        else {
+            R pfnJoinIndexMultiple_four(z,x,y,f);
+        }
     }
     else R E_LENGTH;
 }

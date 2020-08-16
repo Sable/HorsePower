@@ -218,3 +218,11 @@ void freeHorseArray(HA x){
     }
 }
 
+void probeBooleanVector(V x){
+    if(xp == H_B){
+        L c=0; DOI(xn, if(vB(x,i))c++)
+        WP("compress ratio:%.2lf %% (%lld/%lld)\n", c*100.0/xn, c, xn);
+    }
+}
+
+

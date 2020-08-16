@@ -95,6 +95,7 @@ I lib_join_index_basic    (V z0, V z1, V x, V y, B isEq);
 I lib_join_dummy          (V z0, V z1, V x, V y);
 I lib_join_dummy2         (V x, V y);
 I lib_join_dummy3         (V x, V y);
+I lib_hash_groupby        (V z, V x);
 
 void profileListR         (V x);
 B    checkOrderCase1      (V z, V x, V f);
