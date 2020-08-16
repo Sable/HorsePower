@@ -23,7 +23,7 @@ extern List *compiledMethodList;
 extern OC   qOpts[99];
 extern I    numOpts;
 
-sHashTable *hashOpt;
+sHashTable *hashOpt, *hashDel;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
@@ -180,12 +180,23 @@ static void genVarArray(List *list, C sep){
     glueCode("}");
 }
 
+// generate dereference (*var)
+static void genVarDeref(Node *n){
+    if(n->kind == varK){
+        glueAny("*%s", n->val.param.id);
+    }
+    else{
+        printNode(n);
+        EP("Unknown kind: %s", getNodeTypeStr(n));
+    }
+}
+
 static void genVarStoreDep(List *list, I dep){
     if(list){
         genVarStoreDep(list->next, dep+1);
         if(dep > 0) glueCode(" ");
-        scanNode(list->val);
-        glueAny("=tempV[%d];", dep);
+        genVarDeref(list->val);
+        glueAny("=*tempV[%d];", dep);
     }
 }
 
@@ -308,7 +319,14 @@ static void scanExprStmt(Node *n){
 }
 
 static void scanFuncBuiltin(S func){
-    glueCode(obtainBuiltinName(func));
+    switch(qTarg){
+        case TARGET_C  :
+            glueCode(obtainBuiltinName(func)); break;
+        case TARGET_ACC:
+            glueCode(obtainGPUBuiltinName(func)); break;
+        default:
+            EP("Unknown target: %d", qTarg);
+    }
 }
 
 static void scanFuncMethod(S func){
@@ -542,6 +560,7 @@ static B checkSimpleHash(Node *n){
 
 static void scanNode(Node *n){
     if(hashOpt && checkSimpleHash(n)) R ; // if mode for optimization
+    if(hashDel && lookupSimpleHash(hashDel, (L)n)) R ; // delete
     resetCode();
     genStatement(n, true);
     switch(n->kind){

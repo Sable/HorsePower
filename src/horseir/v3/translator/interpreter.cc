@@ -56,7 +56,7 @@ DyadicFunc  dyaFunc[DyaFuncSize] = {
     pfnDiv, pfnPower, pfnLogBase, pfnMod, pfnAnd, pfnOr, pfnNand, pfnNor,
     pfnXor, pfnAppend, pfnLike, pfnCompress, pfnRandK, pfnIndexOf, pfnTake,
     pfnDrop, pfnOrderBy, pfnMember, pfnVector, pfnMatch, pfnIndex, pfnColumnValue,
-    pfnSubString
+    pfnSubString, pfnRange2
 };
 
 static V executeMon(MonadicFunc f, V *p){

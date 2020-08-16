@@ -47,7 +47,7 @@ I pfnIndex(V z, V x, V y){
         I typZ = vp(x); L lenZ = vn(y), lenX = vn(x);
         V tempY = allocNode();
         CHECKE(promoteValue(tempY, y, H_L));
-        DOI(lenZ, if(lenX <= vL(tempY,i))R E_INDEX)
+        DOI(lenZ, if(lenX <= vL(tempY,i) || 0 > vL(tempY,i))R E_INDEX)
         if(isTypeGroupBasic(vp(x))){
             initV(z, typZ, lenZ);
             #define INDEX_BASIC(p) case##p DOP(lenZ, v##p(z,i)=v##p(x,vL(y,i))) break
@@ -3302,5 +3302,81 @@ I pfnCumsum(V z, V x){
     else R E_DOMAIN;
 }
 
+static B isSingleInteger(V x){
+    if(isOne(x) && isTypeGroupReal(vp(x))){
+        switch(xp){
+            caseF R vf(x) == (L)vf(x);
+            caseE R ve(x) == (L)ve(x);
+        }
+        R 1;
+    }
+    R 0;
+}
+
+static L getSingleInteger(V x){
+    switch(xp){
+        caseB R xb;
+        caseJ R xj;
+        caseH R xh;
+        caseI R xi;
+        caseL R xl;
+        caseF R (L)xf;
+        caseE R (L)xe;
+    }
+    R 0;
+}
+
+
+I pfnRange2(V z, V x, V y){
+    if(isSingleInteger(x) && isSingleInteger(y)){
+        L from = getSingleInteger(x);
+        L to   = getSingleInteger(y);
+        if(to < from){
+            EP("range error: [%lld,%lld]", from, to);
+        }
+        L lenZ = to - from + 1;
+        initV(z, H_L, lenZ);
+        DOP(lenZ, vL(z,i)=from+i)
+        R 0;
+    }
+    else R E_DOMAIN;
+}
+
+// MATLAB indexing: starting from 1
+I pfnIndex2(V z, V x, V y){
+    if(isTypeGroupInt(vp(y))){
+        I typZ = vp(x); L lenZ = vn(y), lenX = vn(x);
+        V tempY = allocNode();
+        CHECKE(promoteValue(tempY, y, H_L));
+        DOI(lenZ, if(lenX < vL(tempY,i) || 1 > vL(tempY,i))R E_INDEX)
+        if(isTypeGroupBasic(vp(x))){
+            initV(z, typZ, lenZ);
+            #define INDEX_BASIC_MATLAB(p) case##p DOP(lenZ, v##p(z,i)=v##p(x,vL(y,i)-1)) break
+            switch(vp(x)){
+                INDEX_BASIC_MATLAB(B);
+                INDEX_BASIC_MATLAB(J);
+                INDEX_BASIC_MATLAB(H);
+                INDEX_BASIC_MATLAB(I);
+                INDEX_BASIC_MATLAB(L);
+                INDEX_BASIC_MATLAB(F);
+                INDEX_BASIC_MATLAB(E);
+                INDEX_BASIC_MATLAB(X);
+                INDEX_BASIC_MATLAB(Q);
+                INDEX_BASIC_MATLAB(S);
+                INDEX_BASIC_MATLAB(C);
+                INDEX_BASIC_MATLAB(M);
+                INDEX_BASIC_MATLAB(D);
+                INDEX_BASIC_MATLAB(Z);
+                INDEX_BASIC_MATLAB(U);
+                INDEX_BASIC_MATLAB(W);
+                INDEX_BASIC_MATLAB(T);
+                default: R E_NOT_IMPL; /* date time */
+            }
+            R 0;
+        }
+        else R E_NOT_IMPL;
+    }
+    else R E_TYPE;
+}
 
 

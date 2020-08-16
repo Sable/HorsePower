@@ -11,7 +11,8 @@ static const char *monFnName[] = {
     "pfnUnique", "pfnStr", "pfnLen", "pfnRange", "pfnFact", "pfnRand",
     "pfnSeed", "pfnFlip", "pfnReverse", "pfnWhere", "pfnGroup", "pfnSum",
     "pfnAvg", "pfnMin", "pfnMax", "pfnRaze", "pfnToList", "pfnKeys",
-    "pfnValues", "pfnMeta", "pfnLoadTable", "pfnFetch", "pfnPrint"
+    "pfnValues", "pfnMeta", "pfnLoadTable", "pfnFetch", "pfnPrint",
+    "pfnCumsum"
 };
 
 static const char *dyaFnName[] = {
@@ -20,7 +21,7 @@ static const char *dyaFnName[] = {
     "pfnOr", "pfnNand", "pfnNor", "pfnXor", "pfnAppend", "pfnLike2",
     "pfnCompress", "pfnRandK", "pfnIndexOf", "pfnTake", "pfnDrop",
     "pfnOrderBy", "pfnMember", "pfnVector", "pfnMatch", "pfnIndex",
-    "pfnColumnValue", "pfnSubString"
+    "pfnColumnValue", "pfnSubString", "pfnRange2", "pfnIndex2"
 };
 
 static const char *otherFnName[] = {
@@ -139,5 +140,24 @@ const char *obtainBuiltinName(S func){
         default: EP("Kind not found: %d\n", x.kind);
     }
 }
+
+
+static const char *selectFnName[] = {
+    "pfnPower"
+};
+
+static const char *gpuFnName[] = {
+    "gpuPower"
+};
+
+const char *obtainGPUBuiltinName(S func){
+    // WP("func = %s\n", func);
+    const char * funcStr = obtainBuiltinName(func);
+    L size = sizeof(selectFnName) / sizeof(const char *);
+    // WP("size = %lld\n", size); getchar();
+    DOI(size, if(sEQ(funcStr, selectFnName[i]))R gpuFnName[i])
+    R funcStr;
+}
+
 
 

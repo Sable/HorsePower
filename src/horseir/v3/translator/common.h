@@ -3,6 +3,7 @@
 
 /* declaration */
 const char *obtainBuiltinName(S func);
+const char *obtainGPUBuiltinName(S func);
 
 /* Interpreter */
 I HorseInterpreter();

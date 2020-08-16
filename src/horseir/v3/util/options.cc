@@ -44,7 +44,7 @@ static void usageInterp(){
 
 static void usageCompiler(){
     WP("\nRun with a compiler:\n");
-    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler target (cpu/llvm)");
+    dispLine(0, INDENT, "-c, --compiler <target>", "Enable compiler target (cpu/gpu)");
     usage_n(1);
     dispLine(2, INDENT, "-o, --opt <opt>", "Query optimizations:");
     dispLine(0, INDENT, "", "> fe : elementwise fusion");
@@ -150,6 +150,7 @@ static const char *strMode(OptionMode mode){
 
 static TC getTargetCode(S target){
     if(sEQ(target, "cpu")) R TARGET_C;
+    else if(sEQ(target, "gpu")) R TARGET_ACC;
     else if(sEQ(target, "llvm")) R TARGET_LLVM;
     else if(sEQ(target, "openacc")) R TARGET_ACC;
     else if(sEQ(target, "opencl")) R TARGET_CL;

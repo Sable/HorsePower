@@ -13,11 +13,11 @@ typedef enum TypeUnary { /* unary 59 */
 }TypeUnary;
 // removed: countF/enlistF/format
 
-typedef enum TypeBinary { /* binary 32 */
+typedef enum TypeBinary { /* binary 33 */
     ltF,  gtF,  leqF,   geqF,    eqF,  neqF,  plusF,  minusF,  mulF, divF,
     powerF, logbF, modF, andF, orF, nandF, norF, xorF, appendF, likeF,
     compressF, randkF, indexofF, takeF, dropF, orderF, memberF, vectorF,
-    matchF, indexF, columnValueF, subStringF,
+    matchF, indexF, columnValueF, subStringF, range2F, index2F,
     totalB
 }TypeBinary;
 // removed: datetime_diff

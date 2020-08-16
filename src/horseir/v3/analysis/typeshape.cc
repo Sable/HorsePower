@@ -122,7 +122,8 @@ InfoNodeList *propagateType(Node *func, InfoNodeList *list){
                 cleanInfoList(currentInList);
                 copyInfoNodeList(currentInList, rtns);
             } break;
-        default: TODO("Support kind: %d, for name %s\n", sn->kind, funcName);
+        default: 
+            TODO("Support kind: %d, for name %s\n", sn->kind, funcName);
     }
     return currentInList;
 }
@@ -248,8 +249,7 @@ static bool infoCompatible(InfoNode *x, InfoNode *y){
         return true;
     }
     else {
-        if(checkType(x,y) && checkShape(x,y)){ // shape not necessary
-        //if(checkType(x,y)){
+        if(checkType(x,y) && checkShape(x,y)){
             bool partSub = false, partNext = false;
             // sub field
             if(!x->subInfo && !y->subInfo){
@@ -528,7 +528,7 @@ static void scanReturnStmt(Node *n){
 
 static void scanNode(Node *n){
     if(!n) R;
-    // printNode(n); // debug
+    // WP("Node kind: %s | ", getNodeTypeStr(n)); printNode(n); // debug
     switch(n->kind){
         case    moduleK: scanModule      (n); break;
         case    methodK: scanMethod      (n); break;

@@ -202,6 +202,8 @@ I pfnDatetimeAdd   (V z, V x, V y, V m);
 I pfnDatetimeSub   (V z, V x, V y, V m);
 I pfnAddFKey       (V x, V xKey, V y, V yKey);
 I pfnSubString     (V z, V x, V y);
+I pfnRange2        (V z, V x, V y);
+I pfnIndex2        (V z, V x, V y);
 
 I pfnPrint         (V z, V x);
 I pfnAny           (V z, V x);

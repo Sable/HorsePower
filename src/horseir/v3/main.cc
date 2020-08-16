@@ -63,6 +63,7 @@ static void envCompiler(S file){
     propagateTypeShape(root, false);
     switch(qTarg){
         case TARGET_C   : runCompilerCore();    break;
+        case TARGET_ACC : runCompilerCore();    break;
         case TARGET_LLVM: runCompilerJITCore(); break;
         default: TODO("Add support: %d", qTarg);
     }

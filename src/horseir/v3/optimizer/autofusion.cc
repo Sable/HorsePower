@@ -1639,6 +1639,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
  * chainNode(chain) is stmtK
  */
 static void findFusion(Chain *chain){
+    printNode(chainNode(chain)); getchar();
     Node *call = getStmtCall(chainNode(chain));
     if(call){
         findCompress = false;
@@ -2443,7 +2444,7 @@ static void genFusionCode(){
 
 static void compileMethod(Node *n){
     ChainList *chains = nodeMethodChainList(n);
-    //printChainList(chains); getchar();
+    // printChainList(chains); getchar();
     analyzeChainBottomUp(chains);
     //genCodeListFusion(glist);
     genFusionCode();

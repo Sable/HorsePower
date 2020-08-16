@@ -121,6 +121,7 @@ void printChainVisited(ChainList *list);
 void cleanChainVisited(ChainList *list);
 
 B isScalarShapeByName(Node *n);
+void simplifyUDChain();
 
 
 #endif

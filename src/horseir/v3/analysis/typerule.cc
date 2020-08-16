@@ -16,7 +16,7 @@ CS FunctionBinaryStr[] = { /* binary 32 */
     "div", "power", "logb", "mod", "and", "or", "nand", "nor" , "xor",
     "append", "like", "compress", "randk", "index_of", "take",
     "drop", "order", "member", "vector", "match", "index", "column_value",
-    "sub_string"
+    "sub_string", "range2", "index2"
 };
 
 CS FunctionOtherStr[] = { /* special 13  */
@@ -131,6 +131,8 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleIndex       propIndex
 #define ruleColumnValue specialColumnValue
 #define ruleSubString   propSubString
+#define ruleRange2      propRange2
+#define ruleIndex2      propIndex
 
 /* special */ 
 #define ruleEach        propEach
@@ -221,7 +223,6 @@ B checkType(InfoNode *x, InfoNode *y){
     R (sameT(x,y) || compatibleT(x,y));
 }
 
-// maybe not used any more
 B checkShape(InfoNode *x, InfoNode *y){
     ShapeNode *sx = x->shape;
     ShapeNode *sy = y->shape;
@@ -229,20 +230,25 @@ B checkShape(InfoNode *x, InfoNode *y){
         if(sx->type == unknownH){
             copyShapeNode(sx, sy);
         }
-        else if(sx->type != sy->type) return false;
-        else {
-            switch(sx->kind){
-                case constSP:
-                    if(sx->size != sy->size) { TODO("update size"); }
-                    break;
-                case symbolSP:
-                    if(sx->sizeId != sy->sizeId) { TODO("fix size: %d, %d", sx->sizeId, sy->sizeId); }
-                    break;
-                case scanSP:
-                    if(sx->sizeScan != sy->sizeScan) { TODO("error size"); }
-                    break;
-            }
-        }
+        /* remove the following length check */
+        // else if(sx->type != sy->type) return false;
+        // else {
+        //     switch(sx->kind){
+        //         case constSP:
+        //             if(sx->size != sy->size) { TODO("update size"); }
+        //             break;
+        //         case symbolSP:
+        //             if(sx->sizeId != sy->sizeId) { 
+        //                 WP("Left  shape: "); printInfoNode(x);
+        //                 WP("Right shape: "); printInfoNode(y);
+        //                 TODO("fix size: %d, %d", sx->sizeId, sy->sizeId); 
+        //             }
+        //             break;
+        //         case scanSP:
+        //             if(sx->sizeScan != sy->sizeScan) { TODO("error size"); }
+        //             break;
+        //     }
+        // }
         return true;
     }
     else { // if null, copy y's shape
@@ -902,6 +908,17 @@ static InfoNode *propSubString(InfoNode *x, InfoNode *y){
     // return newInfoNode(rtnType, newShapeNode(vectorH, SN_ID, -1));
 }
 
+static InfoNode *propRange2(InfoNode *x, InfoNode *y){
+    if(isRealIN(x) && isRealIN(y)){
+        ;
+    }
+    else if(isW(x) || isW(y)){
+        ;
+    }
+    else return NULL;
+    return newInfoNode(i64T, newShapeNode(vectorH, SN_ID, -1));
+}
+
 /* special */
 
 // table x:
@@ -1527,6 +1544,8 @@ static O *getBinaryRules(TypeBinary x){
         CASE_VOID(   indexF, ruleIndex);
         CASE_VOID(columnValueF, ruleColumnValue);
         CASE_VOID(  subStringF, ruleSubString);
+        CASE_VOID(     range2F, ruleRange2);
+        CASE_VOID(     index2F, ruleIndex2);
         default: EP("TypeBinary NOT defined: %s", obtainTypeBinary(x));
     }
 }
