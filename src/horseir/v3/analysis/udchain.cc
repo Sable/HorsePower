@@ -490,7 +490,9 @@ static void scanWhileRepeat(Node *n, ChainList *flow, bool isWhile){
             if(sameFlow(mergedFlow, newFlow)) {
                 addToFlowList(flow_list_exit, newFlow); break;
             }
-            else {setFlow(flow, newFlow);}
+            else {
+                setFlow(flow, newFlow);
+            }
             freeFlow(mergedFlow);
             cleanFlowList(flow_list_input);
             cleanFlowList(flow_list_exit);

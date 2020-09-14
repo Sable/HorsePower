@@ -341,11 +341,13 @@ static void r2_probeHashTable(V z0, V z1, V x, L *ht, I minX, I maxX){
     // 2. find all matched indices
     L offset[H_CORE], part = xn/H_CORE;
     DOI(H_CORE, offset[i]=i*part)
+    tic();
     DOT(xn, {I v=vI(x,i);if(v>=minX && v<=maxX){
             L k = ht[v];
             if(k>=0) { vL(z0,offset[tid]) = k; vL(z1,offset[tid]) = i;
                 offset[tid]++;}}
             })
+    toc();
     L c = offset[0];
     if(H_CORE > 1){
         L *t_z0 = sL(z0)+c, *t_z1 = sL(z1)+c;

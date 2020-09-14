@@ -1333,20 +1333,24 @@ static const char *genCodeListParallelReduction(fListNode **fList, I num){
 }
 
 
-static O genCodeListBody(fListNode *f){
+// add section id
+static O genCodeListBody(fListNode *f, L sid){
     gNode *g = f->gnode;
-    I fid = f->fuseId;
+    // I fid = f->fuseId;
+    // WP("fid = %d\n", fid);
     if(sNEQ(g->funcName, "len")){ // != len
         glueIndent();
-        genCodeAutoListNode(g, fid);
+        WP("sid = %lld\n", sid);
+        genCodeAutoListNode(g, sid); // fid
         glueAny("; \\\n");
     }
 }
 
-static O genCodeListBodyLen(fListNode *f, C iter){
+static O genCodeListBodyLen(fListNode *f, C iter, I sid){
     gNode *g = f->gnode;
-    I fid = f->fuseId;
-    I zid = fid - 1;
+    //I fid = f->fuseId;
+    //I zid = fid - 1;
+    I zid = sid;
     Node *z0 = f->nodeRtn;
     C z0c = getTypeCodeByName(z0);
     glueIndent();
@@ -1356,8 +1360,8 @@ static O genCodeListBodyLen(fListNode *f, C iter){
                    fixCodeAutoListSingleLen(f, iter); break;
         case sumR:
         case maxR: 
-        case minR: glueAny("v%c(z%d,%c)=c%d", z0c,zid,iter,fid); break;
-        case avgR: glueAny("v%c(z%d,%c)=c%d/vn(t)", z0c,zid,iter,fid); break;
+        case minR: glueAny("v%c(z%d,%c)=c%d", z0c,zid,iter,sid); break;
+        case avgR: glueAny("v%c(z%d,%c)=c%d/vn(t)", z0c,zid,iter,sid); break;
         default: TODO("Future support.");
     }
     glueAny("; \\\n");
@@ -1639,7 +1643,7 @@ static void genCodeAutoListSingle(Node *cur, gNode *rt){
  * chainNode(chain) is stmtK
  */
 static void findFusion(Chain *chain){
-    printNode(chainNode(chain)); getchar();
+    // printNode(chainNode(chain)); getchar();
     Node *call = getStmtCall(chainNode(chain));
     if(call){
         findCompress = false;
@@ -2143,11 +2147,11 @@ static O genMultipleBodyInner(fListNode **fList, I num, I r0x){
     glueAnyLine("DOP(vn(t), {L k=vL(t,i);\\");
     depth++;
     //WP("3\n");
-    DOI(num, genCodeListBody(fList[i]))   // skip len
+    DOI(num, genCodeListBody(fList[i],i))   // skip len
     depth--;
     glueAnyLine("}, %s)) \\", genCodeListParallelReduction(fList,num));
     //WP("4\n");
-    DOI(num, genCodeListBodyLen(fList[i], 'j')) // do len
+    DOI(num, genCodeListBodyLen(fList[i], 'j', (I)i)) // do len
     depth--;
     glueAnyLine("})");
     depth--;
@@ -2383,9 +2387,12 @@ static void genCodeVectorMultiple(fListNode **myList, I num){
 
 static L genFusionCodeMain(fListNode **fList, I num, B isList){
     clearFusion();
+    WP("isList = %d, num = %d\n", isList, num);
     if(isList){
-        if(num == 1)
-            genCodeListSingle(fList);
+        if(num == 1){
+            R 0;
+            // genCodeListSingle(fList);  // single each functions (delay to fusion with patterns)
+        }
         else
             genCodeListMultiple(fList, num);
     }

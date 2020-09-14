@@ -2,9 +2,9 @@
 #define __A_TYPERULE__
 
 /* consts */
-typedef enum TypeUnary { /* unary 59 */
+typedef enum TypeUnary { /* unary 60 */
     absF, negF, ceilF, floorF, roundF, conjF, recipF, signumF,   piF, notF,
-    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF,
+    logF, log2F, log10F, sqrtF, expF, cosF, sinF, tanF, acosF, asinF, atanF, coshF,
     sinhF, tanhF, acoshF, asinhF, atanhF, dateF, yearF, monthF, dayF, timeF,
     hourF, minuteF, secondF, millF, uniqueF, strF, lenF, rangeF, factF, randF,
     seedF, flipF, reverseF, whereF, groupF, sumF, avgF, minF, maxF,

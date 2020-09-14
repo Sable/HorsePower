@@ -4,6 +4,7 @@
 #define BasicOptSize 2
 #define hashOptSize (1<<12)  // 4K
 #define hashDelSize (1<<10)
+#define hashSliceSize (1<<10)
 
 static const OC ListOfAllOpt[AllOptSize] = {OPT_FA, OPT_FP};
 static const OC ListOfBasicOpt[BasicOptSize] = {OPT_FE, OPT_FP_DLS18};
@@ -11,6 +12,7 @@ static const OC ListOfBasicOpt[BasicOptSize] = {OPT_FE, OPT_FP_DLS18};
 extern Prog *root;
 extern sHashTable *hashOpt;
 extern sHashTable *hashDel;
+extern sHashTable *hashSlice, *hashSliceFlag;
 
 I qid, phTotal;
 
@@ -32,7 +34,8 @@ static void optimizerMain(OC opt){
         case OPT_FP_DLS18:
                       optPattern(5);    break; // for dls18: 4 patterns
         case OPT_FA : optAutoFusion();  break; // compiledMethodList
-        case OPT_IL : optInlining();    break; // compiledMethodList
+        case OPT_IL : optInlining();    break; // entryMain
+        case OPT_SL : optSlicing();     break; // compiledMethodList
         default: TODO("Add impl. %s", obtainOptStr(opt));
     }
 }
@@ -47,14 +50,22 @@ static void init(){
     buildUDChain(root);
     hashOpt = initSimpleHash(hashOptSize);
     hashDel = initSimpleHash(hashDelSize);
+    hashSlice     = initSimpleHash(hashSliceSize);
+    hashSliceFlag = initSimpleHash(hashSliceSize);
     qid     = qIsTpch?qTpchId:99;
     phTotal = 0;
+}
+
+static void earlyOptimization(){
+    optInlining();
+    optSlicing();
 }
 
 I HorseCompilerOptimized(){
     printBanner("Compiling with Optimizations");
     init();
-    simplifyUDChain();
+    // earlyOptimization();
+    // simplifyUDChain();
     if(isOptimizeAll()){
         DOI(AllOptSize, optimizerMain(ListOfAllOpt[i]))  // enumerate all opts
     }

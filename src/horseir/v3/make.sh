@@ -7,6 +7,7 @@ usage(){
         "  2) $0 release   ## clang release mode" \
         "  3) $0 clean     ## remove the temp folder: build/" \
         "  4) $0 lib       ## create a static library" \
+        "  5) $0 vec       ## test vectorization" \
         "Example:" \
         "  *) $0 debug"
     exit 0
@@ -42,6 +43,22 @@ prepare_lib(){
     echo "Library file generated: ${lib_path}/${lib_name}"
 }
 
+test_vectorization(){
+    cc_path=g++-8
+    cur_path=$PWD
+    tmp_path=$PWD/tmp/build-lib
+    mkdir -p ${tmp_path} && cd ${tmp_path}
+    lib_path="${HORSE_LIB_FOLDER}/lib"
+    src_files="${cur_path}/backend/*.cc ${cur_path}/util/*.cc ${cur_path}/global.cc ${cur_path}/frontend/pretty.cc"
+    src_include_dirs="${HORSE_LIB_FOLDER}/include"
+    src_include_libs="${lib_path}/libpcre2-8.a"
+    cc_flags="-fopenmp -lm -lstdc++ -march=native -O3"
+    vec_flags="-ftree-vectorize -fopt-info-vec-missed"  ## <---
+    lib_name=libcore.a
+    time (set -x && ${cc_path} -c ${src_files} -I${src_include_dirs} ${cc_flags} ${vec_flags} && ar rcs ${lib_name} *.o ${src_include_libs})
+    echo "Library file generated: ${tmp_path}/${lib_name}"
+}
+
 
 machine=`hostname` 
 if [ $machine = "sableintel" ]; then
@@ -65,6 +82,8 @@ if [ "$#" -eq 1 ]; then
     elif [ $mode = "lib" ]; then
         # (mkdir -p build-lib && cd build-lib && cmake -D BUILD_STATIC_LIBS=ON .. ${extra_cmd} -DHORSE_MODE="-O3" && make -j16 && mv libcore.a ..)
         prepare_lib
+    elif [ $mode = "vec" ]; then
+        test_vectorization
     else
         usage
     fi

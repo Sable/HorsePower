@@ -102,9 +102,9 @@ void time_clear(){
 
 /* ---------------- Elementwise  -------------------- */
 const TypeUnary GroupElementwiseU[] = {
-    /* unary 32 */
+    /* unary 33 */
     absF, negF, ceilF, floorF, roundF, piF, notF,
-    logF, log2F, log10F, expF, cosF, sinF, tanF, acosF, asinF,
+    logF, log2F, log10F, sqrtF, expF, cosF, sinF, tanF, acosF, asinF,
     atanF, coshF, sinhF, tanhF, acoshF, asinhF, atanhF,
     dateF, yearF, monthF, dayF,
     timeF, hourF, minuteF, secondF, millF

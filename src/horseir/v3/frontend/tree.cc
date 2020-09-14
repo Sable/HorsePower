@@ -249,6 +249,12 @@ Node *makeNodeLiteralFunc(List *funcs){
     return makeListKind(funcs, funcK);
 }
 
+Node *dumplicateNode(Node *x){
+    Node *n = NEW(Node);
+    *n = *x;   // copy all info.
+    return n;
+}
+
 /* constant values */
 
 ConstValue *makeIntType(int x, ConstantType t){

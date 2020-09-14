@@ -122,6 +122,7 @@ Node *makeNodeBlock        (List *stmts);
 Node *makeNodeStmtReturn   (List *operands);
 Node *makeNodeArgExpr      (List *operands);
 Node *makeNodeLiteralFunc  (List *funcs);
+Node *dumplicateNode       (Node *x);
 
 /* constant functions */
 ConstValue *makeIntType    (int       x, ConstantType t);

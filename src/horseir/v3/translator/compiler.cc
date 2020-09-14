@@ -24,6 +24,8 @@ extern OC   qOpts[99];
 extern I    numOpts;
 
 sHashTable *hashOpt, *hashDel;
+sHashTable *hashSlice, *hashSliceFlag;
+extern sHashTable *hashMethod;
 
 #define scanArgExpr(n)   scanList(n->val.listS)
 #define scanParamExpr(n) scanList(n->val.listS)
@@ -561,6 +563,7 @@ static B checkSimpleHash(Node *n){
 static void scanNode(Node *n){
     if(hashOpt && checkSimpleHash(n)) R ; // if mode for optimization
     if(hashDel && lookupSimpleHash(hashDel, (L)n)) R ; // delete
+    if(hashSliceFlag && lookupSimpleHash(hashSliceFlag, (L)n)) R ; // delete
     resetCode();
     genStatement(n, true);
     switch(n->kind){
@@ -707,7 +710,11 @@ static void dispStats(){
 }
 
 static void compileCode(List *list){
-    if(list){ compileCode(list->next); compileMethod(list->val); }
+    if(list){
+        compileCode(list->next);
+        if(lookupSimpleHash(hashMethod, (L)list->val))
+            compileMethod(list->val);
+    }
 }
 
 // static void saveToFile(S path, S head, S func, S code){

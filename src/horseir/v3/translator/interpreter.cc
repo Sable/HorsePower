@@ -41,7 +41,7 @@ static VList *paramList, *rtnList;
 
 MonadicFunc monFunc[MonFuncSize] = {
     pfnAbs, pfnNeg, pfnCeil, pfnFloor, pfnRound, pfnConj, pfnRecip, pfnSignum,
-    pfnPi  , pfnNot , pfnLog, pfnLog2, pfnLog10, pfnExp, pfnTrigCos,
+    pfnPi  , pfnNot , pfnLog, pfnLog2, pfnLog10, pfnSqrt, pfnExp, pfnTrigCos,
     pfnTrigSin, pfnTrigTan, pfnTrigAcos, pfnTrigAsin, pfnTrigAtan,
     pfnHyperCosh, pfnHyperSinh, pfnHyperTanh, pfnHyperAcosh, pfnHyperAsinh,
     pfnHyperAtanh, pfnDate, pfnDateYear, pfnDateMonth, pfnDateDay, pfnTime,

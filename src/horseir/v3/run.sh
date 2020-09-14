@@ -14,7 +14,8 @@ usage() {
         " 6) $0 llvm    q/t/f <id>      ## compile with the jit support" \
         " 7) $0 stats load/dump         ## load/dump statistical information" \
         " 8) $0 print <cmd> q/t/f <id>  ## print cmd (pretty/dot/mermaid/symboltable/typeshape)" \
-        " 9) $0 utility <cmd>           ## udf:q6, (pretty/dot/mermaid/symboltable/typeshape)"
+        " 9) $0 utility <cmd>           ## udf:q6, (pretty/dot/mermaid/symboltable/typeshape)" \
+        "10) $0 temp                    ## any temporary code"
     printf '%s\n\n' \
         "Examples:" \
         "  * run=1 sf=1 thread=1 $0 interp q 6   ## query 6 on interpreter" \
@@ -131,6 +132,11 @@ runUtility() {
     (set -x && ${exe} -u --print ${cmd} -f ${HORSE_BASE}/tests/udf/q6_proc.hir)
 }
 
+runTempCode(){
+    #(set -x && ${exe} -c cpu -o slice -f ${HORSE_TEST_PASS}/t41.hir)
+    (set -x && ${exe} -c cpu -o inline -f ${HORSE_TEST_PASS}/t42.hir)
+}
+
 
 if [ -z $sf ]; then
     sf=1
@@ -162,6 +168,8 @@ if [ $# -eq 1 ]; then
         todo "Add front support in CMakeLists.txt"
     elif [ $cmd = "cloc" ]; then
         (set -x && cloc backend frontend analysis util translator optimizer global.cc global.h main.cc)
+    elif [ $cmd = "temp" ]; then
+        runTempCode
     else
         usage
     fi

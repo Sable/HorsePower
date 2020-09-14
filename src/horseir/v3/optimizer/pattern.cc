@@ -20,6 +20,8 @@ extern sHashTable *hashOpt;
 extern I qid, phTotal;
 extern C code[CODE_MAX_SIZE], *ptr;
 
+static I countCompress, countIndex, countOther;
+
 /* ------ declaration above ------ */
 
 static PatternTree *initPatternTree(const char *func1, const char *func2, I n){
@@ -185,7 +187,7 @@ static S genDecl3(S func, C del){
 
 static void genIndent(){ DOI(depth, glueCode("    ")); }
 
-static void genPattern2_C_Core(PatternTree *ptree, I op){
+static I genPattern2_C_Core(PatternTree *ptree, I op){
     if(isACC){
         TODO("Add directives for pattern 2");
     }
@@ -224,19 +226,20 @@ static void genPattern2_C_Core(PatternTree *ptree, I op){
     S invc = phNameFP2(z0s, tmp, x0s, y1s);
     S decl = genDecl2(tmp,';');
     setAllChainVisited(ptree, invc, decl, strdup(code));
+    R 3;
 }
 
-static void genPattern1_C(PatternTree *ptree){
+static I genPattern1_C(PatternTree *ptree){
     // sum
-    genPattern2_C_Core(ptree, 1);
+    R genPattern2_C_Core(ptree, 1);
 }
 
-static void genPattern2_C(PatternTree *ptree){
+static I genPattern2_C(PatternTree *ptree){
     // avg
-    genPattern2_C_Core(ptree, 2);
+    R genPattern2_C_Core(ptree, 2);
 }
 
-static void genPattern3_C(PatternTree *ptree){
+static I genPattern3_C(PatternTree *ptree){
     if(isACC){
         TODO("Add directives for pattern 3");
     }
@@ -268,9 +271,10 @@ static void genPattern3_C(PatternTree *ptree){
     S invc = phNameFP3(z0s, tmp, x0s, x1s, y0s, y1s);
     S decl = genDecl2new(tmp,';');
     setAllChainVisited(ptree, invc, decl, strdup(code));
+    R 6; // 6 statements fused
 }
 
-static void genPattern4_C(PatternTree *ptree){
+static I genPattern4_C(PatternTree *ptree){
     if(isACC){
         TODO("Add directives for pattern 4");
     }
@@ -299,35 +303,38 @@ static void genPattern4_C(PatternTree *ptree){
     S invc = phNameFP4(z0s, tmp, x0s, y0s);
     S decl = genDecl3(tmp,';');
     setAllChainVisited(ptree, invc, decl, strdup(code));
+    R 4;
 }
 
-static void genPattern5_C(PatternTree *ptree){
+static I genPattern5_C(PatternTree *ptree){
     // min
-    genPattern2_C_Core(ptree, 5);
+    R genPattern2_C_Core(ptree, 5);
 }
 
-static void genPattern6_C(PatternTree *ptree){
+static I genPattern6_C(PatternTree *ptree){
     // max
-    genPattern2_C_Core(ptree, 6);
+    R genPattern2_C_Core(ptree, 6);
 }
 
-static void genPattern7_C(PatternTree *ptree){
+static I genPattern7_C(PatternTree *ptree){
     // len
-    genPattern2_C_Core(ptree, 7);
+    R genPattern2_C_Core(ptree, 7);
 }
 
 static void genPattern_C(PatternTree *ptree, I pid){
     //WP("gen pattern pid = %d\n", pid);
+    I c = 0;
     switch(pid){
-        case 1: genPattern1_C(ptree); break;
-        case 2: genPattern2_C(ptree); break; // q3
-        case 3: genPattern3_C(ptree); break;
-        case 4: genPattern4_C(ptree); break;
-        case 5: genPattern5_C(ptree); break; // q2
-        case 6: genPattern6_C(ptree); break;
-        case 7: genPattern7_C(ptree); break;
+        case 1: c = genPattern1_C(ptree); break;
+        case 2: c = genPattern2_C(ptree); break; // q3
+        case 3: c = genPattern3_C(ptree); break;
+        case 4: c = genPattern4_C(ptree); break;
+        case 5: c = genPattern5_C(ptree); break; // q2
+        case 6: c = genPattern6_C(ptree); break;
+        case 7: c = genPattern7_C(ptree); break;
         default: EP("Pattern not supported yet: %d", pid);
     }
+    countOther += c;
 }
 
 static void genPattern(PatternTree *ptree, I pid){
@@ -554,6 +561,7 @@ static void genPatternCompress(Chain *chain, Node *n){
             setVisited(chain->chain_uses[i], true);
             Node *n = chainNode(chain->chain_uses[i]);
             addToSimpleHash(hashOpt, (L)n, (L)extra);})
+    countCompress += chain->useSize;
 }
 
 static void searchAndGenPatternCompress(Chain* chain, Node *n){
@@ -684,6 +692,7 @@ static void genPatternIndex(Chain *chain, Node *n){
             setVisited(chain->chain_uses[i], true);
             Node *n = chainNode(chain->chain_uses[i]);
             addToSimpleHash(hashOpt, (L)n, (L)extra);})
+    countIndex += chain->useSize;
 }
 
 static void searchAndGenPatternIndex(Chain *chain, Node *n){
@@ -814,6 +823,13 @@ static void initPatterns(){
 }
 
 static void cleanPatterns(){
+    if(optPatternKind == 0){
+        I total = countCompress + countIndex + countOther;
+        P("// Pattern compress: %d\n", countCompress);
+        P("// Pattern index   : %d\n", countIndex);
+        P("// Pattern others  : %d\n", countOther);
+        P("// Total fused stmts with patterns: %d\n", total);
+    }
     DOI(numPattern, deletePatternTree(allPattern[i]))
 }
 
@@ -826,6 +842,7 @@ static void init(){
     if(debugPattern){
         DOI(numPattern, {WP("pattern %lld:\n",i+1);printPatternTree(allPattern[i]);})
     }
+    countCompress = countIndex = countOther = 0;
 }
 
 void optPattern(I kind){

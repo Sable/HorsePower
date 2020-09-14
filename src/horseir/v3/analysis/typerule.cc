@@ -1,8 +1,8 @@
 #include "../global.h"
 
-CS FunctionUnaryStr[] = { /* unary 59 */
+CS FunctionUnaryStr[] = { /* unary 60 */
     "abs", "neg", "ceil", "floor", "round", "conj", "recip", "signum", "pi" ,
-    "not", "log", "log2", "log10", "exp",  "cos",   "sin",   "tan", "acos",
+    "not", "log", "log2", "log10", "sqrt", "exp",  "cos",   "sin",   "tan", "acos",
     "asin",  "atan", "cosh", "sinh", "tanh", "acosh", "asinh", "atanh", "date",
     "date_year", "date_month", "date_day", "time", "time_hour", "time_minute",
     "time_second", "time_mill", "unique", "str", "len", "range", "fact",
@@ -54,6 +54,7 @@ static ShapeNode *decideShapeElementwise(InfoNode *x, InfoNode *y);
 #define ruleLog         commonRealClex
 #define ruleLog2        commonRealClex
 #define ruleLog10       commonRealClex
+#define ruleSqrt        commonRealClex
 #define ruleExp         commonRealClex
 #define ruleCos         commonTrig
 #define ruleSin         commonTrig
@@ -1461,6 +1462,7 @@ static O *getUnaryRules(TypeUnary x){
         CASE_VOID(      logF, ruleLog);
         CASE_VOID(     log2F, ruleLog2);
         CASE_VOID(    log10F, ruleLog10);
+        CASE_VOID(     sqrtF, ruleSqrt);
         CASE_VOID(      expF, ruleExp);
         CASE_VOID(      cosF, ruleCos);
         CASE_VOID(      sinF, ruleSin);

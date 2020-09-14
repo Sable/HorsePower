@@ -39,7 +39,9 @@
 // node: nameK
 #define nodeName1(n)      (n)->val.name.id1        // S
 #define nodeName2(n)      (n)->val.name.id2        // S
-#define nodeNameKind(n)   (n)->val.name.sn->kind   // SymbolKind
+#define nodeNameSymbol(n) (n)->val.name.sn
+#define nodeNameKind(n)   nodeNameSymbol(n)->kind  // SymbolKind
+#define nodeNameMethod(n) nodeNameSymbol(n)->val.method
 
 // node: varK
 #define nodeVarName(n)    (n)->val.param.id        // S
@@ -76,7 +78,8 @@ O  optElementwise();
 O  optPattern    (I kind);
 O  optAutoFusion ();
 O  optSReduction (Prog *root);
-O  optInlining();
+O  optInlining   ();
+O  optSlicing    ();
 
 CS obtainMaxValue(C c);
 CS obtainMinValue(C c);

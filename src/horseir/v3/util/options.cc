@@ -158,14 +158,16 @@ static TC getTargetCode(S target){
 }
 
 static OC obtainOptCode(S opt){
-    if(sEQ(opt, "fe")) R OPT_FE;
-    else if(sEQ(opt, "fp")) R OPT_FP;
-    else if(sEQ(opt, "fp1")) R OPT_FP1;
-    else if(sEQ(opt, "fp2")) R OPT_FP2;
-    else if(sEQ(opt, "fa")) R OPT_FA;
-    else if(sEQ(opt, "basic")) R OPT_BASIC;
+    if(sEQ(opt, "fe"))           R OPT_FE;
+    else if(sEQ(opt, "fp"))      R OPT_FP;
+    else if(sEQ(opt, "fp1"))     R OPT_FP1;
+    else if(sEQ(opt, "fp2"))     R OPT_FP2;
+    else if(sEQ(opt, "fa"))      R OPT_FA;
+    else if(sEQ(opt, "basic"))   R OPT_BASIC;
     else if(sEQ(opt, "basicfp")) R OPT_FP_DLS18;
-    else if(sEQ(opt, "all")) R OPT_ALL;
+    else if(sEQ(opt, "all"))     R OPT_ALL;
+    else if(sEQ(opt, "inline"))  R OPT_IL;
+    else if(sEQ(opt, "slice"))   R OPT_SL;
     else R OPT_NA;
 }
 
@@ -176,6 +178,8 @@ const char *obtainOptStr(OC x){
         case OPT_FA : R "Automatic Operator Fusion";
         case OPT_BASIC: R "Basic Optimizations On";
         case OPT_ALL  : R "All Optimizations On";
+        case OPT_IL   : R "Method Inlining On";
+        case OPT_SL   : R "Backward Slicing On";
         default: R "Unknown Optimizations";
     }
 }
