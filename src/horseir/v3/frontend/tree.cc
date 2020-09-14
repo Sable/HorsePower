@@ -249,7 +249,7 @@ Node *makeNodeLiteralFunc(List *funcs){
     return makeListKind(funcs, funcK);
 }
 
-Node *dumplicateNode(Node *x){
+Node *duplicateNode(Node *x){
     Node *n = NEW(Node);
     *n = *x;   // copy all info.
     return n;

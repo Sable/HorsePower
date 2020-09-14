@@ -167,6 +167,7 @@ generalTypes       : tID
                      { $$ = makeNodeType(false, $1, NULL); }
                    | tID '<' typ_list '>'  /* list(any),enum(1/2),dict(2) */
                      { $$ = makeNodeType(false, $1, $3); }
+;
 
 typ_list           : typ
                      { $$ = makeList(NULL, $1); }

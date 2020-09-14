@@ -134,7 +134,8 @@ runUtility() {
 
 runTempCode(){
     #(set -x && ${exe} -c cpu -o slice -f ${HORSE_TEST_PASS}/t41.hir)
-    (set -x && ${exe} -c cpu -o inline -f ${HORSE_TEST_PASS}/t42.hir)
+    #(set -x && ${exe} -c cpu -o inline -f ${HORSE_TEST_PASS}/t42.hir)
+    (set -x && ${exe} -c cpu -o inline -f ${HORSE_TEST_PASS}/t43.hir)
 }
 
 
