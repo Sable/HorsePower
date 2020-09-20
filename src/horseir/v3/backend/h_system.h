@@ -32,14 +32,10 @@ extern "C" {
 
 /* methods */
 
-void printFloat(E x);
+O printFloat(E x);
 
-void initSys();
-void swap2(V z);
-
-//#define time_tic()
-//#define time_toc() 0
-//#define time_clear()
+O initSys();
+O swap2(V z);
 
 L registerTable          (S tableName, V tablePtr);
 V  findTableByName       (L sid);
@@ -122,7 +118,7 @@ I inferRecip             (I t);
 I inferSignum            (I t);
 I inferPi                (I t);
 
-void printErrMsg         (I eid);
+O printErrMsg            (I eid);
 
 /* error messages */
 #define E_DOMAIN          1

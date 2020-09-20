@@ -34,23 +34,23 @@ I lib_index_of_G(L* targ, V  src, L sLen, V  val, L vLen);
 #define FUNC_QCMP(x) I (*x)(const void*, const void*)
 
 #define FUNC_CMP(x) L (*x)(V,L,L,B*)
-void lib_quicksort            (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
-void lib_quicksort_char       (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
-void lib_quicksort_other      (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
-L   lib_quicksort_cmp        (V val, L a, L b, B *isUp);
-L   lib_quicksort_cmp_item   (V t  , L a, L b, B *isUp);
-void lib_order_by_list        (L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp));
-void lib_quicksort_list       (L *targ, V val, B *isUp, L low , L high, L colId, FUNC_CMP(cmp));
-void lib_order_by_vector      (L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp));
-I    lib_get_group_by         (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
-I    lib_group_by_flat        (V z, V x);
-I    lib_group_by_normal_int  (V z, V x);
-I    lib_group_by_normal_long (V z, V x);
+O lib_quicksort               (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+O lib_quicksort_char          (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+O lib_quicksort_other         (L *rtn, V val, L low, L high, B *isUp, FUNC_CMP(cmp));
+L lib_quicksort_cmp           (V val, L a, L b, B *isUp);
+L lib_quicksort_cmp_item      (V t  , L a, L b, B *isUp);
+O lib_order_by_list           (L *targ, V val, B *isUp, L tLen, L colId, FUNC_CMP(cmp));
+O lib_quicksort_list          (L *targ, V val, B *isUp, L low , L high, L colId, FUNC_CMP(cmp));
+O lib_order_by_vector         (L *targ, V val, B *isUp, L tLen, FUNC_CMP(cmp));
+I lib_get_group_by            (V z, V val, L* index, L iLen, FUNC_CMP(cmp));
+I lib_group_by_flat           (V z, V x);
+I lib_group_by_normal_int     (V z, V x);
+I lib_group_by_normal_long    (V z, V x);
 I lib_group_by_normal_par_long(V z, V x);
 I lib_group_by_normal_par_int (V z, V x);
-void lib_radixsort_int        (L *rtn, V val, L len, B *isUp, B isRtnIndex);
-void lib_radixsort_long       (L *rtn, V val, L len, B *isUp, B isRtnIndex);
-void lib_radixsort_long_v0    (L *rtn_val, L *rtn_pos, V x);
+O lib_radixsort_int           (L *rtn, V val, L len, B *isUp, B isRtnIndex);
+O lib_radixsort_long          (L *rtn, V val, L len, B *isUp, B isRtnIndex);
+O lib_radixsort_long_v0       (L *rtn_val, L *rtn_pos, V x);
 
 I lib_member_B(B* targ, B* src, L sLen, B* val, L vLen);
 I lib_member_H(B* targ, H* src, L sLen, H* val, L vLen);
@@ -97,11 +97,12 @@ I lib_join_dummy2         (V x, V y);
 I lib_join_dummy3         (V x, V y);
 I lib_hash_groupby        (V z, V x);
 
-void profileListR         (V x);
-B    checkOrderCase1      (V z, V x, V f);
-void lib_groupby_dummy    (V x);
+O profileListR            (V x);
+B checkOrderCase1         (V z, V x, V f);
+O lib_groupby_dummy       (V x);
 
-L getInteger1             (V x);
+L getSingleInteger        (V x);
+B isSingleInteger         (V x);
 L genRand                 (L x);
 
 #ifdef	__cplusplus

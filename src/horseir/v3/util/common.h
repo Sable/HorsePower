@@ -73,18 +73,17 @@ const char *getKindName(Kind x);
 //int   getpTypeSize(pType x);
 void  getInfoVar2 (V x, const char *name);
 #define getInfoVar(x) getInfoVar2(x, #x)
-#define showTime(s) P("[%-10s]> The elapsed time (ms): %g\n",s,calcInterval(tv0, tv1))
 
-  HA newHorseArray();
-  HA appendToHorseArray(HA x, L v);
-   L countHorseArray(HA x);
-void copyFromHorseArray(G g, HA x);
-void indexWithHorseArray(V z, V y, HA x); // z=y[x]
-void freeHorseArray(HA x);
+HA newHorseArray();
+HA appendToHorseArray(HA x, L v);
+L  countHorseArray(HA x);
+O  copyFromHorseArray(G g, HA x);
+O  indexWithHorseArray(V z, V y, HA x); // z=y[x]
+O  freeHorseArray(HA x);
 
 /* dot.c */
-void dotProg();
-void dotProgMermaid();
+O  dotProg();
+O  dotProgMermaid();
 
 /* options.c */
 typedef enum OptionMode{
@@ -102,21 +101,21 @@ const char *obtainOptStr(OC x);
 
 extern OptionMode optMode;    // program mode
 extern OptionUtility optUtl;  // utility option
-extern int   qRun;            // number of runs
-extern char *qPath;           // file path
-extern TC    qTarg;           // one target
-extern OC    qOpts[99];       // list of optimizations
-extern int   numOpts;         // number of optimizations
-extern bool  qIsTpch;         // is tpch
-extern int   qTpchId;         // if(qIsTpch) id
-extern char *qCmd;            // dump or load
+extern I  qRun;      // number of runs
+extern S  qPath;     // file path
+extern TC qTarg;     // one target
+extern OC qOpts[99]; // list of optimizations
+extern I  numOpts;   // number of optimizations
+extern B  qIsTpch;   // is tpch
+extern I  qTpchId;   // if(qIsTpch) id
+extern S  qCmd;      // dump or load
 
 #define GOOD_TRY() usage(0)
 #define BAD_TRY()  usage(1)
 
 /* stats.c */
-void loadStats();
-void dumpStats();
+O loadStats();
+O dumpStats();
 
 /* json.c */
 #define newJSONKeyValue(k,v)    newJSON0(k,v)
@@ -124,8 +123,9 @@ void dumpStats();
 #define newJSONKeyJSON(k,v)     newJSON2(k,v)
 #define newJSONKeyList(k,n,v)   newJSON3(k,n,v)
 
-void demoJSON();
-void printJSON(JSON *x);
+O demoJSON();
+O printJSON(JSON *x);
+
 JSON *newJSON0(const char *key, const char *val);
 JSON *newJSON1(const char *key, int size, const char **val);
 JSON *newJSON2(const char *key, JSON *val);
@@ -140,7 +140,7 @@ L lookupSimpleHash  (sHashTable *st, L key);
 O profileSimpleHash (sHashTable *st);
 O freeSimpleHash    (sHashTable *st);
 
-void probeBooleanVector(V x);
+O probeBooleanVector(V x);
 
 #ifdef  __cplusplus
 }

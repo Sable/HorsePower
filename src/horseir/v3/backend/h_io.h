@@ -10,14 +10,14 @@ V    readCSV          (S fileName, L numCols, L *types, Q *symList);
 L    loadCSV          (void *fp, B isLoading, V table, L numCols, L *types);
 L    getField         (S line, C sp, V x, L rowID, L *types, L *errCode);
 FILE*openFile         (S s);
-void loadItem         (V x, L k, L typ, S s);
+O    loadItem         (V x, L k, L typ, S s);
 
 /* helper functions */
-S    trim             (S s);
-S    trimLeft         (S s);
-S    trimRight        (S s);
-S    trimSelf         (S s);
-void errorMsg         (S msg);
+S trim                (S s);
+S trimLeft            (S s);
+S trimRight           (S s);
+S trimSelf            (S s);
+O errorMsg            (S msg);
 
 /* output */
 
@@ -53,9 +53,10 @@ I printTable          (V x);
 I printKTable         (V x);
 I printTablePretty    (V x, L rowLimit);
 O printFormat         (V x, I op);
-
-void serializeV(V x, FILE *fp);
-void readSerializeV(V x, FILE *fp);
+O serializeV          (V x, FILE *fp);
+O readSerializeV      (V x, FILE *fp);
+O profileJoinData     (V x, V y, V f);
+O profileGroupbyData  (V x);
 
 #ifdef	__cplusplus
 }

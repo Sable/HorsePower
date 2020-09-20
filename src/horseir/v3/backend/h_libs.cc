@@ -2193,18 +2193,28 @@ void lib_groupby_dummy(V x){
     else EP("Condition not satisfied");
 }
 
-L getInteger1(V x){
-    if(isOne(x)){
-        switch(xp){
-            caseB R xb;
-            caseJ R xj;
-            caseH R xh;
-            caseI R xi;
-            caseL R xl;
-            default: EP("Not an integer type: %s", getTypeName(xp));
-        }
+L getSingleInteger(V x){
+    switch(xp){
+        caseB R xb;
+        caseJ R xj;
+        caseH R xh;
+        caseI R xi;
+        caseL R xl;
+        caseF R (L)xf;
+        caseE R (L)xe;
     }
-    else EP("Value node must be a singleton");
+    R 0;
+}
+
+B isSingleInteger(V x){
+    if(isOne(x) && isTypeGroupReal(vp(x))){
+        switch(xp){
+            caseF R vf(x) == (L)vf(x);
+            caseE R ve(x) == (L)ve(x);
+        }
+        R 1;
+    }
+    R 0;
 }
 
 #define InitSeed 16807

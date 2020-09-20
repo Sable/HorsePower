@@ -1,8 +1,8 @@
 #include "../global.h"
 
-static void scanStatement    (Node *n, SymbolTable *st);
-static void scanStatementList(List *list, SymbolTable *st);
-static void scanName         (Node *n, SymbolTable *st);
+static O scanStatement       (Node *n, SymbolTable *st);
+static O scanStatementList   (List *list, SymbolTable *st);
+static O scanName            (Node *n, SymbolTable *st);
 static InfoNode *getInfoNode (Node *n);
 
 static SymbolTable    *rootSymbolTable;
@@ -22,15 +22,15 @@ static const char *strSymbolKind(SymbolKind x){
     }
 }
 
-char *strName2(char *id1, char *id2){
-    int size = strlen(id1) + strlen(id2) + 2;
-    char *name2 = NEWL(char, size);
+S strName2(S id1, S id2){
+    L size  = strlen(id1) + strlen(id2) + 2;
+    S name2 = NEWL(char, size);
     return strcat(strcat(strcpy(name2, id1), "."), id2);
 }
 
 // TODO: remove
-static int countNext(InfoNode *in){
-    int c=0; while(in->next){c++; in=in->next;} return c;
+static I countNext(InfoNode *in){
+    I c=0; while(in->next){c++; in=in->next;} return c;
 }
 
 // types 

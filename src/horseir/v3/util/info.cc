@@ -46,7 +46,7 @@ HorseType getType(Node *x){
     //    TODO("Cell types not allowed.\n");
     //}
     else {
-        char *typ = x->val.type.typ;
+        S typ = x->val.type.typ;
         if(sEQ(typ, "bool")) R boolT;
         else if(sEQ(typ, "i8"     )) R i8T;
         else if(sEQ(typ, "i16"    )) R i16T;
@@ -148,7 +148,7 @@ const char *getKindName(Kind x){
 //    } R 0;
 //}
 
-void getInfoVar2(V x, CS name){
+O getInfoVar2(V x, CS name){
     WP("Variable %s has type %s and len %lld\n", name, getTypeName(xp),xn);
     if(xp == H_G){
         L v_min = 9999999, v_max = -1;
@@ -184,7 +184,7 @@ L countHorseArray(HA x){
     R x?(x->size + countHorseArray(x->next)):0;
 }
 
-void copyFromHorseArray(G g, HA x){
+O copyFromHorseArray(G g, HA x){
     if(x){
         L n = sizeof(L)*(x->size);
         memcpy(g, x->data, n);
@@ -192,7 +192,7 @@ void copyFromHorseArray(G g, HA x){
     }
 }
 
-static void indexWithHorseArraySub(V z, V y, HA x, L k){
+static O indexWithHorseArraySub(V z, V y, HA x, L k){
     if(x){
         DOI(x->size, {
             switch(vp(y)){
@@ -207,18 +207,18 @@ static void indexWithHorseArraySub(V z, V y, HA x, L k){
     }
 }
 
-void indexWithHorseArray(V z, V y, HA x){
+O indexWithHorseArray(V z, V y, HA x){
     indexWithHorseArraySub(z,y,x,0);
 }
 
-void freeHorseArray(HA x){
+O freeHorseArray(HA x){
     if(x){
         freeHorseArray(x->next);
         free(x);
     }
 }
 
-void probeBooleanVector(V x){
+O probeBooleanVector(V x){
     if(xp == H_B){
         L c=0; DOI(xn, if(vB(x,i))c++)
         WP("compress ratio:%.2lf %% (%lld/%lld)\n", c*100.0/xn, c, xn);

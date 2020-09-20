@@ -30,27 +30,27 @@ typedef struct BST_node{
 	struct BST_node *lchild,*rchild;
 }BSTnode,*BSTree;
 
-void rRotate     (BSTree *p);
-void L_Rotate    (BSTree *p);
-void leftBalance (BSTree *T);
-void rightBalance(BSTree *T);
-bool InsertAVL   (BSTree *T, Elemtype e, bool *taller, L *index, L *id);
-void initSym     ();
+O rRotate      (BSTree *p);
+O L_Rotate     (BSTree *p);
+O leftBalance  (BSTree *T);
+O rightBalance (BSTree *T);
+B InsertAVL    (BSTree *T, Elemtype e, bool *taller, L *index, L *id);
+O initSym      ();
 
-L getSymbol      (S name);
-L insertSym      (Elemtype h1);
-void cleanSym    ();
-void deleteT     (BSTree T);
+L getSymbol    (S name);
+L insertSym    (Elemtype h1);
+O cleanSym     ();
+O deleteT      (BSTree T);
 
-B symEqual      (Elemtype h1, Elemtype h2);
-B symLess       (Elemtype h1, Elemtype h2);
-B symLessEqual  (Elemtype h1, Elemtype h2);
+B symEqual     (Elemtype h1, Elemtype h2);
+B symLess      (Elemtype h1, Elemtype h2);
+B symLessEqual (Elemtype h1, Elemtype h2);
 
 Elemtype createSymbol(S s);
-L    printSymbol(L x, S strBuff);
-L    printSymTick(L x, S strBuff);
-void printAllSymol();
-void printSymInfo();
+L printSymbol  (L x, S strBuff);
+L printSymTick (L x, S strBuff);
+O printAllSymol();
+O printSymInfo ();
 
 L getSymbolSize(L x);
 S getSymbolStr (L x);

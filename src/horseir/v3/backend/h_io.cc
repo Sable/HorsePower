@@ -154,7 +154,7 @@ FILE *openFile(S s){
 #define ATOE(x) atof(x) /* atof -> double */
 
 /* x[k] = (typ) s */
-void loadItem(V x, L k, L typ, S s){
+O loadItem(V x, L k, L typ, S s){
     switch(typ){
         caseB xB(k) = atoi(s); break;
         caseJ xJ(k) = atoi(s); break;
@@ -203,7 +203,7 @@ S trimSelf(S s){
     R s;
 }
 
-void errorMsg(S msg){
+O errorMsg(S msg){
     fprintf(stderr, "%s\n", msg);
     exit(ERROR_CODE);
 }
@@ -581,8 +581,8 @@ I getStrPretty(S str, L maxSize){
 
 /* TODO: csv(0)/xml(1)/json(2) */
 
-static void printCSV(V x){;}
-static void printXML(V x){;}
+static O printCSV(V x){;}
+static O printXML(V x){;}
 //static void printJSON(V x){;}
 
 O printFormat(V x, I op){
@@ -627,35 +627,35 @@ V readMatrix(S fileName){
 #define serializeV1A(x) fwrite(va(x),sizeof(A0),1,fp)
 #define serializeV1Y(x) fwrite(vy(x),sizeof(Y0),1,fp)
 
-static void serializeStr(S x, L n, FILE *fp){
+static O serializeStr(S x, L n, FILE *fp){
     fwrite(x, 1, n + 1, fp);
 }
 
-static void serializeInt(L x, FILE *fp){
+static O serializeInt(L x, FILE *fp){
     fwrite(&x, sizeof(L), 1, fp);
 }
 
-static void serializeBasic(V x, FILE *fp){
+static O serializeBasic(V x, FILE *fp){
     L size = getTypeSize(xp, xn);
     fwrite(xg, 1, size, fp);
 }
 
-static void serializeQ(V x,FILE *fp){
+static O serializeQ(V x,FILE *fp){
     DOI(xn, serializeInt(getSymbolSize(vQ(x,i)), fp));
     DOI(xn, serializeStr(getSymbolStr(vQ(x,i)), getSymbolSize(vQ(x,i)), fp));
 }
 
-static void serializeS(V x,FILE *fp){
+static O serializeS(V x,FILE *fp){
     //DOI(xn, WP(" %lld",strlen(vS(x,i)))); WP("\n");
     DOI(xn, serializeInt(strlen(vS(x,i)), fp));
     DOI(xn, serializeStr(vS(x,i), strlen(vS(x,i)), fp));
 }
 
-static void serializeG(V x, FILE *fp){
+static O serializeG(V x, FILE *fp){
     DOI(xn, {V val=vV(x,i);serializeV(val, fp);})
 }
 
-static void serializeA(V x, FILE *fp){
+static O serializeA(V x, FILE *fp){
     serializeV1A(x);
     V keyV = getTableKeys(x);
     V valV = getTableVals(x);
@@ -665,7 +665,7 @@ static void serializeA(V x, FILE *fp){
     serializeV(valV, fp);  // list
 }
 
-void serializeV(V x, FILE *fp){
+O serializeV(V x, FILE *fp){
     serializeV1(x);
     // check if size > 1 => xg is not NULL
     switch(xp){
@@ -697,13 +697,13 @@ void serializeV(V x, FILE *fp){
 #define readSerializeV1A(x) readDataBySize(va(x),sizeof(A0),1,fp);
 #define readSerializeV1Y(x) readDataBySize(vy(x),sizeof(Y0),1,fp);
 
-static void readDataBySize(void *ptr, L t_size, L size, FILE *fp){
+static O readDataBySize(void *ptr, L t_size, L size, FILE *fp){
     if(size != fread(ptr, t_size, size, fp)){
         EP("Fread error");
     }
 }
 
-static void readSerializeBasic(V x, FILE *fp){
+static O readSerializeBasic(V x, FILE *fp){
     L size = getTypeSize(xp, xn);
     //switch(xp){ // no performance up
     //    caseI fread(xg, sizeof(I), size/sizeof(I), fp); break;
@@ -716,7 +716,7 @@ static void readSerializeBasic(V x, FILE *fp){
     readDataBySize(xg, 1, size, fp);
 }
 
-static void readSerializeQ(V x,FILE *fp){
+static O readSerializeQ(V x,FILE *fp){
     DOI(xn, readDataBySize(sQ(x)+i, sizeof(L), 1, fp));
     L maxSize=-1; DOI(xn, if(maxSize < vQ(x,i)) maxSize=vQ(x,i))
     S temp = (S)malloc(maxSize + 1);
@@ -724,18 +724,18 @@ static void readSerializeQ(V x,FILE *fp){
     free(temp);
 }
 
-static void readSerializeS(V x, FILE *fp){
+static O readSerializeS(V x, FILE *fp){
     L *temp = (L*)malloc(sizeof(L)*(xn));
     DOI(xn, readDataBySize(temp+i, sizeof(L), 1, fp))
     DOI(xn, {S t=allocStrMem(temp[i]); readDataBySize(t,1,temp[i]+1,fp); vS(x,i)=t;})
     free(temp);
 }
 
-static void readSerializeG(V x, FILE *fp){
+static O readSerializeG(V x, FILE *fp){
     DOI(xn, {V val=vV(x,i);readSerializeV(val, fp);})
 }
 
-static void readSerializeA(V x, FILE *fp){
+static O readSerializeA(V x, FILE *fp){
     readSerializeV1A(x);
     V keyV = getTableKeys(x); initV(keyV, vp(keyV), vn(keyV));
     V valV = getTableVals(x); initV(valV, vp(valV), vn(valV));
@@ -745,7 +745,7 @@ static void readSerializeA(V x, FILE *fp){
     readSerializeV(valV, fp);  // list
 }
 
-void readSerializeV(V x, FILE *fp){
+O readSerializeV(V x, FILE *fp){
     readSerializeV1(x);
     initV(x, xp, xn);
     switch(xp){
@@ -771,6 +771,143 @@ void readSerializeV(V x, FILE *fp){
         default: EP("Type not supported: %s", getTypeName(xp));
     }
 }
+
+/*
+ * Functions for profiling data
+ */
+
+static O profile_write(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    switch(xp){
+        caseI
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%d\n", vI(x,i))) break;
+        caseQ
+            fprintf(fp, "%lld\n", vn(x));
+            DOI(vn(x), fprintf(fp, "%s\n", getSymbolStr(vQ(x,i)))) break;
+        default:
+            getInfoVar(x);
+            fprintf(fp, "%s is not integer (I)\n", fn);
+    }
+    fclose(fp);
+}
+
+static void profile_join_write_one(V x, L i, FILE *fp){
+    switch(xp){
+        caseB
+            FP(fp, "%d ", vB(x,i)); break;
+        caseH
+            FP(fp, "%d ", vH(x,i)); break;
+        caseI
+            FP(fp, "%d ", vI(x,i)); break;
+        caseL
+            FP(fp, "%lld ", vL(x,i)); break;
+        caseE
+            FP(fp, "%g ", vE(x,i)); break;
+        caseD
+            FP(fp, "%d ", vD(x,i)); break;
+        caseQ
+            FP(fp, "%lld ", vQ(x,i)); break;
+        caseS
+            FP(fp, "\"%s\" ", vS(x,i)); break;
+        default:
+            getInfoVar(x);
+            EP("%s is not supported\n", getTypeName(xp));
+    }
+}
+
+
+static void print_type_alias(V x, FILE *fp){
+    switch(xp){
+        caseH FP(fp, "H "); break;
+        caseI FP(fp, "I "); break;
+        caseL FP(fp, "L "); break;
+        caseE FP(fp, "E "); break;
+        caseQ FP(fp, "Q "); break;
+        caseS FP(fp, "S "); break;
+        default: EP("Unknown type: %s\n", getTypeName(xp));
+    }
+}
+
+static void profile_join_write_multiple(V x, S fn){
+    FILE *fp = fopen(fn, "w");
+    L size = vn(x), row = vn(vV(x,0));
+    FP(fp, "%lld %lld\n", size, row);
+    DOI(size, print_type_alias(vV(x,i),fp)) FP(fp, "\n");
+    DOI(row, { DOJ(size, profile_join_write_one(vV(x,j),i,fp)) FP(fp,"\n"); })
+    fclose(fp);
+}
+
+static O profile_join_data_single(V x, V y, V f){
+    P("Profiling join with a single column: %d\n", join_id);
+    C fn_x[99], fn_y[99], fn_f[99];
+    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
+    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
+    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
+    if(x)
+        profile_write(x, fn_x);
+    if(y)
+        profile_write(y, fn_y);
+    if(f)
+        profile_write(f, fn_f);
+    join_id++;
+}
+
+static O profile_join_data_multiple(V x, V y, V f){
+    P("Profiling join with multiple columns: %d\n", join_id);
+    C fn_x[99], fn_y[99], fn_f[99];
+    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
+    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
+    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
+    if(x)
+        profile_join_write_multiple(x, fn_x);
+    if(y)
+        profile_join_write_multiple(y, fn_y);
+    if(f)
+        profile_write(f, fn_f);
+    join_id++;
+}
+
+
+static O profile_groupby_data_single(V x){
+    P("Profiling groupby with a single column: %d\n", group_id);
+    C fn_x[99];
+    sprintf(fn_x, "/tmp/g%d.txt" , group_id);
+    if(x)
+        profile_write(x, fn_x);
+    group_id++;
+}
+
+
+static O profile_groupby_data_multiple(V x){
+    C fn_x[99];
+    sprintf(fn_x, "/tmp/g%d.txt" , join_id);
+    profile_join_write_multiple(x, fn_x);
+    group_id++;
+}
+
+O profileGroupbyData(V x){
+    if(xp == H_G){
+        if (xn == 1)
+            profile_groupby_data_single(vV(x,0));
+        else
+            profile_groupby_data_multiple(x);
+    }
+    else
+        profile_groupby_data_single(x);
+}
+
+O profileJoinData(V x, V y, V f){
+    if(xp == H_G) // isList
+        profile_join_data_multiple(x,y,f);
+    else
+        profile_join_data_single(x,y,f);
+}
+
+
+
+
+
 
 
 

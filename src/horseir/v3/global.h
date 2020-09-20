@@ -77,6 +77,7 @@ extern "C" {
 #define toc() my_toc(1)
 #define calc_toc() my_toc(0)
 #define time_toc(...) do{E elapsed=calc_toc();P("// ");P(__VA_ARGS__);}while(0)
+#define show_toc(msg) time_toc("%s (ms): %g\n", msg,elapsed)
 
 /* constants */
 #define uscore "_"  // underscore

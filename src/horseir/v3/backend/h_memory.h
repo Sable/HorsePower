@@ -14,46 +14,46 @@ extern "C" {
 
 /* methods */
 
-void initMemoryBasic();
-void initMemoryInterp();
+O initMemoryBasic ();
+O initMemoryInterp();
 
-L getTypeSize       (I typ, L len);
-G allocMem          (G heap, L *cur, L top, I typ, L len);
+L getTypeSize     (I typ, L len);
+G allocMem        (G heap, L *cur, L top, I typ, L len);
 
-V allocNode         ();
-V allocTable        (L numCols);
-G allocStrMem       (L n);
+V allocNode       ();
+V allocTable      (L numCols);
+G allocStrMem     (L n);
 
-L getHeapOffset     ();
-L setHeapOffset     (L cur);
+L getHeapOffset   ();
+L setHeapOffset   (L cur);
 
-V initV             (V x, I typ, L len);
-V initTableDict     (V x, I typ, L numCols);
-V initSymbol        (V x, L val);
-V initList          (V x, L numItems);
-V initFlatList      (V x, L numItems);
-V initValue         (V x, I typ, L len);
-V initDict          (V x, L numCols);
-V initTable         (V x, L numCols);
-V initKTable        (V x);
+V initV           (V x, I typ, L len);
+V initTableDict   (V x, I typ, L numCols);
+V initSymbol      (V x, L val);
+V initList        (V x, L numItems);
+V initFlatList    (V x, L numItems);
+V initValue       (V x, I typ, L len);
+V initDict        (V x, L numCols);
+V initTable       (V x, L numCols);
+V initKTable      (V x);
 
-S insertString2     (S str);
+S insertString2   (S str);
 
 /* buddy system */
-L testMemory        ();
-G allocHeap         (L size);
-G getHeapMem        (I typ, L len);
-G allocBlock        (I typ, L len);
-L getRefCount       (G x);
-L updateRefCount    (G x);
-void printHeapInfo  ();
+L testMemory      ();
+G allocHeap       (L size);
+G getHeapMem      (I typ, L len);
+G allocBlock      (I typ, L len);
+L getRefCount     (G x);
+L updateRefCount  (G x);
+O printHeapInfo   ();
 
 /* hash heap */
-void initHashHeap   ();
-G    allocHashMem   (L size);
-void printHashInfo  ();
-L    getHashHeap    ();
-void setHashHeap    (L x);
+O initHashHeap    ();
+G allocHashMem    (L size);
+O printHashInfo   ();
+L getHashHeap     ();
+O setHashHeap     (L x);
 
 #ifdef	__cplusplus
 }

@@ -539,8 +539,8 @@ static O runRepeat(Node *n, I *isR){
     cleanVList(paramList);
     runNode(n->val.whileStmt.condExpr, isR);
     V x = paramList->next->v;
-    if(xn == 1 && isIntegers(x)){
-        L t = getInteger1(x);
+    if(isSingleInteger(x)){
+        L t = getSingleInteger(x);
         while(t--) {
             runNode(n->val.repeatStmt.bodyBlock, isR);
             //WP("t = %lld, isR = %d\n", t, *isR); getchar();

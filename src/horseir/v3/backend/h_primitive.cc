@@ -1016,7 +1016,7 @@ tic();
     L seg=xn/H_CORE;
     DOIa(H_CORE, {L k=seg*i; if(vI(x,k)==vI(x,k-1))parZ[i]--;})
     I tot = 0; DOI(H_CORE, tot+=parZ[i])
-time_toc("k0: count segs (ms): %g\n", elapsed);
+show_toc("k0: count segs");
     initV(z0, H_L, tot+1); // an extra slot for "xn", updated later
     initV(z1, H_G, tot);
     L *offset = sL(z0);
@@ -1028,7 +1028,7 @@ tic();
     DOTc(xn, {if(tid==0 || (tid>0 && vI(x,pos)!=vI(x,pos-1)))offset[parN[tid]++]=pos;}, {if(vI(x,i)!=vI(x,i-1))offset[parN[tid]++]=i;})
     // L c = 1; offset[0] = 0; offset[tot]=xn;
     // DOIa(xn, if(vI(x,i)!=vI(x,i-1))offset[c++]=i)
-time_toc("k0: compute offsets (ms): %g\n", elapsed);
+show_toc("k0: compute offsets");
     V tt = allocNode();
     initV(tt, H_L, xn);
 tic();
@@ -1038,7 +1038,7 @@ tic();
             vg(t)=(G)(sL(tt)+offset[i]);
             DOJ(vn(t), vL(t,j)=j+offset[i])
             })
-time_toc("k0: write values (ms): %g\n", elapsed);
+show_toc("k0: write values");
     // printV2(z0, 20);
     // DOI(20, printV(vV(z1,i)))
     R 0;
@@ -1057,7 +1057,7 @@ tic();
     L seg=xn/H_CORE;
     DOIa(H_CORE, {L k=seg*i; if(vL(x,k)==vL(x,k-1))parZ[i]--;})
     I tot = 0; DOI(H_CORE, tot+=parZ[i])
-time_toc("k0: count segs (ms): %g\n", elapsed);
+show_toc("k0: count segs");
     initV(z0, H_L, tot+1); // an extra slot for "xn", updated later
     initV(z1, H_G, tot);
     L *offset = sL(z0);
@@ -1069,7 +1069,7 @@ tic();
     DOTc(xn, {if(tid==0 || (tid>0 && vL(x,pos)!=vL(x,pos-1)))offset[parN[tid]++]=pos;}, {if(vL(x,i)!=vL(x,i-1))offset[parN[tid]++]=i;})
     // L c = 1; offset[0] = 0; offset[tot]=xn;
     // DOIa(xn, if(vL(x,i)!=vL(x,i-1))offset[c++]=i)
-time_toc("k0: compute offsets (ms): %g\n", elapsed);
+show_toc("k0: compute offsets");
     V tt = allocNode();
     initV(tt, H_L, xn);
 tic();
@@ -1090,7 +1090,7 @@ tic();
                 })
         DOP(tot, vL(z0,i)=loc[offset[i]])  // update key indices
     }
-time_toc("k0: write values (ms): %g\n", elapsed);
+show_toc("k0: write values");
     // printV2(z0, 20);
     // DOI(20, printV(vV(z1,i)))
     R 0;
@@ -1103,98 +1103,6 @@ I pfnGroupSimple(V z, V x){
         default: EP("Unknown type: %s", getTypeName(xp));
     }
     R 0;
-}
-
-
-static void profile_join_write_one(V x, L i, FILE *fp){
-    switch(xp){
-        caseB
-            FP(fp, "%d ", vB(x,i)); break;
-        caseH
-            FP(fp, "%d ", vH(x,i)); break;
-        caseI
-            FP(fp, "%d ", vI(x,i)); break;
-        caseL
-            FP(fp, "%lld ", vL(x,i)); break;
-        caseE
-            FP(fp, "%g ", vE(x,i)); break;
-        caseD
-            FP(fp, "%d ", vD(x,i)); break;
-        caseQ
-            FP(fp, "%lld ", vQ(x,i)); break;
-        caseS
-            FP(fp, "\"%s\" ", vS(x,i)); break;
-        default:
-            getInfoVar(x);
-            EP("%s is not supported\n", getTypeName(xp));
-    }
-}
-
-
-static void print_type_alias(V x, FILE *fp){
-    switch(xp){
-        caseH FP(fp, "H "); break;
-        caseI FP(fp, "I "); break;
-        caseL FP(fp, "L "); break;
-        caseE FP(fp, "E "); break;
-        caseQ FP(fp, "Q "); break;
-        caseS FP(fp, "S "); break;
-        default: EP("Unknown type: %s\n", getTypeName(xp));
-    }
-}
-
-static void profile_join_write_multiple(V x, S fn){
-    FILE *fp = fopen(fn, "w");
-    L size = vn(x), row = vn(vV(x,0));
-    FP(fp, "%lld %lld\n", size, row);
-    DOI(size, print_type_alias(vV(x,i),fp)) FP(fp, "\n");
-    DOI(row, { DOJ(size, profile_join_write_one(vV(x,j),i,fp)) FP(fp,"\n"); })
-    fclose(fp);
-}
-
-static void profile_write(V x, S fn){
-    FILE *fp = fopen(fn, "w");
-    switch(xp){
-        caseI
-            fprintf(fp, "%lld\n", vn(x));
-            DOI(vn(x), fprintf(fp, "%d\n", vI(x,i))) break;
-        caseQ
-            fprintf(fp, "%lld\n", vn(x));
-            DOI(vn(x), fprintf(fp, "%s\n", getSymbolStr(vQ(x,i)))) break;
-        default:
-            getInfoVar(x);
-            fprintf(fp, "%s is not integer (I)\n", fn);
-    }
-    fclose(fp);
-}
-
-
-static void profile_groupby_data_single(V x){
-    P("Profiling groupby with a single column: %d\n", group_id);
-    C fn_x[99];
-    sprintf(fn_x, "/tmp/g%d.txt" , group_id);
-    if(x)
-        profile_write(x, fn_x);
-    group_id++;
-}
-
-
-static void profile_groupby_data_multiple(V x){
-    C fn_x[99];
-    sprintf(fn_x, "/tmp/g%d.txt" , join_id);
-    profile_join_write_multiple(x, fn_x);
-    group_id++;
-}
-
-static void profile_groupby_data(V x){
-    if(xp == H_G){
-        if (xn == 1)
-            profile_groupby_data_single(vV(x,0));
-        else
-            profile_groupby_data_multiple(x);
-    }
-    else
-        profile_groupby_data_single(x);
 }
 
 static H getMaxH(V x){
@@ -1292,7 +1200,7 @@ I pfnGroup(V z, V x){
         R lib_hash_groupby(z, x);
     }
     else{
-        // time_toc("Group time (ms): %g\n", elapsed);
+        // show_toc("Group time");
         R pfnGroupBasic(z, x);
     }
 }
@@ -1326,11 +1234,11 @@ I pfnGroupBasic(V z, V x){
         order_list = sL(t);
         //WP("sort done\n");
     }
-    time_toc("1. prepare data (ms): %g\n", elapsed);
+    show_toc("1. prepare data");
     // WP("t = \n");
     // printV(t);
 
-    tic();
+tic();
     if(isList(x)){
         L numRow= 0==vn(x)?0:vn(vV(x,0));
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp));
@@ -1351,7 +1259,7 @@ I pfnGroupBasic(V z, V x){
         CHECKE(lib_get_group_by(z,x,order_list,numRow,lib_quicksort_cmp_item));
     }
     else R E_DOMAIN;
-    time_toc("2. group data (ms): %g\n", elapsed);
+show_toc("2. group data");
     P("-- output size: %lld\n", vn(vV(z,0)));
  //getchar();
     //L tid = getSymbol((S)"148561");
@@ -2511,35 +2419,35 @@ static I pfnJoinIndexMultiple_four(V z, V x, V y, V f){
     L fx=1;
     L f0 = vQ(f,fx);
     V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
-    WP("r5: join index %lld\n", fx);
-tic();
+    WP("r5-4: join index %lld\n", fx);
+//tic();
     CHECKE(joinOneColumn(z0,x0,y0,f0));
-toc();
+//show_toc("r5-4: join one column");
     initV(z,H_G,2);
-tic();
+//tic();
     CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
-toc();
+//show_toc("r5-4: join other columns");
     R 0;
 }
 
 static I pfnJoinIndexMultiple_one(V z, V x, V y, V f){
     L size = vn(x);
     L fx = getFirstEqual(x,f);
-    if(fx < 0) EP("Not found eq in join\n");
-    P("fx = %lld\n",fx); // getchar();
+    // WP("fx = %lld\n",fx); getchar();
+    if(fx < 0)
+        EP("Not found eq in join\n");
     L f0 = vQ(f,fx);
     V x0=vV(x,fx), y0=vV(y,fx), z0 = allocNode();
-    tic();
+tic();
     CHECKE(joinOneColumn(z0,x0,y0,f0));
-    time_toc("r5: join one column (ms): %g\n", elapsed);
-    //WP("fx = %lld\n", fx); printV(f); getchar();
+show_toc("r5: join one column");
     //V k0 = vV(z0,0), k1 = vV(z0,1);
     //B ff = 0; DOI(vn(x0), if(vI(x0,vL(k0,i))==199478){ff=1;WP("val[%lld] = %d",i,vI(y0,vL(k1,i)));}) if(!ff) WP("not found\n"); getchar();
     //printV(x0); printV(y0); printV(z0); getchar();
     initV(z,H_G,2);
-    tic();
+tic();
     CHECKE(joinOtherColumns(z,x,y,z0,fx,f));
-    time_toc("r5: join other columns (ms): %g\n", elapsed);
+show_toc("r5: join other columns");
     R 0;
 }
 
@@ -2556,71 +2464,12 @@ static I pfnJoinIndexMultiple(V z, V x, V y, V f){
     else R E_LENGTH;
 }
 
-/*
-static L pfnJoinIndexMultiple(V z, V x, V y, V f){
-    if(vn(x)==vn(y) && vn(x)==vn(f)){
-        initV(z,H_G,2);
-        CHECKE(lib_join_index_hash_many(vV(z,0),vV(z,1),x,y,f));
-    }
-    else R E_LENGTH;
-    R 0;
-}*/
-
-
-static void profile_join_data_single(V x, V y, V f){
-    P("Profiling join with a single column: %d\n", join_id);
-    C fn_x[99], fn_y[99], fn_f[99];
-    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
-    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
-    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
-    if(x)
-        profile_write(x, fn_x);
-    if(y)
-        profile_write(y, fn_y);
-    if(f)
-        profile_write(f, fn_f);
-    join_id++;
-}
-
-static void profile_join_data_multiple(V x, V y, V f){
-    P("Profiling join with multiple columns: %d\n", join_id);
-    C fn_x[99], fn_y[99], fn_f[99];
-    sprintf(fn_x, "/tmp/d%d-left.txt" , join_id);
-    sprintf(fn_y, "/tmp/d%d-right.txt", join_id);
-    sprintf(fn_f, "/tmp/d%d-op.txt"   , join_id);
-    if(x)
-        profile_join_write_multiple(x, fn_x);
-    if(y)
-        profile_join_write_multiple(y, fn_y);
-    if(f)
-        profile_write(f, fn_f);
-    join_id++;
-}
-
-static void profile_join_data(V x, V y, V f){
-    if(xp == H_G) // isList
-        profile_join_data_multiple(x,y,f);
-    else
-        profile_join_data_single(x,y,f);
-}
-
-
 I pfnJoinIndex(V z, V x, V y, V f){
 #ifdef H_CALL
     CALLGRIND_START_INSTRUMENTATION;
 #endif
-    // profile_join_data(x, y, f);
+    // profileJoinData(x, y, f);
     if(vn(f)==1){
-        ///// code below is moved to lib_join_index_hash
-        // if(vn(x) > vn(y)){
-        //     CHECKE(pfnJoinIndexSingle(z,y,x,f));
-        //     //WP("before:\n"); printV(vV(z,0)); printV(vV(z,1));
-        //     swap2(z);
-        //     //WP("after:\n"); printV(vV(z,0)); printV(vV(z,1));
-        //     //getchar();
-        //     R 0;
-        // }
-        //else R pfnJoinIndexSingle(z,x,y,f);
         if(isList(x) && vn(x)>1){
             V newf = allocNode();
             initV(newf, H_Q, vn(x));
@@ -2637,11 +2486,6 @@ I pfnJoinIndex(V z, V x, V y, V f){
          *  - (E,I) join (E,I) with f(lt, eq)
          *  - if swap is allowed, then f should be (geq, eq)
          */
-        // if(getListSize1(x) > getListSize1(y)){
-        //     CHECKE(pfnJoinIndexMultiple(z,y,x,f)); swap2(z);
-        //     R 0;
-        // }
-        // else R pfnJoinIndexMultiple(z,x,y,f);
         R pfnJoinIndexMultiple(z,x,y,f);
     }
     else R E_DOMAIN;
@@ -2806,9 +2650,10 @@ I pfnMember(V z, V y, V x){ /* return left shape */
             (isTypeGroupString(vp(x)) || isComplex(x) || isTypeGroupDTime(vp(x)))){
         initV(z,H_B,vn(y));
         if(false && xn <= NUM_JOIN_LINEAR){ // slower than hash
-            if(H_DEBUG) WP("small input for member vn(y)=%lld, vn(x)=%lld\n",vn(y),vn(x));
+            if(H_DEBUG)
+                WP("small input for member vn(y)=%lld, vn(x)=%lld\n",vn(y),vn(x));
             switch(vp(x)){
-                caseQ DOJ(vn(y), {B f=0;DOI(vn(x), if(vQ(y,j)==vQ(x,i)){f=1;break;})vB(z,j)=f;}) break;
+                caseQ DOJ(vn(y), {B f=0; DOI(vn(x),if(vQ(y,j)==vQ(x,i)){f=1;break;}) vB(z,j)=f;}) break;
                 default: TODO("Add more type support for special case: %s", getTypeName(vp(x)));
             }
         }
@@ -2939,9 +2784,7 @@ I pfnAddFKey(V x, V xKey, V y, V yKey){
             printV(yCol);
             getchar();
         }
-        //WP("1111\n"); getchar();
         CHECKE(pfnEnum(fKey, xCol, yCol));
-        //WP("2222\n"); getchar();
         CHECKE(setFKey(tableY, yKey, fKey));
         if(isOne(xKey)){
             WP("Added fkeys successfully: %s.%s (key) -> %s.%s (fkey)\n", \
@@ -2985,164 +2828,6 @@ I pfnSubString(V z, V x, V y){
     else R E_DOMAIN;
 }
 
-/* handcraft optimization for UDFs: BS and PR */
-/* status: on */
-// L optLoopFusionBS_1(V z, L r0, V volatility, V time){
-//     initV(z,H_E,r0);
-//     DOP(r0, vE(z,i)=vE(volatility,i)*sqrt(vE(time,i)))
-//     R 0;
-// }
-// 
-// L optLoopFusionBS_2(V z, L r0, V sptprice, V strike, V time, V rate, V volatility){
-//     initV(z,H_E,r0);
-//     DOP(r0, vE(z,i)=log(vE(sptprice,i)/vE(strike,i)) \
-//         + vE(time,i)*(vE(rate,i) + vE(volatility,i)*vE(volatility,i)*0.5))
-//     R 0;
-// }
-// 
-// L optLoopFusionBS_3(V z, L r0, V sptprice, L id){
-//     initV(z,H_B,r0);
-//     if(id <= 3){
-//         DOP(r0, vB(z,i)=(vE(sptprice,i)>=50) && (vE(sptprice,i)<=100))
-//     }
-//     else if(id <= 6){
-//         DOP(r0, vB(z,i)=(vE(sptprice,i)<50) || (vE(sptprice,i)>100))
-//     }
-//     else {
-//         DOP(r0, vB(z,i)=(vE(sptprice,i)>=51) && (vE(sptprice,i)<=100))
-//     }
-//     R 0;
-// }
-// 
-// L optLoopFusionBS_4(V z, L r0, V sptprice, V optionprice){
-//     initV(z,H_B,r0);
-//     // DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) && (vE(optionprice,i)>15))
-//     DOP(r0, vB(z,i)=((vE(sptprice,i)<51) || (vE(sptprice,i)>100)) || (vE(optionprice,i)<=15))
-//     R 0;
-// }
-// 
-// L optLoopFusionPR_1(V m0, V m1, L r0, V web){
-//     initV(m0, H_L, r0);
-//     initV(m1, H_L, r0);
-//     memset(sL(m1), 0 , sizeof(L)*r0);
-//     DOJ(r0, {V x=vV(web,j); {L t=0; DOI(vn(x), t+=vL(x,i)) vL(m0,j)=t;\
-//              DOI(vn(x), vL(m1,i)+=vL(x,i))} })
-//     // DOJ(r0, {V x=vV(web,j); {L t=0; DOP(vn(x), t+=vL(x,i), reduction(+:t)) vL(m0,j)=t;\
-//     //          DOI(vn(x), vL(m1,i)+=vL(x,i))} }) // slow with DOP
-//     R 0;
-// }
-// 
-// L optLoopFusionPR_2(V m0, V m1, V m2, L r0, V web, L id){
-//     L *cnt = (L*)malloc(sizeof(L)*r0); memset(cnt, 0, sizeof(L)*r0);
-//     L *indx= (L*)malloc(sizeof(L)*r0); memset(indx,0, sizeof(L)*r0);
-//     DOI(r0, { DOJ(r0, cnt[j] +=vL(vV(web,i),j)) } )
-//     L tot = 0;
-//     if(id<=3) {
-//         DOI(r0, if(cnt[i]>70)indx[tot++]=i)
-//     }
-//     else if(id<=6){
-//         DOI(r0, if(cnt[i]<=70)indx[tot++]=i)
-//     }
-//     else {
-//         DOI(r0, if(cnt[i]>54)indx[tot++]=i)
-//     }
-//     initV(m0, H_L, tot);
-//     initV(m1, H_L, tot);
-//     initV(m2, H_L, tot);
-//     DOI(tot, vL(m0,i)=indx[i])
-//     DOI(tot, vL(m2,i)=cnt[indx[i]])
-//     DOI(tot, {V x=vV(web,indx[i]); {L t=0; DOJ(vn(x), t+=vL(x,j)) vL(m1,i)=t;}})
-//     free(cnt);
-//     free(indx);
-//     R 0;
-// }
-// 
-// 
-// L optLoopFusionPR_4(V w5, L r0, V w2){
-//     initV(w5, H_L, r0);
-//     DOI(r0, vL(w5,vL(w2,i))=i)
-//     R 0;
-// }
-// 
-// L optLoopFusionPR_5(V w8, L r0, V w1, V w5, L id){
-//     initV(w8, H_B, r0);
-//     if(id <= 3){
-//         DOI(r0, vB(w8,i)=vL(w1,i)>70&&vL(w5,i)<100)
-//     }
-//     else {
-//         // DOI(r0, vB(w8,i)=vL(w1,i)<=70&&vL(w5,i)<100)
-//         DOI(r0, vB(w8,i)=vL(w1,i)<=70||vL(w5,i)>=100)
-//     }
-//     R 0;
-// }
-// 
-// L optLoopFusionPR_6(V m2, L r0, V w4, V m3){
-//     initV(m2, H_L, r0);
-//     DOI(r0, vL(m2,vL(w4,i))=vL(m3,i))
-//     R 0;
-// }
-
-// /* q18: bucket group by */
-// L pfnGroupBucket(V z, V x){
-//     if(isInteger(x)){
-//         L lenX = -1;
-//         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-//         // WP("lenX 1 = %lld\n", lenX);
-//         L *temp  = (L*)malloc(sizeof(L)*lenX);
-//         L *count = (L*)malloc(sizeof(L)*lenX);
-//         L *maps  = (L*)malloc(sizeof(L)*lenX);
-//         memset(temp , 0, sizeof(L)*lenX);
-//         memset(count, 0, sizeof(L)*lenX);
-//         memset(maps ,-1, sizeof(L)*lenX);
-//         DOI(vn(x), temp[vL(x,i)]++)
-//         L cnt = 0;
-//         DOI(lenX, cnt+= temp[i]!=0)
-//         initV(z, H_N, 2);
-//         V keys = getDictKeys(z);
-//         V vals = getDictVals(z);
-//         // WP("size of keys: %lld\n", cnt);
-//         initV(keys, H_L, cnt); cnt = 0;
-//         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
-//         initV(vals, H_G, cnt);
-//         DOI(vn(x), {L k=vL(x,i); V v0=vV(vals,maps[k]); if(count[k]==0) initV(v0,H_L,temp[k]); vL(v0,count[k]++)=i; })
-//         free(temp);
-//         free(count);
-//         free(maps);
-//         R 0;
-//     }
-//     else R E_DOMAIN;
-// }
-// 
-// 
-// L optLoopFusionQ18_1(V z, V x, V t1){
-//     if(isInteger(x)){
-//         L lenX = -1;
-//         // lenX = vn(x);
-//         DOI(vn(x), lenX = MAX(lenX, vL(x,i))) lenX++;
-//         // WP("lenX 2 = %lld\n", lenX);
-//         L *temp  = (L*)malloc(sizeof(L)*lenX);
-//         L *maps  = (L*)malloc(sizeof(L)*lenX);
-//         memset(temp , 0, sizeof(L)*lenX);
-//         memset(maps ,-1, sizeof(L)*lenX);
-//         DOI(vn(x), temp[vL(x,i)]++)
-//         L cnt = 0;
-//         DOI(lenX, cnt+= temp[i]!=0)
-//         initV(z, H_N, 2);
-//         V keys = getDictKeys(z);
-//         V vals = getDictVals(z);
-//         // WP("size of keys: %lld\n", cnt);
-//         initV(keys, H_L, cnt); cnt = 0;
-//         DOI(lenX, if(temp[i]!=0) {vL(keys,cnt)=i; maps[i]=cnt++; })
-//         initV(vals, H_E, cnt);
-//         memset(sE(vals), 0, sizeof(E)*cnt);  // clean before sum up
-//         DOI(vn(x), {L k=vL(x,i); L c=maps[k]; vE(vals,c)+=vE(t1,i); })
-//         free(temp);
-//         free(maps);
-//         R 0;
-//     }
-//     else R E_DOMAIN;
-// }
-
 /*
  * two columns: (row 650K)
  *   A, N, R
@@ -3160,7 +2845,7 @@ I pfnGroupTrie(V z, V x){
     L charId[MAP_SIZE]={-1};
     L lenX = vn(vV(x,0));
 // tic();
-    DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); charMap[t]++; })
+    DOI(lenX, {C ch0=vC(vV(x,0),i); C ch1=vC(vV(x,1),i); L t=ENCODE2(ch0,ch1); charMap[t]++;})
 // toc();
     L lenZ = 0; DOI(MAP_SIZE, if(charMap[i]!=0)charId[i]=lenZ++)
 // WP("val of lenZ: %lld\n", lenZ);
@@ -3318,31 +3003,6 @@ I pfnCumsum(V z, V x){
     }
     else R E_DOMAIN;
 }
-
-static B isSingleInteger(V x){
-    if(isOne(x) && isTypeGroupReal(vp(x))){
-        switch(xp){
-            caseF R vf(x) == (L)vf(x);
-            caseE R ve(x) == (L)ve(x);
-        }
-        R 1;
-    }
-    R 0;
-}
-
-static L getSingleInteger(V x){
-    switch(xp){
-        caseB R xb;
-        caseJ R xj;
-        caseH R xh;
-        caseI R xi;
-        caseL R xl;
-        caseF R (L)xf;
-        caseE R (L)xe;
-    }
-    R 0;
-}
-
 
 I pfnRange2(V z, V x, V y){
     if(isSingleInteger(x) && isSingleInteger(y)){
